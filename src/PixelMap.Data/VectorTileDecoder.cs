@@ -37,7 +37,7 @@ public static class VectorTileDecoder
         }
         if (layer is not ("building" or "landcover" or "landuse" or "park" or "water" or "waterway"
             or "transportation" or "boundary" or "aeroway" or "place" or "transportation_name"
-            or "mountain_peak" or "water_name")) return;
+            or "mountain_peak" or "water_name" or "poi")) return;
         if (extent <= 0) throw new InvalidDataException("Invalid vector tile extent.");
 
         // The protobuf spec does not require tables to precede feature messages. Index value
@@ -175,6 +175,7 @@ public static class VectorTileDecoder
                 default: reader.Skip(tag); break;
             }
         }
+        if (layer == "poi" && name.Length == 0 && nameEn.Length == 0) return null;
         if (type is < GeometryType.Point or > GeometryType.Polygon || geometry.IsEmpty) return null;
         ReadGeometry(geometry, type, points, paths);
         if (paths.Count == 0) return null;
