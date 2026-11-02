@@ -118,11 +118,12 @@ async function open(context, address, failures) {
     await page.route("https://tiles.openfreemap.org/**", route => route.abort());
     await page.route("https://tiles.maps.eox.at/**", route => route.abort());
     await page.goto(address, {waitUntil: "domcontentloaded", timeout: 120000});
-    // Allow the Uno compositor to submit its first WebGL frame before reading any pixels.
-    // Continuous capture while Chromium is still presenting the DOM splash can retain that surface.
-    await page.waitForFunction(() => document.title.includes("Pixel Atlas") && document.querySelector("canvas")?.width > 0,
-        undefined, {timeout: 100000});
-    await page.waitForTimeout(1500);
+    await page.waitForFunction(() => {
+        const canvas = document.getElementById("uno-canvas");
+        return document.title.includes("Pixel Atlas") && canvas?.width > 0 &&
+            document.elementFromPoint(innerWidth / 2, innerHeight / 2) === canvas;
+    }, undefined, {timeout: 100000});
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     return page;
 }
 
