@@ -59,12 +59,14 @@ function hasEarthTerrain(frame) {
         [...counts.values()].reduce((sum, n) => sum + n, 0) > 200;
 }
 
-async function clickMapAction(page, name) {
+async function clickMapAction(page, name, touch = false) {
     const control = page.getByRole("button", {name, exact: true})
         .or(page.getByRole("checkbox", {name, exact: true}));
     const bounds = await control.boundingBox();
     assert.ok(bounds && bounds.width && bounds.height, "Visible " + name);
-    await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
+    if (touch) await page.touchscreen.tap(x, y);
+    else await page.mouse.click(x, y);
 }
 
 async function checkEarth(page, initial) {
@@ -109,6 +111,10 @@ async function open(context, address, failures) {
         if (message.type() === "error") console.error("Browser console", message.text().slice(0, 1800));
     });
     // The opening district is bundled. CI should not rely on public map services.
+    await page.route("https://raw.githubusercontent.com/notofonts/**", route => {
+        failures.push("The opening view requested an external fallback font: " + route.request().url());
+        return route.abort();
+    });
     await page.route("https://tiles.openfreemap.org/**", route => route.abort());
     await page.route("https://tiles.maps.eox.at/**", route => route.abort());
     await page.goto(address, {waitUntil: "domcontentloaded", timeout: 120000});
@@ -186,6 +192,12 @@ async function run() {
         }
         await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
         await frameWhere(phone, frame => changed(handset, frame) > .25 && measure(frame).roofRatio > .006, "phone-pinch");
+        const enable = phone.getByRole("button", {name: "Enable accessibility"});
+        if (await enable.count()) await enable.evaluate(element => element.click());
+        await clickMapAction(phone, "Earth imagery layer", true);
+        await clickMapAction(phone, "Switch to 2D overhead", true);
+        await frameWhere(phone, hasEarthTerrain, "phone-earth");
+        assert.match(await phone.locator("body").ariaSnapshot(), /Contains modified Copernicus Sentinel data/);
         await mobile.close();
         assert.deepEqual(failures, [], "browser runtime errors");
         console.log("Browser checks passed: seeded geometry, Earth imagery in isometric and overhead views, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.");

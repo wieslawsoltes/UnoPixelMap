@@ -46,7 +46,7 @@
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                 <Button x:Name="GuideButton" Content="City guide" Style="{StaticResource HeaderAction}"
                         AutomationProperties.Name="Browse city guide" Click="OnGuide" />
-                <Button x:Name="ViewButton" Content="View ▾" Style="{StaticResource HeaderAction}" AutomationProperties.Name="Map appearance">
+                <Button x:Name="ViewButton" Style="{StaticResource HeaderAction}" AutomationProperties.Name="Map appearance">
                     <Button.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
@@ -59,6 +59,11 @@
                             <MenuFlyoutItem Text="Map controls" Click="OnHelp" />
                         </MenuFlyout>
                     </Button.Flyout>
+                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                        <TextBlock Text="View" />
+                        <Path Width="8" Height="4" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"
+                              Fill="#F6F4E8" Data="M0,0 L8,0 L4,4 Z" />
+                    </StackPanel>
                 </Button>
             </StackPanel>
         </Grid>
