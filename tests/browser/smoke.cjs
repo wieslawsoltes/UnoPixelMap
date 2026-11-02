@@ -195,8 +195,9 @@ async function run() {
         await frameWhere(phone, frame => changed(handset, frame) > .25 && measure(frame).roofRatio > .006, "phone-pinch");
         const enable = phone.getByRole("button", {name: "Enable accessibility"});
         if (await enable.count()) await enable.evaluate(element => element.click());
-        await clickMapAction(phone, "Earth imagery layer", true);
         await clickMapAction(phone, "Switch to 2D overhead", true);
+        await phone.getByRole("button", {name: "Switch to 3D isometric", exact: true}).waitFor({state: "attached"});
+        await clickMapAction(phone, "Earth imagery layer", true);
         await frameWhere(phone, hasEarthTerrain, "phone-earth");
         assert.match(await phone.locator("body").ariaSnapshot(), /Contains modified Copernicus Sentinel data/);
         await mobile.close();
