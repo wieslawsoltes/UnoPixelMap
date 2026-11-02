@@ -6,7 +6,7 @@ namespace PixelMap.Rendering;
 internal enum Ink
 {
     Urban, Industry, Sand, Ice, Grass, Forest, Park, Water, Stream, Boundary,
-    Tunnel, RoadEdge, Path, Local, Street, Arterial, Highway, Rail, Runway, Shadow
+    Tunnel, RoadEdge, Path, Local, Street, Arterial, Highway, Rail, Runway, Shadow, Ferry
 }
 
 internal readonly record struct BatchKey(int Order, Ink Ink, float Width, int Bucket = 0);
@@ -135,7 +135,8 @@ internal sealed class TileGeometry : IDisposable
                 yield return new(35, Ink.Runway, f.Type == GeometryType.Polygon ? 0 : 4); break;
             case "transportation":
                 if (f.Type == GeometryType.Polygon) { yield return new(31, Ink.Local, 0); break; }
-                if (f.Type != GeometryType.LineString || f.Class is "ferry" or "aerialway") yield break;
+                if (f.Type != GeometryType.LineString || f.Class == "aerialway") yield break;
+                if (f.Class == "ferry") { yield return new(22, Ink.Ferry, 1); break; }
                 var (road, width) = f.Class switch
                 {
                     "motorway" or "trunk" => (Ink.Highway, 6f),
@@ -147,7 +148,7 @@ internal sealed class TileGeometry : IDisposable
                     _ => (Ink.Local, 2.4f)
                 };
                 int level = Math.Clamp(f.Level, -6, 6);
-                if (f.Brunnel == "tunnel") { yield return new(32, Ink.Tunnel, width); break; }
+                if (f.Brunnel == "tunnel") { yield return new(32, Ink.Tunnel, Math.Min(width, 1.5f)); break; }
                 if (f.Brunnel == "bridge") level = Math.Max(1, level);
                 int deck = 160 + level * 16;
                 if (road is not Ink.Path and not Ink.Rail)

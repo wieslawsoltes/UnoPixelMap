@@ -11,6 +11,7 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly List<(TileGeometry Tile, TileTransform Transform, float Scale)> visible = [];
     private readonly Dictionary<(Ink, int), SKShader> shaders = [];
     private readonly Dictionary<Ink, TerrainPattern> patterns = [];
+    private readonly Dictionary<(Ink, float), SKPathEffect> dashes = [];
     private readonly List<(Place Label, SKPoint Screen, float Distance)> candidates = [];
     private readonly List<SKRect> occupied = [];
     private readonly HashSet<string> names = new(StringComparer.OrdinalIgnoreCase);
@@ -161,6 +162,16 @@ public sealed partial class PixelMapRenderer : IDisposable
             paint.StrokeWidth = Math.Max(.6f, key.Width * roadScale) / scale;
             paint.Color = new SKColor(colors.Inks[(int)key.Ink]);
             paint.Shader = null;
+            paint.PathEffect = null;
+            if (key.Ink is Ink.Tunnel or Ink.Boundary or Ink.Ferry or Ink.Rail)
+            {
+                if (!dashes.TryGetValue((key.Ink, scale), out var dash))
+                {
+                    float length = key.Ink == Ink.Ferry ? 5 : 3;
+                    dashes[(key.Ink, scale)] = dash = SKPathEffect.CreateDash([length / scale, (length + 1) / scale], 0);
+                }
+                paint.PathEffect = dash;
+            }
             if (zoom >= 12 && key.Ink is Ink.Water or Ink.Grass or Ink.Forest or Ink.Park)
             {
                 int exponent = (int)Math.Clamp(Math.Round(Math.Log2(1 / scale)), -5, 8);
@@ -176,6 +187,7 @@ public sealed partial class PixelMapRenderer : IDisposable
             canvas.DrawPath(path, paint);
         }
         paint.Shader = null;
+        paint.PathEffect = null;
     }
 
     private void DrawLabels(SKCanvas canvas, int w, int h, double zoom, int pixelSize, PixelPalette colors)
@@ -237,6 +249,8 @@ public sealed partial class PixelMapRenderer : IDisposable
         foreach (var tile in geometry.Values) tile.Dispose();
         geometry.Clear();
         terrain.Clear();
+        foreach (var dash in dashes.Values) dash.Dispose();
+        dashes.Clear();
         lastPicture?.Dispose();
         ground?.Dispose(); bitmap?.Dispose(); paint.Dispose(); font.Dispose();
     }

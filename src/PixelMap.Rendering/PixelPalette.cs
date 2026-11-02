@@ -24,17 +24,20 @@ internal sealed class PixelPalette
         LabelHalo = style == PixelStyle.Night ? 0xff253546 : 0xfffbefcc;
         uint[] colors = [0xdfd1b6, 0xc8bdba, 0xf1d79e, 0xe7f2e9, 0xb3c88c, 0x85b486, 0xa7c887,
             0x76bdc4, 0x73b7bf, 0xad9b90, 0xb7b1a9, 0xb29f87, 0xd0b892, 0xece1c7,
-            0xf9edcf, 0xf5d799, 0xeab87c, 0x867e79, 0xb0aaa4, 0x3a514b];
+            0xf9edcf, 0xf5d799, 0xeab87c, 0x867e79, 0xb0aaa4, 0x3a514b, 0x458d9b];
         Inks = colors.Select(Adapt).ToArray();
         Inks[(int)Ink.Shadow] = (Inks[(int)Ink.Shadow] & 0xffffff) | 0x42000000;
-        uint[] roofs = [0xdcb78e,0xc18a72,0xb8c1b3,0xdaae91,0xc3ada5,0x98b8af,0xe0c6a0,0xb2b6bd,0xb1c4c6,0xd4bcad,0xa8bdac,0xcca397];
+        Inks[(int)Ink.Ferry] = (Inks[(int)Ink.Ferry] & 0xffffff) | 0x72000000;
+        Inks[(int)Ink.Tunnel] = (Inks[(int)Ink.Tunnel] & 0xffffff) | 0x79000000;
+        uint[] roofs = [0xddb17e,0xc28168,0xb8c2af,0xe1b598,0xc6aa9e,0x8fbab0,0xe5caa0,0xa5afbc,0x96b6c2,0xd6b6a4,0xa3bd9f,0xce998a];
         Materials = roofs.Select(rgb =>
         {
             uint roof = Adapt(rgb), lightWall = Mix(roof, Adapt(0xb2a189), .24f);
-            uint darkWall = Mix(roof, Adapt(0x455762), .52f);
+            uint darkWall = Mix(roof, Adapt(0x354f61), .58f);
+            uint glass = Mix(Adapt(0x547c87), darkWall, .22f);
             return new Material(roof, lightWall, darkWall, Mix(roof, Adapt(0xffedd2), .52f),
-                Mix(darkWall, Adapt(0x47525c), .38f), Adapt(0x567477),
-                style == PixelStyle.Day ? Adapt(0xe1d7b6) : 0xffffd58b);
+                Mix(darkWall, Adapt(0x47525c), .38f), glass,
+                style == PixelStyle.Day ? Mix(glass, Adapt(0xc0d0c9), .52f) : 0xffffd58b);
         }).ToArray();
     }
 

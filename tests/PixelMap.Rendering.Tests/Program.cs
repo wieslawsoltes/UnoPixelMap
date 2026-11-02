@@ -45,7 +45,21 @@ var oblique = camera with { Bearing = 31 };
 using var frontFirst = Render(oblique, tall, shortPart);
 using var backFirst = Render(oblique, shortPart, tall);
 Assert(frontFirst.GetPixelSpan().SequenceEqual(backFirst.GetPixelSpan()), "Parts changed visible pixels when submitted in reverse order");
-Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, raised base and depth order checks.");
+var topModel = Building(31, 62, 0, slab);
+var lowModel = Building(32, 15, 0, slab);
+var models = new[] { new MapTile(id, [topModel, lowModel]) };
+using var testSurface = Render(camera, topModel, lowModel);
+Assert(renderer.Pick(128, 85, width, height, camera, models) == topModel, "Roof picking missed the highest part");
+Assert(renderer.Pick(128, 115, width, height, camera, models) == topModel, "Wall picking missed the visible façade");
+Assert(renderer.Pick(128, 128, width, height, flat, [new MapTile(id, [courtyard])]) is null, "Picked a courtyard hole");
+var road = lowModel with { Layer = "transportation", Type = GeometryType.LineString, Name = "Road", Paths = [[new(1948, 2048), new(2148, 2048)]] };
+var poi = road with { Layer = "poi", Type = GeometryType.Point, Name = "Library", Paths = [[new(2048, 2048)]] };
+var park = lowModel with { Layer = "park", Name = "Garden", Paths = [Box(-190, -190, 190, 190)] };
+var groundFeatures = new[] { new MapTile(id, [park, road, poi]) };
+Assert(renderer.Pick(129, 128, width, height, flat, groundFeatures) == poi, "Point picking priority changed");
+Assert(renderer.Pick(150, 131, width, height, flat, groundFeatures) == road, "Road picking tolerance changed");
+Assert(renderer.Pick(150, 151, width, height, flat, groundFeatures) == park, "Area picking failed");
+Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order and feature picking checks.");
 
 if (args.Contains("--benchmark", StringComparer.Ordinal))
 {

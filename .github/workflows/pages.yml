@@ -1,0 +1,54 @@
+name: Pixel Atlas · browser and Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pixelmap-pages
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet run --project tests/PixelMap.Data.Checks -c Release
+      - run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release
+      - run: dotnet workload install wasm-tools --skip-manifest-update
+      - run: dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o "${{ runner.temp }}/atlas"
+      - name: Verify the Pages artifact
+        run: test -s "${{ runner.temp }}/atlas/wwwroot/index.html"
+      - name: Exercise the published map in Chromium
+        run: |
+          npm ci --prefix tests/browser
+          (cd tests/browser && npx playwright install --with-deps chromium)
+          python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/atlas/wwwroot" > /tmp/atlas-server.log 2>&1 &
+          PIXELMAP_SHOTS="${{ runner.temp }}/screens" node tests/browser/smoke.cjs http://127.0.0.1:8100/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: atlas-browser-screens
+          path: ${{ runner.temp }}/screens
+          if-no-files-found: ignore
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/atlas/wwwroot
+  deploy:
+    needs: browser
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - id: publish
+        uses: actions/deploy-pages@v4

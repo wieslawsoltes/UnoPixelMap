@@ -11,6 +11,20 @@ internal readonly record struct TileTransform(float X, float Y, float XX, float 
 /// <summary>Depth-tested orthographic extrusion at the pixel-art resolution.</summary>
 internal sealed class BuildingRasterizer
 {
+    // Apartment/office lights repeat in two-bay groups with a different phase per model.
+    private static readonly byte[] Rooms = CreateRooms();
+    private static byte[] CreateRooms()
+    {
+        var rooms = new byte[256];
+        var random = new Random(859);
+        for (int i = 0; i < rooms.Length; i += 2)
+        {
+            rooms[i] = (byte)random.Next(4);
+            rooms[i + 1] = random.Next(3) == 0 ? (byte)random.Next(4) : rooms[i];
+        }
+        return rooms;
+    }
+
     private float[] depth = [];
     private SKPoint[] vertices = [];
     private float[] intersections = [];
@@ -102,7 +116,10 @@ internal sealed class BuildingRasterizer
                     a = b;
                 }
             }
-            intersections.AsSpan(0, hits).Sort();
+            if (hits == 2 && intersections[0] > intersections[1])
+                (intersections[0], intersections[1]) = (intersections[1], intersections[0]);
+            else if (hits > 2)
+                intersections.AsSpan(0, hits).Sort();
             for (int i = 1; i < hits; i += 2)
             {
                 int begin = FirstPixel(intersections[i - 1], width);
@@ -145,9 +162,13 @@ internal sealed class BuildingRasterizer
     {
         float span = a.X - b.X;
         float dy = (a.Y - b.Y) / span;
-        float floor = Math.Max(.01f, pixelsPerMeter * vertical * 3.5f);
-        float bay = pixelsPerMeter * 3.2f * span / Math.Max(.01f, along);
+        float floor = Math.Max(.01f, pixelsPerMeter * vertical * (3.2f + (seed & 3) * .22f));
+        float bay = pixelsPerMeter * (3.2f + ((seed >> 2) & 3) * .6f) * span / Math.Max(.01f, along);
         bool windows = floor >= 1.65f && bay >= 1.45f && rise - baseRise > floor * 1.6f;
+        bool ribbon = (seed & 8) != 0 && rise > 9 * floor;
+        bool pilasters = (seed & 32) != 0 && rise > 7 * floor;
+        uint rib = PixelPalette.Mix(color, material.Rim, .32f);
+        float invFloor = 1 / floor, invVertical = 1 / vertical;
         int first = FirstPixel(b.X, width), last = FirstPixel(a.X, width);
         for (int x = first; x < last; x++)
         {
@@ -156,21 +177,23 @@ internal sealed class BuildingRasterizer
             int y0 = FirstPixel(ground - rise, height), y1 = FirstPixel(ground - baseRise, height);
             int column = (int)(alongEdge / Math.Max(.01f, bay));
             float windowX = alongEdge - column * bay;
-            bool glass = windows && windowX > bay * .20f && windowX < bay * .70f;
+            bool glass = windows && windowX > bay * (ribbon ? .05f : .19f) && windowX < bay * (ribbon ? .95f : .68f);
+            uint pier = pilasters && bay > 1.9f && (column & 3) == 0 && windowX < .9f ? rib : color;
+            int phase = (int)(seed & 255) + column;
             int pos = y0 * width + x;
             for (int y = y0; y < y1; y++, pos += width)
             {
                 float h = ground - (y + .5f);
-                float altitude = h / vertical;
+                float altitude = h * invVertical;
                 if (altitude < depth[pos]) continue;
                 depth[pos] = altitude;
-                uint texel = color;
+                uint texel = pier;
                 if (glass)
                 {
-                    int story = (int)(h / floor);
+                    int story = (int)(h * invFloor);
                     float within = h - story * floor;
-                    if (within >= floor * .28f && within < floor * .73f)
-                        texel = ((uint)(column * 19 + story * 13) + seed) % 7 < 2 ? material.Lamp : material.Glass;
+                    if (within >= floor * .22f && within < floor * .75f)
+                        texel = Rooms[(phase + story * 16) & 255] == 0 ? material.Lamp : material.Glass;
                 }
                 pixels[pos] = texel;
             }

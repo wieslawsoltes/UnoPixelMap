@@ -1,0 +1,10 @@
+<Project Sdk="Uno.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <UnoFeatures>Skia</UnoFeatures>
+    <IsUnoLibrary>true</IsUnoLibrary>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PixelMap.Rendering/PixelMap.Rendering.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,359 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Net.Http;
+using System.Runtime.InteropServices.JavaScript;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using PixelMap.Data;
+using PixelMap.Rendering;
+using Windows.System;
+using Windows.ApplicationModel.DataTransfer;
+
+namespace PixelMap.App;
+
+public sealed partial class MainPage : Page
+{
+    private static readonly HttpClient SearchHttp = new() { Timeout = TimeSpan.FromSeconds(12) };
+    private static readonly MapPlace[] Destinations =
+    [
+        new("Lower Manhattan", "New York City, United States", 40.7087, -74.0104, 16.5),
+        new("Rynek Główny", "Old Town, Kraków, Poland", 50.0617, 19.9373, 16.8),
+        new("Shibuya Crossing", "Tokyo, Japan", 35.6595, 139.7005, 16.9),
+        new("Eixample", "Barcelona, Spain", 41.3924, 2.1648, 16.4),
+        new("Île de la Cité", "Paris, France", 48.8548, 2.3470, 16.2),
+        new("Marina Bay", "Singapore", 1.2831, 103.8586, 16.2)
+    ];
+    private readonly PhotonGeocoder _geocoder = new(SearchHttp);
+    private readonly SolidColorBrush _ink = new(ColorHelper.FromArgb(255, 28, 59, 54));
+    private readonly SolidColorBrush _muted = new(ColorHelper.FromArgb(255, 75, 101, 92));
+    private readonly SolidColorBrush _rowFill = new(ColorHelper.FromArgb(255, 240, 241, 226));
+    private CancellationTokenSource? _request;
+    private PanelKind _panel;
+    private long _lastReadout;
+    private bool _restored;
+
+    private enum PanelKind { Closed, Guide, Search, Help, Share }
+
+    public MainPage()
+    {
+        InitializeComponent();
+        SizeChanged += (_, e) => LayoutChrome(e.NewSize.Width, e.NewSize.Height);
+        Loaded += (_, _) =>
+        {
+            LayoutChrome(ActualWidth, ActualHeight);
+            RestoreSharedView();
+            SyncReadout();
+        };
+        Unloaded += (_, _) => CancelRequest();
+        Map.CameraChanged += (_, _) =>
+        {
+            var tick = Environment.TickCount64;
+            if (tick - _lastReadout < 100) return;
+            _lastReadout = tick;
+            SyncReadout();
+        };
+        Map.StatusChanged += (_, _) => SyncReadout();
+    }
+
+    private void LayoutChrome(double width, double height)
+    {
+        if (width <= 0 || height <= 0) return;
+        var narrow = width < 600;
+        var inset = narrow ? 8 : 16;
+        SearchOverlay.Margin = MapTools.Margin = PlaceCard.Margin = new Thickness(inset);
+        SearchOverlay.Width = Math.Max(120, Math.Min(344, width - 2 * inset));
+        Header.Padding = new Thickness(narrow ? 8 : 16, narrow ? 6 : 9, narrow ? 8 : 16, narrow ? 6 : 9);
+        BrandCaption.Visibility = width < 360 ? Visibility.Collapsed : Visibility.Visible;
+        Status.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
+        ScaleBar.Visibility = width < 790 ? Visibility.Collapsed : Visibility.Visible;
+        MobileStatus.Visibility = narrow ? Visibility.Visible : Visibility.Collapsed;
+        PlaceCard.MaxWidth = Math.Max(110, Math.Min(335, width - 85 - 2 * inset));
+        ResultScroll.MaxHeight = Math.Clamp(height - 225, 55, 330);
+        PlaceCard.Visibility = height < 345 ? Visibility.Collapsed : Visibility.Visible;
+        // Keep controls usable on landscape phones by laying out the strip horizontally.
+        ToolStack.Orientation = height < 420 ? Orientation.Horizontal : Orientation.Vertical;
+        ToolDivider.Visibility = height < 420 ? Visibility.Collapsed : Visibility.Visible;
+        if (narrow && height < 420) PlaceCard.Visibility = Visibility.Collapsed;
+    }
+
+    private void SyncReadout()
+    {
+        var camera = Map.Camera;
+        var status = Map.StatusText;
+        var location = FormattableString.Invariant($"{camera.Latitude:0.0000}°, {camera.Longitude:0.0000}°");
+        Status.Text = FormattableString.Invariant($"{status}   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
+        MobileStatus.Text = status;
+        double bearing = camera.Bearing * Math.PI / 180;
+        CompassTransform.Angle = Math.Atan2(-Math.Sin(bearing), Math.Cos(bearing) * Math.Cos(camera.Pitch * Math.PI / 180)) * 180 / Math.PI;
+        double metersPerPixel = 40075016.68557849 * Math.Cos(camera.Latitude * Math.PI / 180) / (512 * Math.Pow(2, camera.Zoom));
+        var magnitude = Math.Pow(10, Math.Floor(Math.Log10(80 * metersPerPixel)));
+        var steps = 80 * metersPerPixel / magnitude;
+        var distance = magnitude * (steps >= 5 ? 5 : steps >= 2 ? 2 : 1);
+        ScaleRule.Width = distance / metersPerPixel;
+        ScaleLabel.Text = distance >= 1000
+            ? FormattableString.Invariant($"{distance / 1000:0.#} km")
+            : FormattableString.Invariant($"{distance:0.#} m");
+        ProjectionItem.Text = camera.Pitch < 1 ? "Switch to isometric view" : "Switch to overhead view";
+    }
+
+    private void OnNorth(object sender, RoutedEventArgs e) => Map.RotateBy(-Math.IEEERemainder(Map.Camera.Bearing, 360));
+    private void OnZoomIn(object sender, RoutedEventArgs e) => Map.ZoomBy(1);
+    private void OnZoomOut(object sender, RoutedEventArgs e) => Map.ZoomBy(-1);
+    private void OnRotateLeft(object sender, RoutedEventArgs e) => Map.RotateBy(-45);
+    private void OnRotateRight(object sender, RoutedEventArgs e) => Map.RotateBy(45);
+    private void OnProjection(object sender, RoutedEventArgs e) => Map.ToggleProjection();
+
+    private void OnPalette(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleMenuFlyoutItem item || !Enum.TryParse<PixelStyle>(item.Tag?.ToString(), out var style)) return;
+        SetPalette(style);
+    }
+
+    private void SetPalette(PixelStyle style)
+    {
+        Map.Palette = style;
+        DayItem.IsChecked = style == PixelStyle.Day;
+        DuskItem.IsChecked = style == PixelStyle.Dusk;
+        NightItem.IsChecked = style == PixelStyle.Night;
+    }
+
+    private static Uri? CurrentPageUri()
+    {
+        if (!OperatingSystem.IsBrowser()) return null;
+        using var window = JSHost.GlobalThis;
+        using var location = window.GetPropertyAsJSObject("location");
+        return Uri.TryCreate(location?.GetPropertyAsString("href"), UriKind.Absolute, out var page) ? page : null;
+    }
+
+    private void RestoreSharedView()
+    {
+        if (_restored) return;
+        _restored = true;
+        var page = CurrentPageUri();
+        if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette)) return;
+        SetPalette(palette);
+        Destination.Text = "Shared view";
+        Map.FlyTo(camera);
+    }
+
+    private void OnShare(object sender, RoutedEventArgs e)
+    {
+        var page = CurrentPageUri() ?? new Uri("https://wieslawsoltes.github.io/UnoPixelMap/");
+        var url = MapViewLink.Create(page, Map.Camera, Map.Palette).AbsoluteUri;
+        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link opens the same map position, projection and lighting.");
+        var field = new TextBox { Text = url, IsReadOnly = true, HorizontalAlignment = HorizontalAlignment.Stretch };
+        AutomationProperties.SetName(field, "Shareable map link");
+        field.GotFocus += (_, _) => field.SelectAll();
+        Rows.Children.Add(field);
+        var copy = new Button { Content = "Copy link", HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 6, 0, 0) };
+        copy.Click += (_, _) =>
+        {
+            try
+            {
+                var data = new DataPackage();
+                data.SetText(url);
+                Clipboard.SetContent(data);
+                DrawerNote.Text = "Map link copied.";
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException or NotSupportedException or JSException)
+            {
+                field.Focus(FocusState.Programmatic);
+                field.SelectAll();
+                DrawerNote.Text = "Use your device’s Copy command on the selected link.";
+            }
+        };
+        Rows.Children.Add(copy);
+    }
+
+    private void OnGuide(object sender, RoutedEventArgs e)
+    {
+        if (_panel == PanelKind.Guide) { CloseDrawer(); return; }
+        ShowPanel(PanelKind.Guide, "CITY GUIDE", "Choose a district to fly there.");
+        foreach (var place in Destinations) AddPlace(place);
+    }
+
+    private void OnHelp(object sender, RoutedEventArgs e)
+    {
+        ShowPanel(PanelKind.Help, "MAP CONTROLS", "Place search by Photon / komoot with OpenStreetMap data.");
+        AddHelp("Browse", "Drag to pan, scroll or pinch to zoom. Tap the map to inspect a location.");
+        AddHelp("Change perspective", "Use the curved arrows to rotate. Switch projection or lighting in View.");
+        AddHelp("Keyboard", "Focus the map. Use arrows to pan, + and − to zoom, Q and E to rotate, P to switch projection, or Home to return to Manhattan.");
+        AddHelp("Drop a pin", "Enter latitude, longitude in the search field and press Enter.");
+    }
+
+    private void AddHelp(string title, string detail)
+    {
+        var text = TextPair(title, detail);
+        text.Margin = new Thickness(4, 4, 4, 8);
+        Rows.Children.Add(text);
+    }
+
+    private async void OnSearch(object sender, RoutedEventArgs e) => await SubmitSearchAsync();
+
+    private async void OnSearchKey(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key == VirtualKey.Enter)
+        {
+            e.Handled = true;
+            await SubmitSearchAsync();
+        }
+        else if (e.Key == VirtualKey.Escape)
+        {
+            e.Handled = true;
+            CloseDrawer();
+        }
+    }
+
+    private void OnQueryEdited(object sender, TextChangedEventArgs e)
+    {
+        if (_panel == PanelKind.Search) CloseDrawer();
+    }
+
+    private async Task SubmitSearchAsync()
+    {
+        var query = SearchBox.Text.Trim();
+        if (query.Length == 0) { OnGuide(this, new RoutedEventArgs()); return; }
+        if (PhotonGeocoder.TryParseCoordinates(query, out var coordinate))
+        {
+            NavigateTo(coordinate);
+            return;
+        }
+
+        ShowPanel(PanelKind.Search, "SEARCH RESULTS", "Searching places…");
+        var request = new CancellationTokenSource();
+        _request = request;
+        try
+        {
+            var matches = await _geocoder.SearchAsync(query, request.Token);
+            if (request.IsCancellationRequested) return;
+            var local = LocalMatches(query);
+            foreach (var place in matches) AddPlace(place);
+            foreach (var place in local.Where(p => !matches.Any(m =>
+                Math.Abs(m.Latitude - p.Latitude) < .005 && Math.Abs(m.Longitude - p.Longitude) < .005)))
+                AddPlace(place);
+            DrawerNote.Text = Rows.Children.Count == 0
+                ? "No matches. Try a nearby city, a street address, or latitude, longitude."
+                : "Select a place to fly there. Search by Photon / komoot.";
+        }
+        catch (OperationCanceledException) when (request.IsCancellationRequested) { }
+        catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException or JsonException or InvalidOperationException or KeyNotFoundException)
+        {
+            if (request.IsCancellationRequested) return;
+            foreach (var place in LocalMatches(query)) AddPlace(place);
+            DrawerNote.Text = Rows.Children.Count > 0
+                ? "Live search is unavailable. Showing matches from the city guide."
+                : "Live search is unavailable. Try again, browse the city guide, or enter coordinates.";
+        }
+        finally
+        {
+            if (ReferenceEquals(_request, request)) _request = null;
+            request.Dispose();
+        }
+    }
+
+    private static IEnumerable<MapPlace> LocalMatches(string query) => Destinations.Where(p =>
+        CultureInfo.InvariantCulture.CompareInfo.IndexOf(p.Name + " " + p.Detail, query,
+            CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) >= 0);
+
+    private void AddPlace(MapPlace place)
+    {
+        var button = new Button
+        {
+            Background = _rowFill,
+            BorderThickness = new Thickness(0),
+            CornerRadius = new CornerRadius(3),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            Padding = new Thickness(9, 5, 9, 5),
+            Content = TextPair(place.Name, place.Detail),
+            Tag = place
+        };
+        AutomationProperties.SetName(button, place.Name + ", " + place.Detail);
+        button.Click += OnPick;
+        Rows.Children.Add(button);
+    }
+
+    private StackPanel TextPair(string title, string detail)
+    {
+        var text = new StackPanel { Spacing = 1 };
+        text.Children.Add(new TextBlock { Text = title, FontSize = 14, Foreground = _ink, TextTrimming = TextTrimming.CharacterEllipsis });
+        text.Children.Add(new TextBlock { Text = detail, FontSize = 12, Foreground = _muted, TextWrapping = TextWrapping.Wrap });
+        return text;
+    }
+
+    private void OnPick(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: MapPlace place }) NavigateTo(place);
+    }
+
+    private void NavigateTo(MapPlace place)
+    {
+        CloseDrawer();
+        Destination.Text = place.Name;
+        Map.SetMarker(place.Latitude, place.Longitude, place.Name);
+        Map.FlyTo(place.Latitude, place.Longitude, place.Zoom);
+    }
+
+    private void ShowPanel(PanelKind kind, string heading, string note)
+    {
+        CancelRequest();
+        _panel = kind;
+        Rows.Children.Clear();
+        DrawerHeading.Text = heading;
+        DrawerNote.Text = note;
+        Drawer.Visibility = Visibility.Visible;
+    }
+
+    private void OnCloseDrawer(object sender, RoutedEventArgs e) => CloseDrawer();
+
+    private void CloseDrawer()
+    {
+        CancelRequest();
+        _panel = PanelKind.Closed;
+        Drawer.Visibility = Visibility.Collapsed;
+        Rows.Children.Clear();
+    }
+
+    private void CancelRequest()
+    {
+        _request?.Cancel();
+        _request = null;
+    }
+}
+
+/// <summary>Versioned camera fragments are locale independent and preserve the Pages project base path.</summary>
+internal static class MapViewLink
+{
+    internal static Uri Create(Uri page, MapCamera camera, PixelStyle palette) =>
+        new UriBuilder(page)
+        {
+            Fragment = FormattableString.Invariant($"v1/{camera.Latitude:F6}/{camera.Longitude:F6}/{camera.Zoom:F3}/{Math.IEEERemainder(camera.Bearing, 360):F2}/{camera.Pitch:F2}/{palette}")
+        }.Uri;
+
+    internal static bool TryRead(Uri page, out MapCamera camera, out PixelStyle palette)
+    {
+        camera = default;
+        palette = PixelStyle.Day;
+        var fields = page.Fragment.Split('/');
+        if (fields.Length != 7 || fields[0] != "#v1") return false;
+        Span<double> numbers = stackalloc double[5];
+        for (var i = 0; i < numbers.Length; i++)
+            if (!double.TryParse(fields[i + 1], NumberStyles.Float, CultureInfo.InvariantCulture, out numbers[i]) || !double.IsFinite(numbers[i]))
+                return false;
+        if (Math.Abs(numbers[0]) > 85.051129 || Math.Abs(numbers[1]) > 180 ||
+            numbers[2] < MapCamera.MinZoom || numbers[2] > MapCamera.MaxZoom || Math.Abs(numbers[3]) > 360 ||
+            numbers[4] is < 0 or > 72 || !Enum.TryParse(fields[6], out palette) || !Enum.IsDefined(palette))
+            return false;
+        camera = new MapCamera(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]);
+        return true;
+    }
+}

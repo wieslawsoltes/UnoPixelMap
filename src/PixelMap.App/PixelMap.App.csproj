@@ -1,0 +1,22 @@
+<Project Sdk="Uno.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net10.0-browserwasm</TargetFrameworks>
+    <RuntimeIdentifiers>browser-wasm</RuntimeIdentifiers>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PixelMap.App</RootNamespace>
+    <UnoSingleProject>true</UnoSingleProject>
+    <UnoFeatures>SkiaRenderer;Skia</UnoFeatures>
+    <ApplicationTitle>Pixel Atlas</ApplicationTitle>
+    <ApplicationId>dev.pixelmap.atlas</ApplicationId>
+    <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+    <UnoDisableHotDesign>true</UnoDisableHotDesign>
+    <WasmShellWebAppBasePath>./</WasmShellWebAppBasePath>
+    <WasmShellMonoRuntimeExecutionMode Condition="'$(Configuration)' == 'Release'">InterpreterAndAOT</WasmShellMonoRuntimeExecutionMode>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../PixelMap.Controls/PixelMap.Controls.csproj" />
+    <UnoIcon Include="Assets/atlas.svg" />
+    <UnoSplashScreen Include="Assets/launch.svg" Color="#142F32" BaseSize="80,80" />
+  </ItemGroup>
+</Project>
