@@ -57,7 +57,7 @@ public sealed partial class MainPage : Page
         Map.CameraChanged += (_, _) =>
         {
             var tick = Environment.TickCount64;
-            if (tick - _lastReadout < 100) return;
+            if (tick - _lastReadout < 100 && (Map.Camera.Pitch < 1) == Equals(ProjectionShortcut.Content, "2D")) return;
             _lastReadout = tick;
             SyncReadout();
         };
@@ -69,7 +69,7 @@ public sealed partial class MainPage : Page
         if (width <= 0 || height <= 0) return;
         var narrow = width < 600;
         var inset = narrow ? 8 : 16;
-        SearchOverlay.Margin = MapTools.Margin = PlaceCard.Margin = new Thickness(inset);
+        SearchOverlay.Margin = MapTools.Margin = SceneDock.Margin = new Thickness(inset);
         SearchOverlay.Width = Math.Max(120, Math.Min(344, width - 2 * inset));
         Header.Padding = new Thickness(narrow ? 8 : 16, narrow ? 6 : 9, narrow ? 8 : 16, narrow ? 6 : 9);
         BrandCaption.Visibility = width < 360 ? Visibility.Collapsed : Visibility.Visible;
@@ -102,6 +102,8 @@ public sealed partial class MainPage : Page
         ScaleLabel.Text = distance >= 1000
             ? FormattableString.Invariant($"{distance / 1000:0.#} km")
             : FormattableString.Invariant($"{distance:0.#} m");
+        ProjectionShortcut.Content = camera.Pitch < 1 ? "2D" : "3D";
+        AutomationProperties.SetName(ProjectionShortcut, camera.Pitch < 1 ? "Switch to 3D isometric" : "Switch to 2D overhead");
         ProjectionItem.Text = camera.Pitch < 1 ? "Switch to isometric view" : "Switch to overhead view";
     }
 
@@ -126,6 +128,17 @@ public sealed partial class MainPage : Page
         NightItem.IsChecked = style == PixelStyle.Night;
     }
 
+    private void OnMapLayer(object sender, RoutedEventArgs e) => SetBaseLayer(false);
+    private void OnEarthLayer(object sender, RoutedEventArgs e) => SetBaseLayer(true);
+
+    private void SetBaseLayer(bool earth)
+    {
+        Map.IsEarthImageryEnabled = earth;
+        MapLayerButton.IsChecked = !earth;
+        EarthLayerButton.IsChecked = earth;
+        EarthCredits.Visibility = earth ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private static Uri? CurrentPageUri()
     {
         if (!OperatingSystem.IsBrowser()) return null;
@@ -139,8 +152,9 @@ public sealed partial class MainPage : Page
         if (_restored) return;
         _restored = true;
         var page = CurrentPageUri();
-        if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette)) return;
+        if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette, out var earth)) return;
         SetPalette(palette);
+        SetBaseLayer(earth);
         Destination.Text = "Shared view";
         Map.FlyTo(camera);
     }
@@ -148,8 +162,8 @@ public sealed partial class MainPage : Page
     private void OnShare(object sender, RoutedEventArgs e)
     {
         var page = CurrentPageUri() ?? new Uri("https://wieslawsoltes.github.io/UnoPixelMap/");
-        var url = MapViewLink.Create(page, Map.Camera, Map.Palette).AbsoluteUri;
-        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link opens the same map position, projection and lighting.");
+        var url = MapViewLink.Create(page, Map.Camera, Map.Palette, Map.IsEarthImageryEnabled).AbsoluteUri;
+        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link opens the same map position, base layer, projection and lighting.");
         var field = new TextBox { Text = url, IsReadOnly = true, HorizontalAlignment = HorizontalAlignment.Stretch };
         AutomationProperties.SetName(field, "Shareable map link");
         field.GotFocus += (_, _) => field.SelectAll();
@@ -333,18 +347,21 @@ public sealed partial class MainPage : Page
 /// <summary>Versioned camera fragments are locale independent and preserve the Pages project base path.</summary>
 internal static class MapViewLink
 {
-    internal static Uri Create(Uri page, MapCamera camera, PixelStyle palette) =>
+    internal static Uri Create(Uri page, MapCamera camera, PixelStyle palette, bool earth) =>
         new UriBuilder(page)
         {
-            Fragment = FormattableString.Invariant($"v1/{camera.Latitude:F6}/{camera.Longitude:F6}/{camera.Zoom:F3}/{Math.IEEERemainder(camera.Bearing, 360):F2}/{camera.Pitch:F2}/{palette}")
+            Fragment = FormattableString.Invariant($"v2/{camera.Latitude:F6}/{camera.Longitude:F6}/{camera.Zoom:F3}/{Math.IEEERemainder(camera.Bearing, 360):F2}/{camera.Pitch:F2}/{palette}/{(earth ? "Earth" : "Map")}")
         }.Uri;
 
-    internal static bool TryRead(Uri page, out MapCamera camera, out PixelStyle palette)
+    internal static bool TryRead(Uri page, out MapCamera camera, out PixelStyle palette, out bool earth)
     {
         camera = default;
         palette = PixelStyle.Day;
+        earth = false;
         var fields = page.Fragment.Split('/');
-        if (fields.Length != 7 || fields[0] != "#v1") return false;
+        if (fields is ["#v2", _, _, _, _, _, _, "Map" or "Earth"])
+            earth = fields[7] == "Earth";
+        else if (fields is not ["#v1", _, _, _, _, _, _]) return false;
         Span<double> numbers = stackalloc double[5];
         for (var i = 0; i < numbers.Length; i++)
             if (!double.TryParse(fields[i + 1], NumberStyles.Float, CultureInfo.InvariantCulture, out numbers[i]) || !double.IsFinite(numbers[i]))

@@ -66,16 +66,40 @@
         <Grid Grid.Row="1" x:Name="MapArea" Background="#A7C6BD">
             <maps:PixelMapControl x:Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                   AutomationProperties.Name="Interactive world map" />
-            <Border x:Name="PlaceCard" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16"
-                    Padding="12,8" Background="#F9142F32" BorderBrush="#679789" BorderThickness="1"
-                    CornerRadius="4" IsHitTestVisible="False" MaxWidth="335">
-                <StackPanel Spacing="2">
-                    <TextBlock Text="DESTINATION" Foreground="#A4D9C8" FontSize="9" CharacterSpacing="135" FontWeight="SemiBold" />
-                    <TextBlock x:Name="Destination" Text="Lower Manhattan" Foreground="#FCF9EB" FontSize="16"
-                               FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                    <TextBlock x:Name="MobileStatus" Foreground="#B3CFC1" FontSize="10" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
-                </StackPanel>
-            </Border>
+            <StackPanel x:Name="SceneDock" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Spacing="6">
+                <Border HorizontalAlignment="Left" Padding="3" Background="#FAFFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <ToggleButton x:Name="MapLayerButton" IsChecked="True" MinWidth="66" Height="36" Padding="9,2" CornerRadius="3"
+                                      Click="OnMapLayer" AutomationProperties.Name="Map layer" ToolTipService.ToolTip="Pixel map">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <Path Width="13" Height="13" Stretch="Uniform" Fill="#55987C" Data="M0,7 L8,2 L16,7 L8,12 Z M0,10 L8,15 L16,10 L16,13 L8,18 L0,13 Z" />
+                                <TextBlock Text="Map" FontSize="13" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton x:Name="EarthLayerButton" MinWidth="68" Height="36" Padding="9,2" CornerRadius="3"
+                                      Click="OnEarthLayer" AutomationProperties.Name="Earth imagery layer" ToolTipService.ToolTip="Natural-color satellite imagery">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <Grid Width="13" Height="13"><Ellipse Fill="#658DA4" /><Path Fill="#A7CB8A" Data="M3,2 L7,1 L9,3 L6,5 L7,7 L4,8 L2,5 Z M9,7 L12,6 L12,9 L10,12 L8,11 Z" /></Grid>
+                                <TextBlock Text="Earth" FontSize="13" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <Border Width="1" Margin="1,4" Background="#C6CFBE" />
+                        <Button x:Name="ProjectionShortcut" Content="3D" MinWidth="40" Height="36" Padding="7,2"
+                                Click="OnProjection" AutomationProperties.Name="Switch to 2D overhead"
+                                ToolTipService.ToolTip="Toggle overhead or isometric projection" />
+                    </StackPanel>
+                </Border>
+                <Border x:Name="PlaceCard" HorizontalAlignment="Left"
+                        Padding="12,8" Background="#F9142F32" BorderBrush="#679789" BorderThickness="1"
+                        CornerRadius="4" IsHitTestVisible="False" MaxWidth="335">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="DESTINATION" Foreground="#A4D9C8" FontSize="9" CharacterSpacing="135" FontWeight="SemiBold" />
+                        <TextBlock x:Name="Destination" Text="Lower Manhattan" Foreground="#FCF9EB" FontSize="16"
+                                   FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="MobileStatus" Foreground="#B3CFC1" FontSize="10" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
             <Border x:Name="MapTools" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16"
                     Background="#FFFBEE" BorderBrush="#667666" BorderThickness="1" Padding="2" CornerRadius="6">
                 <StackPanel x:Name="ToolStack" Spacing="1">
@@ -137,7 +161,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid x:Name="Footer" Grid.Row="2" Padding="12,5" ColumnDefinitions="*,Auto,Auto" Background="#F7F5E8">
+        <Grid x:Name="Footer" Grid.Row="2" Padding="12,5" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" Background="#F7F5E8">
             <TextBlock x:Name="Status" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="#395950"
                        FontSize="11" TextTrimming="CharacterEllipsis" />
             <StackPanel x:Name="ScaleBar" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0" Spacing="5">
@@ -148,6 +172,13 @@
                 <Hyperlink NavigateUri="https://openfreemap.org" Foreground="#30594D">OpenFreeMap</Hyperlink>
                 <Run Text=" · " /><Hyperlink NavigateUri="https://openmaptiles.org" Foreground="#30594D">OpenMapTiles</Hyperlink>
                 <Run Text=" · " /><Hyperlink NavigateUri="https://www.openstreetmap.org/copyright" Foreground="#30594D">© OpenStreetMap</Hyperlink>
+            </TextBlock>
+            <TextBlock x:Name="EarthCredits" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,2,0,0"
+                       Visibility="Collapsed" TextWrapping="Wrap" FontSize="10" Foreground="#395950">
+                <Hyperlink NavigateUri="https://cloudless.eox.at/" Foreground="#30594D">EOxCloudless</Hyperlink>
+                <Run Text=" by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · " />
+                <Hyperlink NavigateUri="https://maps.eox.at/" Foreground="#30594D">EOX::Maps</Hyperlink>
+                <Run Text=" · " /><Hyperlink NavigateUri="https://creativecommons.org/licenses/by/4.0/" Foreground="#30594D">CC BY 4.0</Hyperlink>
             </TextBlock>
         </Grid>
     </Grid>

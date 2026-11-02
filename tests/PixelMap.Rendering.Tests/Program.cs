@@ -59,7 +59,28 @@ var groundFeatures = new[] { new MapTile(id, [park, road, poi]) };
 Assert(renderer.Pick(129, 128, width, height, flat, groundFeatures) == poi, "Point picking priority changed");
 Assert(renderer.Pick(150, 131, width, height, flat, groundFeatures) == road, "Road picking tolerance changed");
 Assert(renderer.Pick(150, 151, width, height, flat, groundFeatures) == park, "Area picking failed");
-Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order and feature picking checks.");
+// A tower wholly inside its tile casts tens of meters beyond the neighboring edge.
+// The neighbor's cached terrain must update when the occluder arrives, exactly once
+// even if the vector tile provider includes the same buffered feature on both sides.
+var edgeCamera = camera with { Longitude = (id.X + 1d) / (1 << id.Z) * 360 - 180 };
+var caster = Building(90, 300, 0, new TilePoint[] { new(3910, 1900), new(4010, 1900), new(4010, 2110), new(3910, 2110) });
+var west = new MapTile(id, [caster]);
+var east = new MapTile(id with { X = id.X + 1 }, []);
+var copy = caster with { Paths = caster.Paths.Select(r => r.Select(p => new TilePoint(p.X - 4096, p.Y)).ToArray()).ToArray() };
+using var seamRenderer = new PixelMapRenderer();
+using var seamBitmap = new SKBitmap(width, height);
+using var seamCanvas = new SKCanvas(seamBitmap);
+seamRenderer.Draw(seamCanvas, width, height, edgeCamera, [east], pixelSize: 1);
+var sunlit = seamBitmap.GetPixel(158, 141);
+seamRenderer.Draw(seamCanvas, width, height, edgeCamera, [east, west], pixelSize: 1);
+var shaded = seamBitmap.GetPixel(158, 141);
+Assert(shaded != sunlit, "A neighboring tile clipped the tower shadow");
+seamRenderer.Draw(seamCanvas, width, height, edgeCamera, [east with { Features = [copy] }, west], pixelSize: 1);
+Assert(seamBitmap.GetPixel(158, 141) == shaded, "Buffered tile copies darkened a shadow twice");
+
+Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order, picking and cross-tile shadow checks.");
+
+ImageryChecks.Run();
 
 if (args.Contains("--benchmark", StringComparer.Ordinal))
 {

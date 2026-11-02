@@ -40,6 +40,49 @@ function changed(a, b) {
     return delta / count;
 }
 
+// Exact Earth raster inks for built land, deep water and green land. These are absent
+// from the vector palette, so colored placeholders and building-only frames do not pass.
+const earthInks = new Set([0x102541, 0x153555, 0x1a4968, 0x235e80, 0x133c45, 0x1b5056,
+    0x23696b, 0x263a28, 0x334c32, 0x394531, 0x505a39, 0x42494c, 0x596063, 0x72797a,
+    0x8b9190, 0xa7abaa, 0xc0c4be, 0x26303c, 0x3a485a, 0x52637a, 0x494641, 0x655f55,
+    0x80796b, 0x9b9384, 0xb5ae9d]);
+
+function hasEarthTerrain(frame) {
+    const counts = new Map();
+    for (let y = Math.floor(frame.height * .22); y < frame.height * .72; y += 2) {
+        for (let x = Math.floor(frame.width * .13); x < frame.width * .84; x += 2) {
+            const rgb = color(frame.data, (y * frame.width + x) * 4);
+            if (earthInks.has(rgb)) counts.set(rgb, (counts.get(rgb) || 0) + 1);
+        }
+    }
+    return [...counts.values()].filter(n => n >= 8).length >= 3 &&
+        [...counts.values()].reduce((sum, n) => sum + n, 0) > 200;
+}
+
+async function clickMapAction(page, name) {
+    const control = page.getByRole("button", {name, exact: true})
+        .or(page.getByRole("checkbox", {name, exact: true}));
+    const bounds = await control.boundingBox();
+    assert.ok(bounds && bounds.width && bounds.height, "Visible " + name);
+    await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+}
+
+async function checkEarth(page, initial) {
+    const enable = page.getByRole("button", {name: "Enable accessibility"});
+    if (await enable.count()) await enable.evaluate(element => element.click());
+    assert.ok(!hasEarthTerrain(initial), "vector and satellite basemaps must be distinguishable");
+    await clickMapAction(page, "Earth imagery layer");
+    const iso = await frameWhere(page, frame => hasEarthTerrain(frame) && measure(frame).roofRatio > .01, "earth-isometric", 45000);
+    assert.match(await page.locator("body").ariaSnapshot(), /EOxCloudless/);
+    await clickMapAction(page, "Switch to 2D overhead");
+    await page.getByRole("button", {name: "Switch to 3D isometric", exact: true}).waitFor({state: "attached"});
+    await frameWhere(page, frame => hasEarthTerrain(frame) && changed(iso, frame) > .25, "earth-overhead");
+    await clickMapAction(page, "Map layer");
+    await page.waitForFunction(() => !document.body.innerText.includes("Contains modified Copernicus"));
+    await clickMapAction(page, "Switch to 3D isometric");
+    await page.waitForTimeout(800);
+}
+
 async function frameWhere(page, predicate, name, timeout = 25000) {
     const end = Date.now() + timeout;
     let frame, bytes;
@@ -58,10 +101,22 @@ async function frameWhere(page, predicate, name, timeout = 25000) {
 
 async function open(context, address, failures) {
     const page = await context.newPage();
-    page.on("pageerror", error => failures.push(error.message));
+    page.on("pageerror", error => {
+        failures.push(error.message);
+        console.error("Browser exception", error.message);
+    });
+    page.on("console", message => {
+        if (message.type() === "error") console.error("Browser console", message.text().slice(0, 1800));
+    });
     // The opening district is bundled. CI should not rely on public map services.
     await page.route("https://tiles.openfreemap.org/**", route => route.abort());
+    await page.route("https://tiles.maps.eox.at/**", route => route.abort());
     await page.goto(address, {waitUntil: "domcontentloaded", timeout: 120000});
+    // Allow the Uno compositor to submit its first WebGL frame before reading any pixels.
+    // Continuous capture while Chromium is still presenting the DOM splash can retain that surface.
+    await page.waitForFunction(() => document.title.includes("Pixel Atlas") && document.querySelector("canvas")?.width > 0,
+        undefined, {timeout: 100000});
+    await page.waitForTimeout(1500);
     return page;
 }
 
@@ -77,6 +132,7 @@ async function run() {
         const page = await open(desktop, url, failures);
         const initial = await frameWhere(page, frame => measure(frame).roofRatio > .018, "desktop-city", 110000);
         assert.match(await page.title(), /Pixel Atlas/i);
+        await checkEarth(page, initial);
 
         await page.mouse.move(660, 390);
         await page.mouse.down();
@@ -132,7 +188,7 @@ async function run() {
         await frameWhere(phone, frame => changed(handset, frame) > .25 && measure(frame).roofRatio > .006, "phone-pinch");
         await mobile.close();
         assert.deepEqual(failures, [], "browser runtime errors");
-        console.log("Browser checks passed: seeded geometry, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.");
+        console.log("Browser checks passed: seeded geometry, Earth imagery in isometric and overhead views, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.");
     } finally {
         await browser.close();
     }

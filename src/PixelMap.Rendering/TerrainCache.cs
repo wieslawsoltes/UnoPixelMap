@@ -10,12 +10,12 @@ internal sealed class TerrainCache
     private const int BlockSize = 256;
     private const int MaxBlocks = 128; // 32 MiB of BGRA terrain
     private static readonly SKSamplingOptions Nearest = new(SKFilterMode.Nearest, SKMipmapMode.None);
-    private readonly record struct Key(TileId Id, int Lod, int PixelSize, bool Shadow, int X, int Y);
+    private readonly record struct Key(TileId Id, int Lod, int PixelSize, bool Shadow, bool Overlay, int X, int Y);
     private readonly record struct Entry(Key Key, SKImage Image);
     private readonly Dictionary<Key, LinkedListNode<Entry>> index = [];
     private readonly LinkedList<Entry> usage = [];
 
-    internal void Draw(SKCanvas canvas, TileGeometry tile, float scale, int pixelSize, bool shadows,
+    internal void Draw(SKCanvas canvas, TileGeometry tile, float scale, int pixelSize, bool shadows, bool overlay,
         PixelPalette palette, PixelMapRenderer renderer)
     {
         var clip = canvas.LocalClipBounds;
@@ -31,17 +31,17 @@ internal sealed class TerrainCache
         for (int y = y0; y < y1; y++)
         for (int x = x0; x < x1; x++)
         {
-            var key = new Key(tile.Source.Id, lod, pixelSize, shadows, x, y);
+            var key = new Key(tile.Source.Id, lod, pixelSize, shadows, overlay, x, y);
             var bounds = new SKRect(x * units, y * units, (x + 1) * units, (y + 1) * units);
             if (!index.TryGetValue(key, out var node))
             {
-                using var bitmap = new SKBitmap(BlockSize, BlockSize, SKColorType.Bgra8888, SKAlphaType.Opaque);
+                using var bitmap = new SKBitmap(BlockSize, BlockSize, SKColorType.Bgra8888, overlay ? SKAlphaType.Premul : SKAlphaType.Opaque);
                 using (var block = new SKCanvas(bitmap))
                 {
-                    block.Clear(new SKColor(palette.Ground));
+                    block.Clear(overlay ? SKColors.Transparent : new SKColor(palette.Ground));
                     block.Scale(density);
                     block.Translate(-bounds.Left, -bounds.Top);
-                    renderer.DrawTerrainPatch(block, tile, density, zoom, pixelSize, shadows, palette, bounds);
+                    renderer.DrawTerrainPatch(block, tile, density, zoom, pixelSize, shadows, overlay, palette, bounds);
                     block.Flush();
                 }
                 bitmap.SetImmutable();

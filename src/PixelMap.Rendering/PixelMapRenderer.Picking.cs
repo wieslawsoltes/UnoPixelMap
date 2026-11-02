@@ -13,6 +13,15 @@ public sealed partial class PixelMapRenderer
     /// orthographic depth pass into a single art pixel, so idle drawing carries no object-ID buffer.</summary>
     public MapFeature? Pick(double x, double y, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles)
     {
+        lock (sync)
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            return PickSurface(x, y, width, height, camera, tiles);
+        }
+    }
+
+    private MapFeature? PickSurface(double x, double y, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles)
+    {
         if (x < 0 || x >= width || y < 0 || y >= height) return null;
         int pixelSize = lastView.PixelSize > 0 ? lastView.PixelSize : 2;
         PrepareVisible(width, height, pixelSize, camera, tiles);

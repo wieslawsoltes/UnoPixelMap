@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PixelMap.App/PixelMap.App.csproj" />
+    <Project Path="src/PixelMap.Controls/PixelMap.Controls.csproj" />
+    <Project Path="src/PixelMap.Data/PixelMap.Data.csproj" />
+    <Project Path="src/PixelMap.Rendering/PixelMap.Rendering.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PixelMap.Data.Checks/PixelMap.Data.Checks.csproj" />
+    <Project Path="tests/PixelMap.Rendering.Tests/PixelMap.Rendering.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -6,6 +6,8 @@ namespace PixelMap.Rendering;
 /// <summary>Retained vector-tile display lists, orthographic height rasterization and a nearest-neighbor resolve.</summary>
 public sealed partial class PixelMapRenderer : IDisposable
 {
+    private readonly Lock sync = new();
+    private bool disposed;
     private static readonly SKSamplingOptions Nearest = new(SKFilterMode.Nearest, SKMipmapMode.None);
     private readonly Dictionary<TileId, TileGeometry> geometry = [];
     private readonly List<(TileGeometry Tile, TileTransform Transform, float Scale)> visible = [];
@@ -17,6 +19,12 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly HashSet<string> names = new(StringComparer.OrdinalIgnoreCase);
     private readonly BuildingRasterizer buildings = new();
     private readonly TerrainCache terrain = new();
+    private readonly EarthRaster earth = new();
+    private readonly SKPath earthCoverage = new();
+    private readonly List<ImageryTile> imageryOrder = [];
+    private readonly List<ImageryTile> lastImagery = [];
+    private readonly SKPath shadowMask = new();
+    private readonly List<ShadowSource> shadowSources = [];
     private readonly SKPaint paint = new() { IsAntialias = false, StrokeCap = SKStrokeCap.Round, StrokeJoin = SKStrokeJoin.Round };
     private readonly SKFont font = new(SKTypeface.Default, 8f) { Edging = SKFontEdging.Antialias };
     private SKBitmap? bitmap;
@@ -27,14 +35,24 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly List<MapTile> lastTiles = [];
     private (int Width, int Height, MapCamera Camera, PixelStyle Style, int PixelSize) lastView;
 
-    public unsafe void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
-        PixelStyle style = PixelStyle.Day, int pixelSize = 2)
+    public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
+        PixelStyle style = PixelStyle.Day, int pixelSize = 2, IReadOnlyList<ImageryTile>? imagery = null)
+    {
+        lock (sync)
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery);
+        }
+    }
+
+    private unsafe void DrawFrame(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
+        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery)
     {
         ArgumentNullException.ThrowIfNull(canvas);
         if (width <= 0 || height <= 0) return;
         pixelSize = Math.Clamp(pixelSize, 1, 8);
         var view = (width, height, camera, style, pixelSize);
-        if (view == lastView && lastPicture is not null && SameTiles(tiles))
+        if (view == lastView && lastPicture is not null && SameTiles(tiles, lastTiles) && SameTiles(imagery, lastImagery))
         {
             canvas.DrawPicture(lastPicture);
             return;
@@ -60,17 +78,28 @@ public sealed partial class PixelMapRenderer : IDisposable
         PrepareVisible(width, height, pixelSize, camera, tiles);
         double world = camera.WorldSize / pixelSize;
 
-        foreach (var (tile, transform, scale) in visible)
+        bool hasEarth = imagery is { Count: > 0 } && DrawImagery(surface, width, height, pixelSize, camera, imagery);
+        if (hasEarth)
         {
             surface.Save();
-            var matrix = transform.Matrix;
-            surface.SetMatrix(in matrix);
-            surface.ClipRect(new SKRect(0, 0, TileGeometry.Extent, TileGeometry.Extent));
-            terrain.Draw(surface, tile, scale, pixelSize, camera.Pitch >= 1, colors, this);
+            surface.ClipPath(earthCoverage, SKClipOperation.Difference);
+            if (!surface.LocalClipBounds.IsEmpty)
+                DrawGround(surface, camera, pixelSize, colors, false);
             surface.Restore();
+            surface.Save();
+            surface.ClipPath(earthCoverage);
+            DrawGround(surface, camera, pixelSize, colors, true);
+            surface.Restore();
+        }
+        else
+        {
+            DrawGround(surface, camera, pixelSize, colors, false);
         }
         paint.Shader = null;
         surface.Flush();
+        // In plan view keep the source's photographed roofs visible through the map footprints.
+        // The opacity transitions continuously into full three-dimensional façades on tilt.
+        using var photoUnderlay = hasEarth && camera.Zoom >= 12 && camera.Pitch < 30 ? SKImage.FromBitmap(bitmap) : null;
         if (camera.Zoom >= 12)
         {
             float meters = (float)(world / (MapCamera.EarthCircumference *
@@ -81,6 +110,15 @@ public sealed partial class PixelMapRenderer : IDisposable
             foreach (var building in tile.Buildings)
                 buildings.Draw(pixels, building, transform, colors.Materials[building.Seed % (uint)colors.Materials.Length]);
             bitmap.NotifyPixelsChanged();
+        }
+        if (photoUnderlay is not null)
+        {
+            surface.Save();
+            surface.ClipPath(earthCoverage);
+            paint.Style = SKPaintStyle.Fill;
+            paint.Color = SKColors.White.WithAlpha((byte)Math.Round(209 * (1 - camera.Pitch / 30)));
+            surface.DrawImage(photoUnderlay, 0, 0, Nearest, paint);
+            surface.Restore();
         }
         surface.Flush();
         using var image = SKImage.FromBitmap(bitmap);
@@ -95,17 +133,61 @@ public sealed partial class PixelMapRenderer : IDisposable
         lastView = view;
         lastTiles.Clear();
         foreach (var tile in tiles) lastTiles.Add(tile);
+        lastImagery.Clear();
+        if (imagery is not null) foreach (var tile in imagery) lastImagery.Add(tile);
         canvas.DrawPicture(lastPicture);
+    }
+
+    private void DrawGround(SKCanvas surface, MapCamera camera, int pixelSize, PixelPalette colors, bool overlay)
+    {
+        foreach (var (tile, transform, scale) in visible)
+        {
+            surface.Save();
+            var matrix = transform.Matrix;
+            surface.SetMatrix(in matrix);
+            surface.ClipRect(new SKRect(0, 0, TileGeometry.Extent, TileGeometry.Extent));
+            if (camera.Zoom >= 12 && camera.Pitch >= 1) UpdateShadowSources(tile);
+            terrain.Draw(surface, tile, scale, pixelSize, camera.Pitch >= 1, overlay, colors, this);
+            surface.Restore();
+        }
+    }
+
+    private bool DrawImagery(SKCanvas surface, int width, int height, int pixelSize, MapCamera camera, IReadOnlyList<ImageryTile> imagery)
+    {
+        var projection = new TileProjection(camera, width, height, pixelSize);
+        earthCoverage.Rewind();
+        imageryOrder.Clear();
+        foreach (var tile in imagery) imageryOrder.Add(tile);
+        // Lower-resolution ancestors fill first, detailed children replace only their own area.
+        imageryOrder.Sort(static (a, b) => a.Id.Z.CompareTo(b.Id.Z));
+        var rect = new SKRect(0, 0, TileGeometry.Extent, TileGeometry.Extent);
+        foreach (var tile in imageryOrder)
+        {
+            var copies = projection.Copies(tile.Id);
+            if (copies.Last < copies.First || earth.Get(tile) is not { } image) continue;
+            for (int i = copies.First; i <= copies.Last; i++)
+            {
+                var (transform, _) = projection.Get(tile.Id, i);
+                surface.Save();
+                var matrix = transform.Matrix;
+                surface.SetMatrix(in matrix);
+                surface.DrawImage(image, rect, Nearest);
+                surface.Restore();
+                earthCoverage.MoveTo(transform.At(0, 0));
+                earthCoverage.LineTo(transform.At(rect.Right, 0));
+                earthCoverage.LineTo(transform.At(rect.Right, rect.Bottom));
+                earthCoverage.LineTo(transform.At(0, rect.Bottom));
+                earthCoverage.Close();
+            }
+        }
+        return !earthCoverage.IsEmpty;
     }
 
     private void PrepareVisible(int width, int height, int pixelSize, MapCamera camera, IReadOnlyList<MapTile> tiles)
     {
         frame++;
         visible.Clear();
-        // Do the absolute Mercator subtraction in double before constructing the float Skia transform.
-        var (s, c) = Math.SinCos(camera.Bearing * Math.PI / 180);
-        double tilt = Math.Cos(camera.PitchRadians);
-        double world = camera.WorldSize / pixelSize;
+        var projection = new TileProjection(camera, width, height, pixelSize);
         foreach (var tile in tiles)
         {
             if (!geometry.TryGetValue(tile.Id, out var prepared) || !ReferenceEquals(prepared.Source, tile))
@@ -114,19 +196,10 @@ public sealed partial class PixelMapRenderer : IDisposable
                 geometry[tile.Id] = prepared = new(tile);
             }
             prepared.LastFrame = frame;
-            int n = 1 << tile.Id.Z;
-            var coverage = camera.TileBounds(width, height, n);
-            if (tile.Id.Y < coverage.Top || tile.Id.Y > coverage.Bottom) continue;
-            int firstCopy = (int)Math.Ceiling((coverage.Left - tile.Id.X) / (double)n);
-            int lastCopy = (int)Math.Floor((coverage.Right - tile.Id.X) / (double)n);
-            float scale = (float)(world / (n * TileGeometry.Extent));
-            for (int copy = firstCopy; copy <= lastCopy; copy++)
+            var copies = projection.Copies(tile.Id);
+            for (int copy = copies.First; copy <= copies.Last; copy++)
             {
-                double x = ((double)tile.Id.X / n + copy - camera.CenterX) * world;
-                double y = ((double)tile.Id.Y / n - camera.CenterY) * world;
-                var transform = new TileTransform((float)(width * .5 / pixelSize + c * x + s * y),
-                    (float)(height * .5 / pixelSize + (-s * x + c * y) * tilt),
-                    (float)(scale * c), (float)(scale * s), (float)(-scale * s * tilt), (float)(scale * c * tilt));
+                var (transform, scale) = projection.Get(tile.Id, copy);
                 visible.Add((prepared, transform, scale));
             }
         }
@@ -141,26 +214,53 @@ public sealed partial class PixelMapRenderer : IDisposable
         }
     }
 
-    private bool SameTiles(IReadOnlyList<MapTile> tiles)
+    private void UpdateShadowSources(TileGeometry target)
     {
-        if (tiles.Count != lastTiles.Count) return false;
+        shadowSources.Clear();
+        var targetId = target.Source.Id;
+        int n = 1 << targetId.Z;
+        var tileBounds = new SKRect(0, 0, TileGeometry.Extent, TileGeometry.Extent);
+        foreach (var source in geometry.Values)
+        {
+            var id = source.Source.Id;
+            if (id.Z != targetId.Z || source.Shadows.Length == 0) continue;
+            int dx = id.X - targetId.X;
+            if (dx > n / 2) dx -= n;
+            if (dx < -n / 2) dx += n;
+            float x = dx * TileGeometry.Extent, y = (id.Y - targetId.Y) * TileGeometry.Extent;
+            var bounds = source.ShadowBounds;
+            bounds.Offset(x, y);
+            if (bounds.IntersectsWith(tileBounds)) shadowSources.Add(new(source, x, y));
+        }
+        if (target.ShadowSources.SequenceEqual(shadowSources)) return;
+        // A newly arrived neighbor can cast onto terrain that was already cached.
+        target.ShadowSources.Clear();
+        target.ShadowSources.AddRange(shadowSources);
+        terrain.Remove(targetId);
+    }
+
+    private static bool SameTiles<T>(IReadOnlyList<T>? tiles, List<T> previous) where T : class
+    {
+        if (tiles is null) return previous.Count == 0;
+        if (tiles.Count != previous.Count) return false;
         for (int i = 0; i < tiles.Count; i++)
-            if (!ReferenceEquals(tiles[i], lastTiles[i])) return false;
+            if (!ReferenceEquals(tiles[i], previous[i])) return false;
         return true;
     }
 
     internal void DrawTerrainPatch(SKCanvas canvas, TileGeometry tile, float scale, double zoom, int pixelSize,
-        bool shadows, PixelPalette colors, SKRect clip)
+        bool shadows, bool overlay, PixelPalette colors, SKRect clip)
     {
         float roadScale = (float)Math.Clamp(Math.Pow(2, (zoom - 14) * .37), .36, 5) / pixelSize;
         clip.Inflate(32 / scale, 32 / scale);
         foreach (var (key, path, bounds) in tile.Batches)
         {
-            if (key.Ink == Ink.Shadow && (zoom < 13 || !shadows)) continue;
             if (bounds.Left > clip.Right || bounds.Right < clip.Left || bounds.Top > clip.Bottom || bounds.Bottom < clip.Top) continue;
+            if (overlay && (key.Width <= 0 || key.Ink is Ink.Stream or Ink.Path or Ink.Tunnel)) continue;
             paint.Style = key.Width > 0 ? SKPaintStyle.Stroke : SKPaintStyle.Fill;
-            paint.StrokeWidth = Math.Max(.6f, key.Width * roadScale) / scale;
+            paint.StrokeWidth = Math.Max(.6f, key.Width * roadScale * (overlay ? .52f : 1)) / scale;
             paint.Color = new SKColor(colors.Inks[(int)key.Ink]);
+            if (overlay) paint.Color = paint.Color.WithAlpha(key.Ink == Ink.RoadEdge ? (byte)90 : (byte)150);
             paint.Shader = null;
             paint.PathEffect = null;
             if (key.Ink is Ink.Tunnel or Ink.Boundary or Ink.Ferry or Ink.Rail)
@@ -188,6 +288,22 @@ public sealed partial class PixelMapRenderer : IDisposable
         }
         paint.Shader = null;
         paint.PathEffect = null;
+        if (zoom >= 13 && shadows)
+        {
+            shadowMask.Rewind();
+            foreach (var source in tile.ShadowSources)
+            {
+                var local = clip;
+                local.Offset(-source.X, -source.Y);
+                foreach (var batch in source.Tile.Shadows)
+                    if (batch.Bounds.IntersectsWith(local)) shadowMask.AddPath(batch.Path, source.X, source.Y);
+            }
+            // Fill the union once, including buffered copies and casters across XYZ boundaries.
+            // No overlapping window or tower part can darken the same ground texel twice.
+            paint.Style = SKPaintStyle.Fill;
+            paint.Color = new(colors.Inks[(int)Ink.Shadow]);
+            canvas.DrawPath(shadowMask, paint);
+        }
     }
 
     private void DrawLabels(SKCanvas canvas, int w, int h, double zoom, int pixelSize, PixelPalette colors)
@@ -245,13 +361,18 @@ public sealed partial class PixelMapRenderer : IDisposable
 
     public void Dispose()
     {
-        ReleasePatterns();
-        foreach (var tile in geometry.Values) tile.Dispose();
-        geometry.Clear();
-        terrain.Clear();
-        foreach (var dash in dashes.Values) dash.Dispose();
-        dashes.Clear();
-        lastPicture?.Dispose();
-        ground?.Dispose(); bitmap?.Dispose(); paint.Dispose(); font.Dispose();
+        lock (sync)
+        {
+            if (disposed) return;
+            disposed = true;
+            ReleasePatterns();
+            foreach (var tile in geometry.Values) tile.Dispose();
+            geometry.Clear();
+            terrain.Clear();
+            foreach (var dash in dashes.Values) dash.Dispose();
+            dashes.Clear();
+            lastPicture?.Dispose();
+            earth.Dispose(); earthCoverage.Dispose(); shadowMask.Dispose(); ground?.Dispose(); bitmap?.Dispose(); paint.Dispose(); font.Dispose();
+        }
     }
 }

@@ -16,7 +16,7 @@ public sealed partial class PixelMapControl
     private long _start, _lastMove, _lastTapTime;
     private double _duration, _arc, _vx, _vy;
     private bool _dragged, _rotating, _flight, _longFlight;
-    private int _artScale = 2;
+    private double _flightPhase;
 
     private void HookInput()
     {
@@ -54,6 +54,14 @@ public sealed partial class PixelMapControl
         _arc = _longFlight ? Math.Min(Math.Min(_from.Zoom, _to.Zoom) - 1, Math.Log2(spans)) : 0;
         _duration = _longFlight ? 1050 : 240;
         _flight = true;
+        _flightPhase = 0;
+        if (_longFlight)
+        {
+            _departure = _vectors.Display;
+            _earthDeparture = _earthDisplay;
+            _tilesTimer.Stop();
+            RefreshTiles(_to);
+        }
         _start = Stopwatch.GetTimestamp();
         _motion.Start();
     }
@@ -63,12 +71,20 @@ public sealed partial class PixelMapControl
         if (_flight)
         {
             double t = Math.Min(1, Stopwatch.GetElapsedTime(_start).TotalMilliseconds / _duration);
-            double u = t * t * (3 - 2 * t);
+            _flightPhase = t;
+            double u = Smooth(_longFlight ? Math.Clamp((t - .20) / .60, 0, 1) : t);
+            double zoom = _from.Zoom + (_to.Zoom - _from.Zoom) * u;
+            if (_longFlight)
+            {
+                double overview = Math.Max(0, Math.Min(_from.Zoom, _to.Zoom) - Math.Max(0, _arc));
+                zoom = t < .5 ? _from.Zoom + (overview - _from.Zoom) * Smooth(Math.Min(1, t / .38))
+                    : overview + (_to.Zoom - overview) * Smooth(Math.Clamp((t - .62) / .38, 0, 1));
+            }
             // Interpolate on the wrapped Mercator plane so that antimeridian flights take the short path.
             var pos = _from.Project(_to.Latitude, _to.Longitude, 0, 0);
             var geo = _from.Unproject(pos.X * u, pos.Y * u, 0, 0);
             Camera = t == 1 ? _to : new MapCamera(geo.Latitude, geo.Longitude,
-                _from.Zoom + (_to.Zoom - _from.Zoom) * u - Math.Max(0, _arc) * 4 * u * (1 - u),
+                zoom,
                 _from.Bearing + Wrap(_to.Bearing - _from.Bearing) * u, _from.Pitch + (_to.Pitch - _from.Pitch) * u);
             if (t == 1) { StopMotion(); ViewChanged(); }
             return;
@@ -82,12 +98,16 @@ public sealed partial class PixelMapControl
         if (Math.Abs(_vx) + Math.Abs(_vy) < .018) StopMotion();
     }
 
+    private static double Smooth(double t) => t * t * (3 - 2 * t);
+
     private void StopMotion()
     {
         _motion.Stop();
         _flight = _longFlight = false;
         _vx = _vy = 0;
-        _artScale = 2;
+        _departure = [];
+        _earthDeparture = [];
+        if (_active) InvalidateMap();
     }
 
     private void Pressed(object sender, PointerRoutedEventArgs e)
@@ -173,13 +193,14 @@ public sealed partial class PixelMapControl
             }
         }
         else { _vx = _vy = 0; _lastMove = Stopwatch.GetTimestamp(); }
+        InvalidateMap();
         e.Handled = true;
     }
 
     private void Inspect(Point pos)
     {
         var geo = Camera.Unproject(pos.X, pos.Y, ActualWidth, ActualHeight);
-        var feature = _renderer?.Pick(pos.X, pos.Y, (int)Math.Ceiling(ActualWidth), (int)Math.Ceiling(ActualHeight), Camera, _display);
+        var feature = _surface.Pick(pos, (int)Math.Ceiling(ActualWidth), (int)Math.Ceiling(ActualHeight));
         var label = feature is null ? FormattableString.Invariant($"{geo.Latitude:0.0000}°, {geo.Longitude:0.0000}°")
             : !string.IsNullOrWhiteSpace(feature.Name) ? feature.Name
             : !string.IsNullOrWhiteSpace(feature.Class) ? feature.Class.Replace('_', ' ') : feature.Layer;

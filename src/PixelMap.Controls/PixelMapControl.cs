@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -17,7 +18,10 @@ public sealed partial class PixelMapControl : UserControl
     public static readonly DependencyProperty CameraProperty = DependencyProperty.Register(nameof(Camera),
         typeof(MapCamera), typeof(PixelMapControl), new PropertyMetadata(OpeningView, (o, _) => ((PixelMapControl)o).ViewChanged()));
     public static readonly DependencyProperty PaletteProperty = DependencyProperty.Register(nameof(Palette),
-        typeof(PixelStyle), typeof(PixelMapControl), new PropertyMetadata(PixelStyle.Day, (o, _) => ((PixelMapControl)o)._surface.Invalidate()));
+        typeof(PixelStyle), typeof(PixelMapControl), new PropertyMetadata(PixelStyle.Day, (o, _) => ((PixelMapControl)o).InvalidateMap()));
+
+    public static readonly DependencyProperty IsEarthImageryEnabledProperty = DependencyProperty.Register(nameof(IsEarthImageryEnabled),
+        typeof(bool), typeof(PixelMapControl), new PropertyMetadata(false, (o, _) => ((PixelMapControl)o).EarthChanged()));
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(18) };
     private readonly MapSurface _surface;
@@ -26,21 +30,27 @@ public sealed partial class PixelMapControl : UserControl
     private readonly TranslateTransform _pinPosition = new();
     private readonly VectorTileSource _source;
     private readonly DispatcherTimer _tilesTimer = new() { Interval = TimeSpan.FromMilliseconds(60) };
-    private readonly Dictionary<TileId, CancellationTokenSource> _requests = [];
-    private readonly Dictionary<TileId, MapTile> _loaded = [];
-    private readonly Dictionary<TileId, int> _failures = [];
-    private TileId[] _wanted = [];
-    private IReadOnlyList<MapTile> _display = [];
-    private PixelMapRenderer? _renderer;
+    private readonly EarthImagerySource _earthSource;
+    private readonly TileViewport<MapTile> _vectors;
+    private readonly TileViewport<ImageryTile> _earth;
+    private IReadOnlyList<MapTile> _departure = [];
+    private IReadOnlyList<MapTile> _world = [];
+    private IReadOnlyList<ImageryTile> _earthOverview = [];
+    private IReadOnlyList<ImageryTile> _earthDeparture = [];
+    private IReadOnlyList<ImageryTile> _earthDisplay = [];
+    private CancellationTokenSource? _overviewRequest;
     private (double Latitude, double Longitude)? _marker;
     private bool _active;
 
     public PixelMapControl() : this(new VectorTileSource(Http)) { }
 
-    public PixelMapControl(VectorTileSource source)
+    public PixelMapControl(VectorTileSource source, EarthImagerySource? earthSource = null)
     {
         _source = source ?? throw new ArgumentNullException(nameof(source));
-        _surface = new(this);
+        _earthSource = earthSource ?? new EarthImagerySource(Http);
+        _vectors = new(_source.GetTileAsync, LayerChanged);
+        _earth = new(_earthSource.GetTileAsync, LayerChanged);
+        _surface = new();
         _pinLabel = new TextBlock { FontSize = 12, Foreground = Brush(255, 247, 220), TextTrimming = TextTrimming.CharacterEllipsis };
         _pin = new Border
         {
@@ -54,18 +64,27 @@ public sealed partial class PixelMapControl : UserControl
         IsTabStop = true;
         AutomationProperties.SetName(this, "Interactive pixel map");
         HookInput();
-        _tilesTimer.Tick += (_, _) => { _tilesTimer.Stop(); RefreshTiles(); };
+        _tilesTimer.Tick += (_, _) => { _tilesTimer.Stop(); RefreshTiles(_longFlight ? _to : Camera); };
         SizeChanged += (_, _) => ViewChanged();
-        Loaded += (_, _) => { _active = true; ViewChanged(); };
+        Loaded += (_, _) =>
+        {
+            _active = true;
+            ViewChanged();
+            _ = LoadOverview();
+            if (IsEarthImageryEnabled) EarthChanged();
+        };
         Unloaded += (_, _) =>
         {
             _active = false;
             StopMotion();
             _tilesTimer.Stop();
-            foreach (var request in _requests.Values.ToArray()) request.Cancel();
-            _requests.Clear(); _touches.Clear(); _wanted = []; _display = [];
-            _loaded.Clear(); _failures.Clear();
-            _renderer?.Dispose(); _renderer = null;
+            _vectors.Clear();
+            _earth.Clear();
+            _overviewRequest?.Cancel();
+            _touches.Clear();
+            _departure = _world = [];
+            _earthDisplay = _earthDeparture = _earthOverview = [];
+            _surface.Release();
         };
     }
 
@@ -73,6 +92,7 @@ public sealed partial class PixelMapControl : UserControl
 
     public MapCamera Camera { get => (MapCamera)GetValue(CameraProperty); set => SetValue(CameraProperty, Normalize(value)); }
     public PixelStyle Palette { get => (PixelStyle)GetValue(PaletteProperty); set => SetValue(PaletteProperty, value); }
+    public bool IsEarthImageryEnabled { get => (bool)GetValue(IsEarthImageryEnabledProperty); set => SetValue(IsEarthImageryEnabledProperty, value); }
     public string StatusText { get; private set; } = "Opening atlas";
     public event EventHandler? CameraChanged;
     public event EventHandler? StatusChanged;
@@ -117,95 +137,161 @@ public sealed partial class PixelMapControl : UserControl
     private void ViewChanged()
     {
         if (!_active) return;
-        _surface.Invalidate();
+        InvalidateMap();
         PositionMarker();
         CameraChanged?.Invoke(this, EventArgs.Empty);
         if (!_tilesTimer.IsEnabled && !_longFlight) _tilesTimer.Start();
     }
 
-    private void RefreshTiles()
-    {
-        if (!_active || ActualWidth <= 0 || ActualHeight <= 0) return;
-        var ids = Camera.VisibleTiles(ActualWidth, ActualHeight);
-        if (_wanted.SequenceEqual(ids) && _failures.Count == 0) return;
-        _wanted = ids;
-        foreach (var id in _requests.Keys.Except(ids).ToArray())
-        {
-            var obsolete = _requests[id];
-            _requests.Remove(id);
-            obsolete.Cancel();
-        }
-        foreach (var id in _failures.Keys.Except(ids).ToArray()) _failures.Remove(id);
-        foreach (var id in _loaded.Keys.Except(ids).ToArray()) _loaded.Remove(id);
-        UpdateDisplay();
-        foreach (var id in ids)
-        {
-            if (_loaded.ContainsKey(id) || _requests.ContainsKey(id) || _failures.ContainsKey(id)) continue;
-            var request = new CancellationTokenSource();
-            _requests.Add(id, request);
-            _ = LoadTile(id, request);
-        }
-    }
-
-    private async Task LoadTile(TileId id, CancellationTokenSource request)
+    private async Task LoadOverview()
     {
         try
         {
-            var tile = await _source.GetTileAsync(id, request.Token);
-            if (_active && !request.IsCancellationRequested) _loaded[id] = tile;
+            var world = await _source.GetTileAsync(new TileId(0, 0, 0));
+            if (!_active) return;
+            _world = [world];
+            InvalidateMap();
         }
-        catch (OperationCanceledException) when (request.IsCancellationRequested) { }
-        catch (Exception)
+        catch (HttpRequestException) { /* Detailed tile requests have their own retry state. */ }
+        catch (TaskCanceledException) { }
+    }
+
+    private void RefreshTiles(MapCamera view)
+    {
+        if (!_active || ActualWidth <= 0 || ActualHeight <= 0) return;
+        _vectors.Update(view.VisibleTiles(ActualWidth, ActualHeight, VectorTileSource.MaxZoom));
+        if (IsEarthImageryEnabled)
+            _earth.Update(view.VisibleTiles(ActualWidth, ActualHeight, EarthImagerySource.MaxZoom));
+    }
+
+    private void EarthChanged()
+    {
+        _overviewRequest?.Cancel();
+        _earth.Clear();
+        _earthDeparture = _earthDisplay = [];
+        if (!_active) return;
+        if (IsEarthImageryEnabled)
         {
+            if (_earthOverview.Count == 0)
+            {
+                var request = _overviewRequest = new CancellationTokenSource();
+                _ = LoadEarthOverview(request);
+            }
+            RefreshTiles(_longFlight ? _to : Camera);
+        }
+        LayerChanged();
+    }
+
+    private async Task LoadEarthOverview(CancellationTokenSource request)
+    {
+        try
+        {
+            var overview = await _earthSource.GetTileAsync(new TileId(0, 0, 0), request.Token);
             if (_active && !request.IsCancellationRequested)
             {
-                int generation = ++_retryGeneration;
-                _failures[id] = generation;
-                _ = RetryLater(id, generation);
+                _earthOverview = [overview];
+                LayerChanged();
             }
         }
+        catch (HttpRequestException) { }
+        catch (OperationCanceledException) { }
         finally
         {
-            if (_requests.TryGetValue(id, out var current) && current == request)
-            {
-                _requests.Remove(id);
-                UpdateDisplay();
-            }
+            if (ReferenceEquals(_overviewRequest, request)) _overviewRequest = null;
             request.Dispose();
         }
     }
 
-    private int _retryGeneration;
-    private async Task RetryLater(TileId id, int generation)
-    {
-        await Task.Delay(TimeSpan.FromSeconds(12));
-        if (!_active || !_failures.TryGetValue(id, out int current) || current != generation) return;
-        _failures.Remove(id);
-        _wanted = []; // Re-evaluate the current viewport; it may have moved since the error.
-        RefreshTiles();
-    }
-
-    private void UpdateDisplay()
+    private void LayerChanged()
     {
         if (!_active) return;
-        _display = _wanted.Where(_loaded.ContainsKey).Select(id => _loaded[id]).ToArray();
-        _surface.Invalidate();
-        string status = _failures.Count > 0 ? "Map service unavailable · retrying"
-            : _display.Count < _wanted.Length ? $"Loading map · {_display.Count}/{_wanted.Length}"
-            : "Map ready";
+        _earthDisplay = _earth.Display.Count == 0 ? _earthOverview : _earth.Display;
+        InvalidateMap();
+        string status = _vectors.HasFailures ? "Map service unavailable · retrying"
+            : _vectors.Ready.Count < _vectors.Count ? $"Loading map · {_vectors.Ready.Count}/{_vectors.Count}"
+            : IsEarthImageryEnabled && _earth.HasFailures ? "Imagery unavailable · retrying"
+            : IsEarthImageryEnabled && _earth.Ready.Count < _earth.Count ? $"Loading Earth · {_earth.Ready.Count}/{_earth.Count}"
+            : IsEarthImageryEnabled ? "Earth ready" : "Map ready";
         if (StatusText == status) return;
         StatusText = status;
         StatusChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private sealed class MapSurface(PixelMapControl owner) : SKCanvasElement
+    private IReadOnlyList<MapTile> DisplayTiles()
     {
+        if (_longFlight && _flightPhase < .72)
+            return _flightPhase < .22 && _departure.Count != 0 ? _departure : _world;
+        return _vectors.Display.Count == 0 ? _world : _vectors.Display;
+    }
+
+    private void InvalidateMap()
+    {
+        if (!_active) return;
+        var imagery = !IsEarthImageryEnabled ? null : _longFlight && _flightPhase < .72
+            ? _flightPhase < .22 && _earthDeparture.Count > 0 ? _earthDeparture : _earthOverview
+            : _earthDisplay;
+        _surface.Present(Camera, DisplayTiles(), imagery, Palette, _motion.IsEnabled || _touches.Count != 0);
+    }
+
+    private sealed class MapSurface : SKCanvasElement
+    {
+        private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery, PixelStyle Palette, bool Moving);
+        private readonly object _drawing = new();
+        private PixelMapRenderer? _renderer;
+        private volatile Scene? _scene;
+        private MapCamera? _timedCamera;
+        private double _movingCost = 16;
+        private int _interactivePixelSize = 2;
+
+
+        internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery, PixelStyle palette, bool moving)
+        {
+            _scene = new Scene(camera, tiles, imagery, palette, moving);
+            Invalidate();
+        }
+
+        internal void Release()
+        {
+            lock (_drawing)
+            {
+                _scene = null;
+                _renderer?.Dispose();
+                _renderer = null;
+            }
+        }
+
+        internal MapFeature? Pick(Point point, int width, int height)
+        {
+            lock (_drawing) return _scene is { } scene
+                ? _renderer?.Pick(point.X, point.Y, width, height, scene.Camera, scene.Tiles) : null;
+        }
+
         protected override void RenderOverride(SKCanvas canvas, Size area)
         {
-            if (!owner._active) return;
-            owner._renderer ??= new();
-            owner._renderer.Draw(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height),
-                owner.Camera, owner._display, owner.Palette, owner._artScale);
+            lock (_drawing)
+            {
+                if (_scene is { } scene) DrawScene(canvas, area, scene);
+            }
+        }
+
+        private void DrawScene(SKCanvas canvas, Size area, Scene scene)
+        {
+            _renderer ??= new();
+            var camera = scene.Camera;
+            var moving = scene.Moving;
+            int size = moving ? _interactivePixelSize : 2;
+            long start = Stopwatch.GetTimestamp();
+            _renderer.Draw(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height),
+                camera, scene.Tiles, scene.Palette, size, scene.Imagery);
+            // Adjust only after an actual camera change. Resolution hysteresis avoids thrashing the terrain cache.
+            if (moving && _timedCamera != camera)
+            {
+                double ms = Math.Min(100, Stopwatch.GetElapsedTime(start).TotalMilliseconds);
+                _movingCost = .75 * _movingCost + .25 * ms;
+                if (_movingCost > 29 && _interactivePixelSize < 4) { _interactivePixelSize++; _movingCost = 20; }
+                else if (_movingCost < 10 && _interactivePixelSize > 2) { _interactivePixelSize--; _movingCost = 16; }
+            }
+            _timedCamera = camera;
         }
     }
 }

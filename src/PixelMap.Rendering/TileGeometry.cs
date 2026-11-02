@@ -11,6 +11,7 @@ internal enum Ink
 
 internal readonly record struct BatchKey(int Order, Ink Ink, float Width, int Bucket = 0);
 internal readonly record struct GroundBatch(BatchKey Key, SKPath Path, SKRect Bounds);
+internal readonly record struct ShadowSource(TileGeometry Tile, float X, float Y);
 internal readonly record struct Building(MapFeature Feature, SKRect Bounds, float Unit, float Top, float Bottom, uint Seed);
 internal readonly record struct Place(string Text, SKPoint Point, int Priority, bool Street);
 
@@ -20,6 +21,9 @@ internal sealed class TileGeometry : IDisposable
     internal const float Extent = 4096;
     public readonly MapTile Source;
     public readonly GroundBatch[] Batches;
+    public readonly GroundBatch[] Shadows;
+    public readonly SKRect ShadowBounds;
+    public readonly List<ShadowSource> ShadowSources = [];
     public readonly List<Building> Buildings = [];
     public readonly List<Place> Labels = [];
     public long LastFrame;
@@ -79,7 +83,16 @@ internal sealed class TileGeometry : IDisposable
                 Append(PathFor(key with { Bucket = bucket }), feature, unit);
             }
         }
-        Batches = paths.OrderBy(p => p.Key.Order).ThenBy(p => p.Key.Width).Select(p => new GroundBatch(p.Key, p.Value, p.Value.Bounds)).ToArray();
+        var batches = paths.OrderBy(p => p.Key.Order).ThenBy(p => p.Key.Width)
+            .Select(p => new GroundBatch(p.Key, p.Value, p.Value.Bounds)).ToArray();
+        Batches = batches.Where(b => b.Key.Ink != Ink.Shadow).ToArray();
+        Shadows = batches.Where(b => b.Key.Ink == Ink.Shadow).ToArray();
+        if (Shadows.Length != 0)
+        {
+            var bounds = Shadows[0].Bounds;
+            foreach (var shadow in Shadows) bounds = SKRect.Union(bounds, shadow.Bounds);
+            ShadowBounds = bounds;
+        }
 
         SKPath PathFor(BatchKey key)
         {
@@ -193,5 +206,10 @@ internal sealed class TileGeometry : IDisposable
         }
     }
 
-    public void Dispose() { foreach (var batch in Batches) batch.Path.Dispose(); }
+    public void Dispose()
+    {
+        foreach (var batch in Batches) batch.Path.Dispose();
+        foreach (var shadow in Shadows) shadow.Path.Dispose();
+        ShadowSources.Clear();
+    }
 }

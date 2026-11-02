@@ -12,6 +12,7 @@
     <ApplicationVersion>1</ApplicationVersion>
     <UnoDisableHotDesign>true</UnoDisableHotDesign>
     <WasmShellWebAppBasePath>./</WasmShellWebAppBasePath>
+    <WasmShellIndexHtmlPath>$(MSBuildProjectDirectory)/Platforms/WebAssembly/index.html</WasmShellIndexHtmlPath>
     <WasmShellMonoRuntimeExecutionMode Condition="'$(Configuration)' == 'Release'">InterpreterAndAOT</WasmShellMonoRuntimeExecutionMode>
   </PropertyGroup>
   <ItemGroup>
