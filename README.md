@@ -1,6 +1,6 @@
 # UnoPixelMap · Pixel Atlas
 
-[Explore the live map](https://wieslawsoltes.github.io/UnoPixelMap/)
+[Explore the live map](https://wieslawsoltes.github.io/UnoPixelMap/) · [Earth in 3D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/55.00/Day/Earth) · [Earth in 2D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/0.00/Day/Earth)
 
 Pixel Atlas is an interactive Uno Platform map control for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable isometric pixel art. A world overview and the opening Lower Manhattan neighborhood are bundled with the app.
 
@@ -13,6 +13,18 @@ Pixel Atlas is an interactive Uno Platform map control for the browser. It strea
 Drag to pan, scroll or pinch to zoom, and right-drag to orbit and tilt. Double-click to zoom at the pointer. Click a roof, façade, street or park to inspect it. Use Map or Earth to choose the ground layer, then choose 2D or 3D independently. Earth transforms natural-color satellite imagery into pixel art and keeps map labels and buildings in the same coordinate system. The View menu selects the Day, Dusk or Night palette. Share a view to preserve its exact camera and lighting.
 
 Search by place name, address or decimal latitude and longitude. The city guide includes Lower Manhattan, Kraków, Shibuya, Barcelona, Paris and Singapore. With the map focused, use the arrow keys to pan, +/− to zoom, Q/E to rotate, P to switch projection, Home to return to Manhattan and Escape to clear a marker.
+
+## How Earth becomes pixel art
+
+| Earth in 3D | Earth in 2D |
+| --- | --- |
+| ![Isometric Earth at Battery Park with extruded buildings](docs/earth-isometric.png) | ![The same Battery Park waterfront in overhead Earth mode](docs/earth-overhead.png) |
+
+The renderer decodes each satellite tile once. It averages colors in linear light, merging low-contrast 2×2 areas while retaining individual high-contrast samples along shorelines and field boundaries. It selects neighboring colors from an 89-color palette in OKLab and applies a world-aligned 4×4 ordered dither. Panning or rotating leaves that pattern attached to the ground.
+
+Zoom levels 13 and 14 preserve the full 256×256 source grid. Lower zoom levels use 128×128 art tiles. A 24 MiB LRU holds processed textures. In overhead view, translucent building footprints preserve the imagery underneath. Tilting into the isometric projection reveals the extruded walls.
+
+[Explore Lake Garda in Earth mode](https://wieslawsoltes.github.io/UnoPixelMap/#v2/45.687000/10.737000/13.000/30.00/55.00/Day/Earth) · [View the Lake Garda browser capture](docs/earth-lake-garda.png) · [See Earth on a phone-sized viewport](docs/earth-phone.png)
 
 ## Reuse the control
 
