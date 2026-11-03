@@ -3,6 +3,7 @@ const {mkdir, writeFile} = require("node:fs/promises");
 const {join} = require("node:path");
 const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
+const {enableGpuRendering} = require("./gpu.cjs");
 
 const url = process.argv[2] || "http://127.0.0.1:8000/";
 const evidence = process.env.PIXELMAP_SHOTS;
@@ -124,6 +125,7 @@ async function open(context, address, failures) {
             document.elementFromPoint(innerWidth / 2, innerHeight / 2) === canvas;
     }, undefined, {timeout: 100000});
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    if (process.env.PIXELMAP_GPU === "1") await enableGpuRendering(page);
     return page;
 }
 

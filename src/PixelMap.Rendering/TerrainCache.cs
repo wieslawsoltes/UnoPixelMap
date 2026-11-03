@@ -66,6 +66,7 @@ internal sealed class TerrainCache
         var key = new Key(tile.Source.Id, lod, pixelSize, shadows, overlay, x, y);
         if (!index.TryGetValue(key, out var node))
         {
+            if (canvas.QuickReject(bounds)) return;
             float density = BlockSize / bounds.Width;
             double zoom = tile.Source.Id.Z + lod + Math.Log2(pixelSize) - 1;
             using var bitmap = new SKBitmap(BlockSize, BlockSize, SKColorType.Bgra8888, overlay ? SKAlphaType.Premul : SKAlphaType.Opaque);

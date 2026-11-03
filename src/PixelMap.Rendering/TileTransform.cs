@@ -66,22 +66,49 @@ internal readonly record struct TileTransform(float X, float Y, float XX, float 
         if (!Perspective) return 4;
         int count = 4;
         Span<SKPoint> tmp = stackalloc SKPoint[16];
+        Span<H> projected = stackalloc H[16];
+        Span<H> nextProjected = stackalloc H[16];
+        Span<float> distances = stackalloc float[16];
+        for (int i = 0; i < count; i++) projected[i] = Vertex(result[i].X, result[i].Y);
         for (int plane = 0; plane < 6 && count != 0; plane++)
         {
-            int n = 0; var a = result[count-1];
-            float da = Plane(plane, Vertex(a.X,a.Y), width, height, Far);
+            int inside = 0, outside = 0;
             for (int i = 0; i < count; i++)
             {
-                var b = result[i]; float db = Plane(plane, Vertex(b.X,b.Y), width, height, Far);
+                float distance = Plane(plane, projected[i], width, height, Far);
+                distances[i] = distance;
+                if (distance >= 0) inside++;
+                if (distance < 0) outside++;
+            }
+            if (inside == count) continue;
+            if (outside == count) return 0;
+
+            int n = 0;
+            var a = result[count - 1];
+            float da = distances[count - 1];
+            for (int i = 0; i < count; i++)
+            {
+                var b = result[i];
+                float db = distances[i];
                 if ((da < 0) != (db < 0))
                 {
                     float t = da/(da-db);
-                    tmp[n++] = new(a.X+(b.X-a.X)*t, a.Y+(b.Y-a.Y)*t);
+                    var intersection = new SKPoint(a.X+(b.X-a.X)*t, a.Y+(b.Y-a.Y)*t);
+                    tmp[n] = intersection;
+                    // Re-evaluate each new tile-space vertex with the original arithmetic.
+                    // Interpolating homogeneous coordinates would round differently.
+                    nextProjected[n++] = Vertex(intersection.X, intersection.Y);
                 }
-                if (db >= 0) tmp[n++] = b;
+                if (db >= 0)
+                {
+                    tmp[n] = b;
+                    nextProjected[n++] = projected[i];
+                }
                 a = b; da = db;
             }
-            tmp[..n].CopyTo(result); count = n;
+            tmp[..n].CopyTo(result);
+            nextProjected[..n].CopyTo(projected);
+            count = n;
         }
         return count;
     }

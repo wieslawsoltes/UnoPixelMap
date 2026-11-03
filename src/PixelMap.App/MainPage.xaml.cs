@@ -102,10 +102,13 @@ public sealed partial class MainPage : Page
     {
         var camera = Map.Camera;
         PerspectiveItem.IsChecked = camera.Perspective;
+        GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
         var status = Map.StatusText;
         var location = FormattableString.Invariant($"{camera.Latitude:0.0000}°, {camera.Longitude:0.0000}°");
         Status.Text = FormattableString.Invariant($"{status}   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
         MobileStatus.Text = status;
+        AutomationProperties.SetName(Status, Status.Text);
+        AutomationProperties.SetName(MobileStatus, status);
         double bearing = camera.Bearing * Math.PI / 180;
         CompassTransform.Angle = Math.Atan2(-Math.Sin(bearing), Math.Cos(bearing) * Math.Cos(camera.Pitch * Math.PI / 180)) * 180 / Math.PI;
         double metersPerPixel = 40075016.68557849 * Math.Cos(camera.Latitude * Math.PI / 180) / (512 * Math.Pow(2, camera.Zoom));
@@ -137,6 +140,12 @@ public sealed partial class MainPage : Page
     private void OnProjection(object sender, RoutedEventArgs e) => Map.ToggleProjection();
 
     private void OnPerspective(object sender, RoutedEventArgs e) => ChooseCamera(Map.Camera with { Perspective = !Map.Camera.Perspective });
+
+    private void OnGpuRendering(object sender, RoutedEventArgs e)
+    {
+        Map.IsGpuRenderingEnabled = !Map.IsGpuRenderingEnabled;
+        GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
+    }
 
     private void ChooseCamera(MapCamera camera)
     {

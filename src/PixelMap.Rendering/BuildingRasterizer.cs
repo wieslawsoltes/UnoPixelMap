@@ -22,6 +22,7 @@ internal sealed partial class BuildingRasterizer
     private float[] depth = [];
     private SKPoint[] vertices = [];
     private float[] intersections = [];
+    private float[] ringMinimumY = [], ringMaximumY = [];
     private int width, height;
     private float vertical, pixelsPerMeter;
 
@@ -66,44 +67,57 @@ internal sealed partial class BuildingRasterizer
         float ry = (Math.Abs(transform.YX) * bounds.Width + Math.Abs(transform.YY) * bounds.Height) * .5f;
         if (middle.X + rx < 0 || middle.X - rx >= width || middle.Y + ry - baseRise < 0 || middle.Y - ry - rise >= height) return;
         if (rx < .28f && ry + rise < .5f) return;
+        var rings = building.Feature.Paths;
         int count = 0;
-        foreach (var ring in building.Feature.Paths) count += ring.Length;
+        foreach (var ring in rings) count += ring.Length;
+        var prepared = rise - baseRise >= .35f ? building.Vertices : null;
         if (vertices.Length < count)
         {
             vertices = new SKPoint[Math.Max(count, vertices.Length * 2)];
             intersections = new float[vertices.Length];
         }
 
-        var rings = building.Feature.Paths;
-        int end = 0;
+        if (visibleRings.Length < rings.Length) visibleRings = new bool[rings.Length];
+        if (ringMinimumY.Length < rings.Length)
+        {
+            ringMinimumY = new float[rings.Length];
+            ringMaximumY = new float[rings.Length];
+        }
+        int end = 0, ringIndex = 0;
         float minY = float.PositiveInfinity, maxY = float.NegativeInfinity;
+        float tileWorldScale = prepared is not null
+            ? MathF.Sqrt(transform.XX * transform.XX + transform.XY * transform.XY) : 0;
         foreach (var ring in rings)
         {
             int start = end;
+            float left = float.PositiveInfinity, right = float.NegativeInfinity;
+            float ringTop = float.PositiveInfinity, ringBottom = float.NegativeInfinity;
             foreach (var point in ring)
             {
                 var projected = transform.At(point.X * building.Unit, point.Y * building.Unit);
                 vertices[end++] = projected;
-                minY = Math.Min(minY, projected.Y);
-                maxY = Math.Max(maxY, projected.Y);
+                left = Math.Min(left, projected.X); right = Math.Max(right, projected.X);
+                ringTop = Math.Min(ringTop, projected.Y); ringBottom = Math.Max(ringBottom, projected.Y);
             }
-
-            if (ring.Length < 3 || rise - baseRise < .35f) continue;
+            bool visible = ring.Length >= 3 && right >= 0 && left < width &&
+                ringBottom - baseRise >= 0 && ringTop - rise < height;
+            visibleRings[ringIndex] = visible;
+            ringMinimumY[ringIndex] = ringTop;
+            ringMaximumY[ringIndex++] = ringBottom;
+            if (!visible) continue;
+            minY = Math.Min(minY, ringTop); maxY = Math.Max(maxY, ringBottom);
+            if (prepared is null) continue;
             int previous = ring.Length - 1;
             for (int i = 0; i < ring.Length; i++)
             {
                 var a = vertices[start + previous]; var b = vertices[start + i];
-                var pa = ring[previous]; var pb = ring[i];
+                var edge = prepared[start + i];
                 previous = i;
                 // MVT windings face the solid to the right for outer rings and courtyard rings alike.
                 if (a.X - b.X < .01f) continue;
-                if (IsTileCut(pa.X, pa.Y, pb.X, pb.Y, building.Feature.Extent)) continue;
-                float dx = pb.X - pa.X, dy = pb.Y - pa.Y;
-                float length = MathF.Sqrt(dx * dx + dy * dy);
-                float light = Math.Clamp(.5f + (dx * .75f - dy * .55f) / (length * 2), 0, 1);
-                uint wall = PixelPalette.Mix(material.DarkWall, material.LightWall, light);
-                float tileWorldScale = MathF.Sqrt(transform.XX * transform.XX + transform.XY * transform.XY);
-                float along = length * building.Unit * tileWorldScale;
+                if (edge.TileCut) continue;
+                uint wall = PixelPalette.Mix(material.DarkWall, material.LightWall, edge.Light);
+                float along = edge.Length * tileWorldScale;
                 Wall(pixels, a, b, rise, baseRise, wall, material, along, building.Seed);
             }
         }
@@ -115,9 +129,12 @@ internal sealed partial class BuildingRasterizer
         {
             float row = y + .5f + rise;
             int hits = 0, index = 0;
+            ringIndex = 0;
             foreach (var ring in rings)
             {
-                if (ring.Length < 3) { index += ring.Length; continue; }
+                bool crosses = visibleRings[ringIndex] && row >= ringMinimumY[ringIndex] && row < ringMaximumY[ringIndex];
+                ringIndex++;
+                if (!crosses) { index += ring.Length; continue; }
                 var a = vertices[index + ring.Length - 1];
                 for (int i = 0; i < ring.Length; i++)
                 {
@@ -147,9 +164,10 @@ internal sealed partial class BuildingRasterizer
 
         if (rx < 3 || ry < 1.5f) return;
         int offset = 0;
+        ringIndex = 0;
         foreach (var ring in rings)
         {
-            if (ring.Length < 3) { offset += ring.Length; continue; }
+            if (!visibleRings[ringIndex++]) { offset += ring.Length; continue; }
             int prev = ring.Length - 1;
             for (int i = 0; i < ring.Length; i++)
             {

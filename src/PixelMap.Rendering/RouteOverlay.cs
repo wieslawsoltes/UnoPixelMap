@@ -141,14 +141,18 @@ internal sealed class RouteOverlay : IDisposable
         double world = cam.WorldSize / v.Pixel;
         var (sin, cos) = Math.SinCos(cam.Bearing * Math.PI / 180);
         double tilt = Math.Cos(cam.PitchRadians);
+        double centerX = cam.CenterX, centerY = cam.CenterY;
+        double groundZ = -cam.TargetPixels / v.Pixel;
+        double pitchSin = Math.Sin(cam.PitchRadians);
+        double focal = MapCamera.Focal(v.Height), far = cam.FarLimit(v.Height);
         var cells = cam.TileBounds(v.Width, v.Height, 1);
         float depthRatio = v.Pixel / (float)depthPixel;
         (double X, double Y, double W) Project(Vertex p, int copy)
         {
-            double x = (p.X + copy - cam.CenterX) * world, y = (p.Y - cam.CenterY) * world;
-            double u=x*cos+y*sin, forward=-x*sin+y*cos, z=-cam.TargetPixels/v.Pixel;
-            double w=cam.Perspective ? 1-(forward*Math.Sin(cam.PitchRadians)+z*tilt)*v.Pixel/MapCamera.Focal(v.Height) : 1;
-            return (v.Width*.5/v.Pixel*w+u, v.Height*.5/v.Pixel*w+forward*tilt-z*Math.Sin(cam.PitchRadians), w);
+            double x = (p.X + copy - centerX) * world, y = (p.Y - centerY) * world;
+            double u=x*cos+y*sin, forward=-x*sin+y*cos;
+            double w=cam.Perspective ? 1-(forward*pitchSin+groundZ*tilt)*v.Pixel/focal : 1;
+            return (v.Width*.5/v.Pixel*w+u, v.Height*.5/v.Pixel*w+forward*tilt-groundZ*pitchSin, w);
         }
         for (int i = 1; i < vertices.Length; i++)
         {
@@ -159,7 +163,7 @@ internal sealed class RouteOverlay : IDisposable
             {
                 var ha = Project(a, wrap); var hb = Project(b, wrap);
                 double from=0,to=1,dw=hb.W-ha.W;
-                if (!Clip(-dw,ha.W-MapCamera.Near,ref from,ref to) || !Clip(dw,cam.FarLimit(v.Height)-ha.W,ref from,ref to)) continue;
+                if (!Clip(-dw,ha.W-MapCamera.Near,ref from,ref to) || !Clip(dw,far-ha.W,ref from,ref to)) continue;
                 double aw=ha.W+dw*from, bw=ha.W+dw*to;
                 var sa=(X:(ha.X+(hb.X-ha.X)*from)/aw,Y:(ha.Y+(hb.Y-ha.Y)*from)/aw);
                 var sb=(X:(ha.X+(hb.X-ha.X)*to)/bw,Y:(ha.Y+(hb.Y-ha.Y)*to)/bw);

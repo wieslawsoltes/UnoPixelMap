@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -24,6 +25,9 @@ public sealed partial class PixelMapControl : UserControl
     public static readonly DependencyProperty IsEarthImageryEnabledProperty = DependencyProperty.Register(nameof(IsEarthImageryEnabled),
         typeof(bool), typeof(PixelMapControl), new PropertyMetadata(false, (o, _) => ((PixelMapControl)o).EarthChanged()));
 
+    public static readonly DependencyProperty IsGpuRenderingEnabledProperty = DependencyProperty.Register(nameof(IsGpuRenderingEnabled),
+        typeof(bool), typeof(PixelMapControl), new PropertyMetadata(false, (o, _) => ((PixelMapControl)o).GpuRenderingChanged()));
+
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(18) };
     private readonly MapSurface _surface;
     private readonly Border _pin;
@@ -42,6 +46,7 @@ public sealed partial class PixelMapControl : UserControl
     private CancellationTokenSource? _overviewRequest;
     private (double Latitude, double Longitude)? _marker;
     private bool _active;
+    private string _layerStatus = "Opening atlas";
 
     public PixelMapControl() : this(new VectorTileSource(Http)) { }
 
@@ -51,7 +56,8 @@ public sealed partial class PixelMapControl : UserControl
         _earthSource = earthSource ?? new EarthImagerySource(Http);
         _vectors = new(_source.GetTileAsync, LayerChanged);
         _earth = new(_earthSource.GetTileAsync, LayerChanged);
-        _surface = new();
+        var dispatcher = DispatcherQueue;
+        _surface = new(isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)));
         _pinLabel = new TextBlock { FontSize = 12, Foreground = Brush(255, 247, 220), TextTrimming = TextTrimming.CharacterEllipsis };
         _pin = new Border
         {
@@ -110,6 +116,7 @@ public sealed partial class PixelMapControl : UserControl
             _departure = _world = [];
             _earthDisplay = _earthDeparture = _earthOverview = [];
             _surface.Release();
+            SetGpuRenderingActive(false);
         };
     }
 
@@ -118,7 +125,10 @@ public sealed partial class PixelMapControl : UserControl
     public MapCamera Camera { get => (MapCamera)GetValue(CameraProperty); set => SetValue(CameraProperty, Normalize(value)); }
     public PixelStyle Palette { get => (PixelStyle)GetValue(PaletteProperty); set => SetValue(PaletteProperty, value); }
     public bool IsEarthImageryEnabled { get => (bool)GetValue(IsEarthImageryEnabledProperty); set => SetValue(IsEarthImageryEnabledProperty, value); }
-    public string StatusText { get; private set; } = "Opening atlas";
+    public bool IsGpuRenderingEnabled { get => (bool)GetValue(IsGpuRenderingEnabledProperty); set => SetValue(IsGpuRenderingEnabledProperty, value); }
+    public bool IsGpuRenderingActive { get; private set; }
+    public string StatusText => !IsGpuRenderingEnabled ? _layerStatus
+        : $"{_layerStatus} · {(IsGpuRenderingActive ? "GPU active" : "CPU fallback")}";
     public event EventHandler? CameraChanged;
     public event EventHandler? StatusChanged;
 
@@ -246,8 +256,22 @@ public sealed partial class PixelMapControl : UserControl
             : IsEarthImageryEnabled && _earth.HasFailures ? "Imagery unavailable · retrying"
             : IsEarthImageryEnabled && _earth.Ready.Count < _earth.Count ? $"Loading Earth · {_earth.Ready.Count}/{_earth.Count}"
             : IsEarthImageryEnabled ? "Earth ready" : "Map ready";
-        if (StatusText == status) return;
-        StatusText = status;
+        if (_layerStatus == status) return;
+        _layerStatus = status;
+        StatusChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void GpuRenderingChanged()
+    {
+        InvalidateMap();
+        StatusChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void SetGpuRenderingActive(bool isActive)
+    {
+        isActive &= _active;
+        if (IsGpuRenderingActive == isActive) return;
+        IsGpuRenderingActive = isActive;
         StatusChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -264,23 +288,28 @@ public sealed partial class PixelMapControl : UserControl
         var imagery = !IsEarthImageryEnabled ? null : _longFlight && _flightPhase < .72
             ? _flightPhase < .22 && _earthDeparture.Count > 0 ? _earthDeparture : _earthOverview
             : _earthDisplay;
-        _surface.Present(Camera, DisplayTiles(), imagery, Palette, _motion.IsEnabled || _touches.Count != 0 || Journey.Active && Journey.Follow, Journey.Route, CurrentVehicle(), Journey.NextCheckpoint);
+        _surface.Present(Camera, DisplayTiles(), imagery, Palette,
+            _motion.IsEnabled || _touches.Count != 0 || Journey.Active && Journey.Follow,
+            Journey.Route, CurrentVehicle(), Journey.NextCheckpoint, IsGpuRenderingEnabled);
     }
 
-    private sealed class MapSurface : SKCanvasElement
+    private sealed class MapSurface(Action<bool> backendChanged) : SKCanvasElement
     {
-        private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery, PixelStyle Palette, bool Moving, RoutePlan? Route, VehiclePose? Vehicle, RoutePosition? Gate);
+        private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery,
+            PixelStyle Palette, bool Moving, RoutePlan? Route, VehiclePose? Vehicle, RoutePosition? Gate, bool UseGpuRendering);
         private readonly object _drawing = new();
         private PixelMapRenderer? _renderer;
         private volatile Scene? _scene;
         private MapCamera? _timedCamera;
         private double _movingCost = 16;
         private int _interactivePixelSize = 2;
+        private bool _gpuRenderingActive;
 
 
-        internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery, PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, RoutePosition? gate)
+        internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery,
+            PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, RoutePosition? gate, bool useGpuRendering)
         {
-            _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, gate);
+            _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, gate, useGpuRendering);
             Invalidate();
         }
 
@@ -291,6 +320,7 @@ public sealed partial class PixelMapControl : UserControl
                 _scene = null;
                 _renderer?.Dispose();
                 _renderer = null;
+                ReportBackend(false);
             }
         }
 
@@ -316,7 +346,9 @@ public sealed partial class PixelMapControl : UserControl
             int size = moving ? _interactivePixelSize : 2;
             long start = Stopwatch.GetTimestamp();
             _renderer.Draw(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height),
-                camera, scene.Tiles, scene.Palette, size, scene.Imagery);
+                camera, scene.Tiles, scene.Palette, size, scene.Imagery, useGpuRendering: scene.UseGpuRendering,
+                allowDeferredGpuRendering: scene.UseGpuRendering && CompositionCapabilities.GetForCurrentView().AreEffectsFast());
+            ReportBackend(_renderer.IsGpuRenderingActive);
             if (scene.Gate is { } gate && scene.Route is { } trip && scene.Vehicle is { } driver)
                 _renderer.DrawGate(canvas, camera, area.Width, area.Height, gate, trip.Mode, trip.Mode == TravelMode.Flight ? driver.AltitudeMeters : 0, driver.AnimationSeconds);
             if (scene.Route is { } route)
@@ -330,6 +362,13 @@ public sealed partial class PixelMapControl : UserControl
                 else if (_movingCost < 10 && _interactivePixelSize > 2) { _interactivePixelSize--; _movingCost = 16; }
             }
             _timedCamera = camera;
+        }
+
+        private void ReportBackend(bool isActive)
+        {
+            if (_gpuRenderingActive == isActive) return;
+            _gpuRenderingActive = isActive;
+            backendChanged(isActive);
         }
     }
 }

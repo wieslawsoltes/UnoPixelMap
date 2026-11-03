@@ -51,6 +51,8 @@ jobs:
           python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/preview" > /tmp/atlas-server.log 2>&1 &
           PIXELMAP_SHOTS="${{ runner.temp }}/screens" node tests/browser/smoke.cjs http://127.0.0.1:8100/UnoPixelMap/
           PIXELMAP_SHOTS="${{ runner.temp }}/screens" node tests/browser/journeys.cjs http://127.0.0.1:8100/UnoPixelMap/
+          PIXELMAP_GPU=1 PIXELMAP_SHOTS="${{ runner.temp }}/screens/gpu" node tests/browser/smoke.cjs http://127.0.0.1:8100/UnoPixelMap/
+          PIXELMAP_GPU=1 PIXELMAP_SHOTS="${{ runner.temp }}/screens/gpu" node tests/browser/journeys.cjs http://127.0.0.1:8100/UnoPixelMap/
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -94,6 +94,12 @@ Atlas.Journey.Preview();
 | PixelMap.Controls | Uno input and accessible keyboard navigation, animated cameras and follow rigs, viewport tile scheduling, journey orchestration and the Skia drawing surface. During motion the control adjusts pixel resolution to measured frame cost, then returns to 2-DIP pixels at rest. |
 | PixelMap.App | Responsive XAML explorer, search, city guide, compass, scale, lighting, shareable camera links and the journey planner with touch driving controls. |
 
+## Rendering backends
+
+The View menu includes **GPU rendering (experimental)**. It uses Uno's GPU-backed Skia canvas to project cached terrain and Earth textures into a pixel-resolution render target. An indexed `SKVertices` mesh and an SkSL runtime effect resolve that artwork onto the display. Building rasterization supplies a transparent model layer and the depth information used by routes, picking and vehicle effects. GPU snapshots also preserve the photographed ground beneath translucent roofs in overhead Earth mode.
+
+Uno's recording canvas uses lazy picture images whose textures are generated on the GPU during playback. The control uses the public composition-capability check to select that path. Direct GPU canvases use reusable off-screen surfaces. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The compiled shader is reused during adaptive-resolution changes, and the reusable control exposes `IsGpuRenderingEnabled` and `IsGpuRenderingActive`. CPU and GPU blending can have small rounding differences. [Performance methodology and results](docs/performance.md).
+
 ## Build and test
 
 ```sh
@@ -107,13 +113,16 @@ dotnet publish src/PixelMap.App -f net10.0-browserwasm -c Release -o artifacts/b
 python3 -m http.server 8000 --directory artifacts/browser/wwwroot
 ```
 
-Open http://localhost:8000/. To measure native renderer time on the bundled scene, append `-- --benchmark` to the renderer test command. The routing tests use deterministic data by default. Append `-- --live` for explicit public-provider integration checks.
+Open http://localhost:8000/. Append `-- --benchmark --output artifacts/rendering` to the renderer test command for fixed-resolution timing and exact image hashes across the bundled scene, camera modes, palettes and vehicle journeys. Add `--visual-only` to capture images without timing, `--filter persp65` to select cases, or `--compare path/to/baseline/report.json` to check a previous capture. The routing tests use deterministic data by default. Append `-- --live` for explicit public-provider integration checks.
 
 ```sh
 npm ci --prefix tests/browser
 (cd tests/browser && npx playwright install chromium)
 node tests/browser/smoke.cjs http://localhost:8000/
 node tests/browser/journeys.cjs http://localhost:8000/
+node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-visual --visual
+node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-motion --motion
+node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-gpu --motion --gpu
 ```
 
 The Pages workflow builds the AOT-enabled browser app from main, runs the engine checks, exercises the exact publish artifact with Chromium, and publishes it after verification. Journey browser checks cover all six modes, route alternatives, waypoint picking, perspective projection, manual keyboard/touch inputs and Web Audio activation. Set `PIXELMAP_SHOTS` to save browser captures.

@@ -3,6 +3,7 @@ const { mkdir, writeFile, readFile } = require("node:fs/promises");
 const path = require("node:path");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
+const { enableGpuRendering } = require("./gpu.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const shots = process.env.PIXELMAP_SHOTS;
@@ -73,6 +74,7 @@ async function openDemo(browser, mode, phone = false) {
     await page.screenshot();
     await page.getByRole("button", { name: "Enable accessibility" }).evaluate(el => el.click());
     await page.getByRole("button", { name: "Preview route", exact: true }).waitFor({ state: "attached" });
+    if (process.env.PIXELMAP_GPU === "1") await enableGpuRendering(page);
     return { context, page };
 }
 

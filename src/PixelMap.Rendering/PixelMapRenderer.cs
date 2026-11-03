@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using PixelMap.Data;
 using SkiaSharp;
 
@@ -11,7 +12,8 @@ public sealed partial class PixelMapRenderer : IDisposable
     private static readonly SKSamplingOptions Nearest = new(SKFilterMode.Nearest, SKMipmapMode.None);
     private readonly Dictionary<TileId, TileGeometry> geometry = [];
     private readonly List<(TileGeometry Tile, TileTransform Transform, float Scale)> visible = [];
-    private readonly List<(Building Model, TileTransform Transform, float Near)> perspectiveModels = [];
+    private readonly List<(Building Model, TileTransform Transform)> perspectiveModels = [];
+    private readonly List<(int Index, float Near)> perspectiveOrder = [];
     private readonly Dictionary<(Ink, int), SKShader> shaders = [];
     private readonly Dictionary<Ink, TerrainPattern> patterns = [];
     private readonly Dictionary<(Ink, float), SKPathEffect> dashes = [];
@@ -31,29 +33,56 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly SKFont font = new(SKTypeface.Default, 8f) { Edging = SKFontEdging.Antialias };
     private SKBitmap? bitmap;
     private SKCanvas? ground;
+    private GpuFrameSurface? gpuFrame;
+    private string? reportedGpuFailure;
     private PixelPalette? palette;
     private long frame;
+    private long geometryRevision;
     private SKPicture? lastPicture;
     private readonly List<MapTile> lastTiles = [];
-    private (int Width, int Height, MapCamera Camera, PixelStyle Style, int PixelSize) lastView;
+    private (int Width, int Height, MapCamera Camera, PixelStyle Style, int PixelSize, long GpuGeneration) lastView;
+
+    /// <summary>Whether the most recent draw selected the GPU rendering pipeline.</summary>
+    public bool IsGpuRenderingActive { get; private set; }
 
     public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
         PixelStyle style = PixelStyle.Day, int pixelSize = 2, IReadOnlyList<ImageryTile>? imagery = null)
+        => Draw(canvas, width, height, camera, tiles, style, pixelSize, imagery, false);
+
+    /// <summary>Optionally projects terrain and composes artwork on the destination GPU.
+    /// Unsupported contexts use the CPU path. Model depth and navigation share both paths.</summary>
+    public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
+        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery, bool useGpuRendering)
+        => Draw(canvas, width, height, camera, tiles, style, pixelSize, imagery, useGpuRendering, false);
+
+    /// <summary>A GPU-backed host may allow lazy picture images when its callback records
+    /// drawing commands. Skia generates their textures on the final playback context.</summary>
+    public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
+        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery, bool useGpuRendering, bool allowDeferredGpuRendering)
     {
         lock (sync)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery);
+            if (!useGpuRendering) gpuFrame?.Reset();
+            DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery, useGpuRendering, allowDeferredGpuRendering);
+            if (useGpuRendering && !IsGpuRenderingActive && gpuFrame?.FailureReason is { } failure && failure != reportedGpuFailure)
+            {
+                reportedGpuFailure = failure;
+                Console.WriteLine($"Pixel Atlas GPU fallback. {failure}");
+            }
         }
     }
 
     private unsafe void DrawFrame(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
-        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery)
+        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery, bool useGpuRendering, bool allowDeferredGpuRendering)
     {
         ArgumentNullException.ThrowIfNull(canvas);
         if (width <= 0 || height <= 0) return;
         pixelSize = Math.Clamp(pixelSize, 1, 8);
-        var view = (width, height, camera, style, pixelSize);
+        int w = (width + pixelSize - 1) / pixelSize, h = (height + pixelSize - 1) / pixelSize;
+        bool gpu = useGpuRendering && (gpuFrame ??= new()).TryPrepare(canvas, w, h, allowDeferredGpuRendering);
+        IsGpuRenderingActive = gpu;
+        var view = (width, height, camera, style, pixelSize, gpu ? gpuFrame!.Generation : 0);
         if (view == lastView && lastPicture is not null && SameTiles(tiles, lastTiles) && SameTiles(imagery, lastImagery))
         {
             canvas.DrawPicture(lastPicture);
@@ -61,7 +90,6 @@ public sealed partial class PixelMapRenderer : IDisposable
         }
         lastPicture?.Dispose();
         lastPicture = null;
-        int w = (width + pixelSize - 1) / pixelSize, h = (height + pixelSize - 1) / pixelSize;
         var colors = style switch { PixelStyle.Dusk => PixelPalette.Dusk, PixelStyle.Night => PixelPalette.Night, _ => PixelPalette.Day };
         if (palette != colors)
         {
@@ -69,13 +97,20 @@ public sealed partial class PixelMapRenderer : IDisposable
             terrain.Clear();
             palette = colors;
         }
-        if (bitmap?.Width != w || bitmap.Height != h)
+        var alpha = gpu ? SKAlphaType.Premul : SKAlphaType.Opaque;
+        if (bitmap?.Width != w || bitmap.Height != h || bitmap.AlphaType != alpha)
         {
             ground?.Dispose(); bitmap?.Dispose();
-            bitmap = new SKBitmap(w, h, SKColorType.Bgra8888, SKAlphaType.Opaque);
+            bitmap = new SKBitmap(w, h, SKColorType.Bgra8888, alpha);
             ground = new SKCanvas(bitmap);
         }
-        var surface = ground!;
+        if (gpu) ground!.Clear(SKColors.Transparent);
+        var surface = gpu ? gpuFrame!.BeginFrame() : ground;
+        if (surface is null)
+        {
+            DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery, false, false);
+            return;
+        }
         surface.Clear(new SKColor(colors.Ground));
         if (camera.Perspective && camera.Pitch > 0)
         {
@@ -113,7 +148,24 @@ public sealed partial class PixelMapRenderer : IDisposable
         surface.Flush();
         // In plan view keep the source's photographed roofs visible through the map footprints.
         // The opacity transitions continuously into full three-dimensional façades on tilt.
-        using var photoUnderlay = hasEarth && camera.Zoom >= 12 && camera.Pitch < 30 ? SKImage.FromBitmap(bitmap) : null;
+        bool preservePhoto = hasEarth && camera.Zoom >= 12 && camera.Pitch < 30;
+        SKImage? underlay = null;
+        if (preservePhoto)
+        {
+            if (gpu)
+            {
+                underlay = gpuFrame!.TrySnapshot(out var continuation);
+                if (underlay is null || continuation is null)
+                {
+                    underlay?.Dispose();
+                    DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery, false, false);
+                    return;
+                }
+                surface = continuation;
+            }
+            else underlay = SKImage.FromBitmap(bitmap);
+        }
+        using var photoUnderlay = underlay;
         if (camera.Zoom >= 12)
         {
             float meters = (float)(world / (MapCamera.EarthCircumference *
@@ -123,6 +175,7 @@ public sealed partial class PixelMapRenderer : IDisposable
             if (camera.Perspective)
             {
                 perspectiveModels.Clear();
+                perspectiveOrder.Clear();
                 foreach (var (tile, transform, _) in visible)
                 foreach (var model in tile.Buildings)
                 {
@@ -130,11 +183,16 @@ public sealed partial class PixelMapRenderer : IDisposable
                     float closest = transform.Weight(bounds.MidX, bounds.MidY)
                         - (Math.Abs(transform.PX) * bounds.Width + Math.Abs(transform.PY) * bounds.Height) * .5f
                         - model.Top * meters * transform.CosPitch * transform.InverseFocal;
-                    perspectiveModels.Add((model, transform, closest));
+                    perspectiveOrder.Add((perspectiveModels.Count, closest));
+                    perspectiveModels.Add((model, transform));
                 }
-                perspectiveModels.Sort(static (a, b) => a.Near.CompareTo(b.Near));
-                foreach (var (model, transform, _) in perspectiveModels)
-                    buildings.Draw(pixels, model, transform, colors.Materials[model.Seed % (uint)colors.Materials.Length]);
+                perspectiveOrder.Sort(static (a, b) => a.Near.CompareTo(b.Near));
+                var models = CollectionsMarshal.AsSpan(perspectiveModels);
+                foreach (var (index, _) in perspectiveOrder)
+                {
+                    ref readonly var model = ref models[index];
+                    buildings.Draw(pixels, model.Model, model.Transform, colors.Materials[model.Model.Seed % (uint)colors.Materials.Length]);
+                }
             }
             else
             {
@@ -143,6 +201,11 @@ public sealed partial class PixelMapRenderer : IDisposable
                     buildings.Draw(pixels, building, transform, colors.Materials[building.Seed % (uint)colors.Materials.Length]);
             }
             bitmap.NotifyPixelsChanged();
+            if (gpu)
+            {
+                using var models = SKImage.FromBitmap(bitmap);
+                surface.DrawImage(models, 0, 0, Nearest);
+            }
         }
         if (photoUnderlay is not null)
         {
@@ -154,13 +217,24 @@ public sealed partial class PixelMapRenderer : IDisposable
             surface.Restore();
         }
         surface.Flush();
-        using var image = SKImage.FromBitmap(bitmap);
         // Keep every art pixel the same size, including the last partial row or column.
         var viewport = new SKRect(0, 0, width, height);
         using var recorder = new SKPictureRecorder();
         var layer = recorder.BeginRecording(viewport);
         layer.ClipRect(viewport);
-        layer.DrawImage(image, new SKRect(0, 0, w * pixelSize, h * pixelSize), Nearest);
+        if (gpu)
+        {
+            if (!gpuFrame!.TryResolve(layer, width, height, pixelSize))
+            {
+                DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery, false, false);
+                return;
+            }
+        }
+        else
+        {
+            using var image = SKImage.FromBitmap(bitmap);
+            layer.DrawImage(image, new SKRect(0, 0, w * pixelSize, h * pixelSize), Nearest);
+        }
         DrawLabels(layer, width, height, camera.Zoom, pixelSize, colors);
         lastPicture = recorder.EndRecording();
         lastView = view;
@@ -247,6 +321,7 @@ public sealed partial class PixelMapRenderer : IDisposable
             {
                 if (prepared is not null) { terrain.Remove(tile.Id); prepared.Dispose(); }
                 geometry[tile.Id] = prepared = new(tile);
+                geometryRevision++;
             }
             prepared.LastFrame = frame;
             var copies = projection.Copies(tile.Id);
@@ -263,12 +338,14 @@ public sealed partial class PixelMapRenderer : IDisposable
                 terrain.Remove(id);
                 geometry[id].Dispose();
                 geometry.Remove(id);
+                geometryRevision++;
             }
         }
     }
 
     private void UpdateShadowSources(TileGeometry target)
     {
+        if (target.ShadowRevision == geometryRevision) return;
         shadowSources.Clear();
         var targetId = target.Source.Id;
         int n = 1 << targetId.Z;
@@ -285,6 +362,7 @@ public sealed partial class PixelMapRenderer : IDisposable
             bounds.Offset(x, y);
             if (bounds.IntersectsWith(tileBounds)) shadowSources.Add(new(source, x, y));
         }
+        target.ShadowRevision = geometryRevision;
         if (target.ShadowSources.SequenceEqual(shadowSources)) return;
         // A newly arrived neighbor can cast onto terrain that was already cached.
         target.ShadowSources.Clear();
@@ -383,12 +461,17 @@ public sealed partial class PixelMapRenderer : IDisposable
         {
             if (occupied.Count >= 90) break;
             if (names.Contains(label.Text)) continue;
-            font.Size = label.Street ? 12f : 14f;
-            float tw = font.MeasureText(label.Text);
+            float size = label.Street ? 12f : 14f;
+            float tw = label.TextWidth;
+            if (float.IsNaN(tw))
+            {
+                font.Size = size;
+                label.TextWidth = tw = font.MeasureText(label.Text);
+            }
             if (tw <= 0 || tw > w * .8f) continue;
             float x = MathF.Round(screen.X - tw * .5f), y = MathF.Round(screen.Y);
             float pad = label.Street ? 22 : 7;
-            var bounds = new SKRect(x - pad, y - font.Size - 9, x + tw + pad, y + 9);
+            var bounds = new SKRect(x - pad, y - size - 9, x + tw + pad, y + 9);
             if (bounds.Left < 1 || bounds.Right > w - 1 || bounds.Top < 1 || bounds.Bottom > h - 1) continue;
             bool collision = false;
             foreach (var prior in occupied)
@@ -396,11 +479,17 @@ public sealed partial class PixelMapRenderer : IDisposable
             if (collision) continue;
             names.Add(label.Text);
             occupied.Add(bounds);
+            if (label.Glyphs is null)
+            {
+                font.Size = size;
+                label.Glyphs = SKTextBlob.Create(label.Text, font);
+            }
+            if (label.Glyphs is not { } glyphs) continue;
             paint.Style = SKPaintStyle.Stroke; paint.StrokeWidth = 2.8f;
             paint.Color = new(colors.LabelHalo);
-            canvas.DrawText(label.Text, x, y, SKTextAlign.Left, font, paint);
+            canvas.DrawText(glyphs, x, y, paint);
             paint.Style = SKPaintStyle.Fill; paint.Color = new(colors.Label);
-            canvas.DrawText(label.Text, x, y, SKTextAlign.Left, font, paint);
+            canvas.DrawText(glyphs, x, y, paint);
         }
     }
 
@@ -427,6 +516,7 @@ public sealed partial class PixelMapRenderer : IDisposable
             foreach (var dash in dashes.Values) dash.Dispose();
             dashes.Clear();
             lastPicture?.Dispose();
+            gpuFrame?.Dispose();
             earth.Dispose(); earthCoverage.Dispose(); tileClip.Dispose(); shadowMask.Dispose(); ground?.Dispose(); bitmap?.Dispose(); paint.Dispose(); font.Dispose();
         }
     }

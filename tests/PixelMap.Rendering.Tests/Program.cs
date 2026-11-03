@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
@@ -83,32 +82,15 @@ Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, rais
 ImageryChecks.Run();
 NavigationChecks.Run();
 PerspectiveChecks.Run();
+RingFixtures.Run();
 
 if (args.Contains("--benchmark", StringComparer.Ordinal))
 {
-    const int w = 1100, h = 650, samples = 48;
-    using var http = new HttpClient();
-    var source = new VectorTileSource(http);
-    using var bitmap = new SKBitmap(w, h);
-    using var canvas = new SKCanvas(bitmap);
-    foreach (var (pitch, bearing) in new[] { (0d, 0d), (55d, -15d), (65d, 135d) })
-    {
-        var c = new MapCamera(40.7087, -74.0104, 16.5, bearing, pitch);
-        var tiles = new List<MapTile>();
-        foreach (var tile in c.VisibleTiles(w, h)) tiles.Add(await source.GetTileAsync(tile));
-        using var instance = new PixelMapRenderer();
-        for (int i = 0; i < 32; i++) instance.Draw(canvas, w, h, c with { Bearing = bearing + i % 7 }, tiles);
-        var timings = new double[samples];
-        for (int i = 0; i < samples; i++)
-        {
-            var start = Stopwatch.GetTimestamp();
-            instance.Draw(canvas, w, h, c with { Bearing = bearing + i % 7 }, tiles);
-            timings[i] = Stopwatch.GetElapsedTime(start).TotalMilliseconds;
-        }
-        Array.Sort(timings);
-        Console.WriteLine($"CPU raster canvas, {w}×{h}, pixel size 2, pitch {pitch:F0}°, bearing {bearing:F0}° + [0..6]°: " +
-            $"median {timings[samples / 2]:F2} ms, p95 {timings[(int)(samples * .95)]:F2} ms ({samples} frames)");
-    }
+    await RenderingBenchmark.RunAsync(args);
+}
+else
+{
+    GpuRenderingChecks.Run();
 }
 
 SKBitmap Render(MapCamera c, params MapFeature[] features)

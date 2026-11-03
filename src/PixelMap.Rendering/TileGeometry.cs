@@ -12,8 +12,82 @@ internal enum Ink
 internal readonly record struct BatchKey(int Order, Ink Ink, float Width, int Bucket = 0);
 internal readonly record struct GroundBatch(BatchKey Key, SKPath Path, SKRect Bounds);
 internal readonly record struct ShadowSource(TileGeometry Tile, float X, float Y);
-internal readonly record struct Building(MapFeature Feature, SKRect Bounds, float Unit, float Top, float Bottom, uint Seed);
-internal readonly record struct Place(string Text, SKPoint Point, int Priority, bool Street);
+internal sealed class Building(MapFeature feature, SKRect bounds, float unit, float top, float bottom, uint seed)
+{
+    public readonly MapFeature Feature = feature;
+    public readonly SKRect Bounds = bounds;
+    public readonly float Unit = unit, Top = top, Bottom = bottom;
+    public readonly uint Seed = seed;
+    private BuildingVertex[]? vertices;
+    private SKRect[]? ringBounds;
+
+    // Bounds and depth rejection precede this access in both render and pick passes.
+    // Most models in an overzoomed tile never need a prepared edge table.
+    public BuildingVertex[] Vertices => vertices ??= PrepareVertices(Feature, Unit);
+
+    public SKRect BoundsForRing(int index)
+    {
+        if (ringBounds is null)
+        {
+            ringBounds = new SKRect[Feature.Paths.Length];
+            for (int i = 0; i < ringBounds.Length; i++)
+            {
+                var ring = Feature.Paths[i];
+                if (ring.Length == 0) continue;
+                int left = ring[0].X, right = left, top = ring[0].Y, bottom = top;
+                foreach (var point in ring)
+                {
+                    left = Math.Min(left, point.X); right = Math.Max(right, point.X);
+                    top = Math.Min(top, point.Y); bottom = Math.Max(bottom, point.Y);
+                }
+                ringBounds[i] = new(left * Unit, top * Unit, right * Unit, bottom * Unit);
+            }
+        }
+        return ringBounds[index];
+    }
+
+    private static BuildingVertex[] PrepareVertices(MapFeature feature, float unit)
+    {
+        int count = 0;
+        foreach (var ring in feature.Paths) count += ring.Length;
+        var vertices = new BuildingVertex[count];
+        int index = 0;
+        foreach (var ring in feature.Paths)
+        {
+            if (ring.Length == 0) continue;
+            var previous = ring[^1];
+            foreach (var point in ring)
+            {
+                float x = point.X * unit, y = point.Y * unit;
+                float dx = point.X - previous.X, dy = point.Y - previous.Y;
+                float length = MathF.Sqrt(dx * dx + dy * dy);
+                float light = Math.Clamp(.5f + (dx * .75f - dy * .55f) / (length * 2), 0, 1);
+                // Keep both formulas in their original coordinate spaces. Nonstandard
+                // MVT extents can round their facade lighting differently after scaling.
+                float normalizedDx = x - previous.X * unit, normalizedDy = y - previous.Y * unit;
+                float normalizedLength = MathF.Sqrt(normalizedDx * normalizedDx + normalizedDy * normalizedDy);
+                float normalizedLight = Math.Clamp(.5f + (normalizedDx * .75f - normalizedDy * .55f) / (2 * normalizedLength), 0, 1);
+                bool tileCut = previous.X == point.X && (previous.X <= 0 || previous.X >= feature.Extent) ||
+                    previous.Y == point.Y && (previous.Y <= 0 || previous.Y >= feature.Extent);
+                vertices[index++] = new(new(x, y), length * unit, normalizedLength, light, normalizedLight, tileCut);
+                previous = point;
+            }
+        }
+        return vertices;
+    }
+}
+
+internal readonly record struct BuildingVertex(SKPoint Point, float Length, float PerspectiveLength,
+    float Light, float PerspectiveLight, bool TileCut);
+internal sealed class Place(string text, SKPoint point, int priority, bool street)
+{
+    public string Text { get; } = text;
+    public SKPoint Point { get; } = point;
+    public int Priority { get; } = priority;
+    public bool Street { get; } = street;
+    public float TextWidth { get; set; } = float.NaN;
+    public SKTextBlob? Glyphs { get; set; }
+}
 
 /// <summary>Immutable, tile-local display list. Buildings retain their original rings for depth rasterization.</summary>
 internal sealed class TileGeometry : IDisposable
@@ -27,6 +101,7 @@ internal sealed class TileGeometry : IDisposable
     public readonly List<Building> Buildings = [];
     public readonly List<Place> Labels = [];
     public long LastFrame;
+    public long ShadowRevision = -1;
 
     public TileGeometry(MapTile tile)
     {
@@ -210,6 +285,7 @@ internal sealed class TileGeometry : IDisposable
     {
         foreach (var batch in Batches) batch.Path.Dispose();
         foreach (var shadow in Shadows) shadow.Path.Dispose();
+        foreach (var label in Labels) label.Glyphs?.Dispose();
         ShadowSources.Clear();
     }
 }

@@ -66,11 +66,16 @@ internal sealed class EarthRaster : IDisposable
                     if (Math.Abs(p.R - mean.R) > 22 + mean.R / 6 || Math.Abs(p.G - mean.G) > 22 + mean.G / 6 ||
                         Math.Abs(p.B - mean.B) > 22 + mean.B / 6) { smooth = false; break; }
                 }
+                int pair = smooth ? EarthInks.Resolve(mean.R, mean.G, mean.B) : 0;
                 for (int i = 0; i < 4; i++)
                 {
-                    var sample = smooth ? mean : cluster[i];
+                    if (!smooth)
+                    {
+                        var sample = cluster[i];
+                        pair = EarthInks.Resolve(sample.R, sample.G, sample.B);
+                    }
                     int sx = x + (i & 1), sy = y + (i >> 1);
-                    dest[sy * size + sx] = EarthInks.Sample(sample.R, sample.G, sample.B,
+                    dest[sy * size + sx] = EarthInks.Sample(pair,
                         tile.Id.X * size + sx, tile.Id.Y * size + sy);
                 }
             }
@@ -163,7 +168,7 @@ internal static class EarthInks
 
     // Quantize in OKLab after averaging source samples in linear light. A small ordered mix
     // along the closest palette segment retains low-contrast shorelines and elevation gradients.
-    internal static uint Sample(int r, int g, int b, int x, int y)
+    internal static int Resolve(int r, int g, int b)
     {
         int key = (Gamma5[r] << 10) | (Gamma5[g] << 5) | Gamma5[b];
         int pair = Volatile.Read(ref Lut[key]);
@@ -172,6 +177,11 @@ internal static class EarthInks
             pair = Match(key);
             Volatile.Write(ref Lut[key], pair);
         }
+        return pair;
+    }
+
+    internal static uint Sample(int pair, int x, int y)
+    {
         int choice = Bayer[((y & 3) << 2) | (x & 3)] < ((pair >> 16) & 15) ? (pair >> 8) & 255 : pair & 255;
         return 0xff000000 | Colors[choice];
     }

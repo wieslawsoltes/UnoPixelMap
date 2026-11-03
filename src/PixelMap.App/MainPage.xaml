@@ -51,6 +51,8 @@
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
+                            <ToggleMenuFlyoutItem x:Name="GpuRenderingItem" Text="GPU rendering (experimental)" Click="OnGpuRendering"
+                                                 ToolTipService.ToolTip="Uses a GPU-backed Skia canvas for terrain and image composition, with automatic CPU fallback when GPU resources are unavailable." />
                             <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
                             <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
                             <MenuFlyoutSeparator />

@@ -7,17 +7,28 @@ internal sealed partial class BuildingRasterizer
     private float perspectiveFar;
     private bool usingPerspective;
     private TileTransform depthLens;
-    private TileTransform cullLens;
-    private (int Width,int Height) cullSize;
-    private readonly (float X,float Y,float Z,float Constant)[] planes = new (float,float,float,float)[6];
+    private ProjectionContext[] projectionContexts = new ProjectionContext[8];
+    private FrustumPlane[] frustumPlanes = new FrustumPlane[48];
+    private int projectionCount, projectionIndex = -1;
     private float[] inverseDepth = [];
     private readonly List<H> contour = [], clippedContour = [];
     private readonly List<SKPoint> roofPoints = [];
-    private readonly List<int> roofEnds = [];
+    private readonly List<(int End, float MinimumY, float MaximumY)> roofRings = [];
+    private H[] topVertices = [], bottomVertices = [];
+    private bool[] visibleRings = [];
     private const int DepthCell = 8;
     private int depthColumns;
     private float[] coarseDepth = [];
     private bool[] depthDirty = [];
+
+    private readonly record struct ProjectionContext(TileTransform Transform, int PlaneStart,
+        float MetersPerUnit, float EyeAltitude);
+
+    private readonly struct FrustumPlane(float x, float y, float z, float constant)
+    {
+        internal readonly float X = x, Y = y, Z = z, Constant = constant;
+        internal readonly float AbsX = Math.Abs(x), AbsY = Math.Abs(y), AbsZ = Math.Abs(z);
+    }
 
     private void DrawPerspective(Span<uint> pixels, in Building model, in TileTransform t, Material material)
     {
@@ -25,37 +36,57 @@ internal sealed partial class BuildingRasterizer
         depthLens = t;
         float top = model.Top * pixelsPerMeter, bottom = model.Bottom * pixelsPerMeter;
         var bounds = model.Bounds;
-        if (Outside(bounds,bottom,top,t)) return;
+        ref readonly var context = ref ProjectionFor(t);
+        if (Outside(bounds,bottom,top,context.PlaneStart)) return;
         var screenBounds = ProjectedBounds(bounds, bottom, top, t, out float nearest);
         if (Occluded(screenBounds, nearest)) return;
 
-        float rightX = t.XX - t.CX*t.PX, rightY = t.XY - t.CX*t.PY;
-        float metersPerUnit = MathF.Sqrt(rightX*rightX + rightY*rightY) / pixelsPerMeter;
-        float eyeAltitude = t.TargetZ + t.CosPitch / t.InverseFocal;
+        float metersPerUnit = context.MetersPerUnit;
+        float eyeAltitude = context.EyeAltitude;
         float cap = top < eyeAltitude ? top : bottom > eyeAltitude ? bottom : float.NaN;
-        roofPoints.Clear(); roofEnds.Clear();
-        float minY = float.PositiveInfinity, maxY = float.NegativeInfinity;
-        foreach (var ring in model.Feature.Paths)
+        bool hasCap = float.IsFinite(cap), topCap = cap == top;
+        var prepared = model.Vertices;
+        if (topVertices.Length < prepared.Length)
         {
-            if (ring.Length < 3) continue;
-            contour.Clear();
-            var last = ring[^1];
-            foreach (var point in ring)
+            int capacity = Math.Max(prepared.Length, topVertices.Length * 2);
+            topVertices = new H[capacity];
+            bottomVertices = new H[capacity];
+        }
+        roofPoints.Clear(); roofRings.Clear();
+        float minY = float.PositiveInfinity, maxY = float.NegativeInfinity;
+        int ringEnd = 0, ringIndex = 0;
+        var rings = model.Feature.Paths;
+        if (visibleRings.Length < rings.Length) visibleRings = new bool[rings.Length];
+        foreach (var ring in rings)
+        {
+            int ringStart = ringEnd;
+            ringEnd += ring.Length;
+            // A vector feature can contain hundreds of disconnected footprints. Reject
+            // only complete ring prisms, retaining enclosing rings and courtyard holes.
+            bool visible = ring.Length >= 3 && (rings.Length == 1 ||
+                !Outside(model.BoundsForRing(ringIndex), bottom, top, context.PlaneStart));
+            visibleRings[ringIndex++] = visible;
+            if (!visible) continue;
+            for (int i = ringStart; i < ringEnd; i++)
             {
-                float ax = last.X*model.Unit, ay = last.Y*model.Unit, bx = point.X*model.Unit, by = point.Y*model.Unit;
-                if (float.IsFinite(cap)) contour.Add(t.Vertex(bx, by, cap));
-                if (!IsTileCut(last.X, last.Y, point.X, point.Y, model.Feature.Extent))
+                var point = prepared[i].Point;
+                topVertices[i] = t.Vertex(point.X, point.Y, top);
+                bottomVertices[i] = t.Vertex(point.X, point.Y, bottom);
+            }
+            contour.Clear();
+            int previous = ringEnd - 1;
+            for (int i = ringStart; i < ringEnd; i++)
+            {
+                var edge = prepared[i];
+                if (hasCap) contour.Add(topCap ? topVertices[i] : bottomVertices[i]);
+                if (!edge.TileCut && edge.PerspectiveLength > .001f && top > bottom)
                 {
-                    float dx = bx-ax, dy = by-ay, len = MathF.Sqrt(dx*dx+dy*dy);
-                    if (len > .001f && top > bottom)
-                    {
-                        float light = Math.Clamp(.5f + (dx*.75f - dy*.55f)/(2*len), 0, 1);
-                        uint wall = PixelPalette.Mix(material.DarkWall, material.LightWall, light);
-                        PerspectiveWall(pixels, t.Vertex(ax,ay,top), t.Vertex(bx,by,top,len*metersPerUnit),
-                            t.Vertex(bx,by,bottom,len*metersPerUnit), t.Vertex(ax,ay,bottom), material, wall, model.Seed);
-                    }
+                    uint wall = PixelPalette.Mix(material.DarkWall, material.LightWall, edge.PerspectiveLight);
+                    float along = edge.PerspectiveLength * metersPerUnit;
+                    PerspectiveWall(pixels, topVertices[previous], topVertices[i] with { U = along },
+                        bottomVertices[i] with { U = along }, bottomVertices[previous], material, wall, model.Seed);
                 }
-                last = point;
+                previous = i;
             }
             if (contour.Count == 0) continue;
             // Clip each ring before perspective division; concave rings and holes continue
@@ -63,12 +94,14 @@ internal sealed partial class BuildingRasterizer
             ClipRing(contour, clippedContour, 0);
             ClipRing(clippedContour, contour, 1);
             if (contour.Count < 3) continue;
+            float ringTop = float.PositiveInfinity, ringBottom = float.NegativeInfinity;
             foreach (var v in contour)
             {
                 var p = v.Point; roofPoints.Add(p);
-                minY = Math.Min(minY, p.Y); maxY = Math.Max(maxY, p.Y);
+                ringTop = Math.Min(ringTop, p.Y); ringBottom = Math.Max(ringBottom, p.Y);
             }
-            roofEnds.Add(roofPoints.Count);
+            minY = Math.Min(minY, ringTop); maxY = Math.Max(maxY, ringBottom);
+            roofRings.Add((roofPoints.Count, ringTop, ringBottom));
         }
         if (roofPoints.Count == 0) return;
         if (intersections.Length < roofPoints.Count) intersections = new float[roofPoints.Count];
@@ -81,8 +114,9 @@ internal sealed partial class BuildingRasterizer
             float scan = y + .5f;
             float iw = (t.CosPitch + (scan-t.CY)*t.SinPitch*t.InverseFocal)/divisor;
             int hits = 0, first = 0;
-            foreach (int end in roofEnds)
+            foreach (var (end, ringTop, ringBottom) in roofRings)
             {
+                if (scan < ringTop || scan >= ringBottom) { first = end; continue; }
                 var a = roofPoints[end-1];
                 for (int i = first; i < end; i++)
                 {
@@ -105,22 +139,27 @@ internal sealed partial class BuildingRasterizer
             }
         }
         if (cap != top) return;
-        foreach (var ring in model.Feature.Paths)
+        ringEnd = 0;
+        ringIndex = 0;
+        foreach (var ring in rings)
         {
-            if (ring.Length < 3) continue;
-            var a=ring[^1];
-            foreach (var b in ring)
+            int ringStart = ringEnd;
+            ringEnd += ring.Length;
+            if (!visibleRings[ringIndex++]) continue;
+            int previous = ringEnd - 1;
+            for (int i = ringStart; i < ringEnd; i++)
             {
-                if (!IsTileCut(a.X,a.Y,b.X,b.Y,model.Feature.Extent))
-                    PerspectiveEdge(pixels,t.Vertex(a.X*model.Unit,a.Y*model.Unit,cap),
-                        t.Vertex(b.X*model.Unit,b.Y*model.Unit,cap),cap,material);
-                a=b;
+                if (!prepared[i].TileCut)
+                    PerspectiveEdge(pixels, topVertices[previous], topVertices[i], cap, material);
+                previous = i;
             }
         }
     }
 
     private void BeginOcclusion(int w, int h)
     {
+        projectionCount = 0;
+        projectionIndex = -1;
         depthColumns = (w + DepthCell - 1) / DepthCell;
         int cells = depthColumns * ((h + DepthCell - 1) / DepthCell);
         if (coarseDepth.Length < cells)
@@ -198,23 +237,45 @@ internal sealed partial class BuildingRasterizer
         (int)Math.Clamp(MathF.Ceiling(bounds.Right / DepthCell), 0, depthColumns),
         (int)Math.Clamp(MathF.Ceiling(bounds.Bottom / DepthCell), 0, (height + DepthCell - 1) / DepthCell));
 
-    private bool Outside(SKRect bounds,float bottom,float top,in TileTransform t)
+    private ref readonly ProjectionContext ProjectionFor(in TileTransform t)
     {
-        if (cullLens != t || cullSize != (width,height))
+        if (projectionIndex >= 0 && projectionContexts[projectionIndex].Transform == t)
+            return ref projectionContexts[projectionIndex];
+        // The front-to-back model order interleaves tiles. Retain each tile's lens and
+        // frustum for the frame instead of rebuilding them at every tile transition.
+        for (int i = 0; i < projectionCount; i++)
         {
-            cullLens=t; cullSize=(width,height);
-            float pz=-t.CosPitch*t.InverseFocal,xz=t.CX*pz,yz=t.CY*pz-t.SinPitch;
-            planes[0]=(t.PX,t.PY,pz,t.PW-(float)MapCamera.Near);
-            planes[1]=(-t.PX,-t.PY,-pz,t.Far-t.PW);
-            planes[2]=(t.XX,t.XY,xz,t.X);
-            planes[3]=(width*t.PX-t.XX,width*t.PY-t.XY,width*pz-xz,width*t.PW-t.X);
-            planes[4]=(t.YX,t.YY,yz,t.Y);
-            planes[5]=(height*t.PX-t.YX,height*t.PY-t.YY,height*pz-yz,height*t.PW-t.Y);
+            if (projectionContexts[i].Transform != t) continue;
+            projectionIndex = i;
+            return ref projectionContexts[i];
         }
+        if (projectionCount == projectionContexts.Length)
+        {
+            Array.Resize(ref projectionContexts, projectionContexts.Length * 2);
+            Array.Resize(ref frustumPlanes, projectionContexts.Length * 6);
+        }
+        projectionIndex = projectionCount++;
+        int first = projectionIndex * 6;
+        float pz=-t.CosPitch*t.InverseFocal,xz=t.CX*pz,yz=t.CY*pz-t.SinPitch;
+        frustumPlanes[first] = new(t.PX,t.PY,pz,t.PW-(float)MapCamera.Near);
+        frustumPlanes[first+1] = new(-t.PX,-t.PY,-pz,t.Far-t.PW);
+        frustumPlanes[first+2] = new(t.XX,t.XY,xz,t.X);
+        frustumPlanes[first+3] = new(width*t.PX-t.XX,width*t.PY-t.XY,width*pz-xz,width*t.PW-t.X);
+        frustumPlanes[first+4] = new(t.YX,t.YY,yz,t.Y);
+        frustumPlanes[first+5] = new(height*t.PX-t.YX,height*t.PY-t.YY,height*pz-yz,height*t.PW-t.Y);
+        float rightX = t.XX - t.CX*t.PX, rightY = t.XY - t.CX*t.PY;
+        float metersPerUnit = MathF.Sqrt(rightX*rightX + rightY*rightY) / pixelsPerMeter;
+        float eyeAltitude = t.TargetZ + t.CosPitch / t.InverseFocal;
+        projectionContexts[projectionIndex] = new(t, first, metersPerUnit, eyeAltitude);
+        return ref projectionContexts[projectionIndex];
+    }
+
+    private bool Outside(SKRect bounds,float bottom,float top,int firstPlane)
+    {
         float x=bounds.MidX,y=bounds.MidY,z=(bottom+top)*.5f;
         float rx=bounds.Width*.5f,ry=bounds.Height*.5f,rz=(top-bottom)*.5f;
-        foreach(var p in planes)
-            if(p.X*x+p.Y*y+p.Z*z+p.Constant+Math.Abs(p.X)*rx+Math.Abs(p.Y)*ry+Math.Abs(p.Z)*rz<-.01f)return true;
+        foreach(var p in frustumPlanes.AsSpan(firstPlane, 6))
+            if(p.X*x+p.Y*y+p.Z*z+p.Constant+p.AbsX*rx+p.AbsY*ry+p.AbsZ*rz<-.01f)return true;
         return false;
     }
 
@@ -233,15 +294,32 @@ internal sealed partial class BuildingRasterizer
 
     private void PerspectiveWall(Span<uint> pixels, H a, H b, H c, H d, Material material, uint color, uint seed)
     {
+        if (Inside(a) && Inside(b) && Inside(c) && Inside(d))
+        {
+            WallTriangle(pixels, a, b, c, material, color, seed);
+            WallTriangle(pixels, a, c, d, material, color, seed);
+            return;
+        }
         Span<H> polygon = stackalloc H[12], scratch = stackalloc H[12];
+        Span<float> distances = stackalloc float[12];
         polygon[0]=a;polygon[1]=b;polygon[2]=c;polygon[3]=d;
         int count=4;
         for (int plane=0;plane<6 && count>0;plane++)
         {
-            int n=0; var prev=polygon[count-1]; float da=TileTransform.Plane(plane,prev,width,height,perspectiveFar);
+            int inside = 0, outside = 0;
+            for (int i = 0; i < count; i++)
+            {
+                float distance = TileTransform.Plane(plane, polygon[i], width, height, perspectiveFar);
+                distances[i] = distance;
+                if (distance >= 0) inside++;
+                if (distance < 0) outside++;
+            }
+            if (inside == count) continue;
+            if (outside == count) return;
+            int n=0; var prev=polygon[count-1]; float da=distances[count-1];
             for(int i=0;i<count;i++)
             {
-                var next=polygon[i]; float db=TileTransform.Plane(plane,next,width,height,perspectiveFar);
+                var next=polygon[i]; float db=distances[i];
                 if ((da<0)!=(db<0)) scratch[n++]=H.Lerp(prev,next,da/(da-db));
                 if (db>=0) scratch[n++]=next;
                 prev=next; da=db;
@@ -250,6 +328,9 @@ internal sealed partial class BuildingRasterizer
         }
         for (int i=2;i<count;i++) WallTriangle(pixels,polygon[0],polygon[i-1],polygon[i],material,color,seed);
     }
+
+    private bool Inside(H point) => point.W - (float)MapCamera.Near >= 0 && perspectiveFar - point.W >= 0 &&
+        point.X >= 0 && width * point.W - point.X >= 0 && point.Y >= 0 && height * point.W - point.Y >= 0;
 
     private void WallTriangle(Span<uint> pixels,H a,H b,H c,Material mat,uint color,uint seed)
     {
