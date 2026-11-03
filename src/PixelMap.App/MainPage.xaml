@@ -53,6 +53,8 @@
                             <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
                             <ToggleMenuFlyoutItem x:Name="GpuRenderingItem" Text="GPU rendering (experimental)" Click="OnGpuRendering"
                                                  ToolTipService.ToolTip="Uses a GPU-backed Skia canvas for terrain and image composition, with automatic CPU fallback when GPU resources are unavailable." />
+                            <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief"
+                                                 ToolTipService.ToolTip="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." />
                             <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
                             <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
                             <MenuFlyoutSeparator />
@@ -77,6 +79,19 @@
             <maps:PixelMapControl x:Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                   AutomationProperties.Name="Interactive world map" />
             <StackPanel x:Name="SceneDock" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Spacing="6">
+                <Border x:Name="ElevationLegend" Visibility="Collapsed" Padding="10,7" CornerRadius="4"
+                        HorizontalAlignment="Left" Background="#F9142F32" BorderBrush="#679789" BorderThickness="1" IsHitTestVisible="False">
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Name="ElevationReadout" Foreground="#FCF9EB" FontSize="11" />
+                        <Grid ColumnDefinitions="*,*,*,*,*,*,*" Width="245" Height="7">
+                            <Border Background="#426A83" /><Border Grid.Column="1" Background="#719C78" />
+                            <Border Grid.Column="2" Background="#A6B47C" /><Border Grid.Column="3" Background="#C2AC80" />
+                            <Border Grid.Column="4" Background="#A79691" /><Border Grid.Column="5" Background="#D9D9D0" />
+                            <Border Grid.Column="6" Background="#F0EEE5" />
+                        </Grid>
+                        <TextBlock Text="−500       0        1500       3000       6000 m" Foreground="#C4D8C9" FontSize="10" />
+                    </StackPanel>
+                </Border>
                 <Border HorizontalAlignment="Left" Padding="3" Background="#FAFFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6">
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <ToggleButton x:Name="MapLayerButton" IsChecked="True" MinWidth="66" Height="36" Padding="9,2" CornerRadius="3"
@@ -91,6 +106,13 @@
                             <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                                 <Grid Width="13" Height="13"><Ellipse Fill="#658DA4" /><Path Fill="#A7CB8A" Data="M3,2 L7,1 L9,3 L6,5 L7,7 L4,8 L2,5 Z M9,7 L12,6 L12,9 L10,12 L8,11 Z" /></Grid>
                                 <TextBlock Text="Earth" FontSize="13" />
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton x:Name="ElevationLayerButton" MinWidth="84" Height="36" Padding="8,2" CornerRadius="3"
+                                      Click="OnElevationLayer" AutomationProperties.Name="Elevation layer" ToolTipService.ToolTip="Pixel-art altitude colors and shaded terrain">
+                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                                <Path Width="13" Height="13" Stretch="Uniform" Fill="#8B9B71" Data="M0,13 L6,1 L10,8 L12,5 L17,13 Z M4,6 L6,3 L8,6 L6,5 Z" />
+                                <TextBlock Text="Elevation" FontSize="12" />
                             </StackPanel>
                         </ToggleButton>
                         <Border Width="1" Margin="1,4" Background="#C6CFBE" />
@@ -187,7 +209,7 @@
             </Border>
         </Grid>
 
-        <Grid x:Name="Footer" Grid.Row="2" Padding="12,5" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" Background="#F7F5E8">
+        <Grid x:Name="Footer" Grid.Row="2" Padding="12,5" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto,Auto" Background="#F7F5E8">
             <TextBlock x:Name="Status" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="#395950"
                        FontSize="11" TextTrimming="CharacterEllipsis" />
             <StackPanel x:Name="ScaleBar" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0" Spacing="5">
@@ -210,6 +232,11 @@
                     <Run Text=" · " /><Hyperlink NavigateUri="https://creativecommons.org/licenses/by/4.0/" Foreground="#30594D">CC BY 4.0</Hyperlink>
                 </TextBlock>
             </Grid>
+            <TextBlock x:Name="ElevationCredits" Grid.Row="2" Grid.ColumnSpan="3" Visibility="Collapsed"
+                       TextWrapping="Wrap" FontSize="10" Foreground="#395950" Margin="0,2,0,0">
+                <Hyperlink NavigateUri="https://registry.opendata.aws/terrain-tiles/" Foreground="#30594D">Terrain Tiles / Mapzen</Hyperlink>
+                <Run Text=" · " /><Hyperlink NavigateUri="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" Foreground="#30594D">Elevation data sources and attribution</Hyperlink>
+            </TextBlock>
         </Grid>
     </Grid>
 </Page>

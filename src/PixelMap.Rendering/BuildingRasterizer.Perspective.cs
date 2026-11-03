@@ -30,11 +30,12 @@ internal sealed partial class BuildingRasterizer
         internal readonly float AbsX = Math.Abs(x), AbsY = Math.Abs(y), AbsZ = Math.Abs(z);
     }
 
-    private void DrawPerspective(Span<uint> pixels, in Building model, in TileTransform t, Material material)
+    private void DrawPerspective(Span<uint> pixels, in Building model, in TileTransform t, Material material, float foundationMeters)
     {
         perspectiveFar = t.Far;
         depthLens = t;
-        float top = model.Top * pixelsPerMeter, bottom = model.Bottom * pixelsPerMeter;
+        float foundation = foundationMeters * pixelsPerMeter;
+        float top = (model.Top + foundationMeters) * pixelsPerMeter, bottom = (model.Bottom + foundationMeters) * pixelsPerMeter;
         var bounds = model.Bounds;
         ref readonly var context = ref ProjectionFor(t);
         if (Outside(bounds,bottom,top,context.PlaneStart)) return;
@@ -84,7 +85,7 @@ internal sealed partial class BuildingRasterizer
                     uint wall = PixelPalette.Mix(material.DarkWall, material.LightWall, edge.PerspectiveLight);
                     float along = edge.PerspectiveLength * metersPerUnit;
                     PerspectiveWall(pixels, topVertices[previous], topVertices[i] with { U = along },
-                        bottomVertices[i] with { U = along }, bottomVertices[previous], material, wall, model.Seed);
+                        bottomVertices[i] with { U = along }, bottomVertices[previous], material, wall, model.Seed, foundation);
                 }
                 previous = i;
             }
@@ -292,12 +293,12 @@ internal sealed partial class BuildingRasterizer
         }
     }
 
-    private void PerspectiveWall(Span<uint> pixels, H a, H b, H c, H d, Material material, uint color, uint seed)
+    private void PerspectiveWall(Span<uint> pixels, H a, H b, H c, H d, Material material, uint color, uint seed, float foundation)
     {
         if (Inside(a) && Inside(b) && Inside(c) && Inside(d))
         {
-            WallTriangle(pixels, a, b, c, material, color, seed);
-            WallTriangle(pixels, a, c, d, material, color, seed);
+            WallTriangle(pixels, a, b, c, material, color, seed, foundation);
+            WallTriangle(pixels, a, c, d, material, color, seed, foundation);
             return;
         }
         Span<H> polygon = stackalloc H[12], scratch = stackalloc H[12];
@@ -326,13 +327,13 @@ internal sealed partial class BuildingRasterizer
             }
             scratch[..n].CopyTo(polygon);count=n;
         }
-        for (int i=2;i<count;i++) WallTriangle(pixels,polygon[0],polygon[i-1],polygon[i],material,color,seed);
+        for (int i=2;i<count;i++) WallTriangle(pixels,polygon[0],polygon[i-1],polygon[i],material,color,seed,foundation);
     }
 
     private bool Inside(H point) => point.W - (float)MapCamera.Near >= 0 && perspectiveFar - point.W >= 0 &&
         point.X >= 0 && width * point.W - point.X >= 0 && point.Y >= 0 && height * point.W - point.Y >= 0;
 
-    private void WallTriangle(Span<uint> pixels,H a,H b,H c,Material mat,uint color,uint seed)
+    private void WallTriangle(Span<uint> pixels,H a,H b,H c,Material mat,uint color,uint seed,float foundation)
     {
         var p=a.Point; var q=b.Point; var r=c.Point;
         float dx1=q.X-p.X, dy1=q.Y-p.Y, dx2=r.X-p.X, dy2=r.Y-p.Y;
@@ -360,7 +361,7 @@ internal sealed partial class BuildingRasterizer
                 float z=zOver/inv; uint texel=color;
                 if (pixelsPerMeter*inv > .40f)
                 {
-                    float story=z/(pixelsPerMeter*floor), column=uOver/(inv*bay);
+                    float story=(z-foundation)/(pixelsPerMeter*floor), column=uOver/(inv*bay);
                     int level=(int)MathF.Floor(story), col=(int)MathF.Floor(column);
                     float wy=story-level, wx=column-col;
                     if (wy>.23f && wy<.75f && wx>.17f && wx<.76f)

@@ -22,6 +22,11 @@ internal readonly record struct TileTransform(float X, float Y, float XX, float 
         return new(X + XX*x + XY*y + CX*dz, Y + YX*x + YY*y + CY*dz - z*SinPitch, Weight(x,y) + dz, z, u);
     }
     public SKPoint At(float x, float y) => Perspective ? Vertex(x,y).Point : new(X + XX*x + XY*y, Y + YX*x + YY*y);
+    public TileTransform AtAltitude(float altitude)
+    {
+        float dz = -altitude * CosPitch * InverseFocal;
+        return this with { X = X + CX * dz, Y = Y + CY * dz - altitude * SinPitch, PW = PW + dz };
+    }
     public SKMatrix Matrix => new(XX, XY, X, YX, YY, Y, PX, PY, PW);
     public TileTransform Translate(float dx, float dy) => this with {
         X = X + dx*PW, XX = XX + dx*PX, XY = XY + dx*PY, Y = Y + dy*PW, YX = YX + dy*PX, YY = YY + dy*PY,

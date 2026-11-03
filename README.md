@@ -1,8 +1,8 @@
 # UnoPixelMap · Pixel Atlas
 
-[Explore the live map](https://wieslawsoltes.github.io/UnoPixelMap/) · [Earth in 3D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/55.00/Day/Earth) · [Earth in 2D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/0.00/Day/Earth)
+[Explore the live map](https://wieslawsoltes.github.io/UnoPixelMap/) · [Lake Garda elevation](https://wieslawsoltes.github.io/UnoPixelMap/#v4/45.875000/10.850000/12.300/-25.00/58.00/Day/Elevation/Perspective/0.0/Relief/1.00) · [Earth in 3D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/55.00/Day/Earth) · [Earth in 2D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/0.00/Day/Earth)
 
-Pixel Atlas is an interactive Uno Platform map control for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable pixel art. Choose an overhead, isometric or perspective camera, plan a journey, preview its directions, or drive a pixel vehicle through the map. A world overview, the opening Lower Manhattan neighborhood, and six route demonstrations are bundled with the app.
+Pixel Atlas is an interactive Uno Platform map control for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable pixel art. Choose an overhead, isometric or perspective camera, plan a journey, preview its directions, or drive a pixel vehicle through the map. A world overview, the opening Lower Manhattan neighborhood, northern Lake Garda terrain and six route demonstrations are bundled with the app.
 
 ![Pixel Atlas displaying Lower Manhattan in a 1200 × 780 Chromium viewport](docs/manhattan.png)
 
@@ -10,9 +10,9 @@ Pixel Atlas is an interactive Uno Platform map control for the browser. It strea
 
 ## Explore
 
-Drag to pan, scroll or pinch to zoom, and right-drag or Shift-drag to orbit and tilt. Two fingers can pinch, twist, pan or tilt in parallel. Double-click to zoom at the pointer. Click a roof, façade, street or park to inspect it. Use Map or Earth to choose the ground layer, then choose 2D or 3D independently. Earth transforms natural-color satellite imagery into pixel art and keeps map labels and buildings in the same coordinate system. The View menu selects the Day, Dusk or Night palette and the perspective lens. Share a view to preserve its camera, focus altitude, projection and lighting. Existing v1 and v2 view links continue to work.
+Drag to pan, scroll or pinch to zoom, and right-drag or Shift-drag to orbit and tilt. Two fingers can pinch, twist, pan or tilt in parallel. Double-click to zoom at the pointer. Click a roof, façade, street or park to inspect it. Use Map, Earth or Elevation to choose the ground layer, then choose 2D or 3D independently. Terrain relief can be enabled for all three layers. Earth transforms natural-color satellite imagery into pixel art and keeps map labels and buildings in the same coordinate system. The View menu selects the Day, Dusk or Night palette and the perspective lens. Share a view to preserve its camera, focus altitude, projection, lighting, terrain relief and vertical exaggeration. The v4 link reader also supports v1, v2 and v3 views.
 
-Search by place name, address or decimal latitude and longitude. The city guide includes Lower Manhattan, Kraków, Shibuya, Barcelona, Paris and Singapore. With the map focused, use the arrow keys to pan, +/− to zoom, Q/E to rotate, P to switch projection, Home to return to Manhattan and Escape to clear a marker.
+Search by place name, address or decimal latitude and longitude. The city guide includes Lower Manhattan, Kraków, Shibuya, Barcelona, Paris, Singapore and the Lake Garda mountains. With the map focused, use the arrow keys to pan, +/− to zoom, Q/E to rotate, P to switch projection, Home to return to Manhattan and Escape to clear a marker.
 
 ## Journeys and driving
 
@@ -33,7 +33,7 @@ Take manual control to start a checkpoint challenge. Each vehicle has its own ac
 
 Sound starts muted and is activated by the sound button. The Web Audio mixer synthesizes motors, wind, wheel rhythms, footsteps, horns and checkpoint cues. It suspends on pause and when the document is hidden. Each map has an independent, disposable audio graph.
 
-Road routes use separate FOSSGIS OSRM foot, bicycle and car networks. Train and boat routes follow connected mapped tracks, ferry lines or fairways within a bounded local corridor. Their times are estimates. Flight routes follow great-circle courses. Timetables, passenger transfers, vessel clearance, flight procedures, live traffic, elevation terrain, and photogrammetric city meshes require additional data providers. The simulation uses mapped geometry with simplified vehicle dynamics. [Routing coverage and source details](src/PixelMap.Routing/README.md)
+Road routes use separate FOSSGIS OSRM foot, bicycle and car networks. Train and boat routes follow connected mapped tracks, ferry lines or fairways within a bounded local corridor. Their times are estimates. Flight routes follow great-circle courses. Timetables, passenger transfers, vessel clearance, flight procedures, live traffic and photogrammetric city meshes require additional data providers. The simulation uses mapped geometry with simplified vehicle dynamics. [Routing coverage and source details](src/PixelMap.Routing/README.md)
 
 ## How Earth becomes pixel art
 
@@ -46,6 +46,18 @@ The renderer decodes each satellite tile once. It averages colors in linear ligh
 Zoom levels 13 and 14 preserve the full 256×256 source grid. Lower zoom levels use 128×128 art tiles. A 24 MiB LRU holds processed textures. In overhead view, translucent building footprints preserve the imagery underneath. Tilting into the isometric projection reveals the extruded walls.
 
 [Explore Lake Garda in Earth mode](https://wieslawsoltes.github.io/UnoPixelMap/#v2/45.687000/10.737000/13.000/30.00/55.00/Day/Earth) · [View the Lake Garda browser capture](docs/earth-lake-garda.png) · [See Earth on a phone-sized viewport](docs/earth-phone.png)
+
+## Elevation and terrain relief
+
+[Explore the pixel-art elevation map](https://wieslawsoltes.github.io/UnoPixelMap/#v4/45.875000/10.850000/12.300/-25.00/58.00/Day/Elevation/Perspective/0.0/Relief/1.00) · [Explore Earth over the same mountains](https://wieslawsoltes.github.io/UnoPixelMap/#v4/45.875000/10.850000/12.300/-25.00/58.00/Day/Earth/Perspective/0.0/Relief/1.00)
+
+Elevation combines altitude colors with quantized hill shading and the existing map artwork. **Terrain relief** in View lifts the ground into a real height field for Map, Earth and Elevation. **Camera angles and orbit** includes a 1×–4× vertical exaggeration slider. Altitude readouts report unexaggerated metres above sea level. Overhead and oblique projections, camera orbit, feature inspection and saved views share these settings.
+
+Mapzen Terrain Tiles provide worldwide, keyless Terrarium elevation data. The decoder retains signed heights and bilinearly samples adjoining tiles, with loaded parents and a world overview supplying progressive coverage. A bounded screen-adaptive quadtree stitches neighboring mesh edges and projects cached pixel artwork with perspective-correct texture coordinates. Buildings, labels, routes, vehicle effects and picking share terrain depth. Building height and vehicle clearance retain their physical scale above the terrain.
+
+Ground vehicles and trains follow the sampled surface. Ocean surfaces use sea level, while land and inland water retain signed DEM elevations. Aircraft use absolute altitude and terrain-relative clearance, with swept ground contacts, taxiing and landing handling. Rendered navigation objects follow the selected mesh while the simulation retains physical DEM heights. The camera keeps a local terrain datum, supports terrain-anchored gestures and adjusts perspective eye clearance above slopes.
+
+The relief renderer rasterizes terrain and buildings into a shared CPU depth buffer. The optional GPU backend composes that terrain artwork using the existing Skia mesh and pixel shader. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
 
 ## Reuse the control
 
@@ -61,6 +73,8 @@ Reference `src/PixelMap.Controls/PixelMap.Controls.csproj` from a Skia-rendered 
 using PixelMap.Rendering;
 
 Atlas.IsEarthImageryEnabled = true;
+Atlas.IsTerrainEnabled = true;
+Atlas.TerrainExaggeration = 1;
 Atlas.Palette = PixelStyle.Dusk;
 Atlas.FlyTo(new MapCamera(50.0617, 19.9373, 16.8, Bearing: -35, Pitch: 55));
 Atlas.SetMarker(50.0617, 19.9373, "Rynek Główny");
@@ -82,12 +96,12 @@ Atlas.CameraRig = JourneyCameraRig.Chase;
 Atlas.Journey.Preview();
 ```
 
-`IRouteProvider` supplies additional routing backends. `VehicleProfile` defines compatible vehicle dynamics, and `JourneySession.SelectVehicle` installs a profile for the current route. `IJourneyWorld` supplies collision rules. `IJourneyAudioDevice` supplies an audio backend. The browser host deploys `PixelMap.Audio/Browser/journey-audio.js` and attaches a `BrowserAudioDevice`. Other hosts can use the same simulation without browser audio.
+`IRouteProvider` supplies additional routing backends. `VehicleProfile` defines compatible vehicle dynamics, and `JourneySession.SelectVehicle` installs a profile for the current route. `IJourneyWorld` supplies collision rules and surface heights. `ElevationTileSource` accepts a custom HTTPS Terrarium XYZ provider, and `ElevationSnapshot` supplies raw and water-aware height sampling. `IJourneyAudioDevice` supplies an audio backend. The browser host deploys `PixelMap.Audio/Browser/journey-audio.js` and attaches a `BrowserAudioDevice`. Other hosts can use the same simulation without browser audio.
 
 | Project | Responsibility |
 | --- | --- |
-| PixelMap.Data | Bounded MVT protobuf decoding, source catalog, request coalescing, cancellation and separate byte-bounded caches for vector tiles and satellite imagery. Photon geocoding with an injectable endpoint. |
-| PixelMap.Rendering | Wrapped Web Mercator camera, cached terrain blocks, palette shaders, orthographic and perspective building rasterization, depth-tested walls and roof holes, map labels, feature picking, route overlays, vehicle sprites and world-anchored particles. Perspective uses homographic ground projection, finite clipping and reciprocal-depth interpolation. |
+| PixelMap.Data | Bounded MVT protobuf decoding, source catalog, request coalescing, cancellation and separate byte-bounded caches for vector tiles, satellite imagery and elevation. Bounded Terrarium PNG decoding, immutable height snapshots and indexed water surfaces. Photon geocoding with an injectable endpoint. |
+| PixelMap.Rendering | Wrapped Web Mercator camera, cached terrain blocks, palette shaders, orthographic and perspective building rasterization, depth-tested walls and roof holes, map labels, feature picking, route overlays, vehicle sprites and world-anchored particles. Perspective uses finite clipping and reciprocal-depth interpolation. Terrain relief uses an adaptive stitched height field and a shared terrain/model depth buffer. |
 | PixelMap.Routing | Provider-separated routes and alternatives, bounded local A* rail/ferry searches, great-circle flight paths, ordered stops, maneuver metadata and shared provider-distance route sampling. |
 | PixelMap.Simulation | Fixed 60 Hz clock, six vehicle profiles, manual inputs, preview transport, cruise, checkpoint scoring and recovery, spatially indexed mapped collisions and replaceable world rules. |
 | PixelMap.Audio | Coalesced motion parameters and discrete cues through an injectable sound device. The browser adapter owns a bounded Web Audio graph and releases completed transient sounds. |
@@ -120,17 +134,18 @@ npm ci --prefix tests/browser
 (cd tests/browser && npx playwright install chromium)
 node tests/browser/smoke.cjs http://localhost:8000/
 node tests/browser/journeys.cjs http://localhost:8000/
+node tests/browser/terrain.cjs http://localhost:8000/
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-visual --visual
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-motion --motion
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-gpu --motion --gpu
 ```
 
-The Pages workflow builds the AOT-enabled browser app from main, runs the engine checks, exercises the exact publish artifact with Chromium, and publishes it after verification. Journey browser checks cover all six modes, route alternatives, waypoint picking, perspective projection, manual keyboard/touch inputs and Web Audio activation. Set `PIXELMAP_SHOTS` to save browser captures.
+The Pages workflow builds the AOT-enabled browser app from main, runs the engine checks, exercises the exact publish artifact with Chromium, and publishes it after verification. Journey browser checks cover all six modes, route alternatives, waypoint picking, perspective projection, manual keyboard/touch inputs and Web Audio activation. Terrain browser checks exercise the Garda fixtures, all three layers, overhead and perspective, orbit, dragging, elevation inspection, exaggeration, saved views and handset layout. Map, journey and terrain checks run with CPU and optional GPU modes in CI. Set `PIXELMAP_SHOTS` to save browser captures.
 
 ## Sources and coverage
 
 [OpenFreeMap](https://openfreemap.org/) serves [OpenMapTiles](https://openmaptiles.org/) vector data derived from [OpenStreetMap contributors](https://www.openstreetmap.org/copyright). See [the seed attribution and regeneration instructions](src/PixelMap.Data/Seed/README.md). Coverage and recorded building heights vary. Footprints without height data use an 8 m rendering fallback. Windows and lighting are synthesized by the renderer. The zoom-14 source tiles are overscaled for close inspection.
 
-Earth uses the EOxCloudless 2016 mosaic from EOX IT Services GmbH, containing modified Copernicus Sentinel data from 2016 and 2017. Each tile is processed for the pixel-art view. Imagery has approximately 10 m source resolution. Buildings and labels use independent vector data, so features can differ between acquisition dates. The app includes imagery for the world overview and its Manhattan opening. [EOxCloudless](https://cloudless.eox.at/) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · [Imagery attribution and source](src/PixelMap.Data/Imagery/README.md).
+Earth uses the EOxCloudless 2016 mosaic from EOX IT Services GmbH, containing modified Copernicus Sentinel data from 2016 and 2017. Each tile is processed for the pixel-art view. Imagery has approximately 10 m source resolution. Buildings and labels use independent vector data, so features can differ between acquisition dates. The app includes imagery for the world overview, its Manhattan opening and northern Lake Garda. [EOxCloudless](https://cloudless.eox.at/) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · [Imagery attribution and source](src/PixelMap.Data/Imagery/README.md).
 
 Address and place search uses [Photon](https://photon.komoot.io/). The public service permits moderate use. Configure a dedicated or self-hosted Photon endpoint for a high-volume deployment.

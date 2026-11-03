@@ -32,7 +32,8 @@ public sealed partial class MainPage : Page
         new("Shibuya Crossing", "Tokyo, Japan", 35.6595, 139.7005, 16.9),
         new("Eixample", "Barcelona, Spain", 41.3924, 2.1648, 16.4),
         new("Île de la Cité", "Paris, France", 48.8548, 2.3470, 16.2),
-        new("Marina Bay", "Singapore", 1.2831, 103.8586, 16.2)
+        new("Marina Bay", "Singapore", 1.2831, 103.8586, 16.2),
+        new("Lake Garda mountains", "Riva del Garda, Italy · elevation demo", 45.875, 10.85, 12.3)
     ];
     private readonly PhotonGeocoder _geocoder = new(SearchHttp);
     private readonly SolidColorBrush _ink = new(ColorHelper.FromArgb(255, 28, 59, 54));
@@ -103,18 +104,27 @@ public sealed partial class MainPage : Page
         var camera = Map.Camera;
         PerspectiveItem.IsChecked = camera.Perspective;
         GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
+        TerrainReliefItem.IsChecked = Map.IsTerrainEnabled;
+        ElevationLegend.Visibility = Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
+        ElevationCredits.Visibility = Map.IsTerrainEnabled || Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
+        ElevationReadout.Text = Map.HasElevation
+            ? FormattableString.Invariant($"{Map.CenterElevationMeters:0} m elevation · {(Map.IsTerrainEnabled ? Map.TerrainExaggeration.ToString("0.##", CultureInfo.InvariantCulture) + "× relief" : "2D altitude")}")
+            : "Loading elevation";
+        AutomationProperties.SetName(ElevationReadout, ElevationReadout.Text);
         var status = Map.StatusText;
         var location = FormattableString.Invariant($"{camera.Latitude:0.0000}°, {camera.Longitude:0.0000}°");
         Status.Text = FormattableString.Invariant($"{status}   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
+        if ((Map.IsTerrainEnabled || Map.IsElevationLayerEnabled) && Map.HasElevation)
+            Status.Text += FormattableString.Invariant($"   ·   {Map.CenterElevationMeters:0} m elevation");
         MobileStatus.Text = status;
         AutomationProperties.SetName(Status, Status.Text);
         AutomationProperties.SetName(MobileStatus, status);
         double bearing = camera.Bearing * Math.PI / 180;
         CompassTransform.Angle = Math.Atan2(-Math.Sin(bearing), Math.Cos(bearing) * Math.Cos(camera.Pitch * Math.PI / 180)) * 180 / Math.PI;
         double metersPerPixel = 40075016.68557849 * Math.Cos(camera.Latitude * Math.PI / 180) / (512 * Math.Pow(2, camera.Zoom));
-        if (camera.Perspective && Map.ActualWidth > 80 && Map.ActualHeight > 32 &&
-            camera.TryUnproject(Map.ActualWidth / 2 - 40, Map.ActualHeight - 32, Map.ActualWidth, Map.ActualHeight, out var left) &&
-            camera.TryUnproject(Map.ActualWidth / 2 + 40, Map.ActualHeight - 32, Map.ActualWidth, Map.ActualHeight, out var right))
+        if ((camera.Perspective || Map.IsTerrainEnabled) && Map.ActualWidth > 80 && Map.ActualHeight > 32 &&
+            Map.TryGetLocation(Map.ActualWidth / 2 - 40, Map.ActualHeight - 32, out var left) &&
+            Map.TryGetLocation(Map.ActualWidth / 2 + 40, Map.ActualHeight - 32, out var right))
         {
             double groundScale = new RoutePoint(left.Latitude, left.Longitude).DistanceTo(new RoutePoint(right.Latitude, right.Longitude)) / 80;
             if (double.IsFinite(groundScale) && groundScale > 0) metersPerPixel = groundScale;
@@ -147,6 +157,13 @@ public sealed partial class MainPage : Page
         GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
     }
 
+    private void OnTerrainRelief(object sender, RoutedEventArgs e)
+    {
+        Map.IsTerrainEnabled = !Map.IsTerrainEnabled;
+        TerrainReliefItem.IsChecked = Map.IsTerrainEnabled;
+        SyncReadout();
+    }
+
     private void ChooseCamera(MapCamera camera)
     {
         Map.Journey.Follow = false;
@@ -170,12 +187,17 @@ public sealed partial class MainPage : Page
     private void OnMapLayer(object sender, RoutedEventArgs e) => SetBaseLayer(false);
     private void OnEarthLayer(object sender, RoutedEventArgs e) => SetBaseLayer(true);
 
-    private void SetBaseLayer(bool earth)
+    private void OnElevationLayer(object sender, RoutedEventArgs e) => SetBaseLayer(false, true);
+
+    private void SetBaseLayer(bool earth, bool elevation = false)
     {
+        Map.IsElevationLayerEnabled = elevation;
         Map.IsEarthImageryEnabled = earth;
-        MapLayerButton.IsChecked = !earth;
+        MapLayerButton.IsChecked = !earth && !elevation;
         EarthLayerButton.IsChecked = earth;
+        ElevationLayerButton.IsChecked = elevation;
         EarthCredits.Visibility = earth ? Visibility.Visible : Visibility.Collapsed;
+        SyncReadout();
     }
 
     private static Uri? CurrentPageUri()
@@ -198,9 +220,11 @@ public sealed partial class MainPage : Page
             JourneyPanel.LoadDemo(mode);
             return;
         }
-        if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette, out var earth)) return;
+        if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette, out var earth, out var elevation, out var terrain, out var exaggeration)) return;
         SetPalette(palette);
-        SetBaseLayer(earth);
+        SetBaseLayer(earth, elevation);
+        Map.IsTerrainEnabled = terrain;
+        Map.TerrainExaggeration = exaggeration;
         Destination.Text = "Shared view";
         Map.FlyTo(camera);
     }
@@ -208,8 +232,9 @@ public sealed partial class MainPage : Page
     private void OnShare(object sender, RoutedEventArgs e)
     {
         var page = CurrentPageUri() ?? new Uri("https://wieslawsoltes.github.io/UnoPixelMap/");
-        var url = MapViewLink.Create(page, Map.Camera, Map.Palette, Map.IsEarthImageryEnabled).AbsoluteUri;
-        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link opens the same map position, base layer, lens, projection and lighting.");
+        var url = MapViewLink.Create(page, Map.Camera, Map.Palette, Map.IsEarthImageryEnabled,
+            Map.IsElevationLayerEnabled, Map.IsTerrainEnabled, Map.TerrainExaggeration).AbsoluteUri;
+        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link preserves the map position, base layer, terrain relief, vertical exaggeration, camera and lighting.");
         var field = new TextBox { Text = url, IsReadOnly = true, HorizontalAlignment = HorizontalAlignment.Stretch };
         AutomationProperties.SetName(field, "Shareable map link");
         field.GotFocus += (_, _) => field.SelectAll();
@@ -289,6 +314,19 @@ public sealed partial class MainPage : Page
             orbit.Children.Add(button);
         }
         Rows.Children.Add(orbit);
+        var terrain = new ToggleSwitch { Header = "Terrain relief", IsOn = Map.IsTerrainEnabled };
+        terrain.Toggled += (_, _) => { Map.IsTerrainEnabled = terrain.IsOn; SyncReadout(); };
+        Rows.Children.Add(terrain);
+        var heightLabel = new TextBlock { Text = $"Vertical exaggeration · {Map.TerrainExaggeration:0.##}×", Foreground = _ink };
+        var exaggeration = new Slider { Minimum = 1, Maximum = 4, StepFrequency = .25, SmallChange = .25, LargeChange = 1, Value = Map.TerrainExaggeration };
+        AutomationProperties.SetName(exaggeration, "Terrain vertical exaggeration");
+        exaggeration.ValueChanged += (_, args) =>
+        {
+            Map.TerrainExaggeration = args.NewValue;
+            heightLabel.Text = $"Vertical exaggeration · {Map.TerrainExaggeration:0.##}×";
+        };
+        Rows.Children.Add(heightLabel);
+        Rows.Children.Add(exaggeration);
     }
 
     private void AddCameraAction(string label, Action apply)
@@ -311,6 +349,7 @@ public sealed partial class MainPage : Page
         AddHelp("Browse", "Drag to pan, scroll or pinch to zoom. Tap the map to inspect a location.");
         AddHelp("Change perspective", "Use the curved arrows to rotate. Switch projection or lighting in View.");
         AddHelp("Keyboard", "Focus the map. Use arrows to pan, + and − to zoom, Q and E to rotate, P to switch projection, or Home to return to Manhattan.");
+        AddHelp("Elevation", "Choose Elevation for altitude colors. Terrain relief works with Map and Earth too. Camera tools adjust vertical exaggeration from 1× to 4×. Elevation readouts remain in real metres above sea level.");
         AddHelp("Journeys", "Use Route beside search. Choose stops or try a vehicle demo. Preview, take control, or jump to a turn.");
         AddHelp("Drop a pin", "Enter latitude, longitude in the search field and press Enter.");
     }
@@ -426,7 +465,12 @@ public sealed partial class MainPage : Page
         _selectedPlace = place;
         Destination.Text = place.Name;
         Map.SetMarker(place.Latitude, place.Longitude, place.Name);
-        Map.FlyTo(place.Latitude, place.Longitude, place.Zoom);
+        if (place == Destinations[^1])
+        {
+            SetBaseLayer(false, true);
+            Map.FlyTo(new MapCamera(place.Latitude, place.Longitude, place.Zoom, -25, 58, true));
+        }
+        else Map.FlyTo(place.Latitude, place.Longitude, place.Zoom);
     }
 
     private void ShowPanel(PanelKind kind, string heading, string note)
@@ -454,46 +498,5 @@ public sealed partial class MainPage : Page
     {
         _request?.Cancel();
         _request = null;
-    }
-}
-
-/// <summary>Versioned camera fragments are locale independent and preserve the Pages project base path.</summary>
-internal static class MapViewLink
-{
-    internal static Uri Create(Uri page, MapCamera camera, PixelStyle palette, bool earth) =>
-        new UriBuilder(page)
-        {
-            Fragment = FormattableString.Invariant($"v3/{camera.Latitude:F6}/{camera.Longitude:F6}/{camera.Zoom:F3}/{Math.IEEERemainder(camera.Bearing, 360):F2}/{camera.Pitch:F2}/{palette}/{(earth ? "Earth" : "Map")}/{(camera.Perspective ? "Perspective" : "Orthographic")}/{camera.TargetAltitudeMeters:F1}")
-        }.Uri;
-
-    internal static bool TryRead(Uri page, out MapCamera camera, out PixelStyle palette, out bool earth)
-    {
-        camera = default;
-        palette = PixelStyle.Day;
-        earth = false;
-        var fields = page.Fragment.Split('/');
-        bool perspective = false;
-        double targetAltitude = 0;
-        if (fields is ["#v3", _, _, _, _, _, _, "Map" or "Earth", "Perspective" or "Orthographic"] or
-            ["#v3", _, _, _, _, _, _, "Map" or "Earth", "Perspective" or "Orthographic", _])
-        {
-            earth = fields[7] == "Earth";
-            perspective = fields[8] == "Perspective";
-            if (fields.Length == 10 && (!double.TryParse(fields[9], NumberStyles.Float, CultureInfo.InvariantCulture, out targetAltitude) ||
-                !double.IsFinite(targetAltitude) || targetAltitude is < 0 or > 15000)) return false;
-        }
-        else if (fields is ["#v2", _, _, _, _, _, _, "Map" or "Earth"])
-            earth = fields[7] == "Earth";
-        else if (fields is not ["#v1", _, _, _, _, _, _]) return false;
-        Span<double> numbers = stackalloc double[5];
-        for (var i = 0; i < numbers.Length; i++)
-            if (!double.TryParse(fields[i + 1], NumberStyles.Float, CultureInfo.InvariantCulture, out numbers[i]) || !double.IsFinite(numbers[i]))
-                return false;
-        if (Math.Abs(numbers[0]) > 85.051129 || Math.Abs(numbers[1]) > 180 ||
-            numbers[2] < MapCamera.MinZoom || numbers[2] > MapCamera.MaxZoom || Math.Abs(numbers[3]) > 360 ||
-            numbers[4] is < 0 or > 72 || !Enum.TryParse(fields[6], out palette) || !Enum.IsDefined(palette))
-            return false;
-        camera = new MapCamera(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4], perspective, targetAltitude);
-        return true;
     }
 }

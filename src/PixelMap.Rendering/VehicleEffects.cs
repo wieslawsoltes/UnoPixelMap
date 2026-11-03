@@ -55,7 +55,7 @@ internal sealed class VehicleEffects
     }
 
     internal void Draw(SKCanvas canvas, MapCamera cam, int w, int h, int pixel, TravelMode mode, SKPaint paint,
-        Func<float, float, double, bool> visible)
+        Func<float, float, double, bool> visible, TerrainOptions? terrain = null, TerrainSurface? terrainMesh = null)
     {
         double life = Lifetime(mode);
         paint.Style = SKPaintStyle.Fill;
@@ -64,10 +64,13 @@ internal sealed class VehicleEffects
             var p = trail[(head - count + i + Capacity) % Capacity];
             float age = (float)((Time - p.Born) / life);
             if (age is < 0 or >= 1) continue;
-            if (!Position(cam,p.Point,p.Altitude,w,h,pixel,out float x,out float groundY,out float lift)) continue;
+            double altitude = terrain is not null && mode != TravelMode.Flight
+                ? terrain.Elevation.SampleSurfaceMeters(p.Point.Latitude, p.Point.Longitude) : p.Altitude;
+            if (!Position(cam,p.Point,altitude,w,h,pixel,out float x,out float groundY,out float lift,terrain,terrainMesh)) continue;
             float y=groundY-lift;
-            if (x < -20 || x > w / pixel + 20 || y < -20 || y > h / pixel + 20 || !visible(x, y, p.Altitude + 1)) continue;
-            var axes = Axes(cam, p.Point, p.Altitude, p.Bearing, w, h);
+            double renderedAltitude = terrain?.RenderAltitude(cam, p.Point.Latitude, p.Point.Longitude, altitude, terrainMesh) ?? altitude;
+            if (x < -20 || x > w / pixel + 20 || y < -20 || y > h / pixel + 20 || !visible(x, y, renderedAltitude + (terrain is null ? 1 : 2))) continue;
+            var axes = Axes(cam, p.Point, altitude, p.Bearing, w, h, terrain, mode != TravelMode.Flight, terrainMesh);
             float fx = axes.Forward.X, fy = axes.Forward.Y;
             float rx = axes.Right.X, ry = axes.Right.Y;
             byte alpha = (byte)(185 * (1 - age));
@@ -94,16 +97,25 @@ internal sealed class VehicleEffects
         }
     }
 
-    internal static VehicleAxes Axes(MapCamera camera, RoutePoint point, double altitude, double bearing, int width, int height)
+    internal static VehicleAxes Axes(MapCamera camera, RoutePoint point, double altitude, double bearing, int width, int height,
+        TerrainOptions? terrain = null, bool followsSurface = false, TerrainSurface? terrainMesh = null)
     {
-        if (camera.Perspective)
+        if (camera.Perspective || terrain is not null)
         {
-            var origin = camera.ProjectAtAltitude(point.Latitude, point.Longitude, altitude, width, height);
+            double renderedAltitude = terrain?.RenderAltitude(camera, point.Latitude, point.Longitude, altitude, terrainMesh) ?? altitude;
+            var origin = camera.ProjectAtAltitude(point.Latitude, point.Longitude, renderedAltitude, width, height);
             var forward = point.Move(bearing, 1);
             var right = point.Move(bearing + 90, 1);
-            var f = camera.ProjectAtAltitude(forward.Latitude, forward.Longitude, altitude, width, height);
-            var r = camera.ProjectAtAltitude(right.Latitude, right.Longitude, altitude, width, height);
-            var u = camera.ProjectAtAltitude(point.Latitude, point.Longitude, altitude + 1, width, height);
+            double clearance = altitude - (terrain?.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude) ?? 0);
+            double At(RoutePoint p)
+            {
+                double absolute = followsSurface && terrain is not null
+                    ? terrain.Elevation.SampleSurfaceMeters(p.Latitude, p.Longitude) + clearance : altitude;
+                return terrain?.RenderAltitude(camera, p.Latitude, p.Longitude, absolute, terrainMesh) ?? absolute;
+            }
+            var f = camera.ProjectAtAltitude(forward.Latitude, forward.Longitude, At(forward), width, height);
+            var r = camera.ProjectAtAltitude(right.Latitude, right.Longitude, At(right), width, height);
+            var u = camera.ProjectAtAltitude(point.Latitude, point.Longitude, renderedAltitude + 1, width, height);
             double fx = f.X - origin.X, fy = f.Y - origin.Y, rx = r.X - origin.X, ry = r.Y - origin.Y;
             double scale = Math.Max(Math.Sqrt(fx * fx + fy * fy), Math.Sqrt(rx * rx + ry * ry));
             if (scale > 1e-9 && double.IsFinite(scale))
@@ -117,8 +129,20 @@ internal sealed class VehicleEffects
     }
 
     internal static bool Position(MapCamera camera,RoutePoint p,double altitude,int w,int h,int pixel,
-        out float x,out float groundY,out float lift)
+        out float x,out float groundY,out float lift, TerrainOptions? terrain = null, TerrainSurface? terrainMesh = null)
     {
+        if (terrain is not null)
+        {
+            double surface = terrain.Elevation.SampleSurfaceMeters(p.Latitude, p.Longitude);
+            double groundAltitude = terrain.RenderAltitude(camera, p.Latitude, p.Longitude, surface, terrainMesh);
+            var foot = camera.ProjectAtAltitude(p.Latitude, p.Longitude, groundAltitude, w, h);
+            double renderedAltitude = terrain.RenderAltitude(camera, p.Latitude, p.Longitude, altitude, terrainMesh);
+            bool visible = camera.TryProject(p.Latitude, p.Longitude, renderedAltitude, w, h, out var projected);
+            x = (float)(projected.X / pixel);
+            groundY = (float)(foot.Y / pixel);
+            lift = groundY - (float)(projected.Y / pixel);
+            return visible;
+        }
         var ground=camera.Project(p.Latitude,p.Longitude,w,h);
         groundY=(float)(ground.Y/pixel);
         if(camera.Perspective)

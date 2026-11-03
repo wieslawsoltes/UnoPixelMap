@@ -307,6 +307,10 @@ internal static class RenderingBenchmark
         foreach (var assembly in assemblies)
         foreach (var name in assembly.GetManifestResourceNames().Order(StringComparer.Ordinal))
         {
+            // This matrix uses the original world and Manhattan fixtures. Garda and DEM
+            // fixtures have their own checks and do not change these measured inputs.
+            if (assembly == typeof(VectorTileSource).Assembly &&
+                (name.StartsWith("PixelMap.Elevation.", StringComparison.Ordinal) || name.Contains(".12-", StringComparison.Ordinal))) continue;
             hash.AppendData(Encoding.UTF8.GetBytes(name));
             using var resource = assembly.GetManifestResourceStream(name)!;
             using var data = new MemoryStream();

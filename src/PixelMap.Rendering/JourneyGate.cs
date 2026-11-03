@@ -20,7 +20,16 @@ public sealed partial class PixelMapRenderer
             using var ink = new SKPaint { IsAntialias = false };
             void Flag(RoutePoint foot, int direction)
             {
-                if (!camera.TryProject(foot.Latitude, foot.Longitude, altitude, width, height, out var screen)) return;
+                var terrain = CurrentTerrain;
+                var mesh = lastView.Camera == camera && lastView.Width == (int)Math.Ceiling(width) &&
+                    lastView.Height == (int)Math.Ceiling(height) ? reliefSurface : null;
+                double absolute = terrain is not null && mode != TravelMode.Flight
+                    ? terrain.Elevation.SampleSurfaceMeters(foot.Latitude, foot.Longitude) : altitude;
+                double renderedAltitude = terrain?.RenderAltitude(camera, foot.Latitude, foot.Longitude, absolute, mesh) ?? absolute;
+                if (!camera.TryProject(foot.Latitude, foot.Longitude, renderedAltitude, width, height, out var screen)) return;
+                if (terrain is { Relief: true } && lastView.Camera == camera && lastView.Width == (int)Math.Ceiling(width) &&
+                    lastView.Height == (int)Math.Ceiling(height) && buildings.CoversAt((float)screen.X / Math.Max(1, lastView.PixelSize),
+                        (float)screen.Y / Math.Max(1, lastView.PixelSize), (float)(renderedAltitude - camera.GroundAltitudeMeters + 2))) return;
                 var (x, y) = screen;
                 if (!double.IsFinite(x) || !double.IsFinite(y) || x < -30 || x > width + 30 || y < -30 || y > height + 30) return;
                 float u = (float)Math.Round(x / 2) * 2, v = (float)Math.Round(y / 2) * 2;

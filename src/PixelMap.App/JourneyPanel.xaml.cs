@@ -596,7 +596,9 @@ public sealed partial class JourneyPanel : UserControl
         SetEnabled(PauseButton, j.State is JourneyState.Driving or JourneyState.Preview or JourneyState.Paused);
         PauseButton.Content = j.State == JourneyState.Paused ? "Resume" : "Pause";
         DriveButton.Content = route.Mode switch { TravelMode.Flight => "Pilot", TravelMode.Boat => "Helm", TravelMode.Train => "Operate", TravelMode.Walk => "Walk", TravelMode.Bike => "Ride", _ => "Drive" };
-        var altitude = route.Mode == TravelMode.Flight ? $" · {j.AltitudeMeters:0} m altitude" : "";
+        var altitude = route.Mode == TravelMode.Flight
+            ? $" · {j.AltitudeMeters:0} m elevation · {j.AltitudeAboveGroundMeters:0} m clearance"
+            : _map is { IsTerrainEnabled: true } ? $" · {j.GroundElevationMeters:0} m elevation" : "";
         var motion = !j.IsScoredRun && j.State is JourneyState.Preview or JourneyState.Paused ? "Tour" : $"{j.SpeedMetersPerSecond * 3.6:0} km/h";
         var telemetry = $"{motion} · {Distance(j.DistanceMeters)} / {Distance(route.DistanceMeters)}{altitude}";
         if (manual || j.State == JourneyState.Finished)

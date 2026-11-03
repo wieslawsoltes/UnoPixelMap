@@ -53,6 +53,8 @@ jobs:
           PIXELMAP_SHOTS="${{ runner.temp }}/screens" node tests/browser/journeys.cjs http://127.0.0.1:8100/UnoPixelMap/
           PIXELMAP_GPU=1 PIXELMAP_SHOTS="${{ runner.temp }}/screens/gpu" node tests/browser/smoke.cjs http://127.0.0.1:8100/UnoPixelMap/
           PIXELMAP_GPU=1 PIXELMAP_SHOTS="${{ runner.temp }}/screens/gpu" node tests/browser/journeys.cjs http://127.0.0.1:8100/UnoPixelMap/
+          PIXELMAP_SHOTS="${{ runner.temp }}/screens/terrain" node tests/browser/terrain.cjs http://127.0.0.1:8100/UnoPixelMap/
+          PIXELMAP_GPU=1 PIXELMAP_SHOTS="${{ runner.temp }}/screens/terrain-gpu" node tests/browser/terrain.cjs http://127.0.0.1:8100/UnoPixelMap/
       - uses: actions/upload-artifact@v4
         if: always()
         with:

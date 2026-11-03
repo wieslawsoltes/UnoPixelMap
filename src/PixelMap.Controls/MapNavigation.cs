@@ -35,8 +35,8 @@ public sealed partial class PixelMapControl
         _motion.Tick += (_, _) => Advance();
     }
 
-    public void PanBy(double dx, double dy) { StopTrackingForGesture(); StopMotion(); Camera = Camera.PanFromTo(ActualWidth * .5, ActualHeight * .5, ActualWidth * .5 + dx, ActualHeight * .5 + dy, ActualWidth, ActualHeight); }
-    public void ZoomBy(double delta) { if (!ZoomRide(delta)) FlyTo((_flight ? _to : Camera).ZoomAt(delta, ActualWidth / 2, ActualHeight / 2, ActualWidth, ActualHeight)); }
+    public void PanBy(double dx, double dy) { StopTrackingForGesture(); StopMotion(); Camera = PanCamera(Camera, ActualWidth * .5, ActualHeight * .5, ActualWidth * .5 + dx, ActualHeight * .5 + dy); }
+    public void ZoomBy(double delta) { if (!ZoomRide(delta)) FlyTo(TransformCamera(_flight ? _to : Camera, delta, 0, 0, ActualWidth / 2, ActualHeight / 2)); }
     public void RotateBy(double degrees)
     {
         var target = _flight ? _to : Camera;
@@ -51,7 +51,7 @@ public sealed partial class PixelMapControl
     {
         StopTrackingForGesture();
         StopMotion();
-        _to = Normalize(destination);
+        _to = Normalize(destination).OnTerrain(_terrain, ActualHeight);
         _from = Camera;
         if (!_active || _from == _to) { Camera = _to; return; }
         var mapPlane = _from with { Perspective = false, TargetAltitudeMeters = 0 };
@@ -97,8 +97,8 @@ public sealed partial class PixelMapControl
         double decay = Math.Exp(-dt / 160);
         var centerX = ActualWidth * .5;
         var centerY = ActualHeight * .5;
-        Camera = Camera.PanFromTo(centerX, centerY,
-            centerX + _vx * 160 * (1 - decay), centerY + _vy * 160 * (1 - decay), ActualWidth, ActualHeight);
+        Camera = PanCamera(Camera, centerX, centerY,
+            centerX + _vx * 160 * (1 - decay), centerY + _vy * 160 * (1 - decay));
         _vx *= decay; _vy *= decay;
         if (Math.Abs(_vx) + Math.Abs(_vy) < .018) StopMotion();
     }
@@ -153,8 +153,8 @@ public sealed partial class PixelMapControl
             if (!_dragged) { dx = next.X - _down.X; dy = next.Y - _down.Y; }
             _dragged = true;
             StopTrackingForGesture();
-            if (_rotating) Camera = Camera.OrbitAt(dx * .35, -dy * .22, _down.X, _down.Y, ActualWidth, ActualHeight);
-            else Camera = Camera.PanFromTo(next.X - dx, next.Y - dy, next.X, next.Y, ActualWidth, ActualHeight);
+            if (_rotating) Camera = TransformCamera(Camera, 0, dx * .35, -dy * .22, _down.X, _down.Y);
+            else Camera = PanCamera(Camera, next.X - dx, next.Y - dy, next.X, next.Y);
             var dt = Math.Clamp(Stopwatch.GetElapsedTime(_lastMove).TotalMilliseconds, 4, 100);
             _vx = Math.Clamp(.5 * _vx + .5 * dx / dt, -3, 3);
             _vy = Math.Clamp(.5 * _vy + .5 * dy / dt, -3, 3);
@@ -198,12 +198,11 @@ public sealed partial class PixelMapControl
         }
         if (_tilting)
         {
-            Camera = _gestureCamera.OrbitAt(0, -dy * .28, before.X, before.Y, ActualWidth, ActualHeight);
+            Camera = TransformCamera(_gestureCamera, 0, 0, -dy * .28, before.X, before.Y);
             return;
         }
-        var view = _gestureCamera.OrbitAt(-twist, 0, before.X, before.Y, ActualWidth, ActualHeight);
-        view = view.ZoomAt(Math.Log2(Math.Max(.02, scale)), before.X, before.Y, ActualWidth, ActualHeight);
-        Camera = view.PanFromTo(before.X, before.Y, after.X, after.Y, ActualWidth, ActualHeight);
+        var view = TransformCamera(_gestureCamera, Math.Log2(Math.Max(.02, scale)), -twist, 0, before.X, before.Y);
+        Camera = PanCamera(view, before.X, before.Y, after.X, after.Y);
     }
 
     private static double Distance(Point a, Point b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
@@ -218,7 +217,7 @@ public sealed partial class PixelMapControl
             if (!_dragged && !_rotating && IsMapPointSelectionEnabled)
             {
                 _lastTapTime = 0;
-                if (Camera.TryUnproject(pos.X, pos.Y, ActualWidth, ActualHeight, out var geo))
+                if (TryGetLocation(pos.X, pos.Y, out var geo))
                     MapPointTapped?.Invoke(this, new MapPointEventArgs(geo.Latitude, geo.Longitude));
             }
             else if (!_dragged && !_rotating)
@@ -226,7 +225,7 @@ public sealed partial class PixelMapControl
                 if (_lastTapTime != 0 && Stopwatch.GetElapsedTime(_lastTapTime).TotalMilliseconds < 360 && Distance(pos, _lastTap) < 18)
                 {
                     ClearMarker();
-                    FlyTo(Camera.ZoomAt(1, pos.X, pos.Y, ActualWidth, ActualHeight));
+                    FlyTo(TransformCamera(Camera, 1, 0, 0, pos.X, pos.Y));
                     _lastTapTime = 0;
                 }
                 else
@@ -249,12 +248,13 @@ public sealed partial class PixelMapControl
 
     private void Inspect(Point pos)
     {
-        if (!Camera.TryUnproject(pos.X, pos.Y, ActualWidth, ActualHeight, out var geo)) return;
+        if (!TryGetLocation(pos.X, pos.Y, out var geo)) return;
         var feature = _surface.Pick(pos, (int)Math.Ceiling(ActualWidth), (int)Math.Ceiling(ActualHeight));
         var label = feature is null ? FormattableString.Invariant($"{geo.Latitude:0.0000}°, {geo.Longitude:0.0000}°")
             : !string.IsNullOrWhiteSpace(feature.Name) ? feature.Name
             : !string.IsNullOrWhiteSpace(feature.Class) ? feature.Class.Replace('_', ' ') : feature.Layer;
-        if (feature?.Height is double height) label += $" · {height:0} m";
+        if (feature?.Height is double height) label += $" · {height:0} m building";
+        if (UsesElevation && HasElevation) label += $" · {geo.ElevationMeters:0} m elevation";
         SetMarker(geo.Latitude, geo.Longitude, label);
     }
 
@@ -270,11 +270,11 @@ public sealed partial class PixelMapControl
         StopTrackingForGesture();
         if ((e.KeyModifiers & VirtualKeyModifiers.Shift) != 0)
         {
-            FlyTo((_flight ? _to : Camera).OrbitAt(delta / 10d, 0, point.Position.X, point.Position.Y, ActualWidth, ActualHeight));
+            FlyTo(TransformCamera(_flight ? _to : Camera, 0, delta / 10d, 0, point.Position.X, point.Position.Y));
             e.Handled = true; return;
         }
         if (point.Properties.IsHorizontalMouseWheel) PanBy(-delta * .35, 0);
-        else FlyTo((_flight ? _to : Camera).ZoomAt(Math.Clamp(delta / 300d, -2, 2), point.Position.X, point.Position.Y, ActualWidth, ActualHeight));
+        else FlyTo(TransformCamera(_flight ? _to : Camera, Math.Clamp(delta / 300d, -2, 2), 0, 0, point.Position.X, point.Position.Y));
         e.Handled = true;
     }
 

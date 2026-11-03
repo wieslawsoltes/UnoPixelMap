@@ -11,14 +11,28 @@ public sealed class JourneySession
     private double _accumulator, _throttle, _steer, _brake, _lift, _yawRate, _contactCooldown, _rate = 1;
     private bool _follow = true, _muted = true;
     private RoutePoint _position;
+    private IJourneyWorld? _world;
     public RoutePlan? Route { get; private set; }
     public JourneyState State { get; private set; }
     public VehicleProfile Vehicle { get; private set; } = VehicleProfile.Car;
-    public IJourneyWorld? World { get; set; }
+    public IJourneyWorld? World
+    {
+        get => _world;
+        set
+        {
+            if (ReferenceEquals(_world, value)) return;
+            _world = value;
+            RefreshSurface();
+        }
+    }
     public double Latitude => _position.Latitude;
     public double Longitude => _position.Longitude;
     public double Bearing { get; private set; }
+    /// <summary>Vehicle altitude in metres above mean sea level.</summary>
     public double AltitudeMeters { get; private set; }
+    /// <summary>The supporting terrain or water surface in metres above mean sea level.</summary>
+    public double GroundElevationMeters { get; private set; }
+    public double AltitudeAboveGroundMeters => Math.Max(0, AltitudeMeters - GroundElevationMeters);
     public double SpeedMetersPerSecond { get; private set; }
     public double DistanceMeters { get; private set; }
     public double RunDistanceMeters { get; private set; }
@@ -69,7 +83,7 @@ public sealed class JourneySession
         Continuity++;
         State = JourneyState.Ready; _resumeState = JourneyState.Ready;
         DistanceMeters = RunDistanceMeters = ElapsedSeconds = AnimationSeconds = OffRouteMeters = 0;
-        _accumulator = _yawRate = _contactCooldown = SpeedMetersPerSecond = AltitudeMeters = 0;
+        _accumulator = _yawRate = _contactCooldown = SpeedMetersPerSecond = AltitudeMeters = GroundElevationMeters = 0;
         CheckpointsPassed = Score = 0;
         CheckpointsTotal = _track is { } t ? Math.Clamp((int)Math.Ceiling(t.Length / 350), 3, 24) : 0;
         NextCheckpoint = null;
@@ -90,7 +104,10 @@ public sealed class JourneySession
             // Starting a game begins a new scored run. A preview seek cannot earn checkpoints.
             Reset();
         }
-        if (mode == JourneyState.Preview) { PlaceOnTrack(); OffRouteMeters = 0; }
+        if (mode == JourneyState.Preview)
+        {
+            PlaceOnTrack(); AltitudeMeters = GroundElevationMeters + FlightEnvelope(); OffRouteMeters = 0;
+        }
         NextCheckpoint = mode == JourneyState.Driving ? _track.Sample(NextStation) : null;
         State = _resumeState = mode; _accumulator = 0; _follow = true; ClearInput();
         Cue?.Invoke(JourneyCue.Depart); Notify();
@@ -115,7 +132,7 @@ public sealed class JourneySession
         State = playing ? JourneyState.Preview : JourneyState.Paused; _resumeState = JourneyState.Preview;
         DistanceMeters = _track.Length * Math.Clamp(fraction, 0, 1); OffRouteMeters = 0;
         SpeedMetersPerSecond = _yawRate = _accumulator = 0; ClearInput(); PlaceOnTrack();
-        AltitudeMeters = FlightEnvelope(); AnimationSeconds = Progress * PreviewSeconds; Notify();
+        AltitudeMeters = GroundElevationMeters + FlightEnvelope(); AnimationSeconds = Progress * PreviewSeconds; Notify();
     }
 
     public void Respawn()
@@ -124,7 +141,25 @@ public sealed class JourneySession
         Continuity++; ClearInput();
         DistanceMeters = _track.Length * CheckpointsPassed / CheckpointsTotal;
         OffRouteMeters = SpeedMetersPerSecond = _yawRate = 0;
-        PlaceOnTrack(); AltitudeMeters = FlightEnvelope(); Score = Math.Max(0, Score - 25);
+        PlaceOnTrack(); AltitudeMeters = GroundElevationMeters + FlightEnvelope(); Score = Math.Max(0, Score - 25);
+        Notify();
+    }
+
+    /// <summary>Refresh a ready, paused or active pose after the world's terrain changes.
+    /// Airborne manual vehicles retain their absolute altitude when the surface falls away.</summary>
+    public void RefreshSurface()
+    {
+        if (_track is null) return;
+        double previousGround = GroundElevationMeters, previousAltitude = AltitudeMeters;
+        GroundElevationMeters = SurfaceElevationAt(_position);
+        if (Vehicle.Motion != MotionModel.Aircraft || State == JourneyState.Ready || previousAltitude <= previousGround + .000001)
+            AltitudeMeters = GroundElevationMeters;
+        else if (_resumeState == JourneyState.Preview)
+            AltitudeMeters = GroundElevationMeters + FlightEnvelope();
+        else
+            AltitudeMeters = Math.Max(AltitudeMeters, GroundElevationMeters);
+        if (previousAltitude == AltitudeMeters && previousGround == GroundElevationMeters) return;
+        Continuity++;
         Notify();
     }
 
@@ -155,7 +190,7 @@ public sealed class JourneySession
     {
         SpeedMetersPerSecond = _track!.Length / PreviewSeconds;
         DistanceMeters = Math.Min(_track.Length, DistanceMeters + SpeedMetersPerSecond * Step);
-        PlaceOnTrack(); AltitudeMeters = FlightEnvelope();
+        PlaceOnTrack(); AltitudeMeters = GroundElevationMeters + FlightEnvelope();
         if (DistanceMeters >= _track.Length) Finish(false);
     }
 
@@ -176,13 +211,11 @@ public sealed class JourneySession
         double brake = Cruise ? Math.Max(_brake, Math.Clamp((speed - targetSpeed) * .45, 0, 1)) : _brake;
         double loss = v.CoastDrag + (v.Acceleration - v.CoastDrag) * Math.Pow(speed / v.MaxSpeed, 2);
         SpeedMetersPerSecond = Math.Clamp(speed + (engine * v.Acceleration - loss - brake * v.Braking) * Step, 0, v.MaxSpeed);
-        double ds = (speed + SpeedMetersPerSecond) * .5 * Step;
         if (v.Motion == MotionModel.Aircraft)
         {
-            double climb = Cruise ? Math.Clamp((FlightEnvelope() - AltitudeMeters) * .18, -12, 18) : _lift * 20;
-            double airspeed = Math.Clamp((SpeedMetersPerSecond - 12) / 20, 0, 1);
-            AltitudeMeters = Math.Clamp(AltitudeMeters + (climb * airspeed - (1 - airspeed) * 2.5) * Step, 0, 4200);
+            MoveVertically();
         }
+        double ds = (speed + SpeedMetersPerSecond) * .5 * Step;
         if (Cruise || v.Motion == MotionModel.Rail)
         {
             if (Cruise && OffRouteMeters > 2)
@@ -192,7 +225,7 @@ public sealed class JourneySession
             }
             else
             {
-                DistanceMeters = Math.Min(track.Length, DistanceMeters + ds); PlaceOnTrack(); OffRouteMeters = 0; RunDistanceMeters += ds;
+                MoveOnTrack(ds);
             }
         }
         else
@@ -218,23 +251,85 @@ public sealed class JourneySession
         Bearing = bearing;
         if (ds <= 0) return;
         var next = _position.Move(bearing, ds);
-        if (World?.Blocks(Vehicle, _position, next, AltitudeMeters) == true)
+        double altitude = AltitudeAtMove(next, ds, out double surface);
+        if (World?.Blocks(Vehicle, _position, next, AltitudeMeters, altitude) == true)
         {
-            SpeedMetersPerSecond *= .2;
-            if (_contactCooldown <= 0) { Score = Math.Max(0, Score - 25); _contactCooldown = 1; Cue?.Invoke(JourneyCue.Contact); }
+            Contact();
             return;
         }
-        _position = next; RunDistanceMeters += ds;
+        _position = next; GroundElevationMeters = surface; AltitudeMeters = altitude; RunDistanceMeters += ds;
         var hit = _track!.Nearest(next, DistanceMeters, Math.Max(35, SpeedMetersPerSecond * 2));
         DistanceMeters = hit.Station; OffRouteMeters = hit.Error;
+    }
+
+    private void MoveOnTrack(double distance)
+    {
+        double station = Math.Min(_track!.Length, DistanceMeters + distance);
+        var sample = _track.Sample(station);
+        double altitude = AltitudeAtMove(sample.Point, _position.DistanceTo(sample.Point), out double surface);
+        if (Vehicle.Motion == MotionModel.Aircraft && World?.Blocks(Vehicle, _position, sample.Point, AltitudeMeters, altitude) == true)
+        {
+            Contact();
+            return;
+        }
+        DistanceMeters = station; _position = sample.Point; Bearing = sample.Bearing;
+        GroundElevationMeters = surface; AltitudeMeters = altitude;
+        OffRouteMeters = 0; RunDistanceMeters += distance;
+    }
+
+    private void MoveVertically()
+    {
+        double climb = Cruise ? Math.Clamp((GroundElevationMeters + FlightEnvelope() - AltitudeMeters) * .18, -12, 18) : _lift * 20;
+        double airspeed = Math.Clamp((SpeedMetersPerSecond - 12) / 20, 0, 1);
+        double proposed = AltitudeMeters + (climb * airspeed - (1 - airspeed) * 2.5) * Step;
+        double ceiling = Math.Max(4200, GroundElevationMeters + 4200);
+        // A valley opening beneath an airborne vehicle cannot lower its absolute pose.
+        double next = Math.Clamp(proposed, GroundElevationMeters, Math.Max(ceiling, AltitudeMeters));
+        if (World?.Blocks(Vehicle, _position, _position, AltitudeMeters, next) == true)
+        {
+            Contact();
+            return;
+        }
+        bool landed = AltitudeMeters > GroundElevationMeters + .000001 && proposed <= GroundElevationMeters;
+        AltitudeMeters = next;
+        if (landed) Contact();
+    }
+
+    private double AltitudeAtMove(RoutePoint next, double distance, out double surface)
+    {
+        surface = SurfaceElevationAt(next);
+        if (Vehicle.Motion != MotionModel.Aircraft) return surface;
+        // Grounded aircraft can taxi along a gentle surface. A drop leaves the aircraft airborne.
+        bool taxi = AltitudeMeters <= GroundElevationMeters + .000001 &&
+            Math.Abs(surface - GroundElevationMeters) <= distance * .35 + .02;
+        return taxi ? surface : AltitudeMeters;
+    }
+
+    private double SurfaceElevationAt(RoutePoint point)
+    {
+        double elevation = World?.SurfaceElevationMeters(Vehicle, point) ?? 0;
+        return double.IsFinite(elevation) ? elevation : 0;
+    }
+
+    private void Contact()
+    {
+        SpeedMetersPerSecond *= .2;
+        if (_contactCooldown > 0) return;
+        Score = Math.Max(0, Score - 25); _contactCooldown = 1; Cue?.Invoke(JourneyCue.Contact);
     }
 
     private double FlightEnvelope() => Vehicle.Motion == MotionModel.Aircraft && _track is { } track
         ? Math.Min(2500, Math.Min(track.Length * .12, Math.Min(DistanceMeters, track.Length - DistanceMeters) * .18)) : 0;
     private void PlaceOnTrack()
     {
-        if (_track is null) { _position = default; Bearing = 0; return; }
+        if (_track is null)
+        {
+            _position = default; Bearing = AltitudeMeters = GroundElevationMeters = 0;
+            return;
+        }
         var sample = _track.Sample(DistanceMeters); _position = sample.Point; Bearing = sample.Bearing;
+        GroundElevationMeters = SurfaceElevationAt(_position);
+        if (Vehicle.Motion != MotionModel.Aircraft || State == JourneyState.Ready) AltitudeMeters = GroundElevationMeters;
     }
     private void Finish(bool scored)
     {

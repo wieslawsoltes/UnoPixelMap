@@ -59,10 +59,19 @@ public sealed partial class PixelMapRenderer : IDisposable
     /// drawing commands. Skia generates their textures on the final playback context.</summary>
     public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
         PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery, bool useGpuRendering, bool allowDeferredGpuRendering)
+        => Draw(canvas, width, height, camera, tiles, style, pixelSize, imagery, useGpuRendering, allowDeferredGpuRendering, null);
+
+    /// <summary>Render immutable elevation data with independently selectable relief and
+    /// hypsometric tint. An absent or empty elevation field retains the flat pipeline.</summary>
+    public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
+        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery, bool useGpuRendering,
+        bool allowDeferredGpuRendering, TerrainOptions? terrainOptions)
     {
         lock (sync)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
+            CurrentTerrain = terrainOptions is { Elevation.Count: > 0 } && (terrainOptions.Relief || terrainOptions.Hypsometric)
+                ? terrainOptions : null;
             if (!useGpuRendering) gpuFrame?.Reset();
             DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery, useGpuRendering, allowDeferredGpuRendering);
             if (useGpuRendering && !IsGpuRenderingActive && gpuFrame?.FailureReason is { } failure && failure != reportedGpuFailure)
@@ -78,12 +87,18 @@ public sealed partial class PixelMapRenderer : IDisposable
     {
         ArgumentNullException.ThrowIfNull(canvas);
         if (width <= 0 || height <= 0) return;
+        if (CurrentTerrain is { } relief)
+        {
+            DrawTerrainFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery,
+                useGpuRendering, allowDeferredGpuRendering, relief);
+            return;
+        }
         pixelSize = Math.Clamp(pixelSize, 1, 8);
         int w = (width + pixelSize - 1) / pixelSize, h = (height + pixelSize - 1) / pixelSize;
         bool gpu = useGpuRendering && (gpuFrame ??= new()).TryPrepare(canvas, w, h, allowDeferredGpuRendering);
         IsGpuRenderingActive = gpu;
         var view = (width, height, camera, style, pixelSize, gpu ? gpuFrame!.Generation : 0);
-        if (view == lastView && lastPicture is not null && SameTiles(tiles, lastTiles) && SameTiles(imagery, lastImagery))
+        if (lastTerrain is null && view == lastView && lastPicture is not null && SameTiles(tiles, lastTiles) && SameTiles(imagery, lastImagery))
         {
             canvas.DrawPicture(lastPicture);
             return;
@@ -238,6 +253,7 @@ public sealed partial class PixelMapRenderer : IDisposable
         DrawLabels(layer, width, height, camera.Zoom, pixelSize, colors);
         lastPicture = recorder.EndRecording();
         lastView = view;
+        lastTerrain = null;
         lastTiles.Clear();
         foreach (var tile in tiles) lastTiles.Add(tile);
         lastImagery.Clear();
@@ -325,6 +341,11 @@ public sealed partial class PixelMapRenderer : IDisposable
             }
             prepared.LastFrame = frame;
             var copies = projection.Copies(tile.Id);
+            if (CurrentTerrain is not null && copies.Last < copies.First)
+            {
+                int copy = (int)Math.Round(camera.CenterX - (tile.Id.X + .5) / (1 << tile.Id.Z));
+                copies = (copy, copy);
+            }
             for (int copy = copies.First; copy <= copies.Last; copy++)
             {
                 var (transform, scale) = projection.Get(tile.Id, copy);
@@ -444,9 +465,23 @@ public sealed partial class PixelMapRenderer : IDisposable
         foreach (var label in tile.Labels)
         {
             if (label.Street && zoom < 15 || label.Priority > 9 && zoom < 9) continue;
-            if (transform.Weight(label.Point.X, label.Point.Y) < MapCamera.Near || transform.Weight(label.Point.X, label.Point.Y) > transform.Far) continue;
-            var screen = transform.At(label.Point.X, label.Point.Y);
-            if (label.Street && buildings.Covers(screen.X, screen.Y)) continue;
+            SKPoint screen;
+            if (CurrentTerrain is { } elevation)
+            {
+                float meters = (float)(terrainCamera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
+                    Math.Cos(Math.Clamp(terrainCamera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
+                float altitude = GroundAltitude(tile, label.Point, elevation, terrainCamera);
+                var point = transform.Vertex(label.Point.X, label.Point.Y, altitude * meters);
+                if (point.W < MapCamera.Near || point.W > transform.Far) continue;
+                screen = point.Point;
+                if (buildings.CoversAt(screen.X, screen.Y, altitude + Math.Max(4, .75f / meters))) continue;
+            }
+            else
+            {
+                if (transform.Weight(label.Point.X, label.Point.Y) < MapCamera.Near || transform.Weight(label.Point.X, label.Point.Y) > transform.Far) continue;
+                screen = transform.At(label.Point.X, label.Point.Y);
+                if (label.Street && buildings.Covers(screen.X, screen.Y)) continue;
+            }
             screen.X *= pixelSize; screen.Y *= pixelSize;
             if (screen.X < 0 || screen.X >= w || screen.Y < 0 || screen.Y >= h) continue;
             float dx = screen.X - w * .5f, dy = screen.Y - h * .5f;
@@ -513,6 +548,7 @@ public sealed partial class PixelMapRenderer : IDisposable
             geometry.Clear();
             routeOverlay?.Dispose();
             terrain.Clear();
+            reliefSurface?.Dispose();
             foreach (var dash in dashes.Values) dash.Dispose();
             dashes.Clear();
             lastPicture?.Dispose();

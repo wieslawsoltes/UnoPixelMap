@@ -9,16 +9,34 @@ public sealed class VectorCollisionWorld : IJourneyWorld
 {
     private const double EarthCircumference = 40075016.69;
     private readonly ConditionalWeakTable<MapTile, TileObstacles> _indices = new();
-    private IReadOnlyList<MapTile> _tiles = [];
+    private sealed record Scene(IReadOnlyList<MapTile> Tiles, ElevationSnapshot Elevation);
+    private volatile Scene _scene = new([], ElevationSnapshot.Empty);
 
-    public void Update(IReadOnlyList<MapTile> visible) => _tiles = visible;
+    public void Update(IReadOnlyList<MapTile> visible) => Update(visible, _scene.Elevation);
+
+    public void Update(IReadOnlyList<MapTile> visible, ElevationSnapshot elevation)
+    {
+        ArgumentNullException.ThrowIfNull(visible);
+        ArgumentNullException.ThrowIfNull(elevation);
+        _scene = new(visible, elevation);
+    }
+
+    public double SurfaceElevationMeters(VehicleProfile vehicle, RoutePoint point)
+        => _scene.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude);
 
     public bool Blocks(VehicleProfile vehicle, RoutePoint from, RoutePoint to, double altitudeMeters)
+        => Blocks(vehicle, from, to, altitudeMeters, altitudeMeters);
+
+    public bool Blocks(VehicleProfile vehicle, RoutePoint from, RoutePoint to, double fromAltitudeMeters, double toAltitudeMeters)
     {
         if (vehicle.Motion == MotionModel.Rail) return false;
-        var tiles = _tiles;
+        var scene = _scene;
+        var tiles = scene.Tiles;
+        var elevation = scene.Elevation;
+        if (vehicle.Motion == MotionModel.Aircraft && CrossesTerrain(elevation, from, to, fromAltitudeMeters, toAltitudeMeters))
+            return true;
 
-        bool Obstructed(RoutePoint point)
+        bool Obstructed(RoutePoint point, double altitude)
         {
             double x = (RoutePoint.Wrap(point.Longitude) + 180) / 360;
             double latitude = Math.Clamp(point.Latitude, -85.05112878, 85.05112878) * Math.PI / 180;
@@ -38,17 +56,18 @@ public sealed class VectorCollisionWorld : IJourneyWorld
             if (selected is null) return false;
             double tileMeters = EarthCircumference * Math.Cos(latitude) / Math.Pow(2, selected.Id.Z);
             return _indices.GetValue(selected, static tile => new(tile))
-                .Obstructs(vehicle, localX, localY, altitudeMeters, tileMeters);
+                .Obstructs(vehicle, localX, localY, altitude, tileMeters, elevation);
         }
 
         // A newly streamed tile may put the current vehicle inside a polygon. Allow escape.
-        if (Obstructed(from)) return false;
-        if (Obstructed(to)) return true;
+        if (Obstructed(from, fromAltitudeMeters)) return false;
+        if (Obstructed(to, toAltitudeMeters)) return true;
 
         var (startX, startY) = Project(from);
         var (endX, endY) = Project(to);
         endX = startX + RoutePoint.Wrap((endX - startX) * 360) / 360;
-        bool ObstructedBetween(double fraction) => Obstructed(from.InterpolateTo(to, fraction));
+        bool ObstructedBetween(double fraction) => Obstructed(from.InterpolateTo(to, fraction),
+            fromAltitudeMeters + (toAltitudeMeters - fromAltitudeMeters) * fraction);
         foreach (var tile in tiles)
         {
             if (tile.Id.Z < 12) continue;
@@ -58,7 +77,27 @@ public sealed class VectorCollisionWorld : IJourneyWorld
             double bx = endX * count - originX, by = endY * count - tile.Id.Y;
             if (Math.Max(ax, bx) < 0 || Math.Min(ax, bx) >= 1 || Math.Max(ay, by) < 0 || Math.Min(ay, by) >= 1) continue;
             if (_indices.GetValue(tile, static resident => new(resident))
-                .CrossesBuilding(ax, ay, bx, by, altitudeMeters, ObstructedBetween)) return true;
+                .CrossesBuilding(ax, ay, bx, by, fromAltitudeMeters, toAltitudeMeters, elevation, ObstructedBetween)) return true;
+        }
+        return false;
+    }
+
+    private static bool CrossesTerrain(ElevationSnapshot elevation, RoutePoint from, RoutePoint to,
+        double fromAltitude, double toAltitude)
+    {
+        if (elevation.Count == 0 || Math.Min(fromAltitude, toAltitude) >= Math.Max(0, elevation.MaximumMeters)) return false;
+        double startHeight = elevation.SampleSurfaceMeters(from.Latitude, from.Longitude);
+        // Preserve the escape path when newly streamed terrain surrounds an existing pose.
+        if (fromAltitude < startHeight - .02) return false;
+        double length = from.DistanceTo(to);
+        int samples = (int)Math.Clamp(Math.Ceiling(length * 2), 2, 256);
+        for (int i = 1; i <= samples; i++)
+        {
+            double fraction = (double)i / samples;
+            var point = from.InterpolateTo(to, fraction);
+            double height = elevation.SampleSurfaceMeters(point.Latitude, point.Longitude);
+            double altitude = fromAltitude + (toAltitude - fromAltitude) * fraction;
+            if (height > altitude + .02) return true;
         }
         return false;
     }
@@ -72,10 +111,15 @@ public sealed class VectorCollisionWorld : IJourneyWorld
     private sealed class TileObstacles
     {
         private const int Cells = 16;
-        private readonly List<MapFeature>?[] _buckets = new List<MapFeature>?[Cells * Cells];
+        private sealed record Obstacle(MapFeature Feature, double WorldX, double WorldY, int BuildingIndex);
+        private readonly List<Obstacle>?[] _buckets = new List<Obstacle>?[Cells * Cells];
+        private readonly List<Obstacle> _buildings = [];
+        private readonly ConditionalWeakTable<ElevationSnapshot, double[]> _foundations = new();
+        private readonly ConditionalWeakTable<ElevationSnapshot, double[]>.CreateValueCallback _sampleFoundations;
 
         public TileObstacles(MapTile tile)
         {
+            _sampleFoundations = SampleFoundations;
             double count = Math.Pow(2, tile.Id.Z);
             double north = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * tile.Id.Y / count)));
             double south = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * (tile.Id.Y + 1) / count)));
@@ -93,13 +137,26 @@ public sealed class VectorCollisionWorld : IJourneyWorld
                     maxY = Math.Max(maxY, point.Y);
                 }
                 if (minX > maxX) continue;
+                var obstacle = new Obstacle(feature,
+                    (tile.Id.X + ((double)minX + maxX) / (2d * feature.Extent)) / count,
+                    (tile.Id.Y + ((double)minY + maxY) / (2d * feature.Extent)) / count,
+                    feature.Layer == "building" ? _buildings.Count : -1);
+                if (obstacle.BuildingIndex >= 0) _buildings.Add(obstacle);
                 double margin = feature.Type == GeometryType.LineString
                     ? HalfWidthMeters(feature) * feature.Extent / minimumTileMeters : 0;
                 int Cell(double value) => Math.Clamp((int)Math.Floor(value * Cells / feature.Extent), 0, Cells - 1);
                 for (int cy = Cell(minY - margin); cy <= Cell(maxY + margin); cy++)
                 for (int cx = Cell(minX - margin); cx <= Cell(maxX + margin); cx++)
-                    (_buckets[cy * Cells + cx] ??= []).Add(feature);
+                    (_buckets[cy * Cells + cx] ??= []).Add(obstacle);
             }
+        }
+
+        private double[] SampleFoundations(ElevationSnapshot elevation)
+        {
+            var heights = new double[_buildings.Count];
+            foreach (var obstacle in _buildings)
+                heights[obstacle.BuildingIndex] = elevation.SampleSurfaceMercator(obstacle.WorldX, obstacle.WorldY);
+            return heights;
         }
 
         private static bool Relevant(MapFeature feature) => feature.Layer switch
@@ -112,18 +169,22 @@ public sealed class VectorCollisionWorld : IJourneyWorld
             _ => false
         };
 
-        public bool Obstructs(VehicleProfile vehicle, double tx, double ty, double altitude, double tileMeters)
+        public bool Obstructs(VehicleProfile vehicle, double tx, double ty, double altitude, double tileMeters,
+            ElevationSnapshot elevation)
         {
             var entries = _buckets[(int)(ty * Cells) * Cells + (int)(tx * Cells)];
+            var foundations = elevation.Count == 0 ? null : _foundations.GetValue(elevation, _sampleFoundations);
             bool ground = vehicle.Motion is MotionModel.Ground or MotionModel.Pedestrian;
             bool water = false, building = false, crossing = false, tunnel = false;
             if (entries is not null)
-            foreach (var feature in entries)
+            foreach (var obstacle in entries)
             {
+                var feature = obstacle.Feature;
                 double x = tx * feature.Extent, y = ty * feature.Extent;
                 if (feature.Layer == "building")
                 {
-                    building |= altitude >= (feature.MinHeight ?? 0) && altitude < (feature.Height ?? 8)
+                    double foundation = foundations is null ? 0 : foundations[obstacle.BuildingIndex];
+                    building |= altitude >= foundation + (feature.MinHeight ?? 0) && altitude < foundation + (feature.Height ?? 8)
                         && Contains(feature.Paths, x, y);
                 }
                 else if (feature.Layer is "water" or "waterway")
@@ -145,25 +206,41 @@ public sealed class VectorCollisionWorld : IJourneyWorld
             return ground && water && !crossing;
         }
 
-        public bool CrossesBuilding(double ax, double ay, double bx, double by, double altitude, Func<double, bool> obstructed)
+        public bool CrossesBuilding(double ax, double ay, double bx, double by, double fromAltitude, double toAltitude,
+            ElevationSnapshot elevation, Func<double, bool> obstructed)
         {
+            var foundations = elevation.Count == 0 ? null : _foundations.GetValue(elevation, _sampleFoundations);
             int Cell(double value) => Math.Clamp((int)Math.Floor(value * Cells), 0, Cells - 1);
             for (int cy = Cell(Math.Min(ay, by)); cy <= Cell(Math.Max(ay, by)); cy++)
             for (int cx = Cell(Math.Min(ax, bx)); cx <= Cell(Math.Max(ax, bx)); cx++)
             {
                 var entries = _buckets[cy * Cells + cx];
                 if (entries is null) continue;
-                foreach (var feature in entries)
+                foreach (var obstacle in entries)
                 {
-                    if (feature.Layer != "building" || altitude < (feature.MinHeight ?? 0) || altitude >= (feature.Height ?? 8)) continue;
+                    var feature = obstacle.Feature;
+                    if (feature.Layer != "building") continue;
+                    double foundation = foundations is null ? 0 : foundations[obstacle.BuildingIndex];
+                    double bottom = foundation + (feature.MinHeight ?? 0), top = foundation + (feature.Height ?? 8);
+                    if (Math.Max(fromAltitude, toAltitude) < bottom || Math.Min(fromAltitude, toAltitude) >= top) continue;
+                    double first = 0, last = 1;
+                    if (fromAltitude != toAltitude)
+                    {
+                        double enter = (bottom - fromAltitude) / (toAltitude - fromAltitude);
+                        double leave = (top - fromAltitude) / (toAltitude - fromAltitude);
+                        first = Math.Clamp(Math.Min(enter, leave), 0, 1);
+                        last = Math.Clamp(Math.Max(enter, leave), 0, 1);
+                        if (last <= first) continue;
+                    }
                     if (CrossesInterior(feature.Paths, ax * feature.Extent, ay * feature.Extent,
-                        bx * feature.Extent, by * feature.Extent, obstructed)) return true;
+                        bx * feature.Extent, by * feature.Extent, first, last, obstructed)) return true;
                 }
             }
             return false;
         }
 
-        private static bool CrossesInterior(TilePoint[][] rings, double ax, double ay, double bx, double by, Func<double, bool> obstructed)
+        private static bool CrossesInterior(TilePoint[][] rings, double ax, double ay, double bx, double by,
+            double first, double last, Func<double, bool> obstructed)
         {
             double dx = bx - ax, dy = by - ay;
             List<double>? crossings = null;
@@ -180,14 +257,18 @@ public sealed class VectorCollisionWorld : IJourneyWorld
                         double offsetX = a.X - ax, offsetY = a.Y - ay;
                         double along = (offsetX * edgeY - offsetY * edgeX) / determinant;
                         double edge = (offsetX * dy - offsetY * dx) / determinant;
-                        if (along is >= 0 and <= 1 && edge is >= 0 and <= 1) (crossings ??= []).Add(along);
+                        if (along >= first && along <= last && edge is >= 0 and <= 1) (crossings ??= []).Add(along);
                     }
                     a = b;
                 }
             }
-            if (crossings is null) return Contains(rings, ax + dx * .5, ay + dy * .5) && obstructed(.5);
-            crossings.Add(0);
-            crossings.Add(1);
+            if (crossings is null)
+            {
+                double middle = (first + last) * .5;
+                return Contains(rings, ax + dx * middle, ay + dy * middle) && obstructed(middle);
+            }
+            crossings.Add(first);
+            crossings.Add(last);
             crossings.Sort();
             for (int i = 1; i < crossings.Count; i++)
             {

@@ -3,7 +3,8 @@ using PixelMap.Data;
 namespace PixelMap.Controls;
 
 /// <summary>UI-thread viewport residency for one asynchronously supplied XYZ layer.</summary>
-internal sealed class TileViewport<T>(Func<TileId, CancellationToken, Task<T>> load, Action changed) where T : class
+internal sealed class TileViewport<T>(Func<TileId, CancellationToken, Task<T>> load, Action changed,
+    bool retainPreviousOnFailure = false) where T : class
 {
     private readonly Dictionary<TileId, T> _loaded = [];
     private readonly Dictionary<TileId, CancellationTokenSource> _requests = [];
@@ -18,7 +19,10 @@ internal sealed class TileViewport<T>(Func<TileId, CancellationToken, Task<T>> l
     public void Update(TileId[] wanted)
     {
         if (_wanted.SequenceEqual(wanted)) return;
-        if (wanted.Length > 0 && _wanted.Length > 0 && _wanted[0].Z != wanted[0].Z && Ready.Count > 0)
+        // Mixed-resolution layers can keep a world overview first in the request list.
+        int previousZoom = _wanted.Length == 0 ? -1 : _wanted.Max(id => id.Z);
+        if (wanted.Length > 0 && previousZoom != wanted.Max(id => id.Z) &&
+            _loaded.Keys.Any(id => id.Z == previousZoom))
             _previousLevel = Ready;
         _wanted = wanted;
         foreach (var id in _requests.Keys.Except(wanted).ToArray())
@@ -79,7 +83,7 @@ internal sealed class TileViewport<T>(Func<TileId, CancellationToken, Task<T>> l
     private void Rebuild()
     {
         Ready = _wanted.Where(_loaded.ContainsKey).Select(id => _loaded[id]).ToArray();
-        if (Ready.Count == _wanted.Length || HasFailures) _previousLevel = [];
+        if (Ready.Count == _wanted.Length || (HasFailures && !retainPreviousOnFailure)) _previousLevel = [];
         changed();
     }
 

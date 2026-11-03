@@ -36,4 +36,12 @@ public interface IJourneyWorld
 {
     /// <summary>Return true if the proposed move would enter a mapped obstruction.</summary>
     bool Blocks(VehicleProfile vehicle, RoutePoint from, RoutePoint to, double altitudeMeters);
+
+    /// <summary>Test a move whose endpoint altitudes are measured above mean sea level.
+    /// Worlds implementing the original contact API receive the destination altitude.</summary>
+    bool Blocks(VehicleProfile vehicle, RoutePoint from, RoutePoint to, double fromAltitudeMeters, double toAltitudeMeters)
+        => Blocks(vehicle, from, to, toAltitudeMeters);
+
+    /// <summary>The supporting terrain or water surface, in metres above mean sea level.</summary>
+    double SurfaceElevationMeters(VehicleProfile vehicle, RoutePoint point) => 0;
 }

@@ -6,7 +6,6 @@ internal static class TilePayload
 {
     public static Stream? OpenSeed(TileId id, string group, string extension)
     {
-        if (id.Z != 0 && id is not { Z: 14, X: >= 4822 and <= 4824, Y: >= 6159 and <= 6161 }) return null;
         var name = FormattableString.Invariant($"PixelMap.{group}.{id.Z}-{id.X}-{id.Y}.{extension}");
         return typeof(TilePayload).Assembly.GetManifestResourceStream(name);
     }

@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Elevation/*.png" LogicalName="PixelMap.Elevation.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Imagery/*.jpg" LogicalName="PixelMap.Imagery.%(Filename)%(Extension)" />
     <EmbeddedResource Include="Seed/*.pbf.gz" LogicalName="PixelMap.Seed.%(Filename)%(Extension)" />
   </ItemGroup>

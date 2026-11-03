@@ -174,13 +174,15 @@ async function checkShare(page) {
     await click(page, "Map appearance");
     await activate(page, "menuitem", "Share this view");
     await activate(page, "textbox", "Shareable map link");
-    await see(page, /textbox "Shareable map link": .*#v3\//);
+    await see(page, /textbox "Shareable map link": .*#v4\//);
     const shared = await page.getByRole("textbox", {name: "Shareable map link", exact: true}).inputValue();
     assert.ok(shared, "The share field contains a copyable URL");
     const address = new URL(shared);
     const fields = address.hash.split("/");
-    assert.equal(fields[0], "#v3");
-    assert.equal(fields.length, 10, "Version 3 keeps lens and target altitude");
+    assert.equal(fields[0], "#v4");
+    assert.equal(fields.length, 12, "Version 4 keeps lens, target altitude and terrain settings");
+    assert.equal(fields[10], "Flat", "Existing journey demos start with flat terrain");
+    assert.equal(fields[11], "1.00", "Default exaggeration is one-to-one");
     assert.match(fields[8], /^(Perspective|Orthographic)$/);
     assert.ok(Number.isFinite(Number(fields[9])) && Number(fields[9]) >= 0 && Number(fields[9]) <= 15000);
     assert.equal(address.pathname, base.pathname, "Shared views preserve the Pages base path");

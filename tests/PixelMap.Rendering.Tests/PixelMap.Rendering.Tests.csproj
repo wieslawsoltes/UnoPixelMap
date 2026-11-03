@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/PixelMap.App/MapViewLink.cs" Link="MapViewLink.cs" />
     <ProjectReference Include="../../src/PixelMap.Rendering/PixelMap.Rendering.csproj" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
   </ItemGroup>

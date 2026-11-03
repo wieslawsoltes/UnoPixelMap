@@ -86,14 +86,16 @@ public sealed partial class PixelMapControl
         var viewport = new SkiaSharp.SKRect((float)(safe.X - safe.Width * .5), (float)(safe.Y - safe.Height * .5),
             (float)(safe.X + safe.Width * .5), (float)(safe.Y + safe.Height * .5));
         var view = _flight ? _to : Camera;
-        FlyTo(view.FitRoute(route.Geometry, ActualWidth, ActualHeight, viewport,
-            Math.Min(64, Math.Min(safe.Width, safe.Height) * .12)));
+        double padding = Math.Min(64, Math.Min(safe.Width, safe.Height) * .12);
+        FlyTo(_terrain is { Relief: true } terrain
+            ? view.FitRoute(route.Geometry, ActualWidth, ActualHeight, viewport, padding, terrain)
+            : view.FitRoute(route.Geometry, ActualWidth, ActualHeight, viewport, padding));
     }
     public void OrbitBy(double bearingDelta, double pitchDelta)
     {
         Journey.Follow = false;
         var camera = _flight ? _to : Camera;
-        FlyTo(camera.OrbitAt(bearingDelta, pitchDelta, ActualWidth / 2, ActualHeight / 2, ActualWidth, ActualHeight));
+        FlyTo(TransformCamera(camera, 0, bearingDelta, pitchDelta, ActualWidth / 2, ActualHeight / 2));
     }
 
     private void HookJourney()
@@ -148,18 +150,26 @@ public sealed partial class PixelMapControl
             case JourneyCameraRig.Orbit: heading = Journey.Bearing + Journey.AnimationSeconds * 12; pitch = 54; lead = 0; break;
         }
         var center = new RoutePoint(Journey.Latitude, Journey.Longitude).Move(Journey.Bearing, lead);
+        var focus = center;
         // In an orthographic map a flying vehicle projects above its ground point.
         // Shift the ground target by that projected height so the sprite stays inside the viewport.
         bool perspective = _rig is JourneyCameraRig.Chase or JourneyCameraRig.Cockpit;
-        if (!perspective && Journey.AltitudeMeters > 0)
-            center = center.Move(heading, Journey.AltitudeMeters * Math.Tan(pitch * Math.PI / 180));
+        double clearance = Journey.AltitudeAboveGroundMeters;
+        if (!perspective && clearance > 0)
+            center = center.Move(heading, clearance * Math.Tan(pitch * Math.PI / 180));
         var target = new MapCamera(center.Latitude, center.Longitude, zoom + _rideZoom, heading, pitch, perspective,
-            perspective ? Journey.AltitudeMeters : 0);
+            perspective ? clearance : 0).OnTerrain(_terrain, ActualHeight);
         var safe = SafeViewport();
         // Shift at the focus plane. Ground-plane drag would over-offset an airborne target.
         var shifted = (target with { TargetAltitudeMeters = 0 }).PanFromTo(
             ActualWidth * .5, ActualHeight * .5, safe.X, safe.Y, ActualWidth, ActualHeight);
-        target = target with { Latitude = shifted.Latitude, Longitude = shifted.Longitude };
+        target = (target with { Latitude = shifted.Latitude, Longitude = shifted.Longitude }).OnTerrain(_terrain, ActualHeight);
+        if (_terrain is { Relief: true } terrain)
+        {
+            double focusAltitude = terrain.Elevation.SampleSurfaceMeters(focus.Latitude, focus.Longitude) + clearance;
+            target = target.AnchorAltitude(focus.Latitude, focus.Longitude, focusAltitude,
+                safe.X, safe.Y, ActualWidth, ActualHeight, terrain);
+        }
         long now = Stopwatch.GetTimestamp();
         if (_wasTracking)
         {

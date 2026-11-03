@@ -25,10 +25,14 @@ internal sealed partial class BuildingRasterizer
     private float[] ringMinimumY = [], ringMaximumY = [];
     private int width, height;
     private float vertical, pixelsPerMeter;
+    private bool terrainDepth;
+    private TerrainSurface? terrainSurface;
 
     public void Begin(int w, int h, float sinPitch, float scale, bool perspective = false)
     {
         width = w; height = h; vertical = sinPitch; pixelsPerMeter = scale;
+        terrainDepth = false;
+        terrainSurface = null;
         usingPerspective = perspective;
         if (perspective)
         {
@@ -42,31 +46,65 @@ internal sealed partial class BuildingRasterizer
 
     public bool Covers(float sx, float sy) => CoversAt(sx, sy, 4);
 
+    internal Span<float> Heights => depth.AsSpan(0, width * height);
+    internal Span<float> InverseDepth => usingPerspective ? inverseDepth.AsSpan(0, width * height) : [];
+
+    internal void BeginTerrain(TileTransform lens, TerrainSurface? surface = null)
+    {
+        terrainDepth = true;
+        terrainSurface = surface;
+        depthLens = lens;
+        Heights.Fill(float.NegativeInfinity);
+    }
+
+    internal void TerrainComplete()
+    {
+        if (usingPerspective) InvalidateDepth(new(0, 0, width, height));
+    }
+
+    internal void SeedTerrain(float altitude, float inverse)
+    {
+        depth[0] = altitude;
+        if (usingPerspective) inverseDepth[0] = inverse;
+    }
+
     public bool CoversAt(float sx, float sy, float altitudeMeters)
     {
         int x = (int)MathF.Floor(sx), y = (int)MathF.Floor(sy);
         if ((uint)x >= (uint)width || (uint)y >= (uint)height) return false;
         int offset = y*width+x;
-        if (!usingPerspective) return depth[offset] > pixelsPerMeter*altitudeMeters;
+        if (!usingPerspective)
+        {
+            float nearest = depth[offset];
+            if (terrainSurface?.TryDepthAt(x, y, sx, sy, nearest, nearest, out float continuous) == true) nearest = continuous;
+            return nearest > pixelsPerMeter*altitudeMeters;
+        }
         if (inverseDepth[offset] <= 0) return false;
         float plane = depthLens.CosPitch - (altitudeMeters*pixelsPerMeter-depthLens.TargetZ)*depthLens.InverseFocal;
         if (Math.Abs(plane) < 1e-7f) return false;
-        float inv = (depthLens.CosPitch + (sy-depthLens.CY)*depthLens.SinPitch*depthLens.InverseFocal)/plane;
-        return inverseDepth[offset] > inv+1e-5f;
+        float sampleY = terrainDepth ? y + .5f : sy;
+        float nearestInverse = inverseDepth[offset];
+        if (terrainSurface?.TryDepthAt(x, y, sx, sy, depth[offset], nearestInverse, out float continuousInverse) == true)
+        {
+            nearestInverse = continuousInverse;
+            sampleY = sy;
+        }
+        float inv = (depthLens.CosPitch + (sampleY-depthLens.CY)*depthLens.SinPitch*depthLens.InverseFocal)/plane;
+        return nearestInverse > inv+1e-5f;
     }
 
-    public void Draw(Span<uint> pixels, in Building building, in TileTransform transform, Material material)
+    public void Draw(Span<uint> pixels, in Building building, in TileTransform transform, Material material, float foundationMeters = 0)
     {
-        if (transform.Perspective) { DrawPerspective(pixels, building, transform, material); return; }
-        float top = building.Top * pixelsPerMeter;
-        float bottom = building.Bottom * pixelsPerMeter;
+        if (transform.Perspective) { DrawPerspective(pixels, building, transform, material, foundationMeters); return; }
+        float top = (building.Top + foundationMeters) * pixelsPerMeter;
+        float bottom = (building.Bottom + foundationMeters) * pixelsPerMeter;
         float rise = top * vertical, baseRise = bottom * vertical;
         var bounds = building.Bounds;
         var middle = transform.At(bounds.MidX, bounds.MidY);
         float rx = (Math.Abs(transform.XX) * bounds.Width + Math.Abs(transform.XY) * bounds.Height) * .5f;
         float ry = (Math.Abs(transform.YX) * bounds.Width + Math.Abs(transform.YY) * bounds.Height) * .5f;
         if (middle.X + rx < 0 || middle.X - rx >= width || middle.Y + ry - baseRise < 0 || middle.Y - ry - rise >= height) return;
-        if (rx < .28f && ry + rise < .5f) return;
+        if (rx < .28f && ry + (foundationMeters == 0 ? rise : rise - baseRise) < .5f) return;
         var rings = building.Feature.Paths;
         int count = 0;
         foreach (var ring in rings) count += ring.Length;
@@ -118,7 +156,7 @@ internal sealed partial class BuildingRasterizer
                 if (edge.TileCut) continue;
                 uint wall = PixelPalette.Mix(material.DarkWall, material.LightWall, edge.Light);
                 float along = edge.Length * tileWorldScale;
-                Wall(pixels, a, b, rise, baseRise, wall, material, along, building.Seed);
+                Wall(pixels, a, b, rise, baseRise, wall, material, along, building.Seed, foundationMeters * pixelsPerMeter * vertical);
             }
         }
 
@@ -187,15 +225,15 @@ internal sealed partial class BuildingRasterizer
         ax == bx && (ax <= 0 || ax >= extent) || ay == by && (ay <= 0 || ay >= extent);
 
     private void Wall(Span<uint> pixels, SKPoint a, SKPoint b, float rise, float baseRise,
-        uint color, Material material, float along, uint seed)
+        uint color, Material material, float along, uint seed, float foundationRise)
     {
         float span = a.X - b.X;
         float dy = (a.Y - b.Y) / span;
         float floor = Math.Max(.01f, pixelsPerMeter * vertical * (3.2f + (seed & 3) * .22f));
         float bay = pixelsPerMeter * (3.2f + ((seed >> 2) & 3) * .6f) * span / Math.Max(.01f, along);
         bool windows = floor >= 1.65f && bay >= 1.45f && rise - baseRise > floor * 1.6f;
-        bool ribbon = (seed & 8) != 0 && rise > 9 * floor;
-        bool pilasters = (seed & 32) != 0 && rise > 7 * floor;
+        bool ribbon = (seed & 8) != 0 && rise - foundationRise > 9 * floor;
+        bool pilasters = (seed & 32) != 0 && rise - foundationRise > 7 * floor;
         uint rib = PixelPalette.Mix(color, material.Rim, .32f);
         float invFloor = 1 / floor, invVertical = 1 / vertical;
         int first = FirstPixel(b.X, width), last = FirstPixel(a.X, width);
@@ -219,8 +257,9 @@ internal sealed partial class BuildingRasterizer
                 uint texel = pier;
                 if (glass)
                 {
-                    int story = (int)(h * invFloor);
-                    float within = h - story * floor;
+                    float relativeHeight = h - foundationRise;
+                    int story = (int)(relativeHeight * invFloor);
+                    float within = relativeHeight - story * floor;
                     if (within >= floor * .22f && within < floor * .75f)
                         texel = Rooms[(phase + story * 16) & 255] == 0 ? material.Lamp : material.Glass;
                 }

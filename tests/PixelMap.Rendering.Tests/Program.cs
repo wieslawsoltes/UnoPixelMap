@@ -82,6 +82,9 @@ Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, rais
 ImageryChecks.Run();
 NavigationChecks.Run();
 PerspectiveChecks.Run();
+TerrainCameraChecks.Run();
+TerrainRenderingChecks.Run();
+TerrainNavigationChecks.Run();
 RingFixtures.Run();
 
 if (args.Contains("--benchmark", StringComparer.Ordinal))

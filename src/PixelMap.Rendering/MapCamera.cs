@@ -5,8 +5,11 @@ using SkiaSharp;
 namespace PixelMap.Rendering;
 
 /// <summary>A map camera over wrapped Web Mercator, with clockwise compass bearing and pitch from nadir.</summary>
-public readonly record struct MapCamera(double Latitude, double Longitude, double Zoom, double Bearing = 0, double Pitch = 55, bool Perspective = false, double TargetAltitudeMeters = 0)
+public readonly partial record struct MapCamera(double Latitude, double Longitude, double Zoom, double Bearing = 0, double Pitch = 55, bool Perspective = false, double TargetAltitudeMeters = 0)
 {
+    /// <summary>Absolute surface elevation at the local reference plane, in metres above sea level.
+    /// TargetAltitudeMeters remains the focus height above this plane.</summary>
+    public double GroundAltitudeMeters { get; init; }
     public const double MaxLatitude = 85.0511287798066;
     public const double MinZoom = 0;
     public const double MaxZoom = 21;
@@ -50,7 +53,7 @@ public readonly record struct MapCamera(double Latitude, double Longitude, doubl
     }
 
     public (double X, double Y) Project(double latitude, double longitude, double width, double height) =>
-        ProjectAtAltitude(latitude, longitude, 0, width, height);
+        ProjectAtAltitude(latitude, longitude, GroundAltitudeMeters, width, height);
 
     /// <summary>Returns the bounded ground intersection. Use TryUnproject to distinguish sky.</summary>
     public (double Latitude, double Longitude) Unproject(double x, double y, double width, double height)
@@ -126,9 +129,10 @@ public readonly record struct MapCamera(double Latitude, double Longitude, doubl
         var center = Geographic(CenterX + WrapOffset(destination.CenterX - CenterX) * t,
             CenterY + (destination.CenterY - CenterY) * t);
         double bearing = Bearing + WrapOffset((destination.Bearing - Bearing) / 360) * 360 * t;
-        return new(center.Latitude, center.Longitude, Zoom + (destination.Zoom - Zoom) * t,
+        return new MapCamera(center.Latitude, center.Longitude, Zoom + (destination.Zoom - Zoom) * t,
             WrapOffset(bearing / 360) * 360, Pitch + (destination.Pitch - Pitch) * t, t < .5 ? Perspective : destination.Perspective,
-            TargetAltitudeMeters + (destination.TargetAltitudeMeters - TargetAltitudeMeters)*t);
+            TargetAltitudeMeters + (destination.TargetAltitudeMeters - TargetAltitudeMeters)*t)
+        { GroundAltitudeMeters = GroundAltitudeMeters + (destination.GroundAltitudeMeters - GroundAltitudeMeters) * t };
     }
 
     /// <summary>Fit the ordered route to the current bearing and pitch. Padding is in display
@@ -212,7 +216,7 @@ public readonly record struct MapCamera(double Latitude, double Longitude, doubl
         var (s, c) = Math.SinCos(Bearing * Math.PI / 180);
         var (sp, cp) = Math.SinCos(PitchRadians);
         double u = dx * c + dy * s, v = -dx * s + dy * c;
-        double z = altitudeMeters * WorldSize / (EarthCircumference * Math.Cos(Math.Clamp(Latitude, -MaxLatitude, MaxLatitude) * Math.PI / 180));
+        double z = (altitudeMeters - GroundAltitudeMeters) * WorldSize / (EarthCircumference * Math.Cos(Math.Clamp(Latitude, -MaxLatitude, MaxLatitude) * Math.PI / 180));
         z -= TargetPixels;
         double weight = Perspective ? 1 - (v * sp + z * cp) / Focal(height) : 1;
         double divisor = Math.Max(Near, weight);

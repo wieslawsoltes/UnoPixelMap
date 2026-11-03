@@ -7,5 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/PixelMap.Data/PixelMap.Data.csproj" />
+    <Compile Include="../../src/PixelMap.Controls/TileViewport.cs" Link="TileViewport.cs" />
   </ItemGroup>
 </Project>

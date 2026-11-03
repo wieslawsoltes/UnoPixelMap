@@ -79,6 +79,9 @@ handler.ErrorTile = false;
 Require((await images.GetTileAsync(new(12, 1205, 1540))).Encoded.Length > 4000,
     "A bad satellite tile can be retried.");
 
+await ElevationChecks.Run();
+TileViewportChecks.Run();
+
 Console.WriteLine($"Tile geometry and request lifetime checks passed ({buildings.Length} anchor-tile building features).");
 
 static void Require(bool condition, string message)
