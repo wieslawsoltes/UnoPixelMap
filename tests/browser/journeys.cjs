@@ -67,6 +67,10 @@ async function openDemo(browser, mode, phone = false) {
         const canvas = document.getElementById("uno-canvas");
         return canvas?.width > 0 && document.elementFromPoint(innerWidth / 2, innerHeight / 2) === canvas;
     }, undefined, { timeout: 100000 });
+    // Uno loads font metrics and the bundled map after mounting the canvas. Enable
+    // accessibility only once that first layout has settled, as a user would after loading.
+    await page.waitForLoadState("networkidle", {timeout: 45000});
+    await page.screenshot();
     await page.getByRole("button", { name: "Enable accessibility" }).evaluate(el => el.click());
     await page.getByRole("button", { name: "Preview route", exact: true }).waitFor({ state: "attached" });
     return { context, page };
@@ -74,10 +78,14 @@ async function openDemo(browser, mode, phone = false) {
 
 async function activate(page, role, name, touch = false) {
     const locator = page.getByRole(role, { name, exact: true });
-    await locator.waitFor({state: "attached"});
+    await locator.waitFor({state: "visible"});
     const b = await locator.boundingBox();
     assert.ok(b && b.width > 0 && b.height > 0, "Visible " + name);
-    const x = b.x + b.width / 2, y = b.y + b.height / 2;
+    const viewport = page.viewportSize();
+    const left = Math.max(0, b.x), right = Math.min(viewport.width, b.x + b.width);
+    const top = Math.max(0, b.y), bottom = Math.min(viewport.height, b.y + b.height);
+    assert.ok(right > left && bottom > top, "Onscreen " + name);
+    const x = (left + right) / 2, y = (top + bottom) / 2;
     if (touch) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
 }
 
@@ -90,6 +98,7 @@ async function see(page, pattern, timeout = 15000) {
         if (pattern.test(snapshot)) return snapshot;
         await page.waitForTimeout(180);
     } while (Date.now() < end);
+    if (shots) await page.screenshot({path: path.join(shots, "journey-state-failure.png"), timeout: 10000}).catch(() => {});
     throw new Error("Missing " + pattern + " on\n" + await page.locator("body").ariaSnapshot());
 }
 
@@ -144,9 +153,9 @@ async function checkLens(page) {
     const item = page.getByRole("menuitemcheckbox", {name: "Perspective lens", exact: true})
         .or(page.getByRole("menuitem", {name: "Perspective lens", exact: true}))
         .or(page.getByRole("checkbox", {name: "Perspective lens", exact: true}));
-    const rect = await item.boundingBox();
-    assert.ok(rect, "Perspective menu item");
-    await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    await item.waitFor({state: "visible"});
+    await activate(page, await item.getAttribute("role"), "Perspective lens");
+    await item.waitFor({state: "hidden"});
     const deadline = Date.now() + 9000;
     do {
         await page.waitForTimeout(250);
@@ -163,7 +172,8 @@ async function checkShare(page) {
     await click(page, "Map appearance");
     await activate(page, "menuitem", "Share this view");
     await activate(page, "textbox", "Shareable map link");
-    const shared = await page.evaluate(() => document.activeElement?.value);
+    await see(page, /textbox "Shareable map link": .*#v3\//);
+    const shared = await page.getByRole("textbox", {name: "Shareable map link", exact: true}).inputValue();
     assert.ok(shared, "The share field contains a copyable URL");
     const address = new URL(shared);
     const fields = address.hash.split("/");
@@ -188,13 +198,16 @@ async function choices(page) {
     await click(page, "Edit route stops");
     await click(page, "Calculate route");
     const selector = page.getByRole("combobox", {name: "Alternative routes", exact: true});
-    await selector.waitFor({state: "attached"});
-    const b = await selector.boundingBox();
-    assert.ok(requested && b, "provider returned alternative paths");
-    await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    await activate(page, "combobox", "Alternative routes");
+    assert.ok(requested, "provider returned alternative paths");
+    await page.waitForTimeout(200);
+    if (await selector.getAttribute("aria-expanded") !== "true") await page.keyboard.press("Alt+ArrowDown");
+    await page.waitForFunction(() => document.querySelector('[aria-label="Alternative routes"]')?.getAttribute("aria-expanded") === "true");
     await page.keyboard.press("End");
     await page.keyboard.press("Enter");
+    await page.waitForFunction(() => document.querySelector('[aria-label="Alternative routes"]')?.getAttribute("aria-expanded") === "false");
     await see(page, new RegExp(Math.round(bicycle.routes[0].distance) + " m"));
+    await page.getByRole("listbox").waitFor({state: "hidden"});
 }
 
 async function sound(page) {
@@ -265,9 +278,8 @@ async function groundModes(browser) {
             await click(page, "Take manual control");
             if (mode === "train") assert.ok(await page.getByRole("button", {name: "Steer left", exact: true}).isDisabled(), "Train stays on its track");
             await page.keyboard.down("w");
-            await page.waitForTimeout(1250);
-            await page.keyboard.up("w");
-            await see(page, /[1-9]\d* km\/h/);
+            try { await see(page, /[1-9]\d* km\/h/); }
+            finally { await page.keyboard.up("w"); }
             await see(page, /\d+\/\d+ gates/);
             await click(page, "Reset journey");
             await click(page, "Show or hide directions");

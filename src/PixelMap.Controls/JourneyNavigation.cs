@@ -85,7 +85,8 @@ public sealed partial class PixelMapControl
         var safe = SafeViewport();
         var viewport = new SkiaSharp.SKRect((float)(safe.X - safe.Width * .5), (float)(safe.Y - safe.Height * .5),
             (float)(safe.X + safe.Width * .5), (float)(safe.Y + safe.Height * .5));
-        FlyTo(Camera.FitRoute(route.Geometry, ActualWidth, ActualHeight, viewport,
+        var view = _flight ? _to : Camera;
+        FlyTo(view.FitRoute(route.Geometry, ActualWidth, ActualHeight, viewport,
             Math.Min(64, Math.Min(safe.Width, safe.Height) * .12)));
     }
     public void OrbitBy(double bearingDelta, double pitchDelta)

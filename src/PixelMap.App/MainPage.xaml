@@ -49,7 +49,7 @@
                         AutomationProperties.Name="Browse city guide" Click="OnGuide" />
                 <Button x:Name="ViewButton" Style="{StaticResource HeaderAction}" AutomationProperties.Name="Map appearance">
                     <Button.Flyout>
-                        <MenuFlyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
                             <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
                             <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />

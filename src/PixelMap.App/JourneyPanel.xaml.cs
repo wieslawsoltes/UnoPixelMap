@@ -29,6 +29,9 @@ public sealed partial class JourneyPanel : UserControl
     private readonly SolidColorBrush _selected = new(ColorHelper.FromArgb(255, 215, 235, 215));
     private readonly SolidColorBrush _neutral = new(ColorHelper.FromArgb(255, 241, 242, 229));
     private readonly Dictionary<uint, PadAction> _pressed = [];
+    // Uno's generated named-element references are weak. Retain the inactive pane.
+    private readonly StackPanel _planningPane;
+    private readonly StackPanel _playbackPane;
     private PixelMapControl _map = null!;
     private PhotonGeocoder _geocoder = null!;
     private RoutePlanner _planner = null!;
@@ -50,6 +53,9 @@ public sealed partial class JourneyPanel : UserControl
     public JourneyPanel()
     {
         InitializeComponent();
+        _planningPane = PlanPane;
+        _playbackPane = TripPane;
+        JourneyBody.Children.Remove(_playbackPane);
         ModeBox.SelectedIndex = 0;
         Rate.SelectedIndex = 0;
         BindPad(SteerLeft, PadAction.Left);
@@ -365,6 +371,8 @@ public sealed partial class JourneyPanel : UserControl
     {
         if (plans.Count == 0) { SetText(Note, "No route was found between these stops."); return; }
         _choices = plans;
+        SetText(SingleChoiceText, $"{Duration(plans[0].Duration)} · {Distance(plans[0].DistanceMeters)}");
+        SingleChoice.Visibility = plans.Count > 1 ? Visibility.Collapsed : Visibility.Visible;
         _writingChoices = true;
         try
         {
@@ -387,8 +395,16 @@ public sealed partial class JourneyPanel : UserControl
 
     private void OnChoice(object sender, SelectionChangedEventArgs e)
     {
+        if (!Alternatives.IsDropDownOpen) ApplyChoice();
+    }
+
+    private void OnChoicesClosed(object sender, object e) => ApplyChoice();
+
+    private void ApplyChoice()
+    {
         int index = Alternatives.SelectedIndex;
-        if (!_writingChoices && (uint)index < _choices.Count) ShowPlan(_choices[index]);
+        if (!_writingChoices && (uint)index < _choices.Count && !ReferenceEquals(_choices[index], _map.Journey.Route))
+            ShowPlan(_choices[index]);
     }
 
     private void ShowPlan(RoutePlan route)
@@ -421,7 +437,7 @@ public sealed partial class JourneyPanel : UserControl
             TravelMode.Flight => "Great-circle sightseeing estimate between stops.",
             _ => ""
         });
-        TripCaveat.Visibility = TripCaveat.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+        TripCaveatGroup.Visibility = TripCaveat.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
         SetText(Note, $"{Distance(route.DistanceMeters)} · {Duration(route.Duration)} · {route.Legs.Count} leg{(route.Legs.Count == 1 ? "" : "s")}");
         _map.ShowRoute(route);
         ShowTrip(true);
@@ -456,8 +472,12 @@ public sealed partial class JourneyPanel : UserControl
     private void ShowTrip(bool show)
     {
         _trip = show;
-        PlanPane.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
-        TripPane.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        var pane = show ? _playbackPane : _planningPane;
+        if (!ReferenceEquals(JourneyBody.Children.FirstOrDefault(), pane))
+        {
+            JourneyBody.Children.Clear();
+            JourneyBody.Children.Add(pane);
+        }
         if (!show) ManualPad.Visibility = Visibility.Collapsed;
         SetText(PanelTitle, show ? "Travel controls" : "Route planner");
         ScrollBody.ChangeView(null, 0, null, true);
@@ -577,7 +597,8 @@ public sealed partial class JourneyPanel : UserControl
         PauseButton.Content = j.State == JourneyState.Paused ? "Resume" : "Pause";
         DriveButton.Content = route.Mode switch { TravelMode.Flight => "Pilot", TravelMode.Boat => "Helm", TravelMode.Train => "Operate", TravelMode.Walk => "Walk", TravelMode.Bike => "Ride", _ => "Drive" };
         var altitude = route.Mode == TravelMode.Flight ? $" · {j.AltitudeMeters:0} m altitude" : "";
-        var telemetry = $"{j.SpeedMetersPerSecond * 3.6:0} km/h · {Distance(j.DistanceMeters)} / {Distance(route.DistanceMeters)}{altitude}";
+        var motion = !j.IsScoredRun && j.State is JourneyState.Preview or JourneyState.Paused ? "Tour" : $"{j.SpeedMetersPerSecond * 3.6:0} km/h";
+        var telemetry = $"{motion} · {Distance(j.DistanceMeters)} / {Distance(route.DistanceMeters)}{altitude}";
         if (manual || j.State == JourneyState.Finished)
             telemetry += $" · {j.CheckpointsPassed}/{j.CheckpointsTotal} gates · {j.Score:0} pts · {(int)(j.ElapsedSeconds / 60)}:{(int)(j.ElapsedSeconds % 60):00}";
         if (manual) telemetry += $" · next gate {Distance(j.NextCheckpointMeters)}";
@@ -640,6 +661,11 @@ public sealed partial class JourneyPanel : UserControl
     {
         if (element.Text == text) return;
         element.Text = text;
+        if (element.Parent is Border readout && AutomationProperties.GetAccessibilityView(element) == AccessibilityView.Raw)
+        {
+            AutomationProperties.SetName(readout, text);
+            return;
+        }
         FrameworkElementAutomationPeer.FromElement(element)?.InvalidatePeer();
     }
 

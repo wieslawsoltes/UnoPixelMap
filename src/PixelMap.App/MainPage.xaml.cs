@@ -136,7 +136,7 @@ public sealed partial class MainPage : Page
     private void OnRotateRight(object sender, RoutedEventArgs e) => Map.RotateBy(45);
     private void OnProjection(object sender, RoutedEventArgs e) => Map.ToggleProjection();
 
-    private void OnPerspective(object sender, RoutedEventArgs e) => ChooseCamera(Map.Camera with { Perspective = PerspectiveItem.IsChecked });
+    private void OnPerspective(object sender, RoutedEventArgs e) => ChooseCamera(Map.Camera with { Perspective = !Map.Camera.Perspective });
 
     private void ChooseCamera(MapCamera camera)
     {

@@ -24,7 +24,9 @@
                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="5">
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="JOURNEYS" Foreground="#9DD4B8" FontWeight="SemiBold" FontSize="9" CharacterSpacing="140" />
-                        <TextBlock x:Name="PanelTitle" Text="Route planner" Foreground="#FFFBEE" FontWeight="SemiBold" FontSize="17" />
+                        <Border AutomationProperties.Name="Route planner">
+                            <TextBlock x:Name="PanelTitle" Text="Route planner" Foreground="#FFFBEE" FontWeight="SemiBold" FontSize="17" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
                     </StackPanel>
                     <Button Grid.Column="1" Content="Demo" Style="{StaticResource SmallAction}" Click="OnDemo" AutomationProperties.Name="Load journey demo" />
                     <Button Grid.Column="2" Content="×" Style="{StaticResource SmallAction}" Click="OnClose" AutomationProperties.Name="Close journeys" />
@@ -32,7 +34,7 @@
             </Border>
             <ScrollViewer x:Name="ScrollBody" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                           AutomationProperties.Name="Journey details">
-                <StackPanel Padding="12,9" Spacing="8">
+                <StackPanel x:Name="JourneyBody" Padding="12,9" Spacing="8">
                     <StackPanel x:Name="PlanPane" Spacing="8" AutomationProperties.Name="Route planning">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5" AutomationProperties.Name="Travel mode and stop order">
                             <ComboBox x:Name="ModeBox" HorizontalAlignment="Stretch" MinHeight="36" SelectionChanged="OnMode"
@@ -43,14 +45,18 @@
                             </ComboBox>
                             <Button Grid.Column="1" Content="Reverse" Style="{StaticResource SmallAction}" Click="OnReverse" AutomationProperties.Name="Reverse stops" />
                         </Grid>
-                        <TextBlock x:Name="ModeNote" TextWrapping="Wrap" Foreground="#52675E" FontSize="11" />
+                        <Border AutomationProperties.Name="Travel mode information">
+                            <TextBlock x:Name="ModeNote" TextWrapping="Wrap" Foreground="#52675E" FontSize="11" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
                         <StackPanel x:Name="StopRows" Spacing="3" AutomationProperties.Name="Route stops" />
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4" AutomationProperties.Name="Intermediate stops">
                             <Button Content="+ Via" Style="{StaticResource SmallAction}" Click="OnAddStop" AutomationProperties.Name="Add intermediate stop" />
                             <Button x:Name="RemoveStop" Grid.Column="1" Content="Remove via" Style="{StaticResource SmallAction}" Click="OnRemoveStop"
                                     Visibility="Collapsed" AutomationProperties.Name="Remove selected intermediate stop" />
                         </Grid>
-                        <TextBlock x:Name="StopTitle" Text="SET DESTINATION" Style="{StaticResource SmallTitle}" />
+                        <Border AutomationProperties.Name="Set destination">
+                            <TextBlock x:Name="StopTitle" Text="SET DESTINATION" Style="{StaticResource SmallTitle}" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4" AutomationProperties.Name="Route-stop search">
                             <TextBox x:Name="Query" MaxLength="200" PlaceholderText="Place or latitude, longitude" MinHeight="36"
                                      AutomationProperties.Name="Find a route stop" KeyDown="OnSearchKey" TextChanged="OnSearchEdited" />
@@ -68,24 +74,41 @@
                         <Button x:Name="PlanAction" Content="Find route" Style="{StaticResource PrimaryAction}" Click="OnPlan" AutomationProperties.Name="Calculate route" />
                     </StackPanel>
 
-                    <StackPanel x:Name="TripPane" Spacing="7" Visibility="Collapsed" AutomationProperties.Name="Route playback">
-                        <TextBlock x:Name="ModeBadge" Style="{StaticResource SmallTitle}" />
-                        <TextBlock x:Name="RouteSummary" FontSize="16" FontWeight="SemiBold" Foreground="#193C3C" TextWrapping="Wrap" />
-                        <TextBlock x:Name="TripCaveat" TextWrapping="Wrap" Foreground="#52675E" FontSize="11" Visibility="Collapsed" />
-                        <ComboBox x:Name="Alternatives" HorizontalAlignment="Stretch" Visibility="Collapsed" SelectionChanged="OnChoice"
-                                  AutomationProperties.Name="Alternative routes" />
+                    <StackPanel x:Name="TripPane" Spacing="7" AutomationProperties.Name="Route playback">
+                        <Border AutomationProperties.Name="Travel mode">
+                            <TextBlock x:Name="ModeBadge" Style="{StaticResource SmallTitle}" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
+                        <Border AutomationProperties.Name="Journey route">
+                            <TextBlock x:Name="RouteSummary" FontSize="16" FontWeight="SemiBold" Foreground="#193C3C" TextWrapping="Wrap" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
+                        <Border AutomationProperties.Name="Service information" x:Name="TripCaveatGroup" Visibility="Collapsed">
+                            <TextBlock x:Name="TripCaveat" TextWrapping="Wrap" Foreground="#52675E" FontSize="11" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
+                        <Grid Height="36" AutomationProperties.Name="Available routes">
+                            <Border x:Name="SingleChoice" AutomationProperties.Name="Selected route summary" VerticalAlignment="Center">
+                                <TextBlock x:Name="SingleChoiceText" Foreground="#35574D" FontSize="12" AutomationProperties.AccessibilityView="Raw" />
+                            </Border>
+                            <ComboBox x:Name="Alternatives" HorizontalAlignment="Stretch" Visibility="Collapsed" SelectionChanged="OnChoice" DropDownClosed="OnChoicesClosed"
+                                      AutomationProperties.Name="Alternative routes" />
+                        </Grid>
                         <StackPanel x:Name="PlayActions" Orientation="Horizontal" Spacing="4" AutomationProperties.Name="Journey playback actions">
                             <Button x:Name="WatchButton" Content="Preview" Style="{StaticResource SmallAction}" Click="OnPreview" AutomationProperties.Name="Preview route" />
                             <Button x:Name="DriveButton" Content="Drive" Style="{StaticResource SmallAction}" Click="OnDrive" AutomationProperties.Name="Take manual control" />
                             <Button x:Name="PauseButton" Content="Pause" Style="{StaticResource SmallAction}" Click="OnPause" AutomationProperties.Name="Pause or resume journey" />
                             <Button Content="Reset" Style="{StaticResource SmallAction}" Click="OnReset" AutomationProperties.Name="Reset journey" />
                         </StackPanel>
-                        <TextBlock x:Name="Telemetry" Foreground="#23574F" FontSize="12" TextWrapping="Wrap" />
-                        <TextBlock x:Name="TripInstruction" Foreground="#35574D" FontSize="13" TextWrapping="Wrap" />
+                        <Border AutomationProperties.Name="Journey status" Height="56">
+                            <TextBlock x:Name="Telemetry" Foreground="#23574F" FontSize="12" TextWrapping="Wrap" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
+                        <Border AutomationProperties.Name="Current directions" Height="56">
+                            <TextBlock x:Name="TripInstruction" Foreground="#35574D" FontSize="13" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5" AutomationProperties.Name="Route position">
                             <Slider x:Name="ProgressSlider" Minimum="0" Maximum="1000" StepFrequency="1"
                                     ValueChanged="OnSeek" AutomationProperties.Name="Journey progress" />
-                            <TextBlock x:Name="PositionText" Grid.Column="1" VerticalAlignment="Center" FontSize="12" Foreground="#35574D" />
+                            <Border Grid.Column="1" VerticalAlignment="Center" AutomationProperties.Name="Journey progress percentage">
+                                <TextBlock x:Name="PositionText" FontSize="12" Foreground="#35574D" AutomationProperties.AccessibilityView="Raw" />
+                            </Border>
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" AutomationProperties.Name="Playback options">
                             <ComboBox x:Name="Rate" HorizontalAlignment="Stretch" AutomationProperties.Name="Playback speed" SelectionChanged="OnRate">
@@ -100,7 +123,7 @@
                             <Button Content="Fit" Style="{StaticResource SmallAction}" Click="OnFit" AutomationProperties.Name="Fit route" />
                             <Button x:Name="CameraButton" Content="Camera" Style="{StaticResource SmallAction}" AutomationProperties.Name="Vehicle camera rig">
                                 <Button.Flyout>
-                                    <MenuFlyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedLeft">
                                         <MenuFlyoutItem Text="Chase" Tag="Chase" Click="OnRig" />
                                         <MenuFlyoutItem Text="North up" Tag="NorthUp" Click="OnRig" />
                                         <MenuFlyoutItem Text="Cockpit" Tag="Cockpit" Click="OnRig" />
@@ -112,7 +135,9 @@
                         </StackPanel>
                         <Button x:Name="StepButton" Content="Directions" Style="{StaticResource SmallAction}" Click="OnSteps" AutomationProperties.Name="Show or hide directions" />
                         <StackPanel x:Name="StepRows" Visibility="Collapsed" Spacing="3" AutomationProperties.Name="Turn-by-turn directions" />
-                        <TextBlock x:Name="RouteSource" TextWrapping="Wrap" Foreground="#52675E" FontSize="11" />
+                        <Border AutomationProperties.Name="Routing attribution">
+                            <TextBlock x:Name="RouteSource" TextWrapping="Wrap" Foreground="#52675E" FontSize="11" AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
                         <HyperlinkButton x:Name="FixMap" Content="Improve routing data" NavigateUri="https://www.openstreetmap.org/fixthemap"
                                          Padding="0" MinHeight="18" FontSize="11" HorizontalAlignment="Left"
                                          AutomationProperties.Name="Improve OpenStreetMap routing data" />
@@ -120,7 +145,9 @@
                 </StackPanel>
             </ScrollViewer>
             <StackPanel x:Name="ManualPad" Grid.Row="2" Margin="12,4" Visibility="Collapsed" Spacing="4" AutomationProperties.Name="Manual vehicle controls">
-                <TextBlock x:Name="DrivingTip" Foreground="#50685E" FontSize="12" TextWrapping="Wrap" />
+                <Border AutomationProperties.Name="Driving instructions">
+                    <TextBlock x:Name="DrivingTip" Foreground="#50685E" FontSize="12" TextWrapping="Wrap" AutomationProperties.AccessibilityView="Raw" />
+                </Border>
                 <Grid ColumnDefinitions="*,*,*,*,Auto" ColumnSpacing="3" AutomationProperties.Name="Steering and speed">
                     <Button x:Name="SteerLeft" Grid.Column="0" Style="{StaticResource SmallAction}" Content="Left" AutomationProperties.Name="Steer left" />
                     <Button x:Name="Gas" Grid.Column="1" Style="{StaticResource SmallAction}" Content="Go" AutomationProperties.Name="Accelerate vehicle" />
