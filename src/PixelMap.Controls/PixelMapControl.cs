@@ -5,13 +5,14 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using PixelMap.Data;
 using PixelMap.Rendering;
+using PixelMap.Routing;
 using SkiaSharp;
 using Uno.WinUI.Graphics2DSK;
 using Windows.Foundation;
 
 namespace PixelMap.Controls;
 
-/// <summary>A reusable, navigable vector map with an orthographic pixel-art building renderer.</summary>
+/// <summary>A reusable vector map with isometric and perspective pixel rendering and journey simulation.</summary>
 public sealed partial class PixelMapControl : UserControl
 {
     public static readonly MapCamera OpeningView = new(40.7087, -74.0104, 16.5, -15, 55);
@@ -54,27 +55,51 @@ public sealed partial class PixelMapControl : UserControl
         _pinLabel = new TextBlock { FontSize = 12, Foreground = Brush(255, 247, 220), TextTrimming = TextTrimming.CharacterEllipsis };
         _pin = new Border
         {
-            Child = _pinLabel, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top,
-            Background = Brush(27, 50, 52), BorderBrush = Brush(246, 192, 105), BorderThickness = new(2),
-            CornerRadius = new(4), Padding = new(8, 3, 8, 3), MaxWidth = 230, IsHitTestVisible = false,
-            RenderTransform = _pinPosition, Visibility = Visibility.Collapsed
+            Child = _pinLabel,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top,
+            Background = Brush(27, 50, 52),
+            BorderBrush = Brush(246, 192, 105),
+            BorderThickness = new(2),
+            CornerRadius = new(4),
+            Padding = new(8, 3, 8, 3),
+            MaxWidth = 230,
+            IsHitTestVisible = false,
+            RenderTransform = _pinPosition,
+            Visibility = Visibility.Collapsed
         };
         _pin.SizeChanged += (_, _) => PositionMarker();
         Content = new Grid { Background = Brush(170, 187, 161), Children = { _surface, _pin } };
         IsTabStop = true;
         AutomationProperties.SetName(this, "Interactive pixel map");
         HookInput();
+        HookJourney();
         _tilesTimer.Tick += (_, _) => { _tilesTimer.Stop(); RefreshTiles(_longFlight ? _to : Camera); };
-        SizeChanged += (_, _) => ViewChanged();
+        SizeChanged += (_, _) =>
+        {
+            ViewChanged();
+            if (!_active) return;
+            if (Journey.State == PixelMap.Simulation.JourneyState.Ready) FitRoute();
+            else UpdateRideCamera();
+        };
         Loaded += (_, _) =>
         {
             _active = true;
             ViewChanged();
             _ = LoadOverview();
             if (IsEarthImageryEnabled) EarthChanged();
+            if (_sound is null && _audioDevice is not null) _sound = new PixelMap.Audio.JourneySound(_audioDevice);
+            OnJourneyChanged();
+            if (Journey.State == PixelMap.Simulation.JourneyState.Ready) FitRoute();
         };
         Unloaded += (_, _) =>
         {
+            Journey.Pause();
+            _gameClock.Stop();
+            _sound?.Dispose();
+            _sound = null;
+            ReleaseDrivingKeys();
+            _worldContacts.Update([]);
             _active = false;
             StopMotion();
             _tilesTimer.Stop();
@@ -113,7 +138,12 @@ public sealed partial class PixelMapControl : UserControl
     private void PositionMarker()
     {
         if (_marker is not { } pin) return;
-        var (x, y) = Camera.Project(pin.Latitude, pin.Longitude, ActualWidth, ActualHeight);
+        if (!Camera.TryProject(pin.Latitude, pin.Longitude, 0, ActualWidth, ActualHeight, out var projected))
+        {
+            _pin.Visibility = Visibility.Collapsed;
+            return;
+        }
+        var (x, y) = projected;
         _pin.Visibility = x < 0 || y < 0 || x > ActualWidth || y > ActualHeight ? Visibility.Collapsed : Visibility.Visible;
         _pinPosition.X = Math.Clamp(x - _pin.ActualWidth * .5, 0, Math.Max(0, ActualWidth - _pin.ActualWidth));
         _pinPosition.Y = Math.Max(0, y - _pin.ActualHeight - 4);
@@ -122,13 +152,16 @@ public sealed partial class PixelMapControl : UserControl
     private static MapCamera Normalize(MapCamera value)
     {
         if (!double.IsFinite(value.Latitude) || !double.IsFinite(value.Longitude) || !double.IsFinite(value.Zoom)
-            || !double.IsFinite(value.Bearing) || !double.IsFinite(value.Pitch))
+            || !double.IsFinite(value.Bearing) || !double.IsFinite(value.Pitch) || !double.IsFinite(value.TargetAltitudeMeters))
             throw new ArgumentOutOfRangeException(nameof(value), "Camera coordinates must be finite.");
         return value with
         {
             Latitude = Math.Clamp(value.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude),
-            Longitude = Wrap(value.Longitude), Bearing = Wrap(value.Bearing),
-            Zoom = Math.Clamp(value.Zoom, MapCamera.MinZoom, MapCamera.MaxZoom), Pitch = Math.Clamp(value.Pitch, 0, 72)
+            Longitude = Wrap(value.Longitude),
+            Bearing = Wrap(value.Bearing),
+            Zoom = Math.Clamp(value.Zoom, MapCamera.MinZoom, MapCamera.MaxZoom),
+            Pitch = Math.Clamp(value.Pitch, 0, 72),
+            TargetAltitudeMeters = Math.Clamp(value.TargetAltitudeMeters, 0, 15000)
         };
     }
 
@@ -205,6 +238,7 @@ public sealed partial class PixelMapControl : UserControl
     private void LayerChanged()
     {
         if (!_active) return;
+        _worldContacts.Update(_vectors.Display);
         _earthDisplay = _earth.Display.Count == 0 ? _earthOverview : _earth.Display;
         InvalidateMap();
         string status = _vectors.HasFailures ? "Map service unavailable · retrying"
@@ -230,12 +264,12 @@ public sealed partial class PixelMapControl : UserControl
         var imagery = !IsEarthImageryEnabled ? null : _longFlight && _flightPhase < .72
             ? _flightPhase < .22 && _earthDeparture.Count > 0 ? _earthDeparture : _earthOverview
             : _earthDisplay;
-        _surface.Present(Camera, DisplayTiles(), imagery, Palette, _motion.IsEnabled || _touches.Count != 0);
+        _surface.Present(Camera, DisplayTiles(), imagery, Palette, _motion.IsEnabled || _touches.Count != 0 || Journey.Active && Journey.Follow, Journey.Route, CurrentVehicle(), Journey.NextCheckpoint);
     }
 
     private sealed class MapSurface : SKCanvasElement
     {
-        private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery, PixelStyle Palette, bool Moving);
+        private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery, PixelStyle Palette, bool Moving, RoutePlan? Route, VehiclePose? Vehicle, RoutePosition? Gate);
         private readonly object _drawing = new();
         private PixelMapRenderer? _renderer;
         private volatile Scene? _scene;
@@ -244,9 +278,9 @@ public sealed partial class PixelMapControl : UserControl
         private int _interactivePixelSize = 2;
 
 
-        internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery, PixelStyle palette, bool moving)
+        internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery, PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, RoutePosition? gate)
         {
-            _scene = new Scene(camera, tiles, imagery, palette, moving);
+            _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, gate);
             Invalidate();
         }
 
@@ -283,6 +317,10 @@ public sealed partial class PixelMapControl : UserControl
             long start = Stopwatch.GetTimestamp();
             _renderer.Draw(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height),
                 camera, scene.Tiles, scene.Palette, size, scene.Imagery);
+            if (scene.Gate is { } gate && scene.Route is { } trip && scene.Vehicle is { } driver)
+                _renderer.DrawGate(canvas, camera, area.Width, area.Height, gate, trip.Mode, trip.Mode == TravelMode.Flight ? driver.AltitudeMeters : 0, driver.AnimationSeconds);
+            if (scene.Route is { } route)
+                _renderer.DrawNavigation(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height), camera, route, scene.Vehicle, size);
             // Adjust only after an actual camera change. Resolution hysteresis avoids thrashing the terrain cache.
             if (moving && _timedCamera != camera)
             {

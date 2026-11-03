@@ -73,7 +73,8 @@ public sealed class OsrmRouteProvider(HttpClient client) : IRouteChoiceProvider
             }
             return result;
         }
-        catch (Exception e) when (e is JsonException or KeyNotFoundException or InvalidOperationException or IndexOutOfRangeException or FormatException or OverflowException)
+        catch (Exception e) when (e is JsonException or InvalidDataException or ArgumentException or KeyNotFoundException
+            or InvalidOperationException or IndexOutOfRangeException or FormatException or OverflowException)
         {
             throw new RouteUnavailableException("The route provider returned incomplete directions. Retry the trip.", e);
         }

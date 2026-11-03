@@ -13,6 +13,8 @@ Rail and boat previews trace physical infrastructure. Service calendars, passeng
 
 ## Data and attribution
 
+Road choices are cached in memory for up to 30 minutes, retaining the latest stop sequence for each of the three road profiles. Cache entries contain at most three distinct paths and at most 10,000 vertices in total. Cancellation remains effective on cache hits. Provider step distances are normalized to each leg's reported length for guidance, and arrival is pinned to the leg end.
+
 Road requests use the public FOSSGIS instance with at least one second between request starts per application. Requests contain the ordered coordinates and originate only when planning a trip. Consumers must display attribution and the map correction link, observe the service's fair-use policy, and use another instance for heavy traffic. [FOSSGIS service and policy](https://routing.openstreetmap.de/about.html) · [OSRM HTTP API](https://project-osrm.org/docs/v5.24.0/api/) · [Fix the map](https://www.openstreetmap.org/fixthemap)
 
 The three offline road examples preserve OSRM directions from Wall Street to City Hall Park, retrieved on 2026-11-03. The subway and Pier 11–DUMBO ferry examples retain the geographic alignments from the included Lower Manhattan vector tiles. Offline examples remain selectable with `RouteDemos.ForMode`. Other rail and ferry trips within the seed area can be calculated locally. [OpenFreeMap](https://openfreemap.org/) · [© OpenMapTiles](https://openmaptiles.org/) · [© OpenStreetMap contributors, ODbL](https://www.openstreetmap.org/copyright)

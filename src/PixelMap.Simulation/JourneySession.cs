@@ -49,9 +49,9 @@ public sealed class JourneySession
 
     public void Load(RoutePlan? route)
     {
+        var vehicle = route is null ? Vehicle : VehicleProfile.ForMode(route.Mode);
         var track = route is null ? null : new RouteTrack(route);
-        Route = route; _track = track;
-        if (route is not null) Vehicle = VehicleProfile.ForMode(route.Mode);
+        Route = route; _track = track; Vehicle = vehicle;
         Reset();
     }
 

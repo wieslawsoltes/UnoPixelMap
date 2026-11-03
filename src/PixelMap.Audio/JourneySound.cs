@@ -10,33 +10,47 @@ public interface IJourneyAudioDevice
     void Enable(bool enabled);
     void Update(string instrument, double speed, double load, bool running);
     void Play(string instrument, JourneyCue cue);
+    /// <summary>Release the current audio graph. Repeated calls are safe, and a later Enable(true)
+    /// may recreate resources when a map view reloads.</summary>
     void Close();
 }
 
 public sealed class JourneySound(IJourneyAudioDevice device) : IDisposable
 {
-    private bool _enabled;
+    private readonly IJourneyAudioDevice _device = device ?? throw new ArgumentNullException(nameof(device));
+    private bool _enabled, _disposed;
     private (string Instrument, double Speed, double Load, bool Running)? _previous;
     public void Update(JourneySession session)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(session);
         bool enabled = !session.Muted;
         if (_enabled != enabled)
         {
             _enabled = enabled;
-            device.Enable(enabled);
+            _device.Enable(enabled);
             _previous = null;
         }
         if (!enabled) return;
         double speed = Math.Clamp(session.SpeedMetersPerSecond / session.Vehicle.MaxSpeed, 0, 1);
         var frame = (Instrument: session.Vehicle.Mode.ToString(), Speed: Math.Round(speed, 2),
             Load: Math.Round(session.EngineLoad, 2), Running: session.Active);
-        if (_previous != frame) { device.Update(frame.Instrument, frame.Speed, frame.Load, frame.Running); _previous = frame; }
+        if (_previous != frame) { _device.Update(frame.Instrument, frame.Speed, frame.Load, frame.Running); _previous = frame; }
     }
     public void Play(JourneySession session, JourneyCue cue)
     {
-        if (!session.Muted) { Update(session); device.Play(session.Vehicle.Mode.ToString(), cue); }
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(session);
+        if (!session.Muted) { Update(session); _device.Play(session.Vehicle.Mode.ToString(), cue); }
     }
-    public void Dispose() { device.Close(); _enabled = false; _previous = null; }
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        _device.Close();
+        _enabled = false;
+        _previous = null;
+    }
 }
 
 [SupportedOSPlatform("browser")]

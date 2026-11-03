@@ -60,6 +60,7 @@ Check(!world.Blocks(VehicleProfile.Plane,At(1900,2050),At(2000,2050),200),"Fly a
 world.Update([new MapTile(new(14,8192,8192),[building with { Layer="water" }])]);
 Check(world.Blocks(VehicleProfile.Boat,At(2050,2050),At(1900,2050),0),"Shoreline contact");
 WorldChecks.Run();
+LifecycleChecks.Run();
 Console.WriteLine("Fixed-step, manual steering, obstacle, shoreline, recovery and audio checks passed.");
 
 sealed class AlwaysBlocked:IJourneyWorld

@@ -22,6 +22,14 @@ foreach (var mode in Enum.GetValues<TravelMode>())
     Check(Math.Abs(nearest.Station - track.Length * .42) < .5 && nearest.Error < .5, $"Round-trip station error for {mode}.");
     var limited = track.Nearest(track.Sample(track.Length).Point, 0, 5);
     Check(limited.Station is >= 0 and <= 5, "Projection must stay inside reachable station window.");
+    for (int i = 0; i < 20; i++)
+    {
+        double station = track.Length * i / 20;
+        var direction = track.GuidanceAt(station);
+        if (direction.Next is { } next)
+            Check(track.Sample(station + direction.MetersToNext).Point.DistanceTo(next.Point) < 5,
+                $"{mode} maneuver station must match its geographic location.");
+    }
     Check(demo.Legs[0].Steps.Count >= 2, "Each mode has maneuver or arrival information.");
 }
 
@@ -53,6 +61,12 @@ var flightTrack = new RouteTrack(dateLine);
 Check(Math.Abs(flightTrack.Sample(dateLine.Legs[0].DistanceMeters / 2).Point.Longitude) > 179.9,
     "Flight interpolation remains at the date line.");
 Check(flightTrack.Sample(dateLine.Legs[0].DistanceMeters + 1).LegIndex == 1, "Stationing crosses the via stop.");
+var beforeVia = flightTrack.GuidanceAt(dateLine.Legs[0].DistanceMeters - 5);
+Check(beforeVia.LegIndex == 0 && beforeVia.Next?.ManeuverType == "arrive" && Math.Abs(beforeVia.MetersToNext - 5) < .001,
+    "The approaching via instruction uses the first leg's provider station.");
+var atVia = flightTrack.GuidanceAt(dateLine.Legs[0].DistanceMeters);
+Check(atVia.LegIndex == 1 && atVia.Current?.ManeuverType == "depart" && atVia.Next?.Point == dateLine.Legs[1].Geometry[^1],
+    "At an exact via boundary, guidance advances to the next leg.");
 
 var demoRoad = RouteDemos.ForMode(TravelMode.Drive);
 var savedRoad = await planner.PlanAsync(TravelMode.Drive, demoRoad.Stops);
@@ -108,6 +122,32 @@ Check(alternateHandler.LastUri!.Query.Contains("alternatives=2"), "Two-stop dire
 Check(!alternatives[0].Geometry.SequenceEqual(alternatives[1].Geometry), "Route alternatives require different polylines.");
 var primary = await choicePlanner.PlanAsync(TravelMode.Drive, demoRoad.Stops);
 Check(ReferenceEquals(primary, alternatives[0]) && alternateHandler.Requests == 1, "A full choice set can satisfy a single-route call.");
+
+var wrongLegs = envelope.DeepClone();
+wrongLegs["routes"]![0]!["legs"]!.AsArray().Clear();
+var wrongLegsHandler = new TestHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+{ Content = new StringContent(wrongLegs.ToJsonString()) }));
+using var wrongLegsHttp = new HttpClient(wrongLegsHandler);
+try
+{
+    await new RoutePlanner(wrongLegsHttp).PlanChoicesAsync(TravelMode.Drive, demoRoad.Stops);
+    throw new Exception("An invalid provider itinerary was replaced by an offline example.");
+}
+catch (RouteUnavailableException error)
+{
+    Check(error.InnerException is InvalidDataException, "An invalid leg count is a malformed reply, preserving its cause.");
+}
+
+using var cancelled = new CancellationTokenSource();
+cancelled.Cancel();
+int previousRequests = alternateHandler.Requests;
+try
+{
+    await choicePlanner.PlanChoicesAsync(TravelMode.Drive, demoRoad.Stops, cancelled.Token);
+    throw new Exception("Cancellation was ignored by the route cache.");
+}
+catch (OperationCanceledException) { }
+Check(alternateHandler.Requests == previousRequests, "A cancelled choice request cannot make a network call.");
 
 var guidance = new RouteTrack(primary);
 var departure = guidance.GuidanceAt(0);

@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:maps="using:PixelMap.Controls"
+    xmlns:local="using:PixelMap.App"
     RequestedTheme="Light"
     Background="#142C30">
     <Page.Resources>
@@ -49,6 +50,8 @@
                 <Button x:Name="ViewButton" Style="{StaticResource HeaderAction}" AutomationProperties.Name="Map appearance">
                     <Button.Flyout>
                         <MenuFlyout>
+                            <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
+                            <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
                             <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
                             <MenuFlyoutSeparator />
                             <ToggleMenuFlyoutItem x:Name="DayItem" Text="Daylight" Tag="Day" IsChecked="True" Click="OnPalette" />
@@ -134,7 +137,7 @@
             <StackPanel x:Name="SearchOverlay" HorizontalAlignment="Left" VerticalAlignment="Top"
                         Width="344" Margin="16" Spacing="6">
                 <Border Padding="4" Background="#FFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6">
-                    <Grid ColumnDefinitions="*,Auto">
+                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="3">
                         <TextBox x:Name="SearchBox" PlaceholderText="Search places or coordinates" MaxLength="200"
                                  Background="Transparent" BorderThickness="0" Padding="8,6" MinHeight="38"
                                  AutomationProperties.Name="Search places or latitude and longitude" KeyDown="OnSearchKey" TextChanged="OnQueryEdited" />
@@ -142,6 +145,13 @@
                                 Background="#21564C" BorderBrush="#21564C" CornerRadius="3" Click="OnSearch"
                                 AutomationProperties.Name="Search map" ToolTipService.ToolTip="Search">
                             <Path Stroke="#FFFBEE" StrokeThickness="2" Data="M12.5,6.8 A5.7,5.7 0 1 1 1.1,6.8 A5.7,5.7 0 1 1 12.5,6.8 M11.3,11.3 L17.5,17.5" />
+                        </Button>
+                        <Button Grid.Column="2" Width="67" Height="38" Padding="0" Background="#DBE9D9" BorderBrush="#B5CCB7" CornerRadius="3"
+                                Click="OnJourneys" AutomationProperties.Name="Open route planner" ToolTipService.ToolTip="Directions and journeys">
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <Path VerticalAlignment="Center" Stroke="#205749" StrokeThickness="1.8" Data="M2,16 L2,6 Q2,2 6,2 L14,2 M11,0 L15,2 L11,5 M5,16 L12,16 Q16,16 16,12 L16,9" />
+                                <TextBlock VerticalAlignment="Center" Text="Route" FontSize="12" FontWeight="SemiBold" Foreground="#205749" />
+                            </StackPanel>
                         </Button>
                     </Grid>
                 </Border>
@@ -164,6 +174,15 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
+            <local:JourneyPanel x:Name="JourneyPanel" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                Width="348" Margin="16" />
+            <Border x:Name="PickBanner" Visibility="Collapsed" Background="#193C3C" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Padding="10,6" Margin="16" BorderBrush="#8CC2A7" BorderThickness="1" CornerRadius="5">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                    <TextBlock x:Name="PickText" VerticalAlignment="Center" Foreground="#FFFBEE" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+                    <Button Grid.Column="1" Content="Cancel" Click="OnCancelPick" Padding="8,3" AutomationProperties.Name="Cancel map selection" />
+                </Grid>
+            </Border>
         </Grid>
 
         <Grid x:Name="Footer" Grid.Row="2" Padding="12,5" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" Background="#F7F5E8">
@@ -178,13 +197,17 @@
                 <Run Text=" · " /><Hyperlink NavigateUri="https://openmaptiles.org" Foreground="#30594D">OpenMapTiles</Hyperlink>
                 <Run Text=" · " /><Hyperlink NavigateUri="https://www.openstreetmap.org/copyright" Foreground="#30594D">© OpenStreetMap</Hyperlink>
             </TextBlock>
-            <TextBlock x:Name="EarthCredits" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,2,0,0"
-                       Visibility="Collapsed" TextWrapping="Wrap" FontSize="10" Foreground="#395950">
-                <Hyperlink NavigateUri="https://cloudless.eox.at/" Foreground="#30594D">EOxCloudless</Hyperlink>
-                <Run Text=" by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · " />
-                <Hyperlink NavigateUri="https://maps.eox.at/" Foreground="#30594D">EOX::Maps</Hyperlink>
-                <Run Text=" · " /><Hyperlink NavigateUri="https://creativecommons.org/licenses/by/4.0/" Foreground="#30594D">CC BY 4.0</Hyperlink>
-            </TextBlock>
+            <Grid Grid.Row="1" Grid.ColumnSpan="3" Margin="0,2,0,0">
+                <!-- Reserve the wrapped credit height so map controls retain their position when layers change. -->
+                <TextBlock Text="EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · EOX::Maps · CC BY 4.0"
+                           TextWrapping="Wrap" FontSize="10" Opacity="0" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+                <TextBlock x:Name="EarthCredits" Visibility="Collapsed" TextWrapping="Wrap" FontSize="10" Foreground="#395950">
+                    <Hyperlink NavigateUri="https://cloudless.eox.at/" Foreground="#30594D">EOxCloudless</Hyperlink>
+                    <Run Text=" by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · " />
+                    <Hyperlink NavigateUri="https://maps.eox.at/" Foreground="#30594D">EOX::Maps</Hyperlink>
+                    <Run Text=" · " /><Hyperlink NavigateUri="https://creativecommons.org/licenses/by/4.0/" Foreground="#30594D">CC BY 4.0</Hyperlink>
+                </TextBlock>
+            </Grid>
         </Grid>
     </Grid>
 </Page>

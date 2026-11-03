@@ -1,12 +1,17 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/PixelMap.App/PixelMap.App.csproj" />
+    <Project Path="src/PixelMap.Audio/PixelMap.Audio.csproj" />
     <Project Path="src/PixelMap.Controls/PixelMap.Controls.csproj" />
     <Project Path="src/PixelMap.Data/PixelMap.Data.csproj" />
     <Project Path="src/PixelMap.Rendering/PixelMap.Rendering.csproj" />
+    <Project Path="src/PixelMap.Routing/PixelMap.Routing.csproj" />
+    <Project Path="src/PixelMap.Simulation/PixelMap.Simulation.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PixelMap.Data.Checks/PixelMap.Data.Checks.csproj" />
     <Project Path="tests/PixelMap.Rendering.Tests/PixelMap.Rendering.Tests.csproj" />
+    <Project Path="tests/PixelMap.Routing.Tests/PixelMap.Routing.Tests.csproj" />
+    <Project Path="tests/PixelMap.Simulation.Tests/PixelMap.Simulation.Tests.csproj" />
   </Folder>
 </Solution>

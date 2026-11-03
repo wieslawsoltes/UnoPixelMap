@@ -17,6 +17,11 @@ public sealed partial class PixelMapControl
     private double _duration, _arc, _vx, _vy;
     private bool _dragged, _rotating, _flight, _longFlight;
     private double _flightPhase;
+    private MapCamera _gestureCamera;
+    private Point _firstFinger, _secondFinger;
+    private uint _gestureFirst, _gestureSecond;
+    private bool _tilting, _planarGesture;
+
 
     private void HookInput()
     {
@@ -30,8 +35,8 @@ public sealed partial class PixelMapControl
         _motion.Tick += (_, _) => Advance();
     }
 
-    public void PanBy(double dx, double dy) { StopMotion(); Camera = Camera.PanBy(dx, dy); }
-    public void ZoomBy(double delta) => FlyTo((_flight ? _to : Camera).ZoomAt(delta, ActualWidth / 2, ActualHeight / 2, ActualWidth, ActualHeight));
+    public void PanBy(double dx, double dy) { StopTrackingForGesture(); StopMotion(); Camera = Camera.PanFromTo(ActualWidth * .5, ActualHeight * .5, ActualWidth * .5 + dx, ActualHeight * .5 + dy, ActualWidth, ActualHeight); }
+    public void ZoomBy(double delta) { if (!ZoomRide(delta)) FlyTo((_flight ? _to : Camera).ZoomAt(delta, ActualWidth / 2, ActualHeight / 2, ActualWidth, ActualHeight)); }
     public void RotateBy(double degrees)
     {
         var target = _flight ? _to : Camera;
@@ -40,15 +45,17 @@ public sealed partial class PixelMapControl
     public void ToggleProjection() => FlyTo(Camera with { Pitch = (_flight ? _to : Camera).Pitch > 10 ? 0 : 55 });
 
     public void FlyTo(double latitude, double longitude, double zoom) =>
-        FlyTo(Camera with { Latitude = latitude, Longitude = longitude, Zoom = zoom });
+        FlyTo(Camera with { Latitude = latitude, Longitude = longitude, Zoom = zoom, TargetAltitudeMeters = 0 });
 
     public void FlyTo(MapCamera destination)
     {
+        StopTrackingForGesture();
         StopMotion();
         _to = Normalize(destination);
         _from = Camera;
         if (!_active || _from == _to) { Camera = _to; return; }
-        var end = _from.Project(_to.Latitude, _to.Longitude, 0, 0);
+        var mapPlane = _from with { Perspective = false, TargetAltitudeMeters = 0 };
+        var end = mapPlane.Project(_to.Latitude, _to.Longitude, 0, 0);
         var spans = Math.Sqrt(end.X * end.X + end.Y * end.Y) / Math.Max(256, ActualWidth);
         _longFlight = spans > 4;
         _arc = _longFlight ? Math.Min(Math.Min(_from.Zoom, _to.Zoom) - 1, Math.Log2(spans)) : 0;
@@ -80,12 +87,7 @@ public sealed partial class PixelMapControl
                 zoom = t < .5 ? _from.Zoom + (overview - _from.Zoom) * Smooth(Math.Min(1, t / .38))
                     : overview + (_to.Zoom - overview) * Smooth(Math.Clamp((t - .62) / .38, 0, 1));
             }
-            // Interpolate on the wrapped Mercator plane so that antimeridian flights take the short path.
-            var pos = _from.Project(_to.Latitude, _to.Longitude, 0, 0);
-            var geo = _from.Unproject(pos.X * u, pos.Y * u, 0, 0);
-            Camera = t == 1 ? _to : new MapCamera(geo.Latitude, geo.Longitude,
-                zoom,
-                _from.Bearing + Wrap(_to.Bearing - _from.Bearing) * u, _from.Pitch + (_to.Pitch - _from.Pitch) * u);
+            Camera = t == 1 ? _to : _from.Interpolate(_to, u) with { Zoom = zoom };
             if (t == 1) { StopMotion(); ViewChanged(); }
             return;
         }
@@ -93,7 +95,10 @@ public sealed partial class PixelMapControl
         var dt = Math.Clamp(Stopwatch.GetElapsedTime(_lastMove).TotalMilliseconds, 1, 80);
         _lastMove = Stopwatch.GetTimestamp();
         double decay = Math.Exp(-dt / 160);
-        Camera = Camera.PanBy(_vx * 160 * (1 - decay), _vy * 160 * (1 - decay));
+        var centerX = ActualWidth * .5;
+        var centerY = ActualHeight * .5;
+        Camera = Camera.PanFromTo(centerX, centerY,
+            centerX + _vx * 160 * (1 - decay), centerY + _vy * 160 * (1 - decay), ActualWidth, ActualHeight);
         _vx *= decay; _vy *= decay;
         if (Math.Abs(_vx) + Math.Abs(_vy) < .018) StopMotion();
     }
@@ -118,11 +123,12 @@ public sealed partial class PixelMapControl
         if (_touches.Count == 0)
         {
             _down = point.Position;
-            _rotating = point.Properties.IsRightButtonPressed;
+            _rotating = point.Properties.IsRightButtonPressed || (e.KeyModifiers & VirtualKeyModifiers.Shift) != 0;
             _dragged = false;
         }
         else _dragged = true;
         _touches[e.Pointer.PointerId] = point.Position;
+        if (_touches.Count == 2) StartTwoFingerGesture();
         _lastMove = Stopwatch.GetTimestamp();
         CapturePointer(e.Pointer);
         e.Handled = true;
@@ -138,28 +144,66 @@ public sealed partial class PixelMapControl
         if (dx == 0 && dy == 0) return;
         if (_touches.Count == 2)
         {
-            var other = _touches.First(p => p.Key != id).Value;
-            var previousCenter = new Point((old.X + other.X) * .5, (old.Y + other.Y) * .5);
-            var center = new Point((next.X + other.X) * .5, (next.Y + other.Y) * .5);
-            var before = Distance(old, other); var after = Distance(next, other);
-            var view = Camera.PanBy(center.X - previousCenter.X, center.Y - previousCenter.Y);
-            if (before > 4 && after > 4)
-                view = view.ZoomAt(Math.Log2(after / before), center.X, center.Y, ActualWidth, ActualHeight);
-            Camera = view;
+            StopTrackingForGesture();
+            UpdateTwoFingerGesture();
         }
         else if (_touches.Count == 1)
         {
             if (!_dragged && Distance(next, _down) < 3) return;
             if (!_dragged) { dx = next.X - _down.X; dy = next.Y - _down.Y; }
             _dragged = true;
-            if (_rotating) Camera = Camera with { Bearing = Camera.Bearing + dx * .35, Pitch = Camera.Pitch - dy * .22 };
-            else Camera = Camera.PanBy(dx, dy);
+            StopTrackingForGesture();
+            if (_rotating) Camera = Camera.OrbitAt(dx * .35, -dy * .22, _down.X, _down.Y, ActualWidth, ActualHeight);
+            else Camera = Camera.PanFromTo(next.X - dx, next.Y - dy, next.X, next.Y, ActualWidth, ActualHeight);
             var dt = Math.Clamp(Stopwatch.GetElapsedTime(_lastMove).TotalMilliseconds, 4, 100);
             _vx = Math.Clamp(.5 * _vx + .5 * dx / dt, -3, 3);
             _vy = Math.Clamp(.5 * _vy + .5 * dy / dt, -3, 3);
         }
         _lastMove = Stopwatch.GetTimestamp();
         e.Handled = true;
+    }
+
+    private void StopTrackingForGesture()
+    {
+        if (Journey.Route is not null && Journey.Follow) Journey.Follow = false;
+    }
+
+    private void StartTwoFingerGesture()
+    {
+        var iter = _touches.GetEnumerator();
+        iter.MoveNext(); var first = iter.Current;
+        iter.MoveNext(); var second = iter.Current;
+        _gestureFirst = first.Key; _gestureSecond = second.Key;
+        _firstFinger = first.Value; _secondFinger = second.Value; _gestureCamera = Camera;
+        _tilting = _planarGesture = false;
+        _vx = _vy = 0;
+    }
+
+    private void UpdateTwoFingerGesture()
+    {
+        var a = _touches[_gestureFirst]; var b = _touches[_gestureSecond];
+        double oldX = _secondFinger.X - _firstFinger.X, oldY = _secondFinger.Y - _firstFinger.Y;
+        double x = b.X - a.X, y = b.Y - a.Y;
+        var before = new Point((_firstFinger.X + _secondFinger.X) * .5, (_firstFinger.Y + _secondFinger.Y) * .5);
+        var after = new Point((a.X + b.X) * .5, (a.Y + b.Y) * .5);
+        double dx = after.X - before.X, dy = after.Y - before.Y;
+        double scale = Distance(a, b) / Math.Max(1, Distance(_firstFinger, _secondFinger));
+        double twist = Math.Atan2(oldX * y - oldY * x, oldX * x + oldY * y) * 180 / Math.PI;
+        if (!_tilting && !_planarGesture)
+        {
+            double ay = a.Y - _firstFinger.Y, by = b.Y - _secondFinger.Y;
+            _tilting = Math.Abs(dy) > 10 && ay * by > 0 && Math.Abs(dx) < Math.Abs(dy) * .45 &&
+                Math.Abs(Math.Log2(Math.Max(.001, scale))) < .11 && Math.Abs(twist) < 6;
+            _planarGesture = !_tilting && (Math.Abs(scale - 1) > .1 || Math.Abs(twist) > 6 || Math.Abs(dx) > 10);
+        }
+        if (_tilting)
+        {
+            Camera = _gestureCamera.OrbitAt(0, -dy * .28, before.X, before.Y, ActualWidth, ActualHeight);
+            return;
+        }
+        var view = _gestureCamera.OrbitAt(-twist, 0, before.X, before.Y, ActualWidth, ActualHeight);
+        view = view.ZoomAt(Math.Log2(Math.Max(.02, scale)), before.X, before.Y, ActualWidth, ActualHeight);
+        Camera = view.PanFromTo(before.X, before.Y, after.X, after.Y, ActualWidth, ActualHeight);
     }
 
     private static double Distance(Point a, Point b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
@@ -171,7 +215,13 @@ public sealed partial class PixelMapControl
         ReleasePointerCapture(e.Pointer);
         if (_touches.Count == 0)
         {
-            if (!_dragged && !_rotating)
+            if (!_dragged && !_rotating && IsMapPointSelectionEnabled)
+            {
+                _lastTapTime = 0;
+                if (Camera.TryUnproject(pos.X, pos.Y, ActualWidth, ActualHeight, out var geo))
+                    MapPointTapped?.Invoke(this, new MapPointEventArgs(geo.Latitude, geo.Longitude));
+            }
+            else if (!_dragged && !_rotating)
             {
                 if (_lastTapTime != 0 && Stopwatch.GetElapsedTime(_lastTapTime).TotalMilliseconds < 360 && Distance(pos, _lastTap) < 18)
                 {
@@ -192,14 +242,14 @@ public sealed partial class PixelMapControl
                 _motion.Start();
             }
         }
-        else { _vx = _vy = 0; _lastMove = Stopwatch.GetTimestamp(); }
+        else { if (_touches.Count == 2) StartTwoFingerGesture(); _vx = _vy = 0; _lastMove = Stopwatch.GetTimestamp(); }
         InvalidateMap();
         e.Handled = true;
     }
 
     private void Inspect(Point pos)
     {
-        var geo = Camera.Unproject(pos.X, pos.Y, ActualWidth, ActualHeight);
+        if (!Camera.TryUnproject(pos.X, pos.Y, ActualWidth, ActualHeight, out var geo)) return;
         var feature = _surface.Pick(pos, (int)Math.Ceiling(ActualWidth), (int)Math.Ceiling(ActualHeight));
         var label = feature is null ? FormattableString.Invariant($"{geo.Latitude:0.0000}°, {geo.Longitude:0.0000}°")
             : !string.IsNullOrWhiteSpace(feature.Name) ? feature.Name
@@ -210,13 +260,19 @@ public sealed partial class PixelMapControl
 
     private void Interrupted(object sender, PointerRoutedEventArgs e)
     {
-        if (_touches.Remove(e.Pointer.PointerId)) { _dragged = true; _vx = _vy = 0; }
+        if (_touches.Remove(e.Pointer.PointerId)) { _dragged = true; _vx = _vy = 0; if (_touches.Count == 2) StartTwoFingerGesture(); }
     }
 
     private void Wheel(object sender, PointerRoutedEventArgs e)
     {
         var point = e.GetCurrentPoint(this);
         var delta = point.Properties.MouseWheelDelta;
+        StopTrackingForGesture();
+        if ((e.KeyModifiers & VirtualKeyModifiers.Shift) != 0)
+        {
+            FlyTo((_flight ? _to : Camera).OrbitAt(delta / 10d, 0, point.Position.X, point.Position.Y, ActualWidth, ActualHeight));
+            e.Handled = true; return;
+        }
         if (point.Properties.IsHorizontalMouseWheel) PanBy(-delta * .35, 0);
         else FlyTo((_flight ? _to : Camera).ZoomAt(Math.Clamp(delta / 300d, -2, 2), point.Position.X, point.Position.Y, ActualWidth, ActualHeight));
         e.Handled = true;
@@ -224,6 +280,7 @@ public sealed partial class PixelMapControl
 
     private void OnMapKey(object sender, KeyRoutedEventArgs e)
     {
+        if (HandleDrivingKey(e.Key)) { e.Handled = true; return; }
         switch (e.Key)
         {
             case VirtualKey.Left: PanBy(96, 0); break;
@@ -234,6 +291,8 @@ public sealed partial class PixelMapControl
             case VirtualKey.Subtract: case (VirtualKey)189: ZoomBy(-1); break;
             case VirtualKey.Q: RotateBy(-45); break;
             case VirtualKey.E: RotateBy(45); break;
+            case VirtualKey.PageUp: OrbitBy(0, 8); break;
+            case VirtualKey.PageDown: OrbitBy(0, -8); break;
             case VirtualKey.P: ToggleProjection(); break;
             case VirtualKey.Home: ClearMarker(); FlyTo(OpeningView); break;
             case VirtualKey.Escape: ClearMarker(); break;

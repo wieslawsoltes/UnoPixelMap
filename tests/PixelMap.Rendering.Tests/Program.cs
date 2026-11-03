@@ -81,6 +81,8 @@ Assert(seamBitmap.GetPixel(158, 141) == shaded, "Buffered tile copies darkened a
 Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order, picking and cross-tile shadow checks.");
 
 ImageryChecks.Run();
+NavigationChecks.Run();
+PerspectiveChecks.Run();
 
 if (args.Contains("--benchmark", StringComparer.Ordinal))
 {

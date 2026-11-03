@@ -30,12 +30,12 @@ public sealed partial class PixelMapRenderer
             float offsetX = (float)Math.Floor(x / pixelSize), offsetY = (float)Math.Floor(y / pixelSize);
             float meters = (float)(camera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
                 Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
-            pickRaster.Begin(1, 1, (float)Math.Sin(camera.PitchRadians), meters);
+            pickRaster.Begin(1, 1, (float)Math.Sin(camera.PitchRadians), meters, camera.Perspective);
             Span<uint> hit = stackalloc uint[1];
             MapFeature? surface = null;
             foreach (var (tile, transform, _) in visible)
             {
-                var sample = transform with { X = transform.X - offsetX, Y = transform.Y - offsetY };
+                var sample = transform.Translate(-offsetX, -offsetY);
                 foreach (var building in tile.Buildings)
                 {
                     hit[0] = 0;
@@ -45,6 +45,7 @@ public sealed partial class PixelMapRenderer
             }
             if (surface is not null) return surface;
         }
+        if (!camera.TryUnproject(x,y,width,height,out _)) return null;
         return PickGround((float)(x / pixelSize), (float)(y / pixelSize), pixelSize);
     }
 
@@ -55,10 +56,7 @@ public sealed partial class PixelMapRenderer
         float bestDistance = float.PositiveInfinity;
         foreach (var (tile, t, _) in visible)
         {
-            float determinant = t.XX * t.YY - t.XY * t.YX;
-            if (determinant == 0) continue;
-            float dx = x - t.X, dy = y - t.Y;
-            var local = new SKPoint((dx * t.YY - dy * t.XY) / determinant, (dy * t.XX - dx * t.YX) / determinant);
+            if (!t.Invert(x, y, out var local, out var determinant)) continue;
             float margin = 15f / (pixelSize * Math.Max(.00001f, MathF.Sqrt(t.YX * t.YX + t.YY * t.YY)));
             if (local.X < -margin || local.Y < -margin || local.X > TileGeometry.Extent + margin || local.Y > TileGeometry.Extent + margin) continue;
             foreach (var f in tile.Source.Features)

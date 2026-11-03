@@ -19,6 +19,9 @@ jobs:
           dotnet-version: '10.0.x'
       - run: dotnet run --project tests/PixelMap.Data.Checks -c Release
       - run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release
+      - run: dotnet run --project tests/PixelMap.Routing.Tests -c Release
+      - run: dotnet run --project tests/PixelMap.Simulation.Tests -c Release
+      - run: node tests/browser/audio.cjs
       - run: dotnet workload install wasm-tools --skip-manifest-update
       - run: dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o "${{ runner.temp }}/atlas"
       - name: Verify the Pages artifact
@@ -47,6 +50,7 @@ jobs:
           ln -s "${{ runner.temp }}/atlas/wwwroot" "${{ runner.temp }}/preview/UnoPixelMap"
           python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/preview" > /tmp/atlas-server.log 2>&1 &
           PIXELMAP_SHOTS="${{ runner.temp }}/screens" node tests/browser/smoke.cjs http://127.0.0.1:8100/UnoPixelMap/
+          PIXELMAP_SHOTS="${{ runner.temp }}/screens" node tests/browser/journeys.cjs http://127.0.0.1:8100/UnoPixelMap/
       - uses: actions/upload-artifact@v4
         if: always()
         with:

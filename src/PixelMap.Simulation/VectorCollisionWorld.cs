@@ -208,7 +208,7 @@ public sealed class VectorCollisionWorld : IJourneyWorld
         };
 
         // Vector tiles provide centre lines, so these are conservative physical corridors.
-        // Access permissions and deck clearances remain the routing provider's responsibility.
+        // Access permissions and deck clearances require richer network data.
         private static double HalfWidthMeters(MapFeature feature) => feature.Layer == "waterway" ? 12 : feature.Class switch
         {
             "motorway" => 8,

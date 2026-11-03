@@ -11,6 +11,7 @@ public sealed partial class PixelMapRenderer : IDisposable
     private static readonly SKSamplingOptions Nearest = new(SKFilterMode.Nearest, SKMipmapMode.None);
     private readonly Dictionary<TileId, TileGeometry> geometry = [];
     private readonly List<(TileGeometry Tile, TileTransform Transform, float Scale)> visible = [];
+    private readonly List<(Building Model, TileTransform Transform, float Near)> perspectiveModels = [];
     private readonly Dictionary<(Ink, int), SKShader> shaders = [];
     private readonly Dictionary<Ink, TerrainPattern> patterns = [];
     private readonly Dictionary<(Ink, float), SKPathEffect> dashes = [];
@@ -21,6 +22,7 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly TerrainCache terrain = new();
     private readonly EarthRaster earth = new();
     private readonly SKPath earthCoverage = new();
+    private readonly SKPath tileClip = new();
     private readonly List<ImageryTile> imageryOrder = [];
     private readonly List<ImageryTile> lastImagery = [];
     private readonly SKPath shadowMask = new();
@@ -75,6 +77,18 @@ public sealed partial class PixelMapRenderer : IDisposable
         }
         var surface = ground!;
         surface.Clear(new SKColor(colors.Ground));
+        if (camera.Perspective && camera.Pitch > 0)
+        {
+            float horizon = (float)((height * .5 + (MapCamera.Focal(height) * Math.Cos(camera.PitchRadians) * (1 / camera.FarLimit(height) - 1) + camera.TargetPixels / camera.FarLimit(height)) / Math.Sin(camera.PitchRadians)) / pixelSize);
+            if (horizon > 0)
+            {
+                paint.Style = SKPaintStyle.Fill;
+                paint.Color = new(style == PixelStyle.Night ? 0xff273849u : style == PixelStyle.Dusk ? 0xffba969au : 0xff9bc1c8u);
+                surface.DrawRect(0, 0, w, horizon, paint);
+                paint.Color = new(style == PixelStyle.Night ? 0xff405264u : style == PixelStyle.Dusk ? 0xffd2aaa1u : 0xffc6d6cd);
+                surface.DrawRect(0, Math.Max(0, horizon - 7), w, Math.Min(horizon, 7), paint);
+            }
+        }
         PrepareVisible(width, height, pixelSize, camera, tiles);
         double world = camera.WorldSize / pixelSize;
 
@@ -104,11 +118,30 @@ public sealed partial class PixelMapRenderer : IDisposable
         {
             float meters = (float)(world / (MapCamera.EarthCircumference *
                 Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
-            buildings.Begin(w, h, (float)Math.Sin(camera.PitchRadians), meters);
+            buildings.Begin(w, h, (float)Math.Sin(camera.PitchRadians), meters, camera.Perspective);
             var pixels = new Span<uint>((void*)bitmap.GetPixels(), checked(w * h));
-            foreach (var (tile, transform, _) in visible)
-            foreach (var building in tile.Buildings)
-                buildings.Draw(pixels, building, transform, colors.Materials[building.Seed % (uint)colors.Materials.Length]);
+            if (camera.Perspective)
+            {
+                perspectiveModels.Clear();
+                foreach (var (tile, transform, _) in visible)
+                foreach (var model in tile.Buildings)
+                {
+                    var bounds = model.Bounds;
+                    float closest = transform.Weight(bounds.MidX, bounds.MidY)
+                        - (Math.Abs(transform.PX) * bounds.Width + Math.Abs(transform.PY) * bounds.Height) * .5f
+                        - model.Top * meters * transform.CosPitch * transform.InverseFocal;
+                    perspectiveModels.Add((model, transform, closest));
+                }
+                perspectiveModels.Sort(static (a, b) => a.Near.CompareTo(b.Near));
+                foreach (var (model, transform, _) in perspectiveModels)
+                    buildings.Draw(pixels, model, transform, colors.Materials[model.Seed % (uint)colors.Materials.Length]);
+            }
+            else
+            {
+                foreach (var (tile, transform, _) in visible)
+                foreach (var building in tile.Buildings)
+                    buildings.Draw(pixels, building, transform, colors.Materials[building.Seed % (uint)colors.Materials.Length]);
+            }
             bitmap.NotifyPixelsChanged();
         }
         if (photoUnderlay is not null)
@@ -140,16 +173,34 @@ public sealed partial class PixelMapRenderer : IDisposable
 
     private void DrawGround(SKCanvas surface, MapCamera camera, int pixelSize, PixelPalette colors, bool overlay)
     {
+        Span<SKPoint> polygon = stackalloc SKPoint[16];
         foreach (var (tile, transform, scale) in visible)
         {
+            int count = transform.VisiblePolygon(bitmap!.Width, bitmap.Height, polygon);
+            if (count < 3) continue;
             surface.Save();
             var matrix = transform.Matrix;
             surface.SetMatrix(in matrix);
-            surface.ClipRect(new SKRect(0, 0, TileGeometry.Extent, TileGeometry.Extent));
+            if (transform.Perspective)
+            {
+                SetClip(polygon[..count]);
+                surface.ClipPath(tileClip);
+            }
+            else surface.ClipRect(new SKRect(0, 0, TileGeometry.Extent, TileGeometry.Extent));
             if (camera.Zoom >= 12 && camera.Pitch >= 1) UpdateShadowSources(tile);
-            terrain.Draw(surface, tile, scale, pixelSize, camera.Pitch >= 1, overlay, colors, this);
+            if (transform.Perspective)
+                terrain.DrawPerspective(surface, tile, transform, bitmap.Width, bitmap.Height,
+                    pixelSize, camera.Pitch >= 1, overlay, colors, this);
+            else terrain.Draw(surface, tile, scale, pixelSize, camera.Pitch >= 1, overlay, colors, this);
             surface.Restore();
         }
+    }
+
+    private void SetClip(ReadOnlySpan<SKPoint> polygon)
+    {
+        tileClip.Rewind(); tileClip.MoveTo(polygon[0]);
+        for (int i = 1; i < polygon.Length; i++) tileClip.LineTo(polygon[i]);
+        tileClip.Close();
     }
 
     private bool DrawImagery(SKCanvas surface, int width, int height, int pixelSize, MapCamera camera, IReadOnlyList<ImageryTile> imagery)
@@ -161,6 +212,7 @@ public sealed partial class PixelMapRenderer : IDisposable
         // Lower-resolution ancestors fill first, detailed children replace only their own area.
         imageryOrder.Sort(static (a, b) => a.Id.Z.CompareTo(b.Id.Z));
         var rect = new SKRect(0, 0, TileGeometry.Extent, TileGeometry.Extent);
+        Span<SKPoint> polygon = stackalloc SKPoint[16];
         foreach (var tile in imageryOrder)
         {
             var copies = projection.Copies(tile.Id);
@@ -168,15 +220,16 @@ public sealed partial class PixelMapRenderer : IDisposable
             for (int i = copies.First; i <= copies.Last; i++)
             {
                 var (transform, _) = projection.Get(tile.Id, i);
+                int count = transform.VisiblePolygon(bitmap!.Width, bitmap.Height, polygon);
+                if (count < 3) continue;
                 surface.Save();
                 var matrix = transform.Matrix;
                 surface.SetMatrix(in matrix);
+                if (transform.Perspective) { SetClip(polygon[..count]); surface.ClipPath(tileClip); }
                 surface.DrawImage(image, rect, Nearest);
                 surface.Restore();
-                earthCoverage.MoveTo(transform.At(0, 0));
-                earthCoverage.LineTo(transform.At(rect.Right, 0));
-                earthCoverage.LineTo(transform.At(rect.Right, rect.Bottom));
-                earthCoverage.LineTo(transform.At(0, rect.Bottom));
+                earthCoverage.MoveTo(transform.At(polygon[0].X, polygon[0].Y));
+                for (int j = 1; j < count; j++) earthCoverage.LineTo(transform.At(polygon[j].X, polygon[j].Y));
                 earthCoverage.Close();
             }
         }
@@ -313,6 +366,7 @@ public sealed partial class PixelMapRenderer : IDisposable
         foreach (var label in tile.Labels)
         {
             if (label.Street && zoom < 15 || label.Priority > 9 && zoom < 9) continue;
+            if (transform.Weight(label.Point.X, label.Point.Y) < MapCamera.Near || transform.Weight(label.Point.X, label.Point.Y) > transform.Far) continue;
             var screen = transform.At(label.Point.X, label.Point.Y);
             if (label.Street && buildings.Covers(screen.X, screen.Y)) continue;
             screen.X *= pixelSize; screen.Y *= pixelSize;
@@ -368,11 +422,12 @@ public sealed partial class PixelMapRenderer : IDisposable
             ReleasePatterns();
             foreach (var tile in geometry.Values) tile.Dispose();
             geometry.Clear();
+            routeOverlay?.Dispose();
             terrain.Clear();
             foreach (var dash in dashes.Values) dash.Dispose();
             dashes.Clear();
             lastPicture?.Dispose();
-            earth.Dispose(); earthCoverage.Dispose(); shadowMask.Dispose(); ground?.Dispose(); bitmap?.Dispose(); paint.Dispose(); font.Dispose();
+            earth.Dispose(); earthCoverage.Dispose(); tileClip.Dispose(); shadowMask.Dispose(); ground?.Dispose(); bitmap?.Dispose(); paint.Dispose(); font.Dispose();
         }
     }
 }

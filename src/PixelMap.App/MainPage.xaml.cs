@@ -15,6 +15,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using PixelMap.Data;
 using PixelMap.Rendering;
+using PixelMap.Routing;
 using Windows.System;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -23,6 +24,7 @@ namespace PixelMap.App;
 public sealed partial class MainPage : Page
 {
     private static readonly HttpClient SearchHttp = new() { Timeout = TimeSpan.FromSeconds(12) };
+    private static readonly HttpClient RoutingHttp = new() { Timeout = TimeSpan.FromSeconds(35) };
     private static readonly MapPlace[] Destinations =
     [
         new("Lower Manhattan", "New York City, United States", 40.7087, -74.0104, 16.5),
@@ -39,13 +41,19 @@ public sealed partial class MainPage : Page
     private CancellationTokenSource? _request;
     private PanelKind _panel;
     private long _lastReadout;
-    private bool _restored;
+    private bool _restored, _journeysOpen;
+    private MapPlace? _selectedPlace;
 
-    private enum PanelKind { Closed, Guide, Search, Help, Share }
+    private enum PanelKind { Closed, Guide, Search, Help, Share, Camera }
 
     public MainPage()
     {
         InitializeComponent();
+        if (OperatingSystem.IsBrowser()) Map.AttachAudioDevice(new PixelMap.Audio.BrowserAudioDevice());
+        JourneyPanel.Attach(Map, _geocoder, new RoutePlanner(RoutingHttp, Map.VectorTiles));
+        JourneyPanel.CloseRequested += (_, _) => DisplayJourneys(false);
+        JourneyPanel.PickingChanged += (_, _) => LayoutJourneys();
+        JourneyPanel.SizeChanged += (_, _) => UpdateNavigationInsets();
         SizeChanged += (_, e) => LayoutChrome(e.NewSize.Width, e.NewSize.Height);
         Loaded += (_, _) =>
         {
@@ -70,6 +78,10 @@ public sealed partial class MainPage : Page
         var narrow = width < 600;
         var inset = narrow ? 8 : 16;
         SearchOverlay.Margin = MapTools.Margin = SceneDock.Margin = new Thickness(inset);
+        JourneyPanel.Margin = PickBanner.Margin = new Thickness(inset);
+        JourneyPanel.Width = Math.Max(140, Math.Min(350, width - 2 * inset));
+        JourneyPanel.MaxHeight = narrow && height > 420 ? Math.Clamp(height * .54, 230, 470) : Math.Max(150, height - 115);
+        PickBanner.MaxWidth = Math.Max(160, width - 2 * inset);
         SearchOverlay.Width = Math.Max(120, Math.Min(344, width - 2 * inset));
         Header.Padding = new Thickness(narrow ? 8 : 16, narrow ? 6 : 9, narrow ? 8 : 16, narrow ? 6 : 9);
         BrandCaption.Visibility = width < 360 ? Visibility.Collapsed : Visibility.Visible;
@@ -83,11 +95,13 @@ public sealed partial class MainPage : Page
         ToolStack.Orientation = height < 420 ? Orientation.Horizontal : Orientation.Vertical;
         ToolDivider.Visibility = height < 420 ? Visibility.Collapsed : Visibility.Visible;
         if (narrow && height < 420) PlaceCard.Visibility = Visibility.Collapsed;
+        UpdateNavigationInsets();
     }
 
     private void SyncReadout()
     {
         var camera = Map.Camera;
+        PerspectiveItem.IsChecked = camera.Perspective;
         var status = Map.StatusText;
         var location = FormattableString.Invariant($"{camera.Latitude:0.0000}°, {camera.Longitude:0.0000}°");
         Status.Text = FormattableString.Invariant($"{status}   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
@@ -95,6 +109,13 @@ public sealed partial class MainPage : Page
         double bearing = camera.Bearing * Math.PI / 180;
         CompassTransform.Angle = Math.Atan2(-Math.Sin(bearing), Math.Cos(bearing) * Math.Cos(camera.Pitch * Math.PI / 180)) * 180 / Math.PI;
         double metersPerPixel = 40075016.68557849 * Math.Cos(camera.Latitude * Math.PI / 180) / (512 * Math.Pow(2, camera.Zoom));
+        if (camera.Perspective && Map.ActualWidth > 80 && Map.ActualHeight > 32 &&
+            camera.TryUnproject(Map.ActualWidth / 2 - 40, Map.ActualHeight - 32, Map.ActualWidth, Map.ActualHeight, out var left) &&
+            camera.TryUnproject(Map.ActualWidth / 2 + 40, Map.ActualHeight - 32, Map.ActualWidth, Map.ActualHeight, out var right))
+        {
+            double groundScale = new RoutePoint(left.Latitude, left.Longitude).DistanceTo(new RoutePoint(right.Latitude, right.Longitude)) / 80;
+            if (double.IsFinite(groundScale) && groundScale > 0) metersPerPixel = groundScale;
+        }
         var magnitude = Math.Pow(10, Math.Floor(Math.Log10(80 * metersPerPixel)));
         var steps = 80 * metersPerPixel / magnitude;
         var distance = magnitude * (steps >= 5 ? 5 : steps >= 2 ? 2 : 1);
@@ -103,8 +124,9 @@ public sealed partial class MainPage : Page
             ? FormattableString.Invariant($"{distance / 1000:0.#} km")
             : FormattableString.Invariant($"{distance:0.#} m");
         ProjectionShortcut.Content = camera.Pitch < 1 ? "2D" : "3D";
-        AutomationProperties.SetName(ProjectionShortcut, camera.Pitch < 1 ? "Switch to 3D isometric" : "Switch to 2D overhead");
-        ProjectionItem.Text = camera.Pitch < 1 ? "Switch to isometric view" : "Switch to overhead view";
+        var angledView = camera.Perspective ? "perspective" : "isometric";
+        AutomationProperties.SetName(ProjectionShortcut, camera.Pitch < 1 ? $"Switch to 3D {angledView}" : "Switch to 2D overhead");
+        ProjectionItem.Text = camera.Pitch < 1 ? $"Switch to {angledView} view" : "Switch to overhead view";
     }
 
     private void OnNorth(object sender, RoutedEventArgs e) => Map.RotateBy(-Math.IEEERemainder(Map.Camera.Bearing, 360));
@@ -113,6 +135,14 @@ public sealed partial class MainPage : Page
     private void OnRotateLeft(object sender, RoutedEventArgs e) => Map.RotateBy(-45);
     private void OnRotateRight(object sender, RoutedEventArgs e) => Map.RotateBy(45);
     private void OnProjection(object sender, RoutedEventArgs e) => Map.ToggleProjection();
+
+    private void OnPerspective(object sender, RoutedEventArgs e) => ChooseCamera(Map.Camera with { Perspective = PerspectiveItem.IsChecked });
+
+    private void ChooseCamera(MapCamera camera)
+    {
+        Map.Journey.Follow = false;
+        Map.FlyTo(camera);
+    }
 
     private void OnPalette(object sender, RoutedEventArgs e)
     {
@@ -152,6 +182,13 @@ public sealed partial class MainPage : Page
         if (_restored) return;
         _restored = true;
         var page = CurrentPageUri();
+        if (page?.Fragment.Split('/') is ["#journey", var name] && Enum.TryParse<TravelMode>(name, true, out var mode) &&
+            mode.ToString().Equals(name, StringComparison.OrdinalIgnoreCase))
+        {
+            DisplayJourneys(true);
+            JourneyPanel.LoadDemo(mode);
+            return;
+        }
         if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette, out var earth)) return;
         SetPalette(palette);
         SetBaseLayer(earth);
@@ -163,7 +200,7 @@ public sealed partial class MainPage : Page
     {
         var page = CurrentPageUri() ?? new Uri("https://wieslawsoltes.github.io/UnoPixelMap/");
         var url = MapViewLink.Create(page, Map.Camera, Map.Palette, Map.IsEarthImageryEnabled).AbsoluteUri;
-        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link opens the same map position, base layer, projection and lighting.");
+        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link opens the same map position, base layer, lens, projection and lighting.");
         var field = new TextBox { Text = url, IsReadOnly = true, HorizontalAlignment = HorizontalAlignment.Stretch };
         AutomationProperties.SetName(field, "Shareable map link");
         field.GotFocus += (_, _) => field.SelectAll();
@@ -188,6 +225,70 @@ public sealed partial class MainPage : Page
         Rows.Children.Add(copy);
     }
 
+    private void OnJourneys(object sender, RoutedEventArgs e) => DisplayJourneys(true);
+
+    private void DisplayJourneys(bool show)
+    {
+        _journeysOpen = show;
+        if (show)
+        {
+            CloseDrawer();
+            JourneyPanel.Open(_selectedPlace);
+        }
+        else JourneyPanel.Hide();
+        LayoutJourneys();
+    }
+
+    private void LayoutJourneys()
+    {
+        bool pick = _journeysOpen && JourneyPanel.IsPicking;
+        JourneyPanel.Visibility = _journeysOpen && !pick ? Visibility.Visible : Visibility.Collapsed;
+        SearchOverlay.Visibility = _journeysOpen ? Visibility.Collapsed : Visibility.Visible;
+        PickBanner.Visibility = pick ? Visibility.Visible : Visibility.Collapsed;
+        if (pick) PickText.Text = JourneyPanel.PickingPrompt;
+        UpdateNavigationInsets();
+    }
+
+    private void UpdateNavigationInsets()
+    {
+        var insets = new Thickness(0);
+        if (_journeysOpen && JourneyPanel.Visibility == Visibility.Visible && JourneyPanel.ActualWidth > 0 && JourneyPanel.ActualHeight > 0)
+        {
+            insets = ActualWidth < 600
+                ? new Thickness(0, JourneyPanel.Margin.Top + JourneyPanel.ActualHeight + 8, 0, 0)
+                : new Thickness(JourneyPanel.Margin.Left + JourneyPanel.ActualWidth + 8, 0, 0, 0);
+        }
+        if (!Map.NavigationInsets.Equals(insets)) Map.NavigationInsets = insets;
+    }
+
+    private void OnCancelPick(object sender, RoutedEventArgs e) => JourneyPanel.StopPicking();
+
+    private void OnCameraTools(object sender, RoutedEventArgs e)
+    {
+        if (_panel == PanelKind.Camera) { CloseDrawer(); return; }
+        ShowPanel(PanelKind.Camera, "CAMERA", "Right-drag to orbit and tilt around the map.");
+        AddCameraAction("North-up plan", () => ChooseCamera(Map.Camera with { Bearing = 0, Pitch = 0, Perspective = false }));
+        AddCameraAction("Isometric · 55°", () => ChooseCamera(Map.Camera with { Bearing = -35, Pitch = 55, Perspective = false }));
+        AddCameraAction("Low skyline · 70°", () => ChooseCamera(Map.Camera with { Pitch = 70, Perspective = true }));
+        AddCameraAction("Bird’s-eye · 30°", () => ChooseCamera(Map.Camera with { Pitch = 30, Perspective = true }));
+        var orbit = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
+        foreach (var (text, bearing, pitch) in new[] { ("Left", -15d, 0d), ("Right", 15d, 0d), ("Tilt -", 0d, -10d), ("Tilt +", 0d, 10d) })
+        {
+            var button = new Button { Content = text, Padding = new Thickness(8, 4, 8, 4) };
+            AutomationProperties.SetName(button, "Camera " + text);
+            button.Click += (_, _) => Map.OrbitBy(bearing, pitch);
+            orbit.Children.Add(button);
+        }
+        Rows.Children.Add(orbit);
+    }
+
+    private void AddCameraAction(string label, Action apply)
+    {
+        var button = new Button { Content = label, Background = _rowFill, HorizontalAlignment = HorizontalAlignment.Stretch };
+        button.Click += (_, _) => apply();
+        Rows.Children.Add(button);
+    }
+
     private void OnGuide(object sender, RoutedEventArgs e)
     {
         if (_panel == PanelKind.Guide) { CloseDrawer(); return; }
@@ -201,6 +302,7 @@ public sealed partial class MainPage : Page
         AddHelp("Browse", "Drag to pan, scroll or pinch to zoom. Tap the map to inspect a location.");
         AddHelp("Change perspective", "Use the curved arrows to rotate. Switch projection or lighting in View.");
         AddHelp("Keyboard", "Focus the map. Use arrows to pan, + and − to zoom, Q and E to rotate, P to switch projection, or Home to return to Manhattan.");
+        AddHelp("Journeys", "Use Route beside search. Choose stops or try a vehicle demo. Preview, take control, or jump to a turn.");
         AddHelp("Drop a pin", "Enter latitude, longitude in the search field and press Enter.");
     }
 
@@ -312,6 +414,7 @@ public sealed partial class MainPage : Page
     private void NavigateTo(MapPlace place)
     {
         CloseDrawer();
+        _selectedPlace = place;
         Destination.Text = place.Name;
         Map.SetMarker(place.Latitude, place.Longitude, place.Name);
         Map.FlyTo(place.Latitude, place.Longitude, place.Zoom);
@@ -319,6 +422,7 @@ public sealed partial class MainPage : Page
 
     private void ShowPanel(PanelKind kind, string heading, string note)
     {
+        DisplayJourneys(false);
         CancelRequest();
         _panel = kind;
         Rows.Children.Clear();
@@ -350,7 +454,7 @@ internal static class MapViewLink
     internal static Uri Create(Uri page, MapCamera camera, PixelStyle palette, bool earth) =>
         new UriBuilder(page)
         {
-            Fragment = FormattableString.Invariant($"v2/{camera.Latitude:F6}/{camera.Longitude:F6}/{camera.Zoom:F3}/{Math.IEEERemainder(camera.Bearing, 360):F2}/{camera.Pitch:F2}/{palette}/{(earth ? "Earth" : "Map")}")
+            Fragment = FormattableString.Invariant($"v3/{camera.Latitude:F6}/{camera.Longitude:F6}/{camera.Zoom:F3}/{Math.IEEERemainder(camera.Bearing, 360):F2}/{camera.Pitch:F2}/{palette}/{(earth ? "Earth" : "Map")}/{(camera.Perspective ? "Perspective" : "Orthographic")}/{camera.TargetAltitudeMeters:F1}")
         }.Uri;
 
     internal static bool TryRead(Uri page, out MapCamera camera, out PixelStyle palette, out bool earth)
@@ -359,7 +463,17 @@ internal static class MapViewLink
         palette = PixelStyle.Day;
         earth = false;
         var fields = page.Fragment.Split('/');
-        if (fields is ["#v2", _, _, _, _, _, _, "Map" or "Earth"])
+        bool perspective = false;
+        double targetAltitude = 0;
+        if (fields is ["#v3", _, _, _, _, _, _, "Map" or "Earth", "Perspective" or "Orthographic"] or
+            ["#v3", _, _, _, _, _, _, "Map" or "Earth", "Perspective" or "Orthographic", _])
+        {
+            earth = fields[7] == "Earth";
+            perspective = fields[8] == "Perspective";
+            if (fields.Length == 10 && (!double.TryParse(fields[9], NumberStyles.Float, CultureInfo.InvariantCulture, out targetAltitude) ||
+                !double.IsFinite(targetAltitude) || targetAltitude is < 0 or > 15000)) return false;
+        }
+        else if (fields is ["#v2", _, _, _, _, _, _, "Map" or "Earth"])
             earth = fields[7] == "Earth";
         else if (fields is not ["#v1", _, _, _, _, _, _]) return false;
         Span<double> numbers = stackalloc double[5];
@@ -370,7 +484,7 @@ internal static class MapViewLink
             numbers[2] < MapCamera.MinZoom || numbers[2] > MapCamera.MaxZoom || Math.Abs(numbers[3]) > 360 ||
             numbers[4] is < 0 or > 72 || !Enum.TryParse(fields[6], out palette) || !Enum.IsDefined(palette))
             return false;
-        camera = new MapCamera(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4]);
+        camera = new MapCamera(numbers[0], numbers[1], numbers[2], numbers[3], numbers[4], perspective, targetAltitude);
         return true;
     }
 }

@@ -23,9 +23,16 @@ internal readonly struct TileProjection(MapCamera camera, int width, int height,
         double x = ((double)id.X / n + copy - camera.CenterX) * world;
         double y = ((double)id.Y / n - camera.CenterY) * world;
         float scale = (float)(world / (n * TileGeometry.Extent));
-        return (new((float)(width * .5 / pixelSize + bearing.C * x + bearing.S * y),
-            (float)(height * .5 / pixelSize + (-bearing.S * x + bearing.C * y) * tilt),
-            (float)(scale * bearing.C), (float)(scale * bearing.S),
-            (float)(-scale * bearing.S * tilt), (float)(scale * bearing.C * tilt)), scale);
+        double cx = width * .5 / pixelSize, cy = height * .5 / pixelSize;
+        double u = bearing.C*x + bearing.S*y, v = -bearing.S*x + bearing.C*y;
+        double sp = Math.Sin(camera.PitchRadians);
+        double lens = camera.Perspective ? pixelSize / MapCamera.Focal(height) : 0;
+        double groundZ = -camera.TargetPixels / pixelSize;
+        double pw = 1 - (v*sp + groundZ*tilt)*lens, px = scale*bearing.S*sp*lens, py = -scale*bearing.C*sp*lens;
+        return (new((float)(cx*pw + u), (float)(cy*pw + v*tilt-groundZ*sp),
+            (float)(cx*px + scale*bearing.C), (float)(cx*py + scale*bearing.S),
+            (float)(cy*px - scale*bearing.S*tilt), (float)(cy*py + scale*bearing.C*tilt),
+            (float)px,(float)py,(float)pw,(float)cx,(float)cy,(float)lens,(float)sp,(float)tilt,(float)-groundZ,(float)camera.FarLimit(height)),
+            (float)(scale/camera.GroundDistance(height)));
     }
 }

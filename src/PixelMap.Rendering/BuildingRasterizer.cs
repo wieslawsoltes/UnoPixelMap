@@ -2,14 +2,8 @@ using SkiaSharp;
 
 namespace PixelMap.Rendering;
 
-internal readonly record struct TileTransform(float X, float Y, float XX, float XY, float YX, float YY)
-{
-    public SKPoint At(float x, float y) => new(X + XX * x + XY * y, Y + YX * x + YY * y);
-    public SKMatrix Matrix => new(XX, XY, X, YX, YY, Y, 0, 0, 1);
-}
-
 /// <summary>Depth-tested orthographic extrusion at the pixel-art resolution.</summary>
-internal sealed class BuildingRasterizer
+internal sealed partial class BuildingRasterizer
 {
     // Apartment/office lights repeat in two-bay groups with a different phase per model.
     private static readonly byte[] Rooms = CreateRooms();
@@ -31,21 +25,38 @@ internal sealed class BuildingRasterizer
     private int width, height;
     private float vertical, pixelsPerMeter;
 
-    public void Begin(int w, int h, float sinPitch, float scale)
+    public void Begin(int w, int h, float sinPitch, float scale, bool perspective = false)
     {
         width = w; height = h; vertical = sinPitch; pixelsPerMeter = scale;
+        usingPerspective = perspective;
+        if (perspective)
+        {
+            if (inverseDepth.Length < w*h) inverseDepth = new float[w*h];
+            else Array.Clear(inverseDepth, 0, w*h);
+            BeginOcclusion(w, h);
+        }
         if (depth.Length < w * h) depth = new float[w * h];
         else Array.Clear(depth, 0, w * h);
     }
 
-    public bool Covers(float sx, float sy)
+    public bool Covers(float sx, float sy) => CoversAt(sx, sy, 4);
+
+    public bool CoversAt(float sx, float sy, float altitudeMeters)
     {
         int x = (int)MathF.Floor(sx), y = (int)MathF.Floor(sy);
-        return (uint)x < (uint)width && (uint)y < (uint)height && depth[y * width + x] > pixelsPerMeter * 4;
+        if ((uint)x >= (uint)width || (uint)y >= (uint)height) return false;
+        int offset = y*width+x;
+        if (!usingPerspective) return depth[offset] > pixelsPerMeter*altitudeMeters;
+        if (inverseDepth[offset] <= 0) return false;
+        float plane = depthLens.CosPitch - (altitudeMeters*pixelsPerMeter-depthLens.TargetZ)*depthLens.InverseFocal;
+        if (Math.Abs(plane) < 1e-7f) return false;
+        float inv = (depthLens.CosPitch + (sy-depthLens.CY)*depthLens.SinPitch*depthLens.InverseFocal)/plane;
+        return inverseDepth[offset] > inv+1e-5f;
     }
 
     public void Draw(Span<uint> pixels, in Building building, in TileTransform transform, Material material)
     {
+        if (transform.Perspective) { DrawPerspective(pixels, building, transform, material); return; }
         float top = building.Top * pixelsPerMeter;
         float bottom = building.Bottom * pixelsPerMeter;
         float rise = top * vertical, baseRise = bottom * vertical;

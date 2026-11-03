@@ -6,5 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../PixelMap.Rendering/PixelMap.Rendering.csproj" />
+    <ProjectReference Include="../PixelMap.Simulation/PixelMap.Simulation.csproj" />
+    <ProjectReference Include="../PixelMap.Audio/PixelMap.Audio.csproj" />
   </ItemGroup>
 </Project>
