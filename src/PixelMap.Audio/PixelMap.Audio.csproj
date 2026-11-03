@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><AllowUnsafeBlocks>true</AllowUnsafeBlocks></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../PixelMap.Simulation/PixelMap.Simulation.csproj" /></ItemGroup>
+</Project>
