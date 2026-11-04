@@ -49,6 +49,7 @@ public sealed partial class PixelMapControl
             }
             if (!_terrainGpuRequested) _terrainGpuFailed = false;
             _terrainGpuRequested = true;
+            bool redraw = _terrainGpuFailed || _gpuReady is null;
             if (!_terrainGpuFailed)
             {
                 var (width, height) = TerrainViewport;
@@ -60,6 +61,7 @@ public sealed partial class PixelMapControl
                     reusable.Request.Scene = scene;
                     SetReadyGpuPresentation(reusable);
                     _terrainGpu?.CancelRequest();
+                    redraw = true;
                 }
                 else if (_terrainGpu is null)
                 {
@@ -73,7 +75,9 @@ public sealed partial class PixelMapControl
                 }
                 else _terrainGpu.RequestFrame(scene, width, height, pixelSize);
             }
-            Invalidate();
+            // Camera input coalesces while the current image and overlays are displayed.
+            // Publish invalidates the foreground once matching artwork is available.
+            if (redraw) Invalidate();
         }
 
         private void ReleaseGpuTerrain()
@@ -167,7 +171,7 @@ public sealed partial class PixelMapControl
             var scene = presentation.Request.Scene;
             canvas.Save();
             canvas.ClipRect(new SKRect(0, 0, (float)area.Width, (float)area.Height));
-            if (layers.Background is SolidColorBrush backdrop)
+            if ((frame.Width < area.Width || frame.Height < area.Height) && layers.Background is SolidColorBrush backdrop)
             {
                 var color = backdrop.Color;
                 canvas.DrawColor(new SKColor(color.R, color.G, color.B, color.A));
@@ -265,6 +269,7 @@ public sealed partial class PixelMapControl
             {
                 _owner = owner;
                 IsHitTestVisible = false;
+                Opacity = 0;
                 HorizontalAlignment = HorizontalAlignment.Left;
                 VerticalAlignment = VerticalAlignment.Top;
                 if (Background is ImageBrush readbackBrush) readbackBrush.Opacity = 0;
@@ -318,6 +323,9 @@ public sealed partial class PixelMapControl
                     Opacity = 0;
                     return;
                 }
+                // A visible GL visual already has a paint scheduled. That callback
+                // reads the latest coalesced request, including viewport changes.
+                if (Opacity == 1) return;
                 Opacity = 1;
                 Invalidate();
             }
@@ -333,27 +341,32 @@ public sealed partial class PixelMapControl
                     }
                     try
                     {
-                        if (readback.TryGetCompleted(out var completed))
+                        if (readback.TryGetReadyForCopy(out var ready))
                         {
-                            while (_submissions.TryPeek(out var older) && older.Version < completed.Version)
-                                _submissions.Dequeue().Dispose();
-                            if (!_submissions.TryPeek(out var submission) || submission.Version != completed.Version ||
-                                submission.Request is not { } request || submission.Frame is not { } frame)
+                            GpuSubmission? submission = null;
+                            foreach (var candidate in _submissions)
+                                if (candidate.Version == ready.Version) submission = candidate;
+                            bool retired;
+                            if (submission is not { Request: { } request, Frame: { } frame })
                             {
-                                readback.DiscardCompleted(completed);
-                                if (submission?.Version == completed.Version) _submissions.Dequeue().Dispose();
+                                retired = readback.TryDiscardReady(ready);
                             }
                             else
                             {
-                                if (completed.Width != request.ArtWidth || completed.Height != request.ArtHeight)
-                                    throw new InvalidOperationException("The completed GPU transfer does not match its retained viewport.");
-                                var image = readback.ReadCompleted(completed);
-                                _submissions.Dequeue();
+                                if (ready.Width != request.ArtWidth || ready.Height != request.ArtHeight)
+                                    throw new InvalidOperationException("The selected GPU transfer does not match its retained viewport.");
+                                var image = readback.ReadCompleted(ready);
                                 submission.Frame = null;
-                                if (_requestVersion == completed.Version) _request = null;
+                                if (_requestVersion == ready.Version) _request = null;
                                 _owner.PublishGpuArtwork(this, request, frame, image,
                                     Stopwatch.GetElapsedTime(submission.Started).TotalMilliseconds, bottomUp: true);
+                                retired = true;
                             }
+                            // Keep managed occupancy aligned with the native slots. A
+                            // canceled unsignaled transfer still owns its queue entry.
+                            if (retired)
+                                while (_submissions.TryPeek(out var older) && older.Version <= ready.Version)
+                                    _submissions.Dequeue().Dispose();
                         }
                         if (_submissions.Count == 0) _readbackTimer.Stop();
                         ScheduleGeometry();
@@ -413,6 +426,9 @@ public sealed partial class PixelMapControl
                     _engine = new GlMapRenderer(gl);
                     Renderer = new PixelMapRenderer();
                     _browserReadback = BrowserGpuReadback.TryCreate();
+                    // Uno retains its private backbuffer for the readback callback. The
+                    // asynchronous host does not observe or present that bitmap.
+                    if (_browserReadback is not null && Background is ImageBrush brush) brush.ImageSource = null;
                 }
                 catch (Exception error)
                 {
@@ -430,6 +446,9 @@ public sealed partial class PixelMapControl
                         // Uno reads its backbuffer even when no geometry is pending. A
                         // scoped selection also suppresses those already queued paints.
                         _browserReadback?.SelectSurface();
+                        // Framebuffer resizing attaches a new bitmap to the brush.
+                        if (_browserReadback is not null && Background is ImageBrush { ImageSource: not null } brush)
+                            brush.ImageSource = null;
                         if (_retired || _request is not { } request || _renderedVersion == _requestVersion ||
                             Renderer is null || _engine is null)
                         {

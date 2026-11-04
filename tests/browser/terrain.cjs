@@ -47,11 +47,12 @@ function hasTerrain(frame) {
     return result.colors > 35 && result.deviation > 12 && result.brightness > 35 && result.blackRatio < .02;
 }
 
-function changed(before, after) {
+function changed(before, after, overlay) {
     assert.equal(before.width, after.width);
     assert.equal(before.height, after.height);
     let count = 0, difference = 0;
     scene(before, (x, y) => {
+        if (overlay && x >= overlay.left && x <= overlay.right && y >= overlay.top && y <= overlay.bottom) return;
         if (color(before, x, y) !== color(after, x, y)) difference++;
         count++;
     });
@@ -127,6 +128,20 @@ async function open(context, address) {
     if (process.env.PIXELMAP_GPU === "1") await page.addInitScript(() => {
         const counts = window.pixelMapTerrainGpu = {depthDraws: 0, artViewports: {}, readbacks: 0,
             asynchronousReadbacks: 0, clientMemoryReadbacks: 0};
+        // Capture the native module's manager without relying on the public .NET
+        // Module proxy. The one-shot accessor disappears before any frame is sent.
+        const readbacks = window.pixelMapTerrainReadbacks = {manager: null, originalPoll: null, suppressedPolls: 0};
+        Object.defineProperty(Object.prototype, "pixelMapReadbacks", {
+            configurable: true,
+            get() { return undefined; },
+            set(manager) {
+                Object.defineProperty(this, "pixelMapReadbacks", {
+                    value: manager, writable: true, configurable: true, enumerable: true
+                });
+                delete Object.prototype.pixelMapReadbacks;
+                readbacks.manager = manager;
+            }
+        });
         const terrainContexts = new WeakSet();
         const prototype = WebGL2RenderingContext.prototype;
         for (const name of ["drawElements", "drawElementsInstanced", "drawArrays", "drawArraysInstanced"]) {
@@ -241,6 +256,111 @@ async function inspectTerrain(page) {
     await page.keyboard.press("Escape");
 }
 
+function markerBorder(frame, point) {
+    const pixels = [];
+    for (let y = point.y - 85; y < point.y + 35; y++)
+        for (let x = point.x - 140; x < point.x + 140; x++)
+            if (color(frame, x, y) === 0xf6c069) pixels.push(y * frame.width + x);
+    return pixels;
+}
+
+async function inspectPendingTerrain(page) {
+    await page.waitForFunction(() => {
+        const manager = window.pixelMapTerrainReadbacks?.manager;
+        return manager?.surfaces.size > 0 && [...manager.surfaces.values()].every(state =>
+            !state.failed && !state.armed && !state.ready && state.slots.every(slot => !slot.frame));
+    }, undefined, {timeout: 30000});
+    await page.waitForTimeout(400);
+    await page.evaluate(() => {
+        const readbacks = window.pixelMapTerrainReadbacks;
+        readbacks.originalPoll = readbacks.manager.poll;
+        readbacks.suppressedPolls = 0;
+        readbacks.manager.poll = function () {
+            readbacks.suppressedPolls++;
+            return 0;
+        };
+    });
+
+    let reference;
+    try {
+        const point = {x: 800, y: 350};
+        const marker = snapshot => snapshot.split("\n").find(line =>
+            / · -?\d+ m elevation/.test(line) && !/ · z[\d.]+ · /.test(line))?.trim();
+        await page.mouse.click(point.x, point.y);
+        const label = marker(await see(page, snapshot => marker(snapshot)));
+        let border = [];
+        reference = await frameWhere(page, frame => {
+            const current = markerBorder(frame, point);
+            const settled = current.length > 30 && current.length === border.length &&
+                current.every((pixel, index) => pixel === border[index]);
+            border = current;
+            return settled;
+        }, "terrain-pending-pick-reference");
+        const before = await page.locator("body").ariaSnapshot();
+        const cameraPattern = /-?\d+\.\d{4}°, -?\d+\.\d{4}° · z[\d.]+ · -?\d+°/;
+        const camera = before.match(cameraPattern)?.[0];
+        assert.ok(camera, "The public status exposes the live camera before the delayed frame");
+
+        await page.mouse.move(690, 360);
+        await page.mouse.down({button: "right"});
+        await page.mouse.move(780, 378, {steps: 8});
+        await page.mouse.up({button: "right"});
+        await page.mouse.move(600, 20);
+        await see(page, snapshot => {
+            const nextCamera = snapshot.match(cameraPattern)?.[0];
+            return nextCamera && nextCamera !== camera;
+        });
+        await page.waitForFunction(() => {
+            const readbacks = window.pixelMapTerrainReadbacks;
+            return readbacks.suppressedPolls > 0 && [...readbacks.manager.surfaces.values()]
+                .some(state => state.slots.some(slot => slot.frame));
+        });
+        const heldBytes = await page.screenshot();
+        if (evidence) await writeFile(join(evidence, "terrain-pending-pick-held.png"), heldBytes);
+        const held = PNG.sync.read(heldBytes);
+        assert.deepEqual(markerBorder(held, point), border,
+            "The marker remains anchored to the displayed terrain while the live camera changes");
+        // XAML can resample the pin's antialiased edge during a transform update.
+        // Its exact gold-border position is checked separately from map pixels.
+        const pinBounds = {
+            left: Math.min(...border.map(pixel => pixel % reference.width)) - 1,
+            right: Math.max(...border.map(pixel => pixel % reference.width)) + 1,
+            top: Math.floor(border[0] / reference.width) - 1,
+            bottom: Math.floor(border[border.length - 1] / reference.width) + 1
+        };
+        assert.equal(changed(reference, held, pinBounds), 0,
+            "Pending GPU work preserves all displayed terrain pixels outside the pin overlay");
+
+        await page.keyboard.press("Escape");
+        await see(page, snapshot => !snapshot.includes(label));
+        // A repeated point must take the Inspect path, outside the double-tap window.
+        await page.waitForTimeout(400);
+        await page.mouse.click(point.x, point.y);
+        const inspected = await see(page, snapshot => marker(snapshot));
+        assert.equal(marker(inspected), label,
+            "Picking the same displayed pixel returns the same feature and elevation while its replacement is pending");
+        const picked = await frameWhere(page, frame => markerBorder(frame, point).length > 30,
+            "terrain-pending-pick-repeated");
+        // Reprojecting the picked geographic position through the displayed view
+        // checks its coordinates even when Inspect prefers a feature-name label.
+        assert.deepEqual(markerBorder(picked, point), border,
+            "Re-inspection projects the picked coordinates to the same displayed-frame anchor");
+    } finally {
+        await page.evaluate(() => {
+            const readbacks = window.pixelMapTerrainReadbacks;
+            if (readbacks.originalPoll) {
+                readbacks.manager.poll = readbacks.originalPoll;
+                readbacks.originalPoll = null;
+            }
+        });
+    }
+    await page.keyboard.press("Escape");
+    await frameWhere(page, frame => hasTerrain(frame) && changed(reference, frame) > .12,
+        "terrain-pending-pick-resumed");
+    assert.equal(await page.evaluate(() => window.pixelMapTerrainReadbacks.originalPoll), null,
+        "The retained-frame check restores native polling");
+}
+
 async function run() {
     if (evidence) await mkdir(evidence, {recursive: true});
     const browser = await chromium.launch({executablePath: process.env.CHROMIUM_PATH || undefined,
@@ -265,6 +385,7 @@ async function run() {
             "terrain-restored-relief");
         await inspectTerrain(page);
         if (process.env.PIXELMAP_GPU === "1") {
+            await inspectPendingTerrain(page);
             await menu(page, "GPU rendering (experimental)");
             await see(page, snapshot => !/GPU active|CPU fallback/.test(snapshot));
             await frameWhere(page, hasTerrain, "terrain-gpu-disabled");

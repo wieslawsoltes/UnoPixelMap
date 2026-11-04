@@ -160,12 +160,13 @@ public sealed partial class PixelMapControl : UserControl
     private void PositionMarker()
     {
         if (_marker is not { } pin) return;
-        double surface = _terrain?.Elevation.SampleSurfaceMeters(pin.Latitude, pin.Longitude) ?? 0;
-        double altitude = _terrain?.RenderAltitude(Camera, pin.Latitude, pin.Longitude, surface) ?? 0;
+        var view = _surface.GetInteractionView(Camera, _terrain, ActualWidth, ActualHeight);
+        double surface = view.Terrain?.Elevation.SampleSurfaceMeters(pin.Latitude, pin.Longitude) ?? 0;
+        double altitude = view.Terrain?.RenderAltitude(view.Camera, pin.Latitude, pin.Longitude, surface) ?? 0;
         (double X, double Y) projected = default;
-        bool meshPosition = _terrain is not null && _surface.TryProjectTerrain(pin.Latitude, pin.Longitude,
-            (int)Math.Ceiling(ActualWidth), (int)Math.Ceiling(ActualHeight), Camera, out projected);
-        if (!meshPosition && !Camera.TryProject(pin.Latitude, pin.Longitude, altitude, ActualWidth, ActualHeight, out projected))
+        bool meshPosition = view.Terrain is not null && _surface.TryProjectTerrain(pin.Latitude, pin.Longitude,
+            (int)Math.Ceiling(view.Width), (int)Math.Ceiling(view.Height), view.Camera, out projected);
+        if (!meshPosition && !view.Camera.TryProject(pin.Latitude, pin.Longitude, altitude, view.Width, view.Height, out projected))
         {
             _pin.Visibility = Visibility.Collapsed;
             return;
@@ -367,6 +368,17 @@ public sealed partial class PixelMapControl : UserControl
                     height = displayed.Frame.Height;
                 }
                 return renderer.Pick(point.X, point.Y, width, height, scene.Camera, scene.Tiles);
+            }
+        }
+
+        internal InteractionView GetInteractionView(MapCamera camera, TerrainOptions? terrain, double width, double height)
+        {
+            lock (_drawing)
+            {
+                if (_terrainGpuPresented && _gpuDisplayed is { } displayed)
+                    return new(displayed.Frame.Camera, displayed.Request.Scene.Terrain,
+                        displayed.Frame.Width, displayed.Frame.Height);
+                return new(camera, terrain, width, height);
             }
         }
 

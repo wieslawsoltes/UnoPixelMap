@@ -21,6 +21,9 @@ public sealed partial class PixelMapControl
     private TerrainOptions? _terrain;
     private bool UsesElevation => IsTerrainEnabled || IsElevationLayerEnabled;
 
+    private readonly record struct InteractionView(MapCamera Camera, TerrainOptions? Terrain,
+        double Width, double Height);
+
     public bool IsElevationLayerEnabled { get => (bool)GetValue(IsElevationLayerEnabledProperty); set => SetValue(IsElevationLayerEnabledProperty, value); }
     public bool IsTerrainEnabled { get => (bool)GetValue(IsTerrainEnabledProperty); set => SetValue(IsTerrainEnabledProperty, value); }
     public double TerrainExaggeration
@@ -35,13 +38,14 @@ public sealed partial class PixelMapControl
     public bool TryGetLocation(double x, double y, out TerrainHit hit)
     {
         hit = default;
-        if (_terrain is { } terrain)
+        var view = _surface.GetInteractionView(Camera, _terrain, ActualWidth, ActualHeight);
+        if (view.Terrain is { } terrain)
         {
-            if (terrain.Relief && _surface.TryPickTerrain(x, y, (int)Math.Ceiling(ActualWidth),
-                (int)Math.Ceiling(ActualHeight), Camera, out hit)) return true;
-            return Camera.TryUnprojectTerrain(x, y, ActualWidth, ActualHeight, terrain, out hit);
+            if (terrain.Relief && _surface.TryPickTerrain(x, y, (int)Math.Ceiling(view.Width),
+                (int)Math.Ceiling(view.Height), view.Camera, out hit)) return true;
+            return view.Camera.TryUnprojectTerrain(x, y, view.Width, view.Height, terrain, out hit);
         }
-        if (!Camera.TryUnproject(x, y, ActualWidth, ActualHeight, out var location)) return false;
+        if (!view.Camera.TryUnproject(x, y, view.Width, view.Height, out var location)) return false;
         hit = new(location.Latitude, location.Longitude, 0);
         return true;
     }

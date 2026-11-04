@@ -45,9 +45,10 @@ internal sealed class BrowserGpuReadback : IDisposable
         if (_handle != 0) Native.Cancel(_handle);
     }
 
-    /// <summary>Poll with zero timeout. This can run from a timer without making the
-    /// GLCanvas context current or triggering another render.</summary>
-    internal bool TryGetCompleted(out BrowserGpuReadbackFrame frame)
+    /// <summary>Poll with zero timeout and select a transfer for copying. A queued
+    /// transfer can be selected after its latency budget expires, with completion
+    /// deferred to ReadCompleted. This does not change the current GL context.</summary>
+    internal bool TryGetReadyForCopy(out BrowserGpuReadbackFrame frame)
     {
         int status = Check(Native.Poll(Handle, out var result));
         frame = status == 0 ? default : new BrowserGpuReadbackFrame(
@@ -55,7 +56,8 @@ internal sealed class BrowserGpuReadback : IDisposable
         return status != 0;
     }
 
-    /// <summary>Copy the selected completed transfer into immutable RGBA Skia storage.
+    /// <summary>Complete and copy the selected transfer into immutable RGBA Skia storage.
+    /// An overdue transfer applies backpressure here by waiting for its GPU copy.
     /// The image retains GL's bottom-up row order and must be flipped when presented.</summary>
     internal SKImage ReadCompleted(BrowserGpuReadbackFrame frame)
     {
@@ -68,9 +70,10 @@ internal sealed class BrowserGpuReadback : IDisposable
         return SKImage.FromBitmap(bitmap);
     }
 
-    /// <summary>Release a canceled or superseded frame without transferring its pixels.</summary>
-    internal void DiscardCompleted(BrowserGpuReadbackFrame frame) =>
-        Check(Native.Copy(Handle, (uint)frame.Version, (uint)((ulong)frame.Version >> 32), IntPtr.Zero, 0));
+    /// <summary>Release a canceled or superseded frame without copying its pixels.
+    /// False keeps the queued transfers occupied until GPU completion is observed.</summary>
+    internal bool TryDiscardReady(BrowserGpuReadbackFrame frame) =>
+        Check(Native.Copy(Handle, (uint)frame.Version, (uint)((ulong)frame.Version >> 32), IntPtr.Zero, 0)) != 0;
 
     private int Handle
     {

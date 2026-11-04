@@ -81,6 +81,19 @@ async function openDemo(browser, mode, phone = false) {
 async function activate(page, role, name, touch = false) {
     const locator = page.getByRole(role, { name, exact: true });
     await locator.waitFor({state: "visible"});
+    if (role === "menuitem" || role === "menuitemcheckbox") {
+        // A flyout can expose accessibility bounds before its first focus/layout
+        // pass completes. Target its public command with real keyboard input.
+        await locator.focus();
+        const item = await locator.elementHandle();
+        assert.ok(item, "The menu command has a visible element");
+        try {
+            await page.waitForFunction(element => document.activeElement === element, item);
+        } finally { await item.dispose(); }
+        await page.keyboard.press("Enter");
+        await locator.waitFor({state: "hidden"});
+        return;
+    }
     const b = await locator.boundingBox();
     assert.ok(b && b.width > 0 && b.height > 0, "Visible " + name);
     const viewport = page.viewportSize();
