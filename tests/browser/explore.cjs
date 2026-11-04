@@ -57,6 +57,23 @@ async function tap(page, locator, touch = false) {
     else await page.mouse.click((left + right) / 2, y);
 }
 
+async function waitForSettledFocus(page, locator) {
+    const target = await locator.elementHandle();
+    assert.ok(target, "The keyboard target has an accessibility element");
+    try {
+        await page.waitForFunction(async element => {
+            if (!element.isConnected || document.activeElement !== element) return false;
+            for (let frame = 0; frame < 2; frame++) {
+                await new Promise(requestAnimationFrame);
+                if (document.activeElement !== element) return false;
+            }
+            return true;
+        }, target);
+    } finally {
+        await target.dispose();
+    }
+}
+
 async function action(page, name, touch = false) {
     const target = page.getByRole("button", {name, exact: true})
         .or(page.getByRole("checkbox", {name, exact: true}))
@@ -65,6 +82,7 @@ async function action(page, name, touch = false) {
     else {
         await target.waitFor({state: "visible"});
         await target.focus();
+        await waitForSettledFocus(page, target);
         await page.keyboard.press(await target.getAttribute("role") === "switch" ? "Space" : "Enter");
     }
 }
@@ -96,6 +114,9 @@ async function choose(page, name, index, touch = false, selectedIndex = 0) {
         await page.waitForTimeout(75);
         await page.keyboard.press("Enter");
         await page.waitForFunction(name => document.querySelector('[aria-label="' + name + '"]')?.getAttribute("aria-expanded") === "false", name);
+        // Popup closure also restores ComboBox focus. Let that handoff finish
+        // before a following command takes focus and receives its native key.
+        await waitForSettledFocus(page, selector);
         return;
     }
     const options = page.getByRole("listbox", {name, exact: true}).getByRole("option");
