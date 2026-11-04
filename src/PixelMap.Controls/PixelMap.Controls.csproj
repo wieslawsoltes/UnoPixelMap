@@ -1,10 +1,11 @@
 <Project Sdk="Uno.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <UnoFeatures>Skia</UnoFeatures>
+    <UnoFeatures>Skia;GLCanvas</UnoFeatures>
     <IsUnoLibrary>true</IsUnoLibrary>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Uno.WinUI.Graphics3DGL" Version="6.7.135" />
     <ProjectReference Include="../PixelMap.Rendering/PixelMap.Rendering.csproj" />
     <ProjectReference Include="../PixelMap.Simulation/PixelMap.Simulation.csproj" />
     <ProjectReference Include="../PixelMap.Audio/PixelMap.Audio.csproj" />

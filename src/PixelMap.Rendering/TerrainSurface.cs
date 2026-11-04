@@ -16,6 +16,7 @@ internal sealed class TerrainSurface : IDisposable
     private const int MaximumMeshes = 256;
     private readonly Dictionary<TileId, Texture> textures = [];
     private readonly Dictionary<TileId, Mesh> meshes = [];
+    private readonly Dictionary<(TileId Id, int Copy), GpuTerrainMesh> gpuMeshes = [];
     private readonly Dictionary<TileId, (double Low, double High)> bounds = [];
     private readonly List<Patch> patches = [];
     private readonly List<float[]> stitched = [];
@@ -33,11 +34,15 @@ internal sealed class TerrainSurface : IDisposable
     private MapCamera camera;
     private TerrainOptions options = new(ElevationSnapshot.Empty);
     private TileProjection projection;
+    private GpuMapFrame? gpuScene;
+    private GpuTerrainMesh[] previousGpuSelection = [];
+    internal long HeightRevision { get; private set; }
 
     private sealed class Texture(SKBitmap bitmap, SKRect[] earthAreas) : IDisposable
     {
         internal readonly SKBitmap Bitmap = bitmap;
         internal readonly SKRect[] EarthAreas = earthAreas;
+        internal GpuTerrainTexture? Gpu;
         internal long Frame;
         public void Dispose() => Bitmap.Dispose();
     }
@@ -73,20 +78,7 @@ internal sealed class TerrainSurface : IDisposable
         int logicalHeight, int pixelSize, TerrainOptions terrain, bool preservePhotograph,
         Func<TileId, SKBitmap, SKRect[]> bake)
     {
-        frame++;
-        camera = view;
-        options = terrain;
-        width = bitmap.Width;
-        height = bitmap.Height;
-        meters = (float)(camera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
-            Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
-        projection = new(camera, logicalWidth, logicalHeight, pixelSize);
-        if (!ReferenceEquals(elevation, terrain.Elevation))
-        {
-            elevation = terrain.Elevation;
-            meshes.Clear();
-            bounds.Clear();
-        }
+        Prepare(view, logicalWidth, logicalHeight, pixelSize, bitmap.Width, bitmap.Height, terrain);
         int length = checked(width * height);
         if (groundAltitude.Length < length)
         {
@@ -100,24 +92,6 @@ internal sealed class TerrainSurface : IDisposable
         {
             if (photograph.Length < length) { photograph = new uint[length]; photographic = new bool[length]; }
             photographic.AsSpan(0, length).Clear();
-        }
-        SelectPatches();
-        // Process coarser edges first. Fine meshes interpolate those same edges, including
-        // corners already shared with an even coarser neighbour, preventing LOD cracks.
-        patches.Sort(static (a, b) => a.Id.Z.CompareTo(b.Id.Z));
-        heightPatches.Clear();
-        heightZooms.Clear();
-        for (int i = 0; i < patches.Count; i++)
-        {
-            var patch = patches[i];
-            var mesh = GetMesh(patch.Id);
-            if (i == stitched.Count) stitched.Add(new float[Side * Side]);
-            mesh.Heights.CopyTo(stitched[i], 0);
-            Stitch(i, patch, stitched[i]);
-            if (heightZooms.Count == 0 || heightZooms[^1] != patch.Id.Z) heightZooms.Add(patch.Id.Z);
-            if (!heightPatches.TryGetValue(patch.Id, out int other) ||
-                Math.Abs(patch.Left + patch.Size * .5 - camera.CenterX) < Math.Abs(patches[other].Left + patch.Size * .5 - camera.CenterX))
-                heightPatches[patch.Id] = i;
         }
         var pixels = new Span<uint>((void*)bitmap.GetPixels(), length);
         for (int i = 0; i < patches.Count; i++)
@@ -149,6 +123,120 @@ internal sealed class TerrainSurface : IDisposable
         }
         depth.TerrainComplete();
         TrimCaches();
+    }
+
+    private void Prepare(MapCamera view, int logicalWidth, int logicalHeight, int pixelSize,
+        int artWidth, int artHeight, TerrainOptions terrain)
+    {
+        frame++;
+        gpuScene = null;
+        camera = view;
+        options = terrain;
+        width = artWidth;
+        height = artHeight;
+        meters = (float)(camera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
+            Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
+        projection = new(camera, logicalWidth, logicalHeight, pixelSize);
+        if (!ReferenceEquals(elevation, terrain.Elevation))
+        {
+            elevation = terrain.Elevation;
+            meshes.Clear();
+            bounds.Clear();
+        }
+        SelectPatches();
+        // Process coarser edges first. Fine meshes interpolate those same edges, including
+        // corners already shared with an even coarser neighbour, preventing LOD cracks.
+        patches.Sort(static (a, b) => a.Id.Z.CompareTo(b.Id.Z));
+        heightPatches.Clear();
+        heightZooms.Clear();
+        for (int i = 0; i < patches.Count; i++)
+        {
+            var patch = patches[i];
+            var mesh = GetMesh(patch.Id);
+            if (i == stitched.Count) stitched.Add(new float[Side * Side]);
+            mesh.Heights.CopyTo(stitched[i], 0);
+            Stitch(i, patch, stitched[i]);
+            if (heightZooms.Count == 0 || heightZooms[^1] != patch.Id.Z) heightZooms.Add(patch.Id.Z);
+            if (!heightPatches.TryGetValue(patch.Id, out int other) ||
+                Math.Abs(patch.Left + patch.Size * .5 - camera.CenterX) < Math.Abs(patches[other].Left + patch.Size * .5 - camera.CenterX))
+                heightPatches[patch.Id] = i;
+        }
+    }
+
+    internal TerrainGpuDraw[] PrepareGpu(MapCamera view, int logicalWidth, int logicalHeight,
+        int pixelSize, TerrainOptions terrain, Func<TileId, SKBitmap, SKRect[]> bake)
+    {
+        Prepare(view, logicalWidth, logicalHeight, pixelSize, (logicalWidth + pixelSize - 1) / pixelSize,
+            (logicalHeight + pixelSize - 1) / pixelSize, terrain);
+        var draws = new TerrainGpuDraw[patches.Count];
+        var selection = new GpuTerrainMesh[patches.Count];
+        bool changed = previousGpuSelection.Length != patches.Count;
+        for (int i = 0; i < patches.Count; i++)
+        {
+            var patch = patches[i];
+            var source = meshes[patch.Id];
+            var heights = stitched[i];
+            var key = (patch.Id, patch.Copy);
+            gpuMeshes.TryGetValue(key, out var retained);
+            bool update = retained is null;
+            if (retained is not null)
+                for (int vertex = 0; vertex < heights.Length; vertex++)
+                    if (retained.Vertices[vertex * 4 + 2] != heights[vertex] || retained.Vertices[vertex * 4 + 3] != source.Light[vertex])
+                    { update = true; break; }
+            if (update)
+            {
+                var vertices = new float[Side * Side * GpuTerrainMesh.VertexStride];
+                for (int row = 0; row < Side; row++)
+                for (int column = 0; column < Side; column++)
+                {
+                    int vertex = row * Side + column, offset = vertex * GpuTerrainMesh.VertexStride;
+                    vertices[offset] = column * (TileGeometry.Extent / Segments);
+                    vertices[offset + 1] = row * (TileGeometry.Extent / Segments);
+                    vertices[offset + 2] = heights[vertex];
+                    vertices[offset + 3] = source.Light[vertex];
+                }
+                retained = new(retained?.ResourceKey ?? new object(), patch.Id, patch.Copy, vertices, (retained?.Revision ?? 0) + 1);
+                gpuMeshes[key] = retained;
+            }
+            retained!.Frame = frame;
+            selection[i] = retained;
+            if (!changed && !ReferenceEquals(previousGpuSelection[i], retained)) changed = true;
+            var texture = GetTexture(patch.Id, bake);
+            draws[i] = new(retained, texture.Gpu ??= PrepareGpuTexture(texture), patch.Transform);
+        }
+        if (changed) HeightRevision++;
+        previousGpuSelection = selection;
+        TrimCaches();
+        return draws;
+    }
+
+    private static unsafe GpuTerrainTexture PrepareGpuTexture(Texture source)
+    {
+        var pixels = new ReadOnlySpan<uint>((void*)source.Bitmap.GetPixels(), TextureSize * TextureSize);
+        var texels = new uint[pixels.Length];
+        for (int i = 0; i < pixels.Length; i++) texels[i] = pixels[i] & 0xffffff;
+        foreach (var area in source.EarthAreas)
+        {
+            int left = Math.Clamp((int)MathF.Floor(area.Left - .5f), 0, TextureSize);
+            int top = Math.Clamp((int)MathF.Floor(area.Top - .5f), 0, TextureSize);
+            int right = Math.Clamp((int)MathF.Ceiling(area.Right + .5f), 0, TextureSize);
+            int bottom = Math.Clamp((int)MathF.Ceiling(area.Bottom + .5f), 0, TextureSize);
+            for (int y = top; y < bottom; y++)
+            for (int x = left; x < right; x++)
+                if (area.Contains(x + .5f, y + .5f)) texels[y * TextureSize + x] |= 0xff000000;
+        }
+        return new(texels);
+    }
+
+    internal void ActivateGpu(GpuMapFrame scene)
+    {
+        gpuScene = scene;
+        camera = scene.Camera;
+        options = scene.TerrainOptions;
+        width = scene.ArtWidth;
+        height = scene.ArtHeight;
+        meters = scene.PixelsPerMeter;
+        projection = new(camera, scene.Width, scene.Height, scene.PixelSize);
     }
 
     private void SelectPatches()
@@ -461,6 +549,7 @@ internal sealed class TerrainSurface : IDisposable
 
     internal bool TrySample(int x, int y, out float altitude, out float inverse)
     {
+        if (gpuScene is { } scene) return scene.Depth.TryTerrain(x, y, out altitude, out inverse, out _);
         altitude = inverse = 0;
         if ((uint)x >= (uint)width || (uint)y >= (uint)height || !float.IsFinite(groundAltitude[y * width + x])) return false;
         altitude = groundAltitude[y * width + x];
@@ -486,6 +575,7 @@ internal sealed class TerrainSurface : IDisposable
 
     internal bool TryHeight(double x, double y, out double altitude)
     {
+        if (gpuScene is { } scene) return scene.TryHeight(x, y, out altitude);
         altitude = 0;
         if (!double.IsFinite(x) || !double.IsFinite(y) || y is < 0 or > 1) return false;
         x -= Math.Floor(x);
@@ -506,6 +596,8 @@ internal sealed class TerrainSurface : IDisposable
         hit = default;
         int x = (int)Math.Floor(screenX / pixelSize), y = (int)Math.Floor(screenY / pixelSize);
         if (!TrySample(x, y, out float altitude, out float inverse)) return false;
+        float physicalHeight = gpuScene is { } scene && scene.Depth.TryTerrain(x, y, out _, out _, out float gpuHeight)
+            ? gpuHeight : groundHeight[y * width + x];
         double sx = x + .5 - logicalWidth * .5 / pixelSize, sy = y + .5 - logicalHeight * .5 / pixelSize;
         var (sp, cp) = Math.SinCos(camera.PitchRadians);
         double z = altitude - camera.TargetPixels / pixelSize;
@@ -516,7 +608,7 @@ internal sealed class TerrainSurface : IDisposable
         if (wy is < 0 or > 1) return false;
         wx -= Math.Floor(wx);
         hit = new(Math.Atan(Math.Sinh(Math.PI * (1 - 2 * wy))) * 180 / Math.PI,
-            wx * 360 - 180, groundHeight[y * width + x]);
+            wx * 360 - 180, physicalHeight);
         return true;
     }
 
@@ -527,6 +619,8 @@ internal sealed class TerrainSurface : IDisposable
             { entry.Value.Dispose(); textures.Remove(entry.Key); }
         if (meshes.Count > MaximumMeshes)
             foreach (var entry in meshes.OrderBy(entry => entry.Value.Frame).Take(meshes.Count - MaximumMeshes).ToArray()) meshes.Remove(entry.Key);
+        if (gpuMeshes.Count > MaximumMeshes)
+            foreach (var entry in gpuMeshes.OrderBy(entry => entry.Value.Frame).Take(gpuMeshes.Count - MaximumMeshes).ToArray()) gpuMeshes.Remove(entry.Key);
         if (bounds.Count > MaximumMeshes * 8) bounds.Clear();
     }
 
@@ -536,6 +630,7 @@ internal sealed class TerrainSurface : IDisposable
     {
         ClearTextures();
         meshes.Clear(); bounds.Clear(); patches.Clear(); stitched.Clear(); heightPatches.Clear(); heightZooms.Clear();
+        gpuMeshes.Clear(); previousGpuSelection = []; gpuScene = null;
         groundAltitude = []; groundHeight = []; depthX = []; depthY = []; photograph = []; photographic = [];
     }
 }

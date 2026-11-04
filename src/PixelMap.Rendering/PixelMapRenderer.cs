@@ -543,6 +543,7 @@ public sealed partial class PixelMapRenderer : IDisposable
         {
             if (disposed) return;
             disposed = true;
+            ReleaseGpuScene();
             ReleasePatterns();
             foreach (var tile in geometry.Values) tile.Dispose();
             geometry.Clear();

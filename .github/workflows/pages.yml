@@ -19,6 +19,14 @@ jobs:
           dotnet-version: '10.0.x'
       - run: dotnet run --project tests/PixelMap.Data.Checks -c Release
       - run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release
+      - name: Verify GLES terrain and model shaders
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1-mesa-dri
+          dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --gpu-terrain --gpu-output="${{ runner.temp }}/gpu-terrain"
       - run: dotnet run --project tests/PixelMap.Routing.Tests -c Release
       - run: dotnet run --project tests/PixelMap.Simulation.Tests -c Release
       - run: node tests/browser/audio.cjs

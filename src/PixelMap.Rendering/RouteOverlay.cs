@@ -25,8 +25,11 @@ public sealed partial class PixelMapRenderer
             ObjectDisposedException.ThrowIf(disposed, this);
             bool aligned = lastPicture != null && lastView.Camera == camera && lastView.Width == width && lastView.Height == height
                 && (CurrentTerrain is { Relief: true } || camera.Zoom >= 12 && camera.Pitch > 3);
+            long revision = aligned ? frame : -1;
+            if (aligned && lastView.GpuGeneration == GeometryGpuGeneration && activeGpuDepth is { } gpuDepth)
+                revision = gpuDepth.Revision;
             (routeOverlay ??= new()).Draw(canvas, width, height, Math.Clamp(pixelSize, 1, 8), camera, plan, vehicle,
-                aligned ? buildings : null, Math.Max(1, lastView.PixelSize), aligned ? frame : -1, CurrentTerrain, aligned ? reliefSurface : null);
+                aligned ? buildings : null, Math.Max(1, lastView.PixelSize), revision, CurrentTerrain, aligned ? reliefSurface : null);
         }
     }
 }

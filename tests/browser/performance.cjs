@@ -1,6 +1,7 @@
-// node performance.cjs <site URL> <output directory> [--visual|--motion] [--gpu] [--case=<name>]
+// node performance.cjs <site URL> <output directory> [--visual|--motion] [--gpu] [--terrain] [--case=<name>]
 // node performance.cjs --compare <baseline directory> <candidate directory>
 // Run baseline and candidate serially on the same machine, browser and viewport.
+// PIXELMAP_BROWSER_ARGS accepts a JSON array of additional Chromium flags, recorded in each report.
 const assert = require("node:assert/strict");
 const { createHash } = require("node:crypto");
 const { mkdir, readFile, writeFile } = require("node:fs/promises");
@@ -11,7 +12,8 @@ const { PNG } = require("pngjs");
 const { enableGpuRendering } = require("./gpu.cjs");
 
 const viewport = { width: 1200, height: 780 };
-const browserArgs = ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"];
+const browserArgs = ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
+    ...JSON.parse(process.env.PIXELMAP_BROWSER_ARGS || "[]")];
 const requestGpu = process.argv.includes("--gpu");
 const expectCpuFallback = process.argv.includes("--expect-cpu-fallback");
 let runtimeMetadata;
@@ -26,6 +28,16 @@ for (const [angle, pitch, lens] of [["overhead", 0, "Orthographic"], ["iso55", 5
 }
 for (const mode of ["drive", "bike", "walk", "boat", "train", "flight"])
     views.push({ name: "journey-" + mode, fragment: "journey/" + mode, journey: true });
+
+const terrainViews = [];
+for (const layer of ["Map", "Earth", "Elevation"])
+for (const style of ["Day", "Night"])
+for (const [angle, pitch, lens] of [["overhead", 0, "Orthographic"], ["iso55", 55, "Orthographic"],
+    ["perspective58", 58, "Perspective"]]) {
+    terrainViews.push({ name: `terrain-${layer.toLowerCase()}-${style.toLowerCase()}-${angle}`,
+        fragment: `v4/45.875000/10.850000/12.300/-25.00/${pitch}/${style}/${layer}/${lens}/0.0/Relief/1.00`,
+        journey: false, terrain: true });
+}
 
 const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -46,9 +58,23 @@ function distribution(values) {
 
 // Observe browser scheduling and native texture uploads while preserving every call.
 // The map resolves to ceil(map width / pixel size) by ceil(map height / pixel size).
-function installProbe({ observeDraws = false } = {}) {
+function installProbe({ observeDraws = false, requireDepthQuality = false, observeTransfers = false } = {}) {
     const state = globalThis.__pixelAtlasPerf = { active: false, frames: [], uploads: [], bootUploads: [], bootAllocations: [],
-        bootDraws: [], framebufferAttachments: 0, longTasks: [], width: 0, height: 0, quality: null, start: 0 };
+        bootDraws: [], draws: [], readbacks: [], transfers: [], framebufferAttachments: 0, longTasks: [],
+        width: 0, height: 0, quality: null, start: 0 };
+    const channels = { 6402: 1, 6403: 1, 6406: 1, 6407: 3, 6408: 4, 6409: 1, 6410: 2,
+        32993: 4, 33319: 2, 33320: 2, 36244: 1, 36248: 3, 36249: 4 };
+    const scalarBytes = { 5120: 1, 5121: 1, 5122: 2, 5123: 2, 5124: 4, 5125: 4, 5126: 4, 5131: 2, 36193: 2 };
+    const packedBytes = { 32819: 2, 32820: 2, 33635: 2, 33640: 4, 34042: 4, 35899: 4, 35902: 4, 36269: 8 };
+    const pixelBytes = (width, height, depth, format, type) => {
+        const stride = packedBytes[type] || channels[format] * scalarBytes[type];
+        return Number.isFinite(stride) ? width * height * depth * stride : null;
+    };
+    const transfer = (name, durationMs, width, height, depth, bytes, allocation = false) => {
+        if (durationMs === null) return;
+        state.transfers.push({ method: name, width, height, depth, bytes, allocation,
+            durationMs });
+    };
     const quality = (width, height) => {
         for (const pixels of [2, 3, 4])
             if (width === Math.ceil(state.width / pixels) && height === Math.ceil(state.height / pixels)) return pixels;
@@ -61,7 +87,7 @@ function installProbe({ observeDraws = false } = {}) {
             return;
         }
         const pixels = quality(width, height);
-        if (pixels !== null) state.quality = pixels;
+        if (pixels !== null && !requireDepthQuality) state.quality = pixels;
         if (state.active) state.uploads.push([performance.now(), width, height, pixels]);
         else if (state.bootUploads.length < 2000) state.bootUploads.push([width, height]);
     };
@@ -71,10 +97,14 @@ function installProbe({ observeDraws = false } = {}) {
             const original = type.prototype[name];
             if (original.__pixelAtlasObserved) continue;
             const observed = function (...args) {
+                const started = observeTransfers && state.active ? performance.now() : null;
                 const result = Reflect.apply(original, this, args);
+                const duration = started === null ? null : performance.now() - started;
                 if (args.length >= 9) {
                     const index = name === "texImage2D" ? 3 : 4;
                     record(args[index], args[index + 1], observeDraws && args[8] === null);
+                    transfer(name, duration, args[index], args[index + 1], 1,
+                        pixelBytes(args[index], args[index + 1], 1, args[6], args[7]), args[8] === null);
                 }
                 return result;
             };
@@ -82,26 +112,77 @@ function installProbe({ observeDraws = false } = {}) {
             type.prototype[name] = observed;
         }
     }
+    if (observeTransfers) {
+        for (const type of [globalThis.WebGLRenderingContext, globalThis.WebGL2RenderingContext]) {
+            if (!type) continue;
+            for (const name of ["texImage3D", "texSubImage3D", "texStorage3D", "bufferData", "bufferSubData"]) {
+                const original = type.prototype[name];
+                if (typeof original !== "function" || original.__pixelAtlasObserved) continue;
+                const observed = function (...args) {
+                    const started = state.active ? performance.now() : null;
+                    const result = Reflect.apply(original, this, args);
+                    if (started === null) return result;
+                    const duration = performance.now() - started;
+                    if (name === "texImage3D" || name === "texSubImage3D") {
+                        const index = name === "texImage3D" ? 3 : 5;
+                        const formatIndex = name === "texImage3D" ? 7 : 8;
+                        transfer(name, duration, args[index], args[index + 1], args[index + 2],
+                            pixelBytes(args[index], args[index + 1], args[index + 2], args[formatIndex], args[formatIndex + 1]),
+                            args[formatIndex + 2] === null);
+                    } else if (name === "texStorage3D") {
+                        // Storage allocation is separate from transferred pixels. Internal
+                        // formats and mip levels can change the driver's actual allocation.
+                        transfer(name, duration, args[3], args[4], args[5], null, true);
+                    } else {
+                        const index = name === "bufferData" ? 1 : 2;
+                        const source = args[index];
+                        const scalarSize = source?.BYTES_PER_ELEMENT || 1;
+                        const offset = args[3] || 0;
+                        const length = args[4] || 0;
+                        const bytes = typeof source === "number" ? source : length > 0 ? length * scalarSize :
+                            Math.max(0, (source?.byteLength || 0) - offset * scalarSize);
+                        transfer(name, duration, null, null, null, bytes, typeof source === "number");
+                    }
+                    return result;
+                };
+                observed.__pixelAtlasObserved = true;
+                type.prototype[name] = observed;
+            }
+        }
+    }
     if (observeDraws) {
         const contexts = new WeakMap(), attached = new WeakSet();
         for (const type of [globalThis.WebGLRenderingContext, globalThis.WebGL2RenderingContext]) {
             if (!type) continue;
-            for (const name of ["bindFramebuffer", "framebufferTexture2D", "viewport", "drawArrays", "drawElements",
-                "drawArraysInstanced", "drawElementsInstanced"]) {
+            for (const name of ["bindFramebuffer", "framebufferTexture2D", "viewport", "enable", "disable", "readPixels",
+                "drawArrays", "drawElements", "drawArraysInstanced", "drawElementsInstanced"]) {
                 const original = type.prototype[name];
                 if (typeof original !== "function" || original.__pixelAtlasObserved) continue;
                 const observed = function (...args) {
+                    const started = name === "readPixels" && state.active ? performance.now() : 0;
                     const result = Reflect.apply(original, this, args);
+                    const readDuration = name === "readPixels" && state.active ? performance.now() - started : 0;
                     let context = contexts.get(this);
-                    if (!context) { context = { framebuffer: null, width: 0, height: 0 }; contexts.set(this, context); }
+                    if (!context) { context = { framebuffer: null, width: 0, height: 0, depth: false }; contexts.set(this, context); }
                     if (name === "bindFramebuffer") {
                         if (args[0] === this.FRAMEBUFFER || args[0] === this.DRAW_FRAMEBUFFER) context.framebuffer = args[1];
                     } else if (name === "framebufferTexture2D") {
                         if (context.framebuffer && args[3]) { attached.add(context.framebuffer); state.framebufferAttachments++; }
                     } else if (name === "viewport") {
                         context.width = args[2]; context.height = args[3];
-                    } else if (context.framebuffer && attached.has(context.framebuffer) && state.bootDraws.length < 10000) {
-                        state.bootDraws.push([context.width, context.height]);
+                    } else if (name === "enable" || name === "disable") {
+                        if (args[0] === this.DEPTH_TEST) context.depth = name === "enable";
+                    } else if (name === "readPixels") {
+                        if (state.active) state.readbacks.push([started, readDuration, args[2], args[3], quality(args[2], args[3])]);
+                    } else if (context.framebuffer && attached.has(context.framebuffer)) {
+                        const count = name.startsWith("drawElements") ? args[1] : args[2];
+                        if (state.bootDraws.length < 10000)
+                            state.bootDraws.push([context.width, context.height, context.depth, count]);
+                        if (state.active) {
+                            const pixels = quality(context.width, context.height);
+                            if (pixels !== null && (!requireDepthQuality || context.depth)) state.quality = pixels;
+                            state.draws.push([context.width, context.height, pixels, context.depth, count]);
+                        }
                     }
                     return result;
                 };
@@ -112,13 +193,16 @@ function installProbe({ observeDraws = false } = {}) {
     }
     state.gpuEvidence = (width, height) => {
         state.width = width; state.height = height;
-        const draws = {}, uploads = {}, allocations = {}, viewports = {};
-        for (const [w, h] of state.bootDraws) {
+        const draws = {}, depthDraws = {}, uploads = {}, allocations = {}, viewports = {};
+        for (const [w, h, depth] of state.bootDraws) {
             viewports[`${w}x${h}`] = (viewports[`${w}x${h}`] || 0) + 1;
             const size = quality(w, h);
-            if (size !== null) draws[size] = (draws[size] || 0) + 1;
+            if (size !== null) {
+                draws[size] = (draws[size] || 0) + 1;
+                if (depth) depthDraws[size] = (depthDraws[size] || 0) + 1;
+            }
         }
-        for (const [w, h] of state.bootUploads) {
+        for (const [w, h] of requireDepthQuality ? [] : state.bootUploads) {
             const size = quality(w, h);
             if (size !== null) uploads[size] = (uploads[size] || 0) + 1;
         }
@@ -128,6 +212,7 @@ function installProbe({ observeDraws = false } = {}) {
         }
         return { textureFramebufferAttachments: state.framebufferAttachments,
             artSizedOffscreenDrawsByPixelSize: draws, artSizedCpuUploadsByPixelSize: uploads,
+            artSizedDepthTestedDrawsByPixelSize: depthDraws,
             artSizedTextureAllocationsByPixelSize: allocations,
             allOffscreenViewportDraws: viewports };
     };
@@ -148,8 +233,15 @@ function installProbe({ observeDraws = false } = {}) {
             const pixels = quality(w, h);
             if (pixels !== null) state.quality = pixels;
         }
+        for (const [w, h, depth] of state.bootDraws) {
+            const pixels = quality(w, h);
+            if (pixels !== null && (!requireDepthQuality || depth)) state.quality = pixels;
+        }
         state.frames = [];
         state.uploads = [];
+        state.draws = [];
+        state.readbacks = [];
+        state.transfers = [];
         state.longTasks = [];
         state.start = performance.now();
         state.active = true;
@@ -163,7 +255,8 @@ function installProbe({ observeDraws = false } = {}) {
     state.finish = () => {
         state.active = false;
         return { durationMs: performance.now() - state.start, frames: state.frames,
-            uploads: state.uploads, longTasks: state.longTasks, finalPixelSize: state.quality };
+            uploads: state.uploads, draws: state.draws, readbacks: state.readbacks, transfers: state.transfers,
+            longTasks: state.longTasks, finalPixelSize: state.quality };
     };
 }
 
@@ -176,7 +269,8 @@ async function open(browser, base, view, errors, observe, output) {
         if (message.type() === "error" && !message.text().includes("ERR_FAILED"))
             console.error("Browser console", view.name, message.text().slice(0, 2000));
     });
-    if (observe || requestGpu) await page.addInitScript(installProbe, { observeDraws: requestGpu && !observe });
+    if (observe || requestGpu) await page.addInitScript(installProbe, { observeDraws: true,
+        requireDepthQuality: requestGpu && view.terrain && !expectCpuFallback, observeTransfers: requestGpu });
     const origin = new URL(base).origin;
     await page.route("**/*", route => {
         const address = new URL(route.request().url());
@@ -199,6 +293,16 @@ async function open(browser, base, view, errors, observe, output) {
     if (await enable.count()) await enable.evaluate(element => element.click());
     if (view.journey)
         await page.getByRole("button", { name: "Preview route", exact: true }).waitFor({ state: "attached", timeout: 30000 });
+    if (view.terrain) {
+        const deadline = Date.now() + 60000;
+        let snapshot;
+        do {
+            snapshot = await page.locator("body").ariaSnapshot();
+            if (/61 m elevation/.test(snapshot)) break;
+            await page.waitForTimeout(200);
+        } while (Date.now() < deadline);
+        assert.match(snapshot, /61 m elevation/, "The bundled Garda elevation fixture is loaded");
+    }
     await page.waitForTimeout(1800);
     if (!runtimeMetadata) runtimeMetadata = await readRuntimeMetadata(page);
     let actualBackend = null;
@@ -276,6 +380,9 @@ async function capture(browser, base, view, output, errors) {
         if (requestGpu && !expectCpuFallback)
             assert.ok(Object.values(gpuEvidence.artSizedOffscreenDrawsByPixelSize).some(count => count > 0),
                 "GPU mode rendered into a texture-backed framebuffer at the art resolution");
+        if (requestGpu && view.terrain && !expectCpuFallback)
+            assert.ok(Object.values(gpuEvidence.artSizedDepthTestedDrawsByPixelSize).some(count => count > 0),
+                "GPU terrain used hardware depth at the art resolution");
         await writeFile(path.join(output, view.name + ".png"), image.bytes);
         await writeFile(path.join(output, view.name + ".map.png"), PNG.sync.write(image.map));
         await writeFile(path.join(output, view.name + ".txt"), accessibility);
@@ -306,9 +413,36 @@ function summarizeProbe(probe, before, after) {
     const cpu = {};
     for (const key of ["TaskDuration", "ScriptDuration", "LayoutDuration", "RecalcStyleDuration"])
         if (key in before && key in after) cpu[key + "Ms"] = 1000 * (after[key] - before[key]);
+    const drawsByPixelSize = {}, depthDrawsByPixelSize = {};
+    for (const [, , size, depth] of probe.draws) {
+        if (size === null) continue;
+        drawsByPixelSize[size] = (drawsByPixelSize[size] || 0) + 1;
+        if (depth) depthDrawsByPixelSize[size] = (depthDrawsByPixelSize[size] || 0) + 1;
+    }
+    const readbacksByPixelSize = {}, readbackDimensions = {}, transfersByMethod = {};
+    for (const [, milliseconds, width, height, size] of probe.readbacks) {
+        const key = `${width}x${height}`;
+        readbackDimensions[key] = (readbackDimensions[key] || 0) + 1;
+        if (size !== null && size !== undefined) (readbacksByPixelSize[size] ??= []).push(milliseconds);
+    }
+    for (const item of probe.transfers || []) (transfersByMethod[item.method] ??= []).push(item);
     return { durationMs: probe.durationMs, raf: distribution(intervals),
         rafByObservedPixelSize: Object.fromEntries(Object.entries(byQuality).map(([key, values]) => [key, distribution(values)])),
         mapTextureUploadsByPixelSize: uploads, allTextureUploadDimensions: dimensions,
+        artSizedOffscreenDrawsByPixelSize: drawsByPixelSize,
+        artSizedDepthTestedDrawsByPixelSize: depthDrawsByPixelSize,
+        readPixels: { ...distribution(probe.readbacks.map(item => item[1])),
+            totalPixels: probe.readbacks.reduce((sum, item) => sum + item[2] * item[3], 0),
+            totalMs: probe.readbacks.reduce((sum, item) => sum + item[1], 0),
+            dimensions: readbackDimensions,
+            byPixelSize: Object.fromEntries(Object.entries(readbacksByPixelSize).map(([size, times]) => [size, distribution(times)])) },
+        transfersByMethod: Object.fromEntries(Object.entries(transfersByMethod).map(([method, items]) => [method, {
+            ...distribution(items.map(item => item.durationMs)),
+            totalCallMs: items.reduce((sum, item) => sum + item.durationMs, 0),
+            uploadedBytes: items.reduce((sum, item) => sum + (item.allocation ? 0 : item.bytes || 0), 0),
+            allocationCalls: items.filter(item => item.allocation).length,
+            unknownByteCounts: items.filter(item => item.bytes === null).length
+        }])),
         finalObservedPixelSize: probe.finalPixelSize, longTasks: probe.longTasks.length,
         longTaskDurationMs: probe.longTasks.reduce((sum, entry) => sum + entry.duration, 0), cpu };
 }
@@ -346,7 +480,10 @@ async function motion(browser, base, view, gesture, output, errors) {
         await writeFile(path.join(output, view.name + "-" + gesture + ".png"), settled.bytes);
         const result = { name: view.name + "-" + gesture, gesture, mapBounds: map, inputMoves: 80,
             inputDelayMs: 25, ...summarizeProbe(moving, before, after), blocked: opened.blocked,
-            restPixelSize: 2, settledMapHash: settled.mapHash };
+            restPixelSize: 2, actualBackend: opened.actualBackend, settledMapHash: settled.mapHash };
+        if (requestGpu && view.terrain && !expectCpuFallback)
+            assert.ok(Object.values(result.artSizedDepthTestedDrawsByPixelSize).some(count => count > 0),
+                "The moving terrain frame used hardware depth at the art resolution");
         console.log("Measured", result.name, JSON.stringify({ raf: result.raf,
             quality: result.mapTextureUploadsByPixelSize, cpu: result.cpu }));
         await writeFile(path.join(output, result.name + ".samples.json"), JSON.stringify(moving));
@@ -392,20 +529,23 @@ async function main() {
     assert.ok(base && output, "Provide a site URL and output directory");
     assert.ok(!expectCpuFallback || requestGpu, "--expect-cpu-fallback requires --gpu and a software-canvas test environment");
     const measureMotion = process.argv.includes("--motion");
+    const measureTerrain = process.argv.includes("--terrain");
     const filter = process.argv.find(arg => arg.startsWith("--case="))?.slice(7).split(",");
-    const cases = views.filter(view => filter ? filter.includes(view.name) : !measureMotion ||
-        ["map-day-iso55", "earth-day-iso55", "map-day-perspective65", "earth-day-perspective65"].includes(view.name));
+    const cases = (measureTerrain ? terrainViews : views).filter(view => filter ? filter.includes(view.name) : !measureMotion ||
+        (measureTerrain ? /-day-perspective58$/.test(view.name) :
+            ["map-day-iso55", "earth-day-iso55", "map-day-perspective65", "earth-day-perspective65"].includes(view.name)));
     assert.ok(cases.length > 0, "The selected case exists");
     await mkdir(output, { recursive: true });
     const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: browserArgs });
     const errors = [];
     const report = { browser: browser.version(), viewport, deviceScaleFactor: 1, browserArgs,
         platform: os.platform(), architecture: os.arch(), cpu: os.cpus()[0]?.model,
+        availableParallelism: os.availableParallelism(), logicalCpuCount: os.cpus().length,
         base, revision: process.env.PIXELMAP_REVISION || null, mode: measureMotion ? "motion" : "visual",
         requestedGpuRendering: requestGpu,
         expectedGpuBackend: requestGpu ? expectCpuFallback ? "CPU fallback" : "GPU active" : null,
         performanceTimeDomain: "threadTicks",
-        adaptiveQuality: "Production policy remains active. Resting views use pixel size 2. Motion sizes are inferred from exact WebGL upload dimensions. rAF measures browser scheduling. CPU metrics include the app and observational probe.",
+        adaptiveQuality: "Production policy remains active. Resting views use pixel size 2. GPU terrain quality uses depth-tested art viewport dimensions. Shared 3D texture arrays never influence quality inference. CPU and legacy Skia modes use exact 2D upload/viewport dimensions. rAF measures browser scheduling. CPU metrics include the app and observational probe. readPixels records WebGL call duration including synchronization, grouped by art pixel size and dimensions. GPU runs also time texture and buffer transfer calls and report uncompressed input bytes. These transfer timings cover the page's GL contexts and exclude final display composition.",
         cases: [] };
     const destination = path.join(output, measureMotion ? "motion.json" : "visual.json");
     try {

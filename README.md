@@ -57,11 +57,24 @@ Mapzen Terrain Tiles provide worldwide, keyless Terrarium elevation data. The de
 
 Ground vehicles and trains follow the sampled surface. Ocean surfaces use sea level, while land and inland water retain signed DEM elevations. Aircraft use absolute altitude and terrain-relative clearance, with swept ground contacts, taxiing and landing handling. Rendered navigation objects follow the selected mesh while the simulation retains physical DEM heights. The camera keeps a local terrain datum, supports terrain-anchored gestures and adjusts perspective eye clearance above slopes.
 
-The relief renderer rasterizes terrain and buildings into a shared CPU depth buffer. The optional GPU backend composes that terrain artwork using the existing Skia mesh and pixel shader. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
+The optional GPU backend renders terrain and buildings with retained geometry, vertex and fragment shaders, and hardware depth testing. Sparse CPU visibility queries keep labels, routes, vehicles and feature inspection aligned with the selected mesh. The CPU renderer remains available through the same control. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
 
 ## Reuse the control
 
 Reference `src/PixelMap.Controls/PixelMap.Controls.csproj` from a Skia-rendered Uno app. The browser app uses Uno.Sdk 6.7.30 on .NET 10.
+
+Browser hosts using Uno 6.7.135 also include the GL readback adapter and its linker flag. This adapts Uno's BGRA framebuffer request to WebGL2's RGBA client-memory readback while preserving the other native GL entry points. Adjust the source path to the referenced control project. The adapter targets Uno 6.7's resolver behavior and needs verification when upgrading Uno.
+
+```xml
+<PropertyGroup>
+    <UnoFeatures>SkiaRenderer;Skia;GLCanvas</UnoFeatures>
+    <EmccExtraLDFlags Condition="'$(TargetFramework)' == 'net10.0-browserwasm'">$(EmccExtraLDFlags);-Wl,--wrap=uno_gl_resolve</EmccExtraLDFlags>
+</PropertyGroup>
+<ItemGroup>
+    <WasmShellNativeCompile Include="../PixelMap.Controls/Browser/pixel_map_gl_readback.c"
+                            Condition="'$(TargetFramework)' == 'net10.0-browserwasm'" />
+</ItemGroup>
+```
 
 ```xml
 <Grid xmlns:maps="using:PixelMap.Controls">
@@ -74,6 +87,7 @@ using PixelMap.Rendering;
 
 Atlas.IsEarthImageryEnabled = true;
 Atlas.IsTerrainEnabled = true;
+Atlas.IsGpuRenderingEnabled = true;
 Atlas.TerrainExaggeration = 1;
 Atlas.Palette = PixelStyle.Dusk;
 Atlas.FlyTo(new MapCamera(50.0617, 19.9373, 16.8, Bearing: -35, Pitch: 55));
@@ -101,18 +115,20 @@ Atlas.Journey.Preview();
 | Project | Responsibility |
 | --- | --- |
 | PixelMap.Data | Bounded MVT protobuf decoding, source catalog, request coalescing, cancellation and separate byte-bounded caches for vector tiles, satellite imagery and elevation. Bounded Terrarium PNG decoding, immutable height snapshots and indexed water surfaces. Photon geocoding with an injectable endpoint. |
-| PixelMap.Rendering | Wrapped Web Mercator camera, cached terrain blocks, palette shaders, orthographic and perspective building rasterization, depth-tested walls and roof holes, map labels, feature picking, route overlays, vehicle sprites and world-anchored particles. Perspective uses finite clipping and reciprocal-depth interpolation. Terrain relief uses an adaptive stitched height field and a shared terrain/model depth buffer. |
+| PixelMap.Rendering | Wrapped Web Mercator camera, cached terrain blocks, palette shaders, orthographic and perspective rendering, depth-tested walls and roof holes, map labels, feature picking, route overlays, vehicle sprites and world-anchored particles. The GPU terrain backend uses retained GL geometry, hardware depth, pixel shaders and sparse overlay visibility queries. Terrain relief shares the adaptive stitched height field across both backends. |
 | PixelMap.Routing | Provider-separated routes and alternatives, bounded local A* rail/ferry searches, great-circle flight paths, ordered stops, maneuver metadata and shared provider-distance route sampling. |
 | PixelMap.Simulation | Fixed 60 Hz clock, six vehicle profiles, manual inputs, preview transport, cruise, checkpoint scoring and recovery, spatially indexed mapped collisions and replaceable world rules. |
 | PixelMap.Audio | Coalesced motion parameters and discrete cues through an injectable sound device. The browser adapter owns a bounded Web Audio graph and releases completed transient sounds. |
-| PixelMap.Controls | Uno input and accessible keyboard navigation, animated cameras and follow rigs, viewport tile scheduling, journey orchestration and the Skia drawing surface. During motion the control adjusts pixel resolution to measured frame cost, then returns to 2-DIP pixels at rest. |
+| PixelMap.Controls | Uno input and accessible keyboard navigation, animated cameras and follow rigs, viewport tile scheduling, journey orchestration, Skia drawing and an optional GLCanvasElement terrain surface. During motion the control adjusts pixel resolution to measured frame cost, then returns to 2-DIP pixels at rest. |
 | PixelMap.App | Responsive XAML explorer, search, city guide, compass, scale, lighting, shareable camera links and the journey planner with touch driving controls. |
 
 ## Rendering backends
 
-The View menu includes **GPU rendering (experimental)**. It uses Uno's GPU-backed Skia canvas to project cached terrain and Earth textures into a pixel-resolution render target. An indexed `SKVertices` mesh and an SkSL runtime effect resolve that artwork onto the display. Building rasterization supplies a transparent model layer and the depth information used by routes, picking and vehicle effects. GPU snapshots also preserve the photographed ground beneath translucent roofs in overhead Earth mode.
+The View menu includes **GPU rendering (experimental)**. With terrain relief or the Elevation layer enabled, Uno's `GLCanvasElement` runs a retained WebGL2/OpenGL ES 3 renderer. Vertex shaders project the stitched height field and extruded building meshes. Fragment shaders preserve elevation colors, quantized hill shading, façade windows, roof edges and overhead Earth blending. A depth attachment resolves terrain and building occlusion at pixel-art resolution. A nearest-neighbor resolve produces the final display pixels.
 
-Uno's recording canvas uses lazy picture images whose textures are generated on the GPU during playback. The control uses the public composition-capability check to select that path. Direct GPU canvases use reusable off-screen surfaces. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The compiled shader is reused during adaptive-resolution changes, and the reusable control exposes `IsGpuRenderingEnabled` and `IsGpuRenderingActive`. CPU and GPU blending can have small rounding differences. [Performance methodology and results](docs/performance.md).
+Terrain artwork, height buffers and building meshes remain cached across camera movement. Building foundations follow the same selected terrain triangles used by picking. The host captures only the art-resolution framebuffer and presents an immutable nearest-sampled image through Uno's Skia canvas. Labels, route graphics, gates, sprites and effects use sparse depth queries from the same retained frame and render at the canvas's native DPI. Overlay-only animation reuses the terrain image. Resources are released on unload and GPU initialization failures select the CPU renderer.
+
+Flat views retain the existing GPU-backed Skia path using `SKVertices` and `SKRuntimeEffect`. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The control exposes `IsGpuRenderingEnabled` and `IsGpuRenderingActive`. CPU and GPU rasterization can differ at primitive boundaries and in color rounding. Uno 6.7 synchronously reads back the GL framebuffer. Art-sized presentation reduces transferred pixels by 4×, 9× or 16× at the existing pixel sizes 2, 3 and 4. Measurements include that presentation cost. [Performance methodology and results](docs/performance.md)
 
 ## Build and test
 
@@ -138,6 +154,15 @@ node tests/browser/terrain.cjs http://localhost:8000/
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-visual --visual
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-motion --motion
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-gpu --motion --gpu
+node tests/browser/performance.cjs http://localhost:8000/ artifacts/terrain-gpu --motion --gpu --terrain
+```
+
+On Linux with EGL and Mesa installed, the opt-in GLES checks exercise compiled terrain and building shaders, hardware depth, CPU/GPU image comparisons, navigation overlays, retained-frame lifetime and high-DPI composition. Add `--gpu-benchmark` for fixed-resolution CPU/GPU timings that include synchronous framebuffer readback.
+
+```sh
+LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless dotnet run -c Release \
+  --project tests/PixelMap.Rendering.Tests -- --gpu-terrain --gpu-benchmark \
+  --gpu-output=artifacts/gpu-terrain
 ```
 
 The Pages workflow builds the AOT-enabled browser app from main, runs the engine checks, exercises the exact publish artifact with Chromium, and publishes it after verification. Journey browser checks cover all six modes, route alternatives, waypoint picking, perspective projection, manual keyboard/touch inputs and Web Audio activation. Terrain browser checks exercise the Garda fixtures, all three layers, overhead and perspective, orbit, dragging, elevation inspection, exaggeration, saved views and handset layout. Map, journey and terrain checks run with CPU and optional GPU modes in CI. Set `PIXELMAP_SHOTS` to save browser captures.

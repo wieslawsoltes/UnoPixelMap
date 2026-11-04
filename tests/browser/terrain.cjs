@@ -124,6 +124,30 @@ async function menu(page, name) {
 
 async function open(context, address) {
     const page = await context.newPage();
+    if (process.env.PIXELMAP_GPU === "1") await page.addInitScript(() => {
+        const counts = window.pixelMapTerrainGpu = {depthDraws: 0, artViewports: {}, readbacks: 0};
+        const prototype = WebGL2RenderingContext.prototype;
+        for (const name of ["drawElements", "drawElementsInstanced", "drawArrays", "drawArraysInstanced"]) {
+            const original = prototype[name];
+            prototype[name] = function (...args) {
+                if (this.isEnabled(this.DEPTH_TEST)) {
+                    const viewport = this.getParameter(this.VIEWPORT);
+                    if (viewport[2] > 0 && viewport[2] <= Math.ceil(innerWidth / 2) &&
+                        viewport[3] > 0 && viewport[3] <= Math.ceil(innerHeight / 2)) {
+                        counts.depthDraws++;
+                        const size = viewport[2] + "x" + viewport[3];
+                        counts.artViewports[size] = (counts.artViewports[size] || 0) + 1;
+                    }
+                }
+                return Reflect.apply(original, this, args);
+            };
+        }
+        const readPixels = prototype.readPixels;
+        prototype.readPixels = function (...args) {
+            counts.readbacks++;
+            return Reflect.apply(readPixels, this, args);
+        };
+    });
     const expectedFailures = new Set();
     page.setDefaultTimeout(20000);
     page.on("pageerror", error => {
@@ -131,8 +155,9 @@ async function open(context, address) {
         console.error("Terrain browser exception", error.message);
     });
     page.on("console", message => {
-        if (message.type() !== "error") return;
         const text = message.text();
+        if (text.includes("Pixel Atlas GPU terrain")) console.log(text);
+        if (message.type() !== "error") return;
         if (text === "Failed to load resource: net::ERR_FAILED" && expectedFailures.has(message.location().url)) return;
         console.error("Terrain browser console", text.slice(0, 1800));
         if (/Unhandled (?:managed )?exception|RuntimeError:|System\.[\w.]*Exception/.test(text)) failures.push(text);
@@ -162,6 +187,15 @@ async function open(context, address) {
     await page.getByRole("button", {name: "Map appearance", exact: true}).waitFor({state: "visible"});
     if (process.env.PIXELMAP_GPU === "1") await enableGpuRendering(page);
     return page;
+}
+
+async function assertGpuTerrain(page) {
+    if (process.env.PIXELMAP_GPU !== "1") return;
+    await see(page, /GPU active/);
+    const work = await page.evaluate(() => window.pixelMapTerrainGpu);
+    assert.ok(work.depthDraws > 0, "Terrain submits depth-tested geometry at pixel-art resolution");
+    assert.ok(work.readbacks > 0, "Uno presents the hardware-rendered terrain framebuffer");
+    console.log("GPU terrain geometry", JSON.stringify(work));
 }
 
 async function share(page) {
@@ -210,6 +244,7 @@ async function run() {
         await see(page, /61 m elevation · 1× relief/, 60000);
         await see(page, /Terrain Tiles \/ Mapzen/);
         const mountain = await frameWhere(page, hasTerrain, "terrain-elevation-perspective", 60000);
+        await assertGpuTerrain(page);
 
         await menu(page, "Terrain relief");
         await see(page, /2D altitude/);
@@ -220,6 +255,14 @@ async function run() {
         const restored = await frameWhere(page, frame => hasTerrain(frame) && changed(flat, frame) > .12,
             "terrain-restored-relief");
         await inspectTerrain(page);
+        if (process.env.PIXELMAP_GPU === "1") {
+            await menu(page, "GPU rendering (experimental)");
+            await see(page, snapshot => !/GPU active|CPU fallback/.test(snapshot));
+            await frameWhere(page, hasTerrain, "terrain-gpu-disabled");
+            await enableGpuRendering(page);
+            await frameWhere(page, hasTerrain, "terrain-gpu-recreated");
+            await assertGpuTerrain(page);
+        }
 
         await action(page, "Switch to 2D overhead");
         await page.getByRole("button", {name: "Switch to 3D perspective", exact: true}).waitFor({state: "visible"});
@@ -262,6 +305,7 @@ async function run() {
         await frameWhere(roundTrip, hasTerrain, "terrain-share-round-trip", 60000);
         const sharedAgain = await share(roundTrip);
         assert.equal(sharedAgain.hash, shared.hash, "A fresh page restores the complete v4 terrain camera state");
+        await assertGpuTerrain(roundTrip);
         await desktop.close();
 
         const mobile = await browser.newContext({viewport: {width: 390, height: 830}, deviceScaleFactor: 1,
@@ -271,16 +315,33 @@ async function run() {
         const portrait = await frameWhere(phone, hasTerrain, "terrain-phone-perspective", 60000);
         assert.equal(portrait.width, 390, "Terrain respects the handset viewport");
         await action(phone, "Switch to 2D overhead", true);
+        const phoneOverhead = await frameWhere(phone, frame => hasTerrain(frame) && changed(portrait, frame) > .20,
+            "terrain-phone-overhead");
         await action(phone, "Earth imagery layer", true);
         await see(phone, /Contains modified Copernicus Sentinel data/);
-        const phoneEarth = await frameWhere(phone, frame => hasTerrain(frame) && changed(portrait, frame) > .20,
+        const phoneEarth = await frameWhere(phone, frame => hasTerrain(frame) && changed(phoneOverhead, frame) > .20,
             "terrain-phone-earth");
         await action(phone, "Elevation layer", true);
         await see(phone, /button "Elevation layer" \[pressed\]/);
         await frameWhere(phone, frame => hasTerrain(frame) && changed(phoneEarth, frame) > .20, "terrain-phone-elevation");
         const fits = await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
         assert.ok(fits, "Terrain controls and credits introduce no horizontal overflow");
+        await assertGpuTerrain(phone);
         await mobile.close();
+
+        if (process.env.PIXELMAP_GPU === "1") {
+            const highDpi = await browser.newContext({viewport: {width: 840, height: 600}, deviceScaleFactor: 2});
+            const dense = await open(highDpi, address.href);
+            const initial = await frameWhere(dense, hasTerrain, "terrain-gpu-high-dpi", 60000);
+            assert.equal(initial.width, 1680, "The Skia foreground preserves physical display resolution");
+            await assertGpuTerrain(dense);
+            await dense.setViewportSize({width: 960, height: 640});
+            const resized = await frameWhere(dense, frame => frame.width === 1920 && hasTerrain(frame),
+                "terrain-gpu-high-dpi-resized", 60000);
+            assert.equal(resized.height, 1280);
+            await assertGpuTerrain(dense);
+            await highDpi.close();
+        }
         assert.deepEqual(failures, [], "Terrain has no browser runtime exceptions or missing fonts");
         console.log("Terrain browser checks passed for real Garda relief, flat comparison, elevation, Map and Earth layers, 2D/3D, picking, orbit, drag, exaggeration, v4 sharing and phone controls.");
     } finally {

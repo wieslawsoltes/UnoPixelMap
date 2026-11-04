@@ -9,5 +9,7 @@
     <ProjectReference Include="../PixelMap.Routing/PixelMap.Routing.csproj" />
     <ProjectReference Include="../PixelMap.Data/PixelMap.Data.csproj" />
     <PackageReference Include="SkiaSharp" Version="3.119.2" />
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.16.0" />
+    <PackageReference Include="LibTessDotNet" Version="1.1.15" />
   </ItemGroup>
 </Project>

@@ -27,12 +27,14 @@ internal sealed partial class BuildingRasterizer
     private float vertical, pixelsPerMeter;
     private bool terrainDepth;
     private TerrainSurface? terrainSurface;
+    private Func<float, float, float, bool>? gpuSceneQuery;
 
     public void Begin(int w, int h, float sinPitch, float scale, bool perspective = false)
     {
         width = w; height = h; vertical = sinPitch; pixelsPerMeter = scale;
         terrainDepth = false;
         terrainSurface = null;
+        gpuSceneQuery = null;
         usingPerspective = perspective;
         if (perspective)
         {
@@ -45,6 +47,20 @@ internal sealed partial class BuildingRasterizer
     }
 
     public bool Covers(float sx, float sy) => CoversAt(sx, sy, 4);
+
+    internal void BeginGpuScene(int w, int h, float scale, TileTransform lens,
+        Func<float, float, float, bool> query)
+    {
+        width = w;
+        height = h;
+        pixelsPerMeter = scale;
+        vertical = lens.SinPitch;
+        usingPerspective = lens.Perspective;
+        depthLens = lens;
+        terrainDepth = true;
+        terrainSurface = null;
+        gpuSceneQuery = query;
+    }
 
     internal Span<float> Heights => depth.AsSpan(0, width * height);
     internal Span<float> InverseDepth => usingPerspective ? inverseDepth.AsSpan(0, width * height) : [];
@@ -70,6 +86,7 @@ internal sealed partial class BuildingRasterizer
 
     public bool CoversAt(float sx, float sy, float altitudeMeters)
     {
+        if (gpuSceneQuery is { } query) return query(sx, sy, altitudeMeters);
         int x = (int)MathF.Floor(sx), y = (int)MathF.Floor(sy);
         if ((uint)x >= (uint)width || (uint)y >= (uint)height) return false;
         int offset = y*width+x;

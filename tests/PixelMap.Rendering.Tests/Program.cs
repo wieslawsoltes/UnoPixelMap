@@ -2,6 +2,12 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--gpu-terrain", StringComparer.Ordinal))
+{
+    GlTerrainChecks.Run(args);
+    return;
+}
+
 const int width = 256, height = 256;
 var id = new TileId(14, 8192, 8192);
 double centerX = (id.X + .5) / (1 << id.Z);

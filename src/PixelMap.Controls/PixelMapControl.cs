@@ -62,7 +62,8 @@ public sealed partial class PixelMapControl : UserControl
         _elevationSource = elevationSource ?? new ElevationTileSource(Http);
         _elevations = new(_elevationSource.GetTileAsync, LayerChanged, retainPreviousOnFailure: true);
         var dispatcher = DispatcherQueue;
-        _surface = new(isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)),
+        var layers = new Grid { Background = Brush(170, 187, 161) };
+        _surface = new(layers, isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)),
             () => { if (_marker.HasValue && _terrain is not null) dispatcher.TryEnqueue(() => { if (_active) PositionMarker(); }); });
         _pinLabel = new TextBlock { FontSize = 12, Foreground = Brush(255, 247, 220), TextTrimming = TextTrimming.CharacterEllipsis };
         _pin = new Border
@@ -81,7 +82,9 @@ public sealed partial class PixelMapControl : UserControl
             Visibility = Visibility.Collapsed
         };
         _pin.SizeChanged += (_, _) => PositionMarker();
-        Content = new Grid { Background = Brush(170, 187, 161), Children = { _surface, _pin } };
+        layers.Children.Add(_surface);
+        layers.Children.Add(_pin);
+        Content = layers;
         IsTabStop = true;
         AutomationProperties.SetName(this, "Interactive pixel map");
         HookInput();
@@ -317,7 +320,7 @@ public sealed partial class PixelMapControl : UserControl
             Journey.Route, CurrentVehicle(), Journey.NextCheckpoint, IsGpuRenderingEnabled, _terrain);
     }
 
-    private sealed class MapSurface(Action<bool> backendChanged, Action framePresented) : SKCanvasElement
+    private sealed partial class MapSurface(Grid layers, Action<bool> backendChanged, Action framePresented) : SKCanvasElement
     {
         private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery,
             PixelStyle Palette, bool Moving, RoutePlan? Route, VehiclePose? Vehicle, RoutePosition? Gate, bool UseGpuRendering, TerrainOptions? Terrain);
@@ -334,8 +337,11 @@ public sealed partial class PixelMapControl : UserControl
         internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery,
             PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, RoutePosition? gate, bool useGpuRendering, TerrainOptions? terrain)
         {
-            _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, gate, useGpuRendering, terrain);
-            Invalidate();
+            lock (_drawing)
+            {
+                _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, gate, useGpuRendering, terrain);
+                PresentGpuTerrain(_scene);
+            }
         }
 
         internal void Release()
@@ -343,6 +349,7 @@ public sealed partial class PixelMapControl : UserControl
             lock (_drawing)
             {
                 _scene = _presentedScene = null;
+                ReleaseGpuTerrain();
                 _renderer?.Dispose();
                 _renderer = null;
                 ReportBackend(false);
@@ -351,8 +358,16 @@ public sealed partial class PixelMapControl : UserControl
 
         internal MapFeature? Pick(Point point, int width, int height)
         {
-            lock (_drawing) return _scene is { } scene
-                ? _renderer?.Pick(point.X, point.Y, width, height, scene.Camera, scene.Tiles) : null;
+            lock (_drawing)
+            {
+                if (_presentedScene is not { } scene || PresentedRenderer is not { } renderer) return null;
+                if (_terrainGpuPresented && _gpuDisplayed is { } displayed)
+                {
+                    width = displayed.Frame.Width;
+                    height = displayed.Frame.Height;
+                }
+                return renderer.Pick(point.X, point.Y, width, height, scene.Camera, scene.Tiles);
+            }
         }
 
         internal bool TryProjectTerrain(double latitude, double longitude, int width, int height, MapCamera camera,
@@ -361,7 +376,7 @@ public sealed partial class PixelMapControl : UserControl
             lock (_drawing)
             {
                 screen = default;
-                return _renderer is not null && _renderer.TryProjectTerrain(latitude, longitude, width, height, camera, out screen);
+                return PresentedRenderer is { } renderer && renderer.TryProjectTerrain(latitude, longitude, width, height, camera, out screen);
             }
         }
 
@@ -370,7 +385,7 @@ public sealed partial class PixelMapControl : UserControl
             lock (_drawing)
             {
                 hit = default;
-                return _renderer is not null && _renderer.TryPickTerrain(x, y, width, height, camera, out hit);
+                return PresentedRenderer is { } renderer && renderer.TryPickTerrain(x, y, width, height, camera, out hit);
             }
         }
 
@@ -378,8 +393,10 @@ public sealed partial class PixelMapControl : UserControl
         {
             lock (_drawing)
             {
+                if (DrawGpuPresentation(canvas, area)) return;
                 if (_scene is { } scene)
                 {
+                    _terrainGpuPresented = false;
                     DrawScene(canvas, area, scene);
                     if (!ReferenceEquals(_presentedScene, scene))
                     {
@@ -397,24 +414,30 @@ public sealed partial class PixelMapControl : UserControl
             var moving = scene.Moving;
             int size = moving ? _interactivePixelSize : 2;
             long start = Stopwatch.GetTimestamp();
+            bool useSkiaGpu = scene.UseGpuRendering && !UsesGpuTerrain(scene);
             _renderer.Draw(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height),
-                camera, scene.Tiles, scene.Palette, size, scene.Imagery, useGpuRendering: scene.UseGpuRendering,
-                allowDeferredGpuRendering: scene.UseGpuRendering && CompositionCapabilities.GetForCurrentView().AreEffectsFast(),
+                camera, scene.Tiles, scene.Palette, size, scene.Imagery, useGpuRendering: useSkiaGpu,
+                allowDeferredGpuRendering: useSkiaGpu && CompositionCapabilities.GetForCurrentView().AreEffectsFast(),
                 terrainOptions: scene.Terrain);
             ReportBackend(_renderer.IsGpuRenderingActive);
             if (scene.Gate is { } gate && scene.Route is { } trip && scene.Vehicle is { } driver)
                 _renderer.DrawGate(canvas, camera, area.Width, area.Height, gate, trip.Mode, trip.Mode == TravelMode.Flight ? driver.AltitudeMeters : 0, driver.AnimationSeconds);
             if (scene.Route is { } route)
                 _renderer.DrawNavigation(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height), camera, route, scene.Vehicle, size);
+            TrackFrameCost(scene, Stopwatch.GetElapsedTime(start).TotalMilliseconds);
+        }
+
+        private void TrackFrameCost(Scene scene, double milliseconds)
+        {
             // Adjust only after an actual camera change. Resolution hysteresis avoids thrashing the terrain cache.
-            if (moving && _timedCamera != camera)
+            if (scene.Moving && _timedCamera != scene.Camera)
             {
-                double ms = Math.Min(100, Stopwatch.GetElapsedTime(start).TotalMilliseconds);
+                double ms = Math.Min(100, milliseconds);
                 _movingCost = .75 * _movingCost + .25 * ms;
                 if (_movingCost > 29 && _interactivePixelSize < 4) { _interactivePixelSize++; _movingCost = 20; }
                 else if (_movingCost < 10 && _interactivePixelSize > 2) { _interactivePixelSize--; _movingCost = 16; }
             }
-            _timedCamera = camera;
+            _timedCamera = scene.Camera;
         }
 
         private void ReportBackend(bool isActive)
