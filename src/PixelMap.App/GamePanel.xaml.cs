@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
@@ -18,7 +17,7 @@ public sealed partial class GamePanel : UserControl
     private readonly DispatcherTimer _lookClock = new() { Interval = TimeSpan.FromMilliseconds(16) };
     private readonly DispatcherTimer _pulseClock = new() { Interval = TimeSpan.FromMilliseconds(90) };
     private PixelMapControl? _map;
-    private bool _shown, _syncing, _peerRefreshQueued;
+    private bool _shown, _syncing;
     private long _lookTimestamp, _lastTelemetry, _lastPadPointer;
     private JourneyState? _displayedState;
     private JourneyCameraRig? _displayedRig;
@@ -44,9 +43,6 @@ public sealed partial class GamePanel : UserControl
         BindPad(Climb, PadAction.Climb);
         BindPad(Descend, PadAction.Descend);
         SizeChanged += (_, _) => LayoutControls();
-        SettingsCard.SizeChanged += (_, _) => RefreshControlPeers();
-        TouchPad.SizeChanged += (_, _) => RefreshControlPeers();
-        SettingsScroll.ViewChanged += (_, _) => RefreshControlPeers();
         Unloaded += (_, _) => ReleaseInput();
     }
 
@@ -84,31 +80,17 @@ public sealed partial class GamePanel : UserControl
     private void LayoutControls()
     {
         double inset = ActualWidth < 600 ? 8 : 16;
-        SettingsCard.Margin = new Thickness(inset);
+        bool compact = ActualWidth >= 600 && ActualHeight < 360;
+        bool compactHud = compact && Setup.Visibility != Visibility.Visible;
+        SettingsCard.HorizontalAlignment = compact && !compactHud ? HorizontalAlignment.Center : HorizontalAlignment.Left;
+        SettingsCard.Margin = new Thickness(inset, compactHud ? 6 : inset, inset, inset);
+        SettingsCard.Padding = new Thickness(12, compactHud ? 3 : 9, 12, compactHud ? 3 : 9);
+        SettingsContent.Spacing = compactHud ? 3 : 7;
         SettingsCard.Width = Math.Max(180, Math.Min(326, ActualWidth - 2 * inset));
-        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - 2 * inset);
+        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - 2 * inset - (compact ? 64 : 0));
         TouchPad.Margin = new Thickness(inset, 0, inset, 8);
+        PadActions.Orientation = compact ? Orientation.Horizontal : Orientation.Vertical;
         FlightActions.Orientation = ActualWidth < 370 ? Orientation.Vertical : Orientation.Horizontal;
-        RefreshControlPeers();
-    }
-
-    private void RefreshControlPeers()
-    {
-        if (!_shown || _peerRefreshQueued) return;
-        _peerRefreshQueued = true;
-        if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
-        {
-            _peerRefreshQueued = false;
-            if (!_shown) return;
-            UpdateLayout();
-            // Controls initially measured inside the collapsed overlay need fresh
-            // viewport bounds after their ancestors are laid out or scrolled.
-            FrameworkElement[] controls = [SettingsToggle, ExitButton, ModeChoice, CameraChoice,
-                StyleChoice, LayerChoice, Relief, StartButton, TelemetryBox, PauseButton,
-                RespawnButton, Sound, MoveStick, LookStick, JumpBrake, Boost, Climb, Descend];
-            foreach (var control in controls)
-                FrameworkElementAutomationPeer.FromElement(control)?.InvalidatePeer();
-        })) _peerRefreshQueued = false;
     }
 
     private string SelectedMode => (ModeChoice.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Walk";
@@ -216,7 +198,7 @@ public sealed partial class GamePanel : UserControl
         SettingsToggle.Content = expanded ? "−" : "Settings";
         SettingsToggle.Width = expanded ? 34 : 76;
         AutomationProperties.SetName(SettingsToggle, expanded ? "Collapse game settings" : "Expand game settings");
-        RefreshControlPeers();
+        LayoutControls();
     }
 
     private void OnPause(object sender, RoutedEventArgs e)
@@ -303,7 +285,11 @@ public sealed partial class GamePanel : UserControl
     {
         if (element.Text == text) return;
         element.Text = text;
-        AutomationProperties.SetName(element, text);
+        if (element.Parent is Border readout && AutomationProperties.GetAccessibilityView(element) == AccessibilityView.Raw)
+        {
+            AutomationProperties.SetName(readout, text);
+            return;
+        }
         FrameworkElementAutomationPeer.FromElement(element)?.InvalidatePeer();
     }
 
@@ -320,8 +306,8 @@ public sealed partial class GamePanel : UserControl
         }), true);
         void Release(object sender, PointerRoutedEventArgs e)
         {
-            if (!_pressed.Remove(e.Pointer.PointerId)) return;
             _lastPadPointer = Environment.TickCount64;
+            if (!_pressed.Remove(e.Pointer.PointerId)) return;
             button.ReleasePointerCapture(e.Pointer);
             SendInput();
             e.Handled = true;

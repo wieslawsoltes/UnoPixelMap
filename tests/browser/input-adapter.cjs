@@ -6,7 +6,9 @@ const vm = require("node:vm");
 // Run the production adapter with synchronous capture/routed-event ordering.
 // The physical browser suite separately exercises Uno's native hit testing.
 const microtasks = [];
+const frames = new Map();
 let time = 0;
+let frameSequence = 0;
 let routed;
 
 class Event {
@@ -103,11 +105,14 @@ for (const type of ["wheel", "pointerdown", "pointermove", "keydown"])
 
 const source = fs.readFileSync(path.resolve(__dirname, "../../src/PixelMap.Controls/Browser/map-input.js"), "utf8");
 const sandbox = { document, window, Element, WheelEvent, AbortController,
-    queueMicrotask: callback => microtasks.push(callback) };
+    queueMicrotask: callback => microtasks.push(callback),
+    requestAnimationFrame(callback) { const id = ++frameSequence; frames.set(id, callback); return id; },
+    cancelAnimationFrame: id => frames.delete(id) };
 vm.runInNewContext(source, sandbox);
 const adapter = sandbox.PixelAtlasInput;
 const suspended = [];
-adapter.attach(1, () => suspended.push(1));
+const motions = [];
+adapter.attach(1, () => suspended.push(1), (x, y) => motions.push({ id: 1, x, y }));
 adapter.attach(1, () => assert.fail("Attaching twice replaced the map owner"));
 assert.equal(document.listeners.get("wheel").length, 1);
 assert.equal(document.listeners.get("wheel")[0].options.passive, false);
@@ -127,6 +132,12 @@ function wheel(values, owner = 1) {
     assert.ok(event.defaultPrevented, "A map-owned wheel event retained its browser default");
     assert.deepEqual([...adapter.takeWheel(owner)], [], "Raw events escaped their synchronous routing lifetime");
     return sample;
+}
+
+function drawFrame() {
+    const callbacks = [...frames.values()];
+    frames.clear();
+    for (const callback of callbacks) callback();
 }
 
 assert.deepEqual(wheel({ deltaY: 100, wheelDeltaY: -120, timeStamp: 1000 }), [1, 0, 100, 0, 0]);
@@ -190,6 +201,26 @@ assert.ok(emit(new Event("gestureend"), routeGesture).defaultPrevented);
 assert.equal(emit(new Event("gesturestart", { scale: 1 })).defaultPrevented, false);
 assert.equal(emit(new Event("gestureend")).defaultPrevented, false);
 
+// XAML game sticks capture their own pointers, independently of map capture.
+const uiTouch = emit(new Event("pointerdown", { pointerId: 61, pointerType: "touch" }));
+emit(new Event("pointerdown", { pointerId: 62, pointerType: "touch" }));
+assert.equal(uiTouch.defaultPrevented, false, "The adapter consumed a UI-owned touch press");
+assert.equal(canvas.captures.size, 0);
+const rejectTouchWheel = () => assert.fail("A parallel Safari touch gesture became a map wheel event");
+assert.ok(emit(new Event("gesturestart", { scale: 1 }), rejectTouchWheel).defaultPrevented);
+assert.ok(emit(new Event("gesturechange", { scale: 1.5, rotation: 20 }), rejectTouchWheel).defaultPrevented);
+emit(new Event("pointerup", { pointerId: 61, pointerType: "touch" }));
+assert.ok(emit(new Event("gesturechange", { scale: 1.7 }), rejectTouchWheel).defaultPrevented);
+emit(new Event("pointercancel", { pointerId: 62, pointerType: "touch" }));
+emit(new Event("gestureend"));
+emit(new Event("pointerdown", { pointerId: 63, pointerType: "touch" }), undefined, inputChild);
+assert.equal(emit(new Event("gesturestart", { scale: 1 }), rejectTouchWheel, inputChild).defaultPrevented, false,
+    "A native editor touch gesture lost its browser default");
+emit(new Event("gesturestart", { scale: 1 }), routeGesture);
+assert.deepEqual(safari.pop(), [3, 0, 0, 0, 0], "Released UI touches or editor touches suppressed a trackpad gesture");
+emit(new Event("gestureend"), routeGesture);
+emit(new Event("pointerup", { pointerId: 63, pointerType: "touch" }), undefined, inputChild);
+
 const down = emit(new Event("pointerdown", { pointerId: -37, pointerType: "touch" }), () => {
     adapter.capturePointer(1, 4294967259);
 });
@@ -200,6 +231,10 @@ assert.ok(emit(new Event("gesturestart", { scale: 1 }), () => {
 }).defaultPrevented);
 adapter.releasePointer(1, 4294967259);
 assert.equal(canvas.captures.size, 0);
+assert.ok(emit(new Event("gesturechange", { scale: 1.2 }), rejectTouchWheel).defaultPrevented,
+    "Releasing map capture ended a finger that was still touching the canvas");
+emit(new Event("pointerup", { pointerId: -37, pointerType: "touch" }));
+emit(new Event("gestureend"));
 
 emit(new Event("pointerdown", { pointerId: 10, pointerType: "mouse", button: 2 }),
     () => adapter.capturePointer(1, 10));
@@ -213,13 +248,23 @@ assert.equal(emit(new Event("contextmenu", { button: 2 })).defaultPrevented, fal
 
 assert.equal(adapter.captureMouse(1), true);
 assert.equal(adapter.isMouseCaptured(1), true);
-emit(new Event("pointermove", { pointerId: 8, pointerType: "mouse", movementX: -13.5, movementY: 6.25 }), () => {
-    assert.deepEqual([...adapter.takeMouseMotion(1)], [-13.5, 6.25]);
-    assert.deepEqual([...adapter.takeMouseMotion(1)], []);
-});
+emit(new Event("mousemove", { movementX: -13.5, movementY: 6.25 }));
+emit(new Event("pointermove", { pointerId: 8, pointerType: "mouse", movementX: -13.5, movementY: 6.25 }));
+emit(new Event("mousemove", { movementX: 4.5, movementY: -2.25 }));
+assert.equal(frames.size, 1, "High-rate locked mouse events were not coalesced");
+assert.equal(motions.length, 0);
+drawFrame();
+assert.deepEqual(motions, [{ id: 1, x: -9, y: 4 }],
+    "Relative mouse-only movement was lost or applied again through pointer events");
+emit(new Event("mousemove", { movementX: 12, movementY: 3 }));
 document.exitPointerLock();
+assert.equal(frames.size, 0, "Unlock retained a queued relative mouse frame");
+drawFrame();
+assert.equal(motions.length, 1);
 assert.deepEqual(suspended, [1], "Escape did not suspend the mouse-locked game");
 assert.equal(adapter.isMouseCaptured(1), false);
+emit(new Event("mousemove", { movementX: 50, movementY: 30 }));
+assert.equal(frames.size, 0, "An unlocked mouse bypassed managed UI hit testing");
 canvas.lockError = new Error("Pointer lock denied");
 assert.equal(adapter.captureMouse(1), false);
 canvas.lockError = null;
@@ -231,20 +276,29 @@ adapter.captureMouse(1);
 adapter.releaseMouse(1);
 assert.deepEqual(suspended, [1], "An intentional pointer-lock release invoked an unexpected pause");
 
-adapter.attach(2, () => suspended.push(2));
+adapter.attach(2, () => suspended.push(2), (x, y) => motions.push({ id: 2, x, y }));
 assert.equal(document.listeners.get("wheel").length, 1, "Multiple maps installed duplicate global listeners");
 emit(new Event("pointerdown", { pointerId: 9, pointerType: "touch" }), () => adapter.capturePointer(2, 90));
 adapter.releasePointer(1, 90);
 assert.ok(canvas.hasPointerCapture(9), "One map released another map's pointer capture");
 adapter.captureMouse(2);
+emit(new Event("mousemove", { movementX: 7, movementY: 1 }));
+drawFrame();
+assert.deepEqual(motions.at(-1), { id: 2, x: 7, y: 1 }, "Mouse movement reached a different map owner");
+emit(new Event("mousemove", { movementX: 2, movementY: 8 }));
 emit(new Event("blur", { bubbles: false }), undefined, inputChild);
 assert.deepEqual(suspended, [1], "An internal focus transfer suspended the game");
 assert.ok(canvas.hasPointerCapture(9), "An internal focus transfer released touch capture");
 assert.equal(adapter.isMouseCaptured(2), true, "An internal focus transfer released relative mouse capture");
+assert.equal(frames.size, 1, "An internal focus transfer discarded relative mouse motion");
 window.dispatchEvent(new Event("blur", { bubbles: false }));
+assert.equal(frames.size, 0, "Window deactivation retained relative mouse motion");
 assert.equal(canvas.captures.size, 0);
 assert.equal(document.pointerLockElement, null);
 assert.deepEqual(suspended, [1, 1, 2]);
+emit(new Event("gesturestart", { scale: 1 }), routeGesture);
+assert.deepEqual(safari.pop(), [3, 0, 0, 0, 0], "Window deactivation retained a canvas touch");
+emit(new Event("gestureend"), routeGesture);
 document.hidden = false;
 document.dispatchEvent(new Event("visibilitychange"));
 assert.equal(suspended.length, 3);
@@ -255,14 +309,86 @@ assert.deepEqual(suspended, [1, 1, 2, 1, 2]);
 adapter.detach(1);
 assert.equal(document.listeners.get("wheel").length, 1);
 assert.deepEqual(wheel({ deltaY: 2.5, timeStamp: 5000 }, 2), [0, 0, 2.5, 0, 0]);
+adapter.captureMouse(2);
+emit(new Event("mousemove", { movementX: 4, movementY: 9 }));
+emit(new Event("pointerdown", { pointerId: 81, pointerType: "touch" }));
 adapter.detach(2);
-for (const type of ["wheel", "pointerdown", "pointermove", "keydown", "gesturestart", "gesturechange", "gestureend", "contextmenu", "pointerlockchange", "pointerlockerror", "visibilitychange"])
+assert.equal(frames.size, 0, "Disposal retained a managed mouse callback");
+for (const type of ["wheel", "pointerdown", "pointermove", "pointerup", "pointercancel", "mousemove", "keydown", "gesturestart", "gesturechange", "gestureend", "contextmenu", "pointerlockchange", "pointerlockerror", "visibilitychange"])
     assert.equal(document.listeners.get(type).length, 0, `Disposal retained a ${type} listener`);
 assert.equal(window.listeners.get("blur").length, 0);
 assert.equal(adapter.captureMouse(2), false);
-adapter.attach(3, () => suspended.push(3));
+adapter.attach(3, () => suspended.push(3), (x, y) => motions.push({ id: 3, x, y }));
 assert.equal(document.listeners.get("wheel").length, 1);
 assert.deepEqual(wheel({ deltaY: -5, ctrlKey: true }, 3), [2, 0, -5, 0, 0]);
+emit(new Event("gesturestart", { scale: 1 }), () => safari.push([...adapter.takeWheel(3)]));
+assert.deepEqual(safari.pop(), [3, 0, 0, 0, 0], "Detaching the last map retained an old canvas touch");
+emit(new Event("gestureend"));
 adapter.detach(3);
+
+// Native grants can arrive after release/disposal. Control both event delivery
+// and Promise settlement so a stale completion can be tested against a new owner.
+const immediatePointerLock = canvas.requestPointerLock;
+const deferredLocks = [];
+let promiseLocks = true;
+canvas.requestPointerLock = () => {
+    const request = {};
+    deferredLocks.push(request);
+    if (!promiseLocks) return;
+    return { then(resolve, reject) { request.resolve = resolve; request.reject = reject; } };
+};
+function grantDeferredLock() {
+    document.pointerLockElement = canvas;
+    document.dispatchEvent(new Event("pointerlockchange"));
+}
+
+document.hidden = false;
+adapter.attach(4, () => suspended.push(4), () => {});
+assert.equal(adapter.captureMouse(4), true);
+adapter.releaseMouse(4);
+grantDeferredLock();
+deferredLocks[0].resolve();
+assert.equal(document.pointerLockElement, null, "A grant arriving after release left the browser locked");
+assert.equal(adapter.isMouseCaptured(4), false);
+
+adapter.captureMouse(4);
+adapter.releaseMouse(4);
+adapter.detach(4);
+adapter.attach(5, () => suspended.push(5), () => {});
+adapter.captureMouse(5);
+assert.equal(deferredLocks.length, 2, "A pending canvas request was duplicated during ownership transfer");
+grantDeferredLock();
+assert.equal(adapter.isMouseCaptured(5), true, "A late grant discarded the new authorized owner");
+adapter.releaseMouse(4);
+assert.equal(adapter.isMouseCaptured(5), true, "A disposed owner released another map's lock");
+adapter.releaseMouse(5);
+
+adapter.captureMouse(5);
+deferredLocks[1].resolve();
+deferredLocks[2].reject();
+adapter.captureMouse(5);
+document.dispatchEvent(new Event("pointerlockerror"));
+grantDeferredLock();
+deferredLocks[3].resolve();
+assert.equal(adapter.isMouseCaptured(5), true, "A stale completion or error event invalidated a newer request");
+adapter.releaseMouse(5);
+
+adapter.captureMouse(5);
+adapter.detach(5);
+grantDeferredLock();
+deferredLocks[4].resolve();
+assert.equal(document.pointerLockElement, null, "Disposal failed to release a pending Promise-based grant");
+assert.equal(document.listeners.get("pointerlockchange").length, 0);
+assert.equal(document.listeners.get("pointerlockerror").length, 0);
+
+promiseLocks = false;
+adapter.attach(6, () => suspended.push(6), () => {});
+adapter.captureMouse(6);
+adapter.detach(6);
+grantDeferredLock();
+assert.equal(document.pointerLockElement, null, "Disposal failed to release a pending event-only grant");
+assert.equal(document.listeners.get("pointerlockchange").length, 0);
+assert.equal(document.listeners.get("pointerlockerror").length, 0);
+canvas.requestPointerLock = immediatePointerLock;
 
 console.log("Browser input checks passed for map-scoped pinch, two-axis trackpad motion, wheel units, Safari gestures, pointer capture/lock, UI pass-through and disposal.");

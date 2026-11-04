@@ -5,9 +5,10 @@
 
     const maps = new Map();
     const captures = new Map();
+    const canvasTouches = new Set();
     const gestures = new WeakMap();
     let position = { x: 0, y: 0, target: null };
-    let listeners, wheel, pointer, keyboard, safariGesture, contextPointer, lockOwner = 0;
+    let listeners, wheel, pointer, keyboard, safariGesture, contextPointer, mouseRequest, lockOwner = 0;
 
     function nativeInput(target) {
         return target instanceof Element && target.closest("input,textarea,select,iframe,[contenteditable]");
@@ -26,10 +27,21 @@
     }
 
     function retainPointer(event) {
-        if (event.type === "pointerdown") contextPointer = null;
+        if (event.type === "pointerdown") {
+            contextPointer = null;
+            if (event.pointerType === "touch" && event.target === document.getElementById("uno-canvas") &&
+                !nativeInput(event.target)) {
+                canvasTouches.add(event.pointerId);
+                safariGesture = null;
+            }
+        }
         position = { x: event.clientX, y: event.clientY, target: event.target };
-        const current = pointer = { event, consumed: false };
+        const current = pointer = { event };
         queueMicrotask(() => { if (pointer === current) pointer = null; });
+    }
+
+    function endPointer(event) {
+        canvasTouches.delete(event.pointerId);
     }
 
     function retainKeyboard(event) {
@@ -45,10 +57,52 @@
         if (capture.element.hasPointerCapture(capture.pointerId)) capture.element.releasePointerCapture(capture.pointerId);
     }
 
+    function clearMouseMotion(map) {
+        if (!map) return;
+        if (map.mouseFrame) cancelAnimationFrame(map.mouseFrame);
+        map.mouseFrame = map.mouseX = map.mouseY = 0;
+    }
+
+    function ownsMouse(id) {
+        return lockOwner === id && document.pointerLockElement !== null &&
+            document.pointerLockElement === document.getElementById("uno-canvas");
+    }
+
+    function moveLockedMouse(event) {
+        const owner = lockOwner;
+        const map = maps.get(owner);
+        if (!map || !ownsMouse(owner)) return;
+        map.mouseX += Number.isFinite(event.movementX) ? event.movementX : 0;
+        map.mouseY += Number.isFinite(event.movementY) ? event.movementY : 0;
+        if (map.mouseFrame || map.mouseX === 0 && map.mouseY === 0) return;
+        // Pointer Lock supplies relative MouseEvents even when no XAML PointerMoved
+        // event is raised. Preserve high-rate mouse deltas with one managed update/frame.
+        map.mouseFrame = requestAnimationFrame(() => {
+            map.mouseFrame = 0;
+            const x = map.mouseX, y = map.mouseY;
+            map.mouseX = map.mouseY = 0;
+            if (ownsMouse(owner) && maps.get(owner) === map)
+                map.mouseMove(x, y);
+        });
+    }
+
+    function completeMouseRequest(request, granted) {
+        if (mouseRequest !== request) return;
+        mouseRequest = null;
+        request.events.abort();
+        if (!granted) {
+            clearMouseMotion(maps.get(lockOwner));
+            lockOwner = 0;
+        } else if (!maps.has(lockOwner) && document.pointerLockElement === request.element) {
+            document.exitPointerLock();
+        }
+    }
+
     function releaseMouse(id) {
         if (lockOwner !== id) return;
+        clearMouseMotion(maps.get(id));
         lockOwner = 0;
-        if (document.pointerLockElement) document.exitPointerLock();
+        if (document.pointerLockElement === document.getElementById("uno-canvas")) document.exitPointerLock();
     }
 
     function releasePointers(id) {
@@ -58,6 +112,7 @@
 
     function suspend() {
         safariGesture = contextPointer = keyboard = null;
+        canvasTouches.clear();
         for (const [id, map] of [...maps]) {
             releaseMouse(id);
             releasePointers(id);
@@ -67,9 +122,9 @@
 
     function safari(event) {
         if (nativeInput(event.target)) return;
-        // Touch PointerEvents already drive Uno's two-finger gesture. Safari's
-        // parallel GestureEvents must only cancel browser zoom in this case.
-        if ([...captures.values()].some(capture => capture.pointerType === "touch")) {
+        // XAML owns every canvas touch, including UI sticks and pads whose captures
+        // are independent of the map. Parallel Safari gestures must not apply twice.
+        if (canvasTouches.size !== 0) {
             event.preventDefault();
             return;
         }
@@ -107,6 +162,9 @@
         document.addEventListener("wheel", retainWheel, options);
         document.addEventListener("pointerdown", retainPointer, options);
         document.addEventListener("pointermove", retainPointer, options);
+        document.addEventListener("pointerup", endPointer, options);
+        document.addEventListener("pointercancel", endPointer, options);
+        document.addEventListener("mousemove", moveLockedMouse, options);
         document.addEventListener("keydown", retainKeyboard, options);
         document.addEventListener("gesturestart", safari, options);
         document.addEventListener("gesturechange", safari, options);
@@ -116,13 +174,17 @@
                 event.preventDefault();
         }, options);
         document.addEventListener("pointerlockchange", () => {
-            if (document.pointerLockElement || !lockOwner) return;
+            if (mouseRequest || !lockOwner || ownsMouse(lockOwner)) return;
             const previous = lockOwner;
+            clearMouseMotion(maps.get(previous));
             lockOwner = 0;
             maps.get(previous)?.suspend();
         }, options);
         document.addEventListener("pointerlockerror", () => {
-            if (!document.pointerLockElement) lockOwner = 0;
+            if (!mouseRequest && !ownsMouse(lockOwner)) {
+                clearMouseMotion(maps.get(lockOwner));
+                lockOwner = 0;
+            }
         }, options);
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) suspend();
@@ -133,10 +195,11 @@
     }
 
     globalThis.PixelAtlasInput = {
-        attach(id, onSuspend) {
+        attach(id, onSuspend, onMouseMove) {
             if (maps.has(id)) return;
             if (maps.size === 0) subscribe();
-            maps.set(id, { suspend: onSuspend, wheelTime: -Infinity, wheelKind: 0 });
+            maps.set(id, { suspend: onSuspend, mouseMove: onMouseMove,
+                mouseFrame: 0, mouseX: 0, mouseY: 0, wheelTime: -Infinity, wheelKind: 0 });
         },
 
         detach(id) {
@@ -146,6 +209,7 @@
             maps.delete(id);
             if (maps.size !== 0) return;
             listeners?.abort();
+            canvasTouches.clear();
             listeners = wheel = pointer = keyboard = safariGesture = contextPointer = null;
         },
 
@@ -192,8 +256,7 @@
             if (!(element instanceof Element) || !element.setPointerCapture) return;
             try {
                 element.setPointerCapture(event.pointerId);
-                captures.set(pointerId, { owner: id, element, pointerId: event.pointerId,
-                    pointerType: event.pointerType });
+                captures.set(pointerId, { owner: id, element, pointerId: event.pointerId });
                 if (event.button === 2) contextPointer = { owner: id };
                 event.preventDefault();
             } catch (error) {
@@ -208,26 +271,36 @@
             if (!maps.has(id)) return false;
             const element = document.getElementById("uno-canvas");
             if (!element?.requestPointerLock) return false;
+            if (lockOwner !== id) clearMouseMotion(maps.get(lockOwner));
             lockOwner = id;
+            // One native request serves the shared canvas. A new authorized owner
+            // can take over a pending request without an older completion undoing it.
+            if (ownsMouse(id) || mouseRequest) return true;
+            const request = mouseRequest = { element, events: new AbortController(), hasPromise: false };
+            const options = { signal: request.events.signal };
+            // These completion listeners outlive adapter disposal while a request
+            // is pending, including browsers whose API returns no Promise.
+            document.addEventListener("pointerlockchange", () => {
+                if (document.pointerLockElement === element) completeMouseRequest(request, true);
+            }, options);
+            document.addEventListener("pointerlockerror", () => {
+                if (!request.hasPromise) completeMouseRequest(request, false);
+            }, options);
             try {
                 const requested = element.requestPointerLock();
-                requested?.catch(() => { if (lockOwner === id && !document.pointerLockElement) lockOwner = 0; });
+                if (requested) {
+                    request.hasPromise = true;
+                    requested.then(() => completeMouseRequest(request, true), () => completeMouseRequest(request, false));
+                }
                 return true;
             } catch {
-                lockOwner = 0;
+                completeMouseRequest(request, false);
                 return false;
             }
         },
 
         releaseMouse,
 
-        takeMouseMotion(id) {
-            if (lockOwner !== id || !document.pointerLockElement || !pointer || pointer.consumed ||
-                pointer.event.type !== "pointermove" || pointer.event.pointerType !== "mouse") return [];
-            pointer.consumed = true;
-            return [pointer.event.movementX, pointer.event.movementY];
-        },
-
-        isMouseCaptured(id) { return lockOwner === id && document.pointerLockElement !== null; }
+        isMouseCaptured(id) { return ownsMouse(id); }
     };
 })();

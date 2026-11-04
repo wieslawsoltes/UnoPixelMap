@@ -592,6 +592,8 @@ public sealed partial class JourneyPanel : UserControl
             JourneyState.Paused => "Journey paused", JourneyState.Finished => "Destination reached", _ => "Trip ready"
         });
         foreach (var control in new Control[] { Gas, Brake, Ascend, Descend, Cruise }) SetEnabled(control, j.State == JourneyState.Driving);
+        SetEnabled(SteerLeft, j.State == JourneyState.Driving && route.Mode != TravelMode.Train);
+        SetEnabled(SteerRight, j.State == JourneyState.Driving && route.Mode != TravelMode.Train);
         ManualPad.Visibility = manual ? Visibility.Visible : Visibility.Collapsed;
         SetEnabled(PauseButton, j.State is JourneyState.Driving or JourneyState.Preview or JourneyState.Paused);
         PauseButton.Content = j.State == JourneyState.Paused ? "Resume" : "Pause";
@@ -616,8 +618,6 @@ public sealed partial class JourneyPanel : UserControl
                 instruction += $"\nIn {Distance(turn.MetersToNext)} · {next.Instruction}";
             SetText(TripInstruction, instruction);
         }
-        SetEnabled(SteerLeft, j.State == JourneyState.Driving && route.Mode != TravelMode.Train);
-        SetEnabled(SteerRight, j.State == JourneyState.Driving && route.Mode != TravelMode.Train);
         Ascend.Visibility = Descend.Visibility = route.Mode == TravelMode.Flight ? Visibility.Visible : Visibility.Collapsed;
         SetText(DrivingTip, route.Mode == TravelMode.Flight ? "W/S speed · A/D turn · use Climb and Descend." :
             route.Mode == TravelMode.Train ? "Regulate speed along the track. Space brakes." : "W/S speed · A/D steer · Space brakes. Hold the buttons below on touch.");

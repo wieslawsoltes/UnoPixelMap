@@ -15,13 +15,13 @@ internal sealed partial class BrowserMapInput : IDisposable
 
     private BrowserMapInput(int id) => _id = id;
 
-    internal static BrowserMapInput? TryCreate(Action suspended)
+    internal static BrowserMapInput? TryCreate(Action suspended, Action<double, double> mouseMoved)
     {
         if (!OperatingSystem.IsBrowser()) return null;
         try
         {
             int id = Interlocked.Increment(ref _sequence);
-            Attach(id, suspended);
+            Attach(id, suspended, mouseMoved);
             return new(id);
         }
         catch (JSException error)
@@ -78,16 +78,6 @@ internal sealed partial class BrowserMapInput : IDisposable
 
     internal bool IsMouseCaptured => OperatingSystem.IsBrowser() && _id != 0 && IsNativeMouseCaptured(_id);
 
-    internal bool TryTakeMouseMotion(out double dx, out double dy)
-    {
-        dx = dy = 0;
-        if (!OperatingSystem.IsBrowser() || _id == 0) return false;
-        var values = TakeMouseMotion(_id);
-        if (values.Length != 2) return false;
-        dx = values[0]; dy = values[1];
-        return true;
-    }
-
     public void Dispose()
     {
         if (!OperatingSystem.IsBrowser() || _id == 0) return;
@@ -96,7 +86,8 @@ internal sealed partial class BrowserMapInput : IDisposable
     }
 
     [JSImport("globalThis.PixelAtlasInput.attach")]
-    private static partial void Attach(int id, [JSMarshalAs<JSType.Function>] Action suspended);
+    private static partial void Attach(int id, [JSMarshalAs<JSType.Function>] Action suspended,
+        [JSMarshalAs<JSType.Function<JSType.Number, JSType.Number>>] Action<double, double> mouseMoved);
 
     [JSImport("globalThis.PixelAtlasInput.detach")]
     private static partial void Detach(int id);
@@ -124,7 +115,4 @@ internal sealed partial class BrowserMapInput : IDisposable
 
     [JSImport("globalThis.PixelAtlasInput.isMouseCaptured")]
     private static partial bool IsNativeMouseCaptured(int id);
-
-    [JSImport("globalThis.PixelAtlasInput.takeMouseMotion")]
-    private static partial double[] TakeMouseMotion(int id);
 }

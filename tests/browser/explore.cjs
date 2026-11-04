@@ -27,17 +27,35 @@ async function see(page, expected, timeout = 25000) {
     throw new Error("Missing exploration state " + expected + "\n" + snapshot);
 }
 
+async function controlBounds(page, locator) {
+    const bounds = await locator.boundingBox();
+    const scrollerId = await locator.evaluate(element => {
+        const scroller = element.closest('[elementtype="ScrollContentPresenter"]');
+        return scroller && !scroller.closest('[role="dialog"]') ? scroller.id : null;
+    });
+    const region = page.getByRole("region", {name: "Free roam settings content", exact: true});
+    if (!scrollerId || !await region.count()) return bounds;
+    // Uno exposes native scroll contents in a separate DOM portal. Its absolute
+    // origin can lag a moved card while the named XAML region is already current.
+    // Align peer-local coordinates to that visible public region for native input.
+    const portal = await page.locator("#" + scrollerId).boundingBox();
+    const visible = await region.boundingBox();
+    if (!bounds || !portal || !visible) return bounds;
+    return {...bounds, x: bounds.x + visible.x - portal.x, y: bounds.y + visible.y - portal.y};
+}
+
 async function tap(page, locator, touch = false) {
     await locator.waitFor({state: "visible"});
     await page.waitForTimeout(150);
-    const bounds = await locator.boundingBox();
+    const bounds = await controlBounds(page, locator);
     const viewport = page.viewportSize();
     assert.ok(bounds?.width > 0 && bounds?.height > 0, "The control has visible bounds");
     const left = Math.max(0, bounds.x), right = Math.min(viewport.width, bounds.x + bounds.width);
     const top = Math.max(0, bounds.y), bottom = Math.min(viewport.height, bounds.y + bounds.height);
     assert.ok(right > left && bottom > top, "The control intersects the viewport");
-    if (touch) await page.touchscreen.tap((left + right) / 2, (top + bottom) / 2);
-    else await page.mouse.click((left + right) / 2, (top + bottom) / 2);
+    const y = await locator.getAttribute("role") === "combobox" ? bottom - Math.min(16, (bottom - top) / 2) : (top + bottom) / 2;
+    if (touch) await page.touchscreen.tap((left + right) / 2, y);
+    else await page.mouse.click((left + right) / 2, y);
 }
 
 async function action(page, name, touch = false) {
@@ -65,16 +83,52 @@ async function menu(page, name) {
 
 async function choose(page, name, index, touch = false) {
     const selector = page.getByRole("combobox", {name, exact: true});
-    if (touch) await tap(page, selector, true);
-    else await selector.focus();
-    await page.waitForTimeout(150);
-    if (await selector.getAttribute("aria-expanded") !== "true") await page.keyboard.press("Alt+ArrowDown");
+    const beforePopup = touch ? await screen(page, "mobile-picker-before") : null;
+    const anchor = touch ? await controlBounds(page, selector) : null;
+    const existingScrollers = await page.locator('[elementtype="ScrollContentPresenter"]')
+        .evaluateAll(elements => elements.map(element => element.id));
+    await tap(page, selector, touch);
     await page.waitForFunction(name => document.querySelector('[aria-label="' + name + '"]')?.getAttribute("aria-expanded") === "true", name);
-    await page.keyboard.press("Home");
-    for (let item = 0; item < index; item++) await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("Enter");
+    if (!touch) {
+        // Leave focus inside the native popup. Focusing its external ComboBox
+        // again races Uno's popup focus restoration and can discard the next key.
+        await page.waitForFunction(() => document.activeElement?.getAttribute("elementtype") === "ScrollContentPresenter");
+        await page.keyboard.press("Home");
+        for (let item = 0; item < index; item++) {
+            await page.waitForTimeout(75);
+            await page.keyboard.press("ArrowDown");
+        }
+        await page.waitForTimeout(75);
+        await page.keyboard.press("Enter");
+        await page.waitForFunction(name => document.querySelector('[aria-label="' + name + '"]')?.getAttribute("aria-expanded") === "false", name);
+        return;
+    }
+    const options = page.getByRole("listbox", {name, exact: true}).getByRole("option");
+    await options.nth(index).waitFor({state: "attached"});
+    await page.waitForTimeout(200);
+    // Uno exposes virtual options without rectangles. Use the native presenter
+    // for row dimensions and a fresh canvas frame for its painted origin, which
+    // can move before the portal's accessibility rectangle catches up.
+    const popup = await page.locator('[elementtype="ScrollContentPresenter"]').evaluateAll((elements, existing) => {
+        const element = elements.find(element => !existing.includes(element.id) && element.getBoundingClientRect().height > 0);
+        if (!element) return null;
+        const {x, y, width, height} = element.getBoundingClientRect();
+        return {x, y, width, height};
+    }, existingScrollers);
+    assert.ok(popup?.width > 0 && popup?.height > 0, "The open picker exposes visible native popup bounds");
+    const count = await options.count();
+    let painted = null;
+    const deadline = Date.now() + 10000;
+    do {
+        painted = paintedPopup(beforePopup, await screen(page, "mobile-picker-painted"), anchor, popup.height);
+        if (!painted) await page.waitForTimeout(100);
+    } while (!painted && Date.now() < deadline);
+    assert.ok(painted, "The touch picker is fully painted before selecting its row");
+    const x = anchor.x + anchor.width / 2;
+    const y = painted.top + 4 + (index + .5) * (popup.height - 8) / count;
+    await page.touchscreen.tap(x, y);
     await page.waitForFunction(name => document.querySelector('[aria-label="' + name + '"]')?.getAttribute("aria-expanded") === "false", name);
-    await page.getByRole("listbox").waitFor({state: "hidden"});
+    await page.getByRole("listbox", {name, exact: true}).waitFor({state: "hidden"});
 }
 
 async function open(browser, hash, phone = false) {
@@ -141,6 +195,58 @@ function imageDifference(before, after) {
         }
     }
     return changed / count;
+}
+
+function paintedPopup(before, after, anchor, expectedHeight) {
+    const left = Math.ceil(anchor.x + 4), right = Math.floor(anchor.x + anchor.width - 4);
+    let first = -1, gap = 0, best = null;
+    for (let y = 0; y <= after.height; y++) {
+        let changed = 0, samples = 0;
+        if (y < after.height) for (let x = left; x < right; x += 3) {
+            const pixel = (y * after.width + x) * 4;
+            if (Math.abs(before.data[pixel] - after.data[pixel]) > 3 ||
+                Math.abs(before.data[pixel + 1] - after.data[pixel + 1]) > 3 ||
+                Math.abs(before.data[pixel + 2] - after.data[pixel + 2]) > 3) changed++;
+            samples++;
+        }
+        if (changed > samples * .15) {
+            if (first < 0) first = y;
+            gap = 0;
+        } else if (first >= 0 && (++gap > 2 || y === after.height)) {
+            const height = y - gap + 1 - first;
+            const error = Math.abs(height - expectedHeight);
+            if (error <= 8 && (!best || error < best.error)) best = {top: first, error};
+            first = -1;
+            gap = 0;
+        }
+    }
+    return best;
+}
+
+function paintedStartButton(frame, viewport) {
+    const left = Math.ceil(viewport.x + 8), right = Math.floor(viewport.x + viewport.width - 8);
+    const top = Math.ceil(viewport.y), bottom = Math.floor(viewport.y + viewport.height);
+    let band = -1;
+    for (let y = top; y <= bottom; y++) {
+        let green = 0, samples = 0;
+        for (let x = left; x < right; x += 2) {
+            const pixel = (y * frame.width + x) * 4;
+            // The public Start button uses the opaque #245D4D action fill.
+            if (Math.abs(frame.data[pixel] - 36) <= 1 && Math.abs(frame.data[pixel + 1] - 93) <= 1 &&
+                Math.abs(frame.data[pixel + 2] - 77) <= 1) green++;
+            samples++;
+        }
+        if (green > samples * .6) {
+            if (band < 0) band = y;
+        } else if (band >= 0) {
+            // A 38px button paints at least 37 complete fill rows. Inspect its
+            // final edge even when that edge coincides with the viewport boundary.
+            if (y - band >= 37 && band > top && y <= bottom)
+                return {x: viewport.x + viewport.width / 2, y: (band + y) / 2};
+            band = -1;
+        }
+    }
+    return null;
 }
 
 async function pageGeometry(page) {
@@ -318,8 +424,10 @@ async function startMode(page, index, title, touch = false) {
 }
 
 async function freeRoam(page) {
-    await action(page, "Open free roam game");
-    const walkedFrom = await startMode(page, 0, "Walking");
+    await tap(page, page.getByRole("button", {name: "Open free roam game", exact: true}));
+    await action(page, "Start free roam at map center");
+    await see(page, /Walking/);
+    const walkedFrom = await telemetry(page);
     await page.keyboard.down("w");
     try {
         await waitTelemetry(page, state => state.distance > walkedFrom.distance, "Walking advances without a planned route");
@@ -331,15 +439,38 @@ async function freeRoam(page) {
     assert.ok((await telemetry(page)).clearance < .1, "Holding jump through landing does not start another jump");
     await page.keyboard.up("Space");
     await screen(page, "game-walking-first-person");
+    console.log("Walking, terrain contact and held-jump behavior passed.");
 
-    // A real canvas click requests browser pointer lock. Escape must both release
-    // relative mouse input and pause the simulation before any GUI action resumes it.
+    const beforeDrag = await readCamera(page);
+    await page.mouse.move(800, 400);
+    await page.mouse.down({button: "right"});
+    await page.mouse.move(850, 420, {steps: 5});
+    await page.mouse.up({button: "right"});
+    await page.waitForTimeout(250);
+    assert.notEqual((await readCamera(page)).bearing, beforeDrag.bearing, "Native mouse dragging rotates the first-person view");
+    assert.equal(await page.evaluate(() => document.pointerLockElement), null, "Right dragging keeps ordinary pointer input");
+
+    // Acquire the actual browser lock through a real click. CDP absolute mouse
+    // movement under headless Pointer Lock produces opposing cursor-warp deltas,
+    // so explicit standard relative MouseEvents exercise the live JS→C# callback.
     await page.mouse.click(800, 400);
     await page.waitForFunction(() => document.pointerLockElement !== null);
+    await page.waitForTimeout(300);
     const beforeLook = await readCamera(page);
-    await page.mouse.move(940, 450, {steps: 5});
-    await page.waitForTimeout(250);
-    assert.notEqual((await readCamera(page)).bearing, beforeLook.bearing, "Relative mouse input rotates the first-person view");
+    await page.evaluate(() => {
+        const canvas = document.getElementById("uno-canvas");
+        for (let index = 0; index < 2; index++) canvas.dispatchEvent(new MouseEvent("mousemove", {
+            bubbles: true, cancelable: true, clientX: 800, clientY: 400, movementX: 30, movementY: -15
+        }));
+    });
+    let relativeTurn = 0;
+    const lookDeadline = Date.now() + 10000;
+    do {
+        await page.waitForTimeout(100);
+        relativeTurn = ((await readCamera(page)).bearing - beforeLook.bearing + 540) % 360 - 180;
+    } while (Math.abs(relativeTurn - 10.8) > 1 && Date.now() < lookDeadline);
+    assert.ok(Math.abs(relativeTurn - 10.8) <= 1,
+        "Coalesced relative mouse input reaches the first-person camera exactly once, observed " + relativeTurn + " degrees");
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => document.pointerLockElement === null);
     await see(page, /Resume free roam/);
@@ -347,6 +478,7 @@ async function freeRoam(page) {
     await holdKey(page, "w", 300);
     assert.equal((await telemetry(page)).distance, paused.distance, "Paused free roam releases movement input");
     await pausedRendering(page, paused);
+    console.log("Native drag, browser Pointer Lock, relative look and pause passed.");
     await action(page, "Resume free roam");
 
     const carFrom = await startMode(page, 1, "Driving");
@@ -358,24 +490,45 @@ async function freeRoam(page) {
     await expandSettings(page);
     for (const camera of [1, 2, 3, 4, 0]) await choose(page, "Free roam camera", camera);
     await action(page, "Collapse game settings");
+    console.log("Car driving and all five camera rigs passed.");
 
-    await startMode(page, 6, "Free flight");
+    await startMode(page, 3, "Sailing");
+    await see(page, /waiting for navigable water/);
+    const dryBoat = await telemetry(page);
+    await holdKey(page, "w", 300);
+    assert.equal((await telemetry(page)).distance, dryBoat.distance, "A boat waits for water when selected on dry land");
+
+    const launch = await startMode(page, 6, "Free flight");
     await page.keyboard.down("Shift");
-    await holdKey(page, "PageUp", 3500);
-    await page.keyboard.up("Shift");
+    await page.keyboard.down("PageUp");
+    try {
+        await waitTelemetry(page, state => state.altitude > launch.altitude + 250, "Boosted free flight clears the city skyline", 15000);
+    } finally {
+        await page.keyboard.up("PageUp");
+        await page.keyboard.up("Shift");
+    }
     const flyingFrom = await startMode(page, 4, "Flying");
     await page.keyboard.down("w");
-    await holdKey(page, "PageUp", 1600);
-    await page.keyboard.up("w");
+    await page.keyboard.down("PageUp");
+    try {
+        await waitTelemetry(page, state => state.altitude > flyingFrom.altitude + .5, "The aircraft climbs over real terrain");
+    } finally {
+        await page.keyboard.up("PageUp");
+        await page.keyboard.up("w");
+    }
     const flyingTo = await telemetry(page);
     assert.ok(flyingTo.altitude > flyingFrom.altitude, "The aircraft climbs over real terrain");
     await screen(page, "game-aircraft");
 
     const freeFrom = await startMode(page, 6, "Free flight");
-    await holdKey(page, "PageUp", 800);
-    assert.ok((await telemetry(page)).altitude > freeFrom.altitude, "Independent free flight moves vertically");
-    await holdKey(page, "w", 900);
-    assert.ok((await telemetry(page)).distance > freeFrom.distance, "Independent free flight moves horizontally");
+    await page.keyboard.down("PageUp");
+    try {
+        await waitTelemetry(page, state => state.altitude > freeFrom.altitude + .5, "Independent free flight moves vertically");
+    } finally { await page.keyboard.up("PageUp"); }
+    await page.keyboard.down("w");
+    try {
+        await waitTelemetry(page, state => state.distance > freeFrom.distance, "Independent free flight moves horizontally");
+    } finally { await page.keyboard.up("w"); }
     await action(page, "Respawn free roam vehicle");
     assert.ok((await telemetry(page)).distance < 1, "Respawn resets free-roam progress");
     await screen(page, "game-free-flight");
@@ -405,16 +558,48 @@ async function mobileInput(context, page) {
     assert.ok(imageDifference(before, await screen(page, "mobile-map-pinch-orbit")) > .1, "Touch pinch and twist transform the rendered map");
     await action(page, "Open free roam game", true);
     const start = await startMode(page, 6, "Free flight", true);
+    await page.waitForTimeout(200);
+    const climb = await page.getByRole("button", {name: "Free roam climb", exact: true}).boundingBox();
+    assert.ok(climb?.width > 0 && climb?.height > 0, "The mobile climb button is visible");
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [
+        {id: 1, x: climb.x + climb.width / 2, y: climb.y + climb.height / 2}
+    ]});
+    try {
+        await waitTelemetry(page, state => state.altitude > start.altitude + .5, "The first mobile button hold survives map focus loss");
+    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+    await waitTelemetry(page, state => state.speed === 0, "Free flight stops after releasing climb");
     const move = await page.getByLabel("Free roam movement stick", {exact: true}).boundingBox();
     const look = await page.getByLabel("Free roam look stick", {exact: true}).boundingBox();
     assert.ok(move?.width > 0 && look?.width > 0, "Both independent mobile sticks are visible");
+    assert.ok(move.x >= 0 && look.x > move.x + move.width && look.x + look.width <= 390,
+        "Portrait stick semantics match their separate visible columns");
+    assert.ok(move.y > 500 && look.y > 500, "Portrait sticks follow the bottom of the map viewport");
+    const beforeLook = await screen(page, "mobile-game-before-look");
+    const lookFrom = await telemetry(page);
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [
+        {id: 1, x: look.x + look.width / 2 + 30, y: look.y + look.height / 2}
+    ]});
+    let looked = false;
+    const lookDeadline = Date.now() + 10000;
+    try {
+        do {
+            await page.waitForTimeout(100);
+            looked = imageDifference(beforeLook, await screen(page, "mobile-game-after-look")) > .05;
+        } while (!looked && Date.now() < lookDeadline);
+    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+    const lookTo = await telemetry(page);
+    assert.equal(lookTo.latitude, lookFrom.latitude, "The look stick preserves physical latitude");
+    assert.equal(lookTo.longitude, lookFrom.longitude, "The look stick preserves physical longitude");
+    assert.equal(lookTo.altitude, lookFrom.altitude, "The look stick preserves physical altitude");
+    assert.ok(looked, "A native look-only hold rotates map artwork independently of movement");
     const stickPoints = [
         {id: 1, x: move.x + move.width / 2, y: move.y + move.height / 2 - 33},
         {id: 2, x: look.x + look.width / 2 + 30, y: look.y + look.height / 2 - 8}
     ];
     await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: stickPoints});
-    await page.waitForTimeout(1400);
-    await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
+    try {
+        await waitTelemetry(page, state => state.distance > lookTo.distance, "Native dual sticks move the free camera");
+    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
     const moved = await telemetry(page);
     assert.ok(moved.distance > start.distance, "Touch movement and look run simultaneously");
     assert.ok(moved.latitude !== start.latitude || moved.longitude !== start.longitude, "Touch movement updates geographic position");
@@ -426,8 +611,52 @@ async function mobileInput(context, page) {
     await page.setViewportSize({width: 844, height: 390});
     await page.waitForTimeout(500);
     await screen(page, "mobile-game-landscape");
+    const landscapeMove = await page.getByLabel("Free roam movement stick", {exact: true}).boundingBox();
+    const landscapeLook = await page.getByLabel("Free roam look stick", {exact: true}).boundingBox();
+    const settings = await page.getByRole("group", {name: "Free roam settings", exact: true}).boundingBox();
+    const playback = await page.getByRole("group", {name: "Free roam playback controls", exact: true}).boundingBox();
+    const actions = await page.getByRole("group", {name: "Free roam action controls", exact: true}).boundingBox();
+    assert.ok(settings.y + settings.height <= landscapeMove.y && settings.x + settings.width < landscapeLook.x,
+        "The compact landscape HUD sits above the movement stick and clear of the look stick");
+    const map = await page.getByRole("group", {name: "Interactive world map", exact: true}).boundingBox();
+    assert.ok(settings.x + settings.width < map.x + map.width / 2,
+        "The compact landscape HUD leaves the central gameplay aim visible");
+    assert.ok(actions.y >= playback.y + playback.height && actions.height < 50,
+        "Landscape flight actions occupy one unobstructed bottom row");
+    await action(page, "Expand game settings", true);
+    await page.waitForFunction(() => document.querySelector('[aria-label="Free roam settings content"]')?.getBoundingClientRect().height > 140);
+    const scroller = page.locator('[elementtype="ScrollContentPresenter"]:visible');
+    assert.equal(await scroller.count(), 1, "The expanded game exposes one native settings scroll surface");
+    const scrollBounds = await page.getByRole("region", {name: "Free roam settings content", exact: true}).boundingBox();
+    async function swipeSettings(up) {
+        const from = up ? scrollBounds.y + scrollBounds.height - 15 : scrollBounds.y + 20;
+        const distance = Math.min(40, scrollBounds.height - 35);
+        const to = from + (up ? -distance : distance);
+        const x = scrollBounds.x + scrollBounds.width / 2;
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{id: 3, x, y: from}]});
+        try {
+            for (let step = 1; step <= 8; step++) {
+                await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{id: 3, x, y: from + (to - from) * step / 8}]});
+                await page.waitForTimeout(30);
+            }
+            await page.waitForTimeout(100);
+        } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+        await page.waitForTimeout(250);
+    }
+    let paintedStart = null;
+    for (let attempt = 0; attempt < 12 && !paintedStart; attempt++) {
+        await swipeSettings(true);
+        paintedStart = paintedStartButton(await screen(page, "mobile-landscape-settings-scrolled"), scrollBounds);
+    }
+    assert.ok(await scroller.evaluate(element => element.scrollTop) > 20, "Native landscape swipes scroll the game settings");
+    assert.ok(paintedStart, "A fresh canvas frame paints the complete Start button inside the settings viewport");
+    await page.touchscreen.tap(paintedStart.x, paintedStart.y);
+    await page.getByRole("button", {name: "Expand game settings", exact: true}).waitFor({state: "visible"});
+    await waitTelemetry(page, state => state.distance === 0, "Native activation of the painted landscape Start button restarts free roam");
+    await screen(page, "mobile-landscape-restarted");
     await action(page, "Resume free roam", true);
     await action(page, "Exit free roam", true);
+    await page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true}).waitFor({state: "visible"});
     await cdp.detach();
 }
 

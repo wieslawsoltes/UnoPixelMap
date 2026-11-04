@@ -124,7 +124,7 @@ public sealed partial class PixelMapControl
         {
             if (_held.Remove(e.Key)) { ApplyDrivingKeys(); e.Handled = true; }
         };
-        LostFocus += (_, _) => ReleaseDrivingKeys();
+        LostFocus += (_, _) => ReleaseFocusedDrivingKeys();
     }
 
     private void OnJourneyChanged()
@@ -203,6 +203,16 @@ public sealed partial class PixelMapControl
         if (!Journey.Follow || !Journey.Active) return false;
         _rideZoom = Math.Clamp(_rideZoom + delta, -4, 3);
         UpdateRideCamera(); return true;
+    }
+
+    private void ReleaseFocusedDrivingKeys()
+    {
+        // Touch controls may take focus after installing their input. Remove only
+        // keyboard contributions, preserving the independently captured touch state.
+        if (_held.Count == 0) return;
+        _held.Clear();
+        if (Journey.IsFreeRoaming) ApplyFreeRoamKeys();
+        else Journey.ClearInput();
     }
 
     private void ReleaseDrivingKeys()

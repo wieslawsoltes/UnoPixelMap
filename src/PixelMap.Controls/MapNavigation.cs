@@ -38,7 +38,7 @@ public sealed partial class PixelMapControl
         PointerWheelChanged += Wheel;
         KeyDown += OnMapKey;
         _motion.Tick += (_, _) => Advance();
-        Loaded += (_, _) => _browserInput ??= BrowserMapInput.TryCreate(SuspendBrowserInput);
+        Loaded += (_, _) => _browserInput ??= BrowserMapInput.TryCreate(SuspendBrowserInput, MoveCapturedMouse);
         Unloaded += (_, _) =>
         {
             ResetMapPointers();
@@ -58,6 +58,11 @@ public sealed partial class PixelMapControl
 
     public bool IsMouseCaptured => _browserInput?.IsMouseCaptured == true;
     public void ReleaseMouseCapture() => _browserInput?.ReleaseMouse();
+
+    private void MoveCapturedMouse(double x, double y)
+    {
+        if (_active && Journey.IsFreeRoaming && Journey.Active) TryLookFreeRoam(x * .18, -y * .18);
+    }
 
     private void SuspendBrowserInput()
     {
@@ -189,9 +194,9 @@ public sealed partial class PixelMapControl
 
     private void Moved(object sender, PointerRoutedEventArgs e)
     {
-        if (_browserInput?.TryTakeMouseMotion(out var mouseX, out var mouseY) == true)
+        if (_browserInput?.IsMouseCaptured == true)
         {
-            if (TryLookFreeRoam(mouseX * .18, -mouseY * .18)) e.Handled = true;
+            e.Handled = true;
             return;
         }
         var id = e.Pointer.PointerId;
@@ -274,10 +279,20 @@ public sealed partial class PixelMapControl
             _tilting = Math.Abs(dy) > 10 && ay * by > 0 && Math.Abs(dx) < Math.Abs(dy) * .45 &&
                 Math.Abs(Math.Log2(Math.Max(.001, scale))) < .11 && Math.Abs(twist) < 6;
             _planarGesture = !_tilting && (Math.Abs(scale - 1) > .1 || Math.Abs(twist) > 6 || Math.Abs(dx) > 10);
+            if (_tilting)
+            {
+                // Preserve the view already reached while recognizing the gesture.
+                // Subsequent tilt, pinch and twist start from this same camera pose.
+                _gestureCamera = Camera;
+                _firstFinger = a;
+                _secondFinger = b;
+                return;
+            }
         }
         if (_tilting)
         {
-            Camera = TransformCamera(_gestureCamera, 0, 0, -dy * .28, before.X, before.Y);
+            Camera = TransformCamera(_gestureCamera, Math.Log2(Math.Max(.02, scale)), -twist,
+                -dy * .28, before.X, before.Y);
             return;
         }
         var view = TransformCamera(_gestureCamera, Math.Log2(Math.Max(.02, scale)), -twist, 0, before.X, before.Y);

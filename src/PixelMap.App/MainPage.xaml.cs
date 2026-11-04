@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
-using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -40,6 +39,7 @@ public sealed partial class MainPage : Page
     private readonly SolidColorBrush _ink = new(ColorHelper.FromArgb(255, 28, 59, 54));
     private readonly SolidColorBrush _muted = new(ColorHelper.FromArgb(255, 75, 101, 92));
     private readonly SolidColorBrush _rowFill = new(ColorHelper.FromArgb(255, 240, 241, 226));
+    private readonly DispatcherTimer _readoutClock = new() { Interval = TimeSpan.FromMilliseconds(100) };
     private CancellationTokenSource? _request;
     private PanelKind _panel;
     private long _lastReadout;
@@ -58,10 +58,6 @@ public sealed partial class MainPage : Page
         JourneyPanel.CloseRequested += (_, _) => DisplayJourneys(false);
         JourneyPanel.PickingChanged += (_, _) => LayoutJourneys();
         JourneyPanel.SizeChanged += (_, _) => UpdateNavigationInsets();
-        Header.SizeChanged += RefreshHeaderPeers;
-        GameButton.SizeChanged += RefreshHeaderPeers;
-        GuideButton.SizeChanged += RefreshHeaderPeers;
-        ViewButton.SizeChanged += RefreshHeaderPeers;
         SizeChanged += (_, e) => LayoutChrome(e.NewSize.Width, e.NewSize.Height);
         Loaded += (_, _) =>
         {
@@ -69,27 +65,28 @@ public sealed partial class MainPage : Page
             RestoreSharedView();
             SyncReadout();
         };
-        Unloaded += (_, _) => CancelRequest();
+        Unloaded += (_, _) => { CancelRequest(); _readoutClock.Stop(); };
+        _readoutClock.Tick += (_, _) =>
+        {
+            _readoutClock.Stop();
+            if (!IsLoaded) return;
+            _lastReadout = Environment.TickCount64;
+            SyncReadout();
+        };
         Map.CameraChanged += (_, _) =>
         {
+            if (!IsLoaded) return;
             var tick = Environment.TickCount64;
-            if (tick - _lastReadout < 100 && (Map.Camera.Pitch < 1) == Equals(ProjectionShortcut.Content, "2D")) return;
+            if (tick - _lastReadout < 100 && (Map.Camera.Pitch < 1) == Equals(ProjectionShortcut.Content, "2D"))
+            {
+                if (!_readoutClock.IsEnabled) _readoutClock.Start();
+                return;
+            }
+            _readoutClock.Stop();
             _lastReadout = tick;
             SyncReadout();
         };
         Map.StatusChanged += (_, _) => SyncReadout();
-    }
-
-    private void RefreshHeaderPeers(object sender, SizeChangedEventArgs e)
-    {
-        // Font measurement can move the header commands after their first
-        // accessibility bounds were exposed. Refresh after the layout completes.
-        DispatcherQueue.TryEnqueue(() =>
-        {
-            FrameworkElementAutomationPeer.FromElement(GameButton)?.InvalidatePeer();
-            FrameworkElementAutomationPeer.FromElement(GuideButton)?.InvalidatePeer();
-            FrameworkElementAutomationPeer.FromElement(ViewButton)?.InvalidatePeer();
-        });
     }
 
     private void LayoutChrome(double width, double height)

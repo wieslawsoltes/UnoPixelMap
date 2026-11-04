@@ -28,7 +28,8 @@
     </Page.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <Grid x:Name="Header" Padding="16,9" Background="#142F32" ColumnDefinitions="*,Auto">
+        <Grid x:Name="Header" Padding="16,9" Background="#142F32" ColumnDefinitions="*,Auto"
+              AutomationProperties.Name="Map toolbar">
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <Viewbox Width="35" Height="35" AutomationProperties.Name="Pixel Atlas">
                     <Canvas Width="32" Height="32">
@@ -44,7 +45,8 @@
                                FontSize="9" CharacterSpacing="125" FontWeight="SemiBold" />
                 </StackPanel>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+                        AutomationProperties.Name="Map commands">
                 <Button x:Name="GameButton" Content="Play" Style="{StaticResource HeaderAction}"
                         AutomationProperties.Name="Open free roam game" Click="OnGame" />
                 <Button x:Name="GuideButton" Content="City guide" Style="{StaticResource HeaderAction}"
@@ -83,7 +85,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid Grid.Row="1" x:Name="MapArea" Background="#A7C6BD">
+        <Grid Grid.Row="1" x:Name="MapArea" Background="#A7C6BD" AutomationProperties.Name="Map explorer">
             <maps:PixelMapControl x:Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                   AutomationProperties.Name="Interactive world map" />
             <StackPanel x:Name="SceneDock" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Spacing="6">

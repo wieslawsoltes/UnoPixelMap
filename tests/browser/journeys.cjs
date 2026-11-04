@@ -366,11 +366,17 @@ async function phoneRide(browser) {
         await click(page, "Take manual control", true);
         const b = await page.getByRole("button", { name: "Accelerate vehicle" }).boundingBox();
         assert.ok(b && b.x >= 0 && b.y >= 0 && b.x + b.width <= 391 && b.y + b.height <= 831, "Phone controls fit");
+        assert.ok(await page.getByRole("button", { name: "Steer left", exact: true }).isEnabled(), "Boat left steering is enabled on its first visible frame");
+        assert.ok(await page.getByRole("button", { name: "Steer right", exact: true }).isEnabled(), "Boat right steering is enabled on its first visible frame");
         const cdp = await context.newCDPSession(page);
         await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: b.x + b.width / 2, y: b.y + b.height / 2, id: 1 }] });
-        await page.waitForTimeout(1500);
-        await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
-        await see(page, /[1-9]\d* km\/h/);
+        try {
+            // The first pad press transfers focus away from the map. Its held
+            // throttle must survive that transfer and accelerate before release.
+            await see(page, /[1-9]\d* km\/h/, 15000);
+        } finally {
+            await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+        }
         if (shots) await page.screenshot({ path: path.join(shots, "journey-boat-phone.png") });
     } finally { await context.close(); }
 }

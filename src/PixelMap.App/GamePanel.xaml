@@ -2,7 +2,8 @@
     x:Class="PixelMap.App.GamePanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:PixelMap.App">
+    xmlns:local="using:PixelMap.App"
+    AutomationProperties.Name="Free roam game">
     <UserControl.Resources>
         <Style x:Key="GameAction" TargetType="Button">
             <Setter Property="MinHeight" Value="38" />
@@ -23,18 +24,30 @@
         </Style>
     </UserControl.Resources>
     <Grid>
+        <Grid x:Name="Reticle" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center"
+              IsHitTestVisible="False" Visibility="Collapsed" Opacity=".85" AutomationProperties.AccessibilityView="Raw">
+            <Border Width="18" Height="4" Background="#AA173938" VerticalAlignment="Center" />
+            <Border Width="4" Height="18" Background="#AA173938" HorizontalAlignment="Center" />
+            <Border Width="14" Height="2" Background="#FFFFF8E7" VerticalAlignment="Center" />
+            <Border Width="2" Height="14" Background="#FFFFF8E7" HorizontalAlignment="Center" />
+        </Grid>
         <Border x:Name="SettingsCard" Width="326" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16"
-                Padding="12,9" Background="#F7FFFBEE" BorderBrush="#708F7D" BorderThickness="1" CornerRadius="7">
-            <ScrollViewer x:Name="SettingsScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel Spacing="7">
+                Padding="12,9" Background="#F7FFFBEE" BorderBrush="#708F7D" BorderThickness="1" CornerRadius="7"
+                AutomationProperties.Name="Free roam settings">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                          AutomationProperties.Name="Free roam settings content">
+            <StackPanel x:Name="SettingsContent" Spacing="7">
                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock x:Name="Title" Text="Free roam" FontSize="17" FontWeight="SemiBold" Foreground="#193938" />
+                        <Border AutomationProperties.Name="Free roam">
+                            <TextBlock x:Name="Title" Text="Free roam" FontSize="17" FontWeight="SemiBold" Foreground="#193938"
+                                       AutomationProperties.AccessibilityView="Raw" />
+                        </Border>
                         <TextBlock Text="EXPLORE THE WORLD" FontSize="9" CharacterSpacing="100" Foreground="#466D5C" />
                     </StackPanel>
                     <Button x:Name="SettingsToggle" Grid.Column="1" Content="−" Style="{StaticResource GameAction}"
                             Width="34" Padding="0" Click="OnToggleSettings" AutomationProperties.Name="Collapse game settings" />
-                    <Button x:Name="ExitButton" Grid.Column="2" Content="×" Style="{StaticResource GameAction}" Width="34" Padding="0"
+                    <Button Grid.Column="2" Content="×" Style="{StaticResource GameAction}" Width="34" Padding="0"
                             Click="OnClose" AutomationProperties.Name="Exit free roam" />
                 </Grid>
                 <StackPanel x:Name="Setup" Spacing="7">
@@ -85,10 +98,11 @@
                     <TextBlock x:Name="Telemetry" Foreground="#294C42" FontSize="11" TextWrapping="Wrap"
                                AutomationProperties.AccessibilityView="Raw" />
                 </Border>
-                <Grid x:Name="Transport" Visibility="Collapsed" ColumnDefinitions="*,*,Auto" ColumnSpacing="5">
+                <Grid x:Name="Transport" Visibility="Collapsed" ColumnDefinitions="*,*,Auto" ColumnSpacing="5"
+                      AutomationProperties.Name="Free roam playback controls">
                     <Button x:Name="PauseButton" Content="Pause" Style="{StaticResource GameAction}" Click="OnPause"
                             AutomationProperties.Name="Pause free roam" />
-                    <Button x:Name="RespawnButton" Grid.Column="1" Content="Respawn" Style="{StaticResource GameAction}" Click="OnRespawn"
+                    <Button Grid.Column="1" Content="Respawn" Style="{StaticResource GameAction}" Click="OnRespawn"
                             AutomationProperties.Name="Respawn free roam vehicle" />
                     <ToggleButton x:Name="Sound" Grid.Column="2" Content="Sound" MinHeight="38" Padding="8,3" CornerRadius="4"
                                   Click="OnSound" AutomationProperties.Name="Free roam sound" />
@@ -96,21 +110,16 @@
             </StackPanel>
             </ScrollViewer>
         </Border>
-        <Grid x:Name="Reticle" Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center"
-              IsHitTestVisible="False" Visibility="Collapsed" Opacity=".85" AutomationProperties.AccessibilityView="Raw">
-            <Border Width="18" Height="4" Background="#AA173938" VerticalAlignment="Center" />
-            <Border Width="4" Height="18" Background="#AA173938" HorizontalAlignment="Center" />
-            <Border Width="14" Height="2" Background="#FFFFF8E7" VerticalAlignment="Center" />
-            <Border Width="2" Height="14" Background="#FFFFF8E7" HorizontalAlignment="Center" />
-        </Grid>
         <Grid x:Name="TouchPad" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="16,0,16,12"
-              ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5">
-            <StackPanel Spacing="2" VerticalAlignment="Bottom">
+              ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" AutomationProperties.Name="Free roam touch controls">
+            <StackPanel Spacing="2" VerticalAlignment="Bottom" AutomationProperties.Name="Free roam movement controls">
                 <TextBlock Text="MOVE" Foreground="#FFFAE4" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
                 <local:GameStick x:Name="MoveStick" AutomationProperties.Name="Free roam movement stick" />
             </StackPanel>
-            <StackPanel Grid.Column="1" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10">
-                <StackPanel x:Name="FlightActions" Orientation="Horizontal" Spacing="4" Visibility="Collapsed">
+            <StackPanel x:Name="PadActions" Grid.Column="1" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                        Margin="0,0,0,10" AutomationProperties.Name="Free roam action controls">
+                <StackPanel x:Name="FlightActions" Orientation="Horizontal" Spacing="4" Visibility="Collapsed"
+                            AutomationProperties.Name="Free roam altitude controls">
                     <Button x:Name="Climb" Content="Up" Style="{StaticResource TouchAction}" AutomationProperties.Name="Free roam climb" />
                     <Button x:Name="Descend" Content="Down" Style="{StaticResource TouchAction}" AutomationProperties.Name="Free roam descend" />
                 </StackPanel>
@@ -119,7 +128,7 @@
                 <Button x:Name="Boost" Content="Boost" Style="{StaticResource TouchAction}" HorizontalAlignment="Stretch"
                         AutomationProperties.Name="Free roam boost" />
             </StackPanel>
-            <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Bottom">
+            <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Bottom" AutomationProperties.Name="Free roam look controls">
                 <TextBlock Text="LOOK" Foreground="#FFFAE4" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
                 <local:GameStick x:Name="LookStick" AutomationProperties.Name="Free roam look stick" />
             </StackPanel>
