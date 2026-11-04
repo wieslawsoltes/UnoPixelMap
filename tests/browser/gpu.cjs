@@ -51,6 +51,35 @@ function backendStatus(snapshot) {
     return snapshot.match(/^\s*- [^\n]*(?:GPU active|CPU fallback)[^\n]*$/m)?.[0]?.trim() || "";
 }
 
+async function activateMenuItem(page, item) {
+    await item.waitFor({ state: "visible" });
+    await page.getByRole("menu").waitFor({ state: "visible" });
+    const settledFocus = async target => {
+        const active = document.activeElement;
+        if (!active?.isConnected || active.getClientRects().length === 0) return false;
+        if (target && active !== target) return false;
+        if (!target && !active.matches('[role="menu"], [role="menuitem"], [role="menuitemcheckbox"]')) return false;
+        for (let frame = 0; frame < 2; frame++) {
+            await new Promise(requestAnimationFrame);
+            if (document.activeElement !== active) return false;
+        }
+        return true;
+    };
+    // Item peers can appear before Uno's opening focus reaches the popup, and
+    // can live at the semantic root. Observe that initial focus before taking it.
+    await page.waitForFunction(settledFocus, null);
+    const menuItem = await item.elementHandle();
+    assert.ok(menuItem, "The menu command has a visible element");
+    try {
+        await item.focus();
+        await page.waitForFunction(settledFocus, menuItem);
+        await page.keyboard.press("Enter");
+        await item.waitFor({ state: "hidden" });
+    } finally {
+        await menuItem.dispose();
+    }
+}
+
 async function activateGpuRendering(page, enabled, expected) {
     await page.waitForLoadState("networkidle", { timeout: 45000 });
     await page.screenshot();
@@ -67,19 +96,7 @@ async function activateGpuRendering(page, enabled, expected) {
         const commandName = /^GPU rendering(?: \(experimental\))?$/;
         const item = page.getByRole("menuitem", { name: commandName })
             .or(page.getByRole("menuitemcheckbox", { name: commandName }));
-        await item.waitFor({ state: "visible" });
-        // Uno may initially focus the anchor or the first menu item. Route focus to
-        // the intended public command before sending real keyboard input.
-        await item.focus();
-        const menuItem = await item.elementHandle();
-        assert.ok(menuItem, "The GPU rendering command has a visible element");
-        try {
-            await page.waitForFunction(element => document.activeElement === element, menuItem);
-        } finally {
-            await menuItem.dispose();
-        }
-        await page.keyboard.press("Enter");
-        await item.waitFor({ state: "hidden" });
+        await activateMenuItem(page, item);
     }
     await page.mouse.move(page.viewportSize().width / 2, 20);
     const deadline = Date.now() + 20000;
@@ -95,4 +112,4 @@ async function activateGpuRendering(page, enabled, expected) {
     throw new Error("Expected " + expected + ". Observed " + status.trim());
 }
 
-module.exports = { enableGpuRendering, setGpuRendering };
+module.exports = { activateMenuItem, enableGpuRendering, setGpuRendering };

@@ -3,7 +3,7 @@ const {mkdir, writeFile} = require("node:fs/promises");
 const {join} = require("node:path");
 const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
-const {setGpuRendering} = require("./gpu.cjs");
+const {activateMenuItem, setGpuRendering} = require("./gpu.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const evidence = process.env.PIXELMAP_SHOTS;
@@ -74,10 +74,7 @@ async function menu(page, name) {
     await action(page, "Map appearance");
     const item = page.getByRole("menuitem", {name, exact: true})
         .or(page.getByRole("menuitemcheckbox", {name, exact: true}));
-    await item.waitFor({state: "visible"});
-    await item.focus();
-    await page.keyboard.press("Enter");
-    await item.waitFor({state: "hidden"});
+    await activateMenuItem(page, item);
     await page.mouse.move(page.viewportSize().width / 2, 15);
 }
 
@@ -498,11 +495,22 @@ async function freeRoam(page) {
     await holdKey(page, "w", 300);
     assert.equal((await telemetry(page)).distance, dryBoat.distance, "A boat waits for water when selected on dry land");
 
+    // Isolate flight from the car's eventual position beneath real overhangs.
+    // This seeded harbour point is mapped water, 770m from the nearest building.
+    await action(page, "Exit free roam");
+    const search = page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true});
+    await tap(page, search);
+    await page.keyboard.press("Control+A");
+    await page.keyboard.type("40.695, -74.0285");
+    await page.keyboard.press("Enter");
+    await see(page, /rendering\s*·\s*40\.6950°,\s*-74\.0285°/);
+    await tap(page, page.getByRole("button", {name: "Open free roam game", exact: true}));
     const launch = await startMode(page, 6, "Free flight");
     await page.keyboard.down("Shift");
     await page.keyboard.down("PageUp");
     try {
-        await waitTelemetry(page, state => state.altitude > launch.altitude + 250, "Boosted free flight clears the city skyline", 15000);
+        await waitTelemetry(page, state => state.altitude > launch.altitude + 250 && state.clearance > 650,
+            "Boosted free flight gains altitude above the seeded buildings", 15000);
     } finally {
         await page.keyboard.up("PageUp");
         await page.keyboard.up("Shift");
@@ -521,13 +529,23 @@ async function freeRoam(page) {
     await screen(page, "game-aircraft");
 
     const freeFrom = await startMode(page, 6, "Free flight");
+    // The moving aircraft can reach another block while its mode picker is open.
+    // Seeded towers reach 541m, so establish clear air with real vertical input
+    // before checking unrestricted horizontal flight through this physical world.
+    await page.keyboard.down("Shift");
     await page.keyboard.down("PageUp");
     try {
-        await waitTelemetry(page, state => state.altitude > freeFrom.altitude + .5, "Independent free flight moves vertically");
-    } finally { await page.keyboard.up("PageUp"); }
+        await waitTelemetry(page, state => state.altitude > freeFrom.altitude + .5 && state.clearance > 650,
+            "Independent free flight moves vertically above the seeded buildings", 15000);
+    } finally {
+        await page.keyboard.up("PageUp");
+        await page.keyboard.up("Shift");
+    }
     await page.keyboard.down("w");
     try {
-        await waitTelemetry(page, state => state.distance > freeFrom.distance, "Independent free flight moves horizontally");
+        await waitTelemetry(page, state => state.distance > freeFrom.distance &&
+            (state.latitude !== freeFrom.latitude || state.longitude !== freeFrom.longitude),
+            "Independent free flight moves horizontally");
     } finally { await page.keyboard.up("w"); }
     await action(page, "Respawn free roam vehicle");
     assert.ok((await telemetry(page)).distance < 1, "Respawn resets free-roam progress");
