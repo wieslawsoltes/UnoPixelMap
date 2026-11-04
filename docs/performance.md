@@ -4,31 +4,84 @@ The original CPU optimization measurements compare the renderer with commit `31e
 
 ## Play-mode rendering
 
-Revision `6757c313a5645e610e7ed7c9d1f8b04dc7788a03` addresses three measured sources of play-mode stalls.
+The play-mode changes landed in `6757c313a5645e610e7ed7c9d1f8b04dc7788a03` and `3777867da454f21ef264c72adb1a65b99ddca95a`. The comparison below uses the original application at `11188d0c265c9688ca8a169200e2f1573ec9fbeb` and the final implementation at `3777867`.
 
 - Physical cameras select building prisms against conservative homogeneous frustum planes. Visible wall/cap indices and roof-edge instances compact in their original primitive order. Source vertices stay resident, and unchanged model visibility reuses the compact arrays and GPU uploads. The scene-depth index shares whole-model rejection. Vertex shaders exit immediately for invisible caps and roof edges.
 - Browser pixel transfers copy only after a fence signals. The two-slot queue retains bounded backpressure, canceled transfers drain after completion, and pending camera changes coalesce into the latest request. The previous elapsed-time copy policy could block `getBufferSubData` for seconds in the software-GPU play fixture.
-- A stationary first-person or free-flight camera reuses identical foreground artwork. Route, vehicle, animation and gate changes still schedule presentation. HUD text and accessible names update on changed values, structural controls update on session transitions, and hidden map readouts refresh when returning from Play.
+- A stationary camera reuses identical foreground artwork. Stopped standalone vehicles advance their effects clocks through `TryAdvanceStationaryVehicle` while retaining their picture. First drawing, changed poses, route/gate overlays, mode transitions, clock discontinuities and resumed movement use the ordinary draw path. This preserves the effects timeline when movement resumes after a long stop.
+- Roof endpoints contain four floats each, reducing each edge instance from 96 to 32 bytes. CPU scene-depth construction caches clipping codes after face rejection and reuses them for indexed triangles. Projected vertices and model visibility reuse the existing two-workspace pool. The additional retained scratch is bounded at 131,072 projected vertices and 16,384 visibility entries per accepted workspace.
+- HUD text and accessible names update on changed values, structural controls update on session transitions, and hidden map readouts refresh when returning from Play. Visible telemetry, scale information and status changes retain their live update paths.
 
-The new native regression compares selected streams with complete meshes on 108 identical physical-camera frames across Pixel, Normal, Minecraft and Roblox styles and Map, Earth and Elevation layers. Exact RGBA, terrain intersections, overlay depth, held-stream restoration and unchanged-visibility upload reuse pass. The existing 48-case GLES suite, HiDPI/context-recreation checks and pinned 232-case Pixel suite also pass. The latter preserves 3,712 moving-frame hashes and 232 cold-frame hashes.
+The native regression compares selected streams with complete meshes on 108 identical physical-camera frames across Pixel, Normal, Minecraft and Roblox styles and Map, Earth and Elevation layers. Exact RGBA, terrain intersections, overlay depth, held-stream restoration and unchanged-visibility upload reuse pass. The existing 48-case GLES suite and HiDPI/context-recreation checks also pass. Another 48 cases compare stationary vehicle pixels and complete effects state across all six travel modes, four styles and flat/relief terrain, including long stops and resumed movement. The final renderer also preserves all 232 pinned Pixel cases against `c238352`, including 3,712 moving-frame hashes and 232 cold-frame hashes.
+
+### Browser play measurements
+
+The browser comparison uses the exact GitHub Actions Release `InterpreterAndAOT` artifacts for `11188d0` and `3777867`, Chromium 156.0.8078.4, SwiftShader with an in-process GPU, CPU affinity 0–2, a 1200×780 viewport and DPR 1. External providers are blocked, and the bundled map data supplies both scenes. Each scenario starts in a new browser context, warms for two seconds and requests an eight-second measurement. The actual moving windows span 8,044.6–9,133.4 ms originally and 8,001.9–8,244.9 ms after optimization. Rates use each measured elapsed interval. CPU profiles run in separate passes.
+
+All moving submissions use actual 300×166 art buffers at pixel size 4 in both builds. Completed pixel-pack copies count completed GPU artwork. `requestAnimationFrame` counts browser scheduling callbacks. Final display presentation is outside these probes. Held native keys exercise the same input workload, while the faster simulation travels farther and reaches different final poses. The native comparison below uses identical camera sequences to verify the rendered inputs separately.
+
+| Moving scenario | Original completed art copies/s | Optimized completed art copies/s | Throughput gain | Original rAF callbacks/s | Optimized rAF callbacks/s |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Walk, first person | 0.691 | 4.584 | 6.64× | 4.03 | 46.22 |
+| Walk, chase | 0.564 | 7.520 | 13.34× | 3.72 | 53.97 |
+| Car, chase | 0.657 | 4.444 | 6.76× | 4.27 | 43.70 |
+| Car, first person | 0.557 | 3.999 | 7.17× | 2.56 | 41.86 |
+| Free flight | 1.243 | 4.249 | 3.42× | 8.70 | 53.86 |
+
+| Moving scenario | Original copy-call p95 | Optimized copy-call p95 | Original rAF interval p95 | Optimized rAF interval p95 |
+| --- | ---: | ---: | ---: | ---: |
+| Walk, first person | 2,142.4 ms | 5.7 ms | 1,350.0 ms | 66.6 ms |
+| Walk, chase | 2,560.6 ms | 3.4 ms | 1,699.9 ms | 16.8 ms |
+| Car, chase | 2,538.5 ms | 3.4 ms | 1,016.7 ms | 16.8 ms |
+| Car, first person | 2,320.0 ms | 3.0 ms | 1,966.7 ms | 83.3 ms |
+| Free flight | 1,324.9 ms | 7.1 ms | 683.3 ms | 16.8 ms |
+
+Across the five moving windows, cumulative `getBufferSubData` call time decreases from 38,576.3 to 261.4 ms, a 99.3% reduction. All 201 completed final copies follow an observed signaled fence. Outstanding transfers stay bounded at two, with zero overwrites, abandoned transfers or positive-timeout polls. Main-thread task occupancy rises during movement as the application completes more artwork and advances the simulation farther. The `threadTicks` metric excludes blocked time and software-GPU worker CPU.
+
+| Stationary play scenario | Original rAF callbacks/s | Optimized rAF callbacks/s | Original main-thread task CPU | Optimized main-thread task CPU | Original foreground GL draws | Optimized foreground GL draws |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Walk, first person | 23.35 | 60.20 | 16.92% | 6.32% | 7,421 | 0 |
+| Car, chase | 24.33 | 59.98 | 35.22% | 6.20% | 26,688 | 0 |
+| Free flight | 22.74 | 59.98 | 15.64% | 5.63% | 8,188 | 0 |
+
+All three final stationary-play cases record zero foreground draws, depth draws, transfers and art copies. Two additional stationary-car runs record 60.10 callbacks/s, 7.48% and 8.83% task CPU, zero drawing/transfers/copies, and identical before/after screenshots. The default and relief map-idle cases remain around 60 callbacks/s with 1.47–1.92% task CPU and zero drawing/transfers.
+
+Seven of ten initial full screenshots match the original directly. The two car startup differences match the original's same-pose adaptive 3-pixel and 4-pixel variants exactly when cross-compared. The initial idle-relief screenshot differs at pixel size 2 in both builds and settles to an exact match. All five final stationary screenshots match the original. The CSV's `boot_inferred_final_pixel_size` comes from capped startup history and can differ from retained startup artwork. Its `readback_dimensions` and `readback_pixel_sizes` describe actual timed submissions. The CSV records input-window poses. Moving screenshots are captured after key release and may include additional vehicle coasting.
+
+These are individual software-GPU timing samples. The final run still has maximum scheduling gaps of 150–600 ms across moving scenarios. Car-chase and free-flight maxima are higher than in the first optimization run, while all five final maxima improve over the original. The presentation path still copies completed WebGL artwork into Skia storage. Physical-GPU and Safari/iOS timing remain unmeasured. The CSV includes the original, first optimization, final implementation and both stationary-car repeats, with actual durations, main-thread CPU measurements, completed artwork copies, queue observations, poses and harness hashes. [Complete browser measurements](play-browser-benchmarks.csv)
+
+The final Pages artifact is `13364936410` from workflow `41913417612`. Its ZIP SHA-256 is `4659e43cf10cbb760999b383bb42ab3e2fe835c3e5a9dec4e8dd4d099ce98c7c`. The final native WebAssembly SHA-256 is `774a4f3b2c9028806ebabaad4b98f787e54bd6fe89b4fa6715d420eea164eac7`. Artifact verification checks all 69 boot resources and the signaled-only readback policy. After deployment, all 74 checked live files, including the entry point, boot resources and input adapter, match the measured artifact by SHA-256. [Build, browser verification and Pages deployment](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/41913417612)
+
+```sh
+npm ci --prefix tests/browser
+(cd tests/browser && npx playwright install chromium)
+PIXELMAP_REVISION=3777867da454f21ef264c72adb1a65b99ddca95a \
+  node tests/browser/play-performance.cjs \
+  https://wieslawsoltes.github.io/UnoPixelMap/ artifacts/play-performance
+```
 
 ### Moving native frames
 
-The paired comparison uses the original renderer from `11188d0c265c9688ca8a169200e2f1573ec9fbeb` and candidate `6757c31`. It renders nine bundled Manhattan vector tiles containing 33,747 features, world-DEM relief at exaggeration 1, Day/Pixel style and a 1200×680 logical viewport at pixel size 4. Each eye-height case warms four frames and measures sixteen deterministic moving frames. The total includes scene preparation, GL submission and `glFinish` completion. Pixel readback, hashing, navigation overlays and Uno/browser presentation are outside that timing.
+The paired native comparison renders nine bundled Manhattan vector tiles containing 33,747 features, world-DEM relief at exaggeration 1, Day/Pixel style and a 1200×680 logical viewport at pixel size 4. Each eye-height case warms four frames and measures sixteen deterministic moving frames. The total includes scene preparation, GL submission and `glFinish` completion. Pixel readback, hashing, navigation overlays and Uno/browser presentation are outside that timing. Each reported median uses the upper middle of the sixteen sorted samples. Phase medians are calculated independently.
 
 | Eye height | Original total median | Optimized total median | Speedup | Original preparation median | Optimized preparation median |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 1.7 m | 112.20 ms | 40.84 ms | 2.75× | 22.07 ms | 20.55 ms |
-| 300 m | 134.48 ms | 89.95 ms | 1.50× | 41.12 ms | 48.92 ms |
+| 1.7 m | 92.55 ms | 37.92 ms | 2.44× | 19.26 ms | 17.19 ms |
+| 300 m | 112.94 ms | 75.50 ms | 1.50× | 36.13 ms | 32.99 ms |
+
+| Eye height | Original mean managed allocation per frame | Optimized mean managed allocation per frame | Reduction |
+| --- | ---: | ---: | ---: |
+| 1.7 m | 2,424,709.5 bytes | 484,912.5 bytes | 80.0% |
+| 300 m | 2,645,882.5 bytes | 1,229,196.5 bytes | 53.5% |
 
 | First measured frame | Original submitted indices | Optimized submitted indices | Original roof-edge instances | Optimized roof-edge instances |
 | --- | ---: | ---: | ---: | ---: |
 | 1.7 m | 1,445,862 | 196,191 | 141,273 | 0 |
 | 300 m | 1,445,862 | 215,955 | 141,273 | 26,015 |
 
-All 32 moving RGBA hashes match the original renderer exactly. Changing flying visibility rebuilds compact roof streams, increasing mean managed allocations from 2.65 to 4.09 MB per frame and preparation time as shown above. The complete measured rendering total decreases by 33.1% for that case. Street-level allocations change from 2.42 to 2.63 MB per frame.
+All 32 moving RGBA hashes match the original renderer exactly. In the first measured frame, GL draw calls fall from 21 to 7 at street level and from 21 to 11 in flight. Changing model visibility uploads new compact streams. Total uploads across the sixteen moving frames increase from 3,824,216 to 7,132,412 bytes while walking and from 7,115,648 to 18,597,924 bytes while flying. The measured complete-frame totals include this additional transfer work. The reduced edge layout lowers flight uploads from the first optimization's 30,017,572 bytes. [Per-frame timings, geometry, uploads and exact image hashes](play-native-benchmarks.csv)
 
-These native measurements use .NET 10.0.14, disabled tiered compilation, two managed processors and two llvmpipe workers with LLVM 19.1.7. They measure a software GPU. The original Rendering/Data/Routing sources are identical from the preserved `16c8148` binary through `11188d0`. Original renderer SHA-256 is `660433930301b94107d7199db9e456bd9f59ed0fe56bfdff828ca336b1d4c51e`, and candidate renderer SHA-256 is `5b745c7a37acdadec7b6f1754115f34f8ae15577c21d1a6956c28a2d0a55f108`.
+These native measurements use .NET 10.0.14, disabled tiered compilation, two managed processors and two llvmpipe workers with LLVM 19.1.7. They measure a software GPU. The original Rendering/Data/Routing sources are identical from the preserved `16c8148` binary through `11188d0`. Original renderer SHA-256 is `660433930301b94107d7199db9e456bd9f59ed0fe56bfdff828ca336b1d4c51e`, and final renderer SHA-256 is `e09dec1784a72c3e5d6b8d86f61a03cec87ab383c902bbd6c74fe0fb412981a7`. Both runs use probe SHA-256 `cd3dcd92199e89334d03b39430317b7b5eed434ff49b98fa74d24b5c88bd32c8`. Final application source and project files match `3777867` exactly.
 
 ## Retained GPU terrain
 
