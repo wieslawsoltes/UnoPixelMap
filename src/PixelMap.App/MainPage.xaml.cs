@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -57,6 +58,10 @@ public sealed partial class MainPage : Page
         JourneyPanel.CloseRequested += (_, _) => DisplayJourneys(false);
         JourneyPanel.PickingChanged += (_, _) => LayoutJourneys();
         JourneyPanel.SizeChanged += (_, _) => UpdateNavigationInsets();
+        Header.SizeChanged += RefreshHeaderPeers;
+        GameButton.SizeChanged += RefreshHeaderPeers;
+        GuideButton.SizeChanged += RefreshHeaderPeers;
+        ViewButton.SizeChanged += RefreshHeaderPeers;
         SizeChanged += (_, e) => LayoutChrome(e.NewSize.Width, e.NewSize.Height);
         Loaded += (_, _) =>
         {
@@ -73,6 +78,18 @@ public sealed partial class MainPage : Page
             SyncReadout();
         };
         Map.StatusChanged += (_, _) => SyncReadout();
+    }
+
+    private void RefreshHeaderPeers(object sender, SizeChangedEventArgs e)
+    {
+        // Font measurement can move the header commands after their first
+        // accessibility bounds were exposed. Refresh after the layout completes.
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            FrameworkElementAutomationPeer.FromElement(GameButton)?.InvalidatePeer();
+            FrameworkElementAutomationPeer.FromElement(GuideButton)?.InvalidatePeer();
+            FrameworkElementAutomationPeer.FromElement(ViewButton)?.InvalidatePeer();
+        });
     }
 
     private void LayoutChrome(double width, double height)

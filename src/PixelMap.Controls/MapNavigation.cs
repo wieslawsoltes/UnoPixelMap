@@ -421,7 +421,9 @@ public sealed partial class PixelMapControl
     private void OnMapKey(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key == VirtualKey.Escape) _browserInput?.ReleaseMouse();
-        if (HandleDrivingKey(e.Key, e.KeyStatus.WasKeyDown)) { e.Handled = true; return; }
+        bool repeated = e.KeyStatus.WasKeyDown;
+        repeated = _browserInput?.IsRepeatedKey(repeated) ?? repeated;
+        if (HandleDrivingKey(e.Key, repeated)) { e.Handled = true; return; }
         switch (e.Key)
         {
             case VirtualKey.Left: PanBy(96, 0); break;

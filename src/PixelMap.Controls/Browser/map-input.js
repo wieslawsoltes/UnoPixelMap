@@ -7,7 +7,7 @@
     const captures = new Map();
     const gestures = new WeakMap();
     let position = { x: 0, y: 0, target: null };
-    let listeners, wheel, pointer, safariGesture, contextPointer, lockOwner = 0;
+    let listeners, wheel, pointer, keyboard, safariGesture, contextPointer, lockOwner = 0;
 
     function nativeInput(target) {
         return target instanceof Element && target.closest("input,textarea,select,iframe,[contenteditable]");
@@ -32,6 +32,12 @@
         queueMicrotask(() => { if (pointer === current) pointer = null; });
     }
 
+    function retainKeyboard(event) {
+        if (nativeInput(event.target)) { keyboard = null; return; }
+        keyboard = event;
+        queueMicrotask(() => { if (keyboard === event) keyboard = null; });
+    }
+
     function releasePointer(id, pointerId) {
         const capture = captures.get(pointerId);
         if (!capture || capture.owner !== id) return;
@@ -51,7 +57,7 @@
     }
 
     function suspend() {
-        safariGesture = contextPointer = null;
+        safariGesture = contextPointer = keyboard = null;
         for (const [id, map] of [...maps]) {
             releaseMouse(id);
             releasePointers(id);
@@ -101,6 +107,7 @@
         document.addEventListener("wheel", retainWheel, options);
         document.addEventListener("pointerdown", retainPointer, options);
         document.addEventListener("pointermove", retainPointer, options);
+        document.addEventListener("keydown", retainKeyboard, options);
         document.addEventListener("gesturestart", safari, options);
         document.addEventListener("gesturechange", safari, options);
         document.addEventListener("gestureend", safari, options);
@@ -120,7 +127,9 @@
         document.addEventListener("visibilitychange", () => {
             if (document.hidden) suspend();
         }, options);
-        window.addEventListener("blur", suspend, options);
+        window.addEventListener("blur", event => {
+            if (event.target === window) suspend();
+        }, { ...options, capture: false });
     }
 
     globalThis.PixelAtlasInput = {
@@ -137,7 +146,7 @@
             maps.delete(id);
             if (maps.size !== 0) return;
             listeners?.abort();
-            listeners = wheel = pointer = safariGesture = contextPointer = null;
+            listeners = wheel = pointer = keyboard = safariGesture = contextPointer = null;
         },
 
         takeWheel(id) {
@@ -170,6 +179,10 @@
                 map.wheelTime = event.timeStamp;
             }
             return [kind, x, y, event.shiftKey ? 1 : 0, event.altKey ? 1 : 0];
+        },
+
+        getKeyRepeat(id) {
+            return maps.has(id) && keyboard ? (keyboard.repeat ? 1 : 0) : -1;
         },
 
         capturePointer(id, pointerId) {

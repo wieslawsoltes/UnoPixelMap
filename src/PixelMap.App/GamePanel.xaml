@@ -25,7 +25,7 @@
     <Grid>
         <Border x:Name="SettingsCard" Width="326" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16"
                 Padding="12,9" Background="#F7FFFBEE" BorderBrush="#708F7D" BorderThickness="1" CornerRadius="7">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer x:Name="SettingsScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Spacing="7">
                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
                     <StackPanel VerticalAlignment="Center">
@@ -34,7 +34,7 @@
                     </StackPanel>
                     <Button x:Name="SettingsToggle" Grid.Column="1" Content="−" Style="{StaticResource GameAction}"
                             Width="34" Padding="0" Click="OnToggleSettings" AutomationProperties.Name="Collapse game settings" />
-                    <Button Grid.Column="2" Content="×" Style="{StaticResource GameAction}" Width="34" Padding="0"
+                    <Button x:Name="ExitButton" Grid.Column="2" Content="×" Style="{StaticResource GameAction}" Width="34" Padding="0"
                             Click="OnClose" AutomationProperties.Name="Exit free roam" />
                 </Grid>
                 <StackPanel x:Name="Setup" Spacing="7">
@@ -88,7 +88,7 @@
                 <Grid x:Name="Transport" Visibility="Collapsed" ColumnDefinitions="*,*,Auto" ColumnSpacing="5">
                     <Button x:Name="PauseButton" Content="Pause" Style="{StaticResource GameAction}" Click="OnPause"
                             AutomationProperties.Name="Pause free roam" />
-                    <Button Grid.Column="1" Content="Respawn" Style="{StaticResource GameAction}" Click="OnRespawn"
+                    <Button x:Name="RespawnButton" Grid.Column="1" Content="Respawn" Style="{StaticResource GameAction}" Click="OnRespawn"
                             AutomationProperties.Name="Respawn free roam vehicle" />
                     <ToggleButton x:Name="Sound" Grid.Column="2" Content="Sound" MinHeight="38" Padding="8,3" CornerRadius="4"
                                   Click="OnSound" AutomationProperties.Name="Free roam sound" />

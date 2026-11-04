@@ -80,6 +80,7 @@ class Element extends EventTarget {
 
 const document = new EventTarget();
 const window = new EventTarget();
+document.parent = window;
 const body = new Element();
 const canvas = new Element();
 const input = new Element();
@@ -97,7 +98,7 @@ body.parent = document;
 canvas.parent = input.parent = body;
 inputChild.parent = input;
 input.nativeInput = true;
-for (const type of ["wheel", "pointerdown", "pointermove"])
+for (const type of ["wheel", "pointerdown", "pointermove", "keydown"])
     body.addEventListener(type, event => routed?.(event), { capture: true });
 
 const source = fs.readFileSync(path.resolve(__dirname, "../../src/PixelMap.Controls/Browser/map-input.js"), "utf8");
@@ -156,6 +157,20 @@ unowned = emit(new WheelEvent("wheel", { deltaY: 50, ctrlKey: true }), () => {
     assert.deepEqual([...adapter.takeWheel(1)], []);
 }, inputChild);
 assert.equal(unowned.defaultPrevented, false, "An editable HTML descendant lost native input behavior");
+
+assert.equal(adapter.getKeyRepeat(1), -1);
+for (const repeat of [false, true]) {
+    const key = emit(new Event("keydown", { key: "w", code: "KeyW", repeat }), () => {
+        assert.equal(adapter.getKeyRepeat(1), repeat ? 1 : 0, "Native keyboard repeat metadata was lost");
+        assert.equal(adapter.getKeyRepeat(99), -1, "An unregistered map read keyboard metadata");
+    });
+    assert.equal(key.defaultPrevented, false, "The keyboard adapter consumed a UI-owned event");
+    assert.equal(adapter.getKeyRepeat(1), -1, "Keyboard metadata survived beyond synchronous Uno routing");
+}
+const editKey = emit(new Event("keydown", { key: "p", code: "KeyP", repeat: true }), () => {
+    assert.equal(adapter.getKeyRepeat(1), -1, "A native text input exposed gameplay repeat metadata");
+}, inputChild);
+assert.equal(editKey.defaultPrevented, false);
 
 const safari = [];
 const routeGesture = () => safari.push([...adapter.takeWheel(1)]);
@@ -222,7 +237,11 @@ emit(new Event("pointerdown", { pointerId: 9, pointerType: "touch" }), () => ada
 adapter.releasePointer(1, 90);
 assert.ok(canvas.hasPointerCapture(9), "One map released another map's pointer capture");
 adapter.captureMouse(2);
-window.dispatchEvent(new Event("blur"));
+emit(new Event("blur", { bubbles: false }), undefined, inputChild);
+assert.deepEqual(suspended, [1], "An internal focus transfer suspended the game");
+assert.ok(canvas.hasPointerCapture(9), "An internal focus transfer released touch capture");
+assert.equal(adapter.isMouseCaptured(2), true, "An internal focus transfer released relative mouse capture");
+window.dispatchEvent(new Event("blur", { bubbles: false }));
 assert.equal(canvas.captures.size, 0);
 assert.equal(document.pointerLockElement, null);
 assert.deepEqual(suspended, [1, 1, 2]);
@@ -237,7 +256,7 @@ adapter.detach(1);
 assert.equal(document.listeners.get("wheel").length, 1);
 assert.deepEqual(wheel({ deltaY: 2.5, timeStamp: 5000 }, 2), [0, 0, 2.5, 0, 0]);
 adapter.detach(2);
-for (const type of ["wheel", "pointerdown", "pointermove", "gesturestart", "gesturechange", "gestureend", "contextmenu", "pointerlockchange", "pointerlockerror", "visibilitychange"])
+for (const type of ["wheel", "pointerdown", "pointermove", "keydown", "gesturestart", "gesturechange", "gestureend", "contextmenu", "pointerlockchange", "pointerlockerror", "visibilitychange"])
     assert.equal(document.listeners.get(type).length, 0, `Disposal retained a ${type} listener`);
 assert.equal(window.listeners.get("blur").length, 0);
 assert.equal(adapter.captureMouse(2), false);

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
@@ -17,7 +18,7 @@ public sealed partial class GamePanel : UserControl
     private readonly DispatcherTimer _lookClock = new() { Interval = TimeSpan.FromMilliseconds(16) };
     private readonly DispatcherTimer _pulseClock = new() { Interval = TimeSpan.FromMilliseconds(90) };
     private PixelMapControl? _map;
-    private bool _shown, _syncing;
+    private bool _shown, _syncing, _peerRefreshQueued;
     private long _lookTimestamp, _lastTelemetry, _lastPadPointer;
     private JourneyState? _displayedState;
     private JourneyCameraRig? _displayedRig;
@@ -43,6 +44,9 @@ public sealed partial class GamePanel : UserControl
         BindPad(Climb, PadAction.Climb);
         BindPad(Descend, PadAction.Descend);
         SizeChanged += (_, _) => LayoutControls();
+        SettingsCard.SizeChanged += (_, _) => RefreshControlPeers();
+        TouchPad.SizeChanged += (_, _) => RefreshControlPeers();
+        SettingsScroll.ViewChanged += (_, _) => RefreshControlPeers();
         Unloaded += (_, _) => ReleaseInput();
     }
 
@@ -85,6 +89,26 @@ public sealed partial class GamePanel : UserControl
         SettingsCard.MaxHeight = Math.Max(120, ActualHeight - 2 * inset);
         TouchPad.Margin = new Thickness(inset, 0, inset, 8);
         FlightActions.Orientation = ActualWidth < 370 ? Orientation.Vertical : Orientation.Horizontal;
+        RefreshControlPeers();
+    }
+
+    private void RefreshControlPeers()
+    {
+        if (!_shown || _peerRefreshQueued) return;
+        _peerRefreshQueued = true;
+        if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            _peerRefreshQueued = false;
+            if (!_shown) return;
+            UpdateLayout();
+            // Controls initially measured inside the collapsed overlay need fresh
+            // viewport bounds after their ancestors are laid out or scrolled.
+            FrameworkElement[] controls = [SettingsToggle, ExitButton, ModeChoice, CameraChoice,
+                StyleChoice, LayerChoice, Relief, StartButton, TelemetryBox, PauseButton,
+                RespawnButton, Sound, MoveStick, LookStick, JumpBrake, Boost, Climb, Descend];
+            foreach (var control in controls)
+                FrameworkElementAutomationPeer.FromElement(control)?.InvalidatePeer();
+        })) _peerRefreshQueued = false;
     }
 
     private string SelectedMode => (ModeChoice.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Walk";
@@ -192,6 +216,7 @@ public sealed partial class GamePanel : UserControl
         SettingsToggle.Content = expanded ? "−" : "Settings";
         SettingsToggle.Width = expanded ? 34 : 76;
         AutomationProperties.SetName(SettingsToggle, expanded ? "Collapse game settings" : "Expand game settings");
+        RefreshControlPeers();
     }
 
     private void OnPause(object sender, RoutedEventArgs e)
@@ -278,6 +303,7 @@ public sealed partial class GamePanel : UserControl
     {
         if (element.Text == text) return;
         element.Text = text;
+        AutomationProperties.SetName(element, text);
         FrameworkElementAutomationPeer.FromElement(element)?.InvalidatePeer();
     }
 

@@ -8,7 +8,8 @@ const {setGpuRendering} = require("./gpu.cjs");
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const evidence = process.env.PIXELMAP_SHOTS;
 const mountainView = "v4/45.875/10.85/12.3/-25/58/Day/Elevation/Perspective/0/Relief/1.00";
-const cityView = "v4/40.7087/-74.0104/17/0/55/Day/Map/Perspective/0/Relief/1.00";
+// The bundled Pine Street road center gives movement checks room before a wall.
+const cityView = "v4/40.706846/-74.008817/17/-51/55/Day/Map/Perspective/0/Relief/1.00";
 const failures = [];
 
 async function see(page, expected, timeout = 25000) {
@@ -40,8 +41,15 @@ async function tap(page, locator, touch = false) {
 }
 
 async function action(page, name, touch = false) {
-    await tap(page, page.getByRole("button", {name, exact: true})
-        .or(page.getByRole("checkbox", {name, exact: true})), touch);
+    const target = page.getByRole("button", {name, exact: true})
+        .or(page.getByRole("checkbox", {name, exact: true}))
+        .or(page.getByRole("switch", {name, exact: true}));
+    if (touch) await tap(page, target, true);
+    else {
+        await target.waitFor({state: "visible"});
+        await target.focus();
+        await page.keyboard.press(await target.getAttribute("role") === "switch" ? "Space" : "Enter");
+    }
 }
 
 async function menu(page, name) {
@@ -57,7 +65,8 @@ async function menu(page, name) {
 
 async function choose(page, name, index, touch = false) {
     const selector = page.getByRole("combobox", {name, exact: true});
-    await tap(page, selector, touch);
+    if (touch) await tap(page, selector, true);
+    else await selector.focus();
     await page.waitForTimeout(150);
     if (await selector.getAttribute("aria-expanded") !== "true") await page.keyboard.press("Alt+ArrowDown");
     await page.waitForFunction(name => document.querySelector('[aria-label="' + name + '"]')?.getAttribute("aria-expanded") === "true", name);
@@ -74,6 +83,17 @@ async function open(browser, hash, phone = false) {
         deviceScaleFactor: 1, isMobile: phone, hasTouch: phone
     });
     const page = await context.newPage();
+    await page.addInitScript(() => {
+        window.pixelExploreGpu = {depthDraws: 0};
+        const prototype = WebGL2RenderingContext.prototype;
+        for (const name of ["drawElements", "drawElementsInstanced", "drawArrays", "drawArraysInstanced"]) {
+            const original = prototype[name];
+            prototype[name] = function (...args) {
+                if (this.isEnabled(this.DEPTH_TEST)) window.pixelExploreGpu.depthDraws++;
+                return Reflect.apply(original, this, args);
+            };
+        }
+    });
     page.setDefaultTimeout(25000);
     page.on("pageerror", error => { failures.push(error.message); console.error(error.message); });
     page.on("console", message => {
@@ -208,6 +228,21 @@ async function renderingStyles(page) {
     await menu(page, names[0]);
 }
 
+async function defaultView(browser) {
+    const {context, page} = await open(browser, "");
+    await see(page, /GPU active.+Pixel rendering/);
+    await screen(page, "default-pixel-gpu");
+    await action(page, "Map appearance");
+    for (const name of ["Pixel art rendering", "GPU rendering"])
+        await page.getByRole("menuitem", {name, exact: true})
+            .or(page.getByRole("menuitemcheckbox", {name, exact: true})).waitFor({state: "visible"});
+    await screen(page, "default-appearance-selections");
+    if (evidence) await writeFile(join(evidence, "default-appearance-selections.txt"), await page.locator("body").ariaSnapshot());
+    await page.keyboard.press("Escape");
+    await context.close();
+    console.log("Default view opened with GPU-active Pixel rendering.");
+}
+
 async function telemetry(page) {
     const snapshot = await see(page, /Free roam telemetry/);
     const match = snapshot.match(/Free roam telemetry[^\n]*?([\d.]+) km\/h · (-?[\d.]+) m elevation · (-?[\d.]+) m clearance\s+(-?[\d.]+)°, (-?[\d.]+)° · ([\d.]+) m travelled/);
@@ -239,6 +274,39 @@ async function expandSettings(page, touch = false) {
     if (await expand.count()) await action(page, "Expand game settings", touch);
 }
 
+async function assertSettledGpu(page) {
+    let count = await page.evaluate(() => window.pixelExploreGpu.depthDraws);
+    let stableSince = Date.now();
+    const deadline = stableSince + 10000;
+    while (Date.now() < deadline) {
+        await page.waitForTimeout(200);
+        const next = await page.evaluate(() => window.pixelExploreGpu.depthDraws);
+        if (next !== count) { count = next; stableSince = Date.now(); }
+        if (Date.now() - stableSince >= 1000) return;
+    }
+    throw new Error("Paused terrain and camera did not settle into retained GPU artwork");
+}
+
+async function pausedRendering(page, paused) {
+    await expandSettings(page);
+    for (const [index, style] of [[2, "minecraft"], [3, "roblox"], [1, "normal"], [0, "pixel"]]) {
+        await choose(page, "Game rendering style", index);
+        await see(page, new RegExp("GPU active.+" + style + " rendering", "i"));
+        await assertSettledGpu(page);
+        assert.deepEqual(await telemetry(page), paused, "A paused " + style + " style change preserves the physical pose");
+        await screen(page, "game-paused-" + style);
+    }
+    for (const relief of [false, true]) {
+        await action(page, "Game terrain relief");
+        await assertSettledGpu(page);
+        assert.deepEqual(await telemetry(page), paused, "Changing relief retains paused terrain physics");
+        const state = await page.getByRole("switch", {name: "Game terrain relief", exact: true}).getAttribute("aria-checked");
+        assert.equal(state, String(relief), "The visual relief switch updates independently of physics");
+    }
+    await action(page, "Collapse game settings");
+    console.log("Paused style and relief changes retain the pose and settle GPU rendering.");
+}
+
 async function startMode(page, index, title, touch = false) {
     await expandSettings(page, touch);
     await choose(page, "Free roam vehicle", index, touch);
@@ -252,9 +320,10 @@ async function startMode(page, index, title, touch = false) {
 async function freeRoam(page) {
     await action(page, "Open free roam game");
     const walkedFrom = await startMode(page, 0, "Walking");
-    await holdKey(page, "w", 1400);
-    const walkedTo = await telemetry(page);
-    assert.ok(walkedTo.distance > walkedFrom.distance, "Walking advances without a planned route");
+    await page.keyboard.down("w");
+    try {
+        await waitTelemetry(page, state => state.distance > walkedFrom.distance, "Walking advances without a planned route");
+    } finally { await page.keyboard.up("w"); }
     await page.keyboard.down("Space");
     await waitTelemetry(page, state => state.clearance > .1, "Walking jumps above the elevation surface");
     await waitTelemetry(page, state => state.clearance < .1, "Gravity returns the walker to terrain");
@@ -277,11 +346,14 @@ async function freeRoam(page) {
     const paused = await telemetry(page);
     await holdKey(page, "w", 300);
     assert.equal((await telemetry(page)).distance, paused.distance, "Paused free roam releases movement input");
+    await pausedRendering(page, paused);
     await action(page, "Resume free roam");
 
     const carFrom = await startMode(page, 1, "Driving");
-    await holdKey(page, "w", 1700);
-    assert.ok((await telemetry(page)).distance > carFrom.distance, "The car drives freely through the streamed world");
+    await page.keyboard.down("w");
+    try {
+        await waitTelemetry(page, state => state.distance > carFrom.distance, "The car drives freely through the streamed world");
+    } finally { await page.keyboard.up("w"); }
     await screen(page, "game-car-chase");
     await expandSettings(page);
     for (const camera of [1, 2, 3, 4, 0]) await choose(page, "Free roam camera", camera);
@@ -366,19 +438,33 @@ async function run() {
         args: ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
     });
     try {
+        await defaultView(browser);
         const terrain = await open(browser, mountainView);
         await see(terrain.page, /GPU active.+Pixel rendering/);
         await renderingStyles(terrain.page);
+        console.log("All four rendering styles and CPU/GPU switching passed.");
         await desktopInput(terrain.page);
+        console.log("Desktop trackpad and WebKit gesture routing passed.");
         await terrain.context.close();
         const city = await open(browser, cityView);
         await freeRoam(city.page);
+        console.log("Walking, driving, aircraft, free flight and camera controls passed.");
         await city.context.close();
         const phone = await open(browser, cityView, true);
         await mobileInput(phone.context, phone.page);
         await phone.context.close();
         assert.deepEqual(failures, [], "Exploration has no managed or browser runtime errors");
         console.log("Exploration checks passed for GPU defaults, four styles, native gestures, free movement, physical cameras, terrain and mobile controls.");
+    } catch (error) {
+        const page = browser.contexts().flatMap(context => context.pages()).findLast(page => !page.isClosed());
+        if (evidence && page) {
+            await Promise.allSettled([
+                page.screenshot({path: join(evidence, "explore-failure.png"), timeout: 10000}),
+                page.locator("body").ariaSnapshot({timeout: 10000})
+                    .then(snapshot => writeFile(join(evidence, "explore-failure.txt"), snapshot))
+            ]);
+        }
+        throw error;
     } finally { await browser.close(); }
 }
 

@@ -41,6 +41,13 @@ internal sealed partial class BrowserMapInput : IDisposable
         return true;
     }
 
+    internal bool IsRepeatedKey(bool fallback)
+    {
+        if (!OperatingSystem.IsBrowser() || _id == 0) return fallback;
+        int repeat = GetKeyRepeat(_id);
+        return repeat < 0 ? fallback : repeat != 0;
+    }
+
     internal void CapturePointer(uint pointerId)
     {
         if (OperatingSystem.IsBrowser() && _id != 0) CaptureNativePointer(_id, pointerId);
@@ -96,6 +103,9 @@ internal sealed partial class BrowserMapInput : IDisposable
 
     [JSImport("globalThis.PixelAtlasInput.takeWheel")]
     private static partial double[] TakeWheel(int id);
+
+    [JSImport("globalThis.PixelAtlasInput.getKeyRepeat")]
+    private static partial int GetKeyRepeat(int id);
 
     [JSImport("globalThis.PixelAtlasInput.capturePointer")]
     private static partial void CaptureNativePointer(int id, double pointerId);
