@@ -60,7 +60,10 @@ function distribution(values) {
 // The map resolves to ceil(map width / pixel size) by ceil(map height / pixel size).
 function installProbe({ observeDraws = false, requireDepthQuality = false, observeTransfers = false } = {}) {
     const state = globalThis.__pixelAtlasPerf = { active: false, frames: [], uploads: [], bootUploads: [], bootAllocations: [],
-        bootDraws: [], draws: [], readbacks: [], transfers: [], framebufferAttachments: 0, longTasks: [],
+        bootDraws: [], draws: [], readbacks: [], transfers: [], syncCalls: [], bufferReads: [],
+        pendingPixelPacks: 0, maximumPendingPixelPacks: 0, overwrittenPixelPacks: 0,
+        abandonedPixelPacks: 0, releasedPixelPacks: 0,
+        framebufferAttachments: 0, longTasks: [],
         width: 0, height: 0, quality: null, start: 0 };
     const channels = { 6402: 1, 6403: 1, 6406: 1, 6407: 3, 6408: 4, 6409: 1, 6410: 2,
         32993: 4, 33319: 2, 33320: 2, 36244: 1, 36248: 3, 36249: 4 };
@@ -152,18 +155,31 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
     }
     if (observeDraws) {
         const contexts = new WeakMap(), attached = new WeakSet();
+        const bufferIds = new WeakMap(), fences = new WeakMap(), pendingReads = new Map();
+        const syncMethods = new Set(["fenceSync", "clientWaitSync", "waitSync", "deleteSync", "flush", "finish"]);
+        let nextBufferId = 1, nextReadbackId = 1, nextFenceId = 1;
+        const updatePending = () => {
+            state.pendingPixelPacks = pendingReads.size;
+            if (state.active) state.maximumPendingPixelPacks = Math.max(state.maximumPendingPixelPacks, pendingReads.size);
+        };
         for (const type of [globalThis.WebGLRenderingContext, globalThis.WebGL2RenderingContext]) {
             if (!type) continue;
             for (const name of ["bindFramebuffer", "framebufferTexture2D", "viewport", "enable", "disable", "readPixels",
+                "bindBuffer", "deleteBuffer", "getBufferSubData", ...syncMethods,
                 "drawArrays", "drawElements", "drawArraysInstanced", "drawElementsInstanced"]) {
                 const original = type.prototype[name];
                 if (typeof original !== "function" || original.__pixelAtlasObserved) continue;
                 const observed = function (...args) {
-                    const started = name === "readPixels" && state.active ? performance.now() : 0;
+                    const timed = state.active && (name === "readPixels" ||
+                        observeTransfers && (name === "getBufferSubData" || syncMethods.has(name)));
+                    const started = timed ? performance.now() : 0;
                     const result = Reflect.apply(original, this, args);
-                    const readDuration = name === "readPixels" && state.active ? performance.now() - started : 0;
+                    const duration = timed ? performance.now() - started : 0;
                     let context = contexts.get(this);
-                    if (!context) { context = { framebuffer: null, width: 0, height: 0, depth: false }; contexts.set(this, context); }
+                    if (!context) {
+                        context = { framebuffer: null, width: 0, height: 0, depth: false, pixelPack: null, lastReadback: null };
+                        contexts.set(this, context);
+                    }
                     if (name === "bindFramebuffer") {
                         if (args[0] === this.FRAMEBUFFER || args[0] === this.DRAW_FRAMEBUFFER) context.framebuffer = args[1];
                     } else if (name === "framebufferTexture2D") {
@@ -172,9 +188,76 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
                         context.width = args[2]; context.height = args[3];
                     } else if (name === "enable" || name === "disable") {
                         if (args[0] === this.DEPTH_TEST) context.depth = name === "enable";
+                    } else if (name === "bindBuffer") {
+                        if (args[0] === this.PIXEL_PACK_BUFFER) {
+                            context.pixelPack = args[1];
+                            if (args[1] && !bufferIds.has(args[1])) bufferIds.set(args[1], nextBufferId++);
+                        }
+                    } else if (name === "deleteBuffer") {
+                        const id = args[0] && bufferIds.get(args[0]);
+                        if (context.pixelPack === args[0]) context.pixelPack = null;
+                        if (pendingReads.delete(id)) {
+                            if (state.active) state.abandonedPixelPacks++;
+                            updatePending();
+                        }
                     } else if (name === "readPixels") {
-                        if (state.active) state.readbacks.push([started, readDuration, args[2], args[3], quality(args[2], args[3])]);
-                    } else if (context.framebuffer && attached.has(context.framebuffer)) {
+                        const mode = typeof args[6] === "number" ? "pixelPack" : "client";
+                        const bufferId = context.pixelPack && bufferIds.get(context.pixelPack);
+                        const readback = { id: nextReadbackId++, started: timed ? started : performance.now(),
+                            bytes: pixelBytes(args[2], args[3], 1, args[4], args[5]), copiedBytes: 0, bufferId };
+                        if (mode === "pixelPack") {
+                            context.lastReadback = readback;
+                            if (bufferId) {
+                                if (state.active && pendingReads.has(bufferId)) state.overwrittenPixelPacks++;
+                                pendingReads.set(bufferId, readback);
+                                updatePending();
+                            }
+                        }
+                        if (state.active) state.readbacks.push([started, duration, args[2], args[3],
+                            quality(args[2], args[3]), mode, readback.id, bufferId]);
+                    } else if (name === "getBufferSubData") {
+                        const bufferId = args[0] === this.PIXEL_PACK_BUFFER && context.pixelPack
+                            ? bufferIds.get(context.pixelPack) : null;
+                        const readback = pendingReads.get(bufferId);
+                        const scalarSize = args[2]?.BYTES_PER_ELEMENT || 1;
+                        const bytes = args[4] > 0 ? args[4] * scalarSize :
+                            Math.max(0, (args[2]?.byteLength || 0) - (args[3] || 0) * scalarSize);
+                        if (timed) state.bufferReads.push({ time: started, durationMs: duration, bytes,
+                            pixelPack: args[0] === this.PIXEL_PACK_BUFFER,
+                            bufferId, readbackId: readback?.id ?? null,
+                            submittedToCopyMs: readback ? started + duration - readback.started : null });
+                        if (readback) {
+                            readback.copiedBytes += bytes;
+                            if (readback.copiedBytes >= readback.bytes) pendingReads.delete(bufferId);
+                            updatePending();
+                        }
+                    } else if (syncMethods.has(name)) {
+                        let fence = args[0] && typeof args[0] === "object" ? fences.get(args[0]) : null;
+                        let firstSignalLatencyMs = null;
+                        if (name === "fenceSync" && result) {
+                            fence = { id: nextFenceId++, readback: context.lastReadback, signaled: false };
+                            fences.set(result, fence);
+                        } else if (name === "clientWaitSync" && fence && !fence.signaled &&
+                            (result === this.ALREADY_SIGNALED || result === this.CONDITION_SATISFIED)) {
+                            fence.signaled = true;
+                            if (fence.readback) firstSignalLatencyMs =
+                                (timed ? started + duration : performance.now()) - fence.readback.started;
+                        } else if (name === "deleteSync" && args[0]) {
+                            fences.delete(args[0]);
+                            const readback = fence?.readback;
+                            if (readback && pendingReads.get(readback.bufferId) === readback) {
+                                pendingReads.delete(readback.bufferId);
+                                if (state.active) state.releasedPixelPacks++;
+                                updatePending();
+                            }
+                        }
+                        if (timed) state.syncCalls.push({ method: name, time: started, durationMs: duration,
+                            fenceId: fence?.id ?? null, readbackId: fence?.readback?.id ?? null,
+                            status: name === "clientWaitSync" ? result : null,
+                            flags: name === "clientWaitSync" || name === "waitSync" ? args[1] : null,
+                            timeoutNs: name === "clientWaitSync" || name === "waitSync" ? Number(args[2]) : null,
+                            firstSignalLatencyMs });
+                    } else if (name.startsWith("draw") && context.framebuffer && attached.has(context.framebuffer)) {
                         const count = name.startsWith("drawElements") ? args[1] : args[2];
                         if (state.bootDraws.length < 10000)
                             state.bootDraws.push([context.width, context.height, context.depth, count]);
@@ -242,6 +325,13 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
         state.draws = [];
         state.readbacks = [];
         state.transfers = [];
+        state.syncCalls = [];
+        state.bufferReads = [];
+        state.pixelPacksAtStart = state.pendingPixelPacks;
+        state.maximumPendingPixelPacks = state.pendingPixelPacks;
+        state.overwrittenPixelPacks = 0;
+        state.abandonedPixelPacks = 0;
+        state.releasedPixelPacks = 0;
         state.longTasks = [];
         state.start = performance.now();
         state.active = true;
@@ -256,6 +346,10 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
         state.active = false;
         return { durationMs: performance.now() - state.start, frames: state.frames,
             uploads: state.uploads, draws: state.draws, readbacks: state.readbacks, transfers: state.transfers,
+            syncCalls: state.syncCalls, bufferReads: state.bufferReads,
+            pixelPacks: { atStart: state.pixelPacksAtStart, atEnd: state.pendingPixelPacks,
+                maximumPending: state.maximumPendingPixelPacks, overwritten: state.overwrittenPixelPacks,
+                abandoned: state.abandonedPixelPacks, releasedWithoutCopy: state.releasedPixelPacks },
             longTasks: state.longTasks, finalPixelSize: state.quality };
     };
 }
@@ -419,13 +513,37 @@ function summarizeProbe(probe, before, after) {
         drawsByPixelSize[size] = (drawsByPixelSize[size] || 0) + 1;
         if (depth) depthDrawsByPixelSize[size] = (depthDrawsByPixelSize[size] || 0) + 1;
     }
-    const readbacksByPixelSize = {}, readbackDimensions = {}, transfersByMethod = {};
+    const readbacksByPixelSize = {}, readbackDimensions = {}, readbacksByDestination = {};
+    const transfersByMethod = {}, transferDimensions = {}, syncByMethod = {}, pollStatuses = {};
     for (const [, milliseconds, width, height, size] of probe.readbacks) {
         const key = `${width}x${height}`;
         readbackDimensions[key] = (readbackDimensions[key] || 0) + 1;
         if (size !== null && size !== undefined) (readbacksByPixelSize[size] ??= []).push(milliseconds);
     }
-    for (const item of probe.transfers || []) (transfersByMethod[item.method] ??= []).push(item);
+    for (const item of probe.readbacks)
+        (readbacksByDestination[item[5] || "client"] ??= []).push(item[1]);
+    for (const item of probe.transfers || []) {
+        (transfersByMethod[item.method] ??= []).push(item);
+        if (item.width === null) continue;
+        const key = `${item.width}x${item.height}x${item.depth}`;
+        const dimensions = transferDimensions[item.method] ??= {};
+        const group = dimensions[key] ??= { calls: 0, uploadedBytes: 0, allocationCalls: 0, totalCallMs: 0 };
+        group.calls++;
+        group.uploadedBytes += item.allocation ? 0 : item.bytes || 0;
+        group.allocationCalls += item.allocation ? 1 : 0;
+        group.totalCallMs += item.durationMs;
+    }
+    for (const item of probe.syncCalls || []) {
+        (syncByMethod[item.method] ??= []).push(item);
+        if (item.method === "clientWaitSync") {
+            const status = ({ 37146: "alreadySignaled", 37147: "timeoutExpired",
+                37148: "conditionSatisfied", 37149: "waitFailed" })[item.status] || String(item.status);
+            pollStatuses[status] = (pollStatuses[status] || 0) + 1;
+        }
+    }
+    const bufferReads = (probe.bufferReads || []).filter(item => item.pixelPack);
+    const signalLatencies = (probe.syncCalls || []).filter(item => item.firstSignalLatencyMs !== null);
+    const positiveTimeoutPolls = (syncByMethod.clientWaitSync || []).filter(item => item.timeoutNs > 0).length;
     return { durationMs: probe.durationMs, raf: distribution(intervals),
         rafByObservedPixelSize: Object.fromEntries(Object.entries(byQuality).map(([key, values]) => [key, distribution(values)])),
         mapTextureUploadsByPixelSize: uploads, allTextureUploadDimensions: dimensions,
@@ -435,14 +553,30 @@ function summarizeProbe(probe, before, after) {
             totalPixels: probe.readbacks.reduce((sum, item) => sum + item[2] * item[3], 0),
             totalMs: probe.readbacks.reduce((sum, item) => sum + item[1], 0),
             dimensions: readbackDimensions,
+            byDestination: Object.fromEntries(Object.entries(readbacksByDestination)
+                .map(([destination, times]) => [destination, distribution(times)])),
             byPixelSize: Object.fromEntries(Object.entries(readbacksByPixelSize).map(([size, times]) => [size, distribution(times)])) },
         transfersByMethod: Object.fromEntries(Object.entries(transfersByMethod).map(([method, items]) => [method, {
             ...distribution(items.map(item => item.durationMs)),
             totalCallMs: items.reduce((sum, item) => sum + item.durationMs, 0),
             uploadedBytes: items.reduce((sum, item) => sum + (item.allocation ? 0 : item.bytes || 0), 0),
             allocationCalls: items.filter(item => item.allocation).length,
-            unknownByteCounts: items.filter(item => item.bytes === null).length
+            unknownByteCounts: items.filter(item => item.bytes === null).length,
+            dimensions: transferDimensions[method] || {}
         }])),
+        pixelPackReadback: { ...probe.pixelPacks, submissions: readbacksByDestination.pixelPack?.length || 0,
+            syncByMethod: Object.fromEntries(Object.entries(syncByMethod).map(([method, calls]) => [method, {
+                ...distribution(calls.map(item => item.durationMs)),
+                totalCallMs: calls.reduce((sum, item) => sum + item.durationMs, 0)
+            }])),
+            pollStatuses, positiveTimeoutPolls,
+            submitToSignal: distribution(signalLatencies.map(item => item.firstSignalLatencyMs)),
+            getBufferSubData: { ...distribution(bufferReads.map(item => item.durationMs)),
+                totalCallMs: bufferReads.reduce((sum, item) => sum + item.durationMs, 0),
+                copiedBytes: bufferReads.reduce((sum, item) => sum + item.bytes, 0),
+                correlatedCopies: bufferReads.filter(item => item.readbackId !== null).length,
+                submitToCopy: distribution(bufferReads.filter(item => item.submittedToCopyMs !== null)
+                    .map(item => item.submittedToCopyMs)) } },
         finalObservedPixelSize: probe.finalPixelSize, longTasks: probe.longTasks.length,
         longTaskDurationMs: probe.longTasks.reduce((sum, entry) => sum + entry.duration, 0), cpu };
 }
@@ -539,13 +673,14 @@ async function main() {
     const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: browserArgs });
     const errors = [];
     const report = { browser: browser.version(), viewport, deviceScaleFactor: 1, browserArgs,
+        harnessSha256: digest(await readFile(__filename)), capturedAtUtc: new Date().toISOString(),
         platform: os.platform(), architecture: os.arch(), cpu: os.cpus()[0]?.model,
         availableParallelism: os.availableParallelism(), logicalCpuCount: os.cpus().length,
         base, revision: process.env.PIXELMAP_REVISION || null, mode: measureMotion ? "motion" : "visual",
         requestedGpuRendering: requestGpu,
         expectedGpuBackend: requestGpu ? expectCpuFallback ? "CPU fallback" : "GPU active" : null,
         performanceTimeDomain: "threadTicks",
-        adaptiveQuality: "Production policy remains active. Resting views use pixel size 2. GPU terrain quality uses depth-tested art viewport dimensions. Shared 3D texture arrays never influence quality inference. CPU and legacy Skia modes use exact 2D upload/viewport dimensions. rAF measures browser scheduling. CPU metrics include the app and observational probe. readPixels records WebGL call duration including synchronization, grouped by art pixel size and dimensions. GPU runs also time texture and buffer transfer calls and report uncompressed input bytes. These transfer timings cover the page's GL contexts and exclude final display composition.",
+        adaptiveQuality: "Production policy remains active. Resting views use pixel size 2. GPU terrain quality uses depth-tested art viewport dimensions. Shared 3D texture arrays never influence quality inference. CPU and legacy Skia modes use exact 2D upload/viewport dimensions. rAF measures browser scheduling. CPU metrics include the app and observational probe. readPixels records WebGL call duration including synchronization, grouped by art pixel size, dimensions, and client memory or pixel-pack buffer destination. GPU runs also time texture and buffer transfer calls and report uncompressed input bytes. Pixel-pack probes correlate read submissions, fence polling and buffer copies, including queue depth and completion age. These transfer timings cover the page's GL contexts and exclude final display composition.",
         cases: [] };
     const destination = path.join(output, measureMotion ? "motion.json" : "visual.json");
     try {

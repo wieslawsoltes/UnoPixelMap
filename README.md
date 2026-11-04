@@ -63,7 +63,7 @@ The optional GPU backend renders terrain and buildings with retained geometry, v
 
 Reference `src/PixelMap.Controls/PixelMap.Controls.csproj` from a Skia-rendered Uno app. The browser app uses Uno.Sdk 6.7.30 on .NET 10.
 
-Browser hosts using Uno 6.7.135 also include the GL readback adapter and its linker flag. This adapts Uno's BGRA framebuffer request to WebGL2's RGBA client-memory readback while preserving the other native GL entry points. Adjust the source path to the referenced control project. The adapter targets Uno 6.7's resolver behavior and needs verification when upgrading Uno.
+Browser hosts using Uno 6.7.135 also include the GL readback adapter and its linker flag. It supplies asynchronous WebGL2 pixel-pack transfers and BGRA compatibility for synchronous capture. Adjust the source path to the referenced control project. The adapter targets Uno 6.7's resolver behavior and needs verification when upgrading Uno.
 
 ```xml
 <PropertyGroup>
@@ -126,9 +126,9 @@ Atlas.Journey.Preview();
 
 The View menu includes **GPU rendering (experimental)**. With terrain relief or the Elevation layer enabled, Uno's `GLCanvasElement` runs a retained WebGL2/OpenGL ES 3 renderer. Vertex shaders project the stitched height field and extruded building meshes. Fragment shaders preserve elevation colors, quantized hill shading, façade windows, roof edges and overhead Earth blending. A depth attachment resolves terrain and building occlusion at pixel-art resolution. A nearest-neighbor resolve produces the final display pixels.
 
-Terrain artwork, height buffers and building meshes remain cached across camera movement. Building foundations follow the same selected terrain triangles used by picking. The host captures only the art-resolution framebuffer and presents an immutable nearest-sampled image through Uno's Skia canvas. Labels, route graphics, gates, sprites and effects use sparse depth queries from the same retained frame and render at the canvas's native DPI. Overlay-only animation reuses the terrain image. Resources are released on unload and GPU initialization failures select the CPU renderer.
+Terrain artwork, height buffers and building meshes remain cached across camera movement. Tile-priority reordering preserves those textures. Building foundations follow the same selected terrain triangles used by picking. The browser queues art-resolution transfers into two pixel-pack buffers and polls GPU fences with zero timeout. Completed RGBA images are presented through Uno's Skia canvas with nearest sampling. Retained frame tokens keep each image paired with its labels, terrain picking, route graphics, gates, sprites and effects. Overlays render at native DPI, and overlay-only animation reuses the terrain image. Resources are released on unload and GPU initialization failures select the CPU renderer.
 
-Flat views retain the existing GPU-backed Skia path using `SKVertices` and `SKRuntimeEffect`. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The control exposes `IsGpuRenderingEnabled` and `IsGpuRenderingActive`. CPU and GPU rasterization can differ at primitive boundaries and in color rounding. Uno 6.7 synchronously reads back the GL framebuffer. Art-sized presentation reduces transferred pixels by 4×, 9× or 16× at the existing pixel sizes 2, 3 and 4. Measurements include that presentation cost. [Performance methodology and results](docs/performance.md)
+Flat views retain the existing GPU-backed Skia path using `SKVertices` and `SKRuntimeEffect`. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The control exposes `IsGpuRenderingEnabled` and `IsGpuRenderingActive`. CPU and GPU rasterization can differ at primitive boundaries and in color rounding. Art-sized presentation reduces transferred pixels by 4×, 9× or 16× at the existing pixel sizes 2, 3 and 4. The browser waits for signaled fences before copying completed buffers into Skia storage. Measurements include that presentation cost. [Performance methodology and results](docs/performance.md)
 
 ## Build and test
 

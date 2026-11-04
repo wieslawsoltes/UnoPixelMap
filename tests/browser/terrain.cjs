@@ -125,7 +125,9 @@ async function menu(page, name) {
 async function open(context, address) {
     const page = await context.newPage();
     if (process.env.PIXELMAP_GPU === "1") await page.addInitScript(() => {
-        const counts = window.pixelMapTerrainGpu = {depthDraws: 0, artViewports: {}, readbacks: 0};
+        const counts = window.pixelMapTerrainGpu = {depthDraws: 0, artViewports: {}, readbacks: 0,
+            asynchronousReadbacks: 0, clientMemoryReadbacks: 0};
+        const terrainContexts = new WeakSet();
         const prototype = WebGL2RenderingContext.prototype;
         for (const name of ["drawElements", "drawElementsInstanced", "drawArrays", "drawArraysInstanced"]) {
             const original = prototype[name];
@@ -135,6 +137,7 @@ async function open(context, address) {
                     if (viewport[2] > 0 && viewport[2] <= Math.ceil(innerWidth / 2) &&
                         viewport[3] > 0 && viewport[3] <= Math.ceil(innerHeight / 2)) {
                         counts.depthDraws++;
+                        terrainContexts.add(this);
                         const size = viewport[2] + "x" + viewport[3];
                         counts.artViewports[size] = (counts.artViewports[size] || 0) + 1;
                     }
@@ -145,6 +148,10 @@ async function open(context, address) {
         const readPixels = prototype.readPixels;
         prototype.readPixels = function (...args) {
             counts.readbacks++;
+            if (terrainContexts.has(this)) {
+                if (this.getParameter(this.PIXEL_PACK_BUFFER_BINDING)) counts.asynchronousReadbacks++;
+                else counts.clientMemoryReadbacks++;
+            }
             return Reflect.apply(readPixels, this, args);
         };
     });
@@ -195,6 +202,8 @@ async function assertGpuTerrain(page) {
     const work = await page.evaluate(() => window.pixelMapTerrainGpu);
     assert.ok(work.depthDraws > 0, "Terrain submits depth-tested geometry at pixel-art resolution");
     assert.ok(work.readbacks > 0, "Uno presents the hardware-rendered terrain framebuffer");
+    assert.ok(work.asynchronousReadbacks > 0, "Browser terrain uses pixel-pack buffers for asynchronous readback");
+    assert.equal(work.clientMemoryReadbacks, 0, "Terrain submission avoids synchronous client-memory readback");
     console.log("GPU terrain geometry", JSON.stringify(work));
 }
 

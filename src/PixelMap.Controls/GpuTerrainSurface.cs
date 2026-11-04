@@ -125,10 +125,9 @@ public sealed partial class PixelMapControl
                     try
                     {
                         var image = surface.ReadArtwork(request);
-                        var presentation = new GpuPresentation(request, frame, image, Stopwatch.GetElapsedTime(started).TotalMilliseconds);
                         surface.CompletePublication(version);
-                        SetReadyGpuPresentation(presentation);
-                        Invalidate();
+                        PublishGpuArtwork(surface, request, frame, image,
+                            Stopwatch.GetElapsedTime(started).TotalMilliseconds, bottomUp: false);
                     }
                     catch (Exception error)
                     {
@@ -137,6 +136,19 @@ public sealed partial class PixelMapControl
                     }
                 }
             });
+        }
+
+        private void PublishGpuArtwork(GpuTerrainCanvas surface, GpuMapRequest request,
+            GpuMapFrame frame, SKImage image, double mapMilliseconds, bool bottomUp)
+        {
+            if (!ReferenceEquals(_terrainGpu, surface) || !_terrainGpuRequested || surface.IsGLInitialized != true)
+            {
+                image.Dispose();
+                frame.Dispose();
+                return;
+            }
+            SetReadyGpuPresentation(new GpuPresentation(request, frame, image, mapMilliseconds, bottomUp));
+            Invalidate();
         }
 
         private void SetReadyGpuPresentation(GpuPresentation presentation)
@@ -161,9 +173,16 @@ public sealed partial class PixelMapControl
                 canvas.DrawColor(new SKColor(color.R, color.G, color.B, color.A));
             }
             canvas.ClipRect(new SKRect(0, 0, frame.Width, frame.Height));
+            canvas.Save();
+            if (presentation.BottomUp)
+            {
+                canvas.Translate(0, presentation.Image.Height * frame.PixelSize);
+                canvas.Scale(1, -1);
+            }
             canvas.DrawImage(presentation.Image,
                 new SKRect(0, 0, presentation.Image.Width * frame.PixelSize, presentation.Image.Height * frame.PixelSize),
                 GpuArtworkSampling);
+            canvas.Restore();
             renderer.DrawGpuOverlay(canvas, frame);
             if (scene.Gate is { } gate && scene.Route is { } trip && scene.Vehicle is { } driver)
                 renderer.DrawGate(canvas, scene.Camera, frame.Width, frame.Height, gate, trip.Mode,
@@ -212,12 +231,14 @@ public sealed partial class PixelMapControl
             }
         }
 
-        private sealed class GpuPresentation(GpuMapRequest request, GpuMapFrame frame, SKImage image, double mapMilliseconds) : IDisposable
+        private sealed class GpuPresentation(GpuMapRequest request, GpuMapFrame frame, SKImage image,
+            double mapMilliseconds, bool bottomUp) : IDisposable
         {
             internal readonly GpuMapRequest Request = request;
             internal readonly GpuMapFrame Frame = frame;
             internal readonly SKImage Image = image;
             internal readonly double MapMilliseconds = mapMilliseconds;
+            internal readonly bool BottomUp = bottomUp;
 
             public void Dispose()
             {
@@ -229,7 +250,10 @@ public sealed partial class PixelMapControl
         private sealed class GpuTerrainCanvas : GLCanvasElement
         {
             private readonly MapSurface _owner;
+            private readonly DispatcherTimer _readbackTimer = new() { Interval = TimeSpan.FromMilliseconds(16) };
+            private readonly Queue<GpuSubmission> _submissions = new(2);
             private GlMapRenderer? _engine;
+            private BrowserGpuReadback? _browserReadback;
             private GpuMapRequest? _request;
             private GpuMapRequest? _pendingRequest;
             private GpuMapFrame? _pendingFrame;
@@ -243,6 +267,8 @@ public sealed partial class PixelMapControl
                 IsHitTestVisible = false;
                 HorizontalAlignment = HorizontalAlignment.Left;
                 VerticalAlignment = VerticalAlignment.Top;
+                if (Background is ImageBrush readbackBrush) readbackBrush.Opacity = 0;
+                _readbackTimer.Tick += (_, _) => PollReadback();
                 RegisterPropertyChangedCallback(IsGLInitializedProperty, (_, _) =>
                 {
                     if (IsGLInitialized == false) _owner.GpuTerrainUnavailable(this);
@@ -259,7 +285,7 @@ public sealed partial class PixelMapControl
                     return;
                 }
                 var request = new GpuMapRequest(scene, width, height, pixelSize);
-                if (_pendingRequest is { } pending &&
+                if (_browserReadback is null && _pendingRequest is { } pending &&
                     (pending.ArtWidth != request.ArtWidth || pending.ArtHeight != request.ArtHeight))
                 {
                     _pendingFrame?.Dispose();
@@ -270,8 +296,7 @@ public sealed partial class PixelMapControl
                 _requestVersion++;
                 Width = _request.ArtWidth;
                 Height = _request.ArtHeight;
-                Opacity = 1;
-                Invalidate();
+                ScheduleGeometry();
             }
 
             internal void CancelRequest()
@@ -281,7 +306,66 @@ public sealed partial class PixelMapControl
                 _pendingFrame?.Dispose();
                 _pendingFrame = null;
                 _pendingRequest = null;
+                foreach (var submission in _submissions) submission.Dispose();
                 Opacity = 0;
+            }
+
+            private void ScheduleGeometry()
+            {
+                if (_retired || _request is null || _renderedVersion == _requestVersion) return;
+                if (_browserReadback is not null && _submissions.Count >= 2)
+                {
+                    Opacity = 0;
+                    return;
+                }
+                Opacity = 1;
+                Invalidate();
+            }
+
+            private void PollReadback()
+            {
+                lock (_owner._drawing)
+                {
+                    if (_retired || _browserReadback is not { } readback || IsGLInitialized != true)
+                    {
+                        _readbackTimer.Stop();
+                        return;
+                    }
+                    try
+                    {
+                        if (readback.TryGetCompleted(out var completed))
+                        {
+                            while (_submissions.TryPeek(out var older) && older.Version < completed.Version)
+                                _submissions.Dequeue().Dispose();
+                            if (!_submissions.TryPeek(out var submission) || submission.Version != completed.Version ||
+                                submission.Request is not { } request || submission.Frame is not { } frame)
+                            {
+                                readback.DiscardCompleted(completed);
+                                if (submission?.Version == completed.Version) _submissions.Dequeue().Dispose();
+                            }
+                            else
+                            {
+                                if (completed.Width != request.ArtWidth || completed.Height != request.ArtHeight)
+                                    throw new InvalidOperationException("The completed GPU transfer does not match its retained viewport.");
+                                var image = readback.ReadCompleted(completed);
+                                _submissions.Dequeue();
+                                submission.Frame = null;
+                                if (_requestVersion == completed.Version) _request = null;
+                                _owner.PublishGpuArtwork(this, request, frame, image,
+                                    Stopwatch.GetElapsedTime(submission.Started).TotalMilliseconds, bottomUp: true);
+                            }
+                        }
+                        if (_submissions.Count == 0) _readbackTimer.Stop();
+                        ScheduleGeometry();
+                    }
+                    catch (Exception error)
+                    {
+                        _readbackTimer.Stop();
+                        Opacity = 0;
+                        Console.WriteLine($"Pixel Atlas asynchronous GPU terrain readback failed. {error}");
+                        _owner.GpuTerrainUnavailable(this);
+                    }
+                }
             }
 
             internal bool CanPublish(GpuMapRequest request, GpuMapFrame frame, long version) =>
@@ -328,6 +412,7 @@ public sealed partial class PixelMapControl
                 {
                     _engine = new GlMapRenderer(gl);
                     Renderer = new PixelMapRenderer();
+                    _browserReadback = BrowserGpuReadback.TryCreate();
                 }
                 catch (Exception error)
                 {
@@ -342,15 +427,46 @@ public sealed partial class PixelMapControl
                 {
                     lock (_owner._drawing)
                     {
+                        // Uno reads its backbuffer even when no geometry is pending. A
+                        // scoped selection also suppresses those already queued paints.
+                        _browserReadback?.SelectSurface();
                         if (_retired || _request is not { } request || _renderedVersion == _requestVersion ||
-                            Renderer is null || _engine is null) return;
+                            Renderer is null || _engine is null)
+                        {
+                            if (_browserReadback is not null) Opacity = 0;
+                            return;
+                        }
                         if ((int)RenderSize.Width != request.ArtWidth || (int)RenderSize.Height != request.ArtHeight) return;
+                        if (_browserReadback is { CanSubmit: false })
+                        {
+                            Opacity = 0;
+                            return;
+                        }
                         long started = Stopwatch.GetTimestamp();
                         long version = _requestVersion;
                         var frame = Renderer.PrepareGpuFrame(request.Width, request.Height, request.Scene.Camera, request.Tiles,
                             request.Scene.Palette, request.PixelSize, request.Imagery, request.Scene.Terrain);
-                        try { _engine.DrawArtwork(frame); }
-                        catch { frame.Dispose(); throw; }
+                        try
+                        {
+                            _engine.DrawArtwork(frame);
+                            if (_browserReadback is { } readback)
+                            {
+                                if (!readback.TryBeginFrame(version, request.ArtWidth, request.ArtHeight))
+                                    throw new InvalidOperationException("The browser GPU transfer slot could not be reserved.");
+                                _submissions.Enqueue(new GpuSubmission(request, frame, version, started));
+                                _renderedVersion = version;
+                                // The following Uno readback submits a PBO transfer. Poll
+                                // its fence independently without another GLCanvas paint.
+                                Opacity = 0;
+                                if (!_readbackTimer.IsEnabled) _readbackTimer.Start();
+                                return;
+                            }
+                        }
+                        catch
+                        {
+                            frame.Dispose();
+                            throw;
+                        }
                         _pendingFrame?.Dispose();
                         _pendingFrame = frame;
                         _pendingRequest = request;
@@ -360,6 +476,7 @@ public sealed partial class PixelMapControl
                 }
                 catch (Exception error)
                 {
+                    _browserReadback?.CancelFrame();
                     Console.WriteLine($"Pixel Atlas GPU terrain drawing failed. {error}");
                     throw;
                 }
@@ -375,14 +492,21 @@ public sealed partial class PixelMapControl
             {
                 lock (_owner._drawing)
                 {
-                    _engine?.Dispose();
-                    _engine = null;
-                    ReleaseManagedResources();
+                    try { _engine?.Dispose(); }
+                    finally
+                    {
+                        _engine = null;
+                        ReleaseManagedResources();
+                    }
                 }
             }
 
             private void ReleaseManagedResources()
             {
+                _readbackTimer.Stop();
+                _browserReadback?.Dispose();
+                _browserReadback = null;
+                while (_submissions.TryDequeue(out var submission)) submission.Dispose();
                 _requestVersion++;
                 _request = null;
                 _pendingFrame?.Dispose();
@@ -391,6 +515,20 @@ public sealed partial class PixelMapControl
                 Renderer?.Dispose();
                 Renderer = null;
                 _readback = [];
+            }
+
+            private sealed class GpuSubmission(GpuMapRequest request, GpuMapFrame frame, long version, long started) : IDisposable
+            {
+                internal GpuMapRequest? Request = request;
+                internal GpuMapFrame? Frame = frame;
+                internal readonly long Version = version, Started = started;
+
+                public void Dispose()
+                {
+                    Frame?.Dispose();
+                    Frame = null;
+                    Request = null;
+                }
             }
         }
 

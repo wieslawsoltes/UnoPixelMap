@@ -105,11 +105,23 @@ async function see(page, pattern, timeout = 15000) {
 }
 
 async function routeQuery(page, text) {
-    const b = await page.getByRole("textbox", {name: "Find a route stop", exact: true}).boundingBox();
+    const name = "Find a route stop";
+    const b = await page.getByRole("textbox", {name, exact: true}).boundingBox();
     assert.ok(b, "Route-stop text field is present");
     await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+    // Uno creates its native editing input after the Skia control receives focus.
+    // Wait for that input before delivering text, and observe its value before submit.
+    await page.waitForFunction(name => {
+        const active = document.activeElement;
+        return (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) &&
+            active.getAttribute("aria-label") === name;
+    }, name);
     await page.keyboard.press("ControlOrMeta+A");
     await page.keyboard.insertText(text);
+    await page.waitForFunction(({name, text}) => {
+        const active = document.activeElement;
+        return active?.getAttribute("aria-label") === name && active.value === text;
+    }, {name, text});
 }
 
 async function checkRoutePixels(page, rgb, name) {

@@ -17,10 +17,11 @@ internal static class GlTerrainChecks
     private sealed record Difference(int Pixels, int ChangedPixels, int MaximumChannelDifference,
         double MeanChannelDifference, int UnmatchedPixels, int StableInteriorPixels, int ChangedInteriorPixels);
     private sealed record CaseResult(string Name, int Width, int Height, int PixelSize, Difference Difference,
-        Difference ArtworkDifference, string CpuHash, string GpuHash, string ArtworkHash,
+        Difference ArtworkDifference, string CpuHash, string GpuHash, string ArtworkHash, string RgbaArtworkHash,
         long UploadBytes, int DrawCalls, long ResidentBytes);
     private sealed record Statistics(double Median, double P95, double Minimum, double Maximum,
         IReadOnlyList<double> Samples);
+    private sealed record GardaFixture(MapTile[] Tiles, ImageryTile[] Imagery, ElevationSnapshot Elevation);
 
     internal static void Run(string[] arguments)
     {
@@ -81,12 +82,16 @@ internal static class GlTerrainChecks
         CheckRetainedNavigation(camera, new(plateau));
         CheckHiDpi(gl, renderer, camera, empty, new(hills), output);
         var navigation = CheckNavigation(gl, renderer, output, failures);
+        var sourceOrdering = CheckSourceOrdering(gl);
+        var duplicateImagery = CheckDuplicateImagery(gl, renderer, camera, new(plateau));
         File.WriteAllText(Path.Combine(output, "checks.json"), JsonSerializer.Serialize(new
         {
             Context = context.Description,
             Comparison = "Exact color deltas are reported. Structural validation permits a one-art-pixel rasterization boundary and at most two byte levels per color channel. Both image directions are checked.",
             Cases = results,
             Navigation = navigation,
+            SourceOrdering = sourceOrdering,
+            DuplicateImagery = duplicateImagery,
             Failures = failures
         }, Json));
         if (failures.Count > 0)
@@ -122,10 +127,13 @@ internal static class GlTerrainChecks
             Assert(Hash(expected) == expectedHash, $"{name} changed CPU pixels after GPU preparation.");
             using var artworkFrame = scene.PrepareGpuFrame(width, height, view, tiles, style, pixels, photos, options);
             using var artwork = CaptureArtwork(gl, scene, renderer, artworkFrame);
+            using var rgbaArtwork = CaptureArtwork(gl, scene, renderer, artworkFrame, bottomUpRgba: true);
+            Assert(artwork.GetPixelSpan().SequenceEqual(rgbaArtwork.GetPixelSpan()),
+                $"{name} changed pixels when presenting an immutable bottom-up RGBA image.");
             var artworkDifference = Compare(expected, artwork, pixels);
             Assert(Compare(actual, artwork, pixels).MaximumChannelDifference <= 2,
                 $"{name} changed geometry or photograph composition during art-sized capture.");
-            results.Add(new(name, width, height, pixels, difference, artworkDifference, expectedHash, actualHash, Hash(artwork),
+            results.Add(new(name, width, height, pixels, difference, artworkDifference, expectedHash, actualHash, Hash(artwork), Hash(rgbaArtwork),
                 uploads, draws, renderer.ResidentBytes));
             Console.WriteLine($"GL {name} changed {difference.ChangedPixels}/{difference.Pixels}, " +
                 $"unmatched {difference.UnmatchedPixels}, mean {difference.MeanChannelDifference:F3}, draws {draws}, upload {uploads}");
@@ -174,7 +182,7 @@ internal static class GlTerrainChecks
     }
 
     private static SKBitmap CaptureArtwork(GL gl, PixelMapRenderer scene, GlMapRenderer renderer,
-        GpuMapFrame frame, Action<SKCanvas>? drawOverlay = null, int scale = 1)
+        GpuMapFrame frame, Action<SKCanvas>? drawOverlay = null, int scale = 1, bool bottomUpRgba = false)
     {
         int width = (frame.Width + frame.PixelSize - 1) / frame.PixelSize;
         int height = (frame.Height + frame.PixelSize - 1) / frame.PixelSize;
@@ -183,17 +191,24 @@ internal static class GlTerrainChecks
         byte[] readback = new byte[width * height * 4];
         gl.ReadPixels<byte>(0, 0, (uint)width, (uint)height, PixelFormat.Rgba, PixelType.UnsignedByte, readback.AsSpan());
         CheckError(gl);
-        SwapRedBlue(readback);
+        if (!bottomUpRgba) SwapRedBlue(readback);
         // Uno exposes its readback through IBuffer. Model the public DataReader copy
         // before the immutable, top-down Skia snapshot used by the foreground canvas.
         byte[] copy = new byte[readback.Length];
         readback.CopyTo(copy, 0);
-        using var image = SnapshotArtwork(copy, width, height);
+        using var image = SnapshotArtwork(copy, width, height, bottomUpRgba);
         var result = new SKBitmap(frame.Width * scale, frame.Height * scale, SKColorType.Bgra8888, SKAlphaType.Opaque);
         using var canvas = new SKCanvas(result);
         canvas.Scale(scale);
         canvas.ClipRect(new SKRect(0, 0, frame.Width, frame.Height));
+        canvas.Save();
+        if (bottomUpRgba)
+        {
+            canvas.Translate(0, height * frame.PixelSize);
+            canvas.Scale(1, -1);
+        }
         canvas.DrawImage(image, new SKRect(0, 0, width * frame.PixelSize, height * frame.PixelSize), Nearest);
+        canvas.Restore();
         scene.DrawGpuOverlay(canvas, frame);
         drawOverlay?.Invoke(canvas);
         return result;
@@ -205,13 +220,16 @@ internal static class GlTerrainChecks
             (pixels[i], pixels[i + 2]) = (pixels[i + 2], pixels[i]);
     }
 
-    private static SKImage SnapshotArtwork(ReadOnlySpan<byte> bottomUpBgra, int width, int height)
+    private static SKImage SnapshotArtwork(ReadOnlySpan<byte> pixels, int width, int height, bool bottomUpRgba = false)
     {
-        using var bitmap = new SKBitmap(width, height, SKColorType.Bgra8888, SKAlphaType.Opaque);
+        using var bitmap = new SKBitmap(width, height,
+            bottomUpRgba ? SKColorType.Rgba8888 : SKColorType.Bgra8888, SKAlphaType.Opaque);
         var destination = bitmap.GetPixelSpan();
         int rowBytes = width * 4;
-        for (int y = 0; y < height; y++)
-            bottomUpBgra.Slice((height - 1 - y) * rowBytes, rowBytes).CopyTo(destination.Slice(y * bitmap.RowBytes, rowBytes));
+        if (bottomUpRgba) pixels.CopyTo(destination);
+        else
+            for (int y = 0; y < height; y++)
+                pixels.Slice((height - 1 - y) * rowBytes, rowBytes).CopyTo(destination.Slice(y * bitmap.RowBytes, rowBytes));
         bitmap.SetImmutable();
         return SKImage.FromBitmap(bitmap);
     }
@@ -302,6 +320,10 @@ internal static class GlTerrainChecks
                         item.Style, item.Pixels, null, terrain);
                     using var artwork = CaptureArtwork(gl, artworkScene, renderer, artworkFrame,
                         target => DrawJourney(artworkScene, target));
+                    using var rgbaArtwork = CaptureArtwork(gl, artworkScene, renderer, artworkFrame,
+                        target => DrawJourney(artworkScene, target), bottomUpRgba: true);
+                    Assert(artwork.GetPixelSpan().SequenceEqual(rgbaArtwork.GetPixelSpan()),
+                        $"{name} changed journey overlays when presenting bottom-up RGBA artwork.");
                     var artworkDifference = Compare(expected, artwork, item.Pixels);
                     artworkUnmatched += artworkDifference.UnmatchedPixels;
                     artworkMaximum = Math.Max(artworkMaximum, artworkDifference.MaximumChannelDifference);
@@ -539,13 +561,17 @@ internal static class GlTerrainChecks
             }
             Assert(difference.MaximumChannelDifference <= 2,
                 $"High-DPI geometry or physical-resolution overlay changed by {difference.MaximumChannelDifference} byte levels.");
-            using var artwork = CaptureArtwork(gl, scene, renderer, frame, target =>
+            Action<SKCanvas> drawOverlay = target =>
             {
                 target.Save();
                 target.ResetMatrix();
                 target.DrawBitmap(overlay, 0, 0);
                 target.Restore();
-            }, scale);
+            };
+            using var artwork = CaptureArtwork(gl, scene, renderer, frame, drawOverlay, scale);
+            using var rgbaArtwork = CaptureArtwork(gl, scene, renderer, frame, drawOverlay, scale, bottomUpRgba: true);
+            Assert(artwork.GetPixelSpan().SequenceEqual(rgbaArtwork.GetPixelSpan()),
+                "Bottom-up RGBA presentation changed high-DPI artwork, clipping or full-resolution overlays.");
             var artworkDifference = Compare(expected, artwork, 3 * scale);
             Assert(artworkDifference.MaximumChannelDifference <= 2,
                 $"Art-sized capture changed high-DPI pixels by {artworkDifference.MaximumChannelDifference} byte levels.");
@@ -656,9 +682,8 @@ internal static class GlTerrainChecks
         return requireEvery;
     }
 
-    private static void RunBenchmark(HeadlessGlContext context, string output)
+    private static GardaFixture LoadGarda()
     {
-        const int width = 1100, height = 650, samples = 32;
         using var client = new HttpClient(new OfflineHandler());
         var vectors = new VectorTileSource(client);
         var photos = new EarthImagerySource(client);
@@ -674,7 +699,147 @@ internal static class GlTerrainChecks
             imagery.Add(photos.GetTileAsync(id).GetAwaiter().GetResult());
             elevation.Add(dem.GetTileAsync(id).GetAwaiter().GetResult());
         }
-        var snapshot = new ElevationSnapshot(elevation);
+        return new(tiles.ToArray(), imagery.ToArray(), new ElevationSnapshot(elevation));
+    }
+
+    private static List<object> CheckSourceOrdering(GL gl)
+    {
+        const int width = 1100, height = 650, pixels = 4;
+        const int textureBytes = 256 * 256 * 4;
+        var fixture = LoadGarda();
+        var reports = new List<object>();
+        foreach (string layer in new[] { "Map", "Earth", "Elevation" })
+        {
+            using var scene = new PixelMapRenderer();
+            using var engine = new GlMapRenderer(gl);
+            var options = new TerrainOptions(fixture.Elevation, Hypsometric: layer == "Elevation");
+            var camera = new MapCamera(45.875, 10.85, 12.3, -25, 58, true).OnTerrain(options, height);
+            var images = layer == "Earth" ? fixture.Imagery : null;
+            var initial = Draw(fixture.Tiles, images);
+            var warm = Draw(fixture.Tiles, images);
+            Assert(warm.Hash == initial.Hash && warm.UploadBytes < textureBytes,
+                $"{layer} did not retain its warm terrain resources.");
+            var orderings = new HashSet<string>();
+            var reorderedUploads = new List<long>();
+            for (int step = 0; step < 16; step++)
+            {
+                // TileViewport publishes camera-distance priority order. Change that
+                // priority independently of the view to isolate identical-source reuse.
+                double angle = step * Math.PI / 8;
+                double focusX = (camera.Longitude + 180) / 360 + .0003 * Math.Sin(angle);
+                double focusY = (1 - Math.Asinh(Math.Tan(camera.Latitude * Math.PI / 180)) / Math.PI) * .5
+                    + .0003 * Math.Cos(angle);
+                var tiles = fixture.Tiles.OrderBy(tile => Distance(tile.Id)).ToArray();
+                var photos = images?.OrderBy(tile => Distance(tile.Id)).ToArray();
+                orderings.Add(string.Join('|', tiles.Select(tile => tile.Id)));
+                var result = Draw(tiles, photos);
+                Assert(result.Hash == initial.Hash, $"{layer} terrain pixels changed after source-priority reordering.");
+                Assert(result.UploadBytes == warm.UploadBytes,
+                    $"{layer} uploaded {result.UploadBytes} bytes after an order-only source change, expected {warm.UploadBytes}.");
+                reorderedUploads.Add(result.UploadBytes);
+
+                double Distance(TileId id)
+                {
+                    double count = 1 << id.Z;
+                    double dx = (id.X + .5) / count - focusX;
+                    dx -= Math.Floor(dx + .5);
+                    double dy = (id.Y + .5) / count - focusY;
+                    return dx * dx + dy * dy;
+                }
+            }
+            Assert(orderings.Count > 1, "The source-priority fixture did not change tile ordering.");
+            var replacementTiles = fixture.Tiles.ToArray();
+            replacementTiles[1] = new(replacementTiles[1].Id, replacementTiles[1].Features);
+            var replacement = Draw(replacementTiles, images);
+            Assert(replacement.Hash == initial.Hash && replacement.UploadBytes >= textureBytes,
+                $"{layer} failed to invalidate a replacement vector source with equal contents.");
+            long? replacementImageUploads = null;
+            if (images is not null)
+            {
+                var replacementImages = images.ToArray();
+                replacementImages[1] = new(replacementImages[1].Id, replacementImages[1].Encoded);
+                var replacementImage = Draw(replacementTiles, replacementImages);
+                Assert(replacementImage.Hash == initial.Hash && replacementImage.UploadBytes >= textureBytes,
+                    "Earth failed to invalidate a replacement photograph with equal contents.");
+                replacementImageUploads = replacementImage.UploadBytes;
+            }
+            var removed = Draw(fixture.Tiles.Skip(1).ToArray(), images);
+            Assert(removed.UploadBytes >= textureBytes, $"{layer} failed to invalidate removed source membership.");
+            reports.Add(new { Layer = layer, Permutations = reorderedUploads.Count, DistinctOrderings = orderings.Count,
+                WarmUploadBytes = warm.UploadBytes, ReorderedUploadBytes = reorderedUploads,
+                ReplacementVectorUploadBytes = replacement.UploadBytes,
+                ReplacementImageryUploadBytes = replacementImageUploads, RemovedSourceUploadBytes = removed.UploadBytes });
+            Console.WriteLine($"GL source ordering {layer}, {orderings.Count} priority orders, " +
+                $"warm/reordered uploads {warm.UploadBytes}/{reorderedUploads.Max()} bytes, exact terrain pixels.");
+
+            (string Hash, long UploadBytes) Draw(IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? photos)
+            {
+                using var frame = scene.PrepareGpuFrame(width, height, camera, tiles, PixelStyle.Day, pixels, photos, options);
+                int artWidth = (width + pixels - 1) / pixels, artHeight = (height + pixels - 1) / pixels;
+                gl.Viewport(0, 0, (uint)artWidth, (uint)artHeight);
+                engine.DrawArtwork(frame);
+                using var bitmap = ReadBitmap(gl, artWidth, artHeight);
+                return (Hash(bitmap), engine.LastUploadBytes);
+            }
+        }
+        return reports;
+    }
+
+    private static object CheckDuplicateImagery(GL gl, GlMapRenderer renderer, MapCamera camera, TerrainOptions options)
+    {
+        const int width = 640, height = 420, pixels = 3;
+        const int textureBytes = 256 * 256 * 4;
+        using var scene = new PixelMapRenderer();
+        using var fresh = new PixelMapRenderer();
+        MapTile[] tiles = [new(Tile, [])];
+        var view = (camera with { Pitch = 0, Perspective = false }).OnTerrain(options, height);
+        var firstSource = SolidImage(new SKColor(197, 177, 124));
+        var secondSource = SolidImage(new SKColor(20, 69, 103));
+        using var original = Draw(scene, [firstSource, secondSource]);
+        using var repeated = Draw(scene, [firstSource, secondSource]);
+        long repeatedUploads = renderer.LastUploadBytes;
+        Assert(original.GetPixelSpan().SequenceEqual(repeated.GetPixelSpan()) && repeatedUploads < textureBytes,
+            "An unchanged duplicate-imagery sequence lost its retained artwork.");
+        using var reversed = Draw(scene, [secondSource, firstSource]);
+        long reversedUploads = renderer.LastUploadBytes;
+        using var freshReversed = Draw(fresh, [secondSource, firstSource]);
+        using var firstOnly = Draw(fresh, [firstSource]);
+        using var secondOnly = Draw(fresh, [secondSource]);
+        int changed = ChangedPixels(original, reversed);
+        Assert(changed > width * height / 10, "The duplicate-imagery fixture did not visibly change its last source.");
+        Assert(reversedUploads >= textureBytes, "Reordering distinct same-TileId photographs reused stale artwork.");
+        Assert(reversed.GetPixelSpan().SequenceEqual(freshReversed.GetPixelSpan()) &&
+            reversed.GetPixelSpan().SequenceEqual(firstOnly.GetPixelSpan()) &&
+            original.GetPixelSpan().SequenceEqual(secondOnly.GetPixelSpan()),
+            "Duplicate-imagery ordering no longer renders the last source or differs from a fresh renderer.");
+        Console.WriteLine($"GL duplicate imagery preserves last-source order, changed {changed} pixels, " +
+            $"retained/reordered uploads {repeatedUploads}/{reversedUploads} bytes.");
+        return new { OriginalHash = Hash(original), ReversedHash = Hash(reversed), FreshReversedHash = Hash(freshReversed),
+            ChangedPixels = changed, RetainedUploadBytes = repeatedUploads, ReorderedUploadBytes = reversedUploads };
+
+        SKBitmap Draw(PixelMapRenderer map, IReadOnlyList<ImageryTile> imagery)
+        {
+            using var frame = map.PrepareGpuFrame(width, height, view, tiles, PixelStyle.Day, pixels, imagery, options);
+            return CaptureArtwork(gl, map, renderer, frame, bottomUpRgba: true);
+        }
+
+        ImageryTile SolidImage(SKColor color)
+        {
+            using var bitmap = new SKBitmap(256, 256, SKColorType.Bgra8888, SKAlphaType.Opaque);
+            bitmap.Erase(color);
+            using var image = SKImage.FromBitmap(bitmap);
+            using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+            return new(Tile, png.ToArray());
+        }
+    }
+
+    private static void RunBenchmark(HeadlessGlContext context, string output)
+    {
+        const int width = 1100, height = 650, samples = 32;
+        var fixture = LoadGarda();
+        var tiles = fixture.Tiles;
+        var imagery = fixture.Imagery;
+        var snapshot = fixture.Elevation;
         string rendererHash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(PixelMapRenderer).Assembly.Location)));
         string harnessHash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(GlTerrainChecks).Assembly.Location)));
         string dataHash = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(ElevationTile).Assembly.Location)));

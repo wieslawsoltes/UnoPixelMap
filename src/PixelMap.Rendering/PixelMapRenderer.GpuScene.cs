@@ -60,13 +60,14 @@ public sealed partial class PixelMapRenderer
             reliefSurface ??= new();
             bool shadows = camera.Pitch >= 1;
             var textureStyle = (style, pixelSize, shadows);
-            if (terrainTextureStyle != textureStyle || !SameTiles(tiles, terrainTextureTiles) || !SameTiles(imagery, terrainTextureImagery))
+            if (terrainTextureStyle != textureStyle || !SameTerrainSources(tiles, terrainTextureTiles, static tile => tile.Id) ||
+                !SameTerrainSources(imagery, terrainTextureImagery, static tile => tile.Id))
             {
                 reliefSurface.ClearTextures();
                 terrainTextureStyle = textureStyle;
-                terrainTextureTiles.Clear(); terrainTextureTiles.AddRange(tiles);
-                terrainTextureImagery.Clear(); if (imagery is not null) terrainTextureImagery.AddRange(imagery);
             }
+            terrainTextureTiles.Clear(); terrainTextureTiles.AddRange(tiles);
+            terrainTextureImagery.Clear(); if (imagery is not null) terrainTextureImagery.AddRange(imagery);
             var colors = style switch { PixelStyle.Dusk => PixelPalette.Dusk, PixelStyle.Night => PixelPalette.Night, _ => PixelPalette.Day };
             if (palette != colors)
             {
@@ -156,6 +157,26 @@ public sealed partial class PixelMapRenderer
             ObjectDisposedException.ThrowIf(frame.IsDisposed, frame);
             ActivateGpuFrameCore(frame);
         }
+    }
+
+    private static bool SameTerrainSources<T>(IReadOnlyList<T>? sources, List<T> previous,
+        Func<T, TileId> getId) where T : class
+    {
+        if (SameTiles(sources, previous)) return true;
+        if (sources is null || sources.Count != previous.Count) return false;
+        // Tile request priority follows the moving camera. That ordering does not
+        // change camera-independent artwork clipped to unique source tile bounds.
+        // Duplicate IDs can overlap in drawing order and require rebaking.
+        var ids = new HashSet<TileId>();
+        var remaining = new HashSet<T>(previous.Count, ReferenceEqualityComparer.Instance);
+        foreach (var source in previous)
+        {
+            if (!ids.Add(getId(source))) return false;
+            remaining.Add(source);
+        }
+        foreach (var source in sources)
+            if (!remaining.Remove(source)) return false;
+        return remaining.Count == 0;
     }
 
     private GpuBuildingMesh PrepareGpuBuildings(TileGeometry tile, TerrainOptions options)
