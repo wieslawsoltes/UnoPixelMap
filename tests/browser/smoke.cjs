@@ -63,6 +63,20 @@ function hasEarthTerrain(frame) {
 async function clickMapAction(page, name, touch = false) {
     const control = page.getByRole("button", {name, exact: true})
         .or(page.getByRole("checkbox", {name, exact: true}));
+    await control.waitFor({state: "visible"});
+    const element = await control.elementHandle();
+    assert.ok(element, "Available " + name);
+    try {
+        await page.waitForFunction(async target => {
+            const before = target.getBoundingClientRect();
+            if (!target.isConnected || target.getAttribute("aria-disabled") === "true" || !before.width || !before.height) return false;
+            for (let frame = 0; frame < 2; frame++) await new Promise(requestAnimationFrame);
+            const after = target.getBoundingClientRect();
+            return before.x === after.x && before.y === after.y && before.width === after.width && before.height === after.height;
+        }, element);
+    } finally {
+        await element.dispose();
+    }
     const bounds = await control.boundingBox();
     assert.ok(bounds && bounds.width && bounds.height, "Visible " + name);
     const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
@@ -205,6 +219,16 @@ async function run() {
         await mobile.close();
         assert.deepEqual(failures, [], "browser runtime errors");
         console.log("Browser checks passed: seeded geometry, Earth imagery in isometric and overhead views, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.");
+    } catch (error) {
+        const page = browser.contexts().flatMap(context => context.pages()).at(-1);
+        if (evidence && page) {
+            await Promise.allSettled([
+                page.screenshot({path: join(evidence, "smoke-failure.png"), timeout: 10000}),
+                page.locator("body").ariaSnapshot({timeout: 5000})
+                    .then(snapshot => writeFile(join(evidence, "smoke-failure.txt"), snapshot))
+            ]);
+        }
+        throw error;
     } finally {
         await browser.close();
     }

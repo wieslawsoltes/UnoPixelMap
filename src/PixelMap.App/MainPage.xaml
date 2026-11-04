@@ -88,7 +88,8 @@
         <Grid Grid.Row="1" x:Name="MapArea" Background="#A7C6BD" AutomationProperties.Name="Map explorer">
             <maps:PixelMapControl x:Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                   AutomationProperties.Name="Interactive world map" />
-            <StackPanel x:Name="SceneDock" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Spacing="6">
+            <StackPanel x:Name="SceneDock" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Spacing="6"
+                        AutomationProperties.Name="Map layers and location">
                 <Border x:Name="ElevationLegend" Visibility="Collapsed" Padding="10,7" CornerRadius="4"
                         HorizontalAlignment="Left" Background="#F9142F32" BorderBrush="#679789" BorderThickness="1" IsHitTestVisible="False">
                     <StackPanel Spacing="4">
@@ -102,7 +103,8 @@
                         <TextBlock Text="−500       0        1500       3000       6000 m" Foreground="#C4D8C9" FontSize="10" />
                     </StackPanel>
                 </Border>
-                <Border HorizontalAlignment="Left" Padding="3" Background="#FAFFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6">
+                <Border HorizontalAlignment="Left" Padding="3" Background="#FAFFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6"
+                        AutomationProperties.Name="Map layers and projection">
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <ToggleButton x:Name="MapLayerButton" IsChecked="True" MinWidth="66" Height="36" Padding="9,2" CornerRadius="3"
                                       Click="OnMapLayer" AutomationProperties.Name="Map layer" ToolTipService.ToolTip="Pixel map">
