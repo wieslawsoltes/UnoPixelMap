@@ -71,7 +71,7 @@ public sealed partial class MainPage : Page
             _readoutClock.Stop();
             if (!IsLoaded) return;
             _lastReadout = Environment.TickCount64;
-            SyncReadout();
+            SyncReadout(cameraOnly: true);
         };
         Map.CameraChanged += (_, _) =>
         {
@@ -84,7 +84,7 @@ public sealed partial class MainPage : Page
             }
             _readoutClock.Stop();
             _lastReadout = tick;
-            SyncReadout();
+            SyncReadout(cameraOnly: true);
         };
         Map.StatusChanged += (_, _) => SyncReadout();
     }
@@ -114,57 +114,78 @@ public sealed partial class MainPage : Page
         ToolDivider.Visibility = height < 420 ? Visibility.Collapsed : Visibility.Visible;
         if (narrow && height < 420) PlaceCard.Visibility = Visibility.Collapsed;
         UpdateNavigationInsets();
+        if (IsLoaded) SyncReadout();
     }
 
-    private void SyncReadout()
+    private void SyncReadout(bool cameraOnly = false)
     {
         var camera = Map.Camera;
         PerspectiveItem.IsChecked = camera.Perspective;
-        GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
-        PixelStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Pixel;
-        NormalStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Normal;
-        MinecraftStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Minecraft;
-        RobloxStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Roblox;
-        TerrainReliefItem.IsChecked = Map.IsTerrainEnabled;
-        MapLayerButton.IsChecked = !Map.IsEarthImageryEnabled && !Map.IsElevationLayerEnabled;
-        EarthLayerButton.IsChecked = Map.IsEarthImageryEnabled;
-        ElevationLayerButton.IsChecked = Map.IsElevationLayerEnabled;
-        EarthCredits.Visibility = Map.IsEarthImageryEnabled ? Visibility.Visible : Visibility.Collapsed;
-        ElevationLegend.Visibility = Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
-        ElevationCredits.Visibility = Map.IsTerrainEnabled || Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
-        ElevationReadout.Text = Map.HasElevation
-            ? FormattableString.Invariant($"{Map.CenterElevationMeters:0} m elevation · {(Map.IsTerrainEnabled ? Map.TerrainExaggeration.ToString("0.##", CultureInfo.InvariantCulture) + "× relief" : "2D altitude")}")
-            : "Loading elevation";
-        AutomationProperties.SetName(ElevationReadout, ElevationReadout.Text);
-        var status = Map.StatusText;
-        var location = FormattableString.Invariant($"{camera.Latitude:0.0000}°, {camera.Longitude:0.0000}°");
-        Status.Text = FormattableString.Invariant($"{status}   ·   {Map.RenderStyle} rendering   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
-        if ((Map.IsTerrainEnabled || Map.IsElevationLayerEnabled) && Map.HasElevation)
-            Status.Text += FormattableString.Invariant($"   ·   {Map.CenterElevationMeters:0} m elevation");
-        MobileStatus.Text = status;
-        AutomationProperties.SetName(Status, Status.Text);
-        AutomationProperties.SetName(MobileStatus, status);
-        double bearing = camera.Bearing * Math.PI / 180;
-        CompassTransform.Angle = Math.Atan2(-Math.Sin(bearing), Math.Cos(bearing) * Math.Cos(camera.Pitch * Math.PI / 180)) * 180 / Math.PI;
-        double metersPerPixel = 40075016.68557849 * Math.Cos(camera.Latitude * Math.PI / 180) / (512 * Math.Pow(2, camera.Zoom));
-        if ((camera.Perspective || Map.IsTerrainEnabled) && Map.ActualWidth > 80 && Map.ActualHeight > 32 &&
-            Map.TryGetLocation(Map.ActualWidth / 2 - 40, Map.ActualHeight - 32, out var left) &&
-            Map.TryGetLocation(Map.ActualWidth / 2 + 40, Map.ActualHeight - 32, out var right))
+        if (!cameraOnly)
         {
-            double groundScale = new RoutePoint(left.Latitude, left.Longitude).DistanceTo(new RoutePoint(right.Latitude, right.Longitude)) / 80;
-            if (double.IsFinite(groundScale) && groundScale > 0) metersPerPixel = groundScale;
+            GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
+            PixelStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Pixel;
+            NormalStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Normal;
+            MinecraftStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Minecraft;
+            RobloxStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Roblox;
+            TerrainReliefItem.IsChecked = Map.IsTerrainEnabled;
+            MapLayerButton.IsChecked = !Map.IsEarthImageryEnabled && !Map.IsElevationLayerEnabled;
+            EarthLayerButton.IsChecked = Map.IsEarthImageryEnabled;
+            ElevationLayerButton.IsChecked = Map.IsElevationLayerEnabled;
+            EarthCredits.Visibility = Map.IsEarthImageryEnabled ? Visibility.Visible : Visibility.Collapsed;
+            ElevationLegend.Visibility = Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
+            ElevationCredits.Visibility = Map.IsTerrainEnabled || Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
         }
-        var magnitude = Math.Pow(10, Math.Floor(Math.Log10(80 * metersPerPixel)));
-        var steps = 80 * metersPerPixel / magnitude;
-        var distance = magnitude * (steps >= 5 ? 5 : steps >= 2 ? 2 : 1);
-        ScaleRule.Width = distance / metersPerPixel;
-        ScaleLabel.Text = distance >= 1000
-            ? FormattableString.Invariant($"{distance / 1000:0.#} km")
-            : FormattableString.Invariant($"{distance:0.#} m");
+        bool showElevation = (Map.IsTerrainEnabled || Map.IsElevationLayerEnabled) && Map.HasElevation;
+        double elevation = showElevation && (Status.Visibility == Visibility.Visible || !_gameOpen && Map.IsElevationLayerEnabled)
+            ? Map.CenterElevationMeters : 0;
+        var status = Map.StatusText;
+        if (Status.Visibility == Visibility.Visible)
+        {
+            var location = FormattableString.Invariant($"{camera.Latitude:0.0000}°, {camera.Longitude:0.0000}°");
+            var text = FormattableString.Invariant($"{status}   ·   {Map.RenderStyle} rendering   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
+            if (showElevation) text += FormattableString.Invariant($"   ·   {elevation:0} m elevation");
+            SetReadout(Status, text);
+        }
+        if (!_gameOpen)
+        {
+            if (MobileStatus.Visibility == Visibility.Visible) SetReadout(MobileStatus, status);
+            if (Map.IsElevationLayerEnabled)
+                SetReadout(ElevationReadout, Map.HasElevation
+                    ? FormattableString.Invariant($"{elevation:0} m elevation · {(Map.IsTerrainEnabled ? Map.TerrainExaggeration.ToString("0.##", CultureInfo.InvariantCulture) + "× relief" : "2D altitude")}")
+                    : "Loading elevation");
+            double bearing = camera.Bearing * Math.PI / 180;
+            CompassTransform.Angle = Math.Atan2(-Math.Sin(bearing), Math.Cos(bearing) * Math.Cos(camera.Pitch * Math.PI / 180)) * 180 / Math.PI;
+        }
+        if (ScaleBar.Visibility == Visibility.Visible)
+        {
+            double metersPerPixel = 40075016.68557849 * Math.Cos(camera.Latitude * Math.PI / 180) / (512 * Math.Pow(2, camera.Zoom));
+            if ((camera.Perspective || Map.IsTerrainEnabled) && Map.ActualWidth > 80 && Map.ActualHeight > 32 &&
+                Map.TryGetLocation(Map.ActualWidth / 2 - 40, Map.ActualHeight - 32, out var left) &&
+                Map.TryGetLocation(Map.ActualWidth / 2 + 40, Map.ActualHeight - 32, out var right))
+            {
+                double groundScale = new RoutePoint(left.Latitude, left.Longitude).DistanceTo(new RoutePoint(right.Latitude, right.Longitude)) / 80;
+                if (double.IsFinite(groundScale) && groundScale > 0) metersPerPixel = groundScale;
+            }
+            var magnitude = Math.Pow(10, Math.Floor(Math.Log10(80 * metersPerPixel)));
+            var steps = 80 * metersPerPixel / magnitude;
+            var distance = magnitude * (steps >= 5 ? 5 : steps >= 2 ? 2 : 1);
+            ScaleRule.Width = distance / metersPerPixel;
+            ScaleLabel.Text = distance >= 1000
+                ? FormattableString.Invariant($"{distance / 1000:0.#} km")
+                : FormattableString.Invariant($"{distance:0.#} m");
+        }
         ProjectionShortcut.Content = camera.Pitch < 1 ? "2D" : "3D";
         var angledView = camera.Perspective ? "perspective" : "isometric";
         AutomationProperties.SetName(ProjectionShortcut, camera.Pitch < 1 ? $"Switch to 3D {angledView}" : "Switch to 2D overhead");
         ProjectionItem.Text = camera.Pitch < 1 ? $"Switch to {angledView} view" : "Switch to overhead view";
+    }
+
+    private static void SetReadout(TextBlock element, string text)
+    {
+        if (element.Text == text) return;
+        element.Text = text;
+        AutomationProperties.SetName(element, text);
     }
 
     private void OnNorth(object sender, RoutedEventArgs e) => Map.RotateBy(-Math.IEEERemainder(Map.Camera.Bearing, 360));
@@ -317,6 +338,7 @@ public sealed partial class MainPage : Page
         }
         SceneDock.Visibility = MapTools.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
         LayoutJourneys();
+        SyncReadout();
     }
 
     private void DisplayJourneys(bool show)

@@ -189,6 +189,7 @@ internal sealed class GpuSceneDepth
             float foundation = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, mesh.Models[modelIndex * GpuBuildingMesh.ModelStride]);
             float top = (model.Top + foundation) * pixelsPerMeter, bottom = (model.Bottom + foundation) * pixelsPerMeter;
             IncludeAltitude(top); IncludeAltitude(bottom);
+            if (draw.Selection is { } selected && selected.Models[modelIndex] == 0) continue;
             if (Outside(model.Bounds, bottom, top, transform)) continue;
             float rx = (Math.Abs(transform.XX) * model.Bounds.Width + Math.Abs(transform.XY) * model.Bounds.Height) * .5f;
             float ry = (Math.Abs(transform.YX) * model.Bounds.Width + Math.Abs(transform.YY) * model.Bounds.Height) * .5f;

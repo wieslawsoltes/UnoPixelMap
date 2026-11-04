@@ -287,7 +287,9 @@ public sealed unsafe class GlMapRenderer : IDisposable
         BindTexture(2, roomTexture);
         foreach (var draw in frame.Buildings)
         {
-            var mesh = GetBuildingMesh(draw.Mesh);
+            if (draw.Selection is { Indices.Length: 0, RoofEdges.Length: 0 }) continue;
+            var mesh = GetBuildingMesh(draw.Mesh, draw.Selection);
+            if (mesh.IndexCount == 0) continue;
             SetProjection(program, frame, draw.Transform);
             program.Float("uTileUnitsToMeters", draw.TileUnitsToMeters);
             program.Integer("uModelWidth", mesh.ModelWidth);
@@ -304,7 +306,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
         gl.DepthMask(false);
         foreach (var draw in frame.Buildings)
         {
-            var mesh = buildingMeshes[draw.Mesh.ResourceKey];
+            if (draw.Selection is { RoofEdges.Length: 0 } ||
+                !buildingMeshes.TryGetValue(draw.Mesh.ResourceKey, out var mesh)) continue;
             if (mesh.EdgeCount == 0) continue;
             SetProjection(program, frame, draw.Transform);
             program.Integer("uModelWidth", mesh.ModelWidth);
@@ -460,7 +463,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         return texture;
     }
 
-    private MeshResource GetBuildingMesh(GpuBuildingMesh source)
+    private MeshResource GetBuildingMesh(GpuBuildingMesh source, GpuBuildingSelection? selection)
     {
         if (!buildingMeshes.TryGetValue(source.ResourceKey, out var mesh))
         {
@@ -496,12 +499,24 @@ public sealed unsafe class GlMapRenderer : IDisposable
         {
             gl.BindVertexArray(mesh.Array);
             UploadBuffer(mesh, BufferTargetARB.ArrayBuffer, mesh.Vertices, source.Vertices, ref mesh.VertexBytes);
-            UploadBuffer(mesh, BufferTargetARB.ElementArrayBuffer, mesh.Indices, source.Indices, ref mesh.IndexBytes);
-            gl.BindVertexArray(mesh.EdgeArray);
-            UploadBuffer(mesh, BufferTargetARB.ArrayBuffer, mesh.Edges, source.RoofEdges, ref mesh.EdgeBytes);
-            mesh.IndexCount = source.Indices.Length;
-            mesh.EdgeCount = source.RoofEdges.Length / (GpuBuildingMesh.VertexStride * 2);
+            mesh.IndexSource = mesh.EdgeSource = null;
             mesh.Revision = source.Revision;
+        }
+        var indices = selection?.Indices ?? source.Indices;
+        if (!ReferenceEquals(mesh.IndexSource, indices))
+        {
+            gl.BindVertexArray(mesh.Array);
+            UploadBuffer(mesh, BufferTargetARB.ElementArrayBuffer, mesh.Indices, indices, ref mesh.IndexBytes);
+            mesh.IndexCount = indices.Length;
+            mesh.IndexSource = indices;
+        }
+        var edges = selection?.RoofEdges ?? source.RoofEdges;
+        if (!ReferenceEquals(mesh.EdgeSource, edges))
+        {
+            gl.BindVertexArray(mesh.EdgeArray);
+            UploadBuffer(mesh, BufferTargetARB.ArrayBuffer, mesh.Edges, edges, ref mesh.EdgeBytes);
+            mesh.EdgeCount = edges.Length / (GpuBuildingMesh.VertexStride * 2);
+            mesh.EdgeSource = edges;
         }
         if (mesh.FoundationRevision != source.FoundationRevision)
         {
@@ -513,6 +528,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
 
     private void UploadBuffer<T>(MeshResource mesh, BufferTargetARB target, uint buffer, T[] values, ref long capacity) where T : unmanaged
     {
+        if (values.Length == 0) return;
         long bytes = (long)values.Length * sizeof(T);
         gl.BindBuffer(target, buffer);
         fixed (T* pointer = values)
@@ -846,6 +862,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         internal int IndexCount, EdgeCount, ModelWidth, ModelHeight;
         internal int Layer = -1;
         internal float[] ModelUpload = [];
+        internal object? IndexSource, EdgeSource;
     }
 
     private sealed class TextureResource

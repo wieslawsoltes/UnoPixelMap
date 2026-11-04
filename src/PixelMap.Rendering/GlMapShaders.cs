@@ -256,15 +256,16 @@ internal static class GlMapShaders
             vec4 bounds = modelData(modelIndex, 1);
             float foundation = localFoundation(model.x);
             float altitude = (foundation + aPosition.z) * uGround.z;
-            gl_Position = clipPosition(screenPosition(aPosition.xy, altitude));
             int face = int(aEdge.w + 0.5);
-            if (tinyModel(model, bounds, foundation))
+            if (tinyModel(model, bounds, foundation) ||
+                (uPerspective && ((face == 1 && altitude >= uLens.y) ||
+                                  (face == 2 && altitude <= uLens.y))) ||
+                (!uPerspective && face == 2))
+            {
                 gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
-            if (uPerspective && ((face == 1 && altitude >= uLens.y) ||
-                                 (face == 2 && altitude <= uLens.y)))
-                gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
-            if (!uPerspective && face == 2)
-                gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+                return;
+            }
+            gl_Position = clipPosition(screenPosition(aPosition.xy, altitude));
             float edgeLength = max(aSurface.y, 0.00001);
             vec2 endpoint = aPosition.xy + aEdge.xy * (1.0 - aSurface.x / edgeLength);
             float endpointX = dot(uScreenX, vec4(endpoint, 0.0, 1.0));
@@ -410,16 +411,19 @@ internal static class GlMapShaders
             vec4 bounds = modelData(int(aPosition.w + 0.5), 1);
             float foundation = localFoundation(model.x);
             float altitude = (foundation + aPosition.z) * uGround.z;
-            vec4 a = screenPosition(aPosition.xy, altitude);
-            vec4 b = screenPosition(bPosition.xy, altitude);
             vec2 radius = modelRadius(bounds);
             bool visible = !tinyModel(model, bounds, foundation) &&
                 (uPerspective ? altitude < uLens.y : radius.x >= 3.0 && radius.y >= 1.5);
+            gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+            vVisible = 0;
+            if (!visible) return;
+            vec4 a = screenPosition(aPosition.xy, altitude);
+            vec4 b = screenPosition(bPosition.xy, altitude);
             float low = 0.0, high = 1.0;
             for (int plane = 0; plane < 6; plane++)
             {
                 float first = planeDistance(a, plane), second = planeDistance(b, plane);
-                if (first < 0.0 && second < 0.0) visible = false;
+                if (first < 0.0 && second < 0.0) return;
                 if ((first < 0.0) != (second < 0.0))
                 {
                     float amount = first / (first - second);
@@ -427,7 +431,7 @@ internal static class GlMapShaders
                     else high = min(high, amount);
                 }
             }
-            visible = visible && high >= low;
+            if (high < low) return;
             vec4 first = mix(a, b, low), second = mix(a, b, high);
             vec2 p = first.xy / first.z, q = second.xy / second.z;
             vec2 delta = q - p;
@@ -437,9 +441,9 @@ internal static class GlMapShaders
             bool positive = gl_VertexID == 2 || gl_VertexID == 4 || gl_VertexID == 5;
             vec2 point = (endPoint ? q + direction * 2.0 : p - direction * 2.0) +
                 normal * (positive ? 1.5 : -1.5);
-            gl_Position = visible ? vec4(point.x * 2.0 / uArtSize.x - 1.0,
-                1.0 - point.y * 2.0 / uArtSize.y, 0.0, 1.0) : vec4(2.0, 2.0, 2.0, 1.0);
-            vVisible = visible ? 1 : 0;
+            gl_Position = vec4(point.x * 2.0 / uArtSize.x - 1.0,
+                1.0 - point.y * 2.0 / uArtSize.y, 0.0, 1.0);
+            vVisible = 1;
             vSegment = vec4(p, q);
             vDepth = vec3(1.0 / first.z, 1.0 / second.z, altitude);
             vMaterial = ivec2(int(model.z + 0.5), delta.x >= 0.0 ? 3 : 4);

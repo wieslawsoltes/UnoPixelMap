@@ -19,9 +19,9 @@ public sealed partial class GamePanel : UserControl
     private PixelMapControl? _map;
     private bool _shown, _syncing;
     private long _lookTimestamp, _lastTelemetry, _lastPadPointer;
-    private JourneyState? _displayedState;
-    private JourneyCameraRig? _displayedRig;
-    private bool _displayedFreeRoam;
+    private SessionViewState? _displayedSession;
+    private readonly record struct SessionViewState(JourneyState State, TravelMode Mode, JourneyCameraRig Rig,
+        bool FreeRoam, bool FreeFlight, bool Muted);
     private enum PadAction { JumpBrake, Boost, Climb, Descend }
 
     public event EventHandler? CloseRequested;
@@ -174,7 +174,7 @@ public sealed partial class GamePanel : UserControl
 
     private void OnCameraUpdated(object? sender, EventArgs e)
     {
-        if (_shown && _map?.CameraRig != _displayedRig) SyncSession(true);
+        if (_shown && _map?.CameraRig != _displayedSession?.Rig) SyncSession(true);
     }
 
     private void SyncChoices()
@@ -239,16 +239,16 @@ public sealed partial class GamePanel : UserControl
         var session = _map.Journey;
         bool active = session.IsFreeRoaming;
         bool paused = session.State == JourneyState.Paused;
-        bool transition = _displayedState != session.State || _displayedFreeRoam != active || _displayedRig != _map.CameraRig;
+        var view = new SessionViewState(session.State, session.Vehicle.Mode, _map.CameraRig,
+            active, session.IsFreeFlying, session.Muted);
+        bool transition = _displayedSession != view;
         // A pause can stop the simulation before the next telemetry tick arrives.
         // Release captured controls immediately, including keyboard/blur transitions.
         if (!active || paused) ReleaseInput();
         long now = Environment.TickCount64;
         if (!force && !transition && now - _lastTelemetry < 100) return;
         _lastTelemetry = now;
-        _displayedState = session.State;
-        _displayedFreeRoam = active;
-        _displayedRig = _map.CameraRig;
+        _displayedSession = view;
         if (active && transition)
         {
             _syncing = true;
@@ -259,25 +259,30 @@ public sealed partial class GamePanel : UserControl
             }
             finally { _syncing = false; }
         }
-        TouchPad.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
-        Transport.Visibility = TelemetryBox.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
-        TouchPad.IsHitTestVisible = active && !paused;
-        TouchPad.Opacity = paused ? .45 : 1;
-        string title = !active ? "Free roam" : paused ? "Game paused" : session.IsFreeFlying ? "Free flight"
-            : session.Vehicle.Mode switch { TravelMode.Walk => "Walking", TravelMode.Drive => "Driving", TravelMode.Bike => "Cycling", TravelMode.Boat => "Sailing", TravelMode.Train => "Train", _ => "Flying" };
-        SetText(Title, title);
-        PauseButton.Content = paused ? "Resume" : "Pause";
-        AutomationProperties.SetName(PauseButton, paused ? "Resume free roam" : "Pause free roam");
-        Sound.IsChecked = !session.Muted;
-        bool walking = session.Vehicle.Mode == TravelMode.Walk && !session.IsFreeFlying;
-        JumpBrake.Content = walking ? "Jump" : "Brake";
-        FlightActions.Visibility = session.IsFreeFlying || session.Vehicle.Mode == TravelMode.Flight ? Visibility.Visible : Visibility.Collapsed;
-        Reticle.Visibility = active && (session.IsFreeFlying || _map.CameraRig is JourneyCameraRig.FirstPerson or JourneyCameraRig.Cockpit)
-            ? Visibility.Visible : Visibility.Collapsed;
+        if (force || transition)
+        {
+            TouchPad.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+            Transport.Visibility = TelemetryBox.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+            TouchPad.IsHitTestVisible = active && !paused;
+            TouchPad.Opacity = paused ? .45 : 1;
+            string title = !active ? "Free roam" : paused ? "Game paused" : session.IsFreeFlying ? "Free flight"
+                : session.Vehicle.Mode switch { TravelMode.Walk => "Walking", TravelMode.Drive => "Driving", TravelMode.Bike => "Cycling", TravelMode.Boat => "Sailing", TravelMode.Train => "Train", _ => "Flying" };
+            SetText(Title, title);
+            PauseButton.Content = paused ? "Resume" : "Pause";
+            AutomationProperties.SetName(PauseButton, paused ? "Resume free roam" : "Pause free roam");
+            Sound.IsChecked = !session.Muted;
+            bool walking = session.Vehicle.Mode == TravelMode.Walk && !session.IsFreeFlying;
+            JumpBrake.Content = walking ? "Jump" : "Brake";
+            FlightActions.Visibility = session.IsFreeFlying || session.Vehicle.Mode == TravelMode.Flight ? Visibility.Visible : Visibility.Collapsed;
+            Reticle.Visibility = active && (session.IsFreeFlying || _map.CameraRig is JourneyCameraRig.FirstPerson or JourneyCameraRig.Cockpit)
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
+        if (!active) return;
         var telemetry = FormattableString.Invariant($"{session.SpeedMetersPerSecond * 3.6:0.0} km/h · {session.AltitudeMeters:0.0} m elevation · {session.AltitudeAboveGroundMeters:0.0} m clearance\n{session.Latitude:0.00000}°, {session.Longitude:0.00000}° · {session.RunDistanceMeters:0} m travelled");
         if (session.IsWaitingForTrack) telemetry += " · waiting for nearby mapped tracks";
         if (session.IsWaitingForWater) telemetry += " · waiting for navigable water";
-        SetText(Telemetry, telemetry);
+        if (Telemetry.Text == telemetry) return;
+        Telemetry.Text = telemetry;
         AutomationProperties.SetName(TelemetryBox, "Free roam telemetry · " + telemetry.Replace('\n', ' '));
     }
 

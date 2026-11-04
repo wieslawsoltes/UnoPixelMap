@@ -126,7 +126,6 @@ EM_JS(int, pixel_map_js_create, (), {
                     gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, 0);
                     slot.sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
                     if (!slot.sync) throw new Error('The GPU could not create a transfer fence.');
-                    slot.frame.submittedAt = performance.now();
                     gl.flush();
                     // Uno validates GL errors after its readback callback. Leave that
                     // validation there instead of adding another submission round trip.
@@ -149,21 +148,18 @@ EM_JS(int, pixel_map_js_create, (), {
                 if (!state) return -1;
                 if (!state.ready) {
                     let latest = null;
-                    let newestPending = null;
                     for (const slot of state.slots) {
                         if (!slot.sync) continue;
-                        if (!newestPending || slot.frame.sequence > newestPending.frame.sequence) newestPending = slot;
                         const status = state.gl.clientWaitSync(slot.sync, 0, 0);
                         if (status === state.gl.WAIT_FAILED)
                             return this.fail(state, 'The pixel transfer fence failed.');
                         if ((status === state.gl.ALREADY_SIGNALED || status === state.gl.CONDITION_SATISFIED) &&
                             (!latest || slot.frame.sequence > latest.frame.sequence)) latest = slot;
                     }
-                    // Give the GPU one timer interval to complete asynchronously. If
-                    // the compositor keeps filling its queue, copying the newest frame
-                    // after 16 ms supplies backpressure and keeps the picture current.
-                    if (newestPending && performance.now() - newestPending.frame.submittedAt >= 16)
-                        latest = newestPending;
+                    // Copy only a signaled transfer. A deadline cannot make GPU work
+                    // complete, and getBufferSubData would block input and simulation
+                    // until it does. The two occupied slots bound submission while
+                    // the host coalesces camera changes into its next request.
                     if (!latest) return 0;
                     state.ready = latest;
                 }
@@ -181,17 +177,7 @@ EM_JS(int, pixel_map_js_create, (), {
                 const slot = state.ready;
                 if (!slot || slot.frame.low !== (low >>> 0) || slot.frame.high !== (high >>> 0))
                     return this.fail(state, 'The retained frame does not match the completed pixel transfer.');
-                if (!destination) {
-                    const status = state.gl.clientWaitSync(slot.sync, 0, 0);
-                    if (status === state.gl.WAIT_FAILED)
-                        return this.fail(state, 'The canceled pixel transfer fence failed.');
-                    if (status !== state.gl.ALREADY_SIGNALED && status !== state.gl.CONDITION_SATISFIED) {
-                        // Keep every busy slot. A later valid frame can replace this
-                        // canceled selection and supply backpressure through its copy.
-                        state.ready = null;
-                        return 0;
-                    }
-                } else {
+                if (destination) {
                     const bytes = slot.frame.width * slot.frame.height * 4;
                     const pointer = destination >>> 0;
                     if (capacity < bytes || pointer + bytes > HEAPU8.length)

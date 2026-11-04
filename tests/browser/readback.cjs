@@ -163,16 +163,16 @@ async function serveFixture(directory) {
             check(module._proof_read(9, 6, destination) === 0 && module.HEAPU8[destination] === 0x39, 'No-op paint avoids synchronous read');
 
 
-            // Exercise production deadline selection without overriding any fence status.
+            // A stalled GPU must not turn a zero-timeout poll into a blocking copy.
             // Staying in this JavaScript task keeps WebGL's actual cached fence unsignaled.
-            const blockForDeadline = () => {
-                const until = performance.now() + 18;
+            const holdPending = () => {
+                const until = performance.now() + 32;
                 while (performance.now() < until) { }
             };
             const queue = (token, frame) => {
                 gl1.bindFramebuffer(gl1.FRAMEBUFFER, frame.buffer);
-                check(module._pixel_map_readback_begin(handle1, token, 0, frame.width, frame.height) === 1, 'Reserve production deadline frame');
-                check(module._proof_read(frame.width, frame.height, destination) === 0, 'Submit production deadline frame');
+                check(module._pixel_map_readback_begin(handle1, token, 0, frame.width, frame.height) === 1, 'Reserve production asynchronous frame');
+                check(module._proof_read(frame.width, frame.height, destination) === 0, 'Submit production asynchronous frame');
             };
             const slotState = module.pixelMapReadbacks.surfaces.get(handle1);
             const retainedBuffers = slotState.slots.map(slot => slot.buffer);
@@ -183,25 +183,23 @@ async function serveFixture(directory) {
                 return Reflect.apply(originalCopy, this, args);
             };
             queue(61, first);
-            blockForDeadline();
-            check(module._pixel_map_readback_poll(handle1, metadata) === 1, 'Overdue transfer becomes ready for copy');
-            check(gl1.clientWaitSync(slotState.ready.sync, 0, 0) === gl1.TIMEOUT_EXPIRED, 'Deadline selection preserves the true unsignaled fence');
-            const overdue = Array.from(module.HEAPU32.subarray(metadata >>> 2, (metadata >>> 2) + 4));
-            check(overdue.join(',') === [61, 0, 7, 5].join(','), 'Overdue metadata matches its exact retained frame');
-            check(module._pixel_map_readback_copy(handle1, 61, 0, destination, 65536) === 1, 'Actual buffer copy completes overdue pixels');
-            expectColor(overdue, first.color);
-            check(module._pixel_map_readback_capacity(handle1) === 2, 'Copied overdue slot is released');
+            holdPending();
+            check(module._pixel_map_readback_poll(handle1, metadata) === 0, 'Elapsed time never selects an unsignaled transfer');
+            check(slotState.ready === null && copiedTransfers === 0, 'Pending polls never initiate a pixel copy');
+            check(module._pixel_map_readback_capacity(handle1) === 1, 'The pending transfer retains its slot');
+            const completed = await waitReady(handle1);
+            check(completed.join(',') === [61, 0, 7, 5].join(','), 'Signaled metadata matches its exact retained frame');
+            check(module._pixel_map_readback_copy(handle1, 61, 0, destination, 65536) === 1, 'Copy signaled pixels');
+            expectColor(completed, first.color);
+            check(module._pixel_map_readback_capacity(handle1) === 2, 'Copied completed slot is released');
 
             queue(62, first);
             queue(63, other);
-            blockForDeadline();
-            check(module._pixel_map_readback_poll(handle1, metadata) === 1, 'Canceled newest token is selected after its deadline');
-            check(module.HEAPU32[metadata >>> 2] === 63, 'Newest queued token is selected');
-            check(module._pixel_map_readback_capacity(handle1) === 0, 'Selection retains both busy native slots');
+            holdPending();
+            check(module._pixel_map_readback_poll(handle1, metadata) === 0, 'Canceled unsignaled transfers stay pending');
+            check(module._pixel_map_readback_capacity(handle1) === 0, 'Both busy native slots are retained');
             const beforeDiscard = copiedTransfers;
-            check(module._pixel_map_readback_copy(handle1, 63, 0, 0, 0) === 0, 'Unsignaled discard remains pending');
-            check(slotState.ready === null && slotState.slots.every(slot => slot.frame && slot.sync), 'Pending discard clears selection while retaining both transfers');
-            check(module._pixel_map_readback_capacity(handle1) === 0, 'Pending canceled transfers still bound the queue');
+            check(slotState.ready === null && slotState.slots.every(slot => slot.frame && slot.sync), 'Pending cancellation retains both transfers');
             check(module._pixel_map_readback_begin(handle1, 64, 0, 7, 5) === 0, 'Canceled pending transfers cannot be overwritten');
             check(copiedTransfers === beforeDiscard, 'Pending discard never copies pixels');
             let discarded = false;
@@ -209,22 +207,28 @@ async function serveFixture(directory) {
                 await delay();
                 const selected = module._pixel_map_readback_poll(handle1, metadata);
                 check(selected >= 0, 'Canceled transfer remains valid while waiting for a true signal');
-                if (selected) discarded = module._pixel_map_readback_copy(handle1,
-                    module.HEAPU32[metadata >>> 2], module.HEAPU32[(metadata >>> 2) + 1], 0, 0) === 1;
+                if (selected) {
+                    check(module._pixel_map_readback_copy(handle1, module.HEAPU32[metadata >>> 2],
+                        module.HEAPU32[(metadata >>> 2) + 1], 0, 0) === 1, 'Discard signaled canceled pixels');
+                    discarded = module._pixel_map_readback_capacity(handle1) === 2;
+                }
             }
             check(discarded && module._pixel_map_readback_capacity(handle1) === 2, 'True GPU completion releases canceled slots');
             check(copiedTransfers === beforeDiscard, 'Signaled discard also avoids a pixel copy');
 
             queue(64, first);
-            blockForDeadline();
-            check(module._pixel_map_readback_poll(handle1, metadata) === 1, 'Select a single canceled overdue transfer');
-            check(module._pixel_map_readback_copy(handle1, 64, 0, 0, 0) === 0, 'Keep its unsignaled slot');
+            holdPending();
+            check(module._pixel_map_readback_poll(handle1, metadata) === 0, 'A canceled transfer waits asynchronously');
             queue(65, other);
-            blockForDeadline();
-            check(module._pixel_map_readback_poll(handle1, metadata) === 1, 'A later valid transfer supplies backpressure');
-            const recovered = Array.from(module.HEAPU32.subarray(metadata >>> 2, (metadata >>> 2) + 4));
+            holdPending();
+            check(module._pixel_map_readback_poll(handle1, metadata) === 0, 'A later valid transfer also waits for its fence');
+            check(module._pixel_map_readback_capacity(handle1) === 0, 'Both slots stay occupied while waiting');
+            let recovered = await waitReady(handle1);
+            if (recovered[0] === 64) {
+                check(module._pixel_map_readback_copy(handle1, 64, 0, 0, 0) === 1, 'Retire a canceled predecessor that completes first');
+                recovered = await waitReady(handle1);
+            }
             check(recovered.join(',') === [65, 0, 9, 6].join(','), 'Later valid token and resized image remain paired');
-            check(module._pixel_map_readback_capacity(handle1) === 0, 'Both slots stay occupied until the later copy');
             check(module._pixel_map_readback_copy(handle1, 65, 0, destination, 65536) === 1, 'Copy later valid transfer');
             expectColor(recovered, other.color);
             check(module._pixel_map_readback_capacity(handle1) === 2, 'Later completion also retires the canceled predecessor');
@@ -250,7 +254,7 @@ async function serveFixture(directory) {
             return { passed: true, cases: ['two contexts', 'foreign framebuffer scope', '64-bit tokens', 'exact RGBA',
                 'pack-state restoration', 'context preservation', 'resize', 'two-slot backpressure',
                 'latest completion coalescing', 'no-copy cancellation', 'no-op paint suppression',
-                'dimension failure', 'context loss', 'disposal', 'production deadline copy',
+                'dimension failure', 'context loss', 'disposal', 'unsignaled transfers never force a copy',
                 'unsignaled cancellation remains bounded', 'later valid token after cancellation'] };
         });
         assert.deepEqual(errors, [], 'The native readback fixture has no browser exceptions.');

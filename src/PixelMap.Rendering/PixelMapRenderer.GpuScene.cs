@@ -16,6 +16,8 @@ public sealed partial class PixelMapRenderer
         internal GpuBuildingMesh Mesh = mesh;
         internal long HeightRevision = -1;
         internal ElevationSnapshot? Elevation;
+        internal GpuBuildingSelection? Selection;
+        internal byte[] SelectionScratch = [];
     }
 
     /// <summary>Prepare retained terrain and model buffers for hardware rasterization.
@@ -111,7 +113,15 @@ public sealed partial class PixelMapRenderer
                     float dx = transform.XX - transform.CX * transform.PX;
                     float dy = transform.XY - transform.CX * transform.PY;
                     float unitsToMeters = MathF.Sqrt(dx * dx + dy * dy) / meters;
-                    modelDraws.Add(new(mesh, transform, unitsToMeters));
+                    GpuBuildingSelection? selection = null;
+                    if (camera.IsFreeLook)
+                    {
+                        var modelCache = gpuBuildings[tile];
+                        selection = modelCache.Selection = GpuBuildingSelection.Prepare(mesh, transform, camera, options,
+                            meters, (width + pixelSize - 1) / pixelSize, (height + pixelSize - 1) / pixelSize,
+                            modelCache.Selection, ref modelCache.SelectionScratch);
+                    }
+                    modelDraws.Add(new(mesh, transform, unitsToMeters, selection));
                 }
             foreach (var tile in gpuBuildings.Keys.ToArray())
                 if (!geometry.TryGetValue(tile.Source.Id, out var retained) || !ReferenceEquals(tile, retained)) gpuBuildings.Remove(tile);

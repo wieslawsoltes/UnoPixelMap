@@ -165,4 +165,4 @@ internal sealed class GpuTerrainTexture(uint[] texels)
 }
 
 internal readonly record struct GpuBuildingDraw(GpuBuildingMesh Mesh, TileTransform Transform,
-    float TileUnitsToMeters);
+    float TileUnitsToMeters, GpuBuildingSelection? Selection = null);

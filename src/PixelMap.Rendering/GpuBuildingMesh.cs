@@ -44,9 +44,11 @@ internal sealed class GpuBuildingMesh
             Models[metadata + 5] = model.Bounds.Height;
             Models[metadata + 6] = model.Bottom;
             AddWalls(model, modelIndex, vertices, indices, edges);
+            int wallIndexCount = indices.Count - firstIndex;
             AddCaps(model, modelIndex, vertices, indices);
             ranges.Add(new(model, firstIndex, indices.Count - firstIndex,
-                firstEdge, edges.Count / VertexStride - firstEdge, firstVertex, vertices.Count / VertexStride - firstVertex));
+                firstEdge, edges.Count / VertexStride - firstEdge, firstVertex, vertices.Count / VertexStride - firstVertex,
+                wallIndexCount));
         }
         Vertices = vertices.ToArray();
         Indices = indices.ToArray();
@@ -149,4 +151,4 @@ internal sealed class GpuBuildingMesh
 }
 
 internal readonly record struct GpuBuildingRange(Building Model, int FirstIndex, int IndexCount,
-    int FirstEdge, int EdgeCount, int FirstVertex, int VertexCount);
+    int FirstEdge, int EdgeCount, int FirstVertex, int VertexCount, int WallIndexCount);

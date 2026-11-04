@@ -60,10 +60,16 @@ public sealed partial class PixelMapControl
                     : _gpuDisplayed?.Request.Matches(scene, width, height, pixelSize) == true ? _gpuDisplayed : null;
                 if (reusable is not null)
                 {
+                    var previousScene = reusable.Request.Scene;
+                    // Simulation time advances while a first-person or free camera is
+                    // stationary. Repainting the same image and labels on every tick
+                    // needlessly submits the entire map to the window compositor.
+                    redraw = !ReferenceEquals(_gpuReady, reusable) || !ReferenceEquals(_gpuDisplayed, reusable) ||
+                        !ReferenceEquals(previousScene.Route, scene.Route) || previousScene.Vehicle != scene.Vehicle ||
+                        previousScene.VehicleMode != scene.VehicleMode || previousScene.Gate != scene.Gate;
                     reusable.Request.Scene = scene;
                     SetReadyGpuPresentation(reusable);
                     _terrainGpu?.CancelRequest();
-                    redraw = true;
                 }
                 else if (_terrainGpu is null)
                 {

@@ -441,10 +441,25 @@ async function freeRoam(page) {
     await action(page, "Start free roam at map center");
     await see(page, /Walking/);
     const walkedFrom = await telemetry(page);
+    await page.evaluate(() => {
+        const element = document.querySelector('[aria-label^="Free roam telemetry"]');
+        const updates = {count: 0, intermediateNames: []};
+        const observer = new MutationObserver(records => {
+            for (const record of records) {
+                updates.count++;
+                if (!record.oldValue?.startsWith("Free roam telemetry")) updates.intermediateNames.push(record.oldValue);
+            }
+        });
+        observer.observe(element, {attributes: true, attributeFilter: ["aria-label"], attributeOldValue: true});
+        window.finishTelemetryObservation = () => { observer.disconnect(); return updates; };
+    });
     await page.keyboard.down("w");
     try {
         await waitTelemetry(page, state => state.distance > walkedFrom.distance, "Walking advances without a planned route");
     } finally { await page.keyboard.up("w"); }
+    const telemetryUpdates = await page.evaluate(() => window.finishTelemetryObservation());
+    assert.ok(telemetryUpdates.count > 0, "Movement publishes fresh accessible telemetry");
+    assert.deepEqual(telemetryUpdates.intermediateNames, [], "Each HUD update publishes its complete telemetry name once");
     await page.keyboard.down("Space");
     await waitTelemetry(page, state => state.clearance > .1, "Walking jumps above the elevation surface");
     await waitTelemetry(page, state => state.clearance < .1, "Gravity returns the walker to terrain");
@@ -566,8 +581,14 @@ async function freeRoam(page) {
     await action(page, "Respawn free roam vehicle");
     assert.ok((await telemetry(page)).distance < 1, "Respawn resets free-roam progress");
     await screen(page, "game-free-flight");
+    const returnedFrom = await telemetry(page);
     await action(page, "Exit free roam");
     await page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true}).waitFor({state: "visible"});
+    await page.getByRole("button", {name: "Switch to 2D overhead", exact: true}).waitFor({state: "visible"});
+    const returnedCamera = await readCamera(page);
+    assert.ok(Math.abs(returnedCamera.latitude - returnedFrom.latitude) < .00015 &&
+        Math.abs(returnedCamera.longitude - returnedFrom.longitude) < .00015,
+        "Leaving Play refreshes the map readout at the current physical position");
     await action(page, "Open route planner");
     await page.getByRole("button", {name: "Calculate route", exact: true}).waitFor({state: "visible"});
     await action(page, "Close journeys");
@@ -735,4 +756,7 @@ async function run() {
     } finally { await browser.close(); }
 }
 
-run().catch(error => { console.error(error); process.exitCode = 1; });
+module.exports = {open, action, choose, see, telemetry, waitForSettledFocus, failures};
+
+if (require.main === module)
+    run().catch(error => { console.error(error); process.exitCode = 1; });
