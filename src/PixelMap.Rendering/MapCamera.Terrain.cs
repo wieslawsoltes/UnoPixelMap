@@ -10,6 +10,17 @@ public readonly partial record struct MapCamera
     /// keeps a perspective eye above rising terrain while orbiting.</summary>
     public MapCamera OnTerrain(TerrainOptions? terrain, double viewportHeight = 0)
     {
+        if (IsFreeLook)
+        {
+            var freeEye = GetEye(viewportHeight > 0 ? viewportHeight : ViewportHeight);
+            double datum = terrain is { Relief: true, Elevation.Count: > 0 }
+                ? terrain.Elevation.SampleSurfaceMeters(freeEye.Latitude, freeEye.Longitude) : 0;
+            return this with
+            {
+                GroundAltitudeMeters = datum,
+                TargetAltitudeMeters = TargetAltitudeMeters + GroundAltitudeMeters - datum
+            };
+        }
         if (terrain is not { Relief: true } || terrain.Elevation.Count == 0)
             return this with { GroundAltitudeMeters = 0 };
         var next = this with { GroundAltitudeMeters = terrain.Elevation.SampleSurfaceMeters(Latitude, Longitude) };
@@ -22,7 +33,7 @@ public readonly partial record struct MapCamera
         double surface = terrain.Elevation.SampleSurfaceMeters(eye.Latitude, eye.Longitude);
         double eyeHeight = focal * pitchCos / next.PixelsPerMeter + next.TargetAltitudeMeters;
         double clearance = (surface - next.GroundAltitudeMeters) * terrain.HeightScale + 8 - eyeHeight;
-        return clearance > 0 ? next with { TargetAltitudeMeters = Math.Min(15000, next.TargetAltitudeMeters + clearance) } : next;
+        return clearance > 0 ? next with { TargetAltitudeMeters = next.TargetAltitudeMeters + clearance } : next;
     }
 
     private double PixelsPerMeter => WorldSize /
@@ -56,13 +67,13 @@ public readonly partial record struct MapCamera
             if (Math.Abs(slope) < 1e-12)
             {
                 if (origin < low - 2 || origin > high + 2) return false;
-                start = Near;
+                start = NearLimit(height);
                 end = FarLimit(height);
             }
             else
             {
                 double a = (low - 2 - origin) / slope, b = (high + 2 - origin) / slope;
-                start = Math.Max(Near, Math.Min(a, b));
+                start = Math.Max(NearLimit(height), Math.Min(a, b));
                 end = Math.Min(FarLimit(height), Math.Max(a, b));
             }
         }
@@ -85,13 +96,19 @@ public readonly partial record struct MapCamera
             if (previous >= 0 && difference <= 0)
             {
                 double above = prior, below = current;
+                double aboveDifference = previous, belowDifference = difference;
                 for (int refinement = 0; refinement < 18; refinement++)
                 {
                     double mid = (above + below) * .5;
-                    if (Difference(Ray(mid)) > 0) above = mid;
-                    else below = mid;
+                    double residual = Difference(Ray(mid));
+                    if (residual > 0) { above = mid; aboveDifference = residual; }
+                    else { below = mid; belowDifference = residual; }
                 }
-                ray = Ray((above + below) * .5);
+                // Interpolate within the final bracket. This recovers a flat or planar
+                // surface exactly, including sub-metre rays from a first-person eye.
+                double range = aboveDifference - belowDifference;
+                double fraction = range > 0 ? aboveDifference / range : .5;
+                ray = Ray(above + (below - above) * fraction);
                 if (ray.Y is < 0 or > 1) return false;
                 var location = Geographic(ray.X, ray.Y);
                 hit = new(location.Latitude, location.Longitude,
@@ -145,7 +162,7 @@ public readonly partial record struct MapCamera
         {
             Zoom = Math.Clamp(Zoom + deltaZoom, MinZoom, MaxZoom),
             Bearing = WrapOffset((Bearing + deltaBearing) / 360) * 360,
-            Pitch = Math.Clamp(Pitch + deltaPitch, 0, 72)
+            Pitch = ClampPitch(Pitch + deltaPitch, Perspective)
         };
         return next.AtTerrainAnchor(hit, x, y, width, height, terrain);
     }
@@ -239,7 +256,7 @@ public readonly partial record struct MapCamera
             for (int step = 0; step < 40; step++)
             {
                 double distance = Math.Pow(1.3, step);
-                if (1 / distance >= Near * 1.001 && TryDepth(1 / distance, out var nearer)) return nearer;
+                if (1 / distance >= NearLimit(height) * 1.001 && TryDepth(1 / distance, out var nearer)) return nearer;
                 if (step > 0 && distance <= 4096 && TryDepth(distance, out var farther)) return farther;
             }
             return best;
@@ -275,7 +292,7 @@ public readonly partial record struct MapCamera
             double z = focal * cp - weight * (focal * cp + dy * sp);
             candidate = CenterAt(dx * weight, cp * dy * weight + sp * focal * (1 - weight)).OnTerrain(terrain);
             double target = terrain.LocalAltitude(candidate, hit.ElevationMeters) + aboveSurface - z / candidate.PixelsPerMeter;
-            if (target is < 0 or > 15000 || !double.IsFinite(target)) return false;
+            if ((!basis.IsFreeLook && target < 0) || !double.IsFinite(target)) return false;
             candidate = (candidate with { TargetAltitudeMeters = target }).OnTerrain(terrain, height);
             double error = Error(candidate);
             if (error < bestError) { best = candidate; bestError = error; }

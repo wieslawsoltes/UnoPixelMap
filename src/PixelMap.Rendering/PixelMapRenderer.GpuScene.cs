@@ -25,6 +25,12 @@ public sealed partial class PixelMapRenderer
     public GpuMapFrame PrepareGpuFrame(int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
         PixelStyle style = PixelStyle.Day, int pixelSize = 2, IReadOnlyList<ImageryTile>? imagery = null,
         TerrainOptions? terrainOptions = null)
+        => PrepareGpuFrame(width, height, camera, tiles, style, pixelSize, imagery, terrainOptions, MapRenderStyle.Pixel);
+
+    /// <summary>Prepare a retained hardware frame in the selected geometry/material style.</summary>
+    public GpuMapFrame PrepareGpuFrame(int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
+        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery,
+        TerrainOptions? terrainOptions, MapRenderStyle renderStyle)
     {
         lock (sync)
         {
@@ -32,10 +38,12 @@ public sealed partial class PixelMapRenderer
             ArgumentNullException.ThrowIfNull(tiles);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
-            pixelSize = Math.Clamp(pixelSize, 1, 8);
-            CurrentTerrain = terrainOptions is { Elevation.Count: > 0 } && (terrainOptions.Relief || terrainOptions.Hypsometric)
-                ? terrainOptions : null;
-            var options = CurrentTerrain ?? new TerrainOptions(ElevationSnapshot.Empty, Relief: false);
+            SetRenderStyle(renderStyle);
+            pixelSize = MapRendering.PixelSize(renderStyle, pixelSize);
+            navigationTerrain = terrainOptions is { Elevation.Count: > 0 }
+                ? terrainOptions with { RenderStyle = renderStyle } : null;
+            CurrentTerrain = navigationTerrain is { } visualTerrain && (visualTerrain.Relief || visualTerrain.Hypsometric) ? visualTerrain : null;
+            var options = CurrentTerrain ?? new TerrainOptions(ElevationSnapshot.Empty, Relief: false) { RenderStyle = renderStyle };
             var view = (width, height, camera, style, pixelSize, GeometryGpuGeneration);
             if (view == lastView && CurrentTerrain == lastTerrain && gpuLabelPicture is not null && lastGpuScene is { } cached &&
                 ReferenceEquals(activeGpuScene, cached) &&
@@ -48,6 +56,7 @@ public sealed partial class PixelMapRenderer
                     MinimumAltitude = cached.MinimumAltitude,
                     MaximumAltitude = cached.MaximumAltitude,
                     PreservePhotograph = cached.PreservePhotograph,
+                    NavigationTerrain = navigationTerrain,
                     Overlay = RetainGpuPicture(gpuLabelPicture),
                     Tiles = cached.Tiles,
                     Imagery = cached.Imagery
@@ -59,7 +68,7 @@ public sealed partial class PixelMapRenderer
 
             reliefSurface ??= new();
             bool shadows = camera.Pitch >= 1;
-            var textureStyle = (style, pixelSize, shadows);
+            var textureStyle = (style, pixelSize, shadows, renderStyle);
             if (terrainTextureStyle != textureStyle || !SameTerrainSources(tiles, terrainTextureTiles, static tile => tile.Id) ||
                 !SameTerrainSources(imagery, terrainTextureImagery, static tile => tile.Id))
             {
@@ -110,6 +119,7 @@ public sealed partial class PixelMapRenderer
             var result = new GpuMapFrame(width, height, pixelSize, camera, options, colors, meters, terrainDraws, modelDraws.ToArray())
             {
                 PreservePhotograph = imageryOrder.Count > 0 && camera.Zoom >= 12 && camera.Pitch < 30,
+                NavigationTerrain = navigationTerrain,
                 Tiles = tiles.ToArray(),
                 Imagery = imagery?.ToArray() ?? []
             };
@@ -212,6 +222,7 @@ public sealed partial class PixelMapRenderer
 
     private void ActivateGpuFrameCore(GpuMapFrame frame)
     {
+        SetRenderStyle(frame.RenderStyle);
         IsGpuRenderingActive = true;
         if (ReferenceEquals(activeGpuScene, frame) && lastView.GpuGeneration == GeometryGpuGeneration) return;
         activeGpuScene = frame;
@@ -228,6 +239,7 @@ public sealed partial class PixelMapRenderer
             palette = frame.Palette;
         }
         CurrentTerrain = frame.TerrainOptions is { Elevation.Count: > 0 } active && (active.Relief || active.Hypsometric) ? active : null;
+        navigationTerrain = frame.NavigationTerrain;
         terrainCamera = frame.Camera;
         (reliefSurface ??= new()).ActivateGpu(frame);
         var lens = new TileProjection(frame.Camera, frame.Width, frame.Height, frame.PixelSize).Get(new(0, 0, 0), 0).Transform;

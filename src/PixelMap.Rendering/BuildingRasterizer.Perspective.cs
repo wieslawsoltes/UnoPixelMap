@@ -4,7 +4,7 @@ namespace PixelMap.Rendering;
 
 internal sealed partial class BuildingRasterizer
 {
-    private float perspectiveFar;
+    private float perspectiveFar, perspectiveNear;
     private bool usingPerspective;
     private TileTransform depthLens;
     private ProjectionContext[] projectionContexts = new ProjectionContext[8];
@@ -33,6 +33,7 @@ internal sealed partial class BuildingRasterizer
     private void DrawPerspective(Span<uint> pixels, in Building model, in TileTransform t, Material material, float foundationMeters)
     {
         perspectiveFar = t.Far;
+        perspectiveNear = t.Near;
         depthLens = t;
         float foundation = foundationMeters * pixelsPerMeter;
         float top = (model.Top + foundationMeters) * pixelsPerMeter, bottom = (model.Bottom + foundationMeters) * pixelsPerMeter;
@@ -183,7 +184,7 @@ internal sealed partial class BuildingRasterizer
         {
             var vertex = transform.Vertex((corner & 1) == 0 ? area.Left : area.Right,
                 (corner & 2) == 0 ? area.Top : area.Bottom, (corner & 4) == 0 ? bottom : top);
-            if (vertex.W < MapCamera.Near)
+            if (vertex.W < transform.Near)
             {
                 nearest = float.PositiveInfinity;
                 return new(0, 0, width, height);
@@ -258,7 +259,7 @@ internal sealed partial class BuildingRasterizer
         projectionIndex = projectionCount++;
         int first = projectionIndex * 6;
         float pz=-t.CosPitch*t.InverseFocal,xz=t.CX*pz,yz=t.CY*pz-t.SinPitch;
-        frustumPlanes[first] = new(t.PX,t.PY,pz,t.PW-(float)MapCamera.Near);
+        frustumPlanes[first] = new(t.PX,t.PY,pz,t.PW-t.Near);
         frustumPlanes[first+1] = new(-t.PX,-t.PY,-pz,t.Far-t.PW);
         frustumPlanes[first+2] = new(t.XX,t.XY,xz,t.X);
         frustumPlanes[first+3] = new(width*t.PX-t.XX,width*t.PY-t.XY,width*pz-xz,width*t.PW-t.X);
@@ -283,10 +284,10 @@ internal sealed partial class BuildingRasterizer
     private void ClipRing(List<H> source, List<H> target, int plane)
     {
         target.Clear(); if (source.Count == 0) return;
-        var a=source[^1]; float da=TileTransform.Plane(plane,a,width,height,perspectiveFar);
+        var a=source[^1]; float da=TileTransform.Plane(plane,a,width,height,perspectiveFar,perspectiveNear);
         foreach (var b in source)
         {
-            float db=TileTransform.Plane(plane,b,width,height,perspectiveFar);
+            float db=TileTransform.Plane(plane,b,width,height,perspectiveFar,perspectiveNear);
             if ((da<0)!=(db<0)) target.Add(H.Lerp(a,b,da/(da-db)));
             if (db>=0) target.Add(b);
             a=b;da=db;
@@ -310,7 +311,7 @@ internal sealed partial class BuildingRasterizer
             int inside = 0, outside = 0;
             for (int i = 0; i < count; i++)
             {
-                float distance = TileTransform.Plane(plane, polygon[i], width, height, perspectiveFar);
+                float distance = TileTransform.Plane(plane, polygon[i], width, height, perspectiveFar, perspectiveNear);
                 distances[i] = distance;
                 if (distance >= 0) inside++;
                 if (distance < 0) outside++;
@@ -330,7 +331,7 @@ internal sealed partial class BuildingRasterizer
         for (int i=2;i<count;i++) WallTriangle(pixels,polygon[0],polygon[i-1],polygon[i],material,color,seed,foundation);
     }
 
-    private bool Inside(H point) => point.W - (float)MapCamera.Near >= 0 && perspectiveFar - point.W >= 0 &&
+    private bool Inside(H point) => point.W - perspectiveNear >= 0 && perspectiveFar - point.W >= 0 &&
         point.X >= 0 && width * point.W - point.X >= 0 && point.Y >= 0 && height * point.W - point.Y >= 0;
 
     private void WallTriangle(Span<uint> pixels,H a,H b,H c,Material mat,uint color,uint seed,float foundation)
@@ -385,7 +386,7 @@ internal sealed partial class BuildingRasterizer
         float lo=0, hi=1;
         for(int plane=0;plane<6;plane++)
         {
-            float v=TileTransform.Plane(plane,a,width,height,perspectiveFar), w=TileTransform.Plane(plane,b,width,height,perspectiveFar);
+            float v=TileTransform.Plane(plane,a,width,height,perspectiveFar,perspectiveNear), w=TileTransform.Plane(plane,b,width,height,perspectiveFar,perspectiveNear);
             if(v<0&&w<0)return;
             if(v>=0&&w>=0)continue;
             float t=v/(v-w);

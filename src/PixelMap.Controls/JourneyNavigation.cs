@@ -9,7 +9,7 @@ using Windows.System;
 
 namespace PixelMap.Controls;
 
-public enum JourneyCameraRig { Chase, NorthUp, Cockpit, Orbit }
+public enum JourneyCameraRig { Chase, NorthUp, Cockpit, Orbit, FirstPerson }
 
 public sealed class MapPointEventArgs(double latitude, double longitude) : EventArgs
 {
@@ -57,7 +57,15 @@ public sealed partial class PixelMapControl
     public JourneyCameraRig CameraRig
     {
         get => _rig;
-        set { _rig = value; _wasTracking = false; UpdateRideCamera(); }
+        set
+        {
+            if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            _rig = value;
+            Journey.IsLookRelativeToVehicle = value is JourneyCameraRig.Chase or JourneyCameraRig.Cockpit or JourneyCameraRig.FirstPerson;
+            _wasTracking = false;
+            UpdateRideCamera();
+            InvalidateMap();
+        }
     }
 
     public void AttachAudioDevice(IJourneyAudioDevice device)
@@ -73,6 +81,7 @@ public sealed partial class PixelMapControl
 
     public void ShowRoute(RoutePlan? route, bool fit = true)
     {
+        ForgetFreeRoamReturn();
         StopMotion();
         Journey.Load(route);
         if (route is not null && fit) FitRoute();
@@ -93,6 +102,7 @@ public sealed partial class PixelMapControl
     }
     public void OrbitBy(double bearingDelta, double pitchDelta)
     {
+        if (TryLookFreeRoam(bearingDelta, pitchDelta)) return;
         Journey.Follow = false;
         var camera = _flight ? _to : Camera;
         FlyTo(TransformCamera(camera, 0, bearingDelta, pitchDelta, ActualWidth / 2, ActualHeight / 2));
@@ -120,11 +130,16 @@ public sealed partial class PixelMapControl
     private void OnJourneyChanged()
     {
         if (!_active) return;
+        if (_freeRoamTerrainActive != Journey.IsFreeRoaming)
+        {
+            _freeRoamTerrainActive = Journey.IsFreeRoaming;
+            TerrainChanged();
+        }
         if (Journey.Active && !_gameClock.IsEnabled)
         {
             StopMotion(); _gameTimestamp = Stopwatch.GetTimestamp(); _gameClock.Start();
         }
-        else if (!Journey.Active && _gameClock.IsEnabled)
+        else if (!Journey.Active)
         {
             _gameClock.Stop(); ReleaseDrivingKeys(); _wasTracking = false;
         }
@@ -136,6 +151,7 @@ public sealed partial class PixelMapControl
 
     private void UpdateRideCamera()
     {
+        if (Journey.IsFreeRoaming) { UpdateFreeRoamCamera(); return; }
         bool track = _active && Journey.Follow && Journey.Route is not null &&
             (Journey.Active || Journey.State == JourneyState.Paused);
         if (!track) { _wasTracking = false; return; }
@@ -146,14 +162,15 @@ public sealed partial class PixelMapControl
         switch (_rig)
         {
             case JourneyCameraRig.NorthUp: heading = 0; pitch = 0; lead = 0; break;
-            case JourneyCameraRig.Cockpit: zoom += .85; pitch = 70; lead = Math.Max(15, lead * 1.6); break;
+            case JourneyCameraRig.Cockpit:
+            case JourneyCameraRig.FirstPerson: zoom += .85; pitch = 70; lead = Math.Max(15, lead * 1.6); break;
             case JourneyCameraRig.Orbit: heading = Journey.Bearing + Journey.AnimationSeconds * 12; pitch = 54; lead = 0; break;
         }
         var center = new RoutePoint(Journey.Latitude, Journey.Longitude).Move(Journey.Bearing, lead);
         var focus = center;
         // In an orthographic map a flying vehicle projects above its ground point.
         // Shift the ground target by that projected height so the sprite stays inside the viewport.
-        bool perspective = _rig is JourneyCameraRig.Chase or JourneyCameraRig.Cockpit;
+        bool perspective = _rig is JourneyCameraRig.Chase or JourneyCameraRig.Cockpit or JourneyCameraRig.FirstPerson;
         double clearance = Journey.AltitudeAboveGroundMeters;
         if (!perspective && clearance > 0)
             center = center.Move(heading, clearance * Math.Tan(pitch * Math.PI / 180));
@@ -182,6 +199,7 @@ public sealed partial class PixelMapControl
 
     private bool ZoomRide(double delta)
     {
+        if (ZoomFreeRoam(delta)) return true;
         if (!Journey.Follow || !Journey.Active) return false;
         _rideZoom = Math.Clamp(_rideZoom + delta, -4, 3);
         UpdateRideCamera(); return true;
@@ -189,11 +207,12 @@ public sealed partial class PixelMapControl
 
     private void ReleaseDrivingKeys()
     {
-        if (_held.Count == 0) return;
+        _freeTouchInput = default;
         _held.Clear(); Journey.ClearInput();
     }
-    private bool HandleDrivingKey(VirtualKey key)
+    private bool HandleDrivingKey(VirtualKey key, bool repeated = false)
     {
+        if (Journey.IsFreeRoaming) return HandleFreeRoamKey(key, repeated);
         if (Journey.State != JourneyState.Driving) return false;
         if (key is not (VirtualKey.W or VirtualKey.A or VirtualKey.S or VirtualKey.D or VirtualKey.Up or VirtualKey.Down
             or VirtualKey.Left or VirtualKey.Right or VirtualKey.Space or VirtualKey.PageUp or VirtualKey.PageDown or VirtualKey.H)) return false;
@@ -206,6 +225,7 @@ public sealed partial class PixelMapControl
     }
     private void ApplyDrivingKeys()
     {
+        if (Journey.IsFreeRoaming) { ApplyFreeRoamKeys(); return; }
         double Down(VirtualKey a, VirtualKey b) => (_held.Contains(a) || _held.Contains(b)) ? 1 : 0;
         Journey.SetInput(Down(VirtualKey.W, VirtualKey.Up), Down(VirtualKey.D, VirtualKey.Right) - Down(VirtualKey.A, VirtualKey.Left),
             Math.Max(Down(VirtualKey.S, VirtualKey.Down), _held.Contains(VirtualKey.Space) ? 1 : 0));
@@ -214,6 +234,13 @@ public sealed partial class PixelMapControl
 
     private VehiclePose? CurrentVehicle()
     {
+        if (Journey.IsFreeRoaming)
+        {
+            if (Journey.IsFreeFlying || Journey.Follow && _rig is JourneyCameraRig.FirstPerson or JourneyCameraRig.Cockpit) return null;
+            return new VehiclePose(new(Journey.Latitude, Journey.Longitude), Journey.Bearing, Journey.AnimationSeconds,
+                Journey.AltitudeMeters, Journey.Active && Journey.SpeedMetersPerSecond > .05, double.NaN,
+                Journey.SpeedMetersPerSecond, Journey.Continuity);
+        }
         if (Journey.Route is null || Journey.State == JourneyState.Ready) return null;
         return new VehiclePose(new(Journey.Latitude, Journey.Longitude), Journey.Bearing, Journey.AnimationSeconds,
             Journey.AltitudeMeters, Journey.Active && Journey.SpeedMetersPerSecond > .05, Journey.Progress, Journey.SpeedMetersPerSecond, Journey.Continuity);

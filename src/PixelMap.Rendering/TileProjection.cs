@@ -17,6 +17,7 @@ internal struct TileProjection(MapCamera camera, int width, int height, int pixe
     private readonly double groundZ = -camera.TargetPixels / pixelSize;
     private readonly double groundDistance = camera.GroundDistance(height);
     private readonly float far = (float)camera.FarLimit(height);
+    private readonly float near = (float)camera.NearLimit(height);
     private int boundsZoom = -1;
     private (int Left, int Top, int Right, int Bottom) bounds;
 
@@ -43,7 +44,7 @@ internal struct TileProjection(MapCamera camera, int width, int height, int pixe
         return (new((float)(cx*pw + u), (float)(cy*pw + v*tilt-groundZ*sp),
             (float)(cx*px + scale*bearing.C), (float)(cx*py + scale*bearing.S),
             (float)(cy*px - scale*bearing.S*tilt), (float)(cy*py + scale*bearing.C*tilt),
-            (float)px,(float)py,(float)pw,(float)cx,(float)cy,(float)lens,(float)sp,(float)tilt,(float)-groundZ,far),
+            (float)px,(float)py,(float)pw,(float)cx,(float)cy,(float)lens,(float)sp,(float)tilt,(float)-groundZ,far,near),
             (float)(scale/groundDistance));
     }
 }

@@ -5,7 +5,7 @@ using PixelMap.Routing;
 namespace PixelMap.Simulation;
 
 /// <summary>Swept building contacts and shoreline barriers against streamed cartography. Each resident tile is indexed once on first use.</summary>
-public sealed class VectorCollisionWorld : IJourneyWorld
+public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailWorld, IFreeRoamWaterWorld
 {
     private const double EarthCircumference = 40075016.69;
     private readonly ConditionalWeakTable<MapTile, TileObstacles> _indices = new();
@@ -19,10 +19,20 @@ public sealed class VectorCollisionWorld : IJourneyWorld
         ArgumentNullException.ThrowIfNull(visible);
         ArgumentNullException.ThrowIfNull(elevation);
         _scene = new(visible, elevation);
+        if (_railNetwork is { } rail && !rail.Matches(visible)) _railNetwork = null;
     }
 
     public double SurfaceElevationMeters(VehicleProfile vehicle, RoutePoint point)
         => _scene.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude);
+
+    public bool IsNavigableWater(RoutePoint point)
+    {
+        if (!point.IsValid) return false;
+        var scene = _scene;
+        var index = ObstaclesAt(scene.Tiles, point, out double x, out double y, out double tileMeters);
+        return index is not null && !index.Obstructs(VehicleProfile.Boat, x, y,
+            scene.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude), tileMeters, scene.Elevation);
+    }
 
     public bool Blocks(VehicleProfile vehicle, RoutePoint from, RoutePoint to, double altitudeMeters)
         => Blocks(vehicle, from, to, altitudeMeters, altitudeMeters);
@@ -33,30 +43,13 @@ public sealed class VectorCollisionWorld : IJourneyWorld
         var scene = _scene;
         var tiles = scene.Tiles;
         var elevation = scene.Elevation;
-        if (vehicle.Motion == MotionModel.Aircraft && CrossesTerrain(elevation, from, to, fromAltitudeMeters, toAltitudeMeters))
+        if (vehicle.Motion is MotionModel.Aircraft or MotionModel.FreeFlight && CrossesTerrain(elevation, from, to, fromAltitudeMeters, toAltitudeMeters))
             return true;
 
         bool Obstructed(RoutePoint point, double altitude)
         {
-            double x = (RoutePoint.Wrap(point.Longitude) + 180) / 360;
-            double latitude = Math.Clamp(point.Latitude, -85.05112878, 85.05112878) * Math.PI / 180;
-            double y = (1 - Math.Asinh(Math.Tan(latitude)) / Math.PI) * .5;
-            MapTile? selected = null;
-            double localX = 0, localY = 0;
-            foreach (var tile in tiles)
-            {
-                if (tile.Id.Z < 12 || tile.Id.Z <= (selected?.Id.Z ?? -1)) continue;
-                double count = Math.Pow(2, tile.Id.Z);
-                double tx = x * count - tile.Id.X, ty = y * count - tile.Id.Y;
-                if (tx < 0 || ty < 0 || tx >= 1 || ty >= 1) continue;
-                selected = tile;
-                localX = tx;
-                localY = ty;
-            }
-            if (selected is null) return false;
-            double tileMeters = EarthCircumference * Math.Cos(latitude) / Math.Pow(2, selected.Id.Z);
-            return _indices.GetValue(selected, static tile => new(tile))
-                .Obstructs(vehicle, localX, localY, altitude, tileMeters, elevation);
+            var index = ObstaclesAt(tiles, point, out double x, out double y, out double tileMeters);
+            return index is not null && index.Obstructs(vehicle, x, y, altitude, tileMeters, elevation);
         }
 
         // A newly streamed tile may put the current vehicle inside a polygon. Allow escape.
@@ -80,6 +73,29 @@ public sealed class VectorCollisionWorld : IJourneyWorld
                 .CrossesBuilding(ax, ay, bx, by, fromAltitudeMeters, toAltitudeMeters, elevation, ObstructedBetween)) return true;
         }
         return false;
+    }
+
+    private TileObstacles? ObstaclesAt(IReadOnlyList<MapTile> tiles, RoutePoint point,
+        out double localX, out double localY, out double tileMeters)
+    {
+        double x = (RoutePoint.Wrap(point.Longitude) + 180) / 360;
+        double latitude = Math.Clamp(point.Latitude, -85.05112878, 85.05112878) * Math.PI / 180;
+        double y = (1 - Math.Asinh(Math.Tan(latitude)) / Math.PI) * .5;
+        MapTile? selected = null;
+        localX = localY = tileMeters = 0;
+        foreach (var tile in tiles)
+        {
+            if (tile.Id.Z < 12 || tile.Id.Z <= (selected?.Id.Z ?? -1)) continue;
+            double count = Math.Pow(2, tile.Id.Z);
+            double tx = x * count - tile.Id.X, ty = y * count - tile.Id.Y;
+            if (tx < 0 || ty < 0 || tx >= 1 || ty >= 1) continue;
+            selected = tile;
+            localX = tx;
+            localY = ty;
+        }
+        if (selected is null) return null;
+        tileMeters = EarthCircumference * Math.Cos(latitude) / Math.Pow(2, selected.Id.Z);
+        return _indices.GetValue(selected, static tile => new(tile));
     }
 
     private static bool CrossesTerrain(ElevationSnapshot elevation, RoutePoint from, RoutePoint to,

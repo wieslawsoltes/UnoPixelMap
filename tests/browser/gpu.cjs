@@ -5,8 +5,12 @@ const { join } = require("node:path");
 // Exercise the public menu with real input. MenuFlyoutItem accessibility peers do
 // not consistently expose checked state, so the rendered backend status is the gate.
 async function enableGpuRendering(page, expected = "GPU active") {
+    return setGpuRendering(page, true, expected);
+}
+
+async function setGpuRendering(page, enabled, expected = enabled ? "GPU active" : "CPU rendering") {
     try {
-        return await activateGpuRendering(page, expected);
+        return await activateGpuRendering(page, enabled, expected);
     } catch (error) {
         const [focus, accessibility] = await Promise.allSettled([
             page.evaluate(() => {
@@ -22,7 +26,7 @@ async function enableGpuRendering(page, expected = "GPU active") {
             page.locator("body").ariaSnapshot({ timeout: 5000 })
         ]);
         const diagnostics = {
-            url: page.url(), expected, error: error.message,
+            url: page.url(), enabled, expected, error: error.message,
             focus: focus.status === "fulfilled" ? focus.value : String(focus.reason),
             accessibility: accessibility.status === "fulfilled" ? accessibility.value : String(accessibility.reason)
         };
@@ -43,44 +47,52 @@ async function enableGpuRendering(page, expected = "GPU active") {
     }
 }
 
-async function activateGpuRendering(page, expected) {
+function backendStatus(snapshot) {
+    return snapshot.match(/^\s*- [^\n]*(?:GPU active|CPU fallback)[^\n]*$/m)?.[0]?.trim() || "";
+}
+
+async function activateGpuRendering(page, enabled, expected) {
     await page.waitForLoadState("networkidle", { timeout: 45000 });
     await page.screenshot();
     const accessibility = page.getByRole("button", { name: "Enable accessibility", exact: true });
     if (await accessibility.count()) await accessibility.evaluate(element => element.click());
-    const menu = page.getByRole("button", { name: "Map appearance", exact: true });
-    await menu.waitFor({ state: "visible" });
-    const bounds = await menu.boundingBox();
-    assert.ok(bounds && bounds.width > 0 && bounds.height > 0, "The View menu is visible");
-    await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
-    const item = page.getByRole("menuitem", { name: "GPU rendering (experimental)", exact: true })
-        .or(page.getByRole("menuitemcheckbox", { name: "GPU rendering (experimental)", exact: true }));
-    await item.waitFor({ state: "visible" });
-    // Uno may initially focus the anchor or the first menu item. Route focus to
-    // the intended public command before sending real keyboard input.
-    await item.focus();
-    const menuItem = await item.elementHandle();
-    assert.ok(menuItem, "The GPU rendering command has a visible element");
-    try {
-        await page.waitForFunction(element => document.activeElement === element, menuItem);
-    } finally {
-        await menuItem.dispose();
+    let status = backendStatus(await page.locator("body").ariaSnapshot());
+    const selected = status.length > 0;
+    if (selected !== enabled) {
+        const menu = page.getByRole("button", { name: "Map appearance", exact: true });
+        await menu.waitFor({ state: "visible" });
+        const bounds = await menu.boundingBox();
+        assert.ok(bounds && bounds.width > 0 && bounds.height > 0, "The View menu is visible");
+        await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+        const commandName = /^GPU rendering(?: \(experimental\))?$/;
+        const item = page.getByRole("menuitem", { name: commandName })
+            .or(page.getByRole("menuitemcheckbox", { name: commandName }));
+        await item.waitFor({ state: "visible" });
+        // Uno may initially focus the anchor or the first menu item. Route focus to
+        // the intended public command before sending real keyboard input.
+        await item.focus();
+        const menuItem = await item.elementHandle();
+        assert.ok(menuItem, "The GPU rendering command has a visible element");
+        try {
+            await page.waitForFunction(element => document.activeElement === element, menuItem);
+        } finally {
+            await menuItem.dispose();
+        }
+        await page.keyboard.press("Enter");
+        await item.waitFor({ state: "hidden" });
     }
-    await page.keyboard.press("Enter");
-    await item.waitFor({ state: "hidden" });
     await page.mouse.move(page.viewportSize().width / 2, 20);
     const deadline = Date.now() + 20000;
-    let status = "No backend status exposed";
     while (Date.now() < deadline) {
         const snapshot = await page.locator("body").ariaSnapshot();
-        status = snapshot.match(/^\s*- [^\n]*(?:GPU active|CPU fallback)[^\n]*$/m)?.[0] || status;
-        if (status.includes(expected)) {
+        status = backendStatus(snapshot);
+        if (enabled ? status.includes(expected) : status.length === 0) {
             console.log("Rendering backend confirmed", expected);
-            return status.trim();
+            return status || "CPU rendering";
         }
         await page.waitForTimeout(150);
     }
     throw new Error("Expected " + expected + ". Observed " + status.trim());
 }
 
-module.exports = { enableGpuRendering };
+module.exports = { enableGpuRendering, setGpuRendering };

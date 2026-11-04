@@ -3,7 +3,7 @@ const { mkdir, writeFile, readFile } = require("node:fs/promises");
 const path = require("node:path");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
-const { enableGpuRendering } = require("./gpu.cjs");
+const { setGpuRendering } = require("./gpu.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const shots = process.env.PIXELMAP_SHOTS;
@@ -74,7 +74,7 @@ async function openDemo(browser, mode, phone = false) {
     await page.screenshot();
     await page.getByRole("button", { name: "Enable accessibility" }).evaluate(el => el.click());
     await page.getByRole("button", { name: "Preview route", exact: true }).waitFor({ state: "attached" });
-    if (process.env.PIXELMAP_GPU === "1") await enableGpuRendering(page);
+    await setGpuRendering(page, process.env.PIXELMAP_GPU === "1");
     return { context, page };
 }
 
@@ -199,15 +199,17 @@ async function checkShare(page) {
     await click(page, "Map appearance");
     await activate(page, "menuitem", "Share this view");
     await activate(page, "textbox", "Shareable map link");
-    await see(page, /textbox "Shareable map link": .*#v4\//);
+    await see(page, /textbox "Shareable map link": .*#v5\//);
     const shared = await page.getByRole("textbox", {name: "Shareable map link", exact: true}).inputValue();
     assert.ok(shared, "The share field contains a copyable URL");
     const address = new URL(shared);
     const fields = address.hash.split("/");
-    assert.equal(fields[0], "#v4");
-    assert.equal(fields.length, 12, "Version 4 keeps lens, target altitude and terrain settings");
+    assert.equal(fields[0], "#v5");
+    assert.equal(fields.length, 17, "Version 5 keeps rendering style, physical eye-camera and terrain settings");
     assert.equal(fields[10], "Flat", "Existing journey demos start with flat terrain");
     assert.equal(fields[11], "1.00", "Default exaggeration is one-to-one");
+    assert.equal(fields[12], "Pixel", "Pixel art is the default rendering style");
+    assert.equal(fields[13], "Orbit", "Route map cameras retain orbit projection");
     assert.match(fields[8], /^(Perspective|Orthographic)$/);
     assert.ok(Number.isFinite(Number(fields[9])) && Number(fields[9]) >= 0 && Number(fields[9]) <= 15000);
     assert.equal(address.pathname, base.pathname, "Shared views preserve the Pages base path");

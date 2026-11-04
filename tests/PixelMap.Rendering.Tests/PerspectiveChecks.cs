@@ -72,11 +72,12 @@ internal static class PerspectiveChecks
         var map=new MapTile(id,[near,tall]);
         using var renderer=new PixelMapRenderer();using var image=new SKBitmap(w,h);using var canvas=new SKCanvas(image);
         renderer.Draw(canvas,w,h,cam,[new(id,[])],pixelSize:1,imagery:[blue]);
-        foreach(var (x,y) in new[]{(1450,1450),(2600,1450),(1450,2600),(2600,2600)})
+        foreach(var (x,y) in new[]{(1700,1700),(2350,1700),(1700,2350),(2350,2350)})
         {
             var geo=Geo(id,x,y);Assert(cam.TryProject(geo.Latitude,geo.Longitude,0,w,h,out var screen),"Fixture should be visible");
+            Assert(screen.X >= 0 && screen.X < w && screen.Y >= 0 && screen.Y < h, "Imagery fixture sampled outside the bitmap");
             var sample=image.GetPixel((int)screen.X,(int)screen.Y);
-            Assert(sample.Blue>sample.Red+15,"Homographic imagery registration failed");
+            Assert(sample.Blue>sample.Red+15,$"Homographic imagery registration failed at ({x},{y}) -> ({screen.X},{screen.Y}), color {sample}");
         }
         renderer.Draw(canvas,w,h,cam,[map],pixelSize:1,imagery:[blue]);
         var one=image.GetPixelSpan().ToArray();

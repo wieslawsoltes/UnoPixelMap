@@ -1,5 +1,6 @@
 using PixelMap.Data;
 using SkiaSharp;
+using System.Buffers;
 
 namespace PixelMap.Rendering;
 
@@ -23,6 +24,8 @@ internal sealed class TerrainSurface : IDisposable
     private readonly Dictionary<TileId, int> heightPatches = [];
     private readonly List<int> heightZooms = [];
     private readonly Vertex[] projected = new Vertex[Side * Side];
+    private readonly float[] blockHeights = new float[Side * Side * 2];
+    private readonly float[] patchFloors = new float[MaximumPatches];
     private ElevationSnapshot? elevation;
     private float[] groundAltitude = [], groundHeight = [];
     private float[] depthX = [], depthY = [];
@@ -31,6 +34,7 @@ internal sealed class TerrainSurface : IDisposable
     private int width, height;
     private long frame;
     private float meters;
+    private float near;
     private MapCamera camera;
     private TerrainOptions options = new(ElevationSnapshot.Empty);
     private TileProjection projection;
@@ -61,11 +65,11 @@ internal sealed class TerrainSurface : IDisposable
         internal double Top => Id.Y * Size;
     }
 
-    private readonly record struct Vertex(H Screen, float U, float V, float Height, float Light)
+    private readonly record struct Vertex(H Screen, float U, float V, float Height, float Light, int Face = 0)
     {
         internal static Vertex Lerp(Vertex a, Vertex b, float t) => new(H.Lerp(a.Screen, b.Screen, t),
             a.U + (b.U - a.U) * t, a.V + (b.V - a.V) * t,
-            a.Height + (b.Height - a.Height) * t, a.Light + (b.Light - a.Light) * t);
+            a.Height + (b.Height - a.Height) * t, a.Light + (b.Light - a.Light) * t, a.Face);
     }
 
     internal void ClearTextures()
@@ -100,6 +104,12 @@ internal sealed class TerrainSurface : IDisposable
             var mesh = meshes[patch.Id];
             var heights = stitched[i];
             var texture = GetTexture(patch.Id, bake);
+            var texels = new ReadOnlySpan<uint>((void*)texture.Bitmap.GetPixels(), TextureSize * TextureSize);
+            if (MapRendering.Blocks(options.RenderStyle))
+            {
+                DrawBlocks(GetGpuMesh(i), patch.Transform, pixels, texels, texture.EarthAreas, depth, preservePhotograph);
+                continue;
+            }
             for (int row = 0; row < Side; row++)
             for (int column = 0; column < Side; column++)
             {
@@ -110,7 +120,6 @@ internal sealed class TerrainSurface : IDisposable
                     column * (TextureSize / (float)Segments), row * (TextureSize / (float)Segments),
                     heights[index], mesh.Light[index]);
             }
-            var texels = new ReadOnlySpan<uint>((void*)texture.Bitmap.GetPixels(), TextureSize * TextureSize);
             for (int row = 0; row < Segments; row++)
             for (int column = 0; column < Segments; column++)
             {
@@ -125,12 +134,37 @@ internal sealed class TerrainSurface : IDisposable
         TrimCaches();
     }
 
+    private void DrawBlocks(GpuTerrainMesh mesh, TileTransform transform, Span<uint> pixels,
+        ReadOnlySpan<uint> texels, SKRect[] earthAreas, BuildingRasterizer depth, bool preservePhotograph)
+    {
+        int count = mesh.Vertices.Length / GpuTerrainMesh.VertexStride;
+        var storage = ArrayPool<Vertex>.Shared.Rent(count);
+        try
+        {
+            var vertices = storage.AsSpan(0, count);
+            for (int i = 0; i < count; i++)
+            {
+                int offset = i * GpuTerrainMesh.VertexStride;
+                float x = mesh.Vertices[offset], y = mesh.Vertices[offset + 1], raw = mesh.Vertices[offset + 2];
+                vertices[i] = new(transform.Vertex(x, y, (float)options.LocalAltitude(camera, raw) * meters),
+                    x * TextureSize / TileGeometry.Extent, y * TextureSize / TileGeometry.Extent,
+                    raw, mesh.Vertices[offset + 3], TerrainBlockMesh.Face(i, mesh.RenderStyle));
+            }
+            var indices = mesh.TriangleIndices;
+            for (int i = 0; i < indices.Length; i += 3)
+                Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], transform.Far,
+                    pixels, texels, earthAreas, depth.Heights, depth.InverseDepth, preservePhotograph);
+        }
+        finally { ArrayPool<Vertex>.Shared.Return(storage); }
+    }
+
     private void Prepare(MapCamera view, int logicalWidth, int logicalHeight, int pixelSize,
         int artWidth, int artHeight, TerrainOptions terrain)
     {
         frame++;
         gpuScene = null;
         camera = view;
+        near = (float)camera.NearLimit(logicalHeight);
         options = terrain;
         width = artWidth;
         height = artHeight;
@@ -156,6 +190,9 @@ internal sealed class TerrainSurface : IDisposable
             if (i == stitched.Count) stitched.Add(new float[Side * Side]);
             mesh.Heights.CopyTo(stitched[i], 0);
             Stitch(i, patch, stitched[i]);
+            float minimum = float.PositiveInfinity;
+            foreach (float value in stitched[i]) minimum = Math.Min(minimum, value);
+            patchFloors[i] = minimum;
             if (heightZooms.Count == 0 || heightZooms[^1] != patch.Id.Z) heightZooms.Add(patch.Id.Z);
             if (!heightPatches.TryGetValue(patch.Id, out int other) ||
                 Math.Abs(patch.Left + patch.Size * .5 - camera.CenterX) < Math.Abs(patches[other].Left + patch.Size * .5 - camera.CenterX))
@@ -174,31 +211,7 @@ internal sealed class TerrainSurface : IDisposable
         for (int i = 0; i < patches.Count; i++)
         {
             var patch = patches[i];
-            var source = meshes[patch.Id];
-            var heights = stitched[i];
-            var key = (patch.Id, patch.Copy);
-            gpuMeshes.TryGetValue(key, out var retained);
-            bool update = retained is null;
-            if (retained is not null)
-                for (int vertex = 0; vertex < heights.Length; vertex++)
-                    if (retained.Vertices[vertex * 4 + 2] != heights[vertex] || retained.Vertices[vertex * 4 + 3] != source.Light[vertex])
-                    { update = true; break; }
-            if (update)
-            {
-                var vertices = new float[Side * Side * GpuTerrainMesh.VertexStride];
-                for (int row = 0; row < Side; row++)
-                for (int column = 0; column < Side; column++)
-                {
-                    int vertex = row * Side + column, offset = vertex * GpuTerrainMesh.VertexStride;
-                    vertices[offset] = column * (TileGeometry.Extent / Segments);
-                    vertices[offset + 1] = row * (TileGeometry.Extent / Segments);
-                    vertices[offset + 2] = heights[vertex];
-                    vertices[offset + 3] = source.Light[vertex];
-                }
-                retained = new(retained?.ResourceKey ?? new object(), patch.Id, patch.Copy, vertices, (retained?.Revision ?? 0) + 1);
-                gpuMeshes[key] = retained;
-            }
-            retained!.Frame = frame;
+            var retained = GetGpuMesh(i);
             selection[i] = retained;
             if (!changed && !ReferenceEquals(previousGpuSelection[i], retained)) changed = true;
             var texture = GetTexture(patch.Id, bake);
@@ -208,6 +221,69 @@ internal sealed class TerrainSurface : IDisposable
         previousGpuSelection = selection;
         TrimCaches();
         return draws;
+    }
+
+    private GpuTerrainMesh GetGpuMesh(int index)
+    {
+        var patch = patches[index];
+        var source = meshes[patch.Id];
+        var heights = stitched[index];
+        var key = (patch.Id, patch.Copy);
+        gpuMeshes.TryGetValue(key, out var retained);
+        if (retained is not null && retained.Frame == frame && retained.RenderStyle == options.RenderStyle) return retained;
+        bool blocks = MapRendering.Blocks(options.RenderStyle);
+        if (blocks)
+            TerrainBlockMesh.WriteHeights(patch.Id, heights, source.Light, SkirtHeight(index), options.RenderStyle, blockHeights);
+        bool update = retained is null || retained.RenderStyle != options.RenderStyle;
+        if (!update && blocks) update = retained!.HeightLight is null || !blockHeights.AsSpan().SequenceEqual(retained.HeightLight);
+        if (!update && !blocks)
+            for (int vertex = 0; vertex < heights.Length; vertex++)
+                if (retained!.Vertices[vertex * 4 + 2] != heights[vertex] || retained.Vertices[vertex * 4 + 3] != source.Light[vertex])
+                { update = true; break; }
+        if (update)
+        {
+            float[] vertices;
+            float[]? samples = null;
+            if (blocks)
+            {
+                samples = (float[])blockHeights.Clone();
+                vertices = TerrainBlockMesh.Vertices(samples, options.RenderStyle);
+            }
+            else
+            {
+                vertices = new float[Side * Side * GpuTerrainMesh.VertexStride];
+                for (int row = 0; row < Side; row++)
+                for (int column = 0; column < Side; column++)
+                {
+                    int vertex = row * Side + column, offset = vertex * GpuTerrainMesh.VertexStride;
+                    vertices[offset] = column * (TileGeometry.Extent / Segments);
+                    vertices[offset + 1] = row * (TileGeometry.Extent / Segments);
+                    vertices[offset + 2] = heights[vertex];
+                    vertices[offset + 3] = source.Light[vertex];
+                }
+            }
+            retained = new(retained?.ResourceKey ?? new object(), patch.Id, patch.Copy, vertices,
+                (retained?.Revision ?? 0) + 1, options.RenderStyle, samples);
+            gpuMeshes[key] = retained;
+        }
+        retained!.Frame = frame;
+        return retained;
+    }
+
+    private float SkirtHeight(int index)
+    {
+        var patch = patches[index];
+        float minimum = patchFloors[index];
+        double epsilon = patch.Size * 1e-7;
+        for (int i = 0; i < patches.Count; i++)
+        {
+            var neighbour = patches[i];
+            if (neighbour.Left > patch.Left + patch.Size + epsilon || neighbour.Left + neighbour.Size < patch.Left - epsilon ||
+                neighbour.Top > patch.Top + patch.Size + epsilon || neighbour.Top + neighbour.Size < patch.Top - epsilon) continue;
+            minimum = Math.Min(minimum, patchFloors[i]);
+        }
+        float step = MapRendering.HeightStep(options.RenderStyle);
+        return MathF.Floor(minimum / step) * step - step;
     }
 
     private static unsafe GpuTerrainTexture PrepareGpuTexture(Texture source)
@@ -232,6 +308,7 @@ internal sealed class TerrainSurface : IDisposable
     {
         gpuScene = scene;
         camera = scene.Camera;
+        near = (float)camera.NearLimit(scene.Height);
         options = scene.TerrainOptions;
         width = scene.ArtWidth;
         height = scene.ArtHeight;
@@ -280,8 +357,10 @@ internal sealed class TerrainSurface : IDisposable
     {
         var (transform, _) = projection.Get(id, copy);
         var range = options.Relief ? HeightBounds(id) : default;
-        float low = (float)options.LocalAltitude(camera, range.Low) * meters;
-        float high = (float)options.LocalAltitude(camera, range.High) * meters;
+        // Quantized caps and seam skirts extend beyond the physical DEM extrema.
+        double margin = MapRendering.Blocks(options.RenderStyle) ? MapRendering.HeightStep(options.RenderStyle) * 2 : 0;
+        float low = (float)options.LocalAltitude(camera, range.Low - margin) * meters;
+        float high = (float)options.LocalAltitude(camera, range.High + margin) * meters;
         Span<H> corners = stackalloc H[8];
         for (int corner = 0; corner < corners.Length; corner++)
             corners[corner] = transform.Vertex((corner & 1) == 0 ? 0 : TileGeometry.Extent,
@@ -290,11 +369,11 @@ internal sealed class TerrainSurface : IDisposable
         {
             bool outside = true;
             foreach (var corner in corners)
-                if (TileTransform.Plane(plane, corner, width, height, transform.Far) >= 0) { outside = false; break; }
+                if (TileTransform.Plane(plane, corner, width, height, transform.Far, transform.Near) >= 0) { outside = false; break; }
             if (outside) return;
         }
         float minimumW = transform.Perspective ? float.PositiveInfinity : 1;
-        foreach (var corner in corners) minimumW = Math.Min(minimumW, Math.Max((float)MapCamera.Near, corner.W));
+        foreach (var corner in corners) minimumW = Math.Min(minimumW, Math.Max(transform.Near, corner.W));
         // A projected patch's unforeshortened side controls both texture detail and mesh
         // density. Near-plane patches split before rasterization, keeping clipping bounded.
         float priority = MathF.Sqrt(transform.XX * transform.XX + transform.YX * transform.YX) * TileGeometry.Extent / minimumW;
@@ -434,15 +513,15 @@ internal sealed class TerrainSurface : IDisposable
         {
             int n = 0;
             var previous = polygon[count - 1];
-            float previousDistance = TileTransform.Plane(plane, previous.Screen, width, height, far);
+            float previousDistance = TileTransform.Plane(plane, previous.Screen, width, height, far, near);
             bool allInside = true;
             for (int i = 0; i < count; i++)
-                allInside &= TileTransform.Plane(plane, polygon[i].Screen, width, height, far) >= 0;
+                allInside &= TileTransform.Plane(plane, polygon[i].Screen, width, height, far, near) >= 0;
             if (allInside) continue;
             for (int i = 0; i < count; i++)
             {
                 var next = polygon[i];
-                float distance = TileTransform.Plane(plane, next.Screen, width, height, far);
+                float distance = TileTransform.Plane(plane, next.Screen, width, height, far, near);
                 if ((previousDistance < 0) != (distance < 0)) scratch[n++] = Vertex.Lerp(previous, next, previousDistance / (previousDistance - distance));
                 if (distance >= 0) scratch[n++] = next;
                 previous = next;
@@ -492,7 +571,10 @@ internal sealed class TerrainSurface : IDisposable
                 if (!camera.Perspective && z < depth[offset]) continue;
                 int tx = Math.Clamp((int)(u * reciprocal), 0, TextureSize - 1), ty = Math.Clamp((int)(v * reciprocal), 0, TextureSize - 1);
                 float actualHeight = raw * reciprocal;
-                uint color = Color(texels[ty * TextureSize + tx], actualHeight, shade * reciprocal);
+                float sampleU = u * reciprocal, sampleV = v * reciprocal;
+                uint source = MapRendering.Smooth(options.RenderStyle)
+                    ? SampleLinear(texels, sampleU, sampleV) : texels[ty * TextureSize + tx];
+                uint color = Color(source, actualHeight, shade * reciprocal, a.Face, sampleU / TextureSize, sampleV / TextureSize);
                 pixels[offset] = color;
                 depth[offset] = z;
                 if (camera.Perspective) inverseDepth[offset] = iw;
@@ -520,16 +602,74 @@ internal sealed class TerrainSurface : IDisposable
             (((y - x) * dy2 - (z - x) * dy1) / determinant, (dx1 * (z - x) - dx2 * (y - x)) / determinant);
     }
 
-    private uint Color(uint source, float altitude, float illumination)
+    private uint Color(uint source, float altitude, float illumination, int face, float u, float v)
     {
         if (options.Hypsometric) source = PixelPalette.Mix(source, ElevationColor(altitude), .64f);
         // Six tonal levels keep smooth geographic light legible as deliberate pixel art.
-        float shade = MathF.Round(Math.Clamp(.72f + illumination * .4f, .52f, 1.16f) * 6) / 6;
+        float shade = Math.Clamp(.72f + illumination * .4f, .52f, 1.16f);
+        if (!MapRendering.Smooth(options.RenderStyle)) shade = MathF.Round(shade * 6) / 6;
+        if (options.RenderStyle == MapRenderStyle.Minecraft)
+        {
+            if (face > 0)
+            {
+                source = PixelPalette.Mix(source, 0xff7e5e41, .68f);
+                shade *= ((face - 1) % 4) switch { 0 => .68f, 1 => .82f, 2 => 1, _ => .88f };
+                if (Fraction(altitude * .5f) < .065f) shade *= .78f;
+            }
+            else
+            {
+                float x = Fraction(u * 8), y = Fraction(v * 8);
+                if (Math.Min(Math.Min(x, 1 - x), Math.Min(y, 1 - y)) < .018f) shade *= .88f;
+            }
+            shade *= .96f + (((int)MathF.Floor(u * 128) * 13 + (int)MathF.Floor(v * 128) * 7) & 3) * .022f;
+        }
+        if (options.RenderStyle == MapRenderStyle.Roblox)
+        {
+            float red = (source >> 16) & 255, green = (source >> 8) & 255, blue = source & 255;
+            float mean = red * .2126f + green * .7152f + blue * .0722f;
+            source = 0xff000000 | (uint)Math.Clamp(mean + (red - mean) * 1.3f + 9, 0, 255) << 16 |
+                (uint)Math.Clamp(mean + (green - mean) * 1.3f + 9, 0, 255) << 8 |
+                (uint)Math.Clamp(mean + (blue - mean) * 1.3f + 9, 0, 255);
+            if (face > 0)
+                shade *= (((face - 1) % 4) switch { 0 => .74f, 1 => .88f, 2 => 1.04f, _ => .93f }) * (face <= 4 ? 1.08f : .94f);
+            else
+            {
+                float x = Fraction(u * 32) - .5f, y = Fraction(v * 32) - .5f;
+                float radius = MathF.Sqrt(x * x + y * y);
+                float rim = Smooth(.13f, .16f, radius) - Smooth(.16f, .19f, radius);
+                shade *= 1 + rim * (x + y < 0 ? .11f : -.10f);
+            }
+        }
         if (Math.Abs(shade - 1) < .001f) return source;
         uint r = (uint)Math.Clamp((int)(((source >> 16) & 255) * shade), 0, 255);
         uint g = (uint)Math.Clamp((int)(((source >> 8) & 255) * shade), 0, 255);
         uint b = (uint)Math.Clamp((int)((source & 255) * shade), 0, 255);
         return 0xff000000 | r << 16 | g << 8 | b;
+    }
+
+    private static float Fraction(float value) => value - MathF.Floor(value);
+
+    private static float Smooth(float start, float end, float value)
+    {
+        float amount = Math.Clamp((value - start) / (end - start), 0, 1);
+        return amount * amount * (3 - 2 * amount);
+    }
+
+    private static uint SampleLinear(ReadOnlySpan<uint> texels, float u, float v)
+    {
+        float x = Math.Clamp(u - .5f, 0, TextureSize - 1), y = Math.Clamp(v - .5f, 0, TextureSize - 1);
+        int left = (int)x, top = (int)y, right = Math.Min(TextureSize - 1, left + 1), bottom = Math.Min(TextureSize - 1, top + 1);
+        float dx = x - left, dy = y - top;
+        uint a = texels[top * TextureSize + left], b = texels[top * TextureSize + right];
+        uint c = texels[bottom * TextureSize + left], d = texels[bottom * TextureSize + right];
+        uint result = 0xff000000;
+        for (int shift = 0; shift < 24; shift += 8)
+        {
+            float upper = ((a >> shift) & 255) * (1 - dx) + ((b >> shift) & 255) * dx;
+            float lower = ((c >> shift) & 255) * (1 - dx) + ((d >> shift) & 255) * dx;
+            result |= (uint)MathF.Floor(upper * (1 - dy) + lower * dy + .5f) << shift;
+        }
+        return result;
     }
 
     internal static uint ElevationColor(float altitude)
@@ -585,7 +725,9 @@ internal sealed class TerrainSurface : IDisposable
             int column = Math.Min(count - 1, (int)(x * count)), row = Math.Min(count - 1, (int)(y * count));
             var id = new TileId(zoom, column, row);
             if (!heightPatches.TryGetValue(id, out int index)) continue;
-            altitude = SampleMesh(stitched[index], x * count - column, y * count - row);
+            if (MapRendering.Blocks(options.RenderStyle))
+                altitude = TerrainBlockMesh.Sample(GetGpuMesh(index).HeightLight!, x * count - column, y * count - row, options.RenderStyle);
+            else altitude = SampleMesh(stitched[index], x * count - column, y * count - row);
             return true;
         }
         return false;
@@ -601,7 +743,9 @@ internal sealed class TerrainSurface : IDisposable
         double sx = x + .5 - logicalWidth * .5 / pixelSize, sy = y + .5 - logicalHeight * .5 / pixelSize;
         var (sp, cp) = Math.SinCos(camera.PitchRadians);
         double z = altitude - camera.TargetPixels / pixelSize;
-        double u = sx / inverse, v = (sy / inverse + z * sp) / cp;
+        double u = sx / inverse;
+        double v = !camera.Perspective || Math.Abs(cp) >= Math.Abs(sp) ? (sy / inverse + z * sp) / cp
+            : (MapCamera.Focal(logicalHeight) / pixelSize * (1 - 1 / inverse) - z * cp) / sp;
         var (sin, cos) = Math.SinCos(camera.Bearing * Math.PI / 180);
         double world = camera.WorldSize / pixelSize;
         double wx = camera.CenterX + (u * cos - v * sin) / world, wy = camera.CenterY + (u * sin + v * cos) / world;

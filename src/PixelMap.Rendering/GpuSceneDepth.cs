@@ -1,4 +1,5 @@
 using SkiaSharp;
+using System.Buffers;
 using System.Collections.Concurrent;
 
 namespace PixelMap.Rendering;
@@ -154,18 +155,24 @@ internal sealed class GpuSceneDepth
     private void AddTerrain(TerrainGpuDraw draw, GpuMapFrame frame)
     {
         var vertices = draw.Mesh.Vertices;
-        Span<Vertex> projected = stackalloc Vertex[GpuTerrainMesh.Side * GpuTerrainMesh.Side];
-        for (int i = 0; i < projected.Length; i++)
+        int count = vertices.Length / GpuTerrainMesh.VertexStride;
+        Vertex[]? storage = count > GpuTerrainMesh.Side * GpuTerrainMesh.Side ? ArrayPool<Vertex>.Shared.Rent(count) : null;
+        Span<Vertex> projected = storage is not null ? storage.AsSpan(0, count) : stackalloc Vertex[count];
+        try
         {
-            int offset = i * GpuTerrainMesh.VertexStride;
-            float raw = vertices[offset + 2];
-            float altitude = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, raw) * pixelsPerMeter;
-            IncludeAltitude(altitude);
-            projected[i] = new(draw.Transform.Vertex(vertices[offset], vertices[offset + 1], altitude), raw);
+            for (int i = 0; i < projected.Length; i++)
+            {
+                int offset = i * GpuTerrainMesh.VertexStride;
+                float raw = vertices[offset + 2];
+                float altitude = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, raw) * pixelsPerMeter;
+                IncludeAltitude(altitude);
+                projected[i] = new(draw.Transform.Vertex(vertices[offset], vertices[offset + 1], altitude), raw);
+            }
+            var indices = draw.Mesh.TriangleIndices;
+            for (int i = 0; i < indices.Length; i += 3)
+                AddTriangle(projected[indices[i]], projected[indices[i + 1]], projected[indices[i + 2]], draw.Transform.Far, true);
         }
-        var indices = GpuTerrainMesh.Indices;
-        for (int i = 0; i < indices.Length; i += 3)
-            AddTriangle(projected[indices[i]], projected[indices[i + 1]], projected[indices[i + 2]], draw.Transform.Far, true);
+        finally { if (storage is not null) ArrayPool<Vertex>.Shared.Return(storage); }
     }
 
     private void AddBuildings(GpuBuildingDraw draw, GpuMapFrame frame)
@@ -256,7 +263,7 @@ internal sealed class GpuSceneDepth
     {
         int code = 0;
         for (int plane = 0; plane < 6; plane++)
-            if (TileTransform.Plane(plane, vertex, width, height, far) < 0) code |= 1 << plane;
+            if (TileTransform.Plane(plane, vertex, width, height, far, lens.Near) < 0) code |= 1 << plane;
         return code;
     }
 
@@ -281,11 +288,11 @@ internal sealed class GpuSceneDepth
             if (((ca | cb | cc) & (1 << plane)) == 0) continue;
             int output = 0;
             var previous = polygon[count - 1];
-            float previousDistance = TileTransform.Plane(plane, previous.Screen, width, height, far);
+            float previousDistance = TileTransform.Plane(plane, previous.Screen, width, height, far, lens.Near);
             for (int i = 0; i < count; i++)
             {
                 var current = polygon[i];
-                float distance = TileTransform.Plane(plane, current.Screen, width, height, far);
+                float distance = TileTransform.Plane(plane, current.Screen, width, height, far, lens.Near);
                 if ((distance < 0) != (previousDistance < 0))
                     buffer[output++] = Vertex.Lerp(previous, current, previousDistance / (previousDistance - distance));
                 if (distance >= 0) buffer[output++] = current;
@@ -312,8 +319,8 @@ internal sealed class GpuSceneDepth
         float lo = 0, hi = 1;
         for (int plane = 0; plane < 6; plane++)
         {
-            float from = TileTransform.Plane(plane, a, width, height, far);
-            float to = TileTransform.Plane(plane, b, width, height, far);
+            float from = TileTransform.Plane(plane, a, width, height, far, lens.Near);
+            float to = TileTransform.Plane(plane, b, width, height, far, lens.Near);
             if (from < 0 && to < 0) return;
             if (from >= 0 && to >= 0) continue;
             float t = from / (from - to);

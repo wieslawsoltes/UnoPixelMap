@@ -42,7 +42,7 @@ public sealed partial class MainPage : Page
     private CancellationTokenSource? _request;
     private PanelKind _panel;
     private long _lastReadout;
-    private bool _restored, _journeysOpen;
+    private bool _restored, _journeysOpen, _gameOpen;
     private MapPlace? _selectedPlace;
 
     private enum PanelKind { Closed, Guide, Search, Help, Share, Camera }
@@ -52,6 +52,8 @@ public sealed partial class MainPage : Page
         InitializeComponent();
         if (OperatingSystem.IsBrowser()) Map.AttachAudioDevice(new PixelMap.Audio.BrowserAudioDevice());
         JourneyPanel.Attach(Map, _geocoder, new RoutePlanner(RoutingHttp, Map.VectorTiles));
+        GamePanel.Attach(Map);
+        GamePanel.CloseRequested += (_, _) => DisplayGame(false);
         JourneyPanel.CloseRequested += (_, _) => DisplayJourneys(false);
         JourneyPanel.PickingChanged += (_, _) => LayoutJourneys();
         JourneyPanel.SizeChanged += (_, _) => UpdateNavigationInsets();
@@ -86,6 +88,7 @@ public sealed partial class MainPage : Page
         SearchOverlay.Width = Math.Max(120, Math.Min(344, width - 2 * inset));
         Header.Padding = new Thickness(narrow ? 8 : 16, narrow ? 6 : 9, narrow ? 8 : 16, narrow ? 6 : 9);
         BrandCaption.Visibility = width < 360 ? Visibility.Collapsed : Visibility.Visible;
+        GuideButton.Visibility = width < 650 ? Visibility.Collapsed : Visibility.Visible;
         Status.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
         ScaleBar.Visibility = width < 790 ? Visibility.Collapsed : Visibility.Visible;
         MobileStatus.Visibility = narrow ? Visibility.Visible : Visibility.Collapsed;
@@ -104,7 +107,15 @@ public sealed partial class MainPage : Page
         var camera = Map.Camera;
         PerspectiveItem.IsChecked = camera.Perspective;
         GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
+        PixelStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Pixel;
+        NormalStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Normal;
+        MinecraftStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Minecraft;
+        RobloxStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Roblox;
         TerrainReliefItem.IsChecked = Map.IsTerrainEnabled;
+        MapLayerButton.IsChecked = !Map.IsEarthImageryEnabled && !Map.IsElevationLayerEnabled;
+        EarthLayerButton.IsChecked = Map.IsEarthImageryEnabled;
+        ElevationLayerButton.IsChecked = Map.IsElevationLayerEnabled;
+        EarthCredits.Visibility = Map.IsEarthImageryEnabled ? Visibility.Visible : Visibility.Collapsed;
         ElevationLegend.Visibility = Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
         ElevationCredits.Visibility = Map.IsTerrainEnabled || Map.IsElevationLayerEnabled ? Visibility.Visible : Visibility.Collapsed;
         ElevationReadout.Text = Map.HasElevation
@@ -113,7 +124,7 @@ public sealed partial class MainPage : Page
         AutomationProperties.SetName(ElevationReadout, ElevationReadout.Text);
         var status = Map.StatusText;
         var location = FormattableString.Invariant($"{camera.Latitude:0.0000}°, {camera.Longitude:0.0000}°");
-        Status.Text = FormattableString.Invariant($"{status}   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
+        Status.Text = FormattableString.Invariant($"{status}   ·   {Map.RenderStyle} rendering   ·   {location}   ·   z{camera.Zoom:0.0}   ·   {camera.Bearing:0}°");
         if ((Map.IsTerrainEnabled || Map.IsElevationLayerEnabled) && Map.HasElevation)
             Status.Text += FormattableString.Invariant($"   ·   {Map.CenterElevationMeters:0} m elevation");
         MobileStatus.Text = status;
@@ -155,6 +166,13 @@ public sealed partial class MainPage : Page
     {
         Map.IsGpuRenderingEnabled = !Map.IsGpuRenderingEnabled;
         GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
+    }
+
+    private void OnRenderStyle(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleMenuFlyoutItem item && Enum.TryParse<MapRenderStyle>(item.Tag?.ToString(), out var style))
+            Map.RenderStyle = style;
+        SyncReadout();
     }
 
     private void OnTerrainRelief(object sender, RoutedEventArgs e)
@@ -220,8 +238,10 @@ public sealed partial class MainPage : Page
             JourneyPanel.LoadDemo(mode);
             return;
         }
-        if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette, out var earth, out var elevation, out var terrain, out var exaggeration)) return;
+        if (page is null || !MapViewLink.TryRead(page, out var camera, out var palette, out var earth, out var elevation,
+            out var terrain, out var exaggeration, out var renderStyle)) return;
         SetPalette(palette);
+        Map.RenderStyle = renderStyle;
         SetBaseLayer(earth, elevation);
         Map.IsTerrainEnabled = terrain;
         Map.TerrainExaggeration = exaggeration;
@@ -233,9 +253,9 @@ public sealed partial class MainPage : Page
     {
         var page = CurrentPageUri() ?? new Uri("https://wieslawsoltes.github.io/UnoPixelMap/");
         var url = MapViewLink.Create(page, Map.Camera, Map.Palette, Map.IsEarthImageryEnabled,
-            Map.IsElevationLayerEnabled, Map.IsTerrainEnabled, Map.TerrainExaggeration).AbsoluteUri;
-        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link preserves the map position, base layer, terrain relief, vertical exaggeration, camera and lighting.");
-        var field = new TextBox { Text = url, IsReadOnly = true, HorizontalAlignment = HorizontalAlignment.Stretch };
+            Map.IsElevationLayerEnabled, Map.IsTerrainEnabled, Map.TerrainExaggeration, Map.RenderStyle).AbsoluteUri;
+        ShowPanel(PanelKind.Share, "SHARE THIS VIEW", "This link preserves the map position, rendering style, base layer, terrain relief, camera and lighting.");
+        var field = new TextBox { Text = url, IsReadOnly = true, FontSize = 16, HorizontalAlignment = HorizontalAlignment.Stretch };
         AutomationProperties.SetName(field, "Shareable map link");
         field.GotFocus += (_, _) => field.SelectAll();
         Rows.Children.Add(field);
@@ -261,11 +281,36 @@ public sealed partial class MainPage : Page
 
     private void OnJourneys(object sender, RoutedEventArgs e) => DisplayJourneys(true);
 
+    private void OnGame(object sender, RoutedEventArgs e) => DisplayGame(!_gameOpen);
+
+    private void DisplayGame(bool show)
+    {
+        if (_gameOpen == show) return;
+        if (show)
+        {
+            DisplayJourneys(false);
+            CloseDrawer();
+            _gameOpen = true;
+            GamePanel.Visibility = Visibility.Visible;
+            GamePanel.Open();
+        }
+        else
+        {
+            _gameOpen = false;
+            GamePanel.Hide();
+            GamePanel.Visibility = Visibility.Collapsed;
+            Map.StopFreeRoam();
+        }
+        SceneDock.Visibility = MapTools.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+        LayoutJourneys();
+    }
+
     private void DisplayJourneys(bool show)
     {
         _journeysOpen = show;
         if (show)
         {
+            DisplayGame(false);
             CloseDrawer();
             JourneyPanel.Open(_selectedPlace);
         }
@@ -277,7 +322,7 @@ public sealed partial class MainPage : Page
     {
         bool pick = _journeysOpen && JourneyPanel.IsPicking;
         JourneyPanel.Visibility = _journeysOpen && !pick ? Visibility.Visible : Visibility.Collapsed;
-        SearchOverlay.Visibility = _journeysOpen ? Visibility.Collapsed : Visibility.Visible;
+        SearchOverlay.Visibility = _journeysOpen || _gameOpen ? Visibility.Collapsed : Visibility.Visible;
         PickBanner.Visibility = pick ? Visibility.Visible : Visibility.Collapsed;
         if (pick) PickText.Text = JourneyPanel.PickingPrompt;
         UpdateNavigationInsets();
@@ -300,10 +345,11 @@ public sealed partial class MainPage : Page
     private void OnCameraTools(object sender, RoutedEventArgs e)
     {
         if (_panel == PanelKind.Camera) { CloseDrawer(); return; }
-        ShowPanel(PanelKind.Camera, "CAMERA", "Right-drag to orbit and tilt around the map.");
+        ShowPanel(PanelKind.Camera, "CAMERA", "Right-drag to orbit and tilt. Trackpad scroll pans, and pinch zooms around the pointer.");
         AddCameraAction("North-up plan", () => ChooseCamera(Map.Camera with { Bearing = 0, Pitch = 0, Perspective = false }));
         AddCameraAction("Isometric · 55°", () => ChooseCamera(Map.Camera with { Bearing = -35, Pitch = 55, Perspective = false }));
         AddCameraAction("Low skyline · 70°", () => ChooseCamera(Map.Camera with { Pitch = 70, Perspective = true }));
+        AddCameraAction("Horizon · 88°", () => ChooseCamera(Map.Camera with { Pitch = 88, Perspective = true }));
         AddCameraAction("Bird’s-eye · 30°", () => ChooseCamera(Map.Camera with { Pitch = 30, Perspective = true }));
         var orbit = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4 };
         foreach (var (text, bearing, pitch) in new[] { ("Left", -15d, 0d), ("Right", 15d, 0d), ("Tilt -", 0d, -10d), ("Tilt +", 0d, 10d) })
@@ -346,11 +392,13 @@ public sealed partial class MainPage : Page
     private void OnHelp(object sender, RoutedEventArgs e)
     {
         ShowPanel(PanelKind.Help, "MAP CONTROLS", "Place search by Photon / komoot with OpenStreetMap data.");
-        AddHelp("Browse", "Drag to pan, scroll or pinch to zoom. Tap the map to inspect a location.");
+        AddHelp("Browse", "Drag or use a two-finger trackpad scroll to pan. Pinch over the map to zoom around your fingers or pointer. Mouse-wheel zoom stays on the map. Tap to inspect a location.");
         AddHelp("Change perspective", "Use the curved arrows to rotate. Switch projection or lighting in View.");
         AddHelp("Keyboard", "Focus the map. Use arrows to pan, + and − to zoom, Q and E to rotate, P to switch projection, or Home to return to Manhattan.");
         AddHelp("Elevation", "Choose Elevation for altitude colors. Terrain relief works with Map and Earth too. Camera tools adjust vertical exaggeration from 1× to 4×. Elevation readouts remain in real metres above sea level.");
         AddHelp("Journeys", "Use Route beside search. Choose stops or try a vehicle demo. Preview, take control, or jump to a turn.");
+        AddHelp("Free roam", "Choose Play to walk, drive, cycle, sail, pilot or fly freely from the map center. WASD moves, dragging looks around, Space jumps or brakes, and Page Up / Down changes flight altitude. Two independent touch sticks control movement and look.");
+        AddHelp("Graphics", "View selects Pixel art, Normal, Minecraft or Roblox rendering. GPU rendering starts enabled. Every style works with Map, Earth and Elevation.");
         AddHelp("Drop a pin", "Enter latitude, longitude in the search field and press Enter.");
     }
 
@@ -475,6 +523,7 @@ public sealed partial class MainPage : Page
 
     private void ShowPanel(PanelKind kind, string heading, string note)
     {
+        DisplayGame(false);
         DisplayJourneys(false);
         CancelRequest();
         _panel = kind;

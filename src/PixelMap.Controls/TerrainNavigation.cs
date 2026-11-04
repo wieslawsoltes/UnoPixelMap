@@ -19,7 +19,13 @@ public sealed partial class PixelMapControl
     private MapTile[] _snapshotVectors = [];
     private ElevationSnapshot _elevationSnapshot = ElevationSnapshot.Empty;
     private TerrainOptions? _terrain;
-    private bool UsesElevation => IsTerrainEnabled || IsElevationLayerEnabled;
+    private bool _freeRoamTerrainActive;
+    // Physical free-roam contacts retain the DEM when its visual relief is hidden.
+    private bool UsesElevation => IsTerrainEnabled || IsElevationLayerEnabled || Journey.IsFreeRoaming;
+
+    private IReadOnlyList<MapTile> CollisionTiles() => RenderStyle is MapRenderStyle.Minecraft or MapRenderStyle.Roblox
+        ? _vectors.Display.Select(tile => PixelMapRenderer.PrepareCollisionTile(tile, RenderStyle)).ToArray()
+        : _vectors.Display;
 
     private readonly record struct InteractionView(MapCamera Camera, TerrainOptions? Terrain,
         double Width, double Height);
@@ -66,7 +72,7 @@ public sealed partial class PixelMapControl
         if (!_active) return;
         RefreshElevationSnapshot();
         Camera = Camera.OnTerrain(_terrain, ActualHeight);
-        _worldContacts.Update(_vectors.Display, _elevationSnapshot);
+        _worldContacts.Update(CollisionTiles(), _elevationSnapshot);
         Journey.RefreshSurface();
         if (!Journey.Active) _wasTracking = false;
         UpdateRideCamera();
@@ -131,7 +137,7 @@ public sealed partial class PixelMapControl
         _terrain = next;
         if (changed)
         {
-            _worldContacts.Update(_vectors.Display, _elevationSnapshot);
+            _worldContacts.Update(CollisionTiles(), _elevationSnapshot);
             Journey.RefreshSurface();
             Camera = Camera.OnTerrain(_terrain, ActualHeight);
             if (!Journey.Active) _wasTracking = false;

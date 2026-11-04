@@ -28,8 +28,25 @@ public sealed partial class PixelMapRenderer
             long revision = aligned ? frame : -1;
             if (aligned && lastView.GpuGeneration == GeometryGpuGeneration && activeGpuDepth is { } gpuDepth)
                 revision = gpuDepth.Revision;
-            (routeOverlay ??= new()).Draw(canvas, width, height, Math.Clamp(pixelSize, 1, 8), camera, plan, vehicle,
-                aligned ? buildings : null, Math.Max(1, lastView.PixelSize), revision, CurrentTerrain, aligned ? reliefSurface : null);
+            (routeOverlay ??= new()).Draw(canvas, width, height, MapRendering.PixelSize(renderStyle, pixelSize), camera, plan, vehicle,
+                aligned ? buildings : null, Math.Max(1, lastView.PixelSize), revision, navigationTerrain, aligned ? reliefSurface : null, renderStyle);
+        }
+    }
+
+    /// <summary>Draw a free-roaming, world-scale vehicle and its effects without a route.</summary>
+    public void DrawVehicle(SKCanvas canvas, int width, int height, MapCamera camera,
+        TravelMode mode, VehiclePose vehicle, int pixelSize = 2)
+    {
+        ArgumentNullException.ThrowIfNull(canvas);
+        if (width <= 0 || height <= 0) return;
+        lock (sync)
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            bool aligned = lastPicture is not null && lastView.Camera == camera &&
+                lastView.Width == width && lastView.Height == height;
+            (routeOverlay ??= new()).DrawVehicle(canvas, width, height, MapRendering.PixelSize(renderStyle, pixelSize),
+                camera, mode, vehicle, aligned ? buildings : null, Math.Max(1, lastView.PixelSize),
+                navigationTerrain, aligned ? reliefSurface : null, renderStyle);
         }
     }
 }
@@ -38,7 +55,7 @@ internal sealed class RouteOverlay : IDisposable
 {
     private readonly record struct Vertex(double X, double Y, double Distance, double Elevation = 0);
     private readonly record struct Stroke(SKPoint A, SKPoint B, double Start, double End, bool Hidden, float WeightA, float WeightB);
-    private readonly record struct View(int Width, int Height, int Pixel, MapCamera Camera, long Revision, TerrainOptions? Terrain);
+    private readonly record struct View(int Width, int Height, int Pixel, MapCamera Camera, long Revision, TerrainOptions? Terrain, MapRenderStyle RenderStyle);
 
     private RoutePlan? plan;
     private TerrainOptions? meshTerrain;
@@ -53,12 +70,16 @@ internal sealed class RouteOverlay : IDisposable
     private View? view;
     private readonly VehicleEffects effects = new();
     private readonly VehicleSprite sprite = new();
+    private readonly WorldVehicle worldVehicle = new();
+    private TravelMode? freeMode;
     private readonly List<SKPoint> stops = [];
     private static readonly SKSamplingOptions Nearest = new(SKFilterMode.Nearest, SKMipmapMode.None);
 
     internal void Draw(SKCanvas canvas, int w, int h, int pixel, MapCamera camera, RoutePlan next, VehiclePose? vehicle,
-        BuildingRasterizer? depth, int depthPixel, long revision, TerrainOptions? terrain, TerrainSurface? terrainMesh)
+        BuildingRasterizer? depth, int depthPixel, long revision, TerrainOptions? terrain, TerrainSurface? terrainMesh, MapRenderStyle renderStyle)
     {
+        freeMode = null;
+        paint.IsAntialias = MapRendering.Smooth(renderStyle);
         bool changedPlan = !ReferenceEquals(plan, next);
         if (changedPlan || meshTerrain != terrain)
         {
@@ -70,7 +91,7 @@ internal sealed class RouteOverlay : IDisposable
             if (changedPlan) effects.Reset();
         }
         if (vertices.Length == 0) return;
-        var key = new View(w, h, pixel, camera, revision, terrain);
+        var key = new View(w, h, pixel, camera, revision, terrain, renderStyle);
         if (view != key)
         {
             PrepareView(key, next, depth, depthPixel, terrainMesh);
@@ -88,28 +109,60 @@ internal sealed class RouteOverlay : IDisposable
             DrawStop(canvas, stops[i], i == 0, i == stops.Count - 1, pixel);
 
         if (vehicle is { } sample)
-        {
-            bool Visible(float x, float y, double altitude) => depth is null ||
-                !depth.CoversAt(x * pixel / depthPixel, y * pixel / depthPixel, (float)(altitude - camera.GroundAltitudeMeters));
-            effects.Advance(next.Mode, sample);
-            effects.Draw(canvas, camera, w, h, pixel, next.Mode, paint, Visible, terrain, terrainMesh);
-            bool inFrustum = VehicleEffects.Position(camera,sample.Point,sample.AltitudeMeters,w,h,pixel,out float x,out float y,out float lift,terrain,terrainMesh);
-            if (inFrustum && x > -32 && x < w / pixel + 32 && y - lift > -32 && y - lift < h / pixel + 32)
-            {
-                double renderedAltitude = terrain?.RenderAltitude(camera, sample.Point.Latitude, sample.Point.Longitude, sample.AltitudeMeters, terrainMesh) ?? sample.AltitudeMeters;
-                bool visible = Visible(x, y - lift, renderedAltitude + (terrain is { Relief: true } ? 2 : 0));
-                double surface = terrain?.Elevation.SampleSurfaceMeters(sample.Point.Latitude, sample.Point.Longitude) ?? 0;
-                double footAltitude = terrain?.RenderAltitude(camera, sample.Point.Latitude, sample.Point.Longitude, surface, terrainMesh) ?? 0;
-                SKPoint? ground = camera.TryProject(sample.Point.Latitude, sample.Point.Longitude, footAltitude, w, h, out var foot)
-                    ? new((float)(foot.X / pixel), (float)(foot.Y / pixel)) : null;
-                if (terrain is { Relief: true } && ground is { } shadow && !Visible(shadow.X, shadow.Y, footAltitude + 2))
-                    ground = null;
-                var axes = VehicleEffects.Axes(camera, sample.Point, sample.AltitudeMeters, sample.Bearing, w, h, terrain, next.Mode != TravelMode.Flight, terrainMesh);
-                sprite.Draw(canvas, new(x, y - lift), ground, next.Mode, axes, effects.Time, sample.Moving, visible);
-            }
-        }
+            DrawVehicleCore(canvas, w, h, pixel, camera, next.Mode, sample, depth, depthPixel, terrain, terrainMesh, renderStyle, false);
         else effects.Reset();
         canvas.Restore();
+    }
+
+    internal void DrawVehicle(SKCanvas canvas, int w, int h, int pixel, MapCamera camera, TravelMode mode,
+        VehiclePose sample, BuildingRasterizer? depth, int depthPixel, TerrainOptions? terrain,
+        TerrainSurface? terrainMesh, MapRenderStyle renderStyle)
+    {
+        if (plan is not null || freeMode != mode)
+        {
+            effects.Reset();
+            plan = null;
+            freeMode = mode;
+            view = null;
+            vertices = [];
+            lineImage?.Dispose();
+            lineImage = null;
+        }
+        canvas.Save();
+        canvas.ClipRect(new(0, 0, w, h));
+        canvas.Scale(pixel);
+        DrawVehicleCore(canvas, w, h, pixel, camera, mode, sample, depth, depthPixel, terrain, terrainMesh, renderStyle, true);
+        canvas.Restore();
+    }
+
+    private void DrawVehicleCore(SKCanvas canvas, int w, int h, int pixel, MapCamera camera, TravelMode mode,
+        VehiclePose sample, BuildingRasterizer? depth, int depthPixel, TerrainOptions? terrain,
+        TerrainSurface? terrainMesh, MapRenderStyle renderStyle, bool worldScale)
+    {
+        bool Visible(float x, float y, double altitude) => depth is null ||
+            !depth.CoversAt(x * pixel / depthPixel, y * pixel / depthPixel, (float)(altitude - camera.GroundAltitudeMeters));
+        paint.IsAntialias = MapRendering.Smooth(renderStyle);
+        effects.Advance(mode, sample);
+        effects.Draw(canvas, camera, w, h, pixel, mode, paint, Visible, terrain, terrainMesh);
+        if (worldScale)
+        {
+            worldVehicle.Draw(canvas, camera, w, h, pixel, mode, sample, renderStyle, terrain, terrainMesh, Visible);
+            return;
+        }
+        bool inFrustum = VehicleEffects.Position(camera,sample.Point,sample.AltitudeMeters,w,h,pixel,out float x,out float y,out float lift,terrain,terrainMesh);
+        if (inFrustum && x > -32 && x < w / pixel + 32 && y - lift > -32 && y - lift < h / pixel + 32)
+        {
+            double renderedAltitude = terrain?.RenderAltitude(camera, sample.Point.Latitude, sample.Point.Longitude, sample.AltitudeMeters, terrainMesh) ?? sample.AltitudeMeters;
+            bool visible = Visible(x, y - lift, renderedAltitude + (terrain is { Relief: true } ? 2 : 0));
+            double surface = terrain?.Elevation.SampleSurfaceMeters(sample.Point.Latitude, sample.Point.Longitude) ?? 0;
+            double footAltitude = terrain?.RenderAltitude(camera, sample.Point.Latitude, sample.Point.Longitude, surface, terrainMesh) ?? 0;
+            SKPoint? ground = camera.TryProject(sample.Point.Latitude, sample.Point.Longitude, footAltitude, w, h, out var foot)
+                ? new((float)(foot.X / pixel), (float)(foot.Y / pixel)) : null;
+            if (terrain is { Relief: true } && ground is { } shadow && !Visible(shadow.X, shadow.Y, footAltitude + 2))
+                ground = null;
+            var axes = VehicleEffects.Axes(camera, sample.Point, sample.AltitudeMeters, sample.Bearing, w, h, terrain, mode != TravelMode.Flight, terrainMesh);
+            sprite.Draw(canvas, new(x, y - lift), ground, mode, axes, effects.Time, sample.Moving, visible, renderStyle);
+        }
     }
 
     private void PrepareMesh(RoutePlan route)
@@ -193,7 +246,7 @@ internal sealed class RouteOverlay : IDisposable
             return v.Terrain!.LocalAltitude(cam, surface) + 2;
         }
         double pitchSin = Math.Sin(cam.PitchRadians);
-        double focal = MapCamera.Focal(v.Height), far = cam.FarLimit(v.Height);
+        double focal = MapCamera.Focal(v.Height), far = cam.FarLimit(v.Height), near = cam.NearLimit(v.Height);
         var cells = cam.TileBounds(v.Width, v.Height, 1);
         float depthRatio = v.Pixel / (float)depthPixel;
         (double X, double Y, double W) Project(Vertex p, int copy, double altitude)
@@ -214,7 +267,7 @@ internal sealed class RouteOverlay : IDisposable
             {
                 var ha = Project(a, wrap, altitudeA); var hb = Project(b, wrap, altitudeB);
                 double from=0,to=1,dw=hb.W-ha.W;
-                if (!Clip(-dw,ha.W-MapCamera.Near,ref from,ref to) || !Clip(dw,far-ha.W,ref from,ref to)) continue;
+                if (!Clip(-dw,ha.W-near,ref from,ref to) || !Clip(dw,far-ha.W,ref from,ref to)) continue;
                 double aw=ha.W+dw*from, bw=ha.W+dw*to;
                 var sa=(X:(ha.X+(hb.X-ha.X)*from)/aw,Y:(ha.Y+(hb.Y-ha.Y)*from)/aw);
                 var sb=(X:(ha.X+(hb.X-ha.X)*to)/bw,Y:(ha.Y+(hb.Y-ha.Y)*to)/bw);
@@ -362,7 +415,7 @@ internal sealed class RouteOverlay : IDisposable
 
     public void Dispose()
     {
-        lineImage?.Dispose(); partial.Dispose(); shown.Dispose(); behind.Dispose(); paint.Dispose(); sprite.Dispose();
+        lineImage?.Dispose(); partial.Dispose(); shown.Dispose(); behind.Dispose(); paint.Dispose(); sprite.Dispose(); worldVehicle.Dispose();
         foreach (var chunk in completed) chunk.Path.Dispose();
     }
 }

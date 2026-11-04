@@ -13,6 +13,7 @@ internal static class GlMapShaders
         uniform vec3 uGround;
         uniform vec4 uLens;
         uniform bool uPerspective;
+        uniform int uRenderStyle;
 
         vec4 screenPosition(vec2 point, float altitude)
         {
@@ -72,6 +73,7 @@ internal static class GlMapShaders
         uniform vec3 uSkyColor;
         uniform vec3 uHorizonColor;
         uniform float uHorizon;
+        uniform int uRenderStyle;
         out vec4 outputColor;
 
         void main()
@@ -79,7 +81,9 @@ internal static class GlMapShaders
             float row = uArtSize.y - gl_FragCoord.y;
             vec3 color = uGroundColor;
             if (row < uHorizon)
-                color = row >= max(0.0, uHorizon - 7.0) ? uHorizonColor : uSkyColor;
+                color = (uRenderStyle == 1 || uRenderStyle == 3)
+                    ? mix(uSkyColor, uHorizonColor, smoothstep(0.0, max(1.0, uHorizon), row))
+                    : row >= max(0.0, uHorizon - 7.0) ? uHorizonColor : uSkyColor;
             outputColor = vec4(color, 0.0);
         }
         """;
@@ -93,12 +97,63 @@ internal static class GlMapShaders
         out vec2 vUv;
         out vec2 vHeightLight;
         flat out int vArtworkLayer;
+        flat out int vTerrainFace;
+
+        vec2 corner(int index)
+        {
+            return vec2(index == 1 || index == 2 ? 1.0 : 0.0, index >= 2 ? 1.0 : 0.0);
+        }
 
         void main()
         {
-            ivec2 grid = ivec2(gl_VertexID % 17, gl_VertexID / 17);
-            vHeightLight = texelFetch(uHeights, ivec3(grid, int(aLayers.y + 0.5)), 0).rg;
-            vec2 point = vec2(grid) * 256.0;
+            int layer = int(aLayers.y + 0.5);
+            vec2 point;
+            vTerrainFace = 0;
+            if (uRenderStyle < 2)
+            {
+                ivec2 grid = ivec2(gl_VertexID % 17, gl_VertexID / 17);
+                vHeightLight = texelFetch(uHeights, ivec3(grid, layer), 0).rg;
+                point = vec2(grid) * 256.0;
+            }
+            else
+            {
+                bool beveled = uRenderStyle == 3;
+                int perCell = beveled ? 36 : 20;
+                int cellIndex = gl_VertexID / perCell;
+                int local = gl_VertexID % perCell;
+                ivec2 cell = ivec2(cellIndex % 8, cellIndex / 8);
+                ivec2 samplePoint = cell + ivec2(1);
+                vHeightLight = texelFetch(uHeights, ivec3(samplePoint, layer), 0).rg;
+                float top = vHeightLight.x;
+                float bevel = texelFetch(uHeights, ivec3(16, 16, layer), 0).r;
+                int face = local / 4, vertex = local % 4;
+                vTerrainFace = face;
+                vec2 within;
+                if (face == 0)
+                {
+                    within = corner(vertex);
+                    if (beveled) within = vec2(0.04) + within * 0.92;
+                }
+                else
+                {
+                    bool bevelFace = beveled && face <= 4;
+                    int edge = (face - 1) % 4;
+                    within = corner(vertex == 0 || vertex == 3 ? edge : (edge + 1) % 4);
+                    bool upper = vertex < 2;
+                    if (bevelFace)
+                    {
+                        if (upper) within = vec2(0.04) + within * 0.92;
+                        vHeightLight.x = upper ? top : top - bevel;
+                    }
+                    else
+                    {
+                        const ivec2 neighbours[4] = ivec2[4](ivec2(0, -1), ivec2(1, 0), ivec2(0, 1), ivec2(-1, 0));
+                        float lower = min(top, texelFetch(uHeights, ivec3(samplePoint + neighbours[edge], layer), 0).r);
+                        vHeightLight.x = (upper ? top : lower) - bevel;
+                    }
+                }
+                point = (vec2(cell) + within) * 512.0;
+            }
             float altitude = localFoundation(vHeightLight.x) * uGround.z;
             vec4 position = vec4(point, altitude, 1.0);
             gl_Position = clipPosition(vec4(dot(aScreenX, position), dot(aScreenY, position),
@@ -111,9 +166,11 @@ internal static class GlMapShaders
     internal const string TerrainFragment = """
         uniform sampler2DArray uArtwork;
         uniform bool uHypsometric;
+        uniform int uRenderStyle;
         in vec2 vUv;
         in vec2 vHeightLight;
         flat in int vArtworkLayer;
+        flat in int vTerrainFace;
         out vec4 outputColor;
 
         vec3 mixBytes(vec3 first, vec3 second, float amount)
@@ -140,7 +197,42 @@ internal static class GlMapShaders
             vec3 color = floor(sampleColor.bgr * 255.0 + 0.5);
             if (uHypsometric)
                 color = mixBytes(color, elevationColor(vHeightLight.x), 0.64);
-            float shade = roundEven(clamp(0.72 + vHeightLight.y * 0.4, 0.52, 1.16) * 6.0) / 6.0;
+            float shade = clamp(0.72 + vHeightLight.y * 0.4, 0.52, 1.16);
+            if (uRenderStyle == 0 || uRenderStyle == 2) shade = roundEven(shade * 6.0) / 6.0;
+            if (uRenderStyle == 2)
+            {
+                if (vTerrainFace > 0)
+                {
+                    color = mixBytes(color, vec3(126.0, 94.0, 65.0), 0.68);
+                    const float faces[4] = float[4](0.68, 0.82, 1.0, 0.88);
+                    shade *= faces[(vTerrainFace - 1) % 4];
+                    if (fract(vHeightLight.x * 0.5) < 0.065) shade *= 0.78;
+                }
+                else
+                {
+                    vec2 cell = fract(vUv * 8.0);
+                    if (min(min(cell.x, 1.0 - cell.x), min(cell.y, 1.0 - cell.y)) < 0.018) shade *= 0.88;
+                }
+                ivec2 grain = ivec2(floor(vUv * 128.0));
+                shade *= 0.96 + float((grain.x * 13 + grain.y * 7) & 3) * 0.022;
+            }
+            if (uRenderStyle == 3)
+            {
+                float mean = dot(color, vec3(0.2126, 0.7152, 0.0722));
+                color = clamp(vec3(mean) + (color - vec3(mean)) * 1.3 + vec3(9.0), 0.0, 255.0);
+                if (vTerrainFace > 0)
+                {
+                    const float faces[4] = float[4](0.74, 0.88, 1.04, 0.93);
+                    shade *= faces[(vTerrainFace - 1) % 4] * (vTerrainFace <= 4 ? 1.08 : 0.94);
+                }
+                else
+                {
+                    vec2 stud = fract(vUv * 32.0) - vec2(0.5);
+                    float radius = length(stud);
+                    float rim = smoothstep(0.13, 0.16, radius) - smoothstep(0.16, 0.19, radius);
+                    shade *= 1.0 + rim * (stud.x + stud.y < 0.0 ? 0.11 : -0.10);
+                }
+            }
             if (abs(shade - 1.0) >= 0.001)
                 color = clamp(floor(color * shade), 0.0, 255.0);
             outputColor = vec4(color / 255.0, sampleColor.a);
@@ -179,6 +271,7 @@ internal static class GlMapShaders
             float span = -dot(uScreenX.xy, aEdge.xy);
             float worldLength = aSurface.y * length(uScreenX.xy);
             vFacade = vec2(aSurface.x * length(aEdge.xy) / edgeLength * uTileUnitsToMeters, aPosition.z);
+            if (uRenderStyle != 0 && face != 0) vFacade = aPosition.xy * uTileUnitsToMeters;
             vWall = vec4(endpointX, span, worldLength, uPerspective ? aSurface.w : aSurface.z);
             vBuilding = vec2(model.w - bounds.z, model.w);
             vModel = ivec3(int(model.y + 0.5), int(model.z + 0.5), face);
@@ -214,12 +307,42 @@ internal static class GlMapShaders
         {
             if (vModel.z != 0)
             {
-                outputColor = vec4(material(vModel.z == 1 ? 0 : 2) / 255.0, 1.0);
+                vec3 roof = material(vModel.z == 1 ? 0 : 2);
+                if (uRenderStyle == 2)
+                {
+                    vec2 cell = fract(vFacade * 0.5);
+                    if (min(min(cell.x, 1.0 - cell.x), min(cell.y, 1.0 - cell.y)) < 0.06) roof *= 0.78;
+                }
+                if (uRenderStyle == 3)
+                {
+                    vec2 stud = fract(vFacade * 1.25) - vec2(0.5);
+                    float ring = smoothstep(0.17, 0.24, length(stud)) - smoothstep(0.27, 0.34, length(stud));
+                    roof = clamp(roof * 1.1 + vec3(9.0), 0.0, 255.0) * (1.0 + ring * (stud.x + stud.y < 0.0 ? 0.18 : -0.12));
+                }
+                outputColor = vec4(roof / 255.0, 1.0);
                 return;
             }
             if (!gl_FrontFacing) discard;
             vec3 wall = mixBytes(material(2), material(1), vWall.w);
             vec3 color = wall;
+            if (uRenderStyle == 2)
+            {
+                vec2 block = fract(vFacade * 0.5);
+                float seam = min(min(block.x, 1.0 - block.x), min(block.y, 1.0 - block.y));
+                color *= seam < 0.055 ? 0.76 : 1.0;
+                if ((int(floor(vFacade.x * 0.5)) + int(floor(vFacade.y * 0.5))) % 3 == 0) color *= 0.94;
+                outputColor = vec4(color / 255.0, 1.0);
+                return;
+            }
+            if (uRenderStyle == 3)
+            {
+                vec2 pane = fract(vFacade / vec2(2.8, 3.6));
+                bool window = pane.x > 0.18 && pane.x < 0.82 && pane.y > 0.24 && pane.y < 0.78;
+                color = window ? material(5) : clamp(wall * 1.12 + vec3(10.0), 0.0, 255.0);
+                if (window) color = mix(color, vec3(225.0, 246.0, 250.0), 0.12 + pane.y * 0.22);
+                outputColor = vec4(color / 255.0, 1.0);
+                return;
+            }
             float floorMeters = 3.2 + float(vModel.x & 3) * 0.22;
             float bayMeters = 3.2 + float((vModel.x >> 2) & 3) * 0.6;
             if (uPerspective)
@@ -273,7 +396,7 @@ internal static class GlMapShaders
 
         float planeDistance(vec4 point, int plane)
         {
-            if (plane == 0) return point.z - 0.1;
+            if (plane == 0) return point.z - uLens.w;
             if (plane == 1) return uLens.z - point.z;
             if (plane == 2) return point.x;
             if (plane == 3) return uArtSize.x * point.z - point.x;

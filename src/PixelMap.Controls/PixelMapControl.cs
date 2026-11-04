@@ -26,7 +26,11 @@ public sealed partial class PixelMapControl : UserControl
         typeof(bool), typeof(PixelMapControl), new PropertyMetadata(false, (o, _) => ((PixelMapControl)o).EarthChanged()));
 
     public static readonly DependencyProperty IsGpuRenderingEnabledProperty = DependencyProperty.Register(nameof(IsGpuRenderingEnabled),
-        typeof(bool), typeof(PixelMapControl), new PropertyMetadata(false, (o, _) => ((PixelMapControl)o).GpuRenderingChanged()));
+        typeof(bool), typeof(PixelMapControl), new PropertyMetadata(true, (o, _) => ((PixelMapControl)o).GpuRenderingChanged()));
+
+    public static readonly DependencyProperty RenderStyleProperty = DependencyProperty.Register(nameof(RenderStyle),
+        typeof(MapRenderStyle), typeof(PixelMapControl), new PropertyMetadata(MapRenderStyle.Pixel,
+            (o, _) => ((PixelMapControl)o).RenderStyleChanged()));
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(18) };
     private readonly MapSurface _surface;
@@ -63,8 +67,7 @@ public sealed partial class PixelMapControl : UserControl
         _elevations = new(_elevationSource.GetTileAsync, LayerChanged, retainPreviousOnFailure: true);
         var dispatcher = DispatcherQueue;
         var layers = new Grid { Background = Brush(170, 187, 161) };
-        _surface = new(layers, isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)),
-            () => { if (_marker.HasValue && _terrain is not null) dispatcher.TryEnqueue(() => { if (_active) PositionMarker(); }); });
+        _surface = new(layers, isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)), FramePresented);
         _pinLabel = new TextBlock { FontSize = 12, Foreground = Brush(255, 247, 220), TextTrimming = TextTrimming.CharacterEllipsis };
         _pin = new Border
         {
@@ -92,7 +95,7 @@ public sealed partial class PixelMapControl : UserControl
         _tilesTimer.Tick += (_, _) => { _tilesTimer.Stop(); RefreshTiles(_longFlight ? _to : Camera); };
         SizeChanged += (_, _) =>
         {
-            Camera = Camera.OnTerrain(_terrain, ActualHeight);
+            Camera = Camera.ForViewport(ActualWidth, ActualHeight).OnTerrain(_terrain, ActualHeight);
             ViewChanged();
             if (!_active) return;
             if (Journey.State == PixelMap.Simulation.JourneyState.Ready) FitRoute();
@@ -134,15 +137,44 @@ public sealed partial class PixelMapControl : UserControl
 
     private static SolidColorBrush Brush(byte r, byte g, byte b) => new(Windows.UI.Color.FromArgb(255, r, g, b));
 
-    public MapCamera Camera { get => (MapCamera)GetValue(CameraProperty); set => SetValue(CameraProperty, Normalize(value).OnTerrain(_terrain, ActualHeight)); }
+    public MapCamera Camera { get => (MapCamera)GetValue(CameraProperty); set => SetValue(CameraProperty, Normalize(value).ForViewport(ActualWidth, ActualHeight).OnTerrain(_terrain, ActualHeight)); }
     public PixelStyle Palette { get => (PixelStyle)GetValue(PaletteProperty); set => SetValue(PaletteProperty, value); }
     public bool IsEarthImageryEnabled { get => (bool)GetValue(IsEarthImageryEnabledProperty); set => SetValue(IsEarthImageryEnabledProperty, value); }
     public bool IsGpuRenderingEnabled { get => (bool)GetValue(IsGpuRenderingEnabledProperty); set => SetValue(IsGpuRenderingEnabledProperty, value); }
+    public MapRenderStyle RenderStyle
+    {
+        get => (MapRenderStyle)GetValue(RenderStyleProperty);
+        set
+        {
+            if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            SetValue(RenderStyleProperty, value);
+        }
+    }
     public bool IsGpuRenderingActive { get; private set; }
     public string StatusText => !IsGpuRenderingEnabled ? _layerStatus
         : $"{_layerStatus} · {(IsGpuRenderingActive ? "GPU active" : "CPU fallback")}";
     public event EventHandler? CameraChanged;
     public event EventHandler? StatusChanged;
+    private int _frameUpdateQueued;
+
+    private void FramePresented()
+    {
+        if (!_active || !(_marker.HasValue && _terrain is not null) && !(Journey.IsFreeRoaming && Journey.Follow && !Journey.Active)) return;
+        if (Interlocked.Exchange(ref _frameUpdateQueued, 1) != 0) return;
+        if (!DispatcherQueue.TryEnqueue(() =>
+        {
+            Interlocked.Exchange(ref _frameUpdateQueued, 0);
+            if (!_active) return;
+            if (_marker.HasValue && _terrain is not null) PositionMarker();
+            if (Journey.IsFreeRoaming && Journey.Follow && !Journey.Active)
+            {
+                // A style/LOD change can move the rendered supporting surface while
+                // physics is paused. Recompute once against the presented mesh.
+                _wasTracking = false;
+                UpdateRideCamera();
+            }
+        })) Interlocked.Exchange(ref _frameUpdateQueued, 0);
+    }
 
     public void SetMarker(double latitude, double longitude, string label)
     {
@@ -180,7 +212,9 @@ public sealed partial class PixelMapControl : UserControl
     private static MapCamera Normalize(MapCamera value)
     {
         if (!double.IsFinite(value.Latitude) || !double.IsFinite(value.Longitude) || !double.IsFinite(value.Zoom)
-            || !double.IsFinite(value.Bearing) || !double.IsFinite(value.Pitch) || !double.IsFinite(value.TargetAltitudeMeters) || !double.IsFinite(value.GroundAltitudeMeters))
+            || !double.IsFinite(value.Bearing) || !double.IsFinite(value.Pitch) || !double.IsFinite(value.TargetAltitudeMeters)
+            || !double.IsFinite(value.GroundAltitudeMeters) || !double.IsFinite(value.ViewDistanceMeters) || value.ViewDistanceMeters < 0
+            || !double.IsFinite(value.ViewportHeight) || value.ViewportHeight < 0)
             throw new ArgumentOutOfRangeException(nameof(value), "Camera coordinates must be finite.");
         return value with
         {
@@ -188,8 +222,8 @@ public sealed partial class PixelMapControl : UserControl
             Longitude = Wrap(value.Longitude),
             Bearing = Wrap(value.Bearing),
             Zoom = Math.Clamp(value.Zoom, MapCamera.MinZoom, MapCamera.MaxZoom),
-            Pitch = Math.Clamp(value.Pitch, 0, 72),
-            TargetAltitudeMeters = Math.Clamp(value.TargetAltitudeMeters, 0, 15000),
+            Pitch = MapCamera.ClampPitch(value.Pitch, value.Perspective),
+            TargetAltitudeMeters = Math.Clamp(value.TargetAltitudeMeters, value.IsFreeLook ? -1e7 : 0, 1e7),
             GroundAltitudeMeters = Math.Clamp(value.GroundAltitudeMeters, -32768, 32768)
         };
     }
@@ -270,7 +304,7 @@ public sealed partial class PixelMapControl : UserControl
     {
         if (!_active) return;
         bool elevationChanged = RefreshElevationSnapshot();
-        _worldContacts.Update(_vectors.Display, _elevationSnapshot);
+        _worldContacts.Update(CollisionTiles(), _elevationSnapshot);
         _earthDisplay = _earth.Display.Count == 0 ? _earthOverview : _earth.Display;
         InvalidateMap();
         string status = _vectors.HasFailures ? "Map service unavailable · retrying"
@@ -293,6 +327,12 @@ public sealed partial class PixelMapControl : UserControl
     {
         InvalidateMap();
         StatusChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void RenderStyleChanged()
+    {
+        _worldContacts.Update(CollisionTiles(), _elevationSnapshot);
+        GpuRenderingChanged();
     }
 
     private void SetGpuRenderingActive(bool isActive)
@@ -318,13 +358,17 @@ public sealed partial class PixelMapControl : UserControl
             : _earthDisplay;
         _surface.Present(Camera, DisplayTiles(), imagery, Palette,
             _motion.IsEnabled || _touches.Count != 0 || Journey.Active && Journey.Follow,
-            Journey.Route, CurrentVehicle(), Journey.NextCheckpoint, IsGpuRenderingEnabled, _terrain);
+            Journey.Route, CurrentVehicle(), Journey.Vehicle.Mode, Journey.NextCheckpoint, IsGpuRenderingEnabled, _terrain, RenderStyle);
     }
+
+    private bool TryGetRenderedTerrainElevation(double latitude, double longitude, out double elevationMeters) =>
+        _surface.TryGetTerrainElevation(latitude, longitude, out elevationMeters);
 
     private sealed partial class MapSurface(Grid layers, Action<bool> backendChanged, Action framePresented) : SKCanvasElement
     {
         private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery,
-            PixelStyle Palette, bool Moving, RoutePlan? Route, VehiclePose? Vehicle, RoutePosition? Gate, bool UseGpuRendering, TerrainOptions? Terrain);
+            PixelStyle Palette, bool Moving, RoutePlan? Route, VehiclePose? Vehicle, TravelMode VehicleMode,
+            RoutePosition? Gate, bool UseGpuRendering, TerrainOptions? Terrain, MapRenderStyle RenderStyle);
         private readonly object _drawing = new();
         private PixelMapRenderer? _renderer;
         private volatile Scene? _scene;
@@ -336,11 +380,12 @@ public sealed partial class PixelMapControl : UserControl
 
 
         internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery,
-            PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, RoutePosition? gate, bool useGpuRendering, TerrainOptions? terrain)
+            PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, TravelMode vehicleMode,
+            RoutePosition? gate, bool useGpuRendering, TerrainOptions? terrain, MapRenderStyle renderStyle)
         {
             lock (_drawing)
             {
-                _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, gate, useGpuRendering, terrain);
+                _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, vehicleMode, gate, useGpuRendering, terrain, renderStyle);
                 PresentGpuTerrain(_scene);
             }
         }
@@ -401,6 +446,15 @@ public sealed partial class PixelMapControl : UserControl
             }
         }
 
+        internal bool TryGetTerrainElevation(double latitude, double longitude, out double elevationMeters)
+        {
+            lock (_drawing)
+            {
+                elevationMeters = 0;
+                return PresentedRenderer is { } renderer && renderer.TryGetTerrainElevation(latitude, longitude, out elevationMeters);
+            }
+        }
+
         protected override void RenderOverride(SKCanvas canvas, Size area)
         {
             lock (_drawing)
@@ -408,6 +462,7 @@ public sealed partial class PixelMapControl : UserControl
                 if (DrawGpuPresentation(canvas, area)) return;
                 if (_scene is { } scene)
                 {
+                    QueueGpuInitialization();
                     _terrainGpuPresented = false;
                     DrawScene(canvas, area, scene);
                     if (!ReferenceEquals(_presentedScene, scene))
@@ -423,21 +478,25 @@ public sealed partial class PixelMapControl : UserControl
         {
             _renderer ??= new();
             var camera = scene.Camera;
-            var moving = scene.Moving;
-            int size = moving ? _interactivePixelSize : 2;
+            int size = ArtworkPixelSize(scene);
             long start = Stopwatch.GetTimestamp();
             bool useSkiaGpu = scene.UseGpuRendering && !UsesGpuTerrain(scene);
             _renderer.Draw(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height),
                 camera, scene.Tiles, scene.Palette, size, scene.Imagery, useGpuRendering: useSkiaGpu,
                 allowDeferredGpuRendering: useSkiaGpu && CompositionCapabilities.GetForCurrentView().AreEffectsFast(),
-                terrainOptions: scene.Terrain);
+                terrainOptions: scene.Terrain, renderStyle: scene.RenderStyle);
             ReportBackend(_renderer.IsGpuRenderingActive);
             if (scene.Gate is { } gate && scene.Route is { } trip && scene.Vehicle is { } driver)
                 _renderer.DrawGate(canvas, camera, area.Width, area.Height, gate, trip.Mode, trip.Mode == TravelMode.Flight ? driver.AltitudeMeters : 0, driver.AnimationSeconds);
             if (scene.Route is { } route)
                 _renderer.DrawNavigation(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height), camera, route, scene.Vehicle, size);
+            else if (scene.Vehicle is { } vehicle)
+                _renderer.DrawVehicle(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height), camera, scene.VehicleMode, vehicle, size);
             TrackFrameCost(scene, Stopwatch.GetElapsedTime(start).TotalMilliseconds);
         }
+
+        private int ArtworkPixelSize(Scene scene) => scene.RenderStyle is MapRenderStyle.Normal or MapRenderStyle.Roblox
+            ? 1 : scene.Moving ? _interactivePixelSize : 2;
 
         private void TrackFrameCost(Scene scene, double milliseconds)
         {

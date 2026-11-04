@@ -3,7 +3,7 @@ using PixelMap.Routing;
 namespace PixelMap.Simulation;
 
 public enum JourneyState { Ready, Preview, Driving, Paused, Finished }
-public enum MotionModel { Ground, Vessel, Aircraft, Rail, Pedestrian }
+public enum MotionModel { Ground, Vessel, Aircraft, Rail, Pedestrian, FreeFlight }
 public enum JourneyCue { Depart, Checkpoint, Contact, Finish, Horn }
 
 /// <summary>Physical quantities are SI, with angular rates in degrees per second.</summary>
@@ -26,7 +26,9 @@ public sealed record VehicleProfile(string Id, TravelMode Mode, MotionModel Moti
     public static readonly VehicleProfile Train = new("railcar", TravelMode.Train, MotionModel.Rail, 50, 1.2, 1.8, .06, 0, 1, 23);
     public static readonly VehicleProfile Bike = new("bicycle", TravelMode.Bike, MotionModel.Ground, 14, 2.3, 4.5, .29, 112, 4, 6.5);
     public static readonly VehicleProfile Walker = new("hiker", TravelMode.Walk, MotionModel.Pedestrian, 3.4, 2.3, 6, 1.7, 170, 7, 1.5);
-    internal bool IsValid => !string.IsNullOrWhiteSpace(Id) && Enum.IsDefined(Mode) && Enum.IsDefined(Motion) && FinitePositive(MaxSpeed) && FinitePositive(Acceleration)
+    public static readonly VehicleProfile FreeCamera = new("free-camera", TravelMode.Flight, MotionModel.FreeFlight, 10000, 120, 180, 0, 100, 9, 35);
+    /// <summary>Whether the profile contains finite, physically usable parameters.</summary>
+    public bool IsValid => !string.IsNullOrWhiteSpace(Id) && Enum.IsDefined(Mode) && Enum.IsDefined(Motion) && FinitePositive(MaxSpeed) && FinitePositive(Acceleration)
         && FinitePositive(Braking) && FinitePositive(Response) && FinitePositive(CruiseSpeed) && CruiseSpeed <= MaxSpeed
         && double.IsFinite(CoastDrag) && CoastDrag >= 0 && double.IsFinite(TurnRate) && TurnRate >= 0;
     private static bool FinitePositive(double x) => double.IsFinite(x) && x > 0;

@@ -59,6 +59,7 @@ internal static class NavigationChecks
         canvas.Clear(SKColors.Transparent);
         renderer.DrawNavigation(canvas, w, h, new MapCamera(45, 0, 4, 0, 0), Plan(TravelMode.Boat, points));
         Assert(canvasImage.Pixels.All(p => p.Alpha == 0), "Wrapped route crossed the Greenwich viewport");
+        FreeCameraChecks.Run();
         Console.WriteLine("Passed camera orbit, fit, short-arc flight, six vehicle symbols, pause/seek effects and route wrap checks.");
 
         void Draw(RoutePlan plan, VehiclePose? pose)

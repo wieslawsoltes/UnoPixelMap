@@ -9,13 +9,13 @@ internal sealed class EarthRaster : IDisposable
 {
     private const long Budget = 24 * 1024 * 1024;
     private long bytes;
-    private sealed record Entry(ImageryTile Source, SKImage? Image, long Bytes);
-    private readonly Dictionary<TileId, LinkedListNode<Entry>> index = [];
+    private sealed record Entry(ImageryTile Source, bool Natural, SKImage? Image, long Bytes);
+    private readonly Dictionary<(TileId Id, bool Natural), LinkedListNode<Entry>> index = [];
     private readonly LinkedList<Entry> usage = [];
 
-    public SKImage? Get(ImageryTile tile)
+    public SKImage? Get(ImageryTile tile, bool natural = false)
     {
-        if (index.TryGetValue(tile.Id, out var node))
+        if (index.TryGetValue((tile.Id, natural), out var node))
         {
             if (ReferenceEquals(node.Value.Source.Encoded, tile.Encoded))
             {
@@ -24,15 +24,15 @@ internal sealed class EarthRaster : IDisposable
             }
             Drop(node);
         }
-        var result = Decode(tile);
+        var result = Decode(tile, natural);
         long cost = tile.Encoded.Length + 128L + (result is null ? 0 : result.Width * result.Height * 4L);
-        index.Add(tile.Id, usage.AddFirst(new Entry(tile, result, cost)));
+        index.Add((tile.Id, natural), usage.AddFirst(new Entry(tile, natural, result, cost)));
         bytes += cost;
         while ((bytes > Budget || usage.Count > 384) && usage.Count > 1) Drop(usage.Last!);
         return result;
     }
 
-    private static unsafe SKImage? Decode(ImageryTile tile)
+    private static unsafe SKImage? Decode(ImageryTile tile, bool natural)
     {
         int size = tile.Id.Z >= 13 ? 256 : 128;
         using var data = SKData.CreateCopy(tile.Encoded);
@@ -40,6 +40,11 @@ internal sealed class EarthRaster : IDisposable
         if (codec is null || codec.Info.Width is < 1 or > 2048 || codec.Info.Height is < 1 or > 2048) return null;
         using var decoded = new SKBitmap(codec.Info.Width, codec.Info.Height, SKColorType.Bgra8888, SKAlphaType.Opaque);
         if (codec.GetPixels(decoded.Info, decoded.GetPixels()) != SKCodecResult.Success) return null;
+        if (natural)
+        {
+            decoded.SetImmutable();
+            return SKImage.FromBitmap(decoded);
+        }
         using var art = new SKBitmap(size, size, SKColorType.Bgra8888, SKAlphaType.Opaque);
         int width = decoded.Width, height = decoded.Height;
         var src = new ReadOnlySpan<uint>((void*)decoded.GetPixels(), width * height);
@@ -108,7 +113,7 @@ internal sealed class EarthRaster : IDisposable
     private void Drop(LinkedListNode<Entry> node)
     {
         bytes -= node.Value.Bytes;
-        index.Remove(node.Value.Source.Id);
+        index.Remove((node.Value.Source.Id, node.Value.Natural));
         usage.Remove(node);
         node.Value.Image?.Dispose();
     }

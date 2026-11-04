@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using PixelMap.Rendering;
+using Windows.Devices.Input;
 using Windows.Foundation;
 using Windows.System;
 
@@ -21,6 +22,10 @@ public sealed partial class PixelMapControl
     private Point _firstFinger, _secondFinger;
     private uint _gestureFirst, _gestureSecond;
     private bool _tilting, _planarGesture;
+    private double _gestureScale = 1, _gestureTwist;
+    private Point _gestureCenter;
+    private bool _looking;
+    private BrowserMapInput? _browserInput;
 
 
     private void HookInput()
@@ -33,6 +38,42 @@ public sealed partial class PixelMapControl
         PointerWheelChanged += Wheel;
         KeyDown += OnMapKey;
         _motion.Tick += (_, _) => Advance();
+        Loaded += (_, _) => _browserInput ??= BrowserMapInput.TryCreate(SuspendBrowserInput);
+        Unloaded += (_, _) =>
+        {
+            ResetMapPointers();
+            _browserInput?.Dispose();
+            _browserInput = null;
+        };
+        Journey.Changed += (_, _) =>
+        {
+            if (!Journey.IsFreeRoaming || !Journey.Active) _browserInput?.ReleaseMouse();
+        };
+    }
+
+    /// <summary>Capture relative mouse motion for an active first-person or free camera.
+    /// Browsers require this call to originate from a user gesture.</summary>
+    public bool CaptureMouseForFreeLook() => Journey.IsFreeRoaming && Journey.Active &&
+        _browserInput?.CaptureMouse() == true;
+
+    public bool IsMouseCaptured => _browserInput?.IsMouseCaptured == true;
+    public void ReleaseMouseCapture() => _browserInput?.ReleaseMouse();
+
+    private void SuspendBrowserInput()
+    {
+        ResetMapPointers();
+        StopMotion();
+        ReleaseDrivingKeys();
+        if (Journey.Active) Journey.Pause();
+    }
+
+    private void ResetMapPointers()
+    {
+        _touches.Clear();
+        _dragged = true;
+        _vx = _vy = 0;
+        _browserInput?.ReleasePointers();
+        ReleasePointerCaptures();
     }
 
     public void PanBy(double dx, double dy) { StopTrackingForGesture(); StopMotion(); Camera = PanCamera(Camera, ActualWidth * .5, ActualHeight * .5, ActualWidth * .5 + dx, ActualHeight * .5 + dy); }
@@ -44,14 +85,19 @@ public sealed partial class PixelMapControl
     }
     public void ToggleProjection() => FlyTo(Camera with { Pitch = (_flight ? _to : Camera).Pitch > 10 ? 0 : 55 });
 
-    public void FlyTo(double latitude, double longitude, double zoom) =>
-        FlyTo(Camera with { Latitude = latitude, Longitude = longitude, Zoom = zoom, TargetAltitudeMeters = 0 });
+    public void FlyTo(double latitude, double longitude, double zoom)
+    {
+        var view = Camera;
+        if (view.IsFreeLook || view.Perspective && view.Pitch >= 90)
+            view = view with { IsFreeLook = false, ViewDistanceMeters = 0, ViewportHeight = 0, Pitch = Math.Min(view.Pitch, 55) };
+        FlyTo(view with { Latitude = latitude, Longitude = longitude, Zoom = zoom, TargetAltitudeMeters = 0 });
+    }
 
     public void FlyTo(MapCamera destination)
     {
         StopTrackingForGesture();
         StopMotion();
-        _to = Normalize(destination).OnTerrain(_terrain, ActualHeight);
+        _to = Normalize(destination).ForViewport(ActualWidth, ActualHeight).OnTerrain(_terrain, ActualHeight);
         _from = Camera;
         if (!_active || _from == _to) { Camera = _to; return; }
         var mapPlane = _from with { Perspective = false, TargetAltitudeMeters = 0 };
@@ -105,37 +151,49 @@ public sealed partial class PixelMapControl
 
     private static double Smooth(double t) => t * t * (3 - 2 * t);
 
-    private void StopMotion()
+    private void StopMotion(bool invalidate = true)
     {
         _motion.Stop();
         _flight = _longFlight = false;
         _vx = _vy = 0;
         _departure = [];
         _earthDeparture = [];
-        if (_active) InvalidateMap();
+        if (_active && invalidate) InvalidateMap();
     }
 
     private void Pressed(object sender, PointerRoutedEventArgs e)
     {
-        StopMotion();
+        StopMotion(invalidate: false);
         Focus(FocusState.Pointer);
         var point = e.GetCurrentPoint(this);
         if (_touches.Count == 0)
         {
             _down = point.Position;
-            _rotating = point.Properties.IsRightButtonPressed || (e.KeyModifiers & VirtualKeyModifiers.Shift) != 0;
-            _dragged = false;
+            _rotating = point.Properties.IsRightButtonPressed ||
+                (e.KeyModifiers & (VirtualKeyModifiers.Shift | VirtualKeyModifiers.Menu)) != 0;
+            _looking = Journey.IsFreeRoaming;
+            _dragged = _looking;
         }
         else _dragged = true;
         _touches[e.Pointer.PointerId] = point.Position;
         if (_touches.Count == 2) StartTwoFingerGesture();
         _lastMove = Stopwatch.GetTimestamp();
         CapturePointer(e.Pointer);
+        _browserInput?.CapturePointer(e.Pointer.PointerId);
+        if (_looking && Journey.Active && point.PointerDevice.PointerDeviceType == PointerDeviceType.Mouse &&
+            point.Properties.IsLeftButtonPressed && (Journey.IsFreeFlying ||
+                CameraRig is JourneyCameraRig.FirstPerson or JourneyCameraRig.Cockpit))
+            CaptureMouseForFreeLook();
         e.Handled = true;
     }
 
     private void Moved(object sender, PointerRoutedEventArgs e)
     {
+        if (_browserInput?.TryTakeMouseMotion(out var mouseX, out var mouseY) == true)
+        {
+            if (TryLookFreeRoam(mouseX * .18, -mouseY * .18)) e.Handled = true;
+            return;
+        }
         var id = e.Pointer.PointerId;
         if (!_touches.TryGetValue(id, out var old)) return;
         var next = e.GetCurrentPoint(this).Position;
@@ -152,6 +210,14 @@ public sealed partial class PixelMapControl
             if (!_dragged && Distance(next, _down) < 3) return;
             if (!_dragged) { dx = next.X - _down.X; dy = next.Y - _down.Y; }
             _dragged = true;
+            if (TryLookFreeRoam(dx * .22, -dy * .22))
+            {
+                _looking = true;
+                _vx = _vy = 0;
+                _lastMove = Stopwatch.GetTimestamp();
+                e.Handled = true;
+                return;
+            }
             StopTrackingForGesture();
             if (_rotating) Camera = TransformCamera(Camera, 0, dx * .35, -dy * .22, _down.X, _down.Y);
             else Camera = PanCamera(Camera, next.X - dx, next.Y - dy, next.X, next.Y);
@@ -176,6 +242,9 @@ public sealed partial class PixelMapControl
         _gestureFirst = first.Key; _gestureSecond = second.Key;
         _firstFinger = first.Value; _secondFinger = second.Value; _gestureCamera = Camera;
         _tilting = _planarGesture = false;
+        _gestureScale = 1;
+        _gestureTwist = 0;
+        _gestureCenter = new((_firstFinger.X + _secondFinger.X) * .5, (_firstFinger.Y + _secondFinger.Y) * .5);
         _vx = _vy = 0;
     }
 
@@ -189,6 +258,16 @@ public sealed partial class PixelMapControl
         double dx = after.X - before.X, dy = after.Y - before.Y;
         double scale = Distance(a, b) / Math.Max(1, Distance(_firstFinger, _secondFinger));
         double twist = Math.Atan2(oldX * y - oldY * x, oldX * x + oldY * y) * 180 / Math.PI;
+        if (Journey.IsFreeRoaming)
+        {
+            ZoomRide(Math.Log2(Math.Max(.001, scale) / _gestureScale));
+            TryLookFreeRoam((after.X - _gestureCenter.X) * .22 - Wrap(twist - _gestureTwist),
+                -(after.Y - _gestureCenter.Y) * .22);
+            _gestureScale = Math.Max(.001, scale);
+            _gestureTwist = twist;
+            _gestureCenter = after;
+            return;
+        }
         if (!_tilting && !_planarGesture)
         {
             double ay = a.Y - _firstFinger.Y, by = b.Y - _secondFinger.Y;
@@ -212,6 +291,7 @@ public sealed partial class PixelMapControl
         if (!_touches.Remove(e.Pointer.PointerId)) return;
         var pos = e.GetCurrentPoint(this).Position;
         ReleasePointerCapture(e.Pointer);
+        _browserInput?.ReleasePointer(e.Pointer.PointerId);
         if (_touches.Count == 0)
         {
             if (!_dragged && !_rotating && IsMapPointSelectionEnabled)
@@ -235,7 +315,7 @@ public sealed partial class PixelMapControl
                     Inspect(pos);
                 }
             }
-            else if (!_rotating && Stopwatch.GetElapsedTime(_lastMove).TotalMilliseconds < 85 && Math.Abs(_vx) + Math.Abs(_vy) > .1)
+            else if (!_rotating && !_looking && Stopwatch.GetElapsedTime(_lastMove).TotalMilliseconds < 85 && Math.Abs(_vx) + Math.Abs(_vy) > .1)
             {
                 _lastMove = Stopwatch.GetTimestamp();
                 _motion.Start();
@@ -260,27 +340,88 @@ public sealed partial class PixelMapControl
 
     private void Interrupted(object sender, PointerRoutedEventArgs e)
     {
-        if (_touches.Remove(e.Pointer.PointerId)) { _dragged = true; _vx = _vy = 0; if (_touches.Count == 2) StartTwoFingerGesture(); }
+        if (!_touches.Remove(e.Pointer.PointerId)) return;
+        _browserInput?.ReleasePointer(e.Pointer.PointerId);
+        _dragged = true;
+        _vx = _vy = 0;
+        if (_touches.Count == 2) StartTwoFingerGesture();
+        if (_touches.Count == 0) InvalidateMap();
     }
 
     private void Wheel(object sender, PointerRoutedEventArgs e)
     {
         var point = e.GetCurrentPoint(this);
+        if (_browserInput?.TryTakeWheel(out var wheel) == true)
+        {
+            ApplyBrowserWheel(wheel, point.Position);
+            e.Handled = true;
+            return;
+        }
         var delta = point.Properties.MouseWheelDelta;
+        bool control = (e.KeyModifiers & VirtualKeyModifiers.Control) != 0;
+        if (ZoomRide(control ? delta / 100d : delta / 300d)) { e.Handled = true; return; }
         StopTrackingForGesture();
         if ((e.KeyModifiers & VirtualKeyModifiers.Shift) != 0)
         {
             FlyTo(TransformCamera(_flight ? _to : Camera, 0, delta / 10d, 0, point.Position.X, point.Position.Y));
             e.Handled = true; return;
         }
-        if (point.Properties.IsHorizontalMouseWheel) PanBy(-delta * .35, 0);
+        if (point.Properties.IsHorizontalMouseWheel) PanBy(-delta, 0);
+        else if (!control && Math.Abs(delta) < 120) PanBy(0, delta);
+        else if (control)
+        {
+            StopMotion(invalidate: false);
+            Camera = TransformCamera(Camera, Math.Clamp(delta / 100d, -2, 2), 0, 0, point.Position.X, point.Position.Y);
+        }
         else FlyTo(TransformCamera(_flight ? _to : Camera, Math.Clamp(delta / 300d, -2, 2), 0, 0, point.Position.X, point.Position.Y));
         e.Handled = true;
     }
 
+    private void ApplyBrowserWheel(BrowserWheelSample wheel, Point point)
+    {
+        if (wheel.Kind == BrowserWheelKind.Consumed) return;
+        if (wheel.Kind == BrowserWheelKind.Gesture)
+        {
+            if (ZoomRide(wheel.X)) { TryLookFreeRoam(wheel.Y, 0); return; }
+            StopTrackingForGesture();
+            StopMotion(invalidate: false);
+            Camera = TransformCamera(Camera, wheel.X, wheel.Y, 0, point.X, point.Y);
+            return;
+        }
+        bool pinch = wheel.Kind == BrowserWheelKind.PinchZoom;
+        if (!pinch && (wheel.Shift || wheel.Alt))
+        {
+            double bearing = wheel.Shift ? -(wheel.X + wheel.Y) * .16 : 0;
+            double pitch = wheel.Alt ? -wheel.Y * .12 : 0;
+            if (TryLookFreeRoam(bearing, pitch)) return;
+            StopTrackingForGesture();
+            StopMotion(invalidate: false);
+            Camera = TransformCamera(Camera, 0, bearing, pitch, point.X, point.Y);
+            return;
+        }
+        if (wheel.Kind == BrowserWheelKind.Pan)
+        {
+            if (TryLookFreeRoam(-wheel.X * .18, wheel.Y * .18)) return;
+            StopTrackingForGesture();
+            StopMotion(invalidate: false);
+            Camera = PanCamera(Camera, point.X, point.Y, point.X - wheel.X, point.Y - wheel.Y);
+            return;
+        }
+        double zoom = Math.Clamp(-wheel.Y / (pinch ? 100 : 300), -2, 2);
+        if (ZoomRide(zoom)) return;
+        StopTrackingForGesture();
+        if (pinch)
+        {
+            StopMotion(invalidate: false);
+            Camera = TransformCamera(Camera, zoom, 0, 0, point.X, point.Y);
+        }
+        else FlyTo(TransformCamera(_flight ? _to : Camera, zoom, 0, 0, point.X, point.Y));
+    }
+
     private void OnMapKey(object sender, KeyRoutedEventArgs e)
     {
-        if (HandleDrivingKey(e.Key)) { e.Handled = true; return; }
+        if (e.Key == VirtualKey.Escape) _browserInput?.ReleaseMouse();
+        if (HandleDrivingKey(e.Key, e.KeyStatus.WasKeyDown)) { e.Handled = true; return; }
         switch (e.Key)
         {
             case VirtualKey.Left: PanBy(96, 0); break;

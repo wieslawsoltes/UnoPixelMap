@@ -20,8 +20,9 @@ internal sealed class VehicleSprite : IDisposable
     internal VehicleSprite() => sprite = new(bitmap);
 
     internal void Draw(SKCanvas canvas, SKPoint position, SKPoint? ground, TravelMode mode,
-        VehicleAxes axes, double time, bool moving, bool visible)
+        VehicleAxes axes, double time, bool moving, bool visible, MapRenderStyle renderStyle = MapRenderStyle.Pixel)
     {
+        brush.IsAntialias = MapRendering.Smooth(renderStyle);
         float x = position.X, y = position.Y;
         if (ground is { } shadow && shadow.Y - y > 2)
         {

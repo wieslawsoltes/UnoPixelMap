@@ -10,6 +10,8 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly Lock sync = new();
     private bool disposed;
     private static readonly SKSamplingOptions Nearest = new(SKFilterMode.Nearest, SKMipmapMode.None);
+    private static readonly SKSamplingOptions Linear = new(SKFilterMode.Linear, SKMipmapMode.None);
+    private MapRenderStyle renderStyle;
     private readonly Dictionary<TileId, TileGeometry> geometry = [];
     private readonly List<(TileGeometry Tile, TileTransform Transform, float Scale)> visible = [];
     private readonly List<(Building Model, TileTransform Transform)> perspectiveModels = [];
@@ -66,12 +68,23 @@ public sealed partial class PixelMapRenderer : IDisposable
     public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
         PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery, bool useGpuRendering,
         bool allowDeferredGpuRendering, TerrainOptions? terrainOptions)
+        => Draw(canvas, width, height, camera, tiles, style, pixelSize, imagery, useGpuRendering,
+            allowDeferredGpuRendering, terrainOptions, MapRenderStyle.Pixel);
+
+    /// <summary>Render a map with an independent geometry/material style. Normal and
+    /// Roblox rendering use native-resolution artwork.</summary>
+    public void Draw(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
+        PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery, bool useGpuRendering,
+        bool allowDeferredGpuRendering, TerrainOptions? terrainOptions, MapRenderStyle renderStyle)
     {
         lock (sync)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            CurrentTerrain = terrainOptions is { Elevation.Count: > 0 } && (terrainOptions.Relief || terrainOptions.Hypsometric)
-                ? terrainOptions : null;
+            SetRenderStyle(renderStyle);
+            pixelSize = MapRendering.PixelSize(renderStyle, pixelSize);
+            navigationTerrain = terrainOptions is { Elevation.Count: > 0 }
+                ? terrainOptions with { RenderStyle = renderStyle } : null;
+            CurrentTerrain = navigationTerrain is { } visualTerrain && (visualTerrain.Relief || visualTerrain.Hypsometric) ? visualTerrain : null;
             if (!useGpuRendering) gpuFrame?.Reset();
             DrawFrame(canvas, width, height, camera, tiles, style, pixelSize, imagery, useGpuRendering, allowDeferredGpuRendering);
             if (useGpuRendering && !IsGpuRenderingActive && gpuFrame?.FailureReason is { } failure && failure != reportedGpuFailure)
@@ -80,6 +93,24 @@ public sealed partial class PixelMapRenderer : IDisposable
                 Console.WriteLine($"Pixel Atlas GPU fallback. {failure}");
             }
         }
+    }
+
+    private void SetRenderStyle(MapRenderStyle next)
+    {
+        if (!Enum.IsDefined(next)) throw new ArgumentOutOfRangeException(nameof(next));
+        if (renderStyle == next) return;
+        renderStyle = next;
+        lastPicture?.Dispose();
+        lastPicture = null;
+        ReleaseGpuScene();
+        ReleasePatterns();
+        terrain.Clear();
+        reliefSurface?.ClearTextures();
+        foreach (var tile in geometry.Values) tile.Dispose();
+        geometry.Clear();
+        geometryRevision++;
+        foundations.Clear();
+        paint.IsAntialias = MapRendering.Smooth(next);
     }
 
     private unsafe void DrawFrame(SKCanvas canvas, int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
@@ -306,7 +337,7 @@ public sealed partial class PixelMapRenderer : IDisposable
         foreach (var tile in imageryOrder)
         {
             var copies = projection.Copies(tile.Id);
-            if (copies.Last < copies.First || earth.Get(tile) is not { } image) continue;
+            if (copies.Last < copies.First || earth.Get(tile, renderStyle == MapRenderStyle.Normal) is not { } image) continue;
             for (int i = copies.First; i <= copies.Last; i++)
             {
                 var (transform, _) = projection.Get(tile.Id, i);
@@ -316,7 +347,7 @@ public sealed partial class PixelMapRenderer : IDisposable
                 var matrix = transform.Matrix;
                 surface.SetMatrix(in matrix);
                 if (transform.Perspective) { SetClip(polygon[..count]); surface.ClipPath(tileClip); }
-                surface.DrawImage(image, rect, Nearest);
+                surface.DrawImage(image, rect, MapRendering.Smooth(renderStyle) ? Linear : Nearest);
                 surface.Restore();
                 earthCoverage.MoveTo(transform.At(polygon[0].X, polygon[0].Y));
                 for (int j = 1; j < count; j++) earthCoverage.LineTo(transform.At(polygon[j].X, polygon[j].Y));
@@ -336,7 +367,7 @@ public sealed partial class PixelMapRenderer : IDisposable
             if (!geometry.TryGetValue(tile.Id, out var prepared) || !ReferenceEquals(prepared.Source, tile))
             {
                 if (prepared is not null) { terrain.Remove(tile.Id); prepared.Dispose(); }
-                geometry[tile.Id] = prepared = new(tile);
+                geometry[tile.Id] = prepared = new(tile, renderStyle);
                 geometryRevision++;
             }
             prepared.LastFrame = frame;
@@ -424,7 +455,7 @@ public sealed partial class PixelMapRenderer : IDisposable
                 }
                 paint.PathEffect = dash;
             }
-            if (zoom >= 12 && key.Ink is Ink.Water or Ink.Grass or Ink.Forest or Ink.Park)
+            if (!MapRendering.Smooth(renderStyle) && zoom >= 12 && key.Ink is Ink.Water or Ink.Grass or Ink.Forest or Ink.Park)
             {
                 int exponent = (int)Math.Clamp(Math.Round(Math.Log2(1 / scale)), -5, 8);
                 if (!shaders.TryGetValue((key.Ink, exponent), out var shader))
@@ -472,13 +503,13 @@ public sealed partial class PixelMapRenderer : IDisposable
                     Math.Cos(Math.Clamp(terrainCamera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
                 float altitude = GroundAltitude(tile, label.Point, elevation, terrainCamera);
                 var point = transform.Vertex(label.Point.X, label.Point.Y, altitude * meters);
-                if (point.W < MapCamera.Near || point.W > transform.Far) continue;
+                if (point.W < transform.Near || point.W > transform.Far) continue;
                 screen = point.Point;
                 if (buildings.CoversAt(screen.X, screen.Y, altitude + Math.Max(4, .75f / meters))) continue;
             }
             else
             {
-                if (transform.Weight(label.Point.X, label.Point.Y) < MapCamera.Near || transform.Weight(label.Point.X, label.Point.Y) > transform.Far) continue;
+                if (transform.Weight(label.Point.X, label.Point.Y) < transform.Near || transform.Weight(label.Point.X, label.Point.Y) > transform.Far) continue;
                 screen = transform.At(label.Point.X, label.Point.Y);
                 if (label.Street && buildings.Covers(screen.X, screen.Y)) continue;
             }

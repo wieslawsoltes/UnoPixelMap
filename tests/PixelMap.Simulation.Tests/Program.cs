@@ -62,6 +62,7 @@ Check(world.Blocks(VehicleProfile.Boat,At(2050,2050),At(1900,2050),0),"Shoreline
 WorldChecks.Run();
 LifecycleChecks.Run();
 ElevationChecks.Run();
+FreeRoamChecks.Run();
 Console.WriteLine("Fixed-step, manual steering, obstacle, shoreline, recovery and audio checks passed.");
 
 sealed class AlwaysBlocked:IJourneyWorld

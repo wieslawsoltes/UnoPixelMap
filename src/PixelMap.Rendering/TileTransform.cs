@@ -12,7 +12,7 @@ internal readonly record struct H(float X, float Y, float W, float Z = 0, float 
 
 internal readonly record struct TileTransform(float X, float Y, float XX, float XY, float YX, float YY,
     float PX = 0, float PY = 0, float PW = 1, float CX = 0, float CY = 0, float InverseFocal = 0,
-    float SinPitch = 0, float CosPitch = 1, float TargetZ = 0, float Far = 6)
+    float SinPitch = 0, float CosPitch = 1, float TargetZ = 0, float Far = 6, float Near = (float)MapCamera.Near)
 {
     public bool Perspective => InverseFocal != 0;
     public float Weight(float x, float y) => PW + PX * x + PY * y;
@@ -38,7 +38,7 @@ internal readonly record struct TileTransform(float X, float Y, float XX, float 
         determinant = a*e - b*d;
         p = determinant == 0 ? default : new((cx*e - cy*b)/determinant, (cy*a - cx*d)/determinant);
         float w = Weight(p.X,p.Y);
-        return determinant != 0 && w >= MapCamera.Near && w <= Far;
+        return determinant != 0 && w >= Near && w <= Far;
     }
 
     internal float MaximumScale(ReadOnlySpan<SKPoint> polygon)
@@ -80,7 +80,7 @@ internal readonly record struct TileTransform(float X, float Y, float XX, float 
             int inside = 0, outside = 0;
             for (int i = 0; i < count; i++)
             {
-                float distance = Plane(plane, projected[i], width, height, Far);
+                float distance = Plane(plane, projected[i], width, height, Far, Near);
                 distances[i] = distance;
                 if (distance >= 0) inside++;
                 if (distance < 0) outside++;
@@ -118,9 +118,9 @@ internal readonly record struct TileTransform(float X, float Y, float XX, float 
         return count;
     }
 
-    internal static float Plane(int plane, H v, float w, float h, float far) => plane switch
+    internal static float Plane(int plane, H v, float w, float h, float far, float near = (float)MapCamera.Near) => plane switch
     {
-        0 => v.W - (float)MapCamera.Near, 1 => far - v.W,
+        0 => v.W - near, 1 => far - v.W,
         2 => v.X, 3 => w*v.W-v.X, 4 => v.Y, _ => h*v.W-v.Y
     };
 }

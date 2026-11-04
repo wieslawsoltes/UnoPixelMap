@@ -8,6 +8,7 @@
     <title>Pixel Atlas · UnoPixelMap</title>
     <link rel="icon" href="favicon.ico">
     <script src="audio/journey-audio.js"></script>
+    <script src="input/map-input.js"></script>
     <script src="./require.js"></script>
     <script type="module" src="./uno-bootstrap.js"></script>
     $(ADDITIONAL_CSS)
@@ -16,6 +17,7 @@
         /* The canvas paints over the splash as soon as its first frame is ready. */
         #uno-body { isolation: isolate; }
         #uno-body > .uno-loader { z-index: -1; pointer-events: none; }
+        #uno-canvas { touch-action: none; overscroll-behavior: none; }
     </style>
 </head>
 <body>

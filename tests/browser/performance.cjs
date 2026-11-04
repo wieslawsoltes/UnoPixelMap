@@ -9,7 +9,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
-const { enableGpuRendering } = require("./gpu.cjs");
+const { setGpuRendering } = require("./gpu.cjs");
 
 const viewport = { width: 1200, height: 780 };
 const browserArgs = ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
@@ -401,8 +401,9 @@ async function open(browser, base, view, errors, observe, output) {
     if (!runtimeMetadata) runtimeMetadata = await readRuntimeMetadata(page);
     let actualBackend = null;
     if (requestGpu) try {
+        await setGpuRendering(page, false);
         await page.evaluate(() => __pixelAtlasPerf.resetGpuEvidence());
-        actualBackend = await enableGpuRendering(page, expectCpuFallback ? "CPU fallback" : "GPU active");
+        actualBackend = await setGpuRendering(page, true, expectCpuFallback ? "CPU fallback" : "GPU active");
         await page.waitForTimeout(500);
     } catch (error) {
         await page.screenshot({ path: path.join(output, view.name + "-gpu-setup-failure.png") }).catch(() => {});
@@ -411,6 +412,7 @@ async function open(browser, base, view, errors, observe, output) {
         await context.close();
         throw error;
     }
+    else await setGpuRendering(page, false);
     const map = await page.locator('[aria-label="Interactive world map"]').boundingBox();
     assert.ok(map && map.width > 500 && map.height > 300, "The accessible map has a settled viewport");
     return { context, page, map, blocked, address: address.href, actualBackend };

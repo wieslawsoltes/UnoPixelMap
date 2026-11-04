@@ -66,7 +66,7 @@ public sealed partial class PixelMapRenderer
                 {
                     hit[0] = 0;
                     pickRaster.Draw(hit, building, sample, PickInk, CurrentTerrain is { } active ? Foundation(tile, building, active, camera, aligned) : 0);
-                    if (hit[0] != 0) surface = building.Feature;
+                    if (hit[0] != 0) surface = building.SourceFeature;
                 }
             }
             if (surface is not null) return surface;
@@ -113,7 +113,7 @@ public sealed partial class PixelMapRenderer
                             {
                                 float altitude = GroundAltitude(tile, point, terrain, camera, aligned);
                                 var projected = transform.Vertex(point.X, point.Y, altitude * meters);
-                                if (projected.W < MapCamera.Near || projected.W > transform.Far) continue;
+                                if (projected.W < transform.Near || projected.W > transform.Far) continue;
                                 s = projected.Point;
                                 if (!VisibleGround(s, altitude)) continue;
                             }
@@ -143,7 +143,7 @@ public sealed partial class PixelMapRenderer
                                     var point = new SKPoint(ax + dx * along, ay + dy * along);
                                     float altitude = GroundAltitude(tile, point, terrain, camera, aligned);
                                     var projected = transform.Vertex(point.X, point.Y, altitude * meters);
-                                    if (projected.W >= MapCamera.Near && projected.W <= transform.Far && VisibleGround(projected.Point, altitude))
+                                    if (projected.W >= transform.Near && projected.W <= transform.Far && VisibleGround(projected.Point, altitude))
                                     {
                                         float px = projected.Point.X - x, py = projected.Point.Y - y;
                                         distance = Math.Min(distance, px * px + py * py);

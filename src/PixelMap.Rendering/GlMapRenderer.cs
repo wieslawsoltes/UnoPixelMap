@@ -26,7 +26,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private readonly float[] terrainInstances = new float[MaximumTerrainDraws * TerrainInstanceStride];
     private readonly float[] terrainHeightUpload = new float[GpuTerrainMesh.Side * GpuTerrainMesh.Side * 2];
     private ShaderProgram? terrainProgram, buildingProgram, rimProgram, backgroundProgram, resolveProgram;
-    private uint screenArray, gridIndices, roomTexture, paletteTexture;
+    private uint screenArray, gridIndices, cubeIndices, beveledIndices, roomTexture, paletteTexture;
     private uint terrainArray, terrainInstanceBuffer, terrainArtworkArray, terrainHeightArray;
     private uint framebuffer, artworkTexture, depthBuffer, photographTexture, overlayTexture;
     private int artWidth, artHeight, overlayWidth, overlayHeight;
@@ -209,6 +209,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         var program = backgroundProgram!;
         program.Use();
         program.Vector2("uArtSize", artWidth, artHeight);
+        program.Integer("uRenderStyle", (int)frame.RenderStyle);
         program.Color("uGroundColor", frame.Palette.Ground);
         PixelStyle style = frame.Palette.Style;
         program.Color("uSkyColor", style == PixelStyle.Night ? 0xff273849u : style == PixelStyle.Dusk ? 0xffba969au : 0xff9bc1c8u);
@@ -254,13 +255,23 @@ public sealed unsafe class GlMapRenderer : IDisposable
             terrainInstances[offset++] = mesh.Layer;
         }
         gl.BindVertexArray(terrainArray);
+        var indices = frame.RenderStyle switch
+        {
+            MapRenderStyle.Minecraft => (Buffer: cubeIndices, Count: TerrainBlockMesh.CubeIndices.Length),
+            MapRenderStyle.Roblox => (Buffer: beveledIndices, Count: TerrainBlockMesh.BeveledIndices.Length),
+            _ => (Buffer: gridIndices, Count: GpuTerrainMesh.Indices.Length)
+        };
+        gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, indices.Buffer);
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, terrainInstanceBuffer);
         fixed (float* data = terrainInstances)
             gl.BufferSubData(BufferTargetARB.ArrayBuffer, 0, (nuint)(offset * sizeof(float)), data);
         LastUploadBytes += offset * sizeof(float);
         BindArrayTexture(0, terrainArtworkArray);
+        int filter = (int)(MapRendering.Smooth(frame.RenderStyle) ? TextureMinFilter.Linear : TextureMinFilter.Nearest);
+        gl.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, filter);
+        gl.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, filter);
         BindArrayTexture(1, terrainHeightArray);
-        gl.DrawElementsInstanced(PrimitiveType.Triangles, (uint)GpuTerrainMesh.Indices.Length,
+        gl.DrawElementsInstanced(PrimitiveType.Triangles, (uint)indices.Count,
             DrawElementsType.UnsignedShort, null, (uint)frame.Terrain.Length);
         LastDrawCalls++;
     }
@@ -313,7 +324,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         program.Vector2("uArtSize", artWidth, artHeight);
         if (transform.Perspective)
         {
-            float near = (float)MapCamera.Near, range = transform.Far - near;
+            float near = transform.Near, range = transform.Far - near;
             program.Vector2("uDepth", (transform.Far + near) / range, -2 * transform.Far * near / range);
         }
         else
@@ -326,8 +337,9 @@ public sealed unsafe class GlMapRenderer : IDisposable
             frame.TerrainOptions.Relief ? (float)frame.TerrainOptions.HeightScale : 0, frame.PixelsPerMeter);
         program.Vector4("uLens", transform.SinPitch,
             transform.Perspective ? transform.TargetZ + transform.CosPitch / transform.InverseFocal : 0,
-            transform.Far, 0);
+            transform.Far, transform.Near);
         program.Integer("uPerspective", transform.Perspective ? 1 : 0);
+        program.Integer("uRenderStyle", (int)frame.RenderStyle);
     }
 
     private void Resolve(GpuMapFrame frame, GlState state, float photographOpacity, bool hasOverlay, bool artworkOnly)
@@ -377,6 +389,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
         gl.BindBuffer(BufferTargetARB.ArrayBuffer, terrainInstanceBuffer);
         gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(terrainInstances.Length * sizeof(float)), null, BufferUsageARB.DynamicDraw);
         gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, gridIndices);
+        cubeIndices = CreateIndexBuffer(TerrainBlockMesh.CubeIndices);
+        beveledIndices = CreateIndexBuffer(TerrainBlockMesh.BeveledIndices);
         for (uint attribute = 0; attribute < 4; attribute++)
         {
             gl.EnableVertexAttribArray(attribute);
@@ -386,7 +400,17 @@ public sealed unsafe class GlMapRenderer : IDisposable
         }
         ResidentBytes += (long)GpuTerrainTexture.Size * GpuTerrainTexture.Size * MaximumTerrainTextures * sizeof(uint) +
             (long)GpuTerrainMesh.Side * GpuTerrainMesh.Side * MaximumMeshes * sizeof(float) * 2 +
-            terrainInstances.Length * sizeof(float) + GpuTerrainMesh.Indices.Length * sizeof(ushort);
+            terrainInstances.Length * sizeof(float) + (GpuTerrainMesh.Indices.Length +
+                TerrainBlockMesh.CubeIndices.Length + TerrainBlockMesh.BeveledIndices.Length) * sizeof(ushort);
+    }
+
+    private uint CreateIndexBuffer(ushort[] indices)
+    {
+        uint buffer = gl.GenBuffer();
+        gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, buffer);
+        fixed (ushort* data = indices)
+            gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * sizeof(ushort)), data, BufferUsageARB.StaticDraw);
+        return buffer;
     }
 
     private MeshResource GetTerrainMesh(GpuTerrainMesh source)
@@ -401,11 +425,13 @@ public sealed unsafe class GlMapRenderer : IDisposable
         mesh.Frame = generation;
         if (mesh.Revision != source.Revision)
         {
-            for (int vertex = 0; vertex < GpuTerrainMesh.Side * GpuTerrainMesh.Side; vertex++)
-            {
-                terrainHeightUpload[vertex * 2] = source.Vertices[vertex * GpuTerrainMesh.VertexStride + 2];
-                terrainHeightUpload[vertex * 2 + 1] = source.Vertices[vertex * GpuTerrainMesh.VertexStride + 3];
-            }
+            if (source.HeightLight is { } blocks) blocks.CopyTo(terrainHeightUpload, 0);
+            else
+                for (int vertex = 0; vertex < GpuTerrainMesh.Side * GpuTerrainMesh.Side; vertex++)
+                {
+                    terrainHeightUpload[vertex * 2] = source.Vertices[vertex * GpuTerrainMesh.VertexStride + 2];
+                    terrainHeightUpload[vertex * 2 + 1] = source.Vertices[vertex * GpuTerrainMesh.VertexStride + 3];
+                }
             BindArrayTexture(1, terrainHeightArray);
             fixed (float* pixels = terrainHeightUpload)
                 gl.TexSubImage3D(TextureTarget.Texture2DArray, 0, 0, 0, mesh.Layer, GpuTerrainMesh.Side,
@@ -800,6 +826,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
         if (paletteTexture != 0) gl.DeleteTexture(paletteTexture);
         if (roomTexture != 0) gl.DeleteTexture(roomTexture);
         if (gridIndices != 0) gl.DeleteBuffer(gridIndices);
+        if (cubeIndices != 0) gl.DeleteBuffer(cubeIndices);
+        if (beveledIndices != 0) gl.DeleteBuffer(beveledIndices);
         if (screenArray != 0) gl.DeleteVertexArray(screenArray);
         if (terrainArray != 0) gl.DeleteVertexArray(terrainArray);
         if (terrainInstanceBuffer != 0) gl.DeleteBuffer(terrainInstanceBuffer);

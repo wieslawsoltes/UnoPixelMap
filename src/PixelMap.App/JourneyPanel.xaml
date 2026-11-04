@@ -58,7 +58,7 @@
                             <TextBlock x:Name="StopTitle" Text="SET DESTINATION" Style="{StaticResource SmallTitle}" AutomationProperties.AccessibilityView="Raw" />
                         </Border>
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4" AutomationProperties.Name="Route-stop search">
-                            <TextBox x:Name="Query" MaxLength="200" PlaceholderText="Place or latitude, longitude" MinHeight="36"
+                            <TextBox x:Name="Query" MaxLength="200" PlaceholderText="Place or latitude, longitude" MinHeight="36" FontSize="16"
                                      AutomationProperties.Name="Find a route stop" KeyDown="OnSearchKey" TextChanged="OnSearchEdited" />
                             <Button Grid.Column="1" Content="Find" Style="{StaticResource SmallAction}" Click="OnSearch" AutomationProperties.Name="Search for route stop" />
                         </Grid>

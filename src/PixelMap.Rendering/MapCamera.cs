@@ -10,21 +10,104 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
     /// <summary>Absolute surface elevation at the local reference plane, in metres above sea level.
     /// TargetAltitudeMeters remains the focus height above this plane.</summary>
     public double GroundAltitudeMeters { get; init; }
+    /// <summary>Keep the eye at its absolute position when terrain data or relief settings change.</summary>
+    public bool IsFreeLook { get; init; }
+    /// <summary>Physical far-plane distance for a free camera. Zero retains the map lens policy.</summary>
+    public double ViewDistanceMeters { get; init; }
+    /// <summary>Viewport height used to encode a free eye into its focus and lens.</summary>
+    public double ViewportHeight { get; init; }
     public const double MaxLatitude = 85.0511287798066;
     public const double MinZoom = 0;
-    public const double MaxZoom = 21;
+    public const double MaxZoom = 26;
+    public const double MaxPitch = 179.5;
+    public const double MaxOrthographicPitch = 89.5;
     public const double VerticalFieldOfView = 45;
+    public const double FreeLookNearMeters = .08;
+    public const double MaxViewDistanceMeters = 1e7;
     internal const double Near = .10, Far = 6;
     internal static double Focal(double height) => Math.Max(1, height) * 1.2071067811865475;
     internal const double EarthCircumference = 40075016.68557849;
     internal double WorldSize => 512 * Math.Pow(2, Math.Clamp(Zoom, MinZoom, MaxZoom));
-    internal double TargetPixels => Perspective ? Math.Max(0, TargetAltitudeMeters) * WorldSize /
+    internal double TargetPixels => Perspective ? TargetAltitudeMeters * WorldSize /
         (EarthCircumference * Math.Cos(Math.Clamp(Latitude, -MaxLatitude, MaxLatitude) * Math.PI / 180)) : 0;
-    internal double GroundDistance(double height) => 1 + TargetPixels / (Focal(height) * Math.Cos(PitchRadians));
-    internal double FarLimit(double height) => Math.Max(Far, Math.Min(4096, GroundDistance(height) * 3));
+    internal double GroundDistance(double height)
+    {
+        if (IsFreeLook) return 1;
+        double cosine = Math.Cos(PitchRadians);
+        if (cosine <= 1e-6) return Math.Max(1, Math.Abs(TargetPixels) / Focal(height));
+        return Math.Clamp(1 + TargetPixels / (Focal(height) * cosine), Near, 1e7);
+    }
+    internal double NearLimit(double height) => IsFreeLook && Perspective
+        ? FreeLookNearMeters * PixelsPerMeter / Focal(height) : Near;
+    internal double FarLimit(double height) => IsFreeLook && Perspective
+        ? Math.Max(NearLimit(height) * 2, Math.Min(ViewDistanceMeters > 0 ? ViewDistanceMeters : 6000, MaxViewDistanceMeters) * PixelsPerMeter / Focal(height))
+        : Math.Max(Far, Math.Min(4096, GroundDistance(height) * 3));
     internal double CenterX => (Longitude + 180) / 360;
     internal double CenterY => MercatorY(Latitude);
-    internal double PitchRadians => Math.Clamp(Pitch, 0, 72) * (Math.PI / 180);
+    internal double PitchRadians => ClampPitch(Pitch, Perspective) * (Math.PI / 180);
+
+    public static double ClampPitch(double pitch, bool perspective) =>
+        Math.Clamp(pitch, 0, perspective ? MaxPitch : MaxOrthographicPitch);
+
+    /// <summary>Create a perspective camera at an absolute eye position. Pitch is measured
+    /// from nadir, with 90 degrees horizontal. The near plane is eight centimetres from
+    /// the eye and the far plane is expressed in metres along the viewing direction.</summary>
+    public static MapCamera FromEye(double latitude, double longitude, double absoluteEyeAltitudeMeters,
+        double bearing, double pitchDegreesFromNadir, double width, double height,
+        double viewDistanceMeters = 6000, double groundAltitudeMeters = 0)
+    {
+        if (!double.IsFinite(latitude) || !double.IsFinite(longitude) || !double.IsFinite(absoluteEyeAltitudeMeters) ||
+            !double.IsFinite(bearing) || !double.IsFinite(pitchDegreesFromNadir) || !double.IsFinite(width) ||
+            !double.IsFinite(height) || width <= 0 || height <= 0 || !double.IsFinite(viewDistanceMeters) ||
+            viewDistanceMeters <= FreeLookNearMeters || !double.IsFinite(groundAltitudeMeters))
+            throw new ArgumentOutOfRangeException(nameof(latitude), "The eye, lens and viewport must be finite and have a positive range.");
+        var camera = new MapCamera(Math.Clamp(latitude, -MaxLatitude, MaxLatitude), longitude,
+            24, WrapOffset(bearing / 360) * 360, ClampPitch(pitchDegreesFromNadir, true), true)
+        {
+            IsFreeLook = true,
+            ViewDistanceMeters = Math.Min(viewDistanceMeters, MaxViewDistanceMeters),
+            GroundAltitudeMeters = groundAltitudeMeters,
+            ViewportHeight = height
+        };
+        var (sin, cos) = Math.SinCos(camera.Bearing * Math.PI / 180);
+        double distance = Focal(height) * Math.Sin(camera.PitchRadians) / camera.WorldSize;
+        var focus = Geographic(camera.CenterX + distance * sin, camera.CenterY - distance * cos);
+        camera = camera with { Latitude = focus.Latitude, Longitude = focus.Longitude };
+        return camera with
+        {
+            TargetAltitudeMeters = absoluteEyeAltitudeMeters - groundAltitudeMeters -
+                Focal(height) * Math.Cos(camera.PitchRadians) / camera.PixelsPerMeter
+        };
+    }
+
+    /// <summary>Recover the perspective eye in geographic coordinates and absolute metres.</summary>
+    public (double Latitude, double Longitude, double AltitudeMeters) GetEye(double viewportHeight)
+    {
+        var (sin, cos) = Math.SinCos(Bearing * Math.PI / 180);
+        double focal = Focal(viewportHeight), offset = focal * Math.Sin(PitchRadians) / WorldSize;
+        var eye = Geographic(CenterX - offset * sin, CenterY + offset * cos);
+        return (eye.Latitude, eye.Longitude,
+            GroundAltitudeMeters + TargetAltitudeMeters + focal * Math.Cos(PitchRadians) / PixelsPerMeter);
+    }
+
+    /// <summary>Retain the physical free-camera eye when the viewport changes size.</summary>
+    public MapCamera ForViewport(double width, double height)
+    {
+        if (!IsFreeLook || !Perspective || height == ViewportHeight) return this;
+        if (!double.IsFinite(width) || !double.IsFinite(height) || width <= 0 || height <= 0) return this;
+        if (!double.IsFinite(ViewportHeight) || ViewportHeight <= 0) return this with { ViewportHeight = height };
+        var eye = GetEye(ViewportHeight);
+        var (sin, cos) = Math.SinCos(Bearing * Math.PI / 180);
+        double distance = Focal(height) * Math.Sin(PitchRadians) / WorldSize;
+        var focus = Geographic((eye.Longitude + 180) / 360 + distance * sin,
+            MercatorY(eye.Latitude) - distance * cos);
+        var next = this with { Latitude = focus.Latitude, Longitude = focus.Longitude, ViewportHeight = height };
+        return next with
+        {
+            TargetAltitudeMeters = eye.AltitudeMeters - GroundAltitudeMeters -
+                Focal(height) * Math.Cos(PitchRadians) / next.PixelsPerMeter
+        };
+    }
 
     internal static double MercatorY(double latitude) =>
         (1 - Math.Asinh(Math.Tan(Math.Clamp(latitude, -MaxLatitude, MaxLatitude) * (Math.PI / 180))) / Math.PI) * .5;
@@ -42,11 +125,13 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         if (Perspective && height > 0)
         {
             double focal = Focal(height);
-            double inv = (1 + dy * tiltSin / (focal * tiltCos)) / GroundDistance(height);
-            double w = 1 / Math.Clamp(inv, 1 / FarLimit(height), 1 / Near);
-            // Reconstruct the finite far-plane intersection for rays which miss the ground.
+            double eyeHeight = focal * tiltCos + TargetPixels;
+            double rayHeight = dy * tiltSin + focal * tiltCos;
+            double weight = rayHeight == 0 ? double.PositiveInfinity : eyeHeight / rayHeight;
+            double w = weight > 0 ? Math.Clamp(weight, NearLimit(height), FarLimit(height)) : FarLimit(height);
+            // A finite point on the same ray also supports horizontal and upward views.
             dx *= w;
-            dy = tiltSin < 1e-10 ? dy*w / tiltCos : (focal * (1 - w) + TargetPixels*tiltCos) / tiltSin;
+            dy = tiltCos * dy * w + tiltSin * focal * (1 - w);
         }
         else dy /= tiltCos;
         return ((dx * c - dy * s) / WorldSize, (dx * s + dy * c) / WorldSize);
@@ -66,9 +151,10 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
     {
         location = Unproject(x, y, width, height);
         if (!Perspective) return true;
-        double invW = 1 + (y - height * .5) * Math.Tan(PitchRadians) / Focal(height);
-        invW /= GroundDistance(height);
-        return invW >= 1 / FarLimit(height) && invW <= 1 / Near;
+        var (sin, cos) = Math.SinCos(PitchRadians);
+        double denominator = (y - height * .5) * sin + Focal(height) * cos;
+        double weight = (Focal(height) * cos + TargetPixels) / denominator;
+        return double.IsFinite(weight) && weight >= NearLimit(height) && weight <= FarLimit(height);
     }
 
     public MapCamera PanFromTo(double fromX, double fromY, double toX, double toY, double width, double height)
@@ -82,7 +168,7 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         var next = this;
         // Mercator's metres-per-pixel varies with latitude. Re-evaluate the elevated
         // focus scale as the anchor changes latitude, keeping an airborne orbit exact.
-        for (int i = 0; i < (Perspective && TargetAltitudeMeters > 0 ? 4 : 1); i++)
+        for (int i = 0; i < (Perspective && TargetAltitudeMeters != 0 ? 4 : 1); i++)
         {
             var offset = next.GroundOffset(screenX - width*.5, screenY - height*.5, height);
             var center = Geographic(worldX - offset.X, worldY - offset.Y);
@@ -114,7 +200,7 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         {
             Zoom = Math.Clamp(Zoom + deltaZoom, MinZoom, MaxZoom),
             Bearing = WrapOffset((Bearing + deltaBearing) / 360) * 360,
-            Pitch = Math.Clamp(Pitch + deltaPitch, 0, 72)
+            Pitch = ClampPitch(Pitch + deltaPitch, Perspective)
         };
         var before = GroundOffset(x - width * .5, y - height * .5, height);
         return next.AtAnchor(CenterX + before.X, CenterY + before.Y, x, y, width, height);
@@ -132,7 +218,12 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         return new MapCamera(center.Latitude, center.Longitude, Zoom + (destination.Zoom - Zoom) * t,
             WrapOffset(bearing / 360) * 360, Pitch + (destination.Pitch - Pitch) * t, t < .5 ? Perspective : destination.Perspective,
             TargetAltitudeMeters + (destination.TargetAltitudeMeters - TargetAltitudeMeters)*t)
-        { GroundAltitudeMeters = GroundAltitudeMeters + (destination.GroundAltitudeMeters - GroundAltitudeMeters) * t };
+        {
+            GroundAltitudeMeters = GroundAltitudeMeters + (destination.GroundAltitudeMeters - GroundAltitudeMeters) * t,
+            IsFreeLook = t < .5 ? IsFreeLook : destination.IsFreeLook,
+            ViewDistanceMeters = ViewDistanceMeters + (destination.ViewDistanceMeters - ViewDistanceMeters) * t,
+            ViewportHeight = t < .5 ? ViewportHeight : destination.ViewportHeight
+        };
     }
 
     /// <summary>Fit the ordered route to the current bearing and pitch. Padding is in display
@@ -146,11 +237,16 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
     {
         ArgumentNullException.ThrowIfNull(route);
         if (route.Count == 0 || width <= 0 || height <= 0) return this;
+        if (IsFreeLook || Perspective && Pitch >= 90)
+        {
+            var overview = this with { IsFreeLook = false, ViewDistanceMeters = 0, ViewportHeight = 0, Pitch = Math.Min(Pitch, 55) };
+            return overview.FitRoute(route, width, height, viewport, padding);
+        }
         double left = Math.Clamp(viewport.Left, 0, width), right = Math.Clamp(viewport.Right, 0, width);
         double top = Math.Clamp(viewport.Top, 0, height), bottom = Math.Clamp(viewport.Bottom, 0, height);
         double focal = Focal(height);
         var (tiltSin, tiltCos) = Math.SinCos(PitchRadians);
-        if (Perspective && tiltSin > 0)
+        if (Perspective && tiltSin > 0 && tiltCos > 1e-6)
         {
             top = Math.Max(top, height * .5 + focal * tiltCos * (1 / Far - 1) / tiltSin + .01);
             bottom = Math.Min(bottom, height * .5 + focal * tiltCos * (1 / Near - 1) / tiltSin - .01);
@@ -219,30 +315,49 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         double z = (altitudeMeters - GroundAltitudeMeters) * WorldSize / (EarthCircumference * Math.Cos(Math.Clamp(Latitude, -MaxLatitude, MaxLatitude) * Math.PI / 180));
         z -= TargetPixels;
         double weight = Perspective ? 1 - (v * sp + z * cp) / Focal(height) : 1;
-        double divisor = Math.Max(Near, weight);
+        double near = NearLimit(height);
+        double divisor = Math.Max(near, weight);
         screen = (width * .5 + u / divisor, height * .5 + (v * cp - z * sp) / divisor);
-        return weight >= Near && weight <= FarLimit(height);
+        return weight >= near && weight <= FarLimit(height);
     }
 
     /// <summary>Visible source tiles in center-first request order, unique across the antimeridian.</summary>
     public TileId[] VisibleTiles(double width, double height, int maxZoom = 14)
     {
-        if (width <= 0 || height <= 0) return [];
+        if (width <= 0 || height <= 0 || !double.IsFinite(width) || !double.IsFinite(height)) return [];
         var z = (int)Math.Clamp(Math.Floor(Zoom - Math.Log2(GroundDistance(height))), 0, Math.Clamp(maxZoom, 0, 24));
         var n = 1 << z;
         var bounds = TileBounds(width, height, n);
+        // A grazing map lens can see a very large geographic area. Lower source LOD
+        // before enumerating it. Free look instead prioritizes detailed nearby tiles.
+        while (!IsFreeLook && z > 0 &&
+            (long)Math.Min(n, (long)bounds.Right - bounds.Left + 1) * (bounds.Bottom - bounds.Top + 1) > 256)
+        {
+            z--;
+            n = 1 << z;
+            bounds = TileBounds(width, height, n);
+        }
         var cx = CenterX * n;
         var cy = CenterY * n;
+        int left = bounds.Left, right = bounds.Right, top = bounds.Top, bottom = bounds.Bottom;
+        if (IsFreeLook)
+        {
+            left = Math.Max(left, (int)Math.Floor(cx) - 8);
+            right = Math.Min(right, (int)Math.Floor(cx) + 8);
+            top = Math.Max(top, (int)Math.Floor(cy) - 8);
+            bottom = Math.Min(bottom, (int)Math.Floor(cy) + 8);
+        }
+        right = (int)Math.Min(right, (long)left + n - 1);
         var distances = new Dictionary<TileId, double>();
-        for (int y = bounds.Top; y <= bounds.Bottom; y++)
-        for (int x = bounds.Left; x <= bounds.Right; x++)
+        for (int y = top; y <= bottom; y++)
+        for (int x = left; x <= right; x++)
         {
             var key = new TileId(z, ((x % n) + n) % n, y);
-            double dx = x + .5 - cx, dy = y + .5 - cy;
+            double dx = WrapOffset((key.X + .5) / n - CenterX) * n, dy = y + .5 - cy;
             double distance = dx * dx + dy * dy;
             if (!distances.TryGetValue(key, out var prior) || distance < prior) distances[key] = distance;
         }
-        return distances.OrderBy(p => p.Value).Select(p => p.Key).ToArray();
+        return distances.OrderBy(p => p.Value).Take(IsFreeLook ? 64 : 256).Select(p => p.Key).ToArray();
     }
 
     internal (int Left, int Top, int Right, int Bottom) TileBounds(double width, double height, int n)
@@ -250,14 +365,28 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         double extra = Zoom >= 13 ? Math.Min(height, 450 * WorldSize / (EarthCircumference * Math.Cos(Math.Clamp(Latitude, -MaxLatitude, MaxLatitude) * Math.PI / 180)) * Math.Sin(PitchRadians)) : 0;
         double xMin = double.PositiveInfinity, yMin = double.PositiveInfinity;
         double xMax = double.NegativeInfinity, yMax = double.NegativeInfinity;
-        for (int i = 0; i < 4; i++)
+        bool frustum = Perspective && (IsFreeLook || Pitch >= 80);
+        var (bearingSin, bearingCos) = Math.SinCos(Bearing * Math.PI / 180);
+        var (pitchSin, pitchCos) = Math.SinCos(PitchRadians);
+        for (int i = 0; i < (frustum ? 8 : 4); i++)
         {
-            var p = GroundOffset((i & 1) == 0 ? -width * .5 : width * .5,
-                (i & 2) == 0 ? -height * .5 : height * .5 + extra, height);
+            double dx = (i & 1) == 0 ? -width * .5 : width * .5;
+            double dy = (i & 2) == 0 ? -height * .5 : height * .5 + extra;
+            (double X, double Y) p;
+            if (frustum)
+            {
+                double weight = (i & 4) == 0 ? NearLimit(height) : FarLimit(height);
+                double u = dx * weight, v = pitchCos * dy * weight + pitchSin * Focal(height) * (1 - weight);
+                p = ((u * bearingCos - v * bearingSin) / WorldSize, (u * bearingSin + v * bearingCos) / WorldSize);
+            }
+            else p = GroundOffset(dx, dy, height);
             xMin = Math.Min(xMin, p.X); xMax = Math.Max(xMax, p.X);
             yMin = Math.Min(yMin, p.Y); yMax = Math.Max(yMax, p.Y);
         }
-        return ((int)Math.Floor((CenterX + xMin) * n), Math.Clamp((int)Math.Floor((CenterY + yMin) * n), 0, n - 1),
-                (int)Math.Floor((CenterX + xMax) * n), Math.Clamp((int)Math.Floor((CenterY + yMax) * n), 0, n - 1));
+        // Horizontal wrapping remains continuous, with bounded world copies at extreme
+        // viewport/lens combinations. Clamp before conversion to protect integer bounds.
+        xMin = Math.Clamp(xMin, -32, 32); xMax = Math.Clamp(xMax, -32, 32);
+        return ((int)Math.Floor((CenterX + xMin) * n), (int)Math.Floor(Math.Clamp((CenterY + yMin) * n, 0, n - 1)),
+                (int)Math.Floor((CenterX + xMax) * n), (int)Math.Floor(Math.Clamp((CenterY + yMax) * n, 0, n - 1)));
     }
 }

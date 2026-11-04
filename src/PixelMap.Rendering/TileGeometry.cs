@@ -12,9 +12,11 @@ internal enum Ink
 internal readonly record struct BatchKey(int Order, Ink Ink, float Width, int Bucket = 0);
 internal readonly record struct GroundBatch(BatchKey Key, SKPath Path, SKRect Bounds);
 internal readonly record struct ShadowSource(TileGeometry Tile, float X, float Y);
-internal sealed class Building(MapFeature feature, SKRect bounds, float unit, float top, float bottom, uint seed)
+internal sealed class Building(MapFeature feature, SKRect bounds, float unit, float top, float bottom, uint seed,
+    MapFeature? sourceFeature = null)
 {
     public readonly MapFeature Feature = feature;
+    public readonly MapFeature SourceFeature = sourceFeature ?? feature;
     public readonly SKRect Bounds = bounds;
     public readonly float Unit = unit, Top = top, Bottom = bottom;
     public readonly uint Seed = seed;
@@ -94,6 +96,7 @@ internal sealed class TileGeometry : IDisposable
 {
     internal const float Extent = 4096;
     public readonly MapTile Source;
+    public readonly MapRenderStyle RenderStyle;
     public readonly GroundBatch[] Batches;
     public readonly GroundBatch[] Shadows;
     public readonly SKRect ShadowBounds;
@@ -103,9 +106,10 @@ internal sealed class TileGeometry : IDisposable
     public long LastFrame;
     public long ShadowRevision = -1;
 
-    public TileGeometry(MapTile tile)
+    public TileGeometry(MapTile tile, MapRenderStyle renderStyle = MapRenderStyle.Pixel)
     {
         Source = tile;
+        RenderStyle = renderStyle;
         var paths = new Dictionary<BatchKey, SKPath>();
         int n = 1 << tile.Id.Z;
         var centerLatitude = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * (tile.Id.Y + .5) / n)));
@@ -118,18 +122,19 @@ internal sealed class TileGeometry : IDisposable
             if (feature.Layer == "building" && feature.Type == GeometryType.Polygon)
             {
                 if (feature.Hide3D) continue;
-                var bounds = Bounds(feature, unit);
+                var renderedFeature = BuildingStyle.Prepare(feature, metersToTile, renderStyle);
+                var bounds = Bounds(renderedFeature, unit);
                 if (bounds.Width <= 0 || bounds.Height <= 0) continue;
-                float top = (float)Math.Clamp(feature.Height ?? 8, .5, 1500);
-                float bottom = (float)Math.Clamp(feature.MinHeight ?? 0, 0, top);
+                float top = (float)Math.Clamp(renderedFeature.Height ?? 8, .5, 1500);
+                float bottom = (float)Math.Clamp(renderedFeature.MinHeight ?? 0, 0, top);
                 // Use a tile-independent key on buffered copies of the same building.
                 uint seed = unchecked((uint)(feature.Id ^ (feature.Id >> 32)));
                 if (seed == 0)
                     seed = unchecked((uint)((tile.Id.X * 4096L + (int)bounds.MidX) * 73856093
                                            ^ (tile.Id.Y * 4096L + (int)bounds.MidY) * 19349663));
                 seed = (seed ^ (seed >> 16)) * 0x7feb352d;
-                Buildings.Add(new(feature, bounds, unit, top, bottom, seed ^ (seed >> 15)));
-                AddShadow(PathFor(new(900, Ink.Shadow, 0, Bucket(bounds))), feature, unit, top * metersToTile);
+                Buildings.Add(new(renderedFeature, bounds, unit, top, bottom, seed ^ (seed >> 15), feature));
+                AddShadow(PathFor(new(900, Ink.Shadow, 0, Bucket(bounds))), renderedFeature, unit, top * metersToTile);
                 continue;
             }
 

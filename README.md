@@ -2,7 +2,7 @@
 
 [Explore the live map](https://wieslawsoltes.github.io/UnoPixelMap/) · [Lake Garda elevation](https://wieslawsoltes.github.io/UnoPixelMap/#v4/45.875000/10.850000/12.300/-25.00/58.00/Day/Elevation/Perspective/0.0/Relief/1.00) · [Earth in 3D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/55.00/Day/Earth) · [Earth in 2D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/0.00/Day/Earth)
 
-Pixel Atlas is an interactive Uno Platform map control for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable pixel art. Choose an overhead, isometric or perspective camera, plan a journey, preview its directions, or drive a pixel vehicle through the map. A world overview, the opening Lower Manhattan neighborhood, northern Lake Garda terrain and six route demonstrations are bundled with the app.
+Pixel Atlas is an interactive Uno Platform map control for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable pixel art. Choose an overhead, isometric or perspective camera, plan a journey, preview its directions, or explore freely on foot, in a vehicle or with a flying camera. GPU rendering and Pixel art are enabled by default. Normal, Minecraft and Roblox rendering styles are available independently of the map layer. A world overview, the opening Lower Manhattan neighborhood, northern Lake Garda terrain and six route demonstrations are bundled with the app.
 
 ![Pixel Atlas displaying Lower Manhattan in a 1200 × 780 Chromium viewport](docs/manhattan.png)
 
@@ -10,9 +10,39 @@ Pixel Atlas is an interactive Uno Platform map control for the browser. It strea
 
 ## Explore
 
-Drag to pan, scroll or pinch to zoom, and right-drag or Shift-drag to orbit and tilt. Two fingers can pinch, twist, pan or tilt in parallel. Double-click to zoom at the pointer. Click a roof, façade, street or park to inspect it. Use Map, Earth or Elevation to choose the ground layer, then choose 2D or 3D independently. Terrain relief can be enabled for all three layers. Earth transforms natural-color satellite imagery into pixel art and keeps map labels and buildings in the same coordinate system. The View menu selects the Day, Dusk or Night palette and the perspective lens. Share a view to preserve its camera, focus altitude, projection, lighting, terrain relief and vertical exaggeration. The v4 link reader also supports v1, v2 and v3 views.
+Drag to pan, use a mouse wheel or trackpad pinch to zoom, and right-drag or Shift-drag to orbit and tilt. Continuous two-axis trackpad scrolling pans the map. Shift-scroll orbits and Alt-scroll tilts. Two touch contacts can pinch, twist, pan or tilt in parallel. Map gestures preserve the page scale and UI layout. Double-click to zoom at the pointer. Click a roof, façade, street or park to inspect it. Use Map, Earth or Elevation to choose the ground layer, then choose 2D or 3D independently. Terrain relief can be enabled for all three layers. Earth transforms natural-color satellite imagery into pixel art and keeps map labels and buildings in the same coordinate system. The View menu selects rendering style, the Day, Dusk or Night palette and the perspective lens. Share a view to preserve its camera, physical eye, projection, rendering style, lighting, terrain relief and vertical exaggeration. The v5 link reader also supports v1–v4 views and preserves a free camera's eye when opened on a different viewport.
 
 Search by place name, address or decimal latitude and longitude. The city guide includes Lower Manhattan, Kraków, Shibuya, Barcelona, Paris, Singapore and the Lake Garda mountains. With the map focused, use the arrow keys to pan, +/− to zoom, Q/E to rotate, P to switch projection, Home to return to Manhattan and Escape to clear a marker.
+
+## Rendering styles and free roam
+
+| Style | Terrain and buildings | Image sampling |
+| --- | --- | --- |
+| Pixel | Continuous terrain with palette-quantized lighting, pixel façades and roofs | Adaptive pixel-art resolution with nearest-neighbor presentation |
+| Normal | Continuous terrain, smooth lighting and unprocessed Earth imagery | Full logical resolution |
+| Minecraft | Quantized terrain cells with flat tops and vertical walls, stair-stepped building footprints and block materials | Pixel-art resolution |
+| Roblox | Bevelled terrain blocks, simplified building forms and plastic-like shading | Full logical resolution |
+
+Open **Play** to start a route-independent session at the map center. Walk, car, bicycle, boat, aircraft and train share the fixed-step simulation, terrain sampling, collision world, audio and effects. Free flight provides an independent six-axis camera. Changing vehicles retains the current geographic position. Trains attach to nearby mapped tracks, follow connected segments, and wait for additional track coverage where continuation is unavailable. Boats wait on dry or uncovered starts and resume when navigable water is available. The route planner remains available after leaving free roam.
+
+Third-person chase, first-person, cockpit, orbit and north-up rigs follow the active vehicle. First-person cameras use metre-scaled eye heights and an 8 cm near plane. Perspective pitch extends through the horizon toward an upward view, and longitude wraps around the globe. The projection retains Web Mercator's latitude boundary. Terrain-relative camera clearance uses the rendered surface, including block-style steps, while vehicle physics uses the underlying elevation data.
+
+| Free-roam input | Action |
+| --- | --- |
+| W/S or ↑/↓ | Forward and reverse, or aircraft throttle |
+| A/D or ←/→ | Walk/free-flight strafe, vehicle steering |
+| Q/E | Walk/free-flight yaw |
+| Drag or right touch stick | Look and orbit |
+| Click the map in first person | Capture relative mouse movement |
+| Space | Jump on foot, brake a vehicle, ascend in free flight |
+| Page Up / Page Down | Climb and descend |
+| Shift | Run or boost |
+| C | Toggle first-person and third-person view |
+| R | Respawn at the session origin |
+| Escape or P | Pause or resume, releasing captured mouse input |
+| Left touch stick | Independent movement while the right stick controls look |
+
+Mouse-wheel zoom changes chase distance. In free flight it changes movement speed. Pausing, changing modes, hiding the page or leaving the game releases held inputs. Sound remains opt-in through the game's sound control.
 
 ## Journeys and driving
 
@@ -57,7 +87,7 @@ Mapzen Terrain Tiles provide worldwide, keyless Terrarium elevation data. The de
 
 Ground vehicles and trains follow the sampled surface. Ocean surfaces use sea level, while land and inland water retain signed DEM elevations. Aircraft use absolute altitude and terrain-relative clearance, with swept ground contacts, taxiing and landing handling. Rendered navigation objects follow the selected mesh while the simulation retains physical DEM heights. The camera keeps a local terrain datum, supports terrain-anchored gestures and adjusts perspective eye clearance above slopes.
 
-The optional GPU backend renders terrain and buildings with retained geometry, vertex and fragment shaders, and hardware depth testing. Sparse CPU visibility queries keep labels, routes, vehicles and feature inspection aligned with the selected mesh. The CPU renderer remains available through the same control. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
+The default GPU backend renders terrain and buildings with retained geometry, vertex and fragment shaders, and hardware depth testing. Sparse CPU visibility queries keep labels, routes, vehicles and feature inspection aligned with the selected mesh. The CPU renderer remains available through the same control. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
 
 ## Reuse the control
 
@@ -73,8 +103,12 @@ Browser hosts using Uno 6.7.135 also include the GL readback adapter and its lin
 <ItemGroup>
     <WasmShellNativeCompile Include="../PixelMap.Controls/Browser/pixel_map_gl_readback.c"
                             Condition="'$(TargetFramework)' == 'net10.0-browserwasm'" />
+    <Content Include="../PixelMap.Controls/Browser/map-input.js"
+             Link="input/map-input.js" UnoDeploy="Root" CopyToOutputDirectory="PreserveNewest" />
 </ItemGroup>
 ```
+
+Load `input/map-input.js` before Uno's bootstrap script in the browser host. The adapter preserves native trackpad deltas, scopes browser gesture cancellation to the map after XAML hit testing, manages pointer capture and releases input on focus loss.
 
 ```xml
 <Grid xmlns:maps="using:PixelMap.Controls">
@@ -90,6 +124,7 @@ Atlas.IsTerrainEnabled = true;
 Atlas.IsGpuRenderingEnabled = true;
 Atlas.TerrainExaggeration = 1;
 Atlas.Palette = PixelStyle.Dusk;
+Atlas.RenderStyle = MapRenderStyle.Pixel;
 Atlas.FlyTo(new MapCamera(50.0617, 19.9373, 16.8, Bearing: -35, Pitch: 55));
 Atlas.SetMarker(50.0617, 19.9373, "Rynek Główny");
 ```
@@ -110,6 +145,22 @@ Atlas.CameraRig = JourneyCameraRig.Chase;
 Atlas.Journey.Preview();
 ```
 
+```csharp
+using PixelMap.Controls;
+using PixelMap.Rendering;
+using PixelMap.Routing;
+using PixelMap.Simulation;
+
+Atlas.RenderStyle = MapRenderStyle.Minecraft;
+Atlas.IsTerrainEnabled = true;
+Atlas.StartFreeRoam(TravelMode.Walk);
+Atlas.CameraRig = JourneyCameraRig.FirstPerson;
+Atlas.SetFreeRoamInput(new FreeRoamInput(Forward: 1, Boost: true));
+Atlas.LookFreeRoam(bearingDelta: 15, pitchDelta: -5);
+// A gamepad adapter can update this input independently of held keyboard controls.
+Atlas.SetFreeRoamInput(default);
+```
+
 `IRouteProvider` supplies additional routing backends. `VehicleProfile` defines compatible vehicle dynamics, and `JourneySession.SelectVehicle` installs a profile for the current route. `IJourneyWorld` supplies collision rules and surface heights. `ElevationTileSource` accepts a custom HTTPS Terrarium XYZ provider, and `ElevationSnapshot` supplies raw and water-aware height sampling. `IJourneyAudioDevice` supplies an audio backend. The browser host deploys `PixelMap.Audio/Browser/journey-audio.js` and attaches a `BrowserAudioDevice`. Other hosts can use the same simulation without browser audio.
 
 | Project | Responsibility |
@@ -117,18 +168,18 @@ Atlas.Journey.Preview();
 | PixelMap.Data | Bounded MVT protobuf decoding, source catalog, request coalescing, cancellation and separate byte-bounded caches for vector tiles, satellite imagery and elevation. Bounded Terrarium PNG decoding, immutable height snapshots and indexed water surfaces. Photon geocoding with an injectable endpoint. |
 | PixelMap.Rendering | Wrapped Web Mercator camera, cached terrain blocks, palette shaders, orthographic and perspective rendering, depth-tested walls and roof holes, map labels, feature picking, route overlays, vehicle sprites and world-anchored particles. The GPU terrain backend uses retained GL geometry, hardware depth, pixel shaders and sparse overlay visibility queries. Terrain relief shares the adaptive stitched height field across both backends. |
 | PixelMap.Routing | Provider-separated routes and alternatives, bounded local A* rail/ferry searches, great-circle flight paths, ordered stops, maneuver metadata and shared provider-distance route sampling. |
-| PixelMap.Simulation | Fixed 60 Hz clock, six vehicle profiles, manual inputs, preview transport, cruise, checkpoint scoring and recovery, spatially indexed mapped collisions and replaceable world rules. |
+| PixelMap.Simulation | Fixed 60 Hz clock, vehicle profiles, free roaming and flight, jumping, rail following, manual inputs, preview transport, cruise, checkpoint scoring and recovery, spatially indexed mapped collisions and replaceable world rules. |
 | PixelMap.Audio | Coalesced motion parameters and discrete cues through an injectable sound device. The browser adapter owns a bounded Web Audio graph and releases completed transient sounds. |
-| PixelMap.Controls | Uno input and accessible keyboard navigation, animated cameras and follow rigs, viewport tile scheduling, journey orchestration, Skia drawing and an optional GLCanvasElement terrain surface. During motion the control adjusts pixel resolution to measured frame cost, then returns to 2-DIP pixels at rest. |
-| PixelMap.App | Responsive XAML explorer, search, city guide, compass, scale, lighting, shareable camera links and the journey planner with touch driving controls. |
+| PixelMap.Controls | Uno input and accessible keyboard navigation, scoped browser gestures, physical-eye cameras and follow rigs, viewport tile scheduling, journey orchestration, Skia drawing and a default GLCanvasElement terrain surface. Pixel styles adapt resolution to measured frame cost and return to 2-DIP pixels at rest. |
+| PixelMap.App | Responsive XAML explorer, search, city guide, compass, scale, lighting, shareable camera links, journey planner and free-roam HUD with independent movement/look sticks. |
 
 ## Rendering backends
 
-The View menu includes **GPU rendering (experimental)**. With terrain relief or the Elevation layer enabled, Uno's `GLCanvasElement` runs a retained WebGL2/OpenGL ES 3 renderer. Vertex shaders project the stitched height field and extruded building meshes. Fragment shaders preserve elevation colors, quantized hill shading, façade windows, roof edges and overhead Earth blending. A depth attachment resolves terrain and building occlusion at pixel-art resolution. A nearest-neighbor resolve produces the final display pixels.
+The View menu includes **GPU rendering**, enabled by default. Terrain, free-camera views and the additional styles use Uno's `GLCanvasElement` with a retained WebGL2/OpenGL ES 3 renderer. Vertex shaders project the stitched height field, instanced terrain blocks and extruded building meshes. Fragment shaders implement each style's lighting and materials while preserving elevation colors, façade details, roof edges and overhead Earth blending. A depth attachment resolves terrain and building occlusion at the selected style's resolution. Pixel styles use nearest-neighbor presentation.
 
 Terrain artwork, height buffers and building meshes remain cached across camera movement. Tile-priority reordering preserves those textures. Building foundations follow the same selected terrain triangles used by picking. The browser queues art-resolution transfers into two pixel-pack buffers and polls GPU fences with zero timeout. After a 16 ms asynchronous budget, copying the newest submitted frame supplies backpressure when the compositor is overloaded. Completed RGBA images are presented through Uno's Skia canvas with nearest sampling. Retained frame tokens keep each image paired with its labels, terrain picking, markers, route graphics, gates, sprites and effects. Overlays render at native DPI, and overlay-only animation reuses the terrain image. Resources are released on unload and GPU initialization failures select the CPU renderer.
 
-Flat views retain the existing GPU-backed Skia path using `SKVertices` and `SKRuntimeEffect`. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The control exposes `IsGpuRenderingEnabled` and `IsGpuRenderingActive`. CPU and GPU rasterization can differ at primitive boundaries and in color rounding. Art-sized presentation reduces transferred pixels by 4×, 9× or 16× at the existing pixel sizes 2, 3 and 4. Buffer copies synchronize overdue transfers before publishing their images. Measurements include that presentation cost. [Performance methodology and results](docs/performance.md)
+Flat Pixel views retain the GPU-backed Skia path using `SKVertices` and `SKRuntimeEffect`. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The control exposes `IsGpuRenderingEnabled`, `IsGpuRenderingActive` and `RenderStyle`. CPU and GPU rasterization can differ at primitive boundaries and in color rounding. Art-sized presentation reduces transferred pixels by 4×, 9× or 16× at pixel sizes 2, 3 and 4. Buffer copies synchronize overdue transfers before publishing their images. Measurements include that presentation cost. [Performance methodology and results](docs/performance.md)
 
 ## Build and test
 
@@ -139,6 +190,7 @@ dotnet run -c Release --project tests/PixelMap.Rendering.Tests
 dotnet run -c Release --project tests/PixelMap.Routing.Tests
 dotnet run -c Release --project tests/PixelMap.Simulation.Tests
 node tests/browser/audio.cjs
+node tests/browser/input-adapter.cjs
 dotnet publish src/PixelMap.App -f net10.0-browserwasm -c Release -o artifacts/browser
 python3 -m http.server 8000 --directory artifacts/browser/wwwroot
 ```
@@ -151,6 +203,7 @@ npm ci --prefix tests/browser
 node tests/browser/smoke.cjs http://localhost:8000/
 node tests/browser/journeys.cjs http://localhost:8000/
 node tests/browser/terrain.cjs http://localhost:8000/
+node tests/browser/explore.cjs http://localhost:8000/
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-visual --visual
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-motion --motion
 node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-gpu --motion --gpu
@@ -165,7 +218,7 @@ LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless dotnet run -c Release \
   --gpu-output=artifacts/gpu-terrain
 ```
 
-The Pages workflow builds the AOT-enabled browser app from main, runs the engine checks, exercises the exact publish artifact with Chromium, and publishes it after verification. Journey browser checks cover all six modes, route alternatives, waypoint picking, perspective projection, manual keyboard/touch inputs and Web Audio activation. Terrain browser checks exercise the Garda fixtures, all three layers, overhead and perspective, orbit, dragging, elevation inspection, exaggeration, saved views and handset layout. Map, journey and terrain checks run with CPU and optional GPU modes in CI. Set `PIXELMAP_SHOTS` to save browser captures.
+The Pages workflow builds the AOT-enabled browser app from main, runs the engine checks, exercises the exact publish artifact with Chromium, and publishes it after verification. Journey browser checks cover all six modes, route alternatives, waypoint picking, perspective projection, manual keyboard/touch inputs and Web Audio activation. Terrain browser checks exercise the Garda fixtures, all three layers, overhead and perspective, orbit, dragging, elevation inspection, exaggeration, saved views and handset layout. Exploration checks exercise default GPU rendering, four styles, page-scale-preserving gestures, pointer lock, free movement, camera switching and simultaneous touch sticks. Map, journey and terrain checks run with CPU and GPU modes in CI. Set `PIXELMAP_SHOTS` to save browser captures.
 
 ## Sources and coverage
 

@@ -8,6 +8,12 @@ if (args.Contains("--gpu-terrain", StringComparer.Ordinal))
     return;
 }
 
+if (args.Contains("--styles", StringComparer.Ordinal))
+{
+    RenderStyleChecks.Run();
+    return;
+}
+
 const int width = 256, height = 256;
 var id = new TileId(14, 8192, 8192);
 double centerX = (id.X + .5) / (1 << id.Z);
@@ -92,6 +98,7 @@ TerrainCameraChecks.Run();
 TerrainRenderingChecks.Run();
 TerrainNavigationChecks.Run();
 RingFixtures.Run();
+RenderStyleChecks.Run();
 
 if (args.Contains("--benchmark", StringComparer.Ordinal))
 {

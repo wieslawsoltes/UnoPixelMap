@@ -45,23 +45,31 @@
                 </StackPanel>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Button x:Name="GameButton" Content="Play" Style="{StaticResource HeaderAction}"
+                        AutomationProperties.Name="Open free roam game" Click="OnGame" />
                 <Button x:Name="GuideButton" Content="City guide" Style="{StaticResource HeaderAction}"
                         AutomationProperties.Name="Browse city guide" Click="OnGuide" />
                 <Button x:Name="ViewButton" Style="{StaticResource HeaderAction}" AutomationProperties.Name="Map appearance">
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
-                            <ToggleMenuFlyoutItem x:Name="GpuRenderingItem" Text="GPU rendering (experimental)" Click="OnGpuRendering"
-                                                 ToolTipService.ToolTip="Uses a GPU-backed Skia canvas for terrain and image composition, with automatic CPU fallback when GPU resources are unavailable." />
+                            <ToggleMenuFlyoutItem x:Name="GpuRenderingItem" Text="GPU rendering" IsChecked="True" Click="OnGpuRendering"
+                                                 ToolTipService.ToolTip="Uses retained GPU geometry and shaders, with automatic CPU fallback when GPU resources are unavailable." />
                             <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief"
                                                  ToolTipService.ToolTip="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." />
                             <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
                             <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
                             <MenuFlyoutSeparator />
+                            <ToggleMenuFlyoutItem x:Name="PixelStyleItem" Text="Pixel art rendering" Tag="Pixel" IsChecked="True" Click="OnRenderStyle" />
+                            <ToggleMenuFlyoutItem x:Name="NormalStyleItem" Text="Normal rendering" Tag="Normal" Click="OnRenderStyle" />
+                            <ToggleMenuFlyoutItem x:Name="MinecraftStyleItem" Text="Minecraft rendering" Tag="Minecraft" Click="OnRenderStyle" />
+                            <ToggleMenuFlyoutItem x:Name="RobloxStyleItem" Text="Roblox rendering" Tag="Roblox" Click="OnRenderStyle" />
+                            <MenuFlyoutSeparator />
                             <ToggleMenuFlyoutItem x:Name="DayItem" Text="Daylight" Tag="Day" IsChecked="True" Click="OnPalette" />
                             <ToggleMenuFlyoutItem x:Name="DuskItem" Text="Golden hour" Tag="Dusk" Click="OnPalette" />
                             <ToggleMenuFlyoutItem x:Name="NightItem" Text="After dark" Tag="Night" Click="OnPalette" />
                             <MenuFlyoutSeparator />
+                            <MenuFlyoutItem Text="City guide" Click="OnGuide" />
                             <MenuFlyoutItem Text="Share this view" Click="OnShare" />
                             <MenuFlyoutItem Text="Map controls" Click="OnHelp" />
                         </MenuFlyout>
@@ -162,7 +170,7 @@
                         Width="344" Margin="16" Spacing="6">
                 <Border Padding="4" Background="#FFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6">
                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="3">
-                        <TextBox x:Name="SearchBox" PlaceholderText="Search places or coordinates" MaxLength="200"
+                        <TextBox x:Name="SearchBox" PlaceholderText="Search places or coordinates" MaxLength="200" FontSize="16"
                                  Background="Transparent" BorderThickness="0" Padding="8,6" MinHeight="38"
                                  AutomationProperties.Name="Search places or latitude and longitude" KeyDown="OnSearchKey" TextChanged="OnQueryEdited" />
                         <Button x:Name="SearchButton" Grid.Column="1" Width="42" Height="38" Padding="0"
@@ -198,6 +206,7 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
+            <local:GamePanel x:Name="GamePanel" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
             <local:JourneyPanel x:Name="JourneyPanel" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"
                                 Width="348" Margin="16" />
             <Border x:Name="PickBanner" Visibility="Collapsed" Background="#193C3C" HorizontalAlignment="Left" VerticalAlignment="Top"

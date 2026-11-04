@@ -3,6 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <UnoFeatures>Skia;GLCanvas</UnoFeatures>
     <IsUnoLibrary>true</IsUnoLibrary>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Uno.WinUI.Graphics3DGL" Version="6.7.135" />

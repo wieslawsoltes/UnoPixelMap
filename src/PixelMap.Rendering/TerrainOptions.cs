@@ -7,6 +7,9 @@ namespace PixelMap.Rendering;
 public sealed record TerrainOptions(ElevationSnapshot Elevation, bool Relief = true,
     bool Hypsometric = false, double Exaggeration = 1)
 {
+    /// <summary>Geometry treatment retained with the selected terrain frame.</summary>
+    public MapRenderStyle RenderStyle { get; init; }
+
     internal double HeightScale => double.IsFinite(Exaggeration) ? Math.Clamp(Exaggeration, .25, 8) : 1;
 
     /// <summary>Convert an absolute physical altitude to the camera's rendered altitude.

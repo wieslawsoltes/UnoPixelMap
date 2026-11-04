@@ -20,6 +20,7 @@
     <ProjectReference Include="../PixelMap.Controls/PixelMap.Controls.csproj" />
     <WasmShellNativeCompile Include="../PixelMap.Controls/Browser/pixel_map_gl_readback.c" />
     <Content Include="../PixelMap.Audio/Browser/journey-audio.js" Link="audio/journey-audio.js" UnoDeploy="Root" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../PixelMap.Controls/Browser/map-input.js" Link="input/map-input.js" UnoDeploy="Root" CopyToOutputDirectory="PreserveNewest" />
     <UnoIcon Include="Assets/atlas.svg" />
     <UnoSplashScreen Include="Assets/launch.svg" Color="#142F32" BaseSize="80,80" />
   </ItemGroup>

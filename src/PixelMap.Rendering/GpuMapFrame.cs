@@ -39,9 +39,10 @@ public sealed class GpuMapFrame : IDisposable
     public int Width { get; }
     public int Height { get; }
     public int PixelSize { get; }
+    public MapRenderStyle RenderStyle => TerrainOptions.RenderStyle;
     public MapCamera Camera { get; }
     public int TerrainPatchCount => Terrain.Length;
-    public int TerrainTriangleCount => Terrain.Length * GpuTerrainMesh.Indices.Length / 3;
+    public int TerrainTriangleCount => Terrain.Sum(draw => draw.Mesh.TriangleIndices.Length / 3);
     public int BuildingTriangleCount => Buildings.Sum(draw => draw.Mesh.Indices.Length / 3);
     internal int ArtWidth { get; }
     internal int ArtHeight { get; }
@@ -49,6 +50,7 @@ public sealed class GpuMapFrame : IDisposable
     internal GpuBuildingDraw[] Buildings { get; }
     internal PixelPalette Palette { get; }
     internal TerrainOptions TerrainOptions { get; }
+    internal TerrainOptions? NavigationTerrain { get; init; }
     internal float PixelsPerMeter { get; }
     internal float MinimumAltitude { get; set; }
     internal float MaximumAltitude { get; set; }
@@ -82,6 +84,11 @@ public sealed class GpuMapFrame : IDisposable
             int count = 1 << zoom;
             int column = Math.Min(count - 1, (int)(x * count)), row = Math.Min(count - 1, (int)(y * count));
             if (!heightMeshes.TryGetValue(new(zoom, column, row), out var mesh)) continue;
+            if (mesh.HeightLight is { } blocks)
+            {
+                altitude = TerrainBlockMesh.Sample(blocks, x * count - column, y * count - row, mesh.RenderStyle);
+                return true;
+            }
             float localX = (float)Math.Clamp((x * count - column) * GpuTerrainMesh.Segments, 0, GpuTerrainMesh.Segments);
             float localY = (float)Math.Clamp((y * count - row) * GpuTerrainMesh.Segments, 0, GpuTerrainMesh.Segments);
             int cx = Math.Min(GpuTerrainMesh.Segments - 1, (int)localX), cy = Math.Min(GpuTerrainMesh.Segments - 1, (int)localY);
@@ -111,7 +118,7 @@ internal readonly record struct TerrainGpuDraw(GpuTerrainMesh Mesh, GpuTerrainTe
     TileTransform Transform);
 
 internal sealed class GpuTerrainMesh(object resourceKey, PixelMap.Data.TileId id, int copy,
-    float[] vertices, long revision)
+    float[] vertices, long revision, MapRenderStyle renderStyle = MapRenderStyle.Pixel, float[]? heightLight = null)
 {
     internal const int VertexStride = 4;
     internal const int Segments = 16;
@@ -121,6 +128,14 @@ internal sealed class GpuTerrainMesh(object resourceKey, PixelMap.Data.TileId id
     internal readonly int Copy = copy;
     internal readonly float[] Vertices = vertices;
     internal readonly long Revision = revision;
+    internal readonly MapRenderStyle RenderStyle = renderStyle;
+    internal readonly float[]? HeightLight = heightLight;
+    internal ushort[] TriangleIndices => RenderStyle switch
+    {
+        MapRenderStyle.Minecraft => TerrainBlockMesh.CubeIndices,
+        MapRenderStyle.Roblox => TerrainBlockMesh.BeveledIndices,
+        _ => Indices
+    };
     internal long Frame;
     internal static readonly ushort[] Indices = CreateIndices();
 

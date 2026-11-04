@@ -24,6 +24,7 @@ public sealed partial class PixelMapControl
         private bool _terrainGpuRequested;
         private bool _terrainGpuPresented;
         private bool _terrainGpuFailed;
+        private bool _gpuInitializationQueued;
 
         private PixelMapRenderer? PresentedRenderer
         {
@@ -37,7 +38,8 @@ public sealed partial class PixelMapControl
         }
 
         private static bool UsesGpuTerrain(Scene scene) => scene.UseGpuRendering &&
-            scene.Terrain is { Elevation.Count: > 0 } terrain && (terrain.Relief || terrain.Hypsometric);
+            (scene.RenderStyle != MapRenderStyle.Pixel || scene.Camera.IsFreeLook ||
+             scene.Terrain is { Elevation.Count: > 0 } terrain && (terrain.Relief || terrain.Hypsometric));
 
         private void PresentGpuTerrain(Scene scene)
         {
@@ -53,7 +55,7 @@ public sealed partial class PixelMapControl
             if (!_terrainGpuFailed)
             {
                 var (width, height) = TerrainViewport;
-                int pixelSize = scene.Moving ? _interactivePixelSize : 2;
+                int pixelSize = ArtworkPixelSize(scene);
                 var reusable = _gpuReady?.Request.Matches(scene, width, height, pixelSize) == true ? _gpuReady
                     : _gpuDisplayed?.Request.Matches(scene, width, height, pixelSize) == true ? _gpuDisplayed : null;
                 if (reusable is not null)
@@ -65,19 +67,36 @@ public sealed partial class PixelMapControl
                 }
                 else if (_terrainGpu is null)
                 {
-                    _terrainGpu = new GpuTerrainCanvas(this);
-                    _terrainGpu.RequestFrame(scene, width, height, pixelSize);
-                    // GLCanvasElement initializes its framebuffer during Loaded. Establish
-                    // positive art dimensions before insertion into an already loaded grid.
-                    _terrainGpu.Measure(new Size(_terrainGpu.Width, _terrainGpu.Height));
-                    _terrainGpu.Arrange(new Rect(0, 0, _terrainGpu.Width, _terrainGpu.Height));
-                    layers.Children.Insert(0, _terrainGpu);
+                    // The first Skia paint establishes the host's graphics context and
+                    // final layout. It queues GL initialization after that paint returns.
+                    redraw = true;
                 }
                 else _terrainGpu.RequestFrame(scene, width, height, pixelSize);
             }
             // Camera input coalesces while the current image and overlays are displayed.
             // Publish invalidates the foreground once matching artwork is available.
             if (redraw) Invalidate();
+        }
+
+        private void QueueGpuInitialization()
+        {
+            if (_gpuInitializationQueued || _terrainGpu is not null || !_terrainGpuRequested || _terrainGpuFailed) return;
+            _gpuInitializationQueued = true;
+            if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+            {
+                lock (_drawing)
+                {
+                    _gpuInitializationQueued = false;
+                    if (_scene is not { } scene || !UsesGpuTerrain(scene) || _terrainGpu is not null || _terrainGpuFailed ||
+                        !layers.IsLoaded || layers.ActualWidth <= 0 || layers.ActualHeight <= 0) return;
+                    var (width, height) = TerrainViewport;
+                    _terrainGpu = new GpuTerrainCanvas(this);
+                    _terrainGpu.RequestFrame(scene, width, height, ArtworkPixelSize(scene));
+                    _terrainGpu.Measure(new Size(_terrainGpu.Width, _terrainGpu.Height));
+                    _terrainGpu.Arrange(new Rect(0, 0, _terrainGpu.Width, _terrainGpu.Height));
+                    layers.Children.Insert(0, _terrainGpu);
+                }
+            })) _gpuInitializationQueued = false;
         }
 
         private void ReleaseGpuTerrain()
@@ -193,6 +212,8 @@ public sealed partial class PixelMapControl
                     trip.Mode == TravelMode.Flight ? driver.AltitudeMeters : 0, driver.AnimationSeconds);
             if (scene.Route is { } route)
                 renderer.DrawNavigation(canvas, frame.Width, frame.Height, scene.Camera, route, scene.Vehicle, frame.PixelSize);
+            else if (scene.Vehicle is { } vehicle)
+                renderer.DrawVehicle(canvas, frame.Width, frame.Height, scene.Camera, scene.VehicleMode, vehicle, frame.PixelSize);
             canvas.Restore();
 
             var previous = _gpuDisplayed;
@@ -223,6 +244,7 @@ public sealed partial class PixelMapControl
             internal bool Matches(Scene candidate, int candidateWidth, int candidateHeight, int candidatePixelSize) =>
                 Width == candidateWidth && Height == candidateHeight && PixelSize == candidatePixelSize &&
                 Scene.Camera == candidate.Camera && Scene.Palette == candidate.Palette && Scene.Terrain == candidate.Terrain &&
+                Scene.RenderStyle == candidate.RenderStyle &&
                 SameSources(Tiles, candidate.Tiles) && SameSources(Imagery, candidate.Imagery);
 
             private static bool SameSources<T>(IReadOnlyList<T>? first, IReadOnlyList<T>? second) where T : class
@@ -276,7 +298,11 @@ public sealed partial class PixelMapControl
                 _readbackTimer.Tick += (_, _) => PollReadback();
                 RegisterPropertyChangedCallback(IsGLInitializedProperty, (_, _) =>
                 {
-                    if (IsGLInitialized == false) _owner.GpuTerrainUnavailable(this);
+                    if (IsGLInitialized == false)
+                    {
+                        Console.WriteLine($"Pixel Atlas GPU surface unavailable at {RenderSize.Width}×{RenderSize.Height}, loaded={IsLoaded}, renderer={Renderer is not null}.");
+                        _owner.GpuTerrainUnavailable(this);
+                    }
                 });
             }
 
@@ -464,7 +490,7 @@ public sealed partial class PixelMapControl
                         long started = Stopwatch.GetTimestamp();
                         long version = _requestVersion;
                         var frame = Renderer.PrepareGpuFrame(request.Width, request.Height, request.Scene.Camera, request.Tiles,
-                            request.Scene.Palette, request.PixelSize, request.Imagery, request.Scene.Terrain);
+                            request.Scene.Palette, request.PixelSize, request.Imagery, request.Scene.Terrain, request.Scene.RenderStyle);
                         try
                         {
                             _engine.DrawArtwork(frame);

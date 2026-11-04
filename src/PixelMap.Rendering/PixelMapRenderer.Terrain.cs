@@ -14,11 +14,26 @@ public sealed partial class PixelMapRenderer
     private readonly List<float> perspectiveFoundations = [];
     private readonly List<MapTile> terrainTextureTiles = [];
     private readonly List<ImageryTile> terrainTextureImagery = [];
-    private (PixelStyle Style, int PixelSize, bool Shadows) terrainTextureStyle;
+    private (PixelStyle Style, int PixelSize, bool Shadows, MapRenderStyle RenderStyle) terrainTextureStyle;
     private ElevationSnapshot? foundationSnapshot;
     private long foundationRevision;
+    private TerrainOptions? navigationTerrain;
 
     internal TerrainOptions? CurrentTerrain { get; private set; }
+
+    /// <summary>Sample the active rendered height field, including its LOD, stitched
+    /// edges and block-style surface. The result is unexaggerated metres above sea level.</summary>
+    public bool TryGetTerrainElevation(double latitude, double longitude, out double elevationMeters)
+    {
+        lock (sync)
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            elevationMeters = 0;
+            return double.IsFinite(latitude) && double.IsFinite(longitude) &&
+                CurrentTerrain is { Relief: true } && reliefSurface is not null &&
+                reliefSurface.TryHeight((longitude + 180) / 360, MapCamera.MercatorY(latitude), out elevationMeters);
+        }
+    }
 
     /// <summary>Read the rendered height-field intersection at an art pixel. The retained
     /// view must match the requested camera and viewport. Sky has no terrain intersection.</summary>
@@ -70,7 +85,7 @@ public sealed partial class PixelMapRenderer
         }
         reliefSurface ??= new();
         bool shadows = camera.Pitch >= 1;
-        var textureStyle = (style, pixelSize, shadows);
+        var textureStyle = (style, pixelSize, shadows, renderStyle);
         if (terrainTextureStyle != textureStyle || !SameTiles(tiles, terrainTextureTiles) || !SameTiles(imagery, terrainTextureImagery))
         {
             reliefSurface.ClearTextures();
@@ -218,7 +233,7 @@ public sealed partial class PixelMapRenderer
         bool fullImagery = false;
         foreach (var tile in imageryOrder)
         {
-            if (!TextureArea(patch, tile.Id).Contains(textureBounds) || earth.Get(tile) is null) continue;
+            if (!TextureArea(patch, tile.Id).Contains(textureBounds) || earth.Get(tile, renderStyle == MapRenderStyle.Normal) is null) continue;
             fullImagery = true;
             break;
         }
@@ -228,8 +243,8 @@ public sealed partial class PixelMapRenderer
         foreach (var imageTile in imageryOrder)
         {
             var area = TextureArea(patch, imageTile.Id);
-            if (!area.IntersectsWith(new(0, 0, TerrainSurface.TextureSize, TerrainSurface.TextureSize)) || earth.Get(imageTile) is not { } image) continue;
-            canvas.DrawImage(image, area, Nearest);
+            if (!area.IntersectsWith(new(0, 0, TerrainSurface.TextureSize, TerrainSurface.TextureSize)) || earth.Get(imageTile, renderStyle == MapRenderStyle.Normal) is not { } image) continue;
+            canvas.DrawImage(image, area, MapRendering.Smooth(renderStyle) ? Linear : Nearest);
             area.Intersect(new(0, 0, TerrainSurface.TextureSize, TerrainSurface.TextureSize));
             coverage.AddRect(area);
             areas.Add(area);

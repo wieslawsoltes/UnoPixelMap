@@ -3,7 +3,7 @@ const {mkdir, writeFile} = require("node:fs/promises");
 const {join} = require("node:path");
 const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
-const {enableGpuRendering} = require("./gpu.cjs");
+const {enableGpuRendering, setGpuRendering} = require("./gpu.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const evidence = process.env.PIXELMAP_SHOTS;
@@ -207,7 +207,7 @@ async function open(context, address) {
     const accessibility = page.getByRole("button", {name: "Enable accessibility", exact: true});
     if (await accessibility.count()) await accessibility.evaluate(element => element.click());
     await page.getByRole("button", {name: "Map appearance", exact: true}).waitFor({state: "visible"});
-    if (process.env.PIXELMAP_GPU === "1") await enableGpuRendering(page);
+    await setGpuRendering(page, process.env.PIXELMAP_GPU === "1");
     return page;
 }
 
@@ -229,12 +229,13 @@ async function share(page) {
     const address = new URL(await input.inputValue());
     const fields = address.hash.split("/");
     assert.equal(address.pathname, base.pathname, "Sharing retains the GitHub Pages project path");
-    assert.equal(fields[0], "#v4");
-    assert.equal(fields.length, 12, "The share link contains layer, relief and exaggeration");
+    assert.equal(fields[0], "#v5");
+    assert.equal(fields.length, 17, "The share link contains rendering style, physical camera, layer, relief and exaggeration");
     assert.equal(fields[7], "Elevation");
     assert.equal(fields[8], "Perspective");
     assert.equal(fields[10], "Relief");
     assert.ok(Number(fields[11]) >= 1 && Number(fields[11]) <= 4);
+    assert.equal(fields[12], "Pixel");
     await action(page, "Close panel");
     return address;
 }
@@ -386,7 +387,7 @@ async function run() {
         await inspectTerrain(page);
         if (process.env.PIXELMAP_GPU === "1") {
             await inspectPendingTerrain(page);
-            await menu(page, "GPU rendering (experimental)");
+            await setGpuRendering(page, false);
             await see(page, snapshot => !/GPU active|CPU fallback/.test(snapshot));
             await frameWhere(page, hasTerrain, "terrain-gpu-disabled");
             await enableGpuRendering(page);

@@ -3,7 +3,7 @@ using PixelMap.Routing;
 namespace PixelMap.Simulation;
 
 /// <summary>Fixed 60 Hz simulation clock shared by replay, driving, camera, audio and effects.</summary>
-public sealed class JourneySession
+public sealed partial class JourneySession
 {
     private const double Step = 1d / 60;
     private RouteTrack? _track;
@@ -38,7 +38,7 @@ public sealed class JourneySession
     public double RunDistanceMeters { get; private set; }
     public double ElapsedSeconds { get; private set; }
     public double AnimationSeconds { get; private set; }
-    public double EngineLoad => State == JourneyState.Preview ? .6 : Cruise ? .65 : _throttle;
+    public double EngineLoad => IsFreeRoaming ? Math.Abs(_freeInput.Forward) : State == JourneyState.Preview ? .6 : Cruise ? .65 : _throttle;
     public double OffRouteMeters { get; private set; }
     public double Progress => _track is { } t ? DistanceMeters / t.Length : 0;
     public int CheckpointsTotal { get; private set; }
@@ -46,7 +46,7 @@ public sealed class JourneySession
     public int Score { get; private set; }
     public bool Cruise { get; private set; }
     public long Continuity { get; private set; }
-    public bool IsScoredRun => State == JourneyState.Driving || State == JourneyState.Paused && _resumeState == JourneyState.Driving;
+    public bool IsScoredRun => !IsFreeRoaming && (State == JourneyState.Driving || State == JourneyState.Paused && _resumeState == JourneyState.Driving);
     private double NextStation => _track is { } t && CheckpointsTotal > 0 ? t.Length * (CheckpointsPassed + 1d) / CheckpointsTotal : 0;
     public double NextCheckpointMeters => NextCheckpoint is { } gate ? _position.DistanceTo(gate.Point) : 0;
     public RoutePosition? NextCheckpoint { get; private set; }
@@ -65,6 +65,9 @@ public sealed class JourneySession
     {
         var vehicle = route is null ? Vehicle : VehicleProfile.ForMode(route.Mode);
         var track = route is null ? null : new RouteTrack(route);
+        _freeSpawn = null;
+        _verticalVelocity = _eastVelocity = _northVelocity = _forwardVelocity = 0;
+        IsWaitingForTrack = IsWaitingForWater = false;
         Route = route; _track = track; Vehicle = vehicle;
         Reset();
     }
@@ -73,13 +76,20 @@ public sealed class JourneySession
     public void SelectVehicle(VehicleProfile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
-        if (!profile.IsValid || Route?.Mode != profile.Mode) throw new ArgumentException("Profile is invalid or incompatible with the route.", nameof(profile));
+        if (!profile.IsValid || !IsFreeRoaming && (Route?.Mode != profile.Mode || profile.Motion == MotionModel.FreeFlight))
+            throw new ArgumentException("Profile is invalid or incompatible with the route.", nameof(profile));
+        if (IsFreeRoaming)
+        {
+            StartFreeRoam(profile, _position, Bearing, AltitudeMeters);
+            return;
+        }
         Vehicle = profile;
         Reset();
     }
 
     public void Reset()
     {
+        if (IsFreeRoaming) { ResetFreeRoam(); return; }
         Continuity++;
         State = JourneyState.Ready; _resumeState = JourneyState.Ready;
         DistanceMeters = RunDistanceMeters = ElapsedSeconds = AnimationSeconds = OffRouteMeters = 0;
@@ -94,6 +104,11 @@ public sealed class JourneySession
     public void Drive() => Start(JourneyState.Driving);
     private void Start(JourneyState mode)
     {
+        if (IsFreeRoaming)
+        {
+            if (mode == JourneyState.Driving) Resume();
+            return;
+        }
         if (_track is null) return;
         if (State == JourneyState.Finished) Reset();
         if (State == JourneyState.Paused && _resumeState == mode) { Resume(); return; }
@@ -137,6 +152,7 @@ public sealed class JourneySession
 
     public void Respawn()
     {
+        if (IsFreeRoaming) { ResetFreeRoam(); return; }
         if (!IsScoredRun || _track is null) return;
         Continuity++; ClearInput();
         DistanceMeters = _track.Length * CheckpointsPassed / CheckpointsTotal;
@@ -149,6 +165,7 @@ public sealed class JourneySession
     /// Airborne manual vehicles retain their absolute altitude when the surface falls away.</summary>
     public void RefreshSurface()
     {
+        if (IsFreeRoaming) { RefreshFreeRoamSurface(); return; }
         if (_track is null) return;
         double previousGround = GroundElevationMeters, previousAltitude = AltitudeMeters;
         GroundElevationMeters = SurfaceElevationAt(_position);
@@ -163,24 +180,40 @@ public sealed class JourneySession
         Notify();
     }
 
-    public void SetCruise(bool enabled) { if (Cruise != enabled) { Cruise = enabled; Notify(); } }
+    public void SetCruise(bool enabled)
+    {
+        if (IsFreeRoaming) return;
+        if (Cruise != enabled) { Cruise = enabled; Notify(); }
+    }
     public void SetInput(double throttle, double steering, double brake)
     {
         _throttle = Clip(throttle, 0, 1); _steer = Clip(steering, -1, 1); _brake = Clip(brake, 0, 1);
+        if (IsFreeRoaming) SetFreeRoamInput(_freeInput with { Forward = _throttle, Turn = _steer, Brake = _brake });
     }
-    public void SetLift(double vertical) => _lift = Clip(vertical, -1, 1);
-    public void ClearInput() { _throttle = _steer = _brake = _lift = 0; }
+    public void SetLift(double vertical)
+    {
+        _lift = Clip(vertical, -1, 1);
+        if (IsFreeRoaming) _freeInput = _freeInput with { Vertical = _lift };
+    }
+    public void ClearInput()
+    {
+        _throttle = _steer = _brake = _lift = 0;
+        _freeInput = default;
+        _jumpRequested = _jumpHeld = false;
+    }
     private static double Clip(double x, double min, double max) => double.IsFinite(x) ? Math.Clamp(x, min, max) : 0;
-    public void Horn() { if (Route is not null) Cue?.Invoke(JourneyCue.Horn); }
+    public void Horn() { if (Route is not null || IsFreeRoaming) Cue?.Invoke(JourneyCue.Horn); }
     public void Tick(double wallSeconds)
     {
-        if (!Active || _track is null || !double.IsFinite(wallSeconds) || wallSeconds <= 0) return;
+        if (!Active || _track is null && !IsFreeRoaming || !double.IsFinite(wallSeconds) || wallSeconds <= 0) return;
         _accumulator += Math.Min(.25, wallSeconds) * _rate;
         while (_accumulator + 1e-12 >= Step && Active)
         {
             _accumulator -= Step;
             ElapsedSeconds += Step; AnimationSeconds += Step; _contactCooldown = Math.Max(0, _contactCooldown - Step);
-            if (State == JourneyState.Preview) PreviewStep(); else DriveStep();
+            if (IsFreeRoaming) FreeRoamStep();
+            else if (State == JourneyState.Preview) PreviewStep();
+            else DriveStep();
         }
         Notify();
     }

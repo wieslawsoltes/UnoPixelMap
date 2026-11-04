@@ -31,6 +31,7 @@ internal static class GlTerrainChecks
         using var context = new HeadlessGlContext(1200, 800);
         Console.WriteLine(context.Description);
         var gl = context.Gl;
+        RenderStyleChecks.RunGl(gl);
         var results = new List<CaseResult>();
         var failures = new List<string>();
         using var cpu = new PixelMapRenderer();
