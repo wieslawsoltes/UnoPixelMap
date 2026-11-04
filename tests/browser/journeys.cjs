@@ -3,7 +3,7 @@ const { mkdir, writeFile, readFile } = require("node:fs/promises");
 const path = require("node:path");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
-const { setGpuRendering } = require("./gpu.cjs");
+const { activateMenuItem, setGpuRendering } = require("./gpu.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const shots = process.env.PIXELMAP_SHOTS;
@@ -82,16 +82,7 @@ async function activate(page, role, name, touch = false) {
     const locator = page.getByRole(role, { name, exact: true });
     await locator.waitFor({state: "visible"});
     if (role === "menuitem" || role === "menuitemcheckbox") {
-        // A flyout can expose accessibility bounds before its first focus/layout
-        // pass completes. Target its public command with real keyboard input.
-        await locator.focus();
-        const item = await locator.elementHandle();
-        assert.ok(item, "The menu command has a visible element");
-        try {
-            await page.waitForFunction(element => document.activeElement === element, item);
-        } finally { await item.dispose(); }
-        await page.keyboard.press("Enter");
-        await locator.waitFor({state: "hidden"});
+        await activateMenuItem(page, locator);
         return;
     }
     const b = await locator.boundingBox();
@@ -228,12 +219,10 @@ async function choices(page) {
     });
     await click(page, "Edit route stops");
     await click(page, "Calculate route");
-    const selector = page.getByRole("combobox", {name: "Alternative routes", exact: true});
     await activate(page, "combobox", "Alternative routes");
     assert.ok(requested, "provider returned alternative paths");
-    await page.waitForTimeout(200);
-    if (await selector.getAttribute("aria-expanded") !== "true") await page.keyboard.press("Alt+ArrowDown");
     await page.waitForFunction(() => document.querySelector('[aria-label="Alternative routes"]')?.getAttribute("aria-expanded") === "true");
+    await page.waitForFunction(() => document.activeElement?.getAttribute("elementtype") === "ScrollContentPresenter");
     await page.keyboard.press("End");
     await page.keyboard.press("Enter");
     await page.waitForFunction(() => document.querySelector('[aria-label="Alternative routes"]')?.getAttribute("aria-expanded") === "false");

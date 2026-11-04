@@ -3,7 +3,7 @@ const {mkdir, writeFile} = require("node:fs/promises");
 const {join} = require("node:path");
 const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
-const {enableGpuRendering, setGpuRendering} = require("./gpu.cjs");
+const {activateMenuItem, enableGpuRendering, setGpuRendering} = require("./gpu.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const evidence = process.env.PIXELMAP_SHOTS;
@@ -47,6 +47,17 @@ function hasTerrain(frame) {
     return result.colors > 35 && result.deviation > 12 && result.brightness > 35 && result.blackRatio < .02;
 }
 
+// The bundled Garda photograph contains dark lake and forest inks. Its elevation
+// tint is much lighter, so a queued frame from the preceding layer cannot pass.
+function hasEarthTerrain(frame) {
+    return hasTerrain(frame) && measure(frame).brightness < 100;
+}
+
+function hasElevationTerrain(frame) {
+    const brightness = measure(frame).brightness;
+    return hasTerrain(frame) && brightness > 110 && brightness < 170;
+}
+
 function changed(before, after, overlay) {
     assert.equal(before.width, after.width);
     assert.equal(before.height, after.height);
@@ -61,15 +72,21 @@ function changed(before, after, overlay) {
 
 async function frameWhere(page, predicate, name, timeout = 30000) {
     const deadline = Date.now() + timeout;
-    let bytes, frame;
+    let bytes, frame, previous;
     do {
         bytes = await page.screenshot({timeout: 15000});
         frame = PNG.sync.read(bytes);
         if (predicate(frame)) {
-            if (evidence) await writeFile(join(evidence, name + ".png"), bytes);
-            console.log(name, JSON.stringify(measure(frame)));
-            return frame;
-        }
+            // Public state can advance before asynchronous artwork, and layout or
+            // camera animation can satisfy a difference predicate on an interim frame.
+            // Require the expected map pixels to agree across consecutive captures.
+            if (previous && changed(previous, frame) === 0) {
+                if (evidence) await writeFile(join(evidence, name + ".png"), bytes);
+                console.log(name, JSON.stringify(measure(frame)));
+                return frame;
+            }
+            previous = frame;
+        } else previous = null;
         await page.waitForTimeout(250);
     } while (Date.now() < deadline);
     if (evidence) await writeFile(join(evidence, name + "-failure.png"), bytes);
@@ -116,10 +133,7 @@ async function menu(page, name) {
     await action(page, "Map appearance");
     const item = page.getByRole("menuitem", {name, exact: true})
         .or(page.getByRole("menuitemcheckbox", {name, exact: true}));
-    await item.waitFor({state: "visible"});
-    await item.focus();
-    await page.keyboard.press("Enter");
-    await item.waitFor({state: "hidden"});
+    await activateMenuItem(page, item);
     await page.mouse.move(page.viewportSize().width / 2, 20);
 }
 
@@ -373,7 +387,7 @@ async function run() {
         const page = await open(desktop, address.href);
         await see(page, /61 m elevation · 1× relief/, 60000);
         await see(page, /Terrain Tiles \/ Mapzen/);
-        const mountain = await frameWhere(page, hasTerrain, "terrain-elevation-perspective", 60000);
+        const mountain = await frameWhere(page, hasElevationTerrain, "terrain-elevation-perspective", 60000);
         await assertGpuTerrain(page);
 
         await menu(page, "Terrain relief");
@@ -397,19 +411,19 @@ async function run() {
 
         await action(page, "Switch to 2D overhead");
         await page.getByRole("button", {name: "Switch to 3D perspective", exact: true}).waitFor({state: "visible"});
-        const overhead = await frameWhere(page, frame => hasTerrain(frame) && changed(restored, frame) > .20,
+        const overhead = await frameWhere(page, frame => hasElevationTerrain(frame) && changed(restored, frame) > .20,
             "terrain-elevation-overhead");
         await action(page, "Map layer");
         const map = await frameWhere(page, frame => hasTerrain(frame) && changed(overhead, frame) > .15,
             "terrain-vector-overhead");
         await action(page, "Earth imagery layer");
         await see(page, /Contains modified Copernicus Sentinel data/);
-        const earth = await frameWhere(page, frame => hasTerrain(frame) && changed(map, frame) > .20,
+        const earth = await frameWhere(page, frame => hasEarthTerrain(frame) && changed(map, frame) > .20,
             "terrain-earth-overhead");
         await action(page, "Switch to 3D perspective");
-        await frameWhere(page, frame => hasTerrain(frame) && changed(earth, frame) > .20, "terrain-earth-perspective");
+        await frameWhere(page, frame => hasEarthTerrain(frame) && changed(earth, frame) > .20, "terrain-earth-perspective");
         await action(page, "Elevation layer");
-        const beforeOrbit = await frameWhere(page, hasTerrain, "terrain-before-orbit");
+        const beforeOrbit = await frameWhere(page, hasElevationTerrain, "terrain-before-orbit");
         await page.mouse.move(690, 360);
         await page.mouse.down({button: "right"});
         await page.mouse.move(755, 382, {steps: 8});
@@ -443,18 +457,20 @@ async function run() {
             isMobile: true, hasTouch: true});
         const phone = await open(mobile, address.href);
         await see(phone, /61 m elevation · 1× relief/, 60000);
-        const portrait = await frameWhere(phone, hasTerrain, "terrain-phone-perspective", 60000);
+        const portrait = await frameWhere(phone, hasElevationTerrain, "terrain-phone-perspective", 60000);
         assert.equal(portrait.width, 390, "Terrain respects the handset viewport");
         await action(phone, "Switch to 2D overhead", true);
-        const phoneOverhead = await frameWhere(phone, frame => hasTerrain(frame) && changed(portrait, frame) > .20,
+        await phone.getByRole("button", {name: "Switch to 3D perspective", exact: true}).waitFor({state: "visible"});
+        const phoneOverhead = await frameWhere(phone, frame => hasElevationTerrain(frame) && changed(portrait, frame) > .20,
             "terrain-phone-overhead");
         await action(phone, "Earth imagery layer", true);
         await see(phone, /Contains modified Copernicus Sentinel data/);
-        const phoneEarth = await frameWhere(phone, frame => hasTerrain(frame) && changed(phoneOverhead, frame) > .20,
+        const phoneEarth = await frameWhere(phone, frame => hasEarthTerrain(frame) && changed(phoneOverhead, frame) > .20,
             "terrain-phone-earth");
         await action(phone, "Elevation layer", true);
         await see(phone, /button "Elevation layer" \[pressed\]/);
-        await frameWhere(phone, frame => hasTerrain(frame) && changed(phoneEarth, frame) > .20, "terrain-phone-elevation");
+        await frameWhere(phone, frame => hasElevationTerrain(frame) && changed(phoneEarth, frame) > .20 &&
+            changed(phoneOverhead, frame) < .02, "terrain-phone-elevation");
         const fits = await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
         assert.ok(fits, "Terrain controls and credits introduce no horizontal overflow");
         await assertGpuTerrain(phone);

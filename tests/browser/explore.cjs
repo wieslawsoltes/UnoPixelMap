@@ -27,27 +27,26 @@ async function see(page, expected, timeout = 25000) {
     throw new Error("Missing exploration state " + expected + "\n" + snapshot);
 }
 
-async function controlBounds(page, locator) {
-    const bounds = await locator.boundingBox();
-    const scrollerId = await locator.evaluate(element => {
-        const scroller = element.closest('[elementtype="ScrollContentPresenter"]');
-        return scroller && !scroller.closest('[role="dialog"]') ? scroller.id : null;
+async function controlBounds(locator) {
+    return locator.evaluate(element => {
+        const {x, y, width, height} = element.getBoundingClientRect();
+        const bounds = {x, y, width, height};
+        const portal = element.closest('[elementtype="ScrollContentPresenter"]');
+        const region = document.querySelector('[aria-label="Free roam settings content"]');
+        if (!portal || portal.closest('[role="dialog"]') || !region) return bounds;
+        // Sample the peer, portal and named region in one layout frame. Uno can
+        // publish their absolute offsets in different frames after a resize.
+        const native = portal.getBoundingClientRect();
+        const visible = region.getBoundingClientRect();
+        return {...bounds, x: x + visible.x - native.x, y: y + visible.y - native.y};
     });
-    const region = page.getByRole("region", {name: "Free roam settings content", exact: true});
-    if (!scrollerId || !await region.count()) return bounds;
-    // Uno exposes native scroll contents in a separate DOM portal. Its absolute
-    // origin can lag a moved card while the named XAML region is already current.
-    // Align peer-local coordinates to that visible public region for native input.
-    const portal = await page.locator("#" + scrollerId).boundingBox();
-    const visible = await region.boundingBox();
-    if (!bounds || !portal || !visible) return bounds;
-    return {...bounds, x: bounds.x + visible.x - portal.x, y: bounds.y + visible.y - portal.y};
 }
 
 async function tap(page, locator, touch = false) {
     await locator.waitFor({state: "visible"});
     await page.waitForTimeout(150);
-    const bounds = await controlBounds(page, locator);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const bounds = await controlBounds(locator);
     const viewport = page.viewportSize();
     assert.ok(bounds?.width > 0 && bounds?.height > 0, "The control has visible bounds");
     const left = Math.max(0, bounds.x), right = Math.min(viewport.width, bounds.x + bounds.width);
@@ -78,10 +77,9 @@ async function menu(page, name) {
     await page.mouse.move(page.viewportSize().width / 2, 15);
 }
 
-async function choose(page, name, index, touch = false) {
+async function choose(page, name, index, touch = false, selectedIndex = 0) {
     const selector = page.getByRole("combobox", {name, exact: true});
-    const beforePopup = touch ? await screen(page, "mobile-picker-before") : null;
-    const anchor = touch ? await controlBounds(page, selector) : null;
+    const anchor = touch ? await controlBounds(selector) : null;
     const existingScrollers = await page.locator('[elementtype="ScrollContentPresenter"]')
         .evaluateAll(elements => elements.map(element => element.id));
     await tap(page, selector, touch);
@@ -104,8 +102,8 @@ async function choose(page, name, index, touch = false) {
     await options.nth(index).waitFor({state: "attached"});
     await page.waitForTimeout(200);
     // Uno exposes virtual options without rectangles. Use the native presenter
-    // for row dimensions and a fresh canvas frame for its painted origin, which
-    // can move before the portal's accessibility rectangle catches up.
+    // for row dimensions and its painted blue selection marker for row position.
+    // The touch scenario opens the initial Walk selection at index zero.
     const popup = await page.locator('[elementtype="ScrollContentPresenter"]').evaluateAll((elements, existing) => {
         const element = elements.find(element => !existing.includes(element.id) && element.getBoundingClientRect().height > 0);
         if (!element) return null;
@@ -114,15 +112,16 @@ async function choose(page, name, index, touch = false) {
     }, existingScrollers);
     assert.ok(popup?.width > 0 && popup?.height > 0, "The open picker exposes visible native popup bounds");
     const count = await options.count();
-    let painted = null;
+    const rowHeight = (popup.height - 8) / count;
+    let selectedCenter = null;
     const deadline = Date.now() + 10000;
     do {
-        painted = paintedPopup(beforePopup, await screen(page, "mobile-picker-painted"), anchor, popup.height);
-        if (!painted) await page.waitForTimeout(100);
-    } while (!painted && Date.now() < deadline);
-    assert.ok(painted, "The touch picker is fully painted before selecting its row");
+        selectedCenter = paintedSelection(await screen(page, "mobile-picker-painted"), anchor, popup.height);
+        if (selectedCenter === null) await page.waitForTimeout(100);
+    } while (selectedCenter === null && Date.now() < deadline);
+    assert.notEqual(selectedCenter, null, "The touch picker paints its selected row before native selection");
     const x = anchor.x + anchor.width / 2;
-    const y = painted.top + 4 + (index + .5) * (popup.height - 8) / count;
+    const y = selectedCenter + (index - selectedIndex) * rowHeight;
     await page.touchscreen.tap(x, y);
     await page.waitForFunction(name => document.querySelector('[aria-label="' + name + '"]')?.getAttribute("aria-expanded") === "false", name);
     await page.getByRole("listbox", {name, exact: true}).waitFor({state: "hidden"});
@@ -194,30 +193,26 @@ function imageDifference(before, after) {
     return changed / count;
 }
 
-function paintedPopup(before, after, anchor, expectedHeight) {
-    const left = Math.ceil(anchor.x + 4), right = Math.floor(anchor.x + anchor.width - 4);
-    let first = -1, gap = 0, best = null;
-    for (let y = 0; y <= after.height; y++) {
-        let changed = 0, samples = 0;
-        if (y < after.height) for (let x = left; x < right; x += 3) {
-            const pixel = (y * after.width + x) * 4;
-            if (Math.abs(before.data[pixel] - after.data[pixel]) > 3 ||
-                Math.abs(before.data[pixel + 1] - after.data[pixel + 1]) > 3 ||
-                Math.abs(before.data[pixel + 2] - after.data[pixel + 2]) > 3) changed++;
-            samples++;
+function paintedSelection(frame, anchor, popupHeight) {
+    const left = Math.ceil(anchor.x + 3), right = Math.floor(anchor.x + 12);
+    const top = Math.max(0, Math.floor(anchor.y - popupHeight));
+    const bottom = Math.min(frame.height, Math.ceil(anchor.y + popupHeight));
+    let first = -1;
+    for (let y = top; y < bottom; y++) {
+        let selected = false;
+        for (let x = left; x < right; x++) {
+            const pixel = (y * frame.width + x) * 4;
+            if (frame.data[pixel] <= 1 && Math.abs(frame.data[pixel + 1] - 90) <= 1 &&
+                Math.abs(frame.data[pixel + 2] - 158) <= 1) selected = true;
         }
-        if (changed > samples * .15) {
+        if (selected) {
             if (first < 0) first = y;
-            gap = 0;
-        } else if (first >= 0 && (++gap > 2 || y === after.height)) {
-            const height = y - gap + 1 - first;
-            const error = Math.abs(height - expectedHeight);
-            if (error <= 8 && (!best || error < best.error)) best = {top: first, error};
+        } else if (first >= 0) {
+            if (y - first >= 12 && y - first <= 20) return (first + y) / 2;
             first = -1;
-            gap = 0;
         }
     }
-    return best;
+    return null;
 }
 
 function paintedStartButton(frame, viewport) {
@@ -643,31 +638,35 @@ async function mobileInput(context, page) {
         "Landscape flight actions occupy one unobstructed bottom row");
     await action(page, "Expand game settings", true);
     await page.waitForFunction(() => document.querySelector('[aria-label="Free roam settings content"]')?.getBoundingClientRect().height > 140);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     const scroller = page.locator('[elementtype="ScrollContentPresenter"]:visible');
     assert.equal(await scroller.count(), 1, "The expanded game exposes one native settings scroll surface");
     const scrollBounds = await page.getByRole("region", {name: "Free roam settings content", exact: true}).boundingBox();
-    async function swipeSettings(up) {
-        const from = up ? scrollBounds.y + scrollBounds.height - 15 : scrollBounds.y + 20;
-        const distance = Math.min(40, scrollBounds.height - 35);
-        const to = from + (up ? -distance : distance);
-        const x = scrollBounds.x + scrollBounds.width / 2;
-        await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{id: 3, x, y: from}]});
-        try {
-            for (let step = 1; step <= 8; step++) {
-                await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{id: 3, x, y: from + (to - from) * step / 8}]});
-                await page.waitForTimeout(30);
-            }
-            await page.waitForTimeout(100);
-        } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
-        await page.waitForTimeout(250);
-    }
     let paintedStart = null;
-    for (let attempt = 0; attempt < 12 && !paintedStart; attempt++) {
-        await swipeSettings(true);
-        paintedStart = paintedStartButton(await screen(page, "mobile-landscape-settings-scrolled"), scrollBounds);
-    }
-    assert.ok(await scroller.evaluate(element => element.scrollTop) > 20, "Native landscape swipes scroll the game settings");
+    const initialScroll = await scroller.evaluate(element => element.scrollTop);
+    const scrollX = scrollBounds.x + scrollBounds.width - 18;
+    let scrollY = scrollBounds.y + scrollBounds.height * .65;
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{id: 3, x: scrollX, y: scrollY}]});
+    try {
+        // Keep one native pan captured. The portal's content extent changes as
+        // Uno translates it, so fine motion near its current limit avoids a
+        // sequence of overshoots that leaves the last button rows clipped.
+        for (let step = 0; step < 64 && scrollY > 12 && !paintedStart; step++) {
+            const remaining = await scroller.evaluate(element => element.scrollHeight - element.clientHeight - element.scrollTop);
+            scrollY = Math.max(12, scrollY - (remaining < 20 ? 1 : 8));
+            await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{id: 3, x: scrollX, y: scrollY}]});
+            await page.waitForTimeout(50);
+            if (remaining < 20 || step % 8 === 0)
+                paintedStart = paintedStartButton(await screen(page, "mobile-landscape-settings-scrolled"), scrollBounds);
+        }
+        await page.waitForTimeout(150);
+    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+    await page.waitForTimeout(100);
+    paintedStart = paintedStartButton(await screen(page, "mobile-landscape-settings-scrolled"), scrollBounds);
+    const finalScroll = await scroller.evaluate(element => element.scrollTop);
+    assert.ok(finalScroll > initialScroll + 20, "The native landscape pan advances the actual settings scroll offset");
     assert.ok(paintedStart, "A fresh canvas frame paints the complete Start button inside the settings viewport");
+    console.log("Verified native landscape scroll", {from: initialScroll, to: finalScroll});
     await page.touchscreen.tap(paintedStart.x, paintedStart.y);
     await page.getByRole("button", {name: "Expand game settings", exact: true}).waitFor({state: "visible"});
     await waitTelemetry(page, state => state.distance === 0, "Native activation of the painted landscape Start button restarts free roam");
