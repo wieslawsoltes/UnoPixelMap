@@ -77,6 +77,40 @@ The retained tile/model resources occupy 24.57 MiB in this scene. Average upload
 
 The measured renderer SHA-256 is `39d5a7c3ff19b3750118004c4e62fa5642a888aaf8359c9a6063b29494aefee6`. The harness SHA-256 is `8d9b25640ad0d65306294f115436b2d037b4b1f77867338868911ddd3b006674`, and the data assembly SHA-256 is `bd08e03df8977b0eebf87aa237eff7aee358a37874cd0966760e87879b6baee1`.
 
+### Browser terrain measurements
+
+The browser comparison uses the original elevation CPU build `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`, the first synchronous GPU build `274604100ee53e29edccc8bda0871cc5737bc869` and the deployed GPU build `a764a0b9179b6f5c3b0bc42b36285034bd9cc7b6`. Each run uses its exact GitHub Actions Release `InterpreterAndAOT` artifact. Chromium 156.0.8078.4 runs SwiftShader on three AMD EPYC 9V74 logical processors, with a 1200×780 viewport and DPR 1. Runs execute sequentially during a quiet local measurement window. The fixture starts at Lake Garda, zoom 12.3, bearing −25° and perspective pitch 58°. External providers are blocked, and each gesture contains 80 physical pointer moves with a nominal 25 ms delay.
+
+The production adaptive-quality policy stays active. The original CPU cases use 0–1 initial pixel-size-3 uploads before pixel size 4. Final GPU cases use 1–2 pixel-size-3 depth frames before pixel size 4. The reports retain the complete resolution histograms. Main-thread task time uses Chromium's `threadTicks` metric, while elapsed time includes blocking and input dispatch. SwiftShader also consumes separate worker-thread CPU time.
+
+| Gesture | CPU task time | Final GPU task time | CPU elapsed | Final GPU elapsed | CPU art-image uploads/s | Final GPU art-image uploads/s |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Map pan | 4,731.1 ms | 4,598.6 ms | 8.51 s | 12.69 s | 9.98 | 5.28 |
+| Map orbit | 5,674.1 ms | 4,990.9 ms | 6.52 s | 7.23 s | 11.66 | 5.81 |
+| Earth pan | 9,962.7 ms | 4,059.2 ms | 13.48 s | 11.88 s | 7.12 | 5.55 |
+| Earth orbit | 6,489.1 ms | 5,169.4 ms | 7.38 s | 7.55 s | 9.49 | 5.17 |
+| Elevation pan | 4,954.4 ms | 4,351.4 ms | 8.78 s | 11.96 s | 9.79 | 5.68 |
+| Elevation orbit | 6,232.7 ms | 4,921.2 ms | 7.02 s | 7.35 s | 10.54 | 5.44 |
+
+The final GPU path reduces main-thread task time in all six first-run samples, with the largest reduction in Earth pan at 59.3%. Art-image upload rates are lower in all six, and five gestures take longer. Completed pixel-pack copies and art-image uploads are separate observations. A completed image can be superseded before upload, and the compositor can upload the same image again. These counters measure pipeline work. Actual display presentation is outside the probe. The first synchronous GPU version also uploaded its unused GLCanvas bitmap, so its raw 2D upload counts include duplicate work.
+
+| Gesture | GPU submissions / completed copies | Completed copies/s | Submit-to-copy median / p95 | Initial GPU artwork uploads | Final GPU artwork uploads |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Map pan | 80 / 68 | 5.36 | 105.2 / 212.3 ms | 312.476 MB | 34.341 MB |
+| Map orbit | 43 / 40 | 5.53 | 41.1 / 97.4 ms | 186.909 MB | 87.818 MB |
+| Earth pan | 74 / 64 | 5.39 | 120.7 / 197.8 ms | 310.903 MB | 34.341 MB |
+| Earth orbit | 42 / 38 | 5.04 | 57.8 / 130.4 ms | 176.423 MB | 87.556 MB |
+| Elevation pan | 77 / 66 | 5.52 | 101.7 / 196.1 ms | 337.379 MB | 34.341 MB |
+| Elevation orbit | 44 / 40 | 5.44 | 48.5 / 181.8 ms | 184.549 MB | 83.362 MB |
+
+Artwork-array uploads fall by 50.4–89.8% across these gestures. These totals include the effect of frame coalescing, so frame counts accompany them. The source-order permutation checks independently verify cache reuse with identical rendered pixels. Height-array uploads are recorded separately and range from 203–705 kB in the final cases. MB and kB in these browser tables use decimal units.
+
+Every final gesture retains at most two outstanding transfers, with zero unsafe buffer overwrites, abandoned transfers or positive-timeout fence polls. Median `getBufferSubData` calls cost 76.3–86.9 ms during pans and 5.2–7.2 ms during orbits. The 16 ms selection budget therefore still encounters substantial synchronization time on SwiftShader. The earlier asynchronous build `7fffd732ea8f7df276194d3ee1a7c31626bf532c` exposed longer presentation delays during diagnosis. The final policy reduces those delays, while the complete CPU comparison above records the remaining software-driver throughput regression.
+
+Repeating the final Map pair with the same artifact and unmodified harness gives 5.66 art-image uploads/s for pan and 5.63 for orbit, compared with 5.28 and 5.81 in the first pair. Completed copies measure 5.50/s in both repeats. Pan submit-to-copy median/p95 is 105.1/187.9 ms, and orbit is 49.7/135.0 ms. The repeats reproduce the throughput regression and satisfy the same bounded-transfer checks.
+
+The exact deployed native WebAssembly SHA-256 is `adf1d76ecec2a38f0cc977bfb0fc268ffaefdfbbd4234b9488cf838223085014`. The common browser harness SHA-256 is `c5d6c2b91a2ef0ec4c48fec0d7f4377ad9977e7830382d705d316fd3bd3f8ae0`. The CSV retains all three six-gesture runs, source and harness identity, runtime mode, upload dimensions, queue accounting, copy timing and the repeated Map measurements. Physical-GPU performance remains unmeasured. [Complete terrain browser measurements](terrain-browser-benchmarks.csv)
+
 ## CPU work
 
 - Building models retain normalized edges, facade lighting and ring bounds after visibility checks first require them. Geometry eviction releases these retained data with the tile.
