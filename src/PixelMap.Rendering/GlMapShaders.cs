@@ -385,11 +385,7 @@ internal static class GlMapShaders
 
     internal const string RimVertex = """
         layout(location = 0) in vec4 aPosition;
-        layout(location = 1) in vec4 aSurface;
-        layout(location = 2) in vec4 aEdge;
         layout(location = 3) in vec4 bPosition;
-        layout(location = 4) in vec4 bSurface;
-        layout(location = 5) in vec4 bEdge;
         flat out vec4 vSegment;
         flat out vec3 vDepth;
         flat out ivec2 vMaterial;

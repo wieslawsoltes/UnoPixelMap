@@ -10,6 +10,7 @@ namespace PixelMap.Rendering;
 internal sealed class GpuBuildingMesh
 {
     internal const int VertexStride = 12;
+    internal const int EdgeStride = 4;
     internal const int ModelStride = 8;
     internal readonly object ResourceKey;
     internal readonly TileGeometry Source;
@@ -35,7 +36,7 @@ internal sealed class GpuBuildingMesh
         for (int modelIndex = 0; modelIndex < tile.Buildings.Count; modelIndex++)
         {
             var model = tile.Buildings[modelIndex];
-            int firstIndex = indices.Count, firstEdge = edges.Count / VertexStride, firstVertex = vertices.Count / VertexStride;
+            int firstIndex = indices.Count, firstEdge = edges.Count / EdgeStride, firstVertex = vertices.Count / VertexStride;
             int metadata = modelIndex * ModelStride;
             Models[metadata + 1] = model.Seed & 255;
             Models[metadata + 2] = model.Seed % (uint)PixelPalette.Day.Materials.Length;
@@ -47,7 +48,7 @@ internal sealed class GpuBuildingMesh
             int wallIndexCount = indices.Count - firstIndex;
             AddCaps(model, modelIndex, vertices, indices);
             ranges.Add(new(model, firstIndex, indices.Count - firstIndex,
-                firstEdge, edges.Count / VertexStride - firstEdge, firstVertex, vertices.Count / VertexStride - firstVertex,
+                firstEdge, edges.Count / EdgeStride - firstEdge, firstVertex, vertices.Count / VertexStride - firstVertex,
                 wallIndexCount));
         }
         Vertices = vertices.ToArray();
@@ -101,8 +102,8 @@ internal sealed class GpuBuildingMesh
                         indices.Add(index); indices.Add(index + 1); indices.Add(index + 2);
                         indices.Add(index); indices.Add(index + 2); indices.Add(index + 3);
                     }
-                    AddVertex(edges, a, model.Top, modelIndex, 0, edge, dx, dy, model.Top - model.Bottom, 3);
-                    AddVertex(edges, b, model.Top, modelIndex, edge.Length, edge, dx, dy, model.Top - model.Bottom, 3);
+                    AddPosition(edges, a, model.Top, modelIndex);
+                    AddPosition(edges, b, model.Top, modelIndex);
                 }
             }
             start = end;
@@ -141,10 +142,15 @@ internal sealed class GpuBuildingMesh
         }
     }
 
+    private static void AddPosition(List<float> target, SKPoint point, float height, int model)
+    {
+        target.Add(point.X); target.Add(point.Y); target.Add(height); target.Add(model);
+    }
+
     private static void AddVertex(List<float> target, SKPoint point, float height, int model,
         float along, BuildingVertex edge, float dx, float dy, float heightSpan, int face)
     {
-        target.Add(point.X); target.Add(point.Y); target.Add(height); target.Add(model);
+        AddPosition(target, point, height, model);
         target.Add(along); target.Add(edge.Length); target.Add(edge.Light); target.Add(edge.PerspectiveLight);
         target.Add(dx); target.Add(dy); target.Add(heightSpan); target.Add(face);
     }

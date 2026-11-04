@@ -486,11 +486,12 @@ public sealed unsafe class GlMapRenderer : IDisposable
             }
             gl.BindVertexArray(mesh.EdgeArray);
             gl.BindBuffer(BufferTargetARB.ArrayBuffer, mesh.Edges);
-            for (uint attribute = 0; attribute < 6; attribute++)
+            for (uint endpoint = 0; endpoint < 2; endpoint++)
             {
+                uint attribute = endpoint * 3;
                 gl.EnableVertexAttribArray(attribute);
                 gl.VertexAttribPointer(attribute, 4, VertexAttribPointerType.Float, false,
-                    GpuBuildingMesh.VertexStride * 2 * sizeof(float), (void*)(attribute * 4 * sizeof(float)));
+                    GpuBuildingMesh.EdgeStride * 2 * sizeof(float), (void*)(endpoint * GpuBuildingMesh.EdgeStride * sizeof(float)));
                 gl.VertexAttribDivisor(attribute, 1);
             }
         }
@@ -515,7 +516,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         {
             gl.BindVertexArray(mesh.EdgeArray);
             UploadBuffer(mesh, BufferTargetARB.ArrayBuffer, mesh.Edges, edges, ref mesh.EdgeBytes);
-            mesh.EdgeCount = edges.Length / (GpuBuildingMesh.VertexStride * 2);
+            mesh.EdgeCount = edges.Length / (GpuBuildingMesh.EdgeStride * 2);
             mesh.EdgeSource = edges;
         }
         if (mesh.FoundationRevision != source.FoundationRevision)

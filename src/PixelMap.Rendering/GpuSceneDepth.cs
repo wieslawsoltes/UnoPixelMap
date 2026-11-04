@@ -61,7 +61,8 @@ internal sealed class GpuSceneDepth
         if (Interlocked.Decrement(ref references) != 0) return;
         // Keep two ordinary moving-frame workspaces. Oversized/offscreen renders release
         // their arrays normally instead of permanently enlarging the shared pool.
-        if (triangles.Capacity > 262144 || edges.Capacity > 65536 || samples.EnsureCapacity(0) > 131072) return;
+        if (triangles.Capacity > 262144 || edges.Capacity > 65536 || samples.EnsureCapacity(0) > 131072 ||
+            storage.ProjectedVertices.Length > 131072 || storage.VisibleModels.Length > 16384) return;
         if (Interlocked.Increment(ref pooledStorage) > MaximumPooledStorage)
         {
             Interlocked.Decrement(ref pooledStorage);
@@ -170,7 +171,7 @@ internal sealed class GpuSceneDepth
             }
             var indices = draw.Mesh.TriangleIndices;
             for (int i = 0; i < indices.Length; i += 3)
-                AddTriangle(projected[indices[i]], projected[indices[i + 1]], projected[indices[i + 2]], draw.Transform.Far, true);
+                AddTriangle(ref projected[indices[i]], ref projected[indices[i + 1]], ref projected[indices[i + 2]], draw.Transform.Far, true);
         }
         finally { if (storage is not null) ArrayPool<Vertex>.Shared.Return(storage); }
     }
@@ -180,8 +181,10 @@ internal sealed class GpuSceneDepth
         var mesh = draw.Mesh;
         var transform = draw.Transform;
         var source = mesh.Vertices;
-        Vertex[] projected = [];
-        var visible = new bool[mesh.Ranges.Length];
+        var projected = storage.ProjectedVertices;
+        if (storage.VisibleModels.Length < mesh.Ranges.Length) storage.VisibleModels = new bool[mesh.Ranges.Length];
+        var visible = storage.VisibleModels.AsSpan(0, mesh.Ranges.Length);
+        visible.Clear();
         for (int modelIndex = 0; modelIndex < mesh.Ranges.Length; modelIndex++)
         {
             var range = mesh.Ranges[modelIndex];
@@ -196,7 +199,11 @@ internal sealed class GpuSceneDepth
             float rise = top * transform.SinPitch, baseRise = bottom * transform.SinPitch;
             if (!perspective && rx < .28f && ry + (foundation == 0 ? rise : rise - baseRise) < .5f) continue;
             visible[modelIndex] = true;
-            if (projected.Length < range.VertexCount) projected = new Vertex[range.VertexCount];
+            if (projected.Length < range.VertexCount)
+            {
+                projected = new Vertex[range.VertexCount];
+                storage.ProjectedVertices = projected;
+            }
             for (int i = 0; i < range.VertexCount; i++)
             {
                 int offset = (range.FirstVertex + i) * GpuBuildingMesh.VertexStride;
@@ -218,9 +225,9 @@ internal sealed class GpuSceneDepth
                     var c = projected[(int)mesh.Indices[i + 2] - range.FirstVertex].Screen;
                     if (perspective && Orientation(a, b, c) >= -.00001f) continue;
                 }
-                AddTriangle(projected[first - range.FirstVertex],
-                    projected[(int)mesh.Indices[i + 1] - range.FirstVertex],
-                    projected[(int)mesh.Indices[i + 2] - range.FirstVertex], transform.Far, false);
+                AddTriangle(ref projected[first - range.FirstVertex],
+                    ref projected[(int)mesh.Indices[i + 1] - range.FirstVertex],
+                    ref projected[(int)mesh.Indices[i + 2] - range.FirstVertex], transform.Far, false);
             }
         }
         for (int modelIndex = 0; modelIndex < mesh.Ranges.Length; modelIndex++)
@@ -242,7 +249,7 @@ internal sealed class GpuSceneDepth
             }
             for (int i = range.FirstEdge, end = i + range.EdgeCount; i < end; i += 2)
             {
-                int a = i * GpuBuildingMesh.VertexStride, b = a + GpuBuildingMesh.VertexStride;
+                int a = i * GpuBuildingMesh.EdgeStride, b = a + GpuBuildingMesh.EdgeStride;
                 AddEdge(transform.Vertex(mesh.RoofEdges[a], mesh.RoofEdges[a + 1], top),
                     transform.Vertex(mesh.RoofEdges[b], mesh.RoofEdges[b + 1], top), transform.Far);
             }
@@ -251,13 +258,15 @@ internal sealed class GpuSceneDepth
 
     private bool Outside(SKRect bounds, float bottom, float top, TileTransform transform)
     {
-        Span<H> corners = stackalloc H[8];
-        for (int i = 0; i < corners.Length; i++)
-            corners[i] = transform.Vertex((i & 1) == 0 ? bounds.Left : bounds.Right,
-                (i & 2) == 0 ? bounds.Top : bounds.Bottom, (i & 4) == 0 ? bottom : top);
         int common = 63;
-        foreach (var corner in corners) common &= OutCode(corner, transform.Far);
-        return common != 0;
+        for (int i = 0; i < 8; i++)
+        {
+            var corner = transform.Vertex((i & 1) == 0 ? bounds.Left : bounds.Right,
+                (i & 2) == 0 ? bounds.Top : bounds.Bottom, (i & 4) == 0 ? bottom : top);
+            common &= OutCode(corner, transform.Far);
+            if (common == 0) return false;
+        }
+        return true;
     }
 
     private int OutCode(H vertex, float far)
@@ -271,9 +280,17 @@ internal sealed class GpuSceneDepth
     private static float Orientation(H a, H b, H c) =>
         a.X * (b.Y * c.W - c.Y * b.W) - a.Y * (b.X * c.W - c.X * b.W) + a.W * (b.X * c.Y - c.X * b.Y);
 
-    private void AddTriangle(Vertex a, Vertex b, Vertex c, float far, bool terrain)
+    private int CachedOutCode(ref Vertex vertex, float far)
     {
-        int ca = OutCode(a.Screen, far), cb = OutCode(b.Screen, far), cc = OutCode(c.Screen, far);
+        // A vertex may belong only to hidden caps or back-facing walls. Populate its
+        // clip code after face rejection and reuse it for the remaining triangles.
+        if (vertex.ClipCode < 0) vertex.ClipCode = OutCode(vertex.Screen, far);
+        return vertex.ClipCode;
+    }
+
+    private void AddTriangle(ref Vertex a, ref Vertex b, ref Vertex c, float far, bool terrain)
+    {
+        int ca = CachedOutCode(ref a, far), cb = CachedOutCode(ref b, far), cc = CachedOutCode(ref c, far);
         if ((ca & cb & cc) != 0) return;
         if ((ca | cb | cc) == 0)
         {
@@ -306,7 +323,7 @@ internal sealed class GpuSceneDepth
         for (int i = 1; i + 1 < count; i++) AddProjectedTriangle(polygon[0], polygon[i], polygon[i + 1], terrain);
     }
 
-    private void AddProjectedTriangle(Vertex a, Vertex b, Vertex c, bool terrain)
+    private void AddProjectedTriangle(in Vertex a, in Vertex b, in Vertex c, bool terrain)
     {
         var triangle = new Triangle(a, b, c, terrain);
         if (!triangle.Valid) return;
@@ -360,9 +377,12 @@ internal sealed class GpuSceneDepth
         internal readonly List<Edge> Edges = [];
         internal readonly Dictionary<int, PixelHit> Samples = [];
         internal List<int>?[] Cells = [];
+        // Indexed primitives retain value copies, so model scratch can span tiles and frames.
+        internal Vertex[] ProjectedVertices = [];
+        internal bool[] VisibleModels = [];
     }
 
-    private readonly record struct Vertex(H Screen, float Height = 0)
+    private record struct Vertex(H Screen, float Height = 0, int ClipCode = -1)
     {
         internal static Vertex Lerp(Vertex a, Vertex b, float t) => new(H.Lerp(a.Screen, b.Screen, t), a.Height + (b.Height - a.Height) * t);
     }
@@ -374,7 +394,7 @@ internal sealed class GpuSceneDepth
         internal readonly bool Terrain, Valid;
         internal readonly float Left, Top, Right, Bottom;
 
-        internal Triangle(Vertex va, Vertex vb, Vertex vc, bool terrain)
+        internal Triangle(in Vertex va, in Vertex vb, in Vertex vc, bool terrain)
         {
             a = va.Screen.Point; b = vb.Screen.Point; c = vc.Screen.Point;
             Terrain = terrain;

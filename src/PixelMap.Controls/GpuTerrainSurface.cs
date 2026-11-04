@@ -61,12 +61,22 @@ public sealed partial class PixelMapControl
                 if (reusable is not null)
                 {
                     var previousScene = reusable.Request.Scene;
-                    // Simulation time advances while a first-person or free camera is
-                    // stationary. Repainting the same image and labels on every tick
-                    // needlessly submits the entire map to the window compositor.
-                    redraw = !ReferenceEquals(_gpuReady, reusable) || !ReferenceEquals(_gpuDisplayed, reusable) ||
-                        !ReferenceEquals(previousScene.Route, scene.Route) || previousScene.Vehicle != scene.Vehicle ||
-                        previousScene.VehicleMode != scene.VehicleMode || previousScene.Gate != scene.Gate;
+                    // Simulation time can advance while the map and overlays stay
+                    // stationary. Repainting identical artwork on every tick needlessly
+                    // submits the entire map to the window compositor.
+                    bool samePresentation = ReferenceEquals(_gpuReady, reusable) && ReferenceEquals(_gpuDisplayed, reusable);
+                    bool sameOverlays = ReferenceEquals(previousScene.Route, scene.Route) &&
+                        previousScene.VehicleMode == scene.VehicleMode && previousScene.Gate == scene.Gate;
+                    bool sameVehicle = previousScene.Vehicle == scene.Vehicle;
+                    if (!sameVehicle && samePresentation && sameOverlays && previousScene.Vehicle is not null &&
+                        scene.Route is null && scene.Gate is null &&
+                        scene.Vehicle is { } vehicle && _terrainGpu is { IsGLInitialized: true, Renderer: { } renderer })
+                    {
+                        // A stopped vehicle has a static picture, but its effect clock
+                        // still needs each idle sample before movement resumes.
+                        sameVehicle = renderer.TryAdvanceStationaryVehicle(scene.VehicleMode, vehicle);
+                    }
+                    redraw = !samePresentation || !sameOverlays || !sameVehicle;
                     reusable.Request.Scene = scene;
                     SetReadyGpuPresentation(reusable);
                     _terrainGpu?.CancelRequest();

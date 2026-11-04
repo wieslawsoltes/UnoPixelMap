@@ -2,6 +2,34 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
+## Play-mode rendering
+
+Revision `6757c313a5645e610e7ed7c9d1f8b04dc7788a03` addresses three measured sources of play-mode stalls.
+
+- Physical cameras select building prisms against conservative homogeneous frustum planes. Visible wall/cap indices and roof-edge instances compact in their original primitive order. Source vertices stay resident, and unchanged model visibility reuses the compact arrays and GPU uploads. The scene-depth index shares whole-model rejection. Vertex shaders exit immediately for invisible caps and roof edges.
+- Browser pixel transfers copy only after a fence signals. The two-slot queue retains bounded backpressure, canceled transfers drain after completion, and pending camera changes coalesce into the latest request. The previous elapsed-time copy policy could block `getBufferSubData` for seconds in the software-GPU play fixture.
+- A stationary first-person or free-flight camera reuses identical foreground artwork. Route, vehicle, animation and gate changes still schedule presentation. HUD text and accessible names update on changed values, structural controls update on session transitions, and hidden map readouts refresh when returning from Play.
+
+The new native regression compares selected streams with complete meshes on 108 identical physical-camera frames across Pixel, Normal, Minecraft and Roblox styles and Map, Earth and Elevation layers. Exact RGBA, terrain intersections, overlay depth, held-stream restoration and unchanged-visibility upload reuse pass. The existing 48-case GLES suite, HiDPI/context-recreation checks and pinned 232-case Pixel suite also pass. The latter preserves 3,712 moving-frame hashes and 232 cold-frame hashes.
+
+### Moving native frames
+
+The paired comparison uses the original renderer from `11188d0c265c9688ca8a169200e2f1573ec9fbeb` and candidate `6757c31`. It renders nine bundled Manhattan vector tiles containing 33,747 features, world-DEM relief at exaggeration 1, Day/Pixel style and a 1200×680 logical viewport at pixel size 4. Each eye-height case warms four frames and measures sixteen deterministic moving frames. The total includes scene preparation, GL submission and `glFinish` completion. Pixel readback, hashing, navigation overlays and Uno/browser presentation are outside that timing.
+
+| Eye height | Original total median | Optimized total median | Speedup | Original preparation median | Optimized preparation median |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1.7 m | 112.20 ms | 40.84 ms | 2.75× | 22.07 ms | 20.55 ms |
+| 300 m | 134.48 ms | 89.95 ms | 1.50× | 41.12 ms | 48.92 ms |
+
+| First measured frame | Original submitted indices | Optimized submitted indices | Original roof-edge instances | Optimized roof-edge instances |
+| --- | ---: | ---: | ---: | ---: |
+| 1.7 m | 1,445,862 | 196,191 | 141,273 | 0 |
+| 300 m | 1,445,862 | 215,955 | 141,273 | 26,015 |
+
+All 32 moving RGBA hashes match the original renderer exactly. Changing flying visibility rebuilds compact roof streams, increasing mean managed allocations from 2.65 to 4.09 MB per frame and preparation time as shown above. The complete measured rendering total decreases by 33.1% for that case. Street-level allocations change from 2.42 to 2.63 MB per frame.
+
+These native measurements use .NET 10.0.14, disabled tiered compilation, two managed processors and two llvmpipe workers with LLVM 19.1.7. They measure a software GPU. The original Rendering/Data/Routing sources are identical from the preserved `16c8148` binary through `11188d0`. Original renderer SHA-256 is `660433930301b94107d7199db9e456bd9f59ed0fe56bfdff828ca336b1d4c51e`, and candidate renderer SHA-256 is `5b745c7a37acdadec7b6f1754115f34f8ae15577c21d1a6956c28a2d0a55f108`.
+
 ## Retained GPU terrain
 
 Terrain relief and the Elevation layer use a WebGL2/OpenGL ES 3 geometry renderer through Uno 6.7's public `GLCanvasElement`. The existing adaptive quadtree selects at most 64 stitched patches with 17×17 vertices each. One instanced indexed draw projects all selected patches. A 256-layer RG32F texture array retains height and illumination samples, a 96-layer RGBA8 array retains pixel artwork, and a compact per-instance stream supplies rebased homogeneous transforms and array indices. Moving the camera updates roughly 3.5 KiB of instance data for 64 patches. Mesh and artwork layers upload when their revisions change.

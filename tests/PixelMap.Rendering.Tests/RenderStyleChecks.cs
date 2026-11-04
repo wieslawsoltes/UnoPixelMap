@@ -64,6 +64,7 @@ internal static class RenderStyleChecks
         CheckVehicles(renderer, bitmap, canvas);
         CheckCollisionTiles();
         CheckFlatNavigation(renderer, bitmap, canvas);
+        StationaryVehicleChecks.Run();
         Console.WriteLine("Passed four render styles, bounded voxel/bevel topology, immutable frame switching, terrain height/picking, Pixel restoration and world-scale standalone vehicles.");
     }
 

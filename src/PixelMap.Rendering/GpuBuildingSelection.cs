@@ -43,7 +43,7 @@ internal sealed class GpuBuildingSelection(byte[] models, uint[] indices, float[
             if ((selected & Walls) != 0) indexCount += range.WallIndexCount;
             if ((selected & Roof) != 0) indexCount += capIndices;
             if ((selected & Underside) != 0) indexCount += capIndices;
-            if ((selected & Rim) != 0) edgeFloats += range.EdgeCount * GpuBuildingMesh.VertexStride;
+            if ((selected & Rim) != 0) edgeFloats += range.EdgeCount * GpuBuildingMesh.EdgeStride;
         }
         if (previous is not null && scratch.AsSpan().SequenceEqual(previous.Models)) return previous;
 
@@ -78,8 +78,8 @@ internal sealed class GpuBuildingSelection(byte[] models, uint[] indices, float[
             }
             if (!ReferenceEquals(edges, mesh.RoofEdges) && (selected & Rim) != 0)
             {
-                int length = range.EdgeCount * GpuBuildingMesh.VertexStride;
-                mesh.RoofEdges.AsSpan(range.FirstEdge * GpuBuildingMesh.VertexStride, length).CopyTo(edges.AsSpan(edgeOffset));
+                int length = range.EdgeCount * GpuBuildingMesh.EdgeStride;
+                mesh.RoofEdges.AsSpan(range.FirstEdge * GpuBuildingMesh.EdgeStride, length).CopyTo(edges.AsSpan(edgeOffset));
                 edgeOffset += length;
             }
         }

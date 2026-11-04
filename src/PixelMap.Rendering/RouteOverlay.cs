@@ -49,6 +49,18 @@ public sealed partial class PixelMapRenderer
                 navigationTerrain, aligned ? reliefSurface : null, renderStyle);
         }
     }
+
+    /// <summary>Advance an unchanged standalone vehicle's effects sample without drawing.
+    /// Returns true only after a stationary vehicle has been drawn with the same pose and
+    /// mode. The caller must also retain the same camera, scenery and overlay state.</summary>
+    public bool TryAdvanceStationaryVehicle(TravelMode mode, VehiclePose vehicle)
+    {
+        lock (sync)
+        {
+            ObjectDisposedException.ThrowIf(disposed, this);
+            return routeOverlay?.TryAdvanceStationaryVehicle(mode, vehicle) == true;
+        }
+    }
 }
 
 internal sealed class RouteOverlay : IDisposable
@@ -72,6 +84,7 @@ internal sealed class RouteOverlay : IDisposable
     private readonly VehicleSprite sprite = new();
     private readonly WorldVehicle worldVehicle = new();
     private TravelMode? freeMode;
+    private VehiclePose? freeVehicle;
     private readonly List<SKPoint> stops = [];
     private static readonly SKSamplingOptions Nearest = new(SKFilterMode.Nearest, SKMipmapMode.None);
 
@@ -79,6 +92,7 @@ internal sealed class RouteOverlay : IDisposable
         BuildingRasterizer? depth, int depthPixel, long revision, TerrainOptions? terrain, TerrainSurface? terrainMesh, MapRenderStyle renderStyle)
     {
         freeMode = null;
+        freeVehicle = null;
         paint.IsAntialias = MapRendering.Smooth(renderStyle);
         bool changedPlan = !ReferenceEquals(plan, next);
         if (changedPlan || meshTerrain != terrain)
@@ -118,6 +132,7 @@ internal sealed class RouteOverlay : IDisposable
         VehiclePose sample, BuildingRasterizer? depth, int depthPixel, TerrainOptions? terrain,
         TerrainSurface? terrainMesh, MapRenderStyle renderStyle)
     {
+        freeVehicle = null;
         if (plan is not null || freeMode != mode)
         {
             effects.Reset();
@@ -133,6 +148,21 @@ internal sealed class RouteOverlay : IDisposable
         canvas.Scale(pixel);
         DrawVehicleCore(canvas, w, h, pixel, camera, mode, sample, depth, depthPixel, terrain, terrainMesh, renderStyle, true);
         canvas.Restore();
+        freeVehicle = sample;
+    }
+
+    internal bool TryAdvanceStationaryVehicle(TravelMode mode, VehiclePose sample)
+    {
+        if (plan is not null || freeMode != mode || freeVehicle is not { Moving: false } previous ||
+            !double.IsFinite(previous.AnimationSeconds) || !double.IsFinite(sample.AnimationSeconds) ||
+            sample.AnimationSeconds < previous.AnimationSeconds ||
+            (sample with { AnimationSeconds = previous.AnimationSeconds }) != previous) return false;
+
+        // Stationary effects freeze their visual time but still consume every simulation
+        // sample. Resuming then advances from this sample rather than the last painted one.
+        effects.Advance(mode, sample);
+        freeVehicle = sample;
+        return true;
     }
 
     private void DrawVehicleCore(SKCanvas canvas, int w, int h, int pixel, MapCamera camera, TravelMode mode,

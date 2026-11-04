@@ -70,6 +70,7 @@ internal static class GpuVisibilityChecks
             foreach (object draw in buildings)
             {
                 object mesh = Get(draw, "Mesh")!, selection = Get(draw, "Selection")!;
+                CheckRoofStorage(mesh);
                 fullIndices += ((Array)Field(mesh, "Indices")!).Length;
                 selectedIndices += ((Array)Field(selection, "Indices")!).Length;
                 selectedEdges += ((Array)Field(selection, "RoofEdges")!).Length;
@@ -87,6 +88,30 @@ internal static class GpuVisibilityChecks
         }
         Assert(reduced >= cases / 2 && zeroRims >= 12, "Physical-camera fixtures did not exercise model and roof-edge rejection.");
         Console.WriteLine($"Passed {cases} exact physical-camera GLES visibility comparisons, depth queries, retained stream restoration and upload reuse across all styles and terrain layers.");
+    }
+
+    private static void CheckRoofStorage(object mesh)
+    {
+        var edges = (float[])Field(mesh, "RoofEdges")!;
+        var ranges = (Array)Field(mesh, "Ranges")!;
+        int expectedLength = 0, modelIndex = 0;
+        foreach (object range in ranges)
+        {
+            int first = (int)Get(range, "FirstEdge")!, count = (int)Get(range, "EdgeCount")!;
+            float top = (float)Field(Get(range, "Model")!, "Top")!;
+            Assert(first * 4 == expectedLength && count % 2 == 0,
+                "A compact roof range lost its paired endpoint offsets.");
+            for (int point = first; point < first + count; point++)
+            {
+                int offset = point * 4;
+                Assert(float.IsFinite(edges[offset]) && float.IsFinite(edges[offset + 1]) &&
+                    edges[offset + 2] == top && edges[offset + 3] == modelIndex,
+                    "A compact roof vertex changed its position, height or model identity.");
+            }
+            expectedLength += count * 4;
+            modelIndex++;
+        }
+        Assert(expectedLength == edges.Length, "Roof geometry retained unused per-vertex attributes.");
     }
 
     private static GpuMapFrame CompleteFrame(GpuMapFrame source)
