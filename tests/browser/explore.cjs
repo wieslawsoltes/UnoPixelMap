@@ -626,48 +626,58 @@ async function freeRoam(page) {
 }
 
 async function cameraOwnershipInput(cdp, page) {
+    const viewport = page.viewportSize();
     const points = (spread, rotation = 0) => [
-        {id: 1, x: 195 - spread, y: 410 - rotation},
-        {id: 2, x: 195 + spread, y: 410 + rotation}
+        {id: 1, x: 800 - spread, y: 400 - rotation},
+        {id: 2, x: 800 + spread, y: 400 + rotation}
     ];
-    await see(page, /rendering.+?·\s*z24\.0\s*·/);
-    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: points(40)});
+    // The compact phone layout hides the public camera readout. Exercise this
+    // touchscreen-and-keyboard sequence at desktop width, then restore portrait.
+    await page.setViewportSize({width: 1200, height: 800});
     try {
-        // A hardware Home key can replace the camera while touchscreen contacts
-        // remain down. Their old free-look baseline must stop owning the view.
+        await page.waitForTimeout(500);
+        await see(page, /rendering.+?·\s*z24\.0\s*·/);
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: points(40)});
+        try {
+            // A hardware Home key can replace the camera while touchscreen contacts
+            // remain down. Their old free-look baseline must stop owning the view.
+            await page.keyboard.press("Home");
+            await see(page, /rendering.+?·\s*z16\.5\s*·/);
+            await page.waitForTimeout(500);
+            const home = await readCamera(page);
+            await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(70, 15)});
+            await page.waitForTimeout(350);
+            assert.deepEqual(await readCamera(page), home,
+                "Contacts held across Home cannot restore their previous camera baseline");
+        } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+
+        await page.keyboard.press("c");
+        await see(page, /rendering.+?·\s*z24\.0\s*·/);
+        assert.equal((await readCamera(page)).zoom, 24,
+            "The game camera shortcut restores follow after a manual Home flight");
+
         await page.keyboard.press("Home");
         await see(page, /rendering.+?·\s*z16\.5\s*·/);
         await page.waitForTimeout(500);
-        const home = await readCamera(page);
-        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(70, 15)});
-        await page.waitForTimeout(350);
-        assert.deepEqual(await readCamera(page), home,
-            "Contacts held across Home cannot restore their previous camera baseline");
-    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
-
-    await page.keyboard.press("c");
-    await see(page, /rendering.+?·\s*z24\.0\s*·/);
-    assert.equal((await readCamera(page)).zoom, 24,
-        "The game camera shortcut restores follow after a manual Home flight");
-
-    await page.keyboard.press("Home");
-    await see(page, /rendering.+?·\s*z16\.5\s*·/);
-    await page.waitForTimeout(500);
-    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: points(40)});
-    try {
-        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(65, 12)});
-        await page.waitForTimeout(200);
-        assert.ok((await readCamera(page)).zoom > 16.5,
-            "Fresh contacts can pinch the detached map after cancellation");
-        await page.keyboard.press("c");
-        await see(page, /rendering.+?·\s*z24\.0\s*·/);
-        await page.waitForTimeout(350);
-        const followed = await readCamera(page);
-        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(85, 28)});
-        await page.waitForTimeout(350);
-        assert.deepEqual(await readCamera(page), followed,
-            "Reattaching the game camera cancels an in-progress detached pinch and twist");
-    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: points(40)});
+        try {
+            await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(65, 12)});
+            await page.waitForTimeout(200);
+            assert.ok((await readCamera(page)).zoom > 16.5,
+                "Fresh contacts can pinch the detached map after cancellation");
+            await page.keyboard.press("c");
+            await see(page, /rendering.+?·\s*z24\.0\s*·/);
+            await page.waitForTimeout(350);
+            const followed = await readCamera(page);
+            await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(85, 28)});
+            await page.waitForTimeout(350);
+            assert.deepEqual(await readCamera(page), followed,
+                "Reattaching the game camera cancels an in-progress detached pinch and twist");
+        } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+    } finally {
+        await page.setViewportSize(viewport);
+        await page.waitForTimeout(500);
+    }
     console.log("Held-touch Home flights, keyboard camera reattachment and pinch cancellation passed.");
 }
 
