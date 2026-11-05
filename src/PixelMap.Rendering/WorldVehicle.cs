@@ -32,7 +32,8 @@ internal sealed class WorldVehicle : IDisposable
         double world = camera.WorldSize / pixel;
         originX = MapCamera.WrapOffset((pose.Point.Longitude + 180) / 360 - camera.CenterX) * world;
         originY = (MapCamera.MercatorY(pose.Point.Latitude) - camera.CenterY) * world;
-        metres = world / (MapCamera.EarthCircumference * Math.Cos(camera.Latitude * Math.PI / 180));
+        metres = world / (MapCamera.EarthCircumference *
+            Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180));
         originAltitude = terrain?.RenderAltitude(camera, pose.Point.Latitude, pose.Point.Longitude,
             pose.AltitudeMeters, terrainMesh) ?? pose.AltitudeMeters;
         cameraAltitude = camera.GroundAltitudeMeters;

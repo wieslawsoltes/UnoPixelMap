@@ -14,7 +14,16 @@
         return target instanceof Element && target.closest("input,textarea,select,iframe,[contenteditable]");
     }
 
+    function activeInput(input) {
+        // Native input runs microtasks between DOM listeners. eventPhase remains
+        // nonzero for the entire dispatch, including Uno's later routed callback.
+        // Restore an outer dispatch after a nested event has finished.
+        while (input && input.event.eventPhase === 0) input = input.previous;
+        return input;
+    }
+
     function retainWheel(event) {
+        wheel = { event, owner: 0, previous: activeInput(wheel) };
         if (nativeInput(event.target)) return;
         position = { x: event.clientX, y: event.clientY, target: event.target };
         if (safariGesture?.owned && event.ctrlKey && !gestures.has(event)) {
@@ -22,11 +31,10 @@
             event.stopImmediatePropagation();
             return;
         }
-        const current = wheel = { event, owner: 0 };
-        queueMicrotask(() => { if (wheel === current) wheel = null; });
     }
 
     function retainPointer(event) {
+        pointer = { event, previous: activeInput(pointer) };
         if (event.type === "pointerdown") {
             contextPointer = null;
             if (event.pointerType === "touch" && event.target === document.getElementById("uno-canvas") &&
@@ -36,8 +44,6 @@
             }
         }
         position = { x: event.clientX, y: event.clientY, target: event.target };
-        const current = pointer = { event };
-        queueMicrotask(() => { if (pointer === current) pointer = null; });
     }
 
     function endPointer(event) {
@@ -45,9 +51,7 @@
     }
 
     function retainKeyboard(event) {
-        if (nativeInput(event.target)) { keyboard = null; return; }
-        keyboard = event;
-        queueMicrotask(() => { if (keyboard === event) keyboard = null; });
+        keyboard = { event, previous: activeInput(keyboard) };
     }
 
     function releasePointer(id, pointerId) {
@@ -111,7 +115,7 @@
     }
 
     function suspend() {
-        safariGesture = contextPointer = keyboard = null;
+        wheel = pointer = safariGesture = contextPointer = keyboard = null;
         canvasTouches.clear();
         for (const [id, map] of [...maps]) {
             releaseMouse(id);
@@ -215,7 +219,8 @@
 
         takeWheel(id) {
             const map = maps.get(id);
-            if (!map || !wheel) return [];
+            wheel = activeInput(wheel);
+            if (!map || !wheel || nativeInput(wheel.event.target)) return [];
             const event = wheel.event;
             event.preventDefault();
             // Uno may raise separate X and Y wheel events for this same DOM event.
@@ -246,12 +251,15 @@
         },
 
         getKeyRepeat(id) {
-            return maps.has(id) && keyboard ? (keyboard.repeat ? 1 : 0) : -1;
+            keyboard = activeInput(keyboard);
+            return maps.has(id) && keyboard && !nativeInput(keyboard.event.target)
+                ? (keyboard.event.repeat ? 1 : 0) : -1;
         },
 
         capturePointer(id, pointerId) {
+            pointer = activeInput(pointer);
             const event = pointer?.event;
-            if (!maps.has(id) || event?.type !== "pointerdown") return;
+            if (!maps.has(id) || event?.type !== "pointerdown" || nativeInput(event.target)) return;
             const element = event.target;
             if (!(element instanceof Element) || !element.setPointerCapture) return;
             try {

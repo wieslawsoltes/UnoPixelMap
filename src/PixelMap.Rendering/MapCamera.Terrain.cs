@@ -46,7 +46,8 @@ public readonly partial record struct MapCamera
     {
         ArgumentNullException.ThrowIfNull(terrain);
         hit = default;
-        if (width <= 0 || height <= 0 || !double.IsFinite(x) || !double.IsFinite(y)) return false;
+        if (width <= 0 || height <= 0 || !double.IsFinite(width) || !double.IsFinite(height) ||
+            !double.IsFinite(x) || !double.IsFinite(y)) return false;
         if (!terrain.Relief || terrain.Elevation.Count == 0)
         {
             if (!TryUnproject(x, y, width, height, out var flat)) return false;
@@ -59,11 +60,14 @@ public readonly partial record struct MapCamera
         var (sp, cp) = Math.SinCos(PitchRadians);
         double dx = x - width * .5, dy = y - height * .5;
         double focal = Focal(height), ppm = PixelsPerMeter;
+        double targetPixels = TargetPixels, world = WorldSize, centerX = CenterX, centerY = CenterY;
+        double ground = GroundAltitudeMeters;
+        bool perspective = Perspective;
         double start, end;
         if (Perspective)
         {
             double slope = -(dy * sp + focal * cp) / ppm;
-            double origin = (focal * cp + TargetPixels) / ppm;
+            double origin = (focal * cp + targetPixels) / ppm;
             if (Math.Abs(slope) < 1e-12)
             {
                 if (origin < low - 2 || origin > high + 2) return false;
@@ -79,7 +83,6 @@ public readonly partial record struct MapCamera
         }
         else { start = high + 2; end = low - 2; }
         if (Perspective && end < start) return false;
-        var camera = this;
         var (bearingSin, bearingCos) = Math.SinCos(Bearing * Math.PI / 180);
         var first = Ray(start);
         var last = Ray(end);
@@ -93,22 +96,23 @@ public readonly partial record struct MapCamera
             double current = start + (end - start) * i / steps;
             var ray = Ray(current);
             double difference = Difference(ray);
-            if (previous >= 0 && difference <= 0)
+            bool descending = previous >= 0 && difference <= 0;
+            if (descending || previous <= 0 && difference >= 0)
             {
-                double above = prior, below = current;
-                double aboveDifference = previous, belowDifference = difference;
+                double before = prior, after = current;
+                double beforeDifference = previous, afterDifference = difference;
                 for (int refinement = 0; refinement < 18; refinement++)
                 {
-                    double mid = (above + below) * .5;
+                    double mid = (before + after) * .5;
                     double residual = Difference(Ray(mid));
-                    if (residual > 0) { above = mid; aboveDifference = residual; }
-                    else { below = mid; belowDifference = residual; }
+                    if (descending ? residual > 0 : residual < 0) { before = mid; beforeDifference = residual; }
+                    else { after = mid; afterDifference = residual; }
                 }
                 // Interpolate within the final bracket. This recovers a flat or planar
                 // surface exactly, including sub-metre rays from a first-person eye.
-                double range = aboveDifference - belowDifference;
-                double fraction = range > 0 ? aboveDifference / range : .5;
-                ray = Ray(above + (below - above) * fraction);
+                double range = beforeDifference - afterDifference;
+                double fraction = range != 0 ? beforeDifference / range : .5;
+                ray = Ray(before + (after - before) * fraction);
                 if (ray.Y is < 0 or > 1) return false;
                 var location = Geographic(ray.X, ray.Y);
                 hit = new(location.Latitude, location.Longitude,
@@ -123,11 +127,11 @@ public readonly partial record struct MapCamera
         (double X, double Y, double Z) Ray(double parameter)
         {
             double u, v, z;
-            if (camera.Perspective)
+            if (perspective)
             {
                 u = dx * parameter;
                 v = cp * dy * parameter + sp * focal * (1 - parameter);
-                z = (-sp * dy * parameter + cp * focal * (1 - parameter) + camera.TargetPixels) / ppm;
+                z = (-sp * dy * parameter + cp * focal * (1 - parameter) + targetPixels) / ppm;
             }
             else
             {
@@ -135,12 +139,12 @@ public readonly partial record struct MapCamera
                 v = (dy + parameter * ppm * sp) / cp;
                 z = parameter;
             }
-            return (camera.CenterX + (u * bearingCos - v * bearingSin) / camera.WorldSize,
-                camera.CenterY + (u * bearingSin + v * bearingCos) / camera.WorldSize, z);
+            return (centerX + (u * bearingCos - v * bearingSin) / world,
+                centerY + (u * bearingSin + v * bearingCos) / world, z);
         }
 
         double Difference((double X, double Y, double Z) ray) => ray.Z -
-            (terrain.Elevation.SampleSurfaceMercator(ray.X, ray.Y) - camera.GroundAltitudeMeters) * exaggeration;
+            (terrain.Elevation.SampleSurfaceMercator(ray.X, ray.Y) - ground) * exaggeration;
     }
 
     /// <summary>Drag using the visible terrain as the geographic anchor.</summary>

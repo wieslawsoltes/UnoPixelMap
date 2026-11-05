@@ -216,14 +216,19 @@ public sealed partial class PixelMapControl : UserControl
             || !double.IsFinite(value.GroundAltitudeMeters) || !double.IsFinite(value.ViewDistanceMeters) || value.ViewDistanceMeters < 0
             || !double.IsFinite(value.ViewportHeight) || value.ViewportHeight < 0)
             throw new ArgumentOutOfRangeException(nameof(value), "Camera coordinates must be finite.");
+        bool freeLook = value.IsFreeLook && value.Perspective;
+        double latitudeLimit = freeLook ? MapCamera.MaxFreeLookLatitude : MapCamera.MaxLatitude;
         return value with
         {
-            Latitude = Math.Clamp(value.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude),
+            Latitude = Math.Clamp(value.Latitude, -latitudeLimit, latitudeLimit),
             Longitude = Wrap(value.Longitude),
             Bearing = Wrap(value.Bearing),
             Zoom = Math.Clamp(value.Zoom, MapCamera.MinZoom, MapCamera.MaxZoom),
             Pitch = MapCamera.ClampPitch(value.Pitch, value.Perspective),
-            TargetAltitudeMeters = Math.Clamp(value.TargetAltitudeMeters, value.IsFreeLook ? -1e7 : 0, 1e7),
+            IsFreeLook = freeLook,
+            ViewDistanceMeters = freeLook ? value.ViewDistanceMeters : 0,
+            ViewportHeight = freeLook ? value.ViewportHeight : 0,
+            TargetAltitudeMeters = Math.Clamp(value.TargetAltitudeMeters, freeLook ? -1e7 : 0, 1e7),
             GroundAltitudeMeters = Math.Clamp(value.GroundAltitudeMeters, -32768, 32768)
         };
     }

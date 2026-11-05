@@ -197,27 +197,18 @@ public sealed partial class PixelMapControl
             ActualWidth, ActualHeight, viewDistance, datum);
         if (!firstPerson)
         {
-            // Keep the actor inside the unobstructed part of the viewport while retaining
-            // the physical camera eye. This changes its aim, not its world position.
+            // Solve the unobstructed screen ray while retaining the physical eye.
+            // A no-roll camera keeps its original aim when that ray is unreachable.
             var safe = SafeViewport();
-            for (int iteration = 0; iteration < 3; iteration++)
-            {
-                if (!target.TryProject(body.Latitude, body.Longitude, focusAltitude, ActualWidth, ActualHeight, out var screen)) break;
-                double focal = ActualHeight * 1.2071067811865475;
-                double dx = safe.X - screen.X, dy = safe.Y - screen.Y;
-                if (Math.Abs(dx) + Math.Abs(dy) < .25) break;
-                heading -= Math.Atan2(dx, focal) * 180 / Math.PI;
-                pitch = Math.Clamp(pitch + Math.Atan2(dy, focal) * 180 / Math.PI, 0, 179.5);
-                target = MapCamera.FromEye(eye.Latitude, eye.Longitude, altitude, heading, pitch,
-                    ActualWidth, ActualHeight, viewDistance, datum);
-            }
+            if (target.TryAimAt(body.Latitude, body.Longitude, focusAltitude,
+                safe.X, safe.Y, ActualWidth, ActualHeight, out var aimed)) target = aimed;
         }
         // First-person input tracks the eye directly. Vehicle-mounted third-person
         // cameras retain a short, frame-rate-independent spring after startup.
         long now = Stopwatch.GetTimestamp();
         if (_wasTracking && !firstPerson)
         {
-            double elapsed = Math.Clamp(Stopwatch.GetElapsedTime(_cameraTimestamp, now).TotalSeconds, 0, .15);
+            double elapsed = Math.Max(0, Stopwatch.GetElapsedTime(_cameraTimestamp, now).TotalSeconds);
             target = Camera.Interpolate(target, 1 - Math.Exp(-elapsed * 12));
         }
         _cameraTimestamp = now;
@@ -239,14 +230,20 @@ public sealed partial class PixelMapControl
         if (key is VirtualKey.Escape or VirtualKey.P)
         {
             if (repeated) return true;
-            if (_held.Add(key)) { if (Journey.Active) Journey.Pause(); else Journey.Resume(); }
+            if (_held.Add(key))
+            {
+                if (Journey.Active) Journey.Pause();
+                else if (key == VirtualKey.P) Journey.Resume();
+            }
             return true;
         }
-        if (!Journey.Active) return false;
         if (key is not (VirtualKey.W or VirtualKey.A or VirtualKey.S or VirtualKey.D or VirtualKey.Up or VirtualKey.Down
             or VirtualKey.Left or VirtualKey.Right or VirtualKey.Q or VirtualKey.E or VirtualKey.Space or VirtualKey.PageUp
             or VirtualKey.PageDown or VirtualKey.H or VirtualKey.R or VirtualKey.C or VirtualKey.Shift or VirtualKey.LeftShift
             or VirtualKey.RightShift or VirtualKey.Control or VirtualKey.LeftControl or VirtualKey.RightControl)) return false;
+        // A paused game retains ownership of its movement keys. Letting them fall
+        // through would pan the map or start an unrelated camera flight.
+        if (!Journey.Active) return true;
         // A focus or pause transition clears the input state. An operating-system
         // autorepeat must wait for a fresh press before restoring that held control.
         if (repeated && !_held.Contains(key)) return true;

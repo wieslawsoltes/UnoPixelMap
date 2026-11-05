@@ -17,6 +17,9 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
     /// <summary>Viewport height used to encode a free eye into its focus and lens.</summary>
     public double ViewportHeight { get; init; }
     public const double MaxLatitude = 85.0511287798066;
+    /// <summary>A free eye's virtual focus can extend beyond the Mercator data extent.
+    /// The geographic poles themselves cannot encode a finite Mercator coordinate.</summary>
+    public const double MaxFreeLookLatitude = 89.99999999999999;
     public const double MinZoom = 0;
     public const double MaxZoom = 26;
     public const double MaxPitch = 179.5;
@@ -43,7 +46,8 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         ? Math.Max(NearLimit(height) * 2, Math.Min(ViewDistanceMeters > 0 ? ViewDistanceMeters : 6000, MaxViewDistanceMeters) * PixelsPerMeter / Focal(height))
         : Math.Max(Far, Math.Min(4096, GroundDistance(height) * 3));
     internal double CenterX => (Longitude + 180) / 360;
-    internal double CenterY => MercatorY(Latitude);
+    internal double CenterY => IsFreeLook && Perspective
+        ? MercatorYUnclamped(Math.Clamp(Latitude, -MaxFreeLookLatitude, MaxFreeLookLatitude)) : MercatorY(Latitude);
     internal double PitchRadians => ClampPitch(Pitch, Perspective) * (Math.PI / 180);
 
     public static double ClampPitch(double pitch, bool perspective) =>
@@ -69,15 +73,7 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
             GroundAltitudeMeters = groundAltitudeMeters,
             ViewportHeight = height
         };
-        var (sin, cos) = Math.SinCos(camera.Bearing * Math.PI / 180);
-        double distance = Focal(height) * Math.Sin(camera.PitchRadians) / camera.WorldSize;
-        var focus = Geographic(camera.CenterX + distance * sin, camera.CenterY - distance * cos);
-        camera = camera with { Latitude = focus.Latitude, Longitude = focus.Longitude };
-        return camera with
-        {
-            TargetAltitudeMeters = absoluteEyeAltitudeMeters - groundAltitudeMeters -
-                Focal(height) * Math.Cos(camera.PitchRadians) / camera.PixelsPerMeter
-        };
+        return camera.WithEye(camera.Latitude, longitude, absoluteEyeAltitudeMeters, height);
     }
 
     /// <summary>Recover the perspective eye in geographic coordinates and absolute metres.</summary>
@@ -97,25 +93,106 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         if (!double.IsFinite(width) || !double.IsFinite(height) || width <= 0 || height <= 0) return this;
         if (!double.IsFinite(ViewportHeight) || ViewportHeight <= 0) return this with { ViewportHeight = height };
         var eye = GetEye(ViewportHeight);
+        return WithEye(eye.Latitude, eye.Longitude, eye.AltitudeMeters, height);
+    }
+
+    private MapCamera WithEye(double latitude, double longitude, double altitudeMeters, double height)
+    {
         var (sin, cos) = Math.SinCos(Bearing * Math.PI / 180);
         double distance = Focal(height) * Math.Sin(PitchRadians) / WorldSize;
-        var focus = Geographic((eye.Longitude + 180) / 360 + distance * sin,
-            MercatorY(eye.Latitude) - distance * cos);
+        var focus = Geographic((longitude + 180) / 360 + distance * sin, MercatorY(latitude) - distance * cos,
+            clampToMap: !IsFreeLook || !Perspective);
         var next = this with { Latitude = focus.Latitude, Longitude = focus.Longitude, ViewportHeight = height };
         return next with
         {
-            TargetAltitudeMeters = eye.AltitudeMeters - GroundAltitudeMeters -
+            TargetAltitudeMeters = altitudeMeters - GroundAltitudeMeters -
                 Focal(height) * Math.Cos(PitchRadians) / next.PixelsPerMeter
         };
     }
 
+    /// <summary>Orient a free perspective eye so an absolute world position appears at
+    /// the requested screen position, retaining the physical eye and lens. Returns false
+    /// when the target is clipped or the screen ray requires roll or an unsupported pitch.</summary>
+    public bool TryAimAt(double latitude, double longitude, double absoluteAltitudeMeters,
+        double x, double y, double width, double height, out MapCamera aimed)
+    {
+        aimed = this;
+        if (!IsFreeLook || !Perspective || !double.IsFinite(latitude) || !double.IsFinite(longitude) ||
+            !double.IsFinite(absoluteAltitudeMeters) || !double.IsFinite(x) || !double.IsFinite(y) ||
+            !double.IsFinite(width) || !double.IsFinite(height) || width <= 0 || height <= 0) return false;
+        var next = ForViewport(width, height);
+        var eye = next.GetEye(height);
+        double east = WrapOffset((longitude - eye.Longitude) / 360) * WorldSize;
+        double south = (MercatorY(latitude) - MercatorY(eye.Latitude)) * WorldSize;
+        double horizontal = Math.Sqrt(east * east + south * south);
+        double heading = Math.Atan2(east, -south);
+        double u = (x - width * .5) / Focal(height), v = (y - height * .5) / Focal(height);
+        double rayLength = Math.Sqrt(1 + u * u + v * v), verticalAngle = Math.Atan(v);
+        double originalBearing = Bearing * Math.PI / 180, originalPitch = PitchRadians;
+        if (!double.IsFinite(rayLength)) return false;
+        // Yaw first fixes the horizontal screen component. Pitch then solves the
+        // remaining two-dimensional rotation. Re-encoding the eye changes Mercator's
+        // local height scale slightly, so repeat the analytic solution to convergence.
+        for (int iteration = 0; iteration < 4; iteration++)
+        {
+            double vertical = (absoluteAltitudeMeters - eye.AltitudeMeters) * next.PixelsPerMeter;
+            double distance = Math.Sqrt(horizontal * horizontal + vertical * vertical);
+            if (!double.IsFinite(distance) || distance == 0) return false;
+            double bestScore = -1, bestBearing = 0, bestPitch = 0, bestPitchError = double.PositiveInfinity;
+            if (horizontal == 0)
+            {
+                if (Math.Abs(u) > 1e-12) return false;
+                SelectOrientation(originalBearing, 0);
+            }
+            else
+            {
+                double offset = u * distance / (rayLength * horizontal);
+                double angle = Math.Asin(Math.Clamp(offset, -1, 1));
+                double forward = horizontal * Math.Cos(angle);
+                SelectOrientation(heading - angle, forward);
+                SelectOrientation(heading - (Math.PI - angle), -forward);
+            }
+            if (bestScore < 0) return false;
+            next = (next with { Bearing = bestBearing, Pitch = bestPitch })
+                .WithEye(eye.Latitude, eye.Longitude, eye.AltitudeMeters, height);
+            if (next.TryProject(latitude, longitude, absoluteAltitudeMeters, width, height, out var screen) &&
+                Math.Abs(screen.X - x) + Math.Abs(screen.Y - y) < .0001)
+            {
+                aimed = next;
+                return true;
+            }
+
+            void SelectOrientation(double bearing, double forward)
+            {
+                double pitch = WrapOffset((Math.Atan2(forward, -vertical) + verticalAngle) / (2 * Math.PI)) * (2 * Math.PI);
+                double maximum = MaxPitch * Math.PI / 180;
+                // Coordinate round-off at a pitch limit must not switch to the
+                // opposite yaw branch during the Mercator scale iteration.
+                double pitchError = Math.Max(0, Math.Abs(pitch - Math.Clamp(pitch, 0, maximum)) - 1e-9);
+                pitch = Math.Clamp(pitch, 0, maximum);
+                double yawDelta = WrapOffset((bearing - originalBearing) / (2 * Math.PI)) * (2 * Math.PI);
+                double score = Math.Cos(yawDelta * .5) * Math.Cos((pitch - originalPitch) * .5);
+                if (pitchError > bestPitchError || pitchError == bestPitchError && score <= bestScore) return;
+                bestPitchError = pitchError;
+                bestScore = score;
+                bestBearing = WrapOffset(bearing / (2 * Math.PI)) * 360;
+                bestPitch = pitch * 180 / Math.PI;
+            }
+        }
+        return false;
+    }
+
     internal static double MercatorY(double latitude) =>
-        (1 - Math.Asinh(Math.Tan(Math.Clamp(latitude, -MaxLatitude, MaxLatitude) * (Math.PI / 180))) / Math.PI) * .5;
+        MercatorYUnclamped(Math.Clamp(latitude, -MaxLatitude, MaxLatitude));
+
+    private static double MercatorYUnclamped(double latitude) =>
+        (1 - Math.Asinh(Math.Tan(latitude * (Math.PI / 180))) / Math.PI) * .5;
 
     internal static double WrapOffset(double offset) => offset - Math.Floor(offset + .5);
 
-    private static (double Latitude, double Longitude) Geographic(double x, double y) =>
-        (Math.Atan(Math.Sinh((1 - 2 * Math.Clamp(y, 0, 1)) * Math.PI)) * (180 / Math.PI),
+    private static (double Latitude, double Longitude) Geographic(double x, double y, bool clampToMap = true) =>
+        (Math.Clamp(Math.Atan(Math.Sinh((1 - 2 * (clampToMap ? Math.Clamp(y, 0, 1) : y)) * Math.PI)) * (180 / Math.PI),
+            -MaxFreeLookLatitude, MaxFreeLookLatitude),
          (x - Math.Floor(x)) * 360 - 180);
 
     private (double X, double Y) GroundOffset(double dx, double dy, double height = 0)
@@ -215,7 +292,7 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         var center = Geographic(CenterX + WrapOffset(destination.CenterX - CenterX) * t,
             CenterY + (destination.CenterY - CenterY) * t);
         double bearing = Bearing + WrapOffset((destination.Bearing - Bearing) / 360) * 360 * t;
-        return new MapCamera(center.Latitude, center.Longitude, Zoom + (destination.Zoom - Zoom) * t,
+        var next = new MapCamera(center.Latitude, center.Longitude, Zoom + (destination.Zoom - Zoom) * t,
             WrapOffset(bearing / 360) * 360, Pitch + (destination.Pitch - Pitch) * t, t < .5 ? Perspective : destination.Perspective,
             TargetAltitudeMeters + (destination.TargetAltitudeMeters - TargetAltitudeMeters)*t)
         {
@@ -224,6 +301,17 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
             ViewDistanceMeters = ViewDistanceMeters + (destination.ViewDistanceMeters - ViewDistanceMeters) * t,
             ViewportHeight = t < .5 ? ViewportHeight : destination.ViewportHeight
         };
+        if (!IsFreeLook || !destination.IsFreeLook || !Perspective || !destination.Perspective ||
+            ViewportHeight <= 0 || destination.ViewportHeight <= 0) return next;
+        // A free camera encodes its eye behind a moving focus. Interpolating that
+        // focus makes a stationary eye orbit when only the look direction changes.
+        var eye = GetEye(ViewportHeight);
+        var destinationEye = destination.GetEye(destination.ViewportHeight);
+        var position = Geographic((eye.Longitude + 180) / 360 +
+            WrapOffset((destinationEye.Longitude - eye.Longitude) / 360) * t,
+            MercatorY(eye.Latitude) + (MercatorY(destinationEye.Latitude) - MercatorY(eye.Latitude)) * t);
+        return next.WithEye(position.Latitude, position.Longitude,
+            eye.AltitudeMeters + (destinationEye.AltitudeMeters - eye.AltitudeMeters) * t, next.ViewportHeight);
     }
 
     /// <summary>Fit the ordered route to the current bearing and pitch. Padding is in display

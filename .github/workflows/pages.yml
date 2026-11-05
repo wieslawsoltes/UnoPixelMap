@@ -64,6 +64,7 @@ jobs:
         run: |
           npm ci --prefix tests/browser
           (cd tests/browser && npx playwright install --with-deps chromium)
+          node tests/browser/input-adapter-browser.cjs
           mkdir -p "${{ runner.temp }}/preview"
           ln -s "${{ runner.temp }}/atlas/wwwroot" "${{ runner.temp }}/preview/UnoPixelMap"
           python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/preview" > /tmp/atlas-server.log 2>&1 &

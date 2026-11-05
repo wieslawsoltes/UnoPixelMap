@@ -51,10 +51,13 @@ internal static class FreeCameraChecks
         }
 
         TerrainDatum();
+        FixedEyeInterpolation();
+        AimInsets();
+        MercatorEdges();
         NearGeometry();
         LensBounds();
         Links();
-        Console.WriteLine($"Passed {poses} free-camera poses, physical near/far clipping, terrain datum, close model picking, bounded horizon requests and v5 style/view links.");
+        Console.WriteLine($"Passed {poses} free-camera poses, physical-eye interpolation, analytic inset aim, physical near/far clipping, terrain datum, close model picking, bounded horizon requests and v5 style/view links.");
     }
 
     private static void TerrainDatum()
@@ -81,6 +84,186 @@ internal static class FreeCameraChecks
                     Math.Abs(projected.X - width * .5) + Math.Abs(projected.Y - height * .85) < .03,
                     "Street-level terrain picking disagreed with the displayed camera");
             }
+        }
+        foreach (float surface in new[] { -300f, 1000 })
+        foreach (double pitch in new[] { 91d, 120, 179.5 })
+        {
+            var terrain = new TerrainOptions(new ElevationSnapshot([
+                new ElevationTile(new(0, 0, 0), 2, new[] { surface, surface, surface, surface })]));
+            var camera = MapCamera.FromEye(0, 179.9999, surface - 100, 32, pitch, width, height,
+                groundAltitudeMeters: surface);
+            Assert(camera.TryUnprojectTerrain(width * .5, height * .5, width, height, terrain, out var hit) &&
+                Math.Abs(hit.ElevationMeters - surface) < 1e-6 &&
+                camera.TryProject(hit.Latitude, hit.Longitude, hit.ElevationMeters, width, height, out var screen) &&
+                Math.Abs(screen.X - width * .5) + Math.Abs(screen.Y - height * .5) < .001,
+                "An upward ray from beneath signed terrain missed the first visible surface");
+            var above = MapCamera.FromEye(0, 179.9999, surface + 100, 32, pitch, width, height,
+                groundAltitudeMeters: surface);
+            Assert(!above.TryUnprojectTerrain(width * .5, height * .5, width, height, terrain, out _),
+                "An upward ray above flat terrain reported an intersection behind the eye");
+            Assert(!camera.TryUnprojectTerrain(450, 300, double.NaN, height, terrain, out _) &&
+                !camera.TryUnprojectTerrain(450, 300, width, double.PositiveInfinity, terrain, out _),
+                "A terrain ray accepted a nonfinite viewport");
+        }
+    }
+
+    private static void FixedEyeInterpolation()
+    {
+        foreach (double latitude in new[] { -70d, 0, 70 })
+        foreach (double pitch in new[] { 0d, 90, 120, 179.5 })
+        {
+            var first = MapCamera.FromEye(latitude, 179.9999, 1234.5, 0, 0, 900, 600,
+                groundAltitudeMeters: 1000);
+            var last = MapCamera.FromEye(latitude, 179.9999, 1234.5, 179, pitch, 390, 844,
+                groundAltitudeMeters: 400);
+            foreach (double t in new[] { .01, .25, .49, .5, .75, .99 })
+            {
+                var camera = first.Interpolate(last, t);
+                var eye = camera.GetEye(camera.ViewportHeight);
+                Assert(Math.Abs(eye.Latitude - latitude) < 1e-10 &&
+                    LongitudeError(eye.Longitude, 179.9999) < 1e-10 &&
+                    Math.Abs(eye.AltitudeMeters - 1234.5) < 1e-8,
+                    "Interpolating a look rotation, viewport or terrain datum moved the stationary physical eye");
+            }
+            Assert(first.Interpolate(last, 0) == first && first.Interpolate(last, 1) == last,
+                "Free-camera interpolation changed its endpoint poses");
+        }
+        var start = MapCamera.FromEye(70, 179.9999, -80, 150, 35, 900, 600);
+        var destination = MapCamera.FromEye(70, -179.9999, 120, -150, 135, 900, 600);
+        var midpoint = start.Interpolate(destination, .5).GetEye(600);
+        Assert(LongitudeError(midpoint.Longitude, 180) < 1e-10 && Math.Abs(midpoint.Latitude - 70) < 1e-10 &&
+            Math.Abs(midpoint.AltitudeMeters - 20) < 1e-8,
+            "The free eye did not take the short Mercator path across the antimeridian");
+        var direct = start.Interpolate(destination, 1 - Math.Exp(-12 * .15));
+        var partitioned = start;
+        foreach (double elapsed in new[] { .01, .025, .045, .07 })
+            partitioned = partitioned.Interpolate(destination, 1 - Math.Exp(-12 * elapsed));
+        var directEye = direct.GetEye(600);
+        var partitionedEye = partitioned.GetEye(600);
+        Assert(Math.Abs(directEye.Latitude - partitionedEye.Latitude) < 1e-10 &&
+            LongitudeError(directEye.Longitude, partitionedEye.Longitude) < 1e-10 &&
+            Math.Abs(directEye.AltitudeMeters - partitionedEye.AltitudeMeters) < 1e-8 &&
+            LongitudeError(direct.Bearing, partitioned.Bearing) < 1e-10 &&
+            Math.Abs(direct.Pitch - partitioned.Pitch) < 1e-10,
+            "Physical free-eye smoothing depends on how elapsed time is split into frames");
+    }
+
+    private static void AimInsets()
+    {
+        const int width = 900, height = 600;
+        int cases = 0;
+        double worst = 0;
+        foreach (double latitude in new[] { -70d, 0, 70 })
+        foreach (double bearing in new[] { -179d, 0, 87 })
+        foreach (double pitch in new[] { 0d, 55, 89.999, 90, 120, 179.5 })
+        foreach (double x in new[] { 135d, 450, 765 })
+        foreach (double y in new[] { 90d, 300, 510 })
+        {
+            var expected = MapCamera.FromEye(latitude, 179.9999, 1234.5, bearing, pitch, width, height,
+                groundAltitudeMeters: 1200);
+            var target = AlongRay(expected, width, height, x, y, 35);
+            var original = MapCamera.FromEye(latitude, 179.9999, 1234.5, bearing + 87,
+                Math.Clamp(pitch + 20, 0, MapCamera.MaxPitch), width, height, groundAltitudeMeters: 1200);
+            Assert(original.TryAimAt(target.Latitude, target.Longitude, target.Altitude,
+                x, y, width, height, out var aimed),
+                $"A reachable inset aim was rejected at latitude {latitude}, bearing {bearing}, pitch {pitch}, screen ({x}, {y})");
+            var eye = aimed.GetEye(height);
+            Assert(Math.Abs(eye.Latitude - latitude) < 1e-10 && LongitudeError(eye.Longitude, 179.9999) < 1e-10 &&
+                Math.Abs(eye.AltitudeMeters - 1234.5) < 1e-8 && aimed.ViewDistanceMeters == original.ViewDistanceMeters &&
+                aimed.Zoom == original.Zoom && aimed.GroundAltitudeMeters == original.GroundAltitudeMeters,
+                "Aiming into the safe viewport moved the eye or changed its lens or terrain datum");
+            Assert(aimed.TryProject(target.Latitude, target.Longitude, target.Altitude, width, height, out var screen),
+                "An analytically aimed target left the physical clipping planes");
+            double error = Math.Abs(screen.X - x) + Math.Abs(screen.Y - y);
+            worst = Math.Max(worst, error);
+            Assert(error < .001, "An analytically aimed target missed its requested screen position");
+            cases++;
+        }
+        var overhead = MapCamera.FromEye(0, 0, 100, 0, 0, width, height);
+        Assert(!overhead.TryAimAt(0, 0, 0, 650, 300, width, height, out var unchanged) && unchanged == overhead,
+            "An unreachable horizontal inset at nadir changed the eye or camera orientation");
+        var distant = Forward(overhead, height, 7000);
+        Assert(!overhead.TryAimAt(distant.Latitude, distant.Longitude, distant.Altitude,
+            450, 300, width, height, out unchanged) && unchanged == overhead,
+            "An aim outside the physical far plane changed the camera");
+        Console.WriteLine($"Passed {cases} fixed-eye inset aim cases, worst screen error {worst:F6}px.");
+    }
+
+    private static (double Latitude, double Longitude, double Altitude) AlongRay(MapCamera camera,
+        double width, double height, double x, double y, double distance)
+    {
+        var eye = camera.GetEye(height);
+        double scale = Circumference * Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180);
+        double focal = height / (2 * Math.Tan(MapCamera.VerticalFieldOfView * Math.PI / 360));
+        double u = (x - width * .5) / focal, v = (y - height * .5) / focal;
+        var (sb, cb) = Math.SinCos(camera.Bearing * Math.PI / 180);
+        var (sp, cp) = Math.SinCos(camera.Pitch * Math.PI / 180);
+        double wx = (eye.Longitude + 180) / 360 + distance * (sp * sb + u * cb - v * cp * sb) / scale;
+        double wy = (1 - Math.Asinh(Math.Tan(eye.Latitude * Math.PI / 180)) / Math.PI) * .5 +
+            distance * (-sp * cb + u * sb + v * cp * cb) / scale;
+        return (Math.Atan(Math.Sinh((1 - 2 * wy) * Math.PI)) * 180 / Math.PI,
+            (wx - Math.Floor(wx)) * 360 - 180, eye.AltitudeMeters - distance * (cp + v * sp));
+    }
+
+    private static void MercatorEdges()
+    {
+        var page = new Uri("https://wieslawsoltes.github.io/UnoPixelMap/");
+        foreach (double latitude in new[] { -MapCamera.MaxLatitude, MapCamera.MaxLatitude })
+        foreach (double longitude in new[] { -179.999999, 179.999999 })
+        foreach (double bearing in new[] { 0d, 90, 180, -90 })
+        foreach (double pitch in new[] { 0d, 15, 90, 120, 179.5 })
+        {
+            var camera = MapCamera.FromEye(latitude, longitude, 1201.7, bearing, pitch, 900, 600,
+                groundAltitudeMeters: 1200);
+            var rotated = MapCamera.FromEye(latitude, longitude, 1201.7, bearing + 170, 35, 900, 600,
+                groundAltitudeMeters: 1200);
+            var interpolated = camera.Interpolate(rotated, .5);
+            foreach (var view in new[] { camera, camera.ForViewport(390, 844), interpolated })
+            {
+                var eye = view.GetEye(view.ViewportHeight);
+                Assert(Math.Abs(eye.Latitude - latitude) < 1e-10 && LongitudeError(eye.Longitude, longitude) < 1e-10 &&
+                    Math.Abs(eye.AltitudeMeters - 1201.7) < 1e-9,
+                    "A free virtual focus moved its physical eye at the Mercator or longitude boundary");
+                var tiles = view.VisibleTiles(900, view.ViewportHeight);
+                Assert(tiles.Length is > 0 and <= 64 && tiles.All(t => t.X >= 0 && t.X < 1 << t.Z && t.Y >= 0 && t.Y < 1 << t.Z),
+                    "An out-of-coverage virtual focus requested invalid Mercator tiles");
+            }
+            var link = MapViewLink.Create(page, camera, PixelStyle.Day, true, false, true, 1, MapRenderStyle.Pixel);
+            Assert(MapViewLink.TryRead(link, out var shared, out _, out _, out _, out _, out _, out _),
+                "A free-focus share link was rejected at the Mercator boundary");
+            var restored = shared.ForViewport(390, 844).GetEye(844);
+            Assert(new RoutePoint(latitude, longitude).DistanceTo(new(restored.Latitude, restored.Longitude)) < .001 &&
+                Math.Abs(restored.AltitudeMeters - 1201.7) < .0011,
+                "A shared edge view failed to preserve the physical eye through a viewport resize");
+        }
+        foreach (double latitude in new[] { -MapCamera.MaxLatitude, MapCamera.MaxLatitude })
+        {
+            const int width = 320, height = 240, extent = 1 << 24, count = 1 << 14;
+            double targetLatitude = latitude - Math.CopySign(.0000001, latitude), longitude = 179.99999;
+            double wx = (longitude + 180) / 360, wy = (1 - Math.Asinh(Math.Tan(targetLatitude * Math.PI / 180)) / Math.PI) * .5;
+            var id = new TileId(14, (int)Math.Floor(wx * count), (int)Math.Floor(wy * count));
+            var point = new TilePoint((int)Math.Round((wx * count - id.X) * extent), (int)Math.Round((wy * count - id.Y) * extent));
+            double unitsPerMeter = count * (double)extent / (Circumference * Math.Cos(latitude * Math.PI / 180));
+            int halfWidth = (int)Math.Round(.05 * unitsPerMeter), halfDepth = (int)Math.Round(.005 * unitsPerMeter);
+            TilePoint[] ring = [new(point.X - halfWidth, point.Y - halfDepth), new(point.X + halfWidth, point.Y - halfDepth),
+                new(point.X + halfWidth, point.Y + halfDepth), new(point.X - halfWidth, point.Y + halfDepth)];
+            var feature = new MapFeature("building", "building", "", "Polar edge", 900, extent, GeometryType.Polygon,
+                [ring], .5, 0, false, 0, 0, "");
+            var camera = MapCamera.FromEye(latitude, longitude, 1.7, latitude > 0 ? 0 : 180, 15, width, height);
+            Assert(camera.TryProject(targetLatitude, longitude, .5, width, height, out var screen) &&
+                screen.X >= 0 && screen.X < width && screen.Y >= 0 && screen.Y < height,
+                "The physical eye lost a visible ground point inside the Mercator data edge");
+            using var renderer = new PixelMapRenderer();
+            using var bitmap = new SKBitmap(width, height);
+            using var canvas = new SKCanvas(bitmap);
+            renderer.Draw(canvas, width, height, camera, [new(id, [])], pixelSize: 1);
+            var empty = bitmap.GetPixelSpan().ToArray();
+            var tile = new MapTile(id, [feature]);
+            renderer.Draw(canvas, width, height, camera, [tile], pixelSize: 1);
+            bool rendered = !empty.AsSpan().SequenceEqual(bitmap.GetPixelSpan());
+            var picked = renderer.Pick(screen.X, screen.Y, width, height, camera, [tile]);
+            Assert(rendered && picked == feature,
+                $"The edge feature at {latitude} was not visible or selectable. Rendered {rendered}, picked {picked?.Id}");
         }
     }
 
@@ -190,7 +373,7 @@ internal static class FreeCameraChecks
     private static (double Latitude, double Longitude, double Altitude) Forward(MapCamera camera, double height, double distance)
     {
         var eye = camera.GetEye(height);
-        double scale = Circumference * Math.Cos(camera.Latitude * Math.PI / 180);
+        double scale = Circumference * Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180);
         double bearing = camera.Bearing * Math.PI / 180, pitch = camera.Pitch * Math.PI / 180;
         double x = (eye.Longitude + 180) / 360 + distance * Math.Sin(pitch) * Math.Sin(bearing) / scale;
         double y = (1 - Math.Asinh(Math.Tan(eye.Latitude * Math.PI / 180)) / Math.PI) * .5 -

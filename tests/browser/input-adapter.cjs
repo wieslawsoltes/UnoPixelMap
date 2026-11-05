@@ -3,8 +3,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-// Run the production adapter with synchronous capture/routed-event ordering.
-// The physical browser suite separately exercises Uno's native hit testing.
+// Run the production adapter with DOM capture/routed-event ordering, including
+// native input's microtask checkpoints between listeners. dispatchEvent keeps
+// its caller's JavaScript stack active and does not run those checkpoints.
 const microtasks = [];
 const frames = new Map();
 let time = 0;
@@ -14,7 +15,7 @@ let routed;
 class Event {
     constructor(type, values = {}) {
         Object.assign(this, {
-            type, bubbles: true, cancelable: true, defaultPrevented: false,
+            type, bubbles: true, cancelable: true, defaultPrevented: false, eventPhase: 0,
             clientX: 420, clientY: 350, timeStamp: ++time,
             ctrlKey: false, metaKey: false, shiftKey: false, altKey: false
         }, values);
@@ -48,12 +49,16 @@ class EventTarget {
             target.notify(event, false);
             if (!event.bubbles) break;
         }
+        event.eventPhase = 0;
         return !event.defaultPrevented;
     }
     notify(event, capture) {
         for (const { handler, options } of [...(this.listeners.get(event.type) ?? [])]) {
             if (event.stopped) return;
-            if (!!options.capture === capture) handler(event);
+            if (!!options.capture !== capture) continue;
+            event.eventPhase = this === event.target ? 2 : capture ? 1 : 3;
+            handler(event);
+            if (event.nativeDispatch) flushMicrotasks();
         }
     }
 }
@@ -122,8 +127,12 @@ function emit(event, handler, target = canvas) {
     routed = handler;
     target.dispatchEvent(event);
     routed = undefined;
-    while (microtasks.length) microtasks.shift()();
+    flushMicrotasks();
     return event;
+}
+
+function flushMicrotasks() {
+    while (microtasks.length) microtasks.shift()();
 }
 
 function wheel(values, owner = 1) {
@@ -139,6 +148,79 @@ function drawFrame() {
     frames.clear();
     for (const callback of callbacks) callback();
 }
+
+let nativeSample;
+const nativeWheel = emit(new WheelEvent("wheel", {
+    deltaX: 14.5, deltaY: -8.25, nativeDispatch: true, timeStamp: 500
+}), () => { nativeSample = [...adapter.takeWheel(1)]; });
+assert.deepEqual(nativeSample, [0, 14.5, -8.25, 0, 0],
+    "A native wheel event lost its deltas at the checkpoint before Uno routing");
+assert.ok(nativeWheel.defaultPrevented);
+assert.deepEqual([...adapter.takeWheel(1)], [], "A completed DOM dispatch exposed stale wheel deltas");
+
+emit(new Event("keydown", { key: "p", repeat: true, nativeDispatch: true }), () => {
+    assert.equal(adapter.getKeyRepeat(1), 1,
+        "A native key event lost its repeat flag at the checkpoint before Uno routing");
+});
+assert.equal(adapter.getKeyRepeat(1), -1);
+
+const nativeDown = emit(new Event("pointerdown", {
+    pointerId: 17, pointerType: "mouse", button: 0, nativeDispatch: true
+}), () => adapter.capturePointer(1, 17));
+assert.ok(nativeDown.defaultPrevented);
+assert.ok(canvas.hasPointerCapture(17), "A native pointer press lost its capture target before Uno routing");
+adapter.releasePointer(1, 17);
+
+const outerWheel = new WheelEvent("wheel", { deltaX: 5, deltaY: -2, timeStamp: 600 });
+const innerWheel = new WheelEvent("wheel", { deltaY: -10, ctrlKey: true });
+const editorWheel = new WheelEvent("wheel", { deltaY: 30, ctrlKey: true });
+emit(outerWheel, event => {
+    if (event === innerWheel) {
+        assert.deepEqual([...adapter.takeWheel(1)], [2, 0, -10, 0, 0]);
+        return;
+    }
+    if (event === editorWheel) {
+        assert.deepEqual([...adapter.takeWheel(1)], [], "A nested editor event inherited map wheel metadata");
+        return;
+    }
+    canvas.dispatchEvent(innerWheel);
+    assert.deepEqual([...adapter.takeWheel(1)], [0, 5, -2, 0, 0],
+        "A nested wheel event replaced the outer map event");
+    inputChild.dispatchEvent(editorWheel);
+    assert.deepEqual([...adapter.takeWheel(1)], [-1, 0, 0, 0, 0],
+        "A nested editor event lost the outer event's consumption state");
+});
+assert.equal(editorWheel.defaultPrevented, false);
+assert.deepEqual([...adapter.takeWheel(1)], []);
+
+const outerKey = new Event("keydown", { key: "w", repeat: true });
+const editorKey = new Event("keydown", { key: "p", repeat: false });
+emit(outerKey, event => {
+    if (event === editorKey) {
+        assert.equal(adapter.getKeyRepeat(1), -1);
+        return;
+    }
+    inputChild.dispatchEvent(editorKey);
+    assert.equal(adapter.getKeyRepeat(1), 1, "A nested editor event replaced the outer key repeat flag");
+});
+assert.equal(adapter.getKeyRepeat(1), -1);
+
+const outerDown = new Event("pointerdown", { pointerId: 18, pointerType: "mouse", button: 0 });
+const editorDown = new Event("pointerdown", { pointerId: 19, pointerType: "mouse", button: 0 });
+emit(outerDown, event => {
+    if (event === editorDown) {
+        adapter.capturePointer(1, 19);
+        assert.equal(inputChild.captures.size, 0, "A native editor's pointer was captured by the map");
+        return;
+    }
+    inputChild.dispatchEvent(editorDown);
+    adapter.capturePointer(1, 18);
+    assert.ok(canvas.hasPointerCapture(18), "A nested editor event replaced the outer pointer capture target");
+});
+assert.equal(editorDown.defaultPrevented, false);
+adapter.releasePointer(1, 18);
+adapter.capturePointer(1, 18);
+assert.equal(canvas.captures.size, 0, "A completed DOM dispatch remained available for native capture");
 
 assert.deepEqual(wheel({ deltaY: 100, wheelDeltaY: -120, timeStamp: 1000 }), [1, 0, 100, 0, 0]);
 assert.deepEqual(wheel({ deltaY: -18.25, ctrlKey: true, timeStamp: 1400 }), [2, 0, -18.25, 0, 0]);

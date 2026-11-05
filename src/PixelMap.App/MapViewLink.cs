@@ -24,7 +24,7 @@ internal static class MapViewLink
         bool elevation, bool terrain, double exaggeration, MapRenderStyle renderStyle) =>
         new UriBuilder(page)
         {
-            Fragment = FormattableString.Invariant($"v5/{camera.Latitude:F9}/{camera.Longitude:F9}/{camera.Zoom:F6}/{Math.IEEERemainder(camera.Bearing, 360):F4}/{camera.Pitch:F4}/{palette}/{(elevation ? "Elevation" : earth ? "Earth" : "Map")}/{(camera.Perspective ? "Perspective" : "Orthographic")}/{camera.TargetAltitudeMeters:F3}/{(terrain ? "Relief" : "Flat")}/{exaggeration:F2}/{renderStyle}/{(camera.IsFreeLook ? "FreeLook" : "Orbit")}/{camera.ViewDistanceMeters:F2}/{camera.GroundAltitudeMeters:F3}/{camera.ViewportHeight:F2}")
+            Fragment = FormattableString.Invariant($"v5/{camera.Latitude.ToString(camera.IsFreeLook ? "G17" : "F9", CultureInfo.InvariantCulture)}/{camera.Longitude:F9}/{camera.Zoom:F6}/{Math.IEEERemainder(camera.Bearing, 360):F4}/{camera.Pitch:F4}/{palette}/{(elevation ? "Elevation" : earth ? "Earth" : "Map")}/{(camera.Perspective ? "Perspective" : "Orthographic")}/{camera.TargetAltitudeMeters:F3}/{(terrain ? "Relief" : "Flat")}/{exaggeration:F2}/{renderStyle}/{(camera.IsFreeLook ? "FreeLook" : "Orbit")}/{camera.ViewDistanceMeters:F2}/{camera.GroundAltitudeMeters:F3}/{camera.ViewportHeight:F2}")
         }.Uri;
 
     internal static bool TryRead(Uri page, out MapCamera camera, out PixelStyle palette, out bool earth) =>
@@ -84,7 +84,7 @@ internal static class MapViewLink
         for (var i = 0; i < numbers.Length; i++)
             if (!Number(fields[i + 1], out numbers[i]))
                 return false;
-        if (Math.Abs(numbers[0]) > 85.051129 || Math.Abs(numbers[1]) > 180 ||
+        if (Math.Abs(numbers[0]) > (freeLook ? MapCamera.MaxFreeLookLatitude : 85.051129) || Math.Abs(numbers[1]) > 180 ||
             numbers[2] < MapCamera.MinZoom || numbers[2] > MapCamera.MaxZoom || Math.Abs(numbers[3]) > 360 ||
             numbers[4] != MapCamera.ClampPitch(numbers[4], perspective) || !Enum.TryParse(fields[6], out palette) || !Enum.IsDefined(palette))
             return false;

@@ -190,7 +190,7 @@ public sealed partial class PixelMapControl
         long now = Stopwatch.GetTimestamp();
         if (_wasTracking)
         {
-            double dt = Math.Clamp(Stopwatch.GetElapsedTime(_cameraTimestamp, now).TotalSeconds, 0, .15);
+            double dt = Math.Max(0, Stopwatch.GetElapsedTime(_cameraTimestamp, now).TotalSeconds);
             double weight = 1 - Math.Exp(-dt * 8);
             target = Camera.Interpolate(target, weight);
         }

@@ -505,9 +505,21 @@ async function freeRoam(page) {
     const paused = await telemetry(page);
     await holdKey(page, "w", 300);
     assert.equal((await telemetry(page)).distance, paused.distance, "Paused free roam releases movement input");
+    const pausedCamera = await readCamera(page);
+    for (const key of ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown", "q", "e", "PageUp", "PageDown", "Escape"])
+        await page.keyboard.press(key);
+    await page.waitForTimeout(400);
+    await see(page, /Resume free roam/);
+    assert.deepEqual(await readCamera(page), pausedCamera,
+        "Paused movement keys retain game ownership and Escape keeps the session paused");
     await pausedRendering(page, paused);
     console.log("Native drag, browser Pointer Lock, relative look and pause passed.");
     await action(page, "Resume free roam");
+    await page.keyboard.press("Home");
+    await see(page, /rendering.+?·\s*z16\.5\s*·/);
+    await page.waitForTimeout(500);
+    assert.equal((await readCamera(page)).zoom, 16.5,
+        "A manual map flight detaches free-roam follow and remains at its destination");
 
     const carFrom = await startMode(page, 1, "Driving");
     await page.keyboard.down("w");
