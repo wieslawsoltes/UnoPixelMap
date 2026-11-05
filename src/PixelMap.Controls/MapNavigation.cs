@@ -45,16 +45,24 @@ public sealed partial class PixelMapControl
             _browserInput?.Dispose();
             _browserInput = null;
         };
+        bool followed = Journey.Follow;
         Journey.Changed += (_, _) =>
         {
-            if (!Journey.IsFreeRoaming || !Journey.Active) _browserInput?.ReleaseMouse();
+            bool resumedFollow = !followed && Journey.Follow;
+            followed = Journey.Follow;
+            if (resumedFollow) ResetMapPointers();
+            if (!Journey.IsFreeRoaming || !Journey.Active || !Journey.Follow) _browserInput?.ReleaseMouse();
         };
     }
 
     /// <summary>Capture relative mouse motion for an active first-person or free camera.
     /// Browsers require this call to originate from a user gesture.</summary>
-    public bool CaptureMouseForFreeLook() => Journey.IsFreeRoaming && Journey.Active &&
-        _browserInput?.CaptureMouse() == true;
+    public bool CaptureMouseForFreeLook()
+    {
+        if (!Journey.IsFreeRoaming || !Journey.Active || _browserInput is null) return false;
+        Journey.Follow = true;
+        return _browserInput.CaptureMouse();
+    }
 
     public bool IsMouseCaptured => _browserInput?.IsMouseCaptured == true;
     public void ReleaseMouseCapture() => _browserInput?.ReleaseMouse();
@@ -96,7 +104,7 @@ public sealed partial class PixelMapControl
     public void RotateBy(double degrees) => OrbitBy(degrees, 0);
     public void ToggleProjection()
     {
-        if (Journey.IsFreeRoaming)
+        if (Journey.IsFreeRoaming && Journey.Follow)
         {
             if (Journey.IsFreeFlying)
                 TryLookFreeRoam(0, (Journey.LookPitch > 10 ? 0 : 55) - Journey.LookPitch);
@@ -121,6 +129,7 @@ public sealed partial class PixelMapControl
 
     public void FlyTo(MapCamera destination)
     {
+        ResetMapPointers();
         StopTrackingForGesture();
         StopMotion(invalidate: false);
         _to = Normalize(destination).ForViewport(ActualWidth, ActualHeight).OnTerrain(_terrain, ActualHeight);
@@ -222,7 +231,7 @@ public sealed partial class PixelMapControl
             _down = point.Position;
             _rotating = point.Properties.IsRightButtonPressed ||
                 (e.KeyModifiers & (VirtualKeyModifiers.Shift | VirtualKeyModifiers.Menu)) != 0;
-            _looking = Journey.IsFreeRoaming;
+            _looking = Journey.IsFreeRoaming && Journey.Follow;
             _dragged = _looking;
         }
         else _dragged = true;
@@ -309,7 +318,7 @@ public sealed partial class PixelMapControl
         double dx = after.X - before.X, dy = after.Y - before.Y;
         double scale = Distance(a, b) / Math.Max(1, Distance(_firstFinger, _secondFinger));
         double twist = Math.Atan2(oldX * y - oldY * x, oldX * x + oldY * y) * 180 / Math.PI;
-        if (Journey.IsFreeRoaming)
+        if (Journey.IsFreeRoaming && Journey.Follow)
         {
             ZoomRide(Math.Log2(Math.Max(.001, scale) / _gestureScale));
             TryLookFreeRoam((after.X - _gestureCenter.X) * .22 - Wrap(twist - _gestureTwist),

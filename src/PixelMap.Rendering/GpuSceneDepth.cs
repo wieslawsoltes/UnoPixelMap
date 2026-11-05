@@ -86,7 +86,7 @@ internal sealed class GpuSceneDepth
         float sampleY = y + .5f;
         if (sample.SurfaceIsTerrain)
         {
-            ref readonly var triangle = ref CollectionsMarshal.AsSpan(triangles)[sample.TerrainTriangle];
+            ref var triangle = ref CollectionsMarshal.AsSpan(triangles)[sample.TerrainTriangle];
             nearest = triangle.EvaluateDepth(sx, sy, perspective);
             sampleY = sy;
         }
@@ -103,8 +103,8 @@ internal sealed class GpuSceneDepth
         if ((uint)x >= (uint)width || (uint)y >= (uint)height) return false;
         var sample = Sample(x, y);
         if (sample.TerrainTriangle < 0) return false;
-        CollectionsMarshal.AsSpan(triangles)[sample.TerrainTriangle].Evaluate(
-            x + .5f, y + .5f, out altitude, out inverse, out physicalHeight);
+        ref var triangle = ref CollectionsMarshal.AsSpan(triangles)[sample.TerrainTriangle];
+        triangle.Evaluate(x + .5f, y + .5f, out altitude, out inverse, out physicalHeight);
         return float.IsFinite(altitude) && inverse > 0;
     }
 
@@ -124,7 +124,7 @@ internal sealed class GpuSceneDepth
                 bool isTerrain;
                 if (primitive >= 0)
                 {
-                    ref readonly var triangle = ref preparedTriangles[primitive];
+                    ref var triangle = ref preparedTriangles[primitive];
                     if (!triangle.Contains(sx, sy)) continue;
                     depth = triangle.EvaluateDepth(sx, sy, perspective);
                     isTerrain = triangle.Terrain;
@@ -206,13 +206,17 @@ internal sealed class GpuSceneDepth
                 projected = new Vertex[range.VertexCount];
                 storage.ProjectedVertices = projected;
             }
+            float eye = perspective ? transform.TargetZ + transform.CosPitch / transform.InverseFocal : float.PositiveInfinity;
             for (int i = 0; i < range.VertexCount; i++)
             {
                 int offset = (range.FirstVertex + i) * GpuBuildingMesh.VertexStride;
+                int face = (int)source[offset + 11];
+                // Caps have separate vertices and their same face test precedes
+                // index traversal, so hidden caps never read this scratch entry.
+                if (face == 1 && top >= eye || face == 2 && (!perspective || bottom <= eye)) continue;
                 float altitude = (source[offset + 2] + foundation) * pixelsPerMeter;
                 projected[i] = new(transform.Vertex(source[offset], source[offset + 1], altitude));
             }
-            float eye = perspective ? transform.TargetZ + transform.CosPitch / transform.InverseFocal : float.PositiveInfinity;
             for (int i = range.FirstIndex, end = i + range.IndexCount; i < end; i += 3)
             {
                 int first = (int)mesh.Indices[i];
@@ -274,8 +278,12 @@ internal sealed class GpuSceneDepth
     private int OutCode(H vertex, float far)
     {
         int code = 0;
-        for (int plane = 0; plane < 6; plane++)
-            if (TileTransform.Plane(plane, vertex, width, height, far, lens.Near) < 0) code |= 1 << plane;
+        if (vertex.W - lens.Near < 0) code |= 1;
+        if (far - vertex.W < 0) code |= 2;
+        if (vertex.X < 0) code |= 4;
+        if (width * vertex.W - vertex.X < 0) code |= 8;
+        if (vertex.Y < 0) code |= 16;
+        if (height * vertex.W - vertex.Y < 0) code |= 32;
         return code;
     }
 
@@ -389,10 +397,13 @@ internal sealed class GpuSceneDepth
         internal static Vertex Lerp(Vertex a, Vertex b, float t) => new(H.Lerp(a.Screen, b.Screen, t), a.Height + (b.Height - a.Height) * t);
     }
 
-    private readonly struct Triangle
+    private struct Triangle
     {
+        private const byte InversePlane = 1, AltitudePlane = 2, PhysicalHeightPlane = 4;
         private readonly SKPoint a, b, c;
-        private readonly float inverse, inverseX, inverseY, altitude, altitudeX, altitudeY, raw, rawX, rawY;
+        private readonly float inverse, altitude, raw;
+        private float inverseX, inverseY, altitudeX, altitudeY, rawX, rawY;
+        private byte preparedPlanes;
         internal readonly bool Terrain, Valid;
         internal readonly float Left, Top, Right, Bottom;
 
@@ -406,20 +417,37 @@ internal sealed class GpuSceneDepth
             float determinant = dx1 * dy2 - dx2 * dy1;
             Valid = float.IsFinite(determinant) && Math.Abs(determinant) >= .00001f;
             float ai = 1 / va.Screen.W, bi = 1 / vb.Screen.W, ci = 1 / vc.Screen.W;
-            // Orthographic transforms keep W=1. Models need only the visible depth
-            // channel, while terrain retains height planes for picking and overlays.
+            // Reuse the gradient slots for the other vertices until a query needs
+            // that plane. Unqueried triangles retain the same storage footprint.
+            // Orthographic models have constant W and need only their altitude.
             inverse = ai;
-            (inverseX, inverseY) = terrain || perspective ? Plane(ai, bi, ci) : default;
+            inverseX = terrain || perspective ? bi : 0;
+            inverseY = terrain || perspective ? ci : 0;
             altitude = va.Screen.Z * ai;
-            (altitudeX, altitudeY) = terrain || !perspective
-                ? Plane(altitude, vb.Screen.Z * bi, vc.Screen.Z * ci) : default;
+            altitudeX = terrain || !perspective ? vb.Screen.Z * bi : 0;
+            altitudeY = terrain || !perspective ? vc.Screen.Z * ci : 0;
             raw = va.Height * ai;
-            (rawX, rawY) = terrain ? Plane(raw, vb.Height * bi, vc.Height * ci) : default;
+            rawX = terrain ? vb.Height * bi : 0;
+            rawY = terrain ? vc.Height * ci : 0;
+            preparedPlanes = (byte)((terrain || perspective ? 0 : InversePlane) |
+                (terrain || !perspective ? 0 : AltitudePlane) | (terrain ? 0 : PhysicalHeightPlane));
+        }
+
+        private void PreparePlanes(byte planes)
+        {
+            byte pending = (byte)(planes & ~preparedPlanes);
+            if (pending == 0) return;
+            float dx1 = b.X - a.X, dy1 = b.Y - a.Y, dx2 = c.X - a.X, dy2 = c.Y - a.Y;
+            float determinant = dx1 * dy2 - dx2 * dy1;
+            if ((pending & InversePlane) != 0) (inverseX, inverseY) = Plane(inverse, inverseX, inverseY);
+            if ((pending & AltitudePlane) != 0) (altitudeX, altitudeY) = Plane(altitude, altitudeX, altitudeY);
+            if ((pending & PhysicalHeightPlane) != 0) (rawX, rawY) = Plane(raw, rawX, rawY);
+            preparedPlanes |= pending;
             (float X, float Y) Plane(float x, float y, float z) =>
                 (((y - x) * dy2 - (z - x) * dy1) / determinant, (dx1 * (z - x) - dx2 * (y - x)) / determinant);
         }
 
-        internal bool Contains(float x, float y)
+        internal readonly bool Contains(float x, float y)
         {
             if (x < Left || x >= Right || y < Top || y >= Bottom) return false;
             float left = float.PositiveInfinity, right = float.NegativeInfinity;
@@ -438,6 +466,7 @@ internal sealed class GpuSceneDepth
 
         internal void Evaluate(float x, float y, out float z, out float iw, out float physicalHeight)
         {
+            PreparePlanes(InversePlane | AltitudePlane | PhysicalHeightPlane);
             float ox = x - a.X, oy = y - a.Y;
             iw = inverse + inverseX * ox + inverseY * oy;
             float reciprocal = 1 / iw;
@@ -447,6 +476,7 @@ internal sealed class GpuSceneDepth
 
         internal float EvaluateDepth(float x, float y, bool perspective)
         {
+            PreparePlanes(perspective ? InversePlane : (byte)(InversePlane | AltitudePlane));
             float ox = x - a.X, oy = y - a.Y;
             float iw = inverse + inverseX * ox + inverseY * oy;
             if (perspective) return iw;

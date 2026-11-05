@@ -346,7 +346,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
             program.Integer("uModelWidth", mesh.ModelWidth);
             BindTexture(0, mesh.ModelTexture);
             gl.BindVertexArray(mesh.EdgeArray);
-            gl.DrawArraysInstanced(PrimitiveType.Triangles, 0, 6, (uint)mesh.EdgeCount);
+            gl.DrawArraysInstanced(PrimitiveType.TriangleStrip, 0, 4, (uint)mesh.EdgeCount);
             LastDrawCalls++;
         }
     }

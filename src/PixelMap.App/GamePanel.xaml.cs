@@ -21,7 +21,7 @@ public sealed partial class GamePanel : UserControl
     private long _lookTimestamp, _lastTelemetry, _lastPadPointer;
     private SessionViewState? _displayedSession;
     private readonly record struct SessionViewState(JourneyState State, TravelMode Mode, JourneyCameraRig Rig,
-        bool FreeRoam, bool FreeFlight, bool Muted);
+        bool FreeRoam, bool FreeFlight, bool Follow, bool Muted);
     private enum PadAction { JumpBrake, Boost, Climb, Descend }
 
     public event EventHandler? CloseRequested;
@@ -240,7 +240,7 @@ public sealed partial class GamePanel : UserControl
         bool active = session.IsFreeRoaming;
         bool paused = session.State == JourneyState.Paused;
         var view = new SessionViewState(session.State, session.Vehicle.Mode, _map.CameraRig,
-            active, session.IsFreeFlying, session.Muted);
+            active, session.IsFreeFlying, session.Follow, session.Muted);
         bool transition = _displayedSession != view;
         // A pause can stop the simulation before the next telemetry tick arrives.
         // Release captured controls immediately, including keyboard/blur transitions.
@@ -274,7 +274,7 @@ public sealed partial class GamePanel : UserControl
             bool walking = session.Vehicle.Mode == TravelMode.Walk && !session.IsFreeFlying;
             JumpBrake.Content = walking ? "Jump" : "Brake";
             FlightActions.Visibility = session.IsFreeFlying || session.Vehicle.Mode == TravelMode.Flight ? Visibility.Visible : Visibility.Collapsed;
-            Reticle.Visibility = active && (session.IsFreeFlying || _map.CameraRig is JourneyCameraRig.FirstPerson or JourneyCameraRig.Cockpit)
+            Reticle.Visibility = active && session.Follow && (session.IsFreeFlying || _map.CameraRig is JourneyCameraRig.FirstPerson or JourneyCameraRig.Cockpit)
                 ? Visibility.Visible : Visibility.Collapsed;
         }
         if (!active) return;

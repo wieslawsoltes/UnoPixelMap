@@ -112,13 +112,16 @@ public sealed partial class PixelMapControl
 
     /// <summary>Rotate the active first-person view or the vehicle's orbit camera.</summary>
     public void LookFreeRoam(double bearingDelta, double pitchDelta)
-        => TryLookFreeRoam(bearingDelta, pitchDelta);
+    {
+        if (!Journey.IsFreeRoaming || !double.IsFinite(bearingDelta) || !double.IsFinite(pitchDelta)) return;
+        Journey.Follow = true;
+        TryLookFreeRoam(bearingDelta, pitchDelta);
+    }
 
     private bool TryLookFreeRoam(double bearingDelta, double pitchDelta)
     {
-        if (!Journey.IsFreeRoaming) return false;
+        if (!Journey.IsFreeRoaming || !Journey.Follow) return false;
         if (!double.IsFinite(bearingDelta) || !double.IsFinite(pitchDelta)) return true;
-        Journey.Follow = true;
         if (_rig == JourneyCameraRig.NorthUp) CameraRig = JourneyCameraRig.Orbit;
         Journey.SetLook(Journey.LookBearing + bearingDelta, Journey.LookPitch + pitchDelta);
         return true;
@@ -126,7 +129,7 @@ public sealed partial class PixelMapControl
 
     private bool ZoomFreeRoam(double delta)
     {
-        if (!Journey.IsFreeRoaming) return false;
+        if (!Journey.IsFreeRoaming || !Journey.Follow) return false;
         if (!double.IsFinite(delta)) return true;
         if (Journey.IsFreeFlying)
         {
@@ -140,7 +143,6 @@ public sealed partial class PixelMapControl
         }
         double distance = _freeCameraDistance * Math.Pow(2, -delta * .5);
         if (double.IsFinite(distance)) _freeCameraDistance = Math.Max(.25, distance);
-        Journey.Follow = true;
         _wasTracking = false;
         UpdateRideCamera();
         return true;
@@ -252,7 +254,10 @@ public sealed partial class PixelMapControl
             if (key == VirtualKey.H) SoundCue();
             else if (key == VirtualKey.R && !repeated) Journey.Respawn();
             else if (key == VirtualKey.C && !repeated)
+            {
                 CameraRig = _rig is JourneyCameraRig.FirstPerson or JourneyCameraRig.Cockpit ? JourneyCameraRig.Chase : JourneyCameraRig.FirstPerson;
+                Journey.Follow = true;
+            }
             else ApplyFreeRoamKeys();
         }
         return true;

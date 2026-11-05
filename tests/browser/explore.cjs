@@ -156,6 +156,9 @@ async function open(browser, hash, phone = false) {
     const page = await context.newPage();
     await page.addInitScript(() => {
         window.pixelExploreGpu = {depthDraws: 0};
+        document.addEventListener("pointerdown", event => {
+            if (event.target === document.getElementById("uno-canvas")) window.pixelExplorePointer = event.pointerId;
+        }, {capture: true});
         const prototype = WebGL2RenderingContext.prototype;
         for (const name of ["drawElements", "drawElementsInstanced", "drawArrays", "drawArraysInstanced"]) {
             const original = prototype[name];
@@ -472,6 +475,7 @@ async function freeRoam(page) {
     const beforeDrag = await readCamera(page);
     await page.mouse.move(800, 400);
     await page.mouse.down({button: "right"});
+    await page.waitForFunction(() => document.getElementById("uno-canvas")?.hasPointerCapture(window.pixelExplorePointer));
     await page.mouse.move(850, 420, {steps: 5});
     await page.mouse.up({button: "right"});
     await page.waitForTimeout(250);
@@ -520,6 +524,21 @@ async function freeRoam(page) {
     await page.waitForTimeout(500);
     assert.equal((await readCamera(page)).zoom, 16.5,
         "A manual map flight detaches free-roam follow and remains at its destination");
+    await page.mouse.move(800, 400);
+    const detached = await readCamera(page);
+    await page.mouse.wheel(70, 45);
+    await page.waitForTimeout(350);
+    const detachedPan = await readCamera(page);
+    assert.equal(detachedPan.zoom, detached.zoom, "A detached game's trackpad pans the map without restoring follow");
+    assert.ok(detachedPan.latitude !== detached.latitude || detachedPan.longitude !== detached.longitude,
+        "Detached map panning changes geographic position");
+    await page.keyboard.down("Control");
+    await page.mouse.wheel(0, -50);
+    await page.keyboard.up("Control");
+    await see(page, /rendering.+?·\s*z17\.0\s*·/);
+    await page.waitForTimeout(350);
+    assert.equal((await readCamera(page)).zoom, 17,
+        "A detached game's pinch changes map zoom without returning to the physical rig");
 
     const carFrom = await startMode(page, 1, "Driving");
     await page.keyboard.down("w");
@@ -606,6 +625,52 @@ async function freeRoam(page) {
     await action(page, "Close journeys");
 }
 
+async function cameraOwnershipInput(cdp, page) {
+    const points = (spread, rotation = 0) => [
+        {id: 1, x: 195 - spread, y: 410 - rotation},
+        {id: 2, x: 195 + spread, y: 410 + rotation}
+    ];
+    await see(page, /rendering.+?·\s*z24\.0\s*·/);
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: points(40)});
+    try {
+        // A hardware Home key can replace the camera while touchscreen contacts
+        // remain down. Their old free-look baseline must stop owning the view.
+        await page.keyboard.press("Home");
+        await see(page, /rendering.+?·\s*z16\.5\s*·/);
+        await page.waitForTimeout(500);
+        const home = await readCamera(page);
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(70, 15)});
+        await page.waitForTimeout(350);
+        assert.deepEqual(await readCamera(page), home,
+            "Contacts held across Home cannot restore their previous camera baseline");
+    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+
+    await page.keyboard.press("c");
+    await see(page, /rendering.+?·\s*z24\.0\s*·/);
+    assert.equal((await readCamera(page)).zoom, 24,
+        "The game camera shortcut restores follow after a manual Home flight");
+
+    await page.keyboard.press("Home");
+    await see(page, /rendering.+?·\s*z16\.5\s*·/);
+    await page.waitForTimeout(500);
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: points(40)});
+    try {
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(65, 12)});
+        await page.waitForTimeout(200);
+        assert.ok((await readCamera(page)).zoom > 16.5,
+            "Fresh contacts can pinch the detached map after cancellation");
+        await page.keyboard.press("c");
+        await see(page, /rendering.+?·\s*z24\.0\s*·/);
+        await page.waitForTimeout(350);
+        const followed = await readCamera(page);
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(85, 28)});
+        await page.waitForTimeout(350);
+        assert.deepEqual(await readCamera(page), followed,
+            "Reattaching the game camera cancels an in-progress detached pinch and twist");
+    } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+    console.log("Held-touch Home flights, keyboard camera reattachment and pinch cancellation passed.");
+}
+
 async function mobileInput(context, page) {
     const cdp = await context.newCDPSession(page);
     const geometry = await pageGeometry(page);
@@ -626,6 +691,7 @@ async function mobileInput(context, page) {
     await action(page, "Open free roam game", true);
     const start = await startMode(page, 6, "Free flight", true);
     await page.waitForTimeout(200);
+    await cameraOwnershipInput(cdp, page);
     const climb = await page.getByRole("button", {name: "Free roam climb", exact: true}).boundingBox();
     assert.ok(climb?.width > 0 && climb?.height > 0, "The mobile climb button is visible");
     await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [

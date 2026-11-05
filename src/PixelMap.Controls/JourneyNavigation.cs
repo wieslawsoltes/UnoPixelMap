@@ -130,6 +130,7 @@ public sealed partial class PixelMapControl
     private void OnJourneyChanged()
     {
         if (!_active) return;
+        if (Journey.IsFreeRoaming && Journey.Follow && _motion.IsEnabled) StopMotion(invalidate: false);
         if (_freeRoamTerrainActive != Journey.IsFreeRoaming)
         {
             _freeRoamTerrainActive = Journey.IsFreeRoaming;

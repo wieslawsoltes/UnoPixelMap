@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using PixelMap.Rendering;
 using SkiaSharp;
 
@@ -17,6 +18,10 @@ internal static class GpuDepthChecks
         var triangleConstructor = triangle.GetConstructors(Members).Single();
         var evaluateDepth = triangle.GetMethod("EvaluateDepth", Members)!;
         var evaluate = triangle.GetMethod("Evaluate", Members)!;
+        var contains = triangle.GetMethod("Contains", Members)!;
+        var preparedPlanes = triangle.GetField("preparedPlanes", Members)!;
+        var size = typeof(Unsafe).GetMethod(nameof(Unsafe.SizeOf))!.MakeGenericMethod(triangle);
+        Assert((int)size.Invoke(null, null)! == 80, "Lazy depth planes increased per-triangle storage.");
         int comparisons = 0;
         foreach (bool perspective in new[] { false, true })
         foreach (bool terrain in new[] { false, true })
@@ -29,16 +34,27 @@ internal static class GpuDepthChecks
             if (reverse) (b, c) = (c, b);
             object value = triangleConstructor.Invoke([Vertex(a), Vertex(b), Vertex(c), terrain, perspective]);
             Assert((bool)triangle.GetField("Valid", Members)!.GetValue(value)!, "A depth fixture became degenerate.");
+            int prepared = (terrain || perspective ? 0 : 1) | (terrain || !perspective ? 0 : 2) | (terrain ? 0 : 4);
+            Assert((byte)preparedPlanes.GetValue(value)! == prepared, "A triangle eagerly prepared an unused depth plane.");
+            contains.Invoke(value, [20.5f, 21.5f]);
+            Assert((byte)preparedPlanes.GetValue(value)! == prepared, "Containment prepared interpolation coefficients.");
             foreach (var sample in new[] { new SKPoint(20.5f, 21.5f), new(39.17f, 48.83f), new(63.5f, 51.5f), new(10.25f, 97.75f) })
             {
                 EvaluateReference(a, b, c, sample, out float altitude, out float inverse, out float physical);
                 float actual = (float)evaluateDepth.Invoke(value, [sample.X, sample.Y, perspective])!;
+                prepared |= perspective ? 1 : 3;
+                Assert((byte)preparedPlanes.GetValue(value)! == prepared, "A depth query prepared unrelated height channels.");
                 Assert(Exact(actual, perspective ? inverse : altitude),
                     "Selecting the visible depth channel changed interpolation arithmetic.");
+                var gradients = Gradients(value);
+                Assert(Exact((float)evaluateDepth.Invoke(value, [sample.X, sample.Y, perspective])!, actual) &&
+                    gradients.SequenceEqual(Gradients(value)), "A cached interpolation plane was prepared again.");
                 if (terrain)
                 {
                     object[] arguments = [sample.X, sample.Y, 0f, 0f, 0f];
                     evaluate.Invoke(value, arguments);
+                    prepared = 7;
+                    Assert((byte)preparedPlanes.GetValue(value)! == prepared, "A terrain query omitted a required interpolation plane.");
                     Assert(Exact((float)arguments[2], altitude) && Exact((float)arguments[3], inverse) &&
                         Exact((float)arguments[4], physical), "Terrain depth or physical-height interpolation changed.");
                 }
@@ -53,12 +69,53 @@ internal static class GpuDepthChecks
             }
         }
         Console.WriteLine($"Passed {comparisons} exact GPU depth interpolation comparisons across projection, terrain, near-plane weights and winding.");
+        ClipCodes();
+
+        int[] Gradients(object value) => new[] { "inverseX", "inverseY", "altitudeX", "altitudeY", "rawX", "rawY" }
+            .Select(name => BitConverter.SingleToInt32Bits((float)triangle.GetField(name, Members)!.GetValue(value)!)).ToArray();
 
         object Vertex(SampleVertex sample)
         {
             object screen = Activator.CreateInstance(homogeneous, [sample.X, sample.Y, sample.W, sample.Z, 0f])!;
             return vertexConstructor.Invoke([screen, sample.Height, -1]);
         }
+    }
+
+    private static void ClipCodes()
+    {
+        var assembly = typeof(PixelMapRenderer).Assembly;
+        var homogeneous = assembly.GetType("PixelMap.Rendering.H")!;
+        var transform = assembly.GetType("PixelMap.Rendering.TileTransform")!;
+        var plane = transform.GetMethod("Plane", BindingFlags.Static | BindingFlags.NonPublic)!;
+        using var renderer = new PixelMapRenderer();
+        int comparisons = 0;
+        foreach (var camera in new[] { new MapCamera(0, 0, 16, 23, 55),
+            MapCamera.FromEye(0, 0, 1.7, 23, 90, 391, 233, viewDistanceMeters: 6000) })
+        {
+            using var frame = renderer.PrepareGpuFrame(391, 233, camera, [], pixelSize: 3);
+            object depth = typeof(GpuMapFrame).GetProperty("Depth", Members)!.GetValue(frame)!;
+            var type = depth.GetType();
+            var outCode = type.GetMethod("OutCode", Members)!;
+            object lens = type.GetField("lens", Members)!.GetValue(depth)!;
+            float near = (float)transform.GetProperty("Near", Members)!.GetValue(lens)!;
+            float far = (float)transform.GetProperty("Far", Members)!.GetValue(lens)!;
+            float width = (int)type.GetField("width", Members)!.GetValue(depth)!;
+            float height = (int)type.GetField("height", Members)!.GetValue(depth)!;
+            foreach (float weight in new[] { -1f, -0f, 0f, MathF.BitDecrement(near), near, MathF.BitIncrement(near),
+                1f, MathF.BitDecrement(far), far, MathF.BitIncrement(far), float.NaN, float.NegativeInfinity, float.PositiveInfinity })
+            foreach (float x in new[] { -.001f, -0f, 0f, .5f, 1f, 1.001f })
+            foreach (float y in new[] { -.001f, -0f, 0f, .5f, 1f, 1.001f })
+            {
+                object vertex = Activator.CreateInstance(homogeneous, [x * width * weight, y * height * weight, weight, 0f, 0f])!;
+                int expected = 0;
+                for (int side = 0; side < 6; side++)
+                    if ((float)plane.Invoke(null, [side, vertex, width, height, far, near])! < 0) expected |= 1 << side;
+                Assert((int)outCode.Invoke(depth, [vertex, far])! == expected,
+                    "Direct clipping codes changed a homogeneous plane or exact boundary.");
+                comparisons++;
+            }
+        }
+        Console.WriteLine($"Passed {comparisons} exact direct clipping-code comparisons across viewport and near/far boundaries.");
     }
 
     private static SampleVertex Point(float x, float y, float weight, float altitude, float height) =>

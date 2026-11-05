@@ -433,8 +433,10 @@ internal static class GlMapShaders
             vec2 delta = q - p;
             vec2 direction = length(delta) > 0.0001 ? normalize(delta) : vec2(1.0, 0.0);
             vec2 normal = vec2(-direction.y, direction.x);
-            bool endPoint = gl_VertexID == 1 || gl_VertexID == 2 || gl_VertexID == 4;
-            bool positive = gl_VertexID == 2 || gl_VertexID == 4 || gl_VertexID == 5;
+            // B, C, A, D retains the two original ABC / ACD triangles and their
+            // winding while sharing each endpoint's clipping work across the strip.
+            bool endPoint = gl_VertexID < 2;
+            bool positive = gl_VertexID == 1 || gl_VertexID == 3;
             vec2 point = (endPoint ? q + direction * 2.0 : p - direction * 2.0) +
                 normal * (positive ? 1.5 : -1.5);
             gl_Position = vec4(point.x * 2.0 / uArtSize.x - 1.0,
