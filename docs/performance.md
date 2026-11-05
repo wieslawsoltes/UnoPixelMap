@@ -21,9 +21,37 @@ The native call probe uses an identical single-tile, five-draw fixture in both v
 | Draw calls | 5 | 5 |
 | Uploaded bytes | 728 | 728 |
 
-Capability queries are unchanged. The moving-camera uniform reduction is 88.9% in this fixture. These counts quantify submission work independently of end-to-end browser latency.
+Capability checks run in both versions. The moving-camera uniform reduction is 88.9% in this fixture. These counts quantify submission work independently of end-to-end browser latency.
 
 The full 48-case native GLES suite matches the preceding implementation in all 192 CPU, GPU, artwork and RGBA hash fields. Sixteen new shared-context cases verify exact restored state and pixels across all four render styles, photograph blending, both presentation paths and forced framebuffer resizing. An injected uniform-upload failure restores host state and produces exact pixels after retry. The depth regression adds 128 exact interpolation comparisons. Another eight deterministic moving scenes preserve all 128 dense-query hashes and 128 overlay hashes across perspective, orthographic, flat/relief terrain and block rendering styles.
+
+The full CPU visual comparison also preserves all 232 cases, including 3,712 moving-frame hashes, 232 cold-frame hashes and 232 aggregate sequence hashes. Both runs use identical offline inputs, OpenAI Sans, a 1100×650 viewport and .NET 10.0.14 with tiered compilation disabled. Assembly hashes recorded before and after execution match.
+
+### Paired browser measurements
+
+The paired comparison uses the exact Release `InterpreterAndAOT` Pages artifacts for `3777867` and `0b47e25` on one GitHub Actions runner. Chromium 156.0.8078.4 runs in-process SwiftShader on an AMD EPYC 7763 with affinity 0–2, a 1200×780 viewport and DPR 1. Each of ten scenarios runs the previous artifact followed by the optimized artifact, in fresh Node and Chromium processes. Both warm for two seconds and request an eight-second measurement. Separate passes collect CPU profiles. External providers are blocked and bundled data supplies the scene.
+
+All twenty cases complete successfully. Actual moving windows span 8,002.0–8,151.4 ms previously and 8,003.2–8,157.5 ms after optimization. Rates use each actual interval. Every timed moving readback uses pixel size 4 at 300×166. Held native keys advance the simulation, and final moving poses can differ between versions. Completed artwork copies measure pipeline completion, rAF measures browser scheduling, and final display presentation is outside the probe. Task CPU uses main-thread `threadTicks` and excludes software-GPU worker CPU.
+
+| Moving scenario | Task CPU, previous → optimized | Completed art copies/s, previous → optimized | rAF callbacks/s, previous → optimized |
+| --- | ---: | ---: | ---: |
+| Walking, first person | 37.00% → 32.70% | 3.965 → 3.998 | 51.17 → 54.85 |
+| Walking, chase | 40.05% → 41.27% | 6.258 → 6.497 | 53.62 → 53.94 |
+| Driving, chase | 55.15% → 55.20% | 4.371 → 4.122 | 46.33 → 46.85 |
+| Driving, first person | 51.62% → 52.34% | 3.067 → 3.081 | 41.22 → 44.24 |
+| Free flight | 41.19% → 41.56% | 3.624 → 3.623 | 52.74 → 52.47 |
+
+First-person walking task CPU falls from 2,986.3 to 2,617.2 ms, a 12.36% reduction in the measured windows and an 11.61% reduction after duration normalization. Its rAF interval p95 falls from 50.0 to 33.3 ms. Long-task count falls from 32 to 14, with cumulative duration falling from 2,093 to 851 ms. The other four moving task CPU totals rise by 0.05–3.15%. Each build completes 172 timed artwork copies across the five moving cases. These individual paired samples show mixed end-to-end throughput.
+
+All 344 copies across both builds follow a signaled zero-timeout fence poll. Transfer queues peak at two, with zero overwrites, abandoned transfers or positive-timeout polls. All ten stationary samples across the pair record zero foreground GL draws, transfers, artwork copies and long tasks. Idle relief runs near 60.1 rAF callbacks/s with 1.20% and 1.39% task CPU. The earlier local attempts had two baseline browser crashes and an idle-relief CPU spike. Those attempts are excluded from this paired comparison, and the spike's cause remains unassigned.
+
+Eight of ten initial screenshots match directly, and all five final stationary screenshots match. The car-chase startup difference exactly cross-matches the retained stationary-car adaptive variants in both builds. Relief startup images differ and settle to identical final images. The CSV distinguishes capped startup pixel-size history from actual timed readback sizes and records the input-window poses.
+
+The separate moving profiles contain anonymous AOT/WebAssembly work and shared-context GL queries. Sampled `getParameter` and `getError` self time totals about 205–216 ms per roughly 8.2-second profile. Uniform self time totals 7.8–14.4 ms. Stripped production WASM names limit attribution to individual managed methods. Optimized timed copy-call p95 ranges from 1.9 to 4.5 ms, while submit-to-copy p95 ranges from 341 to 850 ms. Free flight includes one 42.5 ms copy outlier and a maximum rAF gap that rises from 166.7 to 283.4 ms. Physical-GPU and Safari/iOS timing remain unmeasured. [Complete browser measurements, including all twenty paired CI rows](play-browser-benchmarks.csv)
+
+The opt-in `play-benchmark` job runs when a push message contains `[play-benchmark]` or the manual workflow's `play_benchmark` input is enabled. `baseline_run_id` can select a previous successful main run with an unexpired Pages artifact. The job verifies artifact source metadata and boot-resource hashes, runs both builds serially, and uploads raw reports, screenshots, profiles and provenance. The common play harness SHA-256 is `dc6a1801bca4600978e2f3b544c774ab59c9b77abb95d59f34649ce6597dc239`.
+
+Workflow `42030771844` passes the native checks, AOT publish, browser verification, paired benchmark and Pages deployment. Pages artifact `13417530493` has ZIP SHA-256 `f450086fa2259da7f333ac8003ddae44419becaec67059a15bcead5f41817362`. Its native WASM SHA-256 is `9010404fea52d0b0edc042e380b7b7b5c70473ce7537e53474a7697e8c171b8f`. After deployment, all 142 non-hidden uncompressed live files match that artifact byte-for-byte. Evidence artifact `13417148446`, `atlas-play-performance`, has ZIP SHA-256 `e78be10ed9d8ec3f546f27050ac3c812f489e3c0fea7379b126d4f8f0ac008e4`. [Verified build, benchmark evidence and Pages deployment](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42030771844)
 
 ### Diagnostic managed preparation measurements
 
@@ -40,9 +68,9 @@ The native probe uses .NET 10.0.14 with tiered compilation disabled, two managed
 | Orbital camera | 22.85 ms | 14.17 ms | 15.05 ms | 22.89 ms |
 | Orthographic camera | 16.08 ms | 11.85 ms | 11.25 ms | 16.03 ms |
 
-The six physical-camera cases have lower preparation medians in both orders. Orbital and orthographic results reverse between runs, and individual samples have substantial scheduling variation. These local latency magnitudes remain diagnostic. The independent depth-construction samples measure a separate reconstruction and cannot be added to or subtracted from the complete-preparation medians. Geometry, bin memberships and label-query counts match frame by frame.
+The six physical-camera cases have lower preparation medians in both orders. Orbital and orthographic results reverse between runs, and individual samples have substantial scheduling variation. These local latency magnitudes remain diagnostic. Complete-preparation and independent depth-reconstruction medians describe separate samples. Geometry, bin memberships and label-query counts match frame by frame.
 
-The CSV retains all 768 timing records, allocation counts, exact renderer hashes, both execution orders and separately collected dense-query and overlay hashes. The first harness executable was overwritten during a metadata and trace-instrumentation revision, so its binary hash is explicitly unavailable. The repeat records its exact harness hash. First-run resolved pixel size is identified from the unchanged renderer's repeat. [All managed preparation and depth samples](play-depth-benchmarks.csv)
+The CSV retains all 768 timing records, allocation counts, exact renderer hashes, both execution orders and separately collected dense-query and overlay hashes. The first harness executable was overwritten during a metadata and trace-instrumentation revision, so its binary hash is explicitly unavailable. The repeat records its exact harness hash. First-run resolved pixel size is inferred from the repeat with the same renderer hash. [All managed preparation and depth samples](play-depth-benchmarks.csv)
 
 ## Play-mode rendering
 
