@@ -2,6 +2,48 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
+## GPU submission and depth queries
+
+The next optimization pass is implemented in `43940e051a5b6bcd5c8eda9c39d5775ae482036f`. The workflow correction in `0b47e25af6e47dc66c1d9fc9483bab54b1fbd348` moves a runner-specific environment value into step scope. Both commits contain the same application source. This pass compares against the previously deployed application at `3777867da454f21ef264c72adb1a65b99ddca95a`.
+
+- Each renderer-owned shader program retains its uniform locations and last submitted values. Typed raw-bit comparisons preserve signed zero and distinct NaN payloads. Unchanged uniforms and inactive locations skip native calls. A failed frame invalidates the caches before retry.
+- Frame drawing and shared-context restoration use one final GL error checkpoint. Depth clearing uses `ClearBuffer`, preserving the host's clear-depth value directly. Read-framebuffer capture is scoped to photograph copies, and renderbuffer capture is scoped to framebuffer allocation. Terrain texture filters update when the sampling mode changes. Uno's shared context still restores all modified state, including front-face direction used by building shading.
+- Building depth triangles prepare the inverse-W plane for perspective views and the altitude plane for orthographic views. Terrain retains its full interpolation data for picking, physical heights and overlays. Depth-only queries evaluate the required channel with the original floating-point operation order. Query loops access retained triangle storage by reference.
+
+The native call probe uses an identical single-tile, five-draw fixture in both versions. Its moving step changes the camera while keeping the source data and output dimensions fixed.
+
+| Calls or bytes per frame | Previous implementation | Optimized implementation |
+| --- | ---: | ---: |
+| Uniform uploads, identical warm frame | 54 | 0 |
+| Uniform uploads, moving camera | 54 | 6 |
+| GL error queries | 2 | 1 |
+| Integer, Boolean and float state queries | 29 | 26 |
+| Draw calls | 5 | 5 |
+| Uploaded bytes | 728 | 728 |
+
+Capability queries are unchanged. The moving-camera uniform reduction is 88.9% in this fixture. These counts quantify submission work independently of end-to-end browser latency.
+
+The full 48-case native GLES suite matches the preceding implementation in all 192 CPU, GPU, artwork and RGBA hash fields. Sixteen new shared-context cases verify exact restored state and pixels across all four render styles, photograph blending, both presentation paths and forced framebuffer resizing. An injected uniform-upload failure restores host state and produces exact pixels after retry. The depth regression adds 128 exact interpolation comparisons. Another eight deterministic moving scenes preserve all 128 dense-query hashes and 128 overlay hashes across perspective, orthographic, flat/relief terrain and block rendering styles.
+
+### Diagnostic managed preparation measurements
+
+The native probe uses .NET 10.0.14 with tiered compilation disabled, two managed processors, affinity 0–1 and a 1200×680 logical viewport requesting pixel size 4. Each case warms eight frames and measures 24 moving frames. The first pair runs the previous renderer before the optimized renderer. The repeat reverses that order. The table reports the upper middle order statistic for complete `PrepareGpuFrame` calls.
+
+| Scene | Previous, first pair | Optimized, first pair | Previous, reverse pair | Optimized, reverse pair |
+| --- | ---: | ---: | ---: | ---: |
+| Walking with relief | 35.87 ms | 22.42 ms | 44.36 ms | 28.88 ms |
+| Flight with relief | 53.99 ms | 35.61 ms | 45.81 ms | 41.41 ms |
+| Walking on flat terrain | 33.23 ms | 15.85 ms | 19.77 ms | 15.96 ms |
+| Flight on flat terrain | 42.14 ms | 31.81 ms | 44.74 ms | 38.20 ms |
+| Walking in Minecraft style | 50.29 ms | 36.66 ms | 54.75 ms | 54.59 ms |
+| Flight in Roblox style | 47.26 ms | 44.19 ms | 48.84 ms | 44.47 ms |
+| Orbital camera | 22.85 ms | 14.17 ms | 15.05 ms | 22.89 ms |
+| Orthographic camera | 16.08 ms | 11.85 ms | 11.25 ms | 16.03 ms |
+
+The six physical-camera cases have lower preparation medians in both orders. Orbital and orthographic results reverse between runs, and individual samples have substantial scheduling variation. These local latency magnitudes remain diagnostic. The independent depth-construction samples measure a separate reconstruction and cannot be added to or subtracted from the complete-preparation medians. Geometry, bin memberships and label-query counts match frame by frame.
+
+The CSV retains all 768 timing records, allocation counts, exact renderer hashes, both execution orders and separately collected dense-query and overlay hashes. The first harness executable was overwritten during a metadata and trace-instrumentation revision, so its binary hash is explicitly unavailable. The repeat records its exact harness hash. First-run resolved pixel size is identified from the unchanged renderer's repeat. [All managed preparation and depth samples](play-depth-benchmarks.csv)
+
 ## Play-mode rendering
 
 The play-mode changes landed in `6757c313a5645e610e7ed7c9d1f8b04dc7788a03` and `3777867da454f21ef264c72adb1a65b99ddca95a`. The comparison below uses the original application at `11188d0c265c9688ca8a169200e2f1573ec9fbeb` and the final implementation at `3777867`.
