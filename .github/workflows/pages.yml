@@ -91,7 +91,6 @@ jobs:
       contents: read
       actions: read
     env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/play-browsers
       PIXELMAP_BROWSER_ARGS: '["--in-process-gpu","--disable-gpu-watchdog","--renderer-process-limit=1"]'
       CPU_PROFILE_CASES: map-idle-relief,walk-stationary-firstperson,car-moving-chase,freeflight-moving
     steps:
@@ -218,6 +217,8 @@ jobs:
           PY
       - name: Install the pinned browser and record the runner
         id: environment
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/play-browsers
         run: |
           npm ci --prefix tests/browser
           (cd tests/browser && npx playwright install --with-deps chromium --only-shell)
