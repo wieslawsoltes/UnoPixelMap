@@ -3,6 +3,7 @@
 // PROFILE_CASES selects comma-separated names. PROFILE_DURATION_MS defaults to 8000.
 // CPU_PROFILE_CASES selects separate CPU profiling passes, or "none" to omit them.
 // PIXELMAP_REVISION records the deployed artifact revision, independently of this harness.
+// PIXELMAP_BROWSER_ARGS accepts additional Chromium flags, recorded in each report.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -164,7 +165,8 @@ async function main() {
     // Load after setting the evidence directory. Public activation and source
     // isolation are shared with the end-to-end exploration checks.
     const ui = require("./explore.cjs");
-    const browserArgs = ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"];
+    const browserArgs = ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
+        ...JSON.parse(process.env.PIXELMAP_BROWSER_ARGS || "[]")];
     const report = {
         revision: process.env.PIXELMAP_REVISION || null, base, capturedAtUtc: new Date().toISOString(),
         viewport: {width: 1200, height: 780}, deviceScaleFactor: 1,

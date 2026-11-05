@@ -96,6 +96,7 @@ NavigationChecks.Run();
 PerspectiveChecks.Run();
 TerrainCameraChecks.Run();
 TerrainRenderingChecks.Run();
+GpuDepthChecks.Run();
 TerrainNavigationChecks.Run();
 RingFixtures.Run();
 RenderStyleChecks.Run();

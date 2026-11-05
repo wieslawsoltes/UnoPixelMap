@@ -25,6 +25,7 @@ internal static class GlTerrainChecks
 
     internal static void Run(string[] arguments)
     {
+        GpuSubmissionChecks.Run();
         string output = Path.GetFullPath(arguments.FirstOrDefault(a => a.StartsWith("--gpu-output=", StringComparison.Ordinal))?
             ["--gpu-output=".Length..] ?? Path.Combine(Path.GetTempPath(), "PixelMap.GpuTerrain"));
         Directory.CreateDirectory(output);

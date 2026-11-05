@@ -4,6 +4,15 @@ on:
     branches: [main]
     paths-ignore: ['docs/**', 'README.md']
   workflow_dispatch:
+    inputs:
+      play_benchmark:
+        description: Compare play rendering with a previous Pages artifact
+        type: boolean
+        default: false
+      baseline_run_id:
+        description: Optional baseline run ID, otherwise the previous successful main run
+        type: string
+        required: false
 permissions:
   contents: read
 concurrency:
@@ -71,6 +80,204 @@ jobs:
           name: atlas-browser-screens
           path: ${{ runner.temp }}/screens
           if-no-files-found: ignore
+  play-benchmark:
+    needs: browser
+    if: >-
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-benchmark]')) ||
+      (github.event_name == 'workflow_dispatch' && inputs.play_benchmark)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: read
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/play-browsers
+      PIXELMAP_BROWSER_ARGS: '["--in-process-gpu","--disable-gpu-watchdog","--renderer-process-limit=1"]'
+      CPU_PROFILE_CASES: map-idle-relief,walk-stationary-firstperson,car-moving-chase,freeflight-moving
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select exact baseline and candidate artifacts
+        id: artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASELINE_RUN_INPUT: ${{ inputs.baseline_run_id }}
+        run: |
+          set -euo pipefail
+          metadata="$RUNNER_TEMP/play-metadata"
+          mkdir -p "$metadata" "$RUNNER_TEMP/play-evidence"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > "$metadata/candidate-run.json"
+          baseline_run="$BASELINE_RUN_INPUT"
+          if [ -z "$baseline_run" ]; then
+            gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/pages.yml/runs" \
+              -f branch=main -f status=success -f per_page=50 > "$metadata/runs.json"
+            baseline_run=$(python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          runs = json.loads((Path(os.environ['RUNNER_TEMP']) / 'play-metadata/runs.json').read_text())
+          previous = next((r for r in runs['workflow_runs'] if r['id'] != int(os.environ['GITHUB_RUN_ID'])), None)
+          if previous is None:
+              raise SystemExit('No previous successful main Pages run is available')
+          print(previous['id'])
+          PY
+            )
+          fi
+          if [[ ! "$baseline_run" =~ ^[0-9]+$ ]]; then
+            echo 'The baseline run ID must contain only digits'
+            exit 1
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$baseline_run" > "$metadata/baseline-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$baseline_run/artifacts" > "$metadata/baseline-artifacts.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" > "$metadata/candidate-artifacts.json"
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          metadata = root / 'play-metadata'
+          candidate = json.loads((metadata / 'candidate-run.json').read_text())
+          assert candidate['id'] == int(os.environ['GITHUB_RUN_ID'])
+          assert candidate['head_sha'] == os.environ['GITHUB_SHA']
+          provenance = {}
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              for variant in ('baseline', 'candidate'):
+                  run = json.loads((metadata / f'{variant}-run.json').read_text())
+                  assert run['workflow_id'] == candidate['workflow_id']
+                  assert run['repository']['id'] == candidate['repository']['id']
+                  assert run['head_branch'] == 'main'
+                  assert re.fullmatch('[0-9a-f]{40}', run['head_sha'])
+                  if variant == 'baseline':
+                      assert run['conclusion'] == 'success' and run['id'] != candidate['id']
+                  artifacts = json.loads((metadata / f'{variant}-artifacts.json').read_text())['artifacts']
+                  matches = [a for a in artifacts if a['name'] == 'github-pages' and not a['expired']]
+                  assert len(matches) == 1, f'Run {run["id"]} must have one unexpired Pages artifact'
+                  artifact = matches[0]
+                  assert artifact['workflow_run']['head_sha'] == run['head_sha']
+                  assert re.fullmatch('sha256:[0-9a-f]{64}', artifact['digest'])
+                  provenance[variant] = {'run_id': run['id'], 'source_sha': run['head_sha'],
+                      'run_url': run['html_url'], 'artifact_id': artifact['id'],
+                      'artifact_digest': artifact['digest'], 'artifact_size_bytes': artifact['size_in_bytes']}
+                  output.write(f'{variant}_run_id={run["id"]}\n')
+                  output.write(f'{variant}_artifact_id={artifact["id"]}\n')
+                  output.write(f'{variant}_sha={run["head_sha"]}\n')
+          (root / 'play-evidence/provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.artifacts.outputs.baseline_artifact_id }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.artifacts.outputs.baseline_run_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/play-baseline-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ steps.artifacts.outputs.candidate_artifact_id }}
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.artifacts.outputs.candidate_run_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/play-candidate-artifact
+      - name: Verify and unpack both published applications
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, os, re, tarfile
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          evidence = root / 'play-evidence/provenance.json'
+          provenance = json.loads(evidence.read_text())
+          for variant in ('baseline', 'candidate'):
+              archive = root / f'play-{variant}-artifact/artifact.tar'
+              site = root / f'play-sites/{variant}/UnoPixelMap'
+              site.mkdir(parents=True)
+              with tarfile.open(archive) as package:
+                  package.extractall(site, filter='data')
+              configs = list(site.glob('package_*/uno-config.js'))
+              assert len(configs) == 1
+              config = configs[0].read_text()
+              assert configs[0].parent.name + '/uno-bootstrap.js' in (site / 'index.html').read_text()
+              mode = re.search(r'\["UNO_BOOTSTRAP_MONO_RUNTIME_MODE"\]\s*=\s*"([^"]+)"', config)
+              assert mode and mode.group(1) == 'InterpreterAndAOT'
+              loader = re.search(r'config\.dotnet_js_filename\s*=\s*"([\w.-]+)"', config).group(1)
+              text = (site / '_framework' / loader).read_text()
+              boot = json.loads(text.split('/*json-start*/', 1)[1].split('/*json-end*/', 1)[0])
+              resources = []
+              for group, entries in boot['resources'].items():
+                  if not isinstance(entries, list):
+                      continue
+                  for entry in entries:
+                      path = (site / '_framework' / entry['name']).resolve()
+                      assert path.is_relative_to(site.resolve())
+                      digest = hashlib.sha256(path.read_bytes()).digest()
+                      if 'hash' in entry:
+                          assert entry['hash'] == 'sha256-' + base64.b64encode(digest).decode(), entry['name']
+                      resources.append({'group': group, 'name': entry['name'], 'sha256': digest.hex()})
+              provenance[variant].update({'runtime_mode': mode.group(1), 'resources': resources,
+                  'index_sha256': hashlib.sha256((site / 'index.html').read_bytes()).hexdigest(),
+                  'config_sha256': hashlib.sha256(config.encode()).hexdigest(),
+                  'loader_sha256': hashlib.sha256(text.encode()).hexdigest()})
+          evidence.write_text(json.dumps(provenance, indent=2) + '\n')
+          PY
+      - name: Install the pinned browser and record the runner
+        id: environment
+        run: |
+          npm ci --prefix tests/browser
+          (cd tests/browser && npx playwright install --with-deps chromium --only-shell)
+          python3 - <<'PY'
+          import hashlib, json, os, platform, subprocess
+          from pathlib import Path
+          browsers = list(Path(os.environ['PLAYWRIGHT_BROWSERS_PATH']).rglob('chrome-headless-shell'))
+          assert len(browsers) == 1 and browsers[0].is_file()
+          browser = browsers[0]
+          affinity = ','.join(map(str, sorted(os.sched_getaffinity(0))[:3]))
+          record = {'platform': platform.platform(), 'cpu_affinity': affinity,
+              'cpu_description': subprocess.check_output(['lscpu'], text=True),
+              'node': subprocess.check_output(['node', '--version'], text=True).strip(),
+              'browser': subprocess.check_output([str(browser), '--version'], text=True).strip(),
+              'browser_sha256': hashlib.sha256(browser.read_bytes()).hexdigest(),
+              'extra_browser_args': json.loads(os.environ['PIXELMAP_BROWSER_ARGS']),
+              'protocol': 'Each scenario runs baseline then candidate in fresh browser processes on the same runner.'}
+          for name in ('play-performance.cjs', 'performance.cjs', 'explore.cjs'):
+              record[name + '_sha256'] = hashlib.sha256((Path('tests/browser') / name).read_bytes()).hexdigest()
+          (Path(os.environ['RUNNER_TEMP']) / 'play-evidence/environment.json').write_text(json.dumps(record, indent=2) + '\n')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'browser_path={browser}\naffinity={affinity}\n')
+          PY
+      - name: Measure both artifacts with identical play workloads
+        env:
+          CHROMIUM_PATH: ${{ steps.environment.outputs.browser_path }}
+          PLAY_AFFINITY: ${{ steps.environment.outputs.affinity }}
+          BASELINE_SHA: ${{ steps.artifacts.outputs.baseline_sha }}
+          CANDIDATE_SHA: ${{ steps.artifacts.outputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/play-evidence"
+          python3 -m http.server 8100 --bind 127.0.0.1 --directory "$RUNNER_TEMP/play-sites" > "$evidence/server.log" 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          status=0
+          for scenario in map-idle-default map-idle-relief walk-stationary-firstperson \
+            walk-moving-firstperson walk-moving-chase car-stationary-chase car-moving-chase \
+            car-moving-firstperson freeflight-stationary freeflight-moving; do
+            for variant in baseline candidate; do
+              revision="$BASELINE_SHA"
+              if [ "$variant" = candidate ]; then revision="$CANDIDATE_SHA"; fi
+              output="$evidence/$variant/$scenario"
+              mkdir -p "$output"
+              if ! PIXELMAP_REVISION="$revision" PROFILE_CASES="$scenario" \
+                taskset -c "$PLAY_AFFINITY" node tests/browser/play-performance.cjs \
+                "http://127.0.0.1:8100/$variant/UnoPixelMap/" "$output" > "$output/run.log" 2>&1; then
+                status=1
+              fi
+              cat "$output/run.log"
+            done
+          done
+          exit "$status"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: atlas-play-performance
+          path: ${{ runner.temp }}/play-evidence
+          if-no-files-found: warn
+          retention-days: 30
   deploy:
     needs: verify
     runs-on: ubuntu-latest

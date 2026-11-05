@@ -1,6 +1,7 @@
 using SkiaSharp;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 
 namespace PixelMap.Rendering;
 
@@ -85,9 +86,8 @@ internal sealed class GpuSceneDepth
         float sampleY = y + .5f;
         if (sample.SurfaceIsTerrain)
         {
-            var triangle = triangles[sample.TerrainTriangle];
-            triangle.Evaluate(sx, sy, out float altitude, out float inverse, out _);
-            nearest = perspective ? inverse : altitude;
+            ref readonly var triangle = ref CollectionsMarshal.AsSpan(triangles)[sample.TerrainTriangle];
+            nearest = triangle.EvaluateDepth(sx, sy, perspective);
             sampleY = sy;
         }
         if (!perspective) return nearest > pixelsPerMeter * altitudeMeters;
@@ -103,7 +103,8 @@ internal sealed class GpuSceneDepth
         if ((uint)x >= (uint)width || (uint)y >= (uint)height) return false;
         var sample = Sample(x, y);
         if (sample.TerrainTriangle < 0) return false;
-        triangles[sample.TerrainTriangle].Evaluate(x + .5f, y + .5f, out altitude, out inverse, out physicalHeight);
+        CollectionsMarshal.AsSpan(triangles)[sample.TerrainTriangle].Evaluate(
+            x + .5f, y + .5f, out altitude, out inverse, out physicalHeight);
         return float.IsFinite(altitude) && inverse > 0;
     }
 
@@ -115,24 +116,25 @@ internal sealed class GpuSceneDepth
         float nearest = float.NegativeInfinity, terrainDepth = float.NegativeInfinity;
         int terrainIndex = -1;
         bool surfaceIsTerrain = false, hasSurface = false;
+        var preparedTriangles = CollectionsMarshal.AsSpan(triangles);
         if (cells[(y / CellSize) * columns + x / CellSize] is { } candidates)
             foreach (int primitive in candidates)
             {
-                float altitude, inverse;
+                float depth;
                 bool isTerrain;
                 if (primitive >= 0)
                 {
-                    var triangle = triangles[primitive];
+                    ref readonly var triangle = ref preparedTriangles[primitive];
                     if (!triangle.Contains(sx, sy)) continue;
-                    triangle.Evaluate(sx, sy, out altitude, out inverse, out _);
+                    depth = triangle.EvaluateDepth(sx, sy, perspective);
                     isTerrain = triangle.Terrain;
                 }
                 else
                 {
-                    if (!edges[~primitive].TrySample(x, y, out altitude, out inverse)) continue;
+                    if (!edges[~primitive].TrySample(x, y, out float altitude, out float inverse)) continue;
+                    depth = perspective ? inverse : altitude;
                     isTerrain = false;
                 }
-                float depth = perspective ? inverse : altitude;
                 if (!float.IsFinite(depth)) continue;
                 if (isTerrain && depth >= terrainDepth)
                 {
@@ -325,7 +327,7 @@ internal sealed class GpuSceneDepth
 
     private void AddProjectedTriangle(in Vertex a, in Vertex b, in Vertex c, bool terrain)
     {
-        var triangle = new Triangle(a, b, c, terrain);
+        var triangle = new Triangle(a, b, c, terrain, perspective);
         if (!triangle.Valid) return;
         int index = triangles.Count;
         triangles.Add(triangle);
@@ -394,7 +396,7 @@ internal sealed class GpuSceneDepth
         internal readonly bool Terrain, Valid;
         internal readonly float Left, Top, Right, Bottom;
 
-        internal Triangle(in Vertex va, in Vertex vb, in Vertex vc, bool terrain)
+        internal Triangle(in Vertex va, in Vertex vb, in Vertex vc, bool terrain, bool perspective)
         {
             a = va.Screen.Point; b = vb.Screen.Point; c = vc.Screen.Point;
             Terrain = terrain;
@@ -404,12 +406,15 @@ internal sealed class GpuSceneDepth
             float determinant = dx1 * dy2 - dx2 * dy1;
             Valid = float.IsFinite(determinant) && Math.Abs(determinant) >= .00001f;
             float ai = 1 / va.Screen.W, bi = 1 / vb.Screen.W, ci = 1 / vc.Screen.W;
+            // Orthographic transforms keep W=1. Models need only the visible depth
+            // channel, while terrain retains height planes for picking and overlays.
             inverse = ai;
-            (inverseX, inverseY) = Plane(ai, bi, ci);
+            (inverseX, inverseY) = terrain || perspective ? Plane(ai, bi, ci) : default;
             altitude = va.Screen.Z * ai;
-            (altitudeX, altitudeY) = Plane(altitude, vb.Screen.Z * bi, vc.Screen.Z * ci);
+            (altitudeX, altitudeY) = terrain || !perspective
+                ? Plane(altitude, vb.Screen.Z * bi, vc.Screen.Z * ci) : default;
             raw = va.Height * ai;
-            (rawX, rawY) = Plane(raw, vb.Height * bi, vc.Height * ci);
+            (rawX, rawY) = terrain ? Plane(raw, vb.Height * bi, vc.Height * ci) : default;
             (float X, float Y) Plane(float x, float y, float z) =>
                 (((y - x) * dy2 - (z - x) * dy1) / determinant, (dx1 * (z - x) - dx2 * (y - x)) / determinant);
         }
@@ -438,6 +443,15 @@ internal sealed class GpuSceneDepth
             float reciprocal = 1 / iw;
             z = (altitude + altitudeX * ox + altitudeY * oy) * reciprocal;
             physicalHeight = (raw + rawX * ox + rawY * oy) * reciprocal;
+        }
+
+        internal float EvaluateDepth(float x, float y, bool perspective)
+        {
+            float ox = x - a.X, oy = y - a.Y;
+            float iw = inverse + inverseX * ox + inverseY * oy;
+            if (perspective) return iw;
+            float reciprocal = 1 / iw;
+            return (altitude + altitudeX * ox + altitudeY * oy) * reciprocal;
         }
     }
 

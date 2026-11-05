@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Silk.NET.OpenGL;
 using SkiaSharp;
 
@@ -30,6 +31,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private uint terrainArray, terrainInstanceBuffer, terrainArtworkArray, terrainHeightArray;
     private uint framebuffer, artworkTexture, depthBuffer, photographTexture, overlayTexture;
     private int artWidth, artHeight, overlayWidth, overlayHeight;
+    private int terrainArtworkFilter;
     private PixelPalette? uploadedPalette;
     private long generation;
     private bool disposed;
@@ -151,57 +153,84 @@ public sealed unsafe class GlMapRenderer : IDisposable
         var state = new GlState(gl, embedded);
         if (artworkOnly && (state.ViewportWidth != frame.ArtWidth || state.ViewportHeight != frame.ArtHeight))
             throw new InvalidOperationException("The artwork destination viewport must match the frame's art-pixel dimensions.");
-        bool completed = false;
         try
         {
-            ConfigureTransferState();
-            gl.Disable(EnableCap.Blend);
-            gl.Disable(EnableCap.CullFace);
-            gl.Disable(EnableCap.ScissorTest);
-            gl.Disable(EnableCap.StencilTest);
-            gl.Disable(EnableCap.Dither);
-            gl.Disable(EnableCap.RasterizerDiscard);
-            gl.Disable(EnableCap.PolygonOffsetFill);
-            gl.Disable(EnableCap.SampleAlphaToCoverage);
-            if (!embedded) gl.Disable(EnableCap.FramebufferSrgb);
-            gl.FrontFace(FrontFaceDirection.Ccw);
-            gl.ColorMask(true, true, true, true);
-            if (embedded) gl.DepthRange(0f, 1f); else gl.DepthRange(0d, 1d);
-            EnsureFramebuffer(frame.ArtWidth, frame.ArtHeight);
-            UploadPalette(frame.Palette);
-            gl.BindFramebuffer(FramebufferTarget.Framebuffer, framebuffer);
-            gl.Viewport(0, 0, (uint)artWidth, (uint)artHeight);
-            gl.Disable(EnableCap.DepthTest);
-            gl.DepthMask(false);
-            DrawBackground(frame);
-            gl.Enable(EnableCap.DepthTest);
-            gl.DepthMask(true);
-            gl.DepthFunc(DepthFunction.Lequal);
-            if (embedded) gl.ClearDepth(1f); else gl.ClearDepth(1d);
-            gl.Clear(ClearBufferMask.DepthBufferBit);
-            DrawTerrain(frame);
-
-            float photographOpacity = frame.PreservePhotograph
-                ? (float)(209d / 255 * (1 - frame.Camera.Pitch / 30)) : 0;
-            if (photographOpacity > 0)
+            try
             {
-                BindTexture(0, photographTexture);
-                gl.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, (uint)artWidth, (uint)artHeight);
+                ConfigureTransferState();
+                gl.Disable(EnableCap.Blend);
+                gl.Disable(EnableCap.CullFace);
+                gl.Disable(EnableCap.ScissorTest);
+                gl.Disable(EnableCap.StencilTest);
+                gl.Disable(EnableCap.Dither);
+                gl.Disable(EnableCap.RasterizerDiscard);
+                gl.Disable(EnableCap.PolygonOffsetFill);
+                gl.Disable(EnableCap.SampleAlphaToCoverage);
+                if (!embedded) gl.Disable(EnableCap.FramebufferSrgb);
+                gl.FrontFace(FrontFaceDirection.Ccw);
+                gl.ColorMask(true, true, true, true);
+                if (embedded) gl.DepthRange(0f, 1f); else gl.DepthRange(0d, 1d);
+                EnsureFramebuffer(frame.ArtWidth, frame.ArtHeight);
+                UploadPalette(frame.Palette);
+                gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, framebuffer);
+                gl.Viewport(0, 0, (uint)artWidth, (uint)artHeight);
+                gl.Disable(EnableCap.DepthTest);
+                gl.DepthMask(false);
+                DrawBackground(frame);
+                gl.Enable(EnableCap.DepthTest);
+                gl.DepthMask(true);
+                gl.DepthFunc(DepthFunction.Lequal);
+                // ClearBuffer leaves the host's clear-depth value untouched.
+                float clearDepth = 1;
+                gl.ClearBuffer(GLEnum.Depth, 0, &clearDepth);
+                DrawTerrain(frame);
+
+                float photographOpacity = frame.PreservePhotograph
+                    ? (float)(209d / 255 * (1 - frame.Camera.Pitch / 30)) : 0;
+                if (photographOpacity > 0) CopyPhotograph();
+                DrawBuildings(frame);
+                if (overlay is not null) UploadOverlay(overlay);
+                Resolve(frame, state, photographOpacity, overlay is not null, artworkOnly);
+                TrimCaches();
             }
-            DrawBuildings(frame);
-            if (overlay is not null) UploadOverlay(overlay);
-            Resolve(frame, state, photographOpacity, overlay is not null, artworkOnly);
-            TrimCaches();
-            CheckError("drawing the GPU map frame");
-            completed = true;
+            finally
+            {
+                state.Restore(gl);
+            }
+            // Validate the complete transaction once, including host-state restoration.
+            // One post-restore check also avoids a second browser GL error query.
+            CheckError("drawing the GPU map frame and restoring host state");
+        }
+        catch
+        {
+            terrainProgram!.InvalidateUniforms();
+            buildingProgram!.InvalidateUniforms();
+            rimProgram!.InvalidateUniforms();
+            backgroundProgram!.InvalidateUniforms();
+            resolveProgram!.InvalidateUniforms();
+            terrainArtworkFilter = 0;
+            DrainErrors();
+            throw;
         }
         finally
         {
-            state.Restore(gl);
-            if (!completed) DrainErrors();
             LastSubmissionMilliseconds = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
         }
-        CheckError("restoring the host GL state");
+    }
+
+    private void CopyPhotograph()
+    {
+        int previousReadFramebuffer = gl.GetInteger(GLEnum.ReadFramebufferBinding);
+        try
+        {
+            gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, framebuffer);
+            BindTexture(0, photographTexture);
+            gl.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, (uint)artWidth, (uint)artHeight);
+        }
+        finally
+        {
+            gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (uint)previousReadFramebuffer);
+        }
     }
 
     private void DrawBackground(GpuMapFrame frame)
@@ -268,8 +297,12 @@ public sealed unsafe class GlMapRenderer : IDisposable
         LastUploadBytes += offset * sizeof(float);
         BindArrayTexture(0, terrainArtworkArray);
         int filter = (int)(MapRendering.Smooth(frame.RenderStyle) ? TextureMinFilter.Linear : TextureMinFilter.Nearest);
-        gl.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, filter);
-        gl.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, filter);
+        if (terrainArtworkFilter != filter)
+        {
+            gl.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, filter);
+            gl.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, filter);
+            terrainArtworkFilter = filter;
+        }
         BindArrayTexture(1, terrainHeightArray);
         gl.DrawElementsInstanced(PrimitiveType.Triangles, (uint)indices.Count,
             DrawElementsType.UnsignedShort, null, (uint)frame.Terrain.Length);
@@ -650,6 +683,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     {
         if (artWidth == width && artHeight == height) return;
         uint nextFramebuffer = 0, nextArtwork = 0, nextDepth = 0, nextPhotograph = 0;
+        int previousRenderbuffer = gl.GetInteger(GLEnum.RenderbufferBinding);
         try
         {
             nextArtwork = CreateTexture();
@@ -664,12 +698,12 @@ public sealed unsafe class GlMapRenderer : IDisposable
             gl.BindRenderbuffer(RenderbufferTarget.Renderbuffer, nextDepth);
             gl.RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Depth24Stencil8, (uint)width, (uint)height);
             nextFramebuffer = gl.GenFramebuffer();
-            gl.BindFramebuffer(FramebufferTarget.Framebuffer, nextFramebuffer);
-            gl.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+            gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, nextFramebuffer);
+            gl.FramebufferTexture2D(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.ColorAttachment0,
                 TextureTarget.Texture2D, nextArtwork, 0);
-            gl.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthStencilAttachment,
+            gl.FramebufferRenderbuffer(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.DepthStencilAttachment,
                 RenderbufferTarget.Renderbuffer, nextDepth);
-            if (gl.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete)
+            if (gl.CheckFramebufferStatus(FramebufferTarget.DrawFramebuffer) != GLEnum.FramebufferComplete)
                 throw new NotSupportedException("The GPU cannot allocate the map's RGBA8 and 24-bit depth framebuffer.");
             CheckError("allocating the pixel-art framebuffer");
             DeleteFramebuffer();
@@ -687,6 +721,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
             if (nextArtwork != 0) gl.DeleteTexture(nextArtwork);
             if (nextDepth != 0) gl.DeleteRenderbuffer(nextDepth);
             if (nextPhotograph != 0) gl.DeleteTexture(nextPhotograph);
+            gl.BindRenderbuffer(RenderbufferTarget.Renderbuffer, (uint)previousRenderbuffer);
         }
     }
 
@@ -875,7 +910,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private sealed class ShaderProgram : IDisposable
     {
         private readonly GL gl;
-        private readonly Dictionary<string, int> uniforms = [];
+        private readonly Dictionary<string, Uniform> uniforms = [];
         private uint program;
 
         internal ShaderProgram(GL gl, string vertex, string fragment, string name)
@@ -923,20 +958,61 @@ public sealed unsafe class GlMapRenderer : IDisposable
             }
         }
 
-        private int Location(string name)
+        private int ChangedLocation(string name, UniformValue value)
         {
-            if (!uniforms.TryGetValue(name, out int location)) uniforms[name] = location = gl.GetUniformLocation(program, name);
-            return location;
+            // Programs belong exclusively to this renderer. Binding another host program
+            // leaves these values intact, while raw float bits preserve signed zero/NaNs.
+            ref var uniform = ref CollectionsMarshal.GetValueRefOrAddDefault(uniforms, name, out bool exists);
+            if (!exists) uniform = new(gl.GetUniformLocation(program, name), null);
+            if (uniform.Location < 0 || uniform.Value == value) return -1;
+            uniform.Value = value;
+            return uniform.Location;
         }
 
+        internal void InvalidateUniforms() => uniforms.Clear();
         internal void Use() => gl.UseProgram(program);
-        internal void Float(string name, float value) => gl.Uniform1(Location(name), value);
-        internal void Integer(string name, int value) => gl.Uniform1(Location(name), value);
-        internal void Integer2(string name, int x, int y) => gl.Uniform2(Location(name), x, y);
-        internal void Vector2(string name, float x, float y) => gl.Uniform2(Location(name), x, y);
-        internal void Vector3(string name, float x, float y, float z) => gl.Uniform3(Location(name), x, y, z);
-        internal void Vector4(string name, float x, float y, float z, float w) => gl.Uniform4(Location(name), x, y, z, w);
+        internal void Float(string name, float value)
+        {
+            int location = ChangedLocation(name, new(GLEnum.Float, BitConverter.SingleToInt32Bits(value)));
+            if (location >= 0) gl.Uniform1(location, value);
+        }
+
+        internal void Integer(string name, int value)
+        {
+            int location = ChangedLocation(name, new(GLEnum.Int, value));
+            if (location >= 0) gl.Uniform1(location, value);
+        }
+
+        internal void Integer2(string name, int x, int y)
+        {
+            int location = ChangedLocation(name, new(GLEnum.IntVec2, x, y));
+            if (location >= 0) gl.Uniform2(location, x, y);
+        }
+
+        internal void Vector2(string name, float x, float y)
+        {
+            int location = ChangedLocation(name, new(GLEnum.FloatVec2, BitConverter.SingleToInt32Bits(x), BitConverter.SingleToInt32Bits(y)));
+            if (location >= 0) gl.Uniform2(location, x, y);
+        }
+
+        internal void Vector3(string name, float x, float y, float z)
+        {
+            int location = ChangedLocation(name, new(GLEnum.FloatVec3, BitConverter.SingleToInt32Bits(x), BitConverter.SingleToInt32Bits(y),
+                BitConverter.SingleToInt32Bits(z)));
+            if (location >= 0) gl.Uniform3(location, x, y, z);
+        }
+
+        internal void Vector4(string name, float x, float y, float z, float w)
+        {
+            int location = ChangedLocation(name, new(GLEnum.FloatVec4, BitConverter.SingleToInt32Bits(x), BitConverter.SingleToInt32Bits(y),
+                BitConverter.SingleToInt32Bits(z), BitConverter.SingleToInt32Bits(w)));
+            if (location >= 0) gl.Uniform4(location, x, y, z, w);
+        }
+
         internal void Color(string name, uint color) => Vector3(name, ((color >> 16) & 255) / 255f, ((color >> 8) & 255) / 255f, (color & 255) / 255f);
+
+        private record struct Uniform(int Location, UniformValue? Value);
+        private readonly record struct UniformValue(GLEnum Type, int X, int Y = 0, int Z = 0, int W = 0);
         public void Dispose()
         {
             if (program != 0) gl.DeleteProgram(program);
@@ -947,20 +1023,19 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private readonly struct GlState
     {
         internal readonly int DrawFramebuffer, ViewportX, ViewportY, ViewportWidth, ViewportHeight;
-        private readonly int readFramebuffer, program, array, vertexBuffer, unpackBuffer, renderbuffer;
+        private readonly int program, array, vertexBuffer, unpackBuffer;
         private readonly int activeTexture, texture0, texture1, texture2, sampler0, sampler1, sampler2;
         private readonly int textureArray0, textureArray1;
         private readonly int unpackAlignment, unpackRowLength, unpackSkipRows, unpackSkipPixels, unpackImageHeight, unpackSkipImages;
         private readonly int depthFunction, frontFace;
         private readonly bool blend, cull, scissor, stencil, depth, dither, rasterizerDiscard, polygonOffset, alphaCoverage;
         private readonly bool depthMask, redMask, greenMask, blueMask, alphaMask, embedded, framebufferSrgb;
-        private readonly double depthClear, depthNear, depthFar;
+        private readonly double depthNear, depthFar;
 
         internal GlState(GL gl, bool embedded)
         {
             this.embedded = embedded;
             DrawFramebuffer = gl.GetInteger(GLEnum.DrawFramebufferBinding);
-            readFramebuffer = gl.GetInteger(GLEnum.ReadFramebufferBinding);
             int* viewport = stackalloc int[4];
             gl.GetInteger(GetPName.Viewport, viewport);
             ViewportX = viewport[0]; ViewportY = viewport[1]; ViewportWidth = viewport[2]; ViewportHeight = viewport[3];
@@ -968,7 +1043,6 @@ public sealed unsafe class GlMapRenderer : IDisposable
             array = gl.GetInteger(GLEnum.VertexArrayBinding);
             vertexBuffer = gl.GetInteger(GLEnum.ArrayBufferBinding);
             unpackBuffer = gl.GetInteger(GLEnum.PixelUnpackBufferBinding);
-            renderbuffer = gl.GetInteger(GLEnum.RenderbufferBinding);
             activeTexture = gl.GetInteger(GLEnum.ActiveTexture);
             gl.ActiveTexture(TextureUnit.Texture0);
             texture0 = gl.GetInteger(GLEnum.TextureBinding2D); sampler0 = gl.GetInteger(GLEnum.SamplerBinding);
@@ -1002,28 +1076,23 @@ public sealed unsafe class GlMapRenderer : IDisposable
                 float* range = stackalloc float[2];
                 gl.GetFloat(GetPName.DepthRange, range);
                 depthNear = range[0]; depthFar = range[1];
-                gl.GetFloat(GetPName.DepthClearValue, out float clear);
-                depthClear = clear;
             }
             else
             {
                 double* range = stackalloc double[2];
                 gl.GetDouble(GetPName.DepthRange, range);
                 depthNear = range[0]; depthFar = range[1];
-                gl.GetDouble(GetPName.DepthClearValue, out depthClear);
             }
         }
 
         internal void Restore(GL gl)
         {
             gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, (uint)DrawFramebuffer);
-            gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, (uint)readFramebuffer);
             gl.Viewport(ViewportX, ViewportY, (uint)ViewportWidth, (uint)ViewportHeight);
             gl.UseProgram((uint)program);
             gl.BindVertexArray((uint)array);
             gl.BindBuffer(BufferTargetARB.ArrayBuffer, (uint)vertexBuffer);
             gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, (uint)unpackBuffer);
-            gl.BindRenderbuffer(RenderbufferTarget.Renderbuffer, (uint)renderbuffer);
             gl.ActiveTexture(TextureUnit.Texture0); gl.BindTexture(TextureTarget.Texture2D, (uint)texture0); gl.BindSampler(0, (uint)sampler0);
             gl.BindTexture(TextureTarget.Texture2DArray, (uint)textureArray0);
             gl.ActiveTexture(TextureUnit.Texture1); gl.BindTexture(TextureTarget.Texture2D, (uint)texture1); gl.BindSampler(1, (uint)sampler1);
@@ -1043,12 +1112,10 @@ public sealed unsafe class GlMapRenderer : IDisposable
             if (embedded)
             {
                 gl.DepthRange((float)depthNear, (float)depthFar);
-                gl.ClearDepth((float)depthClear);
             }
             else
             {
                 gl.DepthRange(depthNear, depthFar);
-                gl.ClearDepth(depthClear);
             }
             Set(gl, EnableCap.Blend, blend); Set(gl, EnableCap.CullFace, cull);
             Set(gl, EnableCap.ScissorTest, scissor); Set(gl, EnableCap.StencilTest, stencil);
