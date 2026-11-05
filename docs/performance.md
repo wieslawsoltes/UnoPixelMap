@@ -2,6 +2,95 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
+## Camera input and terrain interaction
+
+Commit `088017aadb3f3b333c2850e5c09f8133fe03cf51` fixes raw browser input ownership and physical camera mathematics. Its Release browser build passed the published Chromium suites and deployed successfully. [Camera build and deployment](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42074751416)
+
+- Raw wheel, pointer and keyboard metadata follows the DOM event's dispatch lifetime. Trusted events can run a microtask checkpoint between listeners, so the adapter now uses `eventPhase` and restores outer metadata after nested dispatch. Native fractional wheel axes, pointer capture and key-repeat flags reach the Uno handlers. The adapter removes one queued closure and microtask per retained event.
+- Free-camera interpolation reconstructs the focus from the interpolated physical eye. A stationary-eye regression previously drifted 3.375166 m through a 180-degree yaw transition and 0.699802 m vertically through a 0-to-90-degree pitch transition. The updated regression records zero drift to nine decimal places.
+- `MapCamera.TryAimAt` solves the two yaw branches and pitch for a requested screen ray while retaining the physical eye. It selects the nearest feasible no-roll orientation and validates direct reprojection within 0.0001 px. The 486-case fixture reaches a worst residual of 0.000099 px.
+- The virtual focus can extend beyond the Mercator data extent. The 80 boundary poses cover both latitude limits and antimeridian sides through resizing, interpolation and v5 shared-link restoration. A north-facing boundary eye previously shifted 0.291165 m. Free-focus latitude now uses round-trip serialization.
+- Follow and inertial damping integrate the full elapsed time. Paused movement keys retain game ownership. Escape pauses, and P toggles pause/resume. Immediate navigation and completed flights publish their final motion state with the new camera, reducing redundant presentation requests.
+- Manual navigation detaches the game camera, and subsequent map gestures retain that ownership. Explicit game-look, mouse capture and the C camera shortcut restore follow. New flights and follow reattachment cancel stale pointer baselines. The first-person reticle follows the same state transition.
+- Terrain picking handles upward intersections through signed terrain. Camera scale, Mercator coordinates, altitude and lens constants are evaluated once per ray query, outside the sampling and refinement loops.
+
+### Native camera-query measurements
+
+The comparison uses the application source at `e1e1fa03252fbcd0ef501227a865a41301e42593` and the camera changes at `088017aadb3f3b333c2850e5c09f8133fe03cf51`. It runs synchronous `MapCamera` queries on two seeded 5-by-5 grids of 256-by-256 z14 elevation tiles, each with a 2-by-2 z0 parent. Heights span 943.964–1456.337 m and −640.820 to −359.015 m. Cases include 3× relief exaggeration, grazing rays and anchored pan/orbit operations. The environment is .NET 10.0.14 x64, SDK 10.0.403, Debian 13, an Intel Xeon Platinum 8573C, CPU affinity 0 and disabled tiered compilation.
+
+The table reports median thread-CPU microseconds per operation across three separate processes per variant. The execution order is baseline, candidate, candidate, baseline, baseline, candidate. A baseline-derived plan fixes the same repeat counts in both variants. Each process performs 168,498 timed operations. All 621 unique ray results and 54 full anchor-camera results have identical IEEE 754 output bits across both six-process passes.
+
+| Workload | Baseline µs | Updated µs | Speedup |
+| --- | ---: | ---: | ---: |
+| Positive relief, orbital ray | 28.948 | 11.755 | 2.46× |
+| Positive relief, free-eye ray | 13.224 | 5.966 | 2.22× |
+| Positive relief, grazing street ray | 29.994 | 13.129 | 2.28× |
+| Positive relief, hilltop horizon miss | 663.911 | 229.954 | 2.89× |
+| Positive relief, anchored pan/orbit | 44.297 | 31.659 | 1.40× |
+| Negative relief, orbital ray | 48.201 | 22.608 | 2.13× |
+| Negative relief, free-eye ray | 10.483 | 6.056 | 1.73× |
+| Negative relief, grazing street ray | 55.637 | 25.628 | 2.17× |
+| Negative relief, hilltop horizon miss | 556.070 | 282.235 | 1.97× |
+| Negative relief, anchored pan/orbit | 52.957 | 27.277 | 1.94× |
+| Exaggerated relief, orbital ray | 19.902 | 11.187 | 1.78× |
+| Exaggerated relief, anchored pan/orbit | 40.633 | 26.811 | 1.52× |
+| Orthographic relief | 22.195 | 9.991 | 2.22× |
+| Flat hypsometric control | 0.754 | 0.823 | 0.92× |
+
+The flat control increases by 0.070 µs per query, approximately 9.25%. Hosted-runtime outliers remain visible even in thread-CPU time. The positive pan/orbit baseline samples are 37.226, 44.297 and 438.515 µs. All samples are retained, and the table uses medians. The wall-only pass records zero allocations per workload. The CPU-clock confirmation retains the 32-byte first P/Invoke setup allocation, followed by zero-byte workload rows. The raw confirmation rows include wall time, thread-CPU time, allocation counters, runtime and source/binary hashes. [Camera-query measurements](camera-query-benchmarks.csv)
+
+## Deferred depth interpolation and roof rims
+
+Commit `59a6a65255d4f3fe3748a4264820c8c412db48ed` contains this rendering pass and the follow-ownership refinements.
+
+Depth triangles retain their existing 80-byte storage and prepare inverse-W, altitude and physical-height coefficients on first use. Each channel caches its original arithmetic result in the existing gradient fields. Containment checks require no interpolation coefficients, and retained references preserve the cache across queries. Terrain picking can subsequently prepare the additional height channels without overwriting the cached depth plane.
+
+Building preparation skips cap vertices already rejected by the existing eye-facing predicate. Direct homogeneous outcodes retain the exact subtraction and multiplication expressions for the six clipping planes. GPU roof rims use a four-vertex triangle strip that preserves the original two triangles and their winding, reducing vertex shader invocations for this draw by one third.
+
+Deterministic counts after ordinary label preparation use the bundled nine-tile scene and the same 1200×680 logical viewport, requested pixel size 4 and 64 terrain patches in each case. Count instrumentation runs separately from timings.
+
+| Scene | Required planes before deferral | Planes prepared | Planes deferred | Cap vertices skipped / previously projected |
+| --- | ---: | ---: | ---: | ---: |
+| Walking with relief | 95,270 | 3,685 | 96.1% | 27,712 / 146,622 |
+| Flight with relief | 42,015 | 763 | 98.2% | 24,726 / 153,668 |
+
+The final native diagnostic pair runs the candidate before the baseline, with eight warmup and 24 moving frames per scene. Its baseline is `e1e1fa03252fbcd0ef501227a865a41301e42593`, and its candidate includes both the camera changes in `088017a` and the deferred-depth patch. The table uses the upper-middle wall-time statistic for complete `PrepareGpuFrame` calls, including label visibility. It also reports an independently reconstructed depth object from the same immutable frame. Both versions use .NET 10.0.14, disabled tiered compilation, two managed processors and CPU affinity 0–1.
+
+| Scene | Complete preparation, baseline → updated | Change | Independent depth construction, baseline → updated |
+| --- | ---: | ---: | ---: |
+| Walking with relief | 28.511 → 21.162 ms | −25.8% | 15.114 → 11.868 ms |
+| Flight with relief | 39.013 → 42.680 ms | +9.4% | 18.176 → 14.869 ms |
+
+The flight result regresses in this diagnostic pair, and the runtime has substantial outliers. Its updated complete-preparation samples range from 27.514 to 1,271.362 ms. An earlier timing pair was excluded from performance conclusions after similarly severe runtime variability. Two broader model-index prototypes were also removed after complete preparation regressed. The retained patch reduces deterministic interpolation and shader work while end-to-end throughput is checked separately in the paired browser benchmark. The 96 warm timing rows and two separately marked count rows retain source/binary identities, wall and thread-CPU times, allocations and GC counters. [Depth-preparation measurements](depth-preparation-benchmarks.csv)
+
+The GLES comparison preserves all 48 cases and 192 hash fields. Its complete `checks.json` is byte-identical to the preceding renderer. The CPU comparison preserves 232 cases, 3,712 moving-frame hashes, 232 cold-frame hashes and 232 sequence hashes with identical offline inputs, OpenAI Sans and a 1100×650 viewport. Eight additional moving scenes preserve all 128 dense-query payload hashes and 128 overlay pixel hashes, including terrain altitude, inverse depth, physical height and subpixel coverage. The native regression suite also passes 128 exact interpolation/cache/layout comparisons and 936 clipping-code boundary comparisons, including NaN and infinity inputs.
+
+### Two paired browser runs
+
+Both runs compare exact Release `InterpreterAndAOT` artifacts against camera commit `088017aadb3f3b333c2850e5c09f8133fe03cf51`. Run 1 measures `59a6a65` on an Intel Xeon Platinum 8573C. Run 2 measures `650feb5` on an AMD EPYC 9V74. The two candidates have identical application source. The latter commit corrects the touchscreen regression fixture to use a visible desktop-width camera readout and then restore the portrait viewport.
+
+Each run pairs baseline then candidate on its own runner in fresh processes, using Chromium 156.0.8078.4, in-process SwiftShader, CPU affinity 0–2, a 1200×780 viewport and DPR 1. Each case warms for two seconds and requests eight seconds of measurement. All timed moving readbacks use pixel size 4 at 300×166. External providers are blocked, and the same bundled inputs and held native keys exercise play mode. Moving endpoints can differ as simulation advances against wall time. The table reports completed map-image readbacks per second using each actual probe duration.
+
+| Moving scenario | Run 1 baseline → updated | Run 1 change | Run 2 baseline → updated | Run 2 change |
+| --- | ---: | ---: | ---: | ---: |
+| Walking, first person | 3.747 → 3.721 | −0.69% | 4.488 → 4.497 | +0.18% |
+| Walking, chase | 5.163 → 5.186 | +0.43% | 6.428 → 6.679 | +3.91% |
+| Driving, chase | 3.374 → 3.611 | +7.04% | 4.478 → 4.458 | −0.46% |
+| Driving, first person | 2.709 → 2.749 | +1.49% | 3.335 → 3.448 | +3.39% |
+| Free flight | 2.873 → 2.991 | +4.10% | 3.854 → 3.498 | −9.24% |
+
+End-to-end throughput remains mixed across these software-GPU runs. The five moving cases complete 145 → 148 copies in run 1 and 184 → 183 in run 2. Walking first-person long-task duration falls from 600 → 549 ms and 1,146 → 902 ms. Flight long-task duration falls from 959 → 849 ms in run 1 and rises from 1,141 → 1,335 ms in run 2. Run 1 also increases walking-chase long-task duration from 643 → 664 ms and driving-first-person duration from 2,158 → 2,411 ms. The same baseline's throughput differs by 19.8–34.1% between the two runner environments. Physical-GPU and Safari/iOS timing remain unmeasured.
+
+All 40 raw report summaries and 16 separate CPU-profile summaries recompute exactly. Every one of the 660 completed pixel-pack copies follows a correlated signaled zero-timeout poll. The 697 submissions retain the two-slot bound with zero overwrites, abandoned transfers, releases without copying or positive-timeout waits. All 20 idle/stationary measurements record zero foreground graphics work and long tasks. A run-1 car interval ends with 27 completed copies and 26 art uploads, so upload and readback counts remain separate measurements.
+
+The CSV retains its original `TaskDuration / probe duration` percentage. `Performance.getMetrics` spans the surrounding CDP start/finish and raw-data transfer, so its collection window is longer than the rendering probe. In run 1, moving metric intervals span 8.567–9.610 seconds while rendering probes span 8.003–8.328 seconds. Run 2 spans 8.539–9.836 seconds and 8.006–8.401 seconds respectively. CPU percentages therefore include instrumentation work and use the narrower probe interval as their denominator. The audit separately computes task shares against the actual metric timestamps. The historical browser tables below use the same original calculation. [All browser measurements and both paired runs](play-browser-benchmarks.csv)
+
+Run 1 preserves nine of ten initial screenshot pairs and all five final idle/stationary pairs exactly. Its initial moving-car baseline uses adaptive pixel size 3 while the candidate uses size 4, with size 4 used for all timed readbacks. Run 2 preserves eight of ten initial pairs and all five final idle/stationary pairs. Its two startup differences are the same car raster states and different relief-map capture states at equal pixel size 2. Both final relief captures match exactly. Moving screenshots reflect independently advanced poses, and their capture follows the recorded HUD sample. The deterministic native comparisons above provide the fixed-pose visual regression coverage.
+
+The first browser verification attempt stopped because the new touchscreen helper queried a desktop status field hidden by the compact phone layout. Commit `650feb58cbdf7050c195735cf0e4790e53fd05d3` fixes that fixture. Its complete Chromium suite passes the held-touch Home, C reattachment and pinch-cancellation sequence, followed by restored portrait controls, native landscape scrolling and restart/exit. All native checks, AOT publication, browser verification, paired benchmark and Pages deployment pass in run `42086131355`. [Verified build and deployment](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42086131355)
+
+The deployed Pages artifact is `13444315889`, with ZIP SHA-256 `bf43f9005349e811ea10714ff0de9fc39f619afcfe9953b95c5673eefc0f23c6` and native WASM SHA-256 `9e54519b406895b8ab3b3af4ce55b7ec725e20f896b9c5909df26f907202fc46`. All 72 boot resources validate against the manifest, and all 142 non-hidden uncompressed live files match the artifact byte-for-byte. The run-2 performance evidence artifact is `13443897611`, with ZIP SHA-256 `7573f01d19b56313f9ddf5a7e56e8be8616c7a6fc7812f044817cd3fd7efe0c7`. Run 1's successful benchmark job produced artifact `13443555033`, with ZIP SHA-256 `5df526066609d3f993ab82a98b793e7bb1bb2d8e1e216303870f64d182c215c2`. [First paired benchmark](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42081873673)
+
 ## GPU submission and depth queries
 
 The next optimization pass is implemented in `43940e051a5b6bcd5c8eda9c39d5775ae482036f`. The workflow correction in `0b47e25af6e47dc66c1d9fc9483bab54b1fbd348` moves a runner-specific environment value into step scope. Both commits contain the same application source. This pass compares against the previously deployed application at `3777867da454f21ef264c72adb1a65b99ddca95a`.
