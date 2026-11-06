@@ -17,6 +17,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private const int MaximumTerrainDraws = 64;
     private const int TerrainInstanceStride = 14;
     private readonly GL gl;
+    private readonly long cacheBudget;
     private readonly bool embedded;
     private readonly int maximumTextureSize;
     private readonly Dictionary<object, MeshResource> terrainMeshes = [];
@@ -51,9 +52,13 @@ public sealed unsafe class GlMapRenderer : IDisposable
     /// <summary>Retained mesh, model and tile texture storage, excluding framebuffer attachments.</summary>
     public long ResidentBytes { get; private set; }
 
-    public GlMapRenderer(GL gl)
+    public GlMapRenderer(GL gl) : this(gl, CacheBudget) { }
+
+    internal GlMapRenderer(GL gl, long cacheBudgetBytes)
     {
         this.gl = gl ?? throw new ArgumentNullException(nameof(gl));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(cacheBudgetBytes);
+        cacheBudget = cacheBudgetBytes;
         string version = gl.GetStringS(StringName.Version) ?? string.Empty;
         Driver = gl.GetStringS(StringName.Renderer) ?? version;
         embedded = version.Contains("OpenGL ES", StringComparison.Ordinal) || version.Contains("WebGL", StringComparison.Ordinal);
@@ -167,7 +172,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
             if (terrainTextures.TryGetValue(draw.Texture, out var texture)) texture.Frame = generation;
         }
         foreach (var draw in frame.Buildings)
-            if (buildingMeshes.TryGetValue(draw.Mesh.ResourceKey, out var mesh)) mesh.Frame = generation;
+            if (draw.Selection is not { Indices.Length: 0, RoofEdges.Length: 0 } &&
+                buildingMeshes.TryGetValue(draw.Mesh.ResourceKey, out var mesh)) mesh.Frame = generation;
         var state = new GlState(gl, embedded);
         if (artworkOnly && imageContext is null &&
             (state.ViewportWidth != frame.ArtWidth || state.ViewportHeight != frame.ArtHeight))
@@ -376,7 +382,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
         BindTexture(2, roomTexture);
         foreach (var draw in frame.Buildings)
         {
-            if (draw.Selection is { Indices.Length: 0, RoofEdges.Length: 0 }) continue;
+            if (draw.Selection is { Indices.Length: 0 } ||
+                draw.Selection is null && draw.Mesh.Indices.Length == 0) continue;
             var mesh = GetBuildingMesh(draw.Mesh, draw.Selection);
             if (mesh.IndexCount == 0) continue;
             SetProjection(program, frame, draw.Transform);
@@ -396,7 +403,11 @@ public sealed unsafe class GlMapRenderer : IDisposable
         foreach (var draw in frame.Buildings)
         {
             if (draw.Selection is { RoofEdges.Length: 0 } ||
-                !buildingMeshes.TryGetValue(draw.Mesh.ResourceKey, out var mesh)) continue;
+                draw.Selection is null && draw.Mesh.RoofEdges.Length == 0) continue;
+            // Dense views can exceed the retained working set. Rehydrate evicted
+            // rims after every face has written depth, preserving occlusion and
+            // submission order without re-uploading the tile's face vertices.
+            var mesh = GetBuildingMesh(draw.Mesh, draw.Selection, includeFaces: false);
             if (mesh.EdgeCount == 0) continue;
             SetProjection(program, frame, draw.Transform);
             program.Integer("uModelWidth", mesh.ModelWidth);
@@ -562,7 +573,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         return texture;
     }
 
-    private MeshResource GetBuildingMesh(GpuBuildingMesh source, GpuBuildingSelection? selection)
+    private MeshResource GetBuildingMesh(GpuBuildingMesh source, GpuBuildingSelection? selection, bool includeFaces = true)
     {
         if (!buildingMeshes.TryGetValue(source.ResourceKey, out var mesh))
         {
@@ -595,7 +606,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
             }
         }
         mesh.Frame = generation;
-        if (mesh.Revision != source.Revision)
+        if (includeFaces && mesh.Revision != source.Revision)
         {
             gl.BindVertexArray(mesh.Array);
             UploadBuffer(mesh, BufferTargetARB.ArrayBuffer, mesh.Vertices, source.Vertices, ref mesh.VertexBytes);
@@ -603,7 +614,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
             mesh.Revision = source.Revision;
         }
         var indices = selection?.Indices ?? source.Indices;
-        if (!ReferenceEquals(mesh.IndexSource, indices))
+        if (includeFaces && !ReferenceEquals(mesh.IndexSource, indices))
         {
             gl.BindVertexArray(mesh.Array);
             UploadBuffer(mesh, BufferTargetARB.ElementArrayBuffer, mesh.Indices, indices, ref mesh.IndexBytes);
@@ -635,7 +646,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         {
             if (capacity < bytes)
             {
-                EnsureCacheBudget(bytes - capacity);
+                EnsureCacheBudget(mesh, bytes - capacity);
                 gl.BufferData(target, (nuint)bytes, pointer, BufferUsageARB.DynamicDraw);
                 ResidentBytes += bytes - capacity;
                 mesh.Bytes += bytes - capacity;
@@ -667,7 +678,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         {
             if (mesh.ModelWidth != width || mesh.ModelHeight != height)
             {
-                EnsureCacheBudget(Math.Max(0, bytes - mesh.ModelBytes));
+                EnsureCacheBudget(mesh, Math.Max(0, bytes - mesh.ModelBytes));
                 gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba32f, (uint)width, (uint)height,
                     0, PixelFormat.Rgba, PixelType.Float, pointer);
                 ResidentBytes += bytes - mesh.ModelBytes;
@@ -837,11 +848,14 @@ public sealed unsafe class GlMapRenderer : IDisposable
         for (uint unit = 0; unit < 3; unit++) gl.BindSampler(unit, 0);
     }
 
-    private void EnsureCacheBudget(long additionalBytes)
+    private void EnsureCacheBudget(MeshResource uploading, long additionalBytes)
     {
-        while (ResidentBytes + additionalBytes > CacheBudget)
-            if (!EvictOldest(1))
-                throw new NotSupportedException("The visible map exceeds the bounded GPU geometry cache.");
+        while (ResidentBytes + additionalBytes > cacheBudget)
+            if (!EvictOldest(1, uploading) && !EvictOldest(1, uploading, includeCurrentFrame: true))
+                throw new NotSupportedException("A single map tile exceeds the bounded GPU geometry cache.");
+        // GL retains resources referenced by submitted commands until those draws
+        // complete. Deleting another tile is safe even within this frame; its next
+        // face/rim pass will reconstruct it on demand. The active upload is pinned.
     }
 
     private void TrimCaches()
@@ -850,9 +864,9 @@ public sealed unsafe class GlMapRenderer : IDisposable
             if (!EvictOldest(1)) break;
     }
 
-    private bool EvictOldest(int kind)
+    private bool EvictOldest(int kind, MeshResource? protectedMesh = null, bool includeCurrentFrame = false)
     {
-        long oldest = generation;
+        long oldest = includeCurrentFrame ? long.MaxValue : generation;
         object? key = null;
         if (kind == 2)
         {
@@ -862,7 +876,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
         else
         {
             foreach (var entry in kind == 0 ? terrainMeshes : buildingMeshes)
-                if (entry.Value.Frame < oldest) { oldest = entry.Value.Frame; key = entry.Key; }
+                if (!ReferenceEquals(entry.Value, protectedMesh) && entry.Value.Frame < oldest)
+                { oldest = entry.Value.Frame; key = entry.Key; }
         }
         if (key is null) return false;
         if (kind == 2)

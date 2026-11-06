@@ -34,6 +34,7 @@ internal static class GlTerrainChecks
         var gl = context.Gl;
         RenderStyleChecks.RunGl(gl);
         GpuVisibilityChecks.Run(gl);
+        GpuCacheChecks.Run(gl);
         var results = new List<CaseResult>();
         var failures = new List<string>();
         using var cpu = new PixelMapRenderer();
