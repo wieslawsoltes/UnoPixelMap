@@ -68,6 +68,7 @@ internal static class TerrainCameraChecks
 
         SteepAnchors();
         InsetRouteFits();
+        DenseRouteFit();
         MountainRays();
         Links();
         Console.WriteLine("Passed terrain camera datum, height-field inverse, orbit/zoom/drag and flight-follow anchors, signed heights and v1–v4 view links.");
@@ -155,6 +156,48 @@ internal static class TerrainCameraChecks
             cases++;
         }
         Console.WriteLine($"Passed {cases} elevated route fits with top, bottom and side UI insets.");
+
+        RoutePoint Point(double x, double y)
+        {
+            var point = Geographic((id.X + x) / (1 << id.Z), (id.Y + y) / (1 << id.Z));
+            return new(point.Latitude, point.Longitude);
+        }
+    }
+
+    private static void DenseRouteFit()
+    {
+        const int width = 900, height = 600, size = 64;
+        var id = new TileId(14, 8192, 8192);
+        var values = new float[size * size];
+        for (int y = 23; y <= 27; y++)
+        for (int x = 17; x <= 21; x++) values[y * size + x] = 3000;
+        var terrain = new TerrainOptions(new ElevationSnapshot([
+            new ElevationTile(new(0, 0, 0), 2, [0, 0, 0, 0]),
+            new ElevationTile(id, size, values)]), Exaggeration: 3);
+        var route = new RoutePoint[1025];
+        for (int i = 0; i < route.Length; i++) route[i] = Point(.1 + .8 * i / (route.Length - 1), .6);
+        // Providers need not sample by arc length. The summit is the first bend,
+        // followed by many detailed points on the long descent and valley road.
+        // The old 513-point subset skipped this vertex entirely.
+        route[1] = Point(.3, .4);
+        var origin = Point(.5, .5);
+        foreach (bool perspective in new[] { false, true })
+        {
+            var camera = new MapCamera(origin.Latitude, origin.Longitude, 15, 0, 55, perspective);
+            var viewport = new SKRect(200, 0, width, height);
+            var fitted = camera.FitRoute(route, width, height, viewport, 30, terrain);
+            Assert(fitted.Zoom > MapCamera.MinZoom, "A dense elevated route exhausted the map lens range");
+            foreach (var point in route)
+            {
+                double surface = terrain.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude);
+                double altitude = terrain.RenderAltitude(fitted, point.Latitude, point.Longitude, surface);
+                Assert(fitted.TryProject(point.Latitude, point.Longitude, altitude, width, height, out var screen) &&
+                    screen.X >= viewport.Left + 29.99 && screen.X <= viewport.Right - 29.99 &&
+                    screen.Y >= viewport.Top + 29.99 && screen.Y <= viewport.Bottom - 29.99,
+                    $"Dense route fitting omitted a terrain peak in the {(perspective ? "perspective" : "orthographic")} view");
+            }
+        }
+        Console.WriteLine("Passed full-vertex terrain fitting for dense routes with unevenly sampled mountain peaks.");
 
         RoutePoint Point(double x, double y)
         {

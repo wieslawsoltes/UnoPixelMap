@@ -203,8 +203,11 @@ public sealed partial class PixelMapControl
     private bool ZoomRide(double delta)
     {
         if (ZoomFreeRoam(delta)) return true;
-        if (!Journey.Follow || !Journey.Active) return false;
+        if (!Journey.Follow || Journey.Route is null ||
+            !Journey.Active && Journey.State != JourneyState.Paused) return false;
         _rideZoom = Math.Clamp(_rideZoom + delta, -4, 3);
+        // A paused journey has no subsequent tick to complete the follow spring.
+        if (!Journey.Active) _wasTracking = false;
         UpdateRideCamera(); return true;
     }
 

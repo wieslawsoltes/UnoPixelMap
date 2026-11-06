@@ -116,7 +116,8 @@ public sealed partial class PixelMapControl
     /// <summary>Rotate the active first-person view or the vehicle's orbit camera.</summary>
     public void LookFreeRoam(double bearingDelta, double pitchDelta)
     {
-        if (!Journey.IsFreeRoaming || !double.IsFinite(bearingDelta) || !double.IsFinite(pitchDelta)) return;
+        if (!Journey.IsFreeRoaming || !double.IsFinite(bearingDelta) || !double.IsFinite(pitchDelta) ||
+            bearingDelta == 0 && pitchDelta == 0) return;
         Journey.Follow = true;
         TryLookFreeRoam(bearingDelta, pitchDelta);
     }
@@ -125,6 +126,9 @@ public sealed partial class PixelMapControl
     {
         if (!Journey.IsFreeRoaming || !Journey.Follow) return false;
         if (!double.IsFinite(bearingDelta) || !double.IsFinite(pitchDelta)) return true;
+        // A pure pinch also calls this path with no look delta. Keep north-up and
+        // its vehicle-relative policy until the user actually rotates the view.
+        if (bearingDelta == 0 && pitchDelta == 0) return true;
         if (_rig == JourneyCameraRig.NorthUp) CameraRig = JourneyCameraRig.Orbit;
         Journey.SetLook(Journey.LookBearing + bearingDelta, Journey.LookPitch + pitchDelta);
         return true;

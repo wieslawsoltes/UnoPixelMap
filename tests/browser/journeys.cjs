@@ -200,7 +200,53 @@ async function checkPausedFollow(page) {
     await page.waitForTimeout(500);
     const resumed = (await see(page, cameraReadout)).match(cameraReadout)[0];
     assert.equal(resumed, followed, "Reattaching paused route follow cancels the pending map flight");
-    console.log("Paused route follow owns the camera after an interrupted fit animation.");
+    const followToggle = page.getByRole("button", {name: "Follow vehicle", exact: true});
+    assert.equal(await followToggle.getAttribute("aria-pressed"), "true", "Paused route follow is attached");
+    await page.evaluate(() => {
+        for (const type of ["gesturestart", "gestureend"]) {
+            const gesture = new Event(type, {bubbles: true, cancelable: true});
+            Object.defineProperties(gesture, {scale: {value: 1}, rotation: {value: 0},
+                clientX: {value: 900}, clientY: {value: 420}});
+            document.getElementById("uno-canvas").dispatchEvent(gesture);
+        }
+    });
+    assert.equal(await followToggle.getAttribute("aria-pressed"), "true",
+        "A zero-delta Safari gesture retains paused route follow");
+    const readZoom = text => Number(text.match(/·\s*z([\d.]+)/)[1]);
+    await page.mouse.move(900, 420);
+    await page.keyboard.down("Control");
+    try {
+        // There is no simulation tick to finish a smoothing step while paused.
+        for (let i = 0; i < 2; i++) await page.mouse.wheel(0, -25);
+    } finally { await page.keyboard.up("Control"); }
+    await page.waitForTimeout(300);
+    const zoomed = (await see(page, cameraReadout)).match(cameraReadout)[0];
+    assert.ok(Math.abs(readZoom(zoomed) - readZoom(resumed) - .5) < .06,
+        "Consecutive paused pinches apply their full zoom without waiting for a game tick");
+    assert.equal(await followToggle.getAttribute("aria-pressed"), "true", "Paused pinch preserves the vehicle rig");
+    await page.keyboard.down("Control");
+    try { await page.mouse.wheel(0, 50); }
+    finally { await page.keyboard.up("Control"); }
+    await page.waitForTimeout(300);
+    assert.equal((await see(page, cameraReadout)).match(cameraReadout)[0], resumed,
+        "Inverse paused pinch restores the same followed camera");
+    await page.evaluate(() => {
+        for (const [type, rotation] of [["gesturestart", 0], ["gesturechange", 15], ["gestureend", 15]]) {
+            const gesture = new Event(type, {bubbles: true, cancelable: true});
+            Object.defineProperties(gesture, {scale: {value: 1}, rotation: {value: rotation},
+                clientX: {value: 900}, clientY: {value: 420}});
+            document.getElementById("uno-canvas").dispatchEvent(gesture);
+        }
+    });
+    await page.waitForTimeout(300);
+    assert.equal(await followToggle.getAttribute("aria-pressed"), "false", "Explicit Safari twist takes over the route camera");
+    assert.notEqual((await see(page, cameraReadout)).match(cameraReadout)[0], resumed,
+        "A route camera applies the Safari rotation instead of swallowing it");
+    await click(page, "Follow vehicle");
+    await page.waitForTimeout(300);
+    assert.equal((await see(page, cameraReadout)).match(cameraReadout)[0], resumed,
+        "Follow restores the vehicle camera after the manual twist");
+    console.log("Paused route follow, interrupted fit, exact pinch zoom, zero-delta Safari ownership and explicit twist passed.");
 }
 
 async function checkShare(page) {

@@ -441,10 +441,18 @@ public sealed partial class PixelMapControl
 
     private void ApplyBrowserWheel(BrowserWheelSample wheel, Point point)
     {
-        if (wheel.Kind == BrowserWheelKind.Consumed) return;
+        // Safari routes a zero-delta gesturestart to claim the native gesture.
+        // Owning that event must not cancel a flight, detach follow, or change a rig.
+        if (wheel.Kind == BrowserWheelKind.Consumed || wheel.X == 0 && wheel.Y == 0) return;
         if (wheel.Kind == BrowserWheelKind.Gesture)
         {
-            if (ZoomRide(wheel.X)) { TryLookFreeRoam(wheel.Y, 0); return; }
+            // Route follow owns pinch distance, but an explicit twist takes over
+            // the map bearing just like mouse orbit or a two-contact gesture.
+            if ((wheel.Y == 0 || Journey.IsFreeRoaming) && ZoomRide(wheel.X))
+            {
+                TryLookFreeRoam(wheel.Y, 0);
+                return;
+            }
             StopTrackingForGesture();
             SetImmediateCamera(TransformCamera(Camera, wheel.X, wheel.Y, 0, point.X, point.Y));
             return;

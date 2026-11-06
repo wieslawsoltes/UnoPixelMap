@@ -1,3 +1,4 @@
+using System.Buffers;
 using PixelMap.Data;
 using PixelMap.Routing;
 using SkiaSharp;
@@ -325,30 +326,41 @@ public readonly partial record struct MapCamera
     {
         var next = FitRoute(route, width, height, viewport, padding).OnTerrain(terrain, height);
         if (!terrain.Relief || route.Count == 0) return next;
-        int samples = Math.Min(512, route.Count - 1);
-        for (int pass = 0; pass <= 4 * (MaxZoom - MinZoom); pass++)
+        // Geometry providers do not distribute vertices uniformly. Subsampling by
+        // index can omit the only mountain peak or elevated turn in a dense route.
+        // Read every absolute height once; each lens trial then needs projection
+        // arithmetic only, rather than repeatedly querying the immutable terrain.
+        var heights = ArrayPool<double>.Shared.Rent(route.Count);
+        try
         {
-            double left = double.PositiveInfinity, top = double.PositiveInfinity;
-            double right = double.NegativeInfinity, bottom = double.NegativeInfinity;
-            bool visible = true;
-            for (int sample = 0; sample <= samples; sample++)
+            for (int i = 0; i < route.Count; i++)
             {
-                int index = (int)((long)sample * (route.Count - 1) / Math.Max(1, samples));
-                var point = route[index];
-                double surface = terrain.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude);
-                double altitude = next.GroundAltitudeMeters + (surface - next.GroundAltitudeMeters) * terrain.HeightScale;
-                visible &= next.TryProject(point.Latitude, point.Longitude, altitude, width, height, out var screen);
-                left = Math.Min(left, screen.X); right = Math.Max(right, screen.X);
-                top = Math.Min(top, screen.Y); bottom = Math.Max(bottom, screen.Y);
+                var point = route[i];
+                heights[i] = terrain.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude);
             }
             // Subpixel inverse-projection noise must not trigger another zoom step.
-            if (visible && left >= viewport.Left + padding - .01 && right <= viewport.Right - padding + .01 &&
-                top >= viewport.Top + padding - .01 && bottom <= viewport.Bottom - padding + .01) break;
-            if (next.Zoom <= MinZoom) break;
-            // Preserve the unobstructed viewport's anchor while expanding the fit.
-            // Directly changing Zoom pulls the route behind asymmetric UI insets.
-            next = next.TransformAt(-.25, 0, 0, viewport.MidX, viewport.MidY, width, height, terrain);
+            double left = viewport.Left + padding - .01, right = viewport.Right - padding + .01;
+            double top = viewport.Top + padding - .01, bottom = viewport.Bottom - padding + .01;
+            double scale = terrain.HeightScale;
+            for (int pass = 0; pass <= 4 * (MaxZoom - MinZoom); pass++)
+            {
+                bool fits = true;
+                for (int i = 0; i < route.Count; i++)
+                {
+                    var point = route[i];
+                    double altitude = next.GroundAltitudeMeters + (heights[i] - next.GroundAltitudeMeters) * scale;
+                    if (next.TryProject(point.Latitude, point.Longitude, altitude, width, height, out var screen) &&
+                        screen.X >= left && screen.X <= right && screen.Y >= top && screen.Y <= bottom) continue;
+                    fits = false;
+                    break;
+                }
+                if (fits || next.Zoom <= MinZoom) break;
+                // Preserve the unobstructed viewport's anchor while expanding the fit.
+                // Directly changing Zoom pulls the route behind asymmetric UI insets.
+                next = next.TransformAt(-.25, 0, 0, viewport.MidX, viewport.MidY, width, height, terrain);
+            }
+            return next;
         }
-        return next;
+        finally { ArrayPool<double>.Shared.Return(heights); }
     }
 }

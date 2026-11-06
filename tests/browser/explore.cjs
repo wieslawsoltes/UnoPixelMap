@@ -547,7 +547,24 @@ async function freeRoam(page) {
     } finally { await page.keyboard.up("w"); }
     await screen(page, "game-car-chase");
     await expandSettings(page);
-    for (const camera of [1, 2, 3, 4, 0]) await choose(page, "Free roam camera", camera);
+    for (const camera of [1, 2, 3, 4, 0]) {
+        await choose(page, "Free roam camera", camera);
+        if (camera !== 4) continue;
+        const northUp = page.getByRole("combobox", {name: "Free roam camera", exact: true});
+        const selected = await northUp.ariaSnapshot();
+        await page.evaluate(() => {
+            for (const [type, scale] of [["gesturestart", 1], ["gesturechange", 1.5], ["gestureend", 1.5]]) {
+                const gesture = new Event(type, {bubbles: true, cancelable: true});
+                Object.defineProperties(gesture, {scale: {value: scale}, rotation: {value: 0},
+                    clientX: {value: 900}, clientY: {value: 420}});
+                document.getElementById("uno-canvas").dispatchEvent(gesture);
+            }
+        });
+        await page.waitForTimeout(250);
+        assert.equal(await northUp.ariaSnapshot(), selected,
+            "A pure Safari pinch retains the north-up camera instead of switching to orbit");
+        assert.equal((await readCamera(page)).bearing, 0, "North-up pinch preserves its compass orientation");
+    }
     await action(page, "Collapse game settings");
     console.log("Car driving and all five camera rigs passed.");
 
