@@ -9,6 +9,7 @@ internal static class TerrainRenderingChecks
 
     internal static void Run()
     {
+        TerrainMeshChecks.Run();
         var id = new TileId(14, 8192, 8192);
         var center = Geo(id, .5, .5);
         var camera = new MapCamera(center.Latitude, center.Longitude, 14.4, 23, 55, true);

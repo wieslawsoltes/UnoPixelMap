@@ -2,6 +2,12 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--terrain-preparation", StringComparer.Ordinal))
+{
+    TerrainMeshChecks.Run(args);
+    return;
+}
+
 if (args.Contains("--gpu-terrain", StringComparer.Ordinal))
 {
     GlTerrainChecks.Run(args);

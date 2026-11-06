@@ -20,6 +20,8 @@ internal sealed class TerrainSurface : IDisposable
     private readonly Dictionary<(TileId Id, int Copy), GpuTerrainMesh> gpuMeshes = [];
     private readonly Dictionary<TileId, (double Low, double High)> bounds = [];
     private readonly List<Patch> patches = [];
+    private readonly List<Patch> children = new(4);
+    private readonly List<(TileId Id, int Copy)> heightLayout = [];
     private readonly List<float[]> stitched = [];
     private readonly Dictionary<TileId, int> heightPatches = [];
     private readonly List<int> heightZooms = [];
@@ -40,6 +42,7 @@ internal sealed class TerrainSurface : IDisposable
     private TileProjection projection;
     private GpuMapFrame? gpuScene;
     private GpuTerrainMesh[] previousGpuSelection = [];
+    private bool heightLayoutChanged;
     internal long HeightRevision { get; private set; }
 
     private sealed class Texture(SKBitmap bitmap, SKRect[] earthAreas) : IDisposable
@@ -171,7 +174,8 @@ internal sealed class TerrainSurface : IDisposable
         meters = (float)(camera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
             Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
         projection = new(camera, logicalWidth, logicalHeight, pixelSize);
-        if (!ReferenceEquals(elevation, terrain.Elevation))
+        heightLayoutChanged = !ReferenceEquals(elevation, terrain.Elevation);
+        if (heightLayoutChanged)
         {
             elevation = terrain.Elevation;
             meshes.Clear();
@@ -181,18 +185,29 @@ internal sealed class TerrainSurface : IDisposable
         // Process coarser edges first. Fine meshes interpolate those same edges, including
         // corners already shared with an even coarser neighbour, preventing LOD cracks.
         patches.Sort(static (a, b) => a.Id.Z.CompareTo(b.Id.Z));
+        if (heightLayout.Count != patches.Count) heightLayoutChanged = true;
+        if (!heightLayoutChanged)
+            for (int i = 0; i < patches.Count; i++)
+                if (heightLayout[i] != (patches[i].Id, patches[i].Copy)) { heightLayoutChanged = true; break; }
+        // Heights, shared edges and skirt floors depend on the DEM and ordered patch
+        // layout, not the camera transform. Retain them while that layout is unchanged.
+        if (heightLayoutChanged) heightLayout.Clear();
         heightPatches.Clear();
         heightZooms.Clear();
         for (int i = 0; i < patches.Count; i++)
         {
             var patch = patches[i];
             var mesh = GetMesh(patch.Id);
-            if (i == stitched.Count) stitched.Add(new float[Side * Side]);
-            mesh.Heights.CopyTo(stitched[i], 0);
-            Stitch(i, patch, stitched[i]);
-            float minimum = float.PositiveInfinity;
-            foreach (float value in stitched[i]) minimum = Math.Min(minimum, value);
-            patchFloors[i] = minimum;
+            if (heightLayoutChanged)
+            {
+                if (i == stitched.Count) stitched.Add(new float[Side * Side]);
+                mesh.Heights.CopyTo(stitched[i], 0);
+                Stitch(i, patch, stitched[i]);
+                float minimum = float.PositiveInfinity;
+                foreach (float value in stitched[i]) minimum = Math.Min(minimum, value);
+                patchFloors[i] = minimum;
+                heightLayout.Add((patch.Id, patch.Copy));
+            }
             if (heightZooms.Count == 0 || heightZooms[^1] != patch.Id.Z) heightZooms.Add(patch.Id.Z);
             if (!heightPatches.TryGetValue(patch.Id, out int other) ||
                 Math.Abs(patch.Left + patch.Size * .5 - camera.CenterX) < Math.Abs(patches[other].Left + patch.Size * .5 - camera.CenterX))
@@ -230,7 +245,14 @@ internal sealed class TerrainSurface : IDisposable
         var heights = stitched[index];
         var key = (patch.Id, patch.Copy);
         gpuMeshes.TryGetValue(key, out var retained);
-        if (retained is not null && retained.Frame == frame && retained.RenderStyle == options.RenderStyle) return retained;
+        if (retained is not null && retained.RenderStyle == options.RenderStyle &&
+            (retained.Frame == frame || !heightLayoutChanged && retained.Frame == frame - 1))
+        {
+            // The consecutive-frame guard excludes meshes left behind by a CPU-only
+            // interlude, which may have changed the DEM without updating GPU resources.
+            retained.Frame = frame;
+            return retained;
+        }
         bool blocks = MapRendering.Blocks(options.RenderStyle);
         if (blocks)
             TerrainBlockMesh.WriteHeights(patch.Id, heights, source.Light, SkirtHeight(index), options.RenderStyle, blockHeights);
@@ -326,7 +348,6 @@ internal sealed class TerrainSurface : IDisposable
         int first = Math.Max(centerCopy - MaximumPatches / 2, copies.First - 1);
         int last = Math.Min(centerCopy + MaximumPatches / 2 - 1, copies.Last + 1);
         for (int copy = first; copy <= last; copy++) AddPatch(new(0, 0, 0), copy, patches);
-        var children = new List<Patch>(4);
         while (patches.Count < MaximumPatches)
         {
             int candidate = -1;
@@ -436,18 +457,33 @@ internal sealed class TerrainSurface : IDisposable
         var mesh = new Mesh { Frame = frame };
         double size = 1d / (1 << id.Z), left = id.X * size, top = id.Y * size;
         double step = size / Segments;
-        for (int row = 0; row < Side; row++)
-        for (int column = 0; column < Side; column++)
+        const int SampleSide = Side + 2;
+        Span<double> samples = stackalloc double[SampleSide * SampleSide];
+        // Each five-point derivative stencil shares its samples with adjacent vertices.
+        // A one-sample border needs 357 lookups instead of 1,445 per patch. Tile origins
+        // and steps are binary fractions, preserving the original x +/- step inputs
+        // exactly, including wrapped longitude and clamped polar samples.
+        for (int row = -1; row <= Side; row++)
         {
-            double x = left + column * step, y = top + row * step;
-            int index = row * Side + column;
-            mesh.Heights[index] = (float)elevation!.SampleSurfaceMercator(x, y);
+            bool border = row == -1 || row == Side;
+            double y = top + row * step;
+            for (int column = border ? 0 : -1; column <= (border ? Segments : Side); column++)
+                samples[(row + 1) * SampleSide + column + 1] = elevation!.SampleSurfaceMercator(left + column * step, y);
+        }
+        for (int row = 0; row < Side; row++)
+        {
+            double y = top + row * step;
             double latitude = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * y)));
             double span = 2 * step * MapCamera.EarthCircumference * Math.Cos(latitude);
-            double dx = (elevation.SampleSurfaceMercator(x + step, y) - elevation.SampleSurfaceMercator(x - step, y)) / Math.Max(1, span);
-            double dy = (elevation.SampleSurfaceMercator(x, y + step) - elevation.SampleSurfaceMercator(x, y - step)) / Math.Max(1, span);
-            // Northwest light in geographic space stays fixed while the camera orbits.
-            mesh.Light[index] = (float)((.45 * dx + .55 * dy + .705) / Math.Sqrt(1 + dx * dx + dy * dy));
+            for (int column = 0; column < Side; column++)
+            {
+                int index = row * Side + column, sample = (row + 1) * SampleSide + column + 1;
+                mesh.Heights[index] = (float)samples[sample];
+                double dx = (samples[sample + 1] - samples[sample - 1]) / Math.Max(1, span);
+                double dy = (samples[sample + SampleSide] - samples[sample - SampleSide]) / Math.Max(1, span);
+                // Northwest light in geographic space stays fixed while the camera orbits.
+                mesh.Light[index] = (float)((.45 * dx + .55 * dy + .705) / Math.Sqrt(1 + dx * dx + dy * dy));
+            }
         }
         meshes[id] = mesh;
         return mesh;
@@ -773,7 +809,7 @@ internal sealed class TerrainSurface : IDisposable
     public void Dispose()
     {
         ClearTextures();
-        meshes.Clear(); bounds.Clear(); patches.Clear(); stitched.Clear(); heightPatches.Clear(); heightZooms.Clear();
+        meshes.Clear(); bounds.Clear(); patches.Clear(); children.Clear(); heightLayout.Clear(); stitched.Clear(); heightPatches.Clear(); heightZooms.Clear();
         gpuMeshes.Clear(); previousGpuSelection = []; gpuScene = null;
         groundAltitude = []; groundHeight = []; depthX = []; depthY = []; photograph = []; photographic = [];
     }
