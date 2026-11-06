@@ -2,6 +2,7 @@ using PixelMap.App;
 using PixelMap.Data;
 using PixelMap.Rendering;
 using PixelMap.Routing;
+using SkiaSharp;
 
 internal static class TerrainCameraChecks
 {
@@ -66,6 +67,7 @@ internal static class TerrainCameraChecks
             "Flat elevation mode failed to preserve flight clearance");
 
         SteepAnchors();
+        InsetRouteFits();
         MountainRays();
         Links();
         Console.WriteLine("Passed terrain camera datum, height-field inverse, orbit/zoom/drag and flight-follow anchors, signed heights and v1–v4 view links.");
@@ -111,6 +113,54 @@ internal static class TerrainCameraChecks
             cases++;
         }
         Console.WriteLine($"Passed {cases} steep-slope follow anchors with {worst:F4}px maximum projection error.");
+    }
+
+    private static void InsetRouteFits()
+    {
+        const int width = 900, height = 600, size = 64;
+        var id = new TileId(14, 8192, 8192);
+        var values = new float[size * size];
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++) values[y * size + x] = 1000 + x * 15 + y * 12;
+        var terrain = new TerrainOptions(new ElevationSnapshot([
+            new ElevationTile(new(0, 0, 0), 2, [1000, 1000, 1000, 1000]),
+            new ElevationTile(id, size, values)]), Exaggeration: 4);
+        RoutePoint[] route = [Point(.25, .25), Point(.5, .6), Point(.75, .75)];
+        var origin = Point(.5, .5);
+        int cases = 0;
+        foreach (bool perspective in new[] { false, true })
+        foreach (double bearing in new[] { 0d, 67, -145 })
+        foreach (double pitch in new[] { 0d, 42, 67 })
+        foreach (var viewport in new[]
+        {
+            new SKRect(0, 0, 900, 240), new SKRect(0, 360, 900, 600), new SKRect(600, 0, 900, 600)
+        })
+        {
+            var camera = new MapCamera(origin.Latitude, origin.Longitude, 15, bearing, pitch, perspective);
+            var fitted = camera.FitRoute(route, width, height, viewport, 20, terrain);
+            Assert(fitted.Zoom > MapCamera.MinZoom,
+                "Terrain route fitting exhausted the lens range behind an asymmetric inset");
+            if (!perspective && pitch == 0)
+                Assert(Math.Abs(fitted.Zoom - camera.FitRoute(route, width, height, viewport, 20).Zoom) < 1e-9,
+                    "Subpixel rounding changed the scale of an already-fitted overhead route");
+            foreach (var point in route)
+            {
+                double surface = terrain.Elevation.SampleSurfaceMeters(point.Latitude, point.Longitude);
+                double altitude = terrain.RenderAltitude(fitted, point.Latitude, point.Longitude, surface);
+                Assert(fitted.TryProject(point.Latitude, point.Longitude, altitude, width, height, out var screen) &&
+                    screen.X >= viewport.Left + 19.99 && screen.X <= viewport.Right - 19.99 &&
+                    screen.Y >= viewport.Top + 19.99 && screen.Y <= viewport.Bottom - 19.99,
+                    $"Terrain fit left the safe viewport at perspective={perspective}, bearing={bearing}, pitch={pitch}, viewport={viewport}");
+            }
+            cases++;
+        }
+        Console.WriteLine($"Passed {cases} elevated route fits with top, bottom and side UI insets.");
+
+        RoutePoint Point(double x, double y)
+        {
+            var point = Geographic((id.X + x) / (1 << id.Z), (id.Y + y) / (1 << id.Z));
+            return new(point.Latitude, point.Longitude);
+        }
     }
 
     private static void MountainRays()

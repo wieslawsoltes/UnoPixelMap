@@ -46,23 +46,20 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
         if (vehicle.Motion is MotionModel.Aircraft or MotionModel.FreeFlight && CrossesTerrain(elevation, from, to, fromAltitudeMeters, toAltitudeMeters))
             return true;
 
-        bool Obstructed(RoutePoint point, double altitude)
-        {
-            var index = ObstaclesAt(tiles, point, out double x, out double y, out double tileMeters);
-            return index is not null && index.Obstructs(vehicle, x, y, altitude, tileMeters, elevation);
-        }
+        // An unchanged pose cannot enter geometry and keeps the same streamed-tile escape behavior.
+        if (from == to && fromAltitudeMeters == toAltitudeMeters) return false;
+        var sweep = new ContactSweep(this, scene, vehicle, from, to, fromAltitudeMeters, toAltitudeMeters);
 
         // A newly streamed tile may put the current vehicle inside a polygon. Allow escape.
-        if (Obstructed(from, fromAltitudeMeters)) return false;
-        if (Obstructed(to, toAltitudeMeters)) return true;
+        if (sweep.Obstructed(from, fromAltitudeMeters)) return false;
+        if (sweep.Obstructed(to, toAltitudeMeters)) return true;
 
         var (startX, startY) = Project(from);
         var (endX, endY) = Project(to);
         endX = startX + RoutePoint.Wrap((endX - startX) * 360) / 360;
-        bool ObstructedBetween(double fraction) => Obstructed(from.InterpolateTo(to, fraction),
-            fromAltitudeMeters + (toAltitudeMeters - fromAltitudeMeters) * fraction);
-        foreach (var tile in tiles)
+        for (int i = 0; i < tiles.Count; i++)
         {
+            var tile = tiles[i];
             if (tile.Id.Z < 12) continue;
             double count = Math.Pow(2, tile.Id.Z);
             double originX = tile.Id.X + Math.Round(startX - tile.Id.X / count) * count;
@@ -70,9 +67,22 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
             double bx = endX * count - originX, by = endY * count - tile.Id.Y;
             if (Math.Max(ax, bx) < 0 || Math.Min(ax, bx) >= 1 || Math.Max(ay, by) < 0 || Math.Min(ay, by) >= 1) continue;
             if (_indices.GetValue(tile, static resident => new(resident))
-                .CrossesBuilding(ax, ay, bx, by, fromAltitudeMeters, toAltitudeMeters, elevation, ObstructedBetween)) return true;
+                .CrossesBuilding(ax, ay, bx, by, sweep)) return true;
         }
         return false;
+    }
+
+    private readonly record struct ContactSweep(VectorCollisionWorld World, Scene Scene, VehicleProfile Vehicle,
+        RoutePoint From, RoutePoint To, double FromAltitude, double ToAltitude)
+    {
+        public bool Obstructed(RoutePoint point, double altitude)
+        {
+            var index = World.ObstaclesAt(Scene.Tiles, point, out double x, out double y, out double tileMeters);
+            return index is not null && index.Obstructs(Vehicle, x, y, altitude, tileMeters, Scene.Elevation);
+        }
+
+        public bool ObstructedBetween(double fraction) => Obstructed(From.InterpolateTo(To, fraction),
+            FromAltitude + (ToAltitude - FromAltitude) * fraction);
     }
 
     private TileObstacles? ObstaclesAt(IReadOnlyList<MapTile> tiles, RoutePoint point,
@@ -83,8 +93,9 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
         double y = (1 - Math.Asinh(Math.Tan(latitude)) / Math.PI) * .5;
         MapTile? selected = null;
         localX = localY = tileMeters = 0;
-        foreach (var tile in tiles)
+        for (int i = 0; i < tiles.Count; i++)
         {
+            var tile = tiles[i];
             if (tile.Id.Z < 12 || tile.Id.Z <= (selected?.Id.Z ?? -1)) continue;
             double count = Math.Pow(2, tile.Id.Z);
             double tx = x * count - tile.Id.X, ty = y * count - tile.Id.Y;
@@ -189,7 +200,7 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
             ElevationSnapshot elevation)
         {
             var entries = _buckets[(int)(ty * Cells) * Cells + (int)(tx * Cells)];
-            var foundations = elevation.Count == 0 ? null : _foundations.GetValue(elevation, _sampleFoundations);
+            double[]? foundations = null;
             bool ground = vehicle.Motion is MotionModel.Ground or MotionModel.Pedestrian;
             bool water = false, building = false, crossing = false, tunnel = false;
             if (entries is not null)
@@ -199,6 +210,7 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
                 double x = tx * feature.Extent, y = ty * feature.Extent;
                 if (feature.Layer == "building")
                 {
+                    if (elevation.Count > 0) foundations ??= _foundations.GetValue(elevation, _sampleFoundations);
                     double foundation = foundations is null ? 0 : foundations[obstacle.BuildingIndex];
                     building |= altitude >= foundation + (feature.MinHeight ?? 0) && altitude < foundation + (feature.Height ?? 8)
                         && Contains(feature.Paths, x, y);
@@ -222,10 +234,11 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
             return ground && water && !crossing;
         }
 
-        public bool CrossesBuilding(double ax, double ay, double bx, double by, double fromAltitude, double toAltitude,
-            ElevationSnapshot elevation, Func<double, bool> obstructed)
+        public bool CrossesBuilding(double ax, double ay, double bx, double by, in ContactSweep sweep)
         {
-            var foundations = elevation.Count == 0 ? null : _foundations.GetValue(elevation, _sampleFoundations);
+            var elevation = sweep.Scene.Elevation;
+            double fromAltitude = sweep.FromAltitude, toAltitude = sweep.ToAltitude;
+            double[]? foundations = null;
             int Cell(double value) => Math.Clamp((int)Math.Floor(value * Cells), 0, Cells - 1);
             for (int cy = Cell(Math.Min(ay, by)); cy <= Cell(Math.Max(ay, by)); cy++)
             for (int cx = Cell(Math.Min(ax, bx)); cx <= Cell(Math.Max(ax, bx)); cx++)
@@ -236,6 +249,7 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
                 {
                     var feature = obstacle.Feature;
                     if (feature.Layer != "building") continue;
+                    if (elevation.Count > 0) foundations ??= _foundations.GetValue(elevation, _sampleFoundations);
                     double foundation = foundations is null ? 0 : foundations[obstacle.BuildingIndex];
                     double bottom = foundation + (feature.MinHeight ?? 0), top = foundation + (feature.Height ?? 8);
                     if (Math.Max(fromAltitude, toAltitude) < bottom || Math.Min(fromAltitude, toAltitude) >= top) continue;
@@ -249,14 +263,14 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
                         if (last <= first) continue;
                     }
                     if (CrossesInterior(feature.Paths, ax * feature.Extent, ay * feature.Extent,
-                        bx * feature.Extent, by * feature.Extent, first, last, obstructed)) return true;
+                        bx * feature.Extent, by * feature.Extent, first, last, sweep)) return true;
                 }
             }
             return false;
         }
 
         private static bool CrossesInterior(TilePoint[][] rings, double ax, double ay, double bx, double by,
-            double first, double last, Func<double, bool> obstructed)
+            double first, double last, in ContactSweep sweep)
         {
             double dx = bx - ax, dy = by - ay;
             List<double>? crossings = null;
@@ -281,7 +295,7 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
             if (crossings is null)
             {
                 double middle = (first + last) * .5;
-                return Contains(rings, ax + dx * middle, ay + dy * middle) && obstructed(middle);
+                return Contains(rings, ax + dx * middle, ay + dy * middle) && sweep.ObstructedBetween(middle);
             }
             crossings.Add(first);
             crossings.Add(last);
@@ -290,7 +304,7 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
             {
                 if (crossings[i] - crossings[i - 1] < 1e-10) continue;
                 double fraction = (crossings[i] + crossings[i - 1]) * .5;
-                if (Contains(rings, ax + dx * fraction, ay + dy * fraction) && obstructed(fraction)) return true;
+                if (Contains(rings, ax + dx * fraction, ay + dy * fraction) && sweep.ObstructedBetween(fraction)) return true;
             }
             return false;
         }

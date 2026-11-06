@@ -290,6 +290,57 @@ internal static class FreeRoamChecks
         world.TryMoveOnRails(At(id, 4050, 2000), 90, 80, 0, out var separateLevel, out _);
         Check(separateLevel.Longitude <= At(nextId, 0, 2000).Longitude + .0000001,
             "Track endpoints at different levels cannot become an accidental junction.");
+        RailSnapshotReuse();
+    }
+
+    private static void RailSnapshotReuse()
+    {
+        var id = new TileId(14, 8192, 8192);
+        var otherId = new TileId(14, 8193, 8192);
+        var track = Rail([new(1000, 2000), new(3000, 2000)]);
+        var tile = new MapTile(id, [track]);
+        var other = new MapTile(otherId, [track]);
+        var world = new VectorCollisionWorld();
+        RoutePoint start = At(id, 1700, 2000), otherStart = At(otherId, 1700, 2000);
+        world.Update([tile, other]);
+        Check(world.TryMoveOnRails(start, 90, .5, 0, out var expected, out var expectedHeading),
+            "Both resident source tiles contribute to the rail graph.");
+        var networkField = typeof(VectorCollisionWorld).GetField("_railNetwork",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+        var original = networkField.GetValue(world);
+        world.Update([other, tile]);
+        Check(ReferenceEquals(original, networkField.GetValue(world)), "Reordering resident sources retains the rail graph.");
+        for (int i = 0; i < 32; i++) world.TryMoveOnRails(start, 90, .5, 0, out _, out _);
+        long allocated = GC.GetAllocatedBytesForCurrentThread();
+        bool same = true;
+        for (int i = 0; i < 256; i++)
+            same &= world.TryMoveOnRails(start, 90, .5, 0, out var point, out var heading) &&
+                point == expected && heading == expectedHeading;
+        Check(same && GC.GetAllocatedBytesForCurrentThread() == allocated,
+            "Reordered source snapshots preserve train movement without allocating per-step membership sets.");
+
+        var replacement = tile with { };
+        Check(replacement == tile && !ReferenceEquals(replacement, tile), "The replacement has equal data and a distinct immutable identity.");
+        world.Update([other, replacement]);
+        Check(world.TryMoveOnRails(start, 90, .5, 0, out _, out _) && !ReferenceEquals(original, networkField.GetValue(world)),
+            "An equal-valued replacement tile rebuilds the rail graph using instance identity.");
+
+        world.Update([tile, other]);
+        Check(world.TryMoveOnRails(otherStart, 90, .5, 0, out _, out _), "The second source initially has navigable rails.");
+        world.Update([tile, tile]);
+        Check(!world.TryMoveOnRails(otherStart, 90, .5, 0, out _, out _) &&
+            world.TryMoveOnRails(start, 90, .5, 0, out _, out _),
+            "A duplicated remaining source cannot preserve rails from a removed tile.");
+        original = networkField.GetValue(world);
+        world.TryMoveOnRails(start, 90, .5, 0, out _, out _);
+        Check(ReferenceEquals(original, networkField.GetValue(world)), "An unchanged duplicate source sequence retains its graph.");
+
+        MapTile[] mutableSources = [tile, other];
+        world.Update(mutableSources);
+        Check(world.TryMoveOnRails(otherStart, 90, .5, 0, out _, out _), "The mutable source list initially contains both rail tiles.");
+        mutableSources[1] = new(otherId, []);
+        Check(!world.TryMoveOnRails(otherStart, 90, .5, 0, out _, out _),
+            "A changed caller-owned source sequence cannot reuse a stale matched order.");
     }
 
     private static void SessionLifecycle()

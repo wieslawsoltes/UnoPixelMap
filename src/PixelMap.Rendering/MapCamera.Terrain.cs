@@ -237,7 +237,7 @@ public readonly partial record struct MapCamera
 
         MapCamera Shift(MapCamera camera, double dx, double dy)
         {
-            var center = Geographic(camera.CenterX + dx, camera.CenterY + dy);
+            var center = Geographic(camera.CenterX + dx, camera.CenterY + dy, clampToMap: !camera.IsFreeLook || !camera.Perspective);
             return (camera with { Latitude = center.Latitude, Longitude = center.Longitude }).OnTerrain(terrain, height);
         }
     }
@@ -305,7 +305,8 @@ public readonly partial record struct MapCamera
 
         MapCamera CenterAt(double u, double v)
         {
-            var location = Geographic(worldX - (u * cos - v * sin) / world, worldY - (u * sin + v * cos) / world);
+            var location = Geographic(worldX - (u * cos - v * sin) / world, worldY - (u * sin + v * cos) / world,
+                clampToMap: !basis.IsFreeLook || !basis.Perspective);
             return basis with { Latitude = location.Latitude, Longitude = location.Longitude };
         }
 
@@ -340,10 +341,13 @@ public readonly partial record struct MapCamera
                 left = Math.Min(left, screen.X); right = Math.Max(right, screen.X);
                 top = Math.Min(top, screen.Y); bottom = Math.Max(bottom, screen.Y);
             }
-            if (visible && left >= viewport.Left + padding && right <= viewport.Right - padding &&
-                top >= viewport.Top + padding && bottom <= viewport.Bottom - padding) break;
+            // Subpixel inverse-projection noise must not trigger another zoom step.
+            if (visible && left >= viewport.Left + padding - .01 && right <= viewport.Right - padding + .01 &&
+                top >= viewport.Top + padding - .01 && bottom <= viewport.Bottom - padding + .01) break;
             if (next.Zoom <= MinZoom) break;
-            next = (next with { Zoom = Math.Max(MinZoom, next.Zoom - .25) }).OnTerrain(terrain, height);
+            // Preserve the unobstructed viewport's anchor while expanding the fit.
+            // Directly changing Zoom pulls the route behind asymmetric UI insets.
+            next = next.TransformAt(-.25, 0, 0, viewport.MidX, viewport.MidY, width, height, terrain);
         }
         return next;
     }

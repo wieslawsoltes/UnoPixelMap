@@ -206,7 +206,15 @@ internal static class ElevationChecks
         var tower = Polygon("building", Box(2000, 1950, 2200, 2150)) with { Height = 60, MinHeight = 30 };
         var mapped = new MapTile(Tile, [tower]);
         var world = new VectorCollisionWorld();
+        world.Update([mapped]);
+        RoutePoint clear = At(3000, 3000), next = At(3001, 3000);
+        Check(!world.Blocks(VehicleProfile.Car, clear, next, 0), "The clear collision cell can be indexed before elevation arrives.");
         world.Update([mapped], Constant(1500));
+        long allocated = GC.GetAllocatedBytesForCurrentThread();
+        bool blocked = false;
+        for (int i = 0; i < 32; i++) blocked |= world.Blocks(VehicleProfile.Car, clear, next, 1500);
+        Check(!blocked && GC.GetAllocatedBytesForCurrentThread() == allocated,
+            "An elevation refresh leaves unrelated building foundations unallocated until a contact query needs them.");
         RoutePoint outside = At(1950, 2050), inside = At(2050, 2050);
         Check(!world.Blocks(VehicleProfile.Plane, outside, inside, 1529), "A raised building retains clearance above an elevated foundation.");
         Check(world.Blocks(VehicleProfile.Plane, outside, inside, 1530), "Raised contact begins at foundation plus minimum height.");

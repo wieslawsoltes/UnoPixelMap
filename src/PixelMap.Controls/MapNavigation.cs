@@ -200,6 +200,7 @@ public sealed partial class PixelMapControl
 
     private void SetImmediateCamera(MapCamera camera)
     {
+        ResetMapPointers();
         bool moving = _motion.IsEnabled;
         StopMotion(invalidate: false);
         var previous = Camera;

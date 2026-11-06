@@ -66,6 +66,8 @@ public sealed partial class PixelMapControl
     public void StopFreeRoam()
     {
         if (!Journey.IsFreeRoaming) return;
+        ResetMapPointers();
+        StopMotion(invalidate: false);
         var point = new RoutePoint(Journey.Latitude, Journey.Longitude);
         double bearing = Journey.LookBearing;
         var route = _routeBeforeFreeRoam;
@@ -82,6 +84,7 @@ public sealed partial class PixelMapControl
 
     private void PrepareFreeRoam()
     {
+        ResetMapPointers();
         if (!Journey.IsFreeRoaming)
         {
             _routeBeforeFreeRoam = Journey.Route;

@@ -208,6 +208,8 @@ internal static class FreeCameraChecks
     private static void MercatorEdges()
     {
         var page = new Uri("https://wieslawsoltes.github.io/UnoPixelMap/");
+        var terrain = new TerrainOptions(new ElevationSnapshot([
+            new ElevationTile(new(0, 0, 0), 2, [1200, 1200, 1200, 1200])]));
         foreach (double latitude in new[] { -MapCamera.MaxLatitude, MapCamera.MaxLatitude })
         foreach (double longitude in new[] { -179.999999, 179.999999 })
         foreach (double bearing in new[] { 0d, 90, 180, -90 })
@@ -218,7 +220,14 @@ internal static class FreeCameraChecks
             var rotated = MapCamera.FromEye(latitude, longitude, 1201.7, bearing + 170, 35, 900, 600,
                 groundAltitudeMeters: 1200);
             var interpolated = camera.Interpolate(rotated, .5);
-            foreach (var view in new[] { camera, camera.ForViewport(390, 844), interpolated })
+            foreach (var view in new[]
+            {
+                camera, camera.ForViewport(390, 844), interpolated, camera.PanBy(0, 0),
+                camera.PanFromTo(450, 450, 450, 450, 900, 600),
+                camera.TransformAt(0, 0, 0, 450, 450, 900, 600),
+                camera.PanFromTo(450, 450, 450, 450, 900, 600, terrain),
+                camera.TransformAt(0, 0, 0, 450, 450, 900, 600, terrain)
+            })
             {
                 var eye = view.GetEye(view.ViewportHeight);
                 Assert(Math.Abs(eye.Latitude - latitude) < 1e-10 && LongitudeError(eye.Longitude, longitude) < 1e-10 &&

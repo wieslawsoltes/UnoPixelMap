@@ -248,7 +248,7 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         for (int i = 0; i < (Perspective && TargetAltitudeMeters != 0 ? 4 : 1); i++)
         {
             var offset = next.GroundOffset(screenX - width*.5, screenY - height*.5, height);
-            var center = Geographic(worldX - offset.X, worldY - offset.Y);
+            var center = Geographic(worldX - offset.X, worldY - offset.Y, clampToMap: !IsFreeLook || !Perspective);
             next = next with { Latitude = center.Latitude, Longitude = center.Longitude };
         }
         return next;
@@ -258,7 +258,7 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
     public MapCamera PanBy(double dx, double dy)
     {
         var delta = GroundOffset(-dx, -dy);
-        var center = Geographic(CenterX + delta.X, CenterY + delta.Y);
+        var center = Geographic(CenterX + delta.X, CenterY + delta.Y, clampToMap: !IsFreeLook || !Perspective);
         return this with { Latitude = center.Latitude, Longitude = center.Longitude };
     }
 

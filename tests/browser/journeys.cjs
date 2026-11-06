@@ -186,6 +186,23 @@ async function checkLens(page) {
     throw new Error("The perspective lens did not visibly reproject map geometry");
 }
 
+async function checkPausedFollow(page) {
+    const cameraReadout = /rendering\s*·\s*-?[\d.]+°,[ ]*-?[\d.]+°\s*·\s*z[\d.]+\s*·\s*-?[\d.]+°/;
+    await page.waitForTimeout(350);
+    const followed = (await see(page, cameraReadout)).match(cameraReadout)[0];
+    const fit = await page.getByRole("button", {name: "Fit route", exact: true}).boundingBox();
+    const follow = await page.getByRole("button", {name: "Follow vehicle", exact: true}).boundingBox();
+    assert.ok(fit?.width > 0 && follow?.width > 0, "The paused route exposes fit and follow controls");
+    // Keep the native clicks adjacent so the route reclaims the camera while
+    // the 240 ms fitting animation still owns a timer. The game clock is paused.
+    await page.mouse.click(fit.x + fit.width / 2, fit.y + fit.height / 2);
+    await page.mouse.click(follow.x + follow.width / 2, follow.y + follow.height / 2);
+    await page.waitForTimeout(500);
+    const resumed = (await see(page, cameraReadout)).match(cameraReadout)[0];
+    assert.equal(resumed, followed, "Reattaching paused route follow cancels the pending map flight");
+    console.log("Paused route follow owns the camera after an interrupted fit animation.");
+}
+
 async function checkShare(page) {
     await click(page, "Map appearance");
     await activate(page, "menuitem", "Share this view");
@@ -266,6 +283,7 @@ async function drive(browser) {
         await see(page, /Route preview/);
         await click(page, "Pause or resume journey");
         await see(page, /Journey paused/);
+        await checkPausedFollow(page);
         await click(page, "Take manual control");
         await see(page, /Manual control/);
         await page.keyboard.down("w");

@@ -16,8 +16,11 @@ internal static class WorldChecks
         {
             Check(world.Blocks(vehicle, land, wet, 0), $"{vehicle.Id} must meet a shoreline barrier.");
             Check(!world.Blocks(vehicle, wet, land, 0), "A vehicle caught in newly loaded water can leave it.");
+            Check(!world.Blocks(vehicle, wet, wet, 0), "A stationary pose in newly streamed water preserves the escape rule.");
         }
         Check(world.Blocks(VehicleProfile.Boat, wet, land, 0), "A vessel cannot climb onto land.");
+        Check(!world.Blocks(VehicleProfile.Boat, land, land, 0) && !world.Blocks(VehicleProfile.Boat, wet, wet, 0),
+            "Stationary vessel contact preserves both newly streamed land and navigable-water behavior.");
         Check(!world.Blocks(VehicleProfile.Plane, land, wet, 50), "Aircraft can fly across water.");
 
         var bridge = Line("transportation", "minor", [new(1900, 2050), new(2300, 2050)]) with { Brunnel = "bridge" };
@@ -112,7 +115,36 @@ internal static class WorldChecks
         Check(world.Blocks(VehicleProfile.Car, land, wet, 0), "Fine shoreline geometry wins even when a parent appears first.");
         world.Update([]);
         Check(!world.Blocks(VehicleProfile.Car, land, wet, 0), "Unloaded geometry does not leave stale collisions.");
+        StationaryAndClearSweeps();
         Console.WriteLine("Water, bridge, tunnel, raised-building, courtyard and tile-resolution checks passed.");
+    }
+
+    private static void StationaryAndClearSweeps()
+    {
+        var world = new VectorCollisionWorld();
+        var tower = Polygon("building", Box(2000, 1950, 2200, 2150)) with { MinHeight = 30, Height = 60 };
+        world.Update([new(Tile, [tower])]);
+        RoutePoint inside = At(2050, 2050), clear = At(3000, 3000), next = At(3001, 3000);
+        foreach (var vehicle in new[] { VehicleProfile.Car, VehicleProfile.Walker, VehicleProfile.Plane, VehicleProfile.FreeCamera })
+        {
+            Check(!world.Blocks(vehicle, inside, inside, 40), "A stationary pose preserves the streamed-building escape rule.");
+            Check(!world.Blocks(vehicle, clear, clear, 40), "A stationary clear pose has no contact.");
+            Check(world.Blocks(vehicle, inside, inside, 20, 70), "A vertical sweep still intersects a raised building between clear endpoints.");
+            Check(world.Blocks(vehicle, inside, inside, 20, 30), "A vertical sweep includes the raised building's lower boundary.");
+            Check(!world.Blocks(vehicle, inside, inside, 70, 60), "A vertical sweep preserves the exclusive roof boundary.");
+            Check(!world.Blocks(vehicle, inside, inside, 40, 70), "A vertical sweep can escape newly streamed building geometry.");
+        }
+
+        for (int i = 0; i < 32; i++) world.Blocks(VehicleProfile.Car, clear, next, 0);
+        long allocated = GC.GetAllocatedBytesForCurrentThread();
+        bool blocked = false;
+        for (int i = 0; i < 256; i++)
+        {
+            blocked |= world.Blocks(VehicleProfile.Car, clear, next, 0);
+            blocked |= world.Blocks(VehicleProfile.Car, next, next, 0, 1.5);
+        }
+        Check(!blocked && GC.GetAllocatedBytesForCurrentThread() == allocated,
+            "Warm clear body sweeps do not allocate delegates or tile enumerators.");
     }
 
     private static MapFeature Polygon(string layer, TilePoint[] ring) =>

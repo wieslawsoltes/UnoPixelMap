@@ -656,6 +656,32 @@ async function cameraOwnershipInput(cdp, page) {
         assert.equal((await readCamera(page)).zoom, 24,
             "The game camera shortcut restores follow after a manual Home flight");
 
+        for (const kind of ["pan", "pinch"]) {
+            await page.keyboard.press("Home");
+            await see(page, /rendering.+?·\s*z16\.5\s*·/);
+            await page.waitForTimeout(500);
+            await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: points(40)});
+            try {
+                await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(65, 12)});
+                await page.waitForTimeout(200);
+                const touched = await readCamera(page);
+                await page.mouse.move(800, 400);
+                if (kind === "pinch") await page.keyboard.down("Control");
+                try {
+                    await page.mouse.wheel(kind === "pan" ? 70 : 0, kind === "pan" ? 45 : -90);
+                } finally {
+                    if (kind === "pinch") await page.keyboard.up("Control");
+                }
+                await page.waitForTimeout(300);
+                const immediate = await readCamera(page);
+                assert.notDeepEqual(immediate, touched, `Trackpad ${kind} takes over from held touch contacts`);
+                await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: points(85, 28)});
+                await page.waitForTimeout(250);
+                assert.deepEqual(await readCamera(page), immediate,
+                    `Contacts held across immediate trackpad ${kind} cannot restore their old pinch baseline`);
+            } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+        }
+
         await page.keyboard.press("Home");
         await see(page, /rendering.+?·\s*z16\.5\s*·/);
         await page.waitForTimeout(500);
@@ -678,7 +704,7 @@ async function cameraOwnershipInput(cdp, page) {
         await page.setViewportSize(viewport);
         await page.waitForTimeout(500);
     }
-    console.log("Held-touch Home flights, keyboard camera reattachment and pinch cancellation passed.");
+    console.log("Held-touch flights, mixed trackpad takeover, camera reattachment and pinch cancellation passed.");
 }
 
 async function mobileInput(context, page) {
@@ -802,8 +828,25 @@ async function mobileInput(context, page) {
     await waitTelemetry(page, state => state.distance === 0, "Native activation of the painted landscape Start button restarts free roam");
     await screen(page, "mobile-landscape-restarted");
     await action(page, "Resume free roam", true);
-    await action(page, "Exit free roam", true);
-    await page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true}).waitFor({state: "visible"});
+    const exitViewport = page.viewportSize();
+    await page.setViewportSize({width: 1200, height: 800});
+    try {
+        await page.waitForTimeout(500);
+        const held = [{id: 1, x: 760, y: 400}, {id: 2, x: 840, y: 400}];
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: held});
+        try {
+            await action(page, "Exit free roam");
+            await page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true}).waitFor({state: "visible"});
+            await page.waitForTimeout(400);
+            const returned = await readCamera(page);
+            await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [
+                {id: 1, x: 730, y: 380}, {id: 2, x: 870, y: 420}
+            ]});
+            await page.waitForTimeout(300);
+            assert.deepEqual(await readCamera(page), returned,
+                "Exiting free roam cancels held contacts before restoring the map camera");
+        } finally { await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []}); }
+    } finally { await page.setViewportSize(exitViewport); }
     await cdp.detach();
 }
 

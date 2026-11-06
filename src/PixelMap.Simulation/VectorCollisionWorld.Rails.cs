@@ -22,7 +22,7 @@ public sealed partial class VectorCollisionWorld
     {
         private const long WorldUnits = 1L << 26;
         private const int IndexCells = 4096;
-        private readonly MapTile[] sources;
+        private MapTile[] sources;
         private readonly Dictionary<(long X, long Y, int Level, string Family), int> vertices = [];
         private readonly List<RoutePoint> points = [];
         private readonly List<List<int>> adjacency = [];
@@ -69,12 +69,16 @@ public sealed partial class VectorCollisionWorld
 
         internal bool Matches(IReadOnlyList<MapTile> tiles)
         {
-            if (sources.Length != tiles.Count) return false;
+            var previousOrder = sources;
+            if (previousOrder.Length != tiles.Count) return false;
             bool ordered = true;
-            for (int i = 0; i < sources.Length; i++) ordered &= ReferenceEquals(sources[i], tiles[i]);
+            for (int i = 0; i < previousOrder.Length; i++) ordered &= ReferenceEquals(previousOrder[i], tiles[i]);
             if (ordered) return true;
-            var previous = new HashSet<MapTile>(sources, ReferenceEqualityComparer.Instance);
-            return previous.Count == tiles.Count && tiles.All(previous.Contains);
+            var previous = new HashSet<MapTile>(previousOrder, ReferenceEqualityComparer.Instance);
+            if (previous.Count != tiles.Count || !previous.SetEquals(tiles)) return false;
+            // Retain the graph's junction order while making the newly streamed order the fast path.
+            sources = tiles.ToArray();
+            return true;
         }
 
         internal bool Move(RoutePoint from, double bearing, double distance, double steering,
