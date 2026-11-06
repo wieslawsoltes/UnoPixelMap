@@ -4,6 +4,7 @@ const {join} = require("node:path");
 const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
 const {activateMenuItem, enableGpuRendering, setGpuRendering} = require("./gpu.cjs");
+const {installProbe} = require("./performance.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const evidence = process.env.PIXELMAP_SHOTS;
@@ -137,14 +138,38 @@ async function menu(page, name) {
     await page.mouse.move(page.viewportSize().width / 2, 20);
 }
 
-async function open(context, address) {
-    const page = await context.newPage();
-    if (process.env.PIXELMAP_GPU === "1") await page.addInitScript(() => {
-        const counts = window.pixelMapTerrainGpu = {depthDraws: 0, artViewports: {}, readbacks: 0,
-            asynchronousReadbacks: 0, clientMemoryReadbacks: 0};
+function installTerrainPresentationProbe({forceDetachedGpu}) {
+    const presentation = window.pixelMapTerrainPresentation = {forceDetachedGpu,
+        hold: false, suppressedPolls: 0, manager: null, originalPoll: null};
+    const prototype = WebGL2RenderingContext.prototype;
+    const directFences = new WeakSet();
+    const fenceSync = prototype.fenceSync;
+    prototype.fenceSync = function (...args) {
+        const before = __pixelAtlasPerf.pendingDirectFrames;
+        const result = Reflect.apply(fenceSync, this, args);
+        // The shared probe correlates fences with the production map resolve shader.
+        // Only those fences may be held; unrelated Skia work must continue normally.
+        if (result && __pixelAtlasPerf.pendingDirectFrames > before) directFences.add(result);
+        return result;
+    };
+    const clientWaitSync = prototype.clientWaitSync;
+    prototype.clientWaitSync = function (...args) {
+        if (presentation.hold && directFences.has(args[0])) {
+            presentation.suppressedPolls++;
+            return this.TIMEOUT_EXPIRED;
+        }
+        return Reflect.apply(clientWaitSync, this, args);
+    };
+    if (forceDetachedGpu) {
+        // Reject only the map renderer's array-texture requirement on Uno's window
+        // context. Skia and the detached GLCanvas retain their actual capabilities.
+        const getParameter = prototype.getParameter;
+        prototype.getParameter = function (parameter) {
+            if (this.canvas?.id === "uno-canvas" && parameter === this.MAX_ARRAY_TEXTURE_LAYERS) return 128;
+            return Reflect.apply(getParameter, this, [parameter]);
+        };
         // Capture the native module's manager without relying on the public .NET
         // Module proxy. The one-shot accessor disappears before any frame is sent.
-        const readbacks = window.pixelMapTerrainReadbacks = {manager: null, originalPoll: null, suppressedPolls: 0};
         Object.defineProperty(Object.prototype, "pixelMapReadbacks", {
             configurable: true,
             get() { return undefined; },
@@ -153,37 +178,17 @@ async function open(context, address) {
                     value: manager, writable: true, configurable: true, enumerable: true
                 });
                 delete Object.prototype.pixelMapReadbacks;
-                readbacks.manager = manager;
+                presentation.manager = manager;
             }
         });
-        const terrainContexts = new WeakSet();
-        const prototype = WebGL2RenderingContext.prototype;
-        for (const name of ["drawElements", "drawElementsInstanced", "drawArrays", "drawArraysInstanced"]) {
-            const original = prototype[name];
-            prototype[name] = function (...args) {
-                if (this.isEnabled(this.DEPTH_TEST)) {
-                    const viewport = this.getParameter(this.VIEWPORT);
-                    if (viewport[2] > 0 && viewport[2] <= Math.ceil(innerWidth / 2) &&
-                        viewport[3] > 0 && viewport[3] <= Math.ceil(innerHeight / 2)) {
-                        counts.depthDraws++;
-                        terrainContexts.add(this);
-                        const size = viewport[2] + "x" + viewport[3];
-                        counts.artViewports[size] = (counts.artViewports[size] || 0) + 1;
-                    }
-                }
-                return Reflect.apply(original, this, args);
-            };
-        }
-        const readPixels = prototype.readPixels;
-        prototype.readPixels = function (...args) {
-            counts.readbacks++;
-            if (terrainContexts.has(this)) {
-                if (this.getParameter(this.PIXEL_PACK_BUFFER_BINDING)) counts.asynchronousReadbacks++;
-                else counts.clientMemoryReadbacks++;
-            }
-            return Reflect.apply(readPixels, this, args);
-        };
-    });
+    }
+}
+
+async function open(context, address, {forceDetachedGpu = false} = {}) {
+    const page = await context.newPage();
+    if (process.env.PIXELMAP_GPU === "1") await page.addInitScript({content:
+        `(${installProbe.toString()})({observeDraws: true, observeTransfers: true});\n` +
+        `(${installTerrainPresentationProbe.toString()})(${JSON.stringify({forceDetachedGpu})});`});
     const expectedFailures = new Set();
     page.setDefaultTimeout(20000);
     page.on("pageerror", error => {
@@ -228,12 +233,33 @@ async function open(context, address) {
 async function assertGpuTerrain(page) {
     if (process.env.PIXELMAP_GPU !== "1") return;
     await see(page, /GPU active/);
-    const work = await page.evaluate(() => window.pixelMapTerrainGpu);
-    assert.ok(work.depthDraws > 0, "Terrain submits depth-tested geometry at pixel-art resolution");
-    assert.ok(work.readbacks > 0, "Uno presents the hardware-rendered terrain framebuffer");
-    assert.ok(work.asynchronousReadbacks > 0, "Browser terrain uses pixel-pack buffers for asynchronous readback");
-    assert.equal(work.clientMemoryReadbacks, 0, "Terrain submission avoids synchronous client-memory readback");
-    console.log("GPU terrain geometry", JSON.stringify(work));
+    const map = await page.locator('[aria-label="Interactive world map"]').boundingBox();
+    assert.ok(map && map.width > 0 && map.height > 0, "Terrain has a settled accessible viewport");
+    const work = await page.evaluate(({width, height}) => ({
+        ...__pixelAtlasPerf.gpuEvidence(width, height),
+        forceDetachedGpu: window.pixelMapTerrainPresentation.forceDetachedGpu
+    }), map);
+    assert.ok(Object.values(work.artSizedDepthTestedDrawsByPixelSize).some(count => count > 0),
+        "Terrain submits depth-tested geometry at the map's art resolution");
+    assert.ok(work.mapResolves.length > 0, "The terrain resolve shader submits a map image");
+    assert.ok([2, 3, 4].includes(work.mapResolves.at(-1).pixelSize),
+        "The latest terrain image matches the current logical map viewport and Pixel resolution");
+    assert.ok(work.readbacks.every(item => item.mode === "pixelPack"),
+        "Terrain presentation never reads synchronously into client memory");
+    if (work.forceDetachedGpu) {
+        assert.ok(work.mapResolves.every(item => !item.compositorContext),
+            "Unavailable compositor terrain rendering selects the detached GLCanvas fallback");
+        assert.ok(work.readbacks.length > 0, "The fallback presents through asynchronous pixel-pack readback");
+        assert.ok(Object.values(work.artSizedCpuUploadsByPixelSize).some(count => count > 0),
+            "The fallback uploads its completed terrain image to Uno");
+    } else {
+        assert.ok(work.mapResolves.every(item => item.compositorContext),
+            "Terrain images render directly in Uno's compositor context");
+        assert.equal(work.readbacks.length, 0, "Direct terrain presentation performs zero framebuffer readbacks");
+        assert.deepEqual(work.artSizedCpuUploadsByPixelSize, {},
+            "Direct terrain presentation avoids map-sized CPU texture uploads");
+    }
+    console.log("GPU terrain presentation", JSON.stringify(work));
 }
 
 async function share(page) {
@@ -280,24 +306,45 @@ function markerBorder(frame, point) {
 }
 
 async function inspectPendingTerrain(page) {
+    const direct = await page.evaluate(() => !window.pixelMapTerrainPresentation.forceDetachedGpu);
+    const name = direct ? "terrain-direct-pending-pick" : "terrain-fallback-pending-pick";
     await page.waitForFunction(() => {
-        const manager = window.pixelMapTerrainReadbacks?.manager;
+        const presentation = window.pixelMapTerrainPresentation;
+        if (!presentation.forceDetachedGpu) return __pixelAtlasPerf.pendingDirectFrames === 0;
+        const manager = presentation.manager;
         return manager?.surfaces.size > 0 && [...manager.surfaces.values()].every(state =>
             !state.failed && !state.armed && !state.ready && state.slots.every(slot => !slot.frame));
     }, undefined, {timeout: 30000});
     await page.waitForTimeout(400);
     await page.evaluate(() => {
-        const readbacks = window.pixelMapTerrainReadbacks;
-        readbacks.originalPoll = readbacks.manager.poll;
-        readbacks.suppressedPolls = 0;
-        readbacks.manager.poll = function () {
-            readbacks.suppressedPolls++;
-            return 0;
-        };
+        const presentation = window.pixelMapTerrainPresentation;
+        presentation.hold = true;
+        presentation.suppressedPolls = 0;
+        if (presentation.forceDetachedGpu) {
+            presentation.originalPoll = presentation.manager.poll;
+            presentation.manager.poll = function () {
+                presentation.suppressedPolls++;
+                return 0;
+            };
+        }
     });
 
     let reference;
     try {
+        if (direct) {
+            // Shared-context images can be drawn immediately in GL command order;
+            // their fences bound the next submissions rather than publication. Fill
+            // both slots before choosing the reference image for the held-camera check.
+            for (let pending = 1; pending <= 2; pending++) {
+                if (await page.evaluate(count => __pixelAtlasPerf.pendingDirectFrames >= count, pending)) continue;
+                await page.mouse.move(690, 360);
+                await page.mouse.down({button: "right"});
+                await page.mouse.move(720, 366, {steps: 4});
+                await page.mouse.up({button: "right"});
+                await page.waitForFunction(count => __pixelAtlasPerf.pendingDirectFrames >= count, pending);
+            }
+            await frameWhere(page, hasTerrain, "terrain-direct-queue-full");
+        }
         const point = {x: 800, y: 350};
         const marker = snapshot => snapshot.split("\n").find(line =>
             / · -?\d+ m elevation/.test(line) && !/ · z[\d.]+ · /.test(line))?.trim();
@@ -310,7 +357,8 @@ async function inspectPendingTerrain(page) {
                 current.every((pixel, index) => pixel === border[index]);
             border = current;
             return settled;
-        }, "terrain-pending-pick-reference");
+        }, name + "-reference");
+        const submitted = await page.evaluate(() => __pixelAtlasPerf.bootResolves.length);
         const before = await page.locator("body").ariaSnapshot();
         const cameraPattern = /-?\d+\.\d{4}°, -?\d+\.\d{4}° · z[\d.]+ · -?\d+°/;
         const camera = before.match(cameraPattern)?.[0];
@@ -326,13 +374,20 @@ async function inspectPendingTerrain(page) {
             return nextCamera && nextCamera !== camera;
         });
         await page.waitForFunction(() => {
-            const readbacks = window.pixelMapTerrainReadbacks;
-            return readbacks.suppressedPolls > 0 && [...readbacks.manager.surfaces.values()]
-                .some(state => state.slots.some(slot => slot.frame));
+            const presentation = window.pixelMapTerrainPresentation;
+            return presentation.suppressedPolls > 0 && (presentation.forceDetachedGpu
+                ? [...presentation.manager.surfaces.values()].some(state => state.slots.some(slot => slot.frame))
+                : __pixelAtlasPerf.pendingDirectFrames > 0);
         });
         const heldBytes = await page.screenshot();
-        if (evidence) await writeFile(join(evidence, "terrain-pending-pick-held.png"), heldBytes);
+        if (evidence) await writeFile(join(evidence, name + "-held.png"), heldBytes);
         const held = PNG.sync.read(heldBytes);
+        if (direct) {
+            assert.equal(await page.evaluate(() => __pixelAtlasPerf.pendingDirectFrames), 2,
+                "The direct presentation queue bounds GPU backpressure to two unresolved maps");
+            assert.equal(await page.evaluate(() => __pixelAtlasPerf.bootResolves.length), submitted,
+                "A held direct queue coalesces camera changes without submitting more maps");
+        }
         assert.deepEqual(markerBorder(held, point), border,
             "The marker remains anchored to the displayed terrain while the live camera changes");
         // XAML can resample the pin's antialiased edge during a transform update.
@@ -355,25 +410,28 @@ async function inspectPendingTerrain(page) {
         assert.equal(marker(inspected), label,
             "Picking the same displayed pixel returns the same feature and elevation while its replacement is pending");
         const picked = await frameWhere(page, frame => markerBorder(frame, point).length > 30,
-            "terrain-pending-pick-repeated");
+            name + "-repeated");
         // Reprojecting the picked geographic position through the displayed view
         // checks its coordinates even when Inspect prefers a feature-name label.
         assert.deepEqual(markerBorder(picked, point), border,
             "Re-inspection projects the picked coordinates to the same displayed-frame anchor");
     } finally {
         await page.evaluate(() => {
-            const readbacks = window.pixelMapTerrainReadbacks;
-            if (readbacks.originalPoll) {
-                readbacks.manager.poll = readbacks.originalPoll;
-                readbacks.originalPoll = null;
+            const presentation = window.pixelMapTerrainPresentation;
+            presentation.hold = false;
+            if (presentation.originalPoll) {
+                presentation.manager.poll = presentation.originalPoll;
+                presentation.originalPoll = null;
             }
         });
     }
     await page.keyboard.press("Escape");
     await frameWhere(page, frame => hasTerrain(frame) && changed(reference, frame) > .12,
-        "terrain-pending-pick-resumed");
-    assert.equal(await page.evaluate(() => window.pixelMapTerrainReadbacks.originalPoll), null,
+        name + "-resumed");
+    assert.equal(await page.evaluate(() => window.pixelMapTerrainPresentation.originalPoll), null,
         "The retained-frame check restores native polling");
+    assert.equal(await page.evaluate(() => window.pixelMapTerrainPresentation.hold), false,
+        "The retained-frame check releases direct map fences");
 }
 
 async function run() {
@@ -404,6 +462,7 @@ async function run() {
             await setGpuRendering(page, false);
             await see(page, snapshot => !/GPU active|CPU fallback/.test(snapshot));
             await frameWhere(page, hasTerrain, "terrain-gpu-disabled");
+            await page.evaluate(() => __pixelAtlasPerf.resetGpuEvidence());
             await enableGpuRendering(page);
             await frameWhere(page, hasTerrain, "terrain-gpu-recreated");
             await assertGpuTerrain(page);
@@ -482,12 +541,24 @@ async function run() {
             const initial = await frameWhere(dense, hasTerrain, "terrain-gpu-high-dpi", 60000);
             assert.equal(initial.width, 1680, "The Skia foreground preserves physical display resolution");
             await assertGpuTerrain(dense);
+            await dense.evaluate(() => __pixelAtlasPerf.resetGpuEvidence());
             await dense.setViewportSize({width: 960, height: 640});
             const resized = await frameWhere(dense, frame => frame.width === 1920 && hasTerrain(frame),
                 "terrain-gpu-high-dpi-resized", 60000);
             assert.equal(resized.height, 1280);
             await assertGpuTerrain(dense);
             await highDpi.close();
+
+            // Force the production capability fallback independently of the default
+            // direct path, including its retained displayed-frame picking contract.
+            const detached = await browser.newContext({viewport: {width: 1200, height: 800}, deviceScaleFactor: 1});
+            const fallback = await open(detached, address.href, {forceDetachedGpu: true});
+            await see(fallback, /61 m elevation · 1× relief/, 60000);
+            await frameWhere(fallback, hasElevationTerrain, "terrain-fallback-elevation", 60000);
+            await assertGpuTerrain(fallback);
+            await inspectPendingTerrain(fallback);
+            await assertGpuTerrain(fallback);
+            await detached.close();
         }
         assert.deepEqual(failures, [], "Terrain has no browser runtime exceptions or missing fonts");
         console.log("Terrain browser checks passed for real Garda relief, flat comparison, elevation, Map and Earth layers, 2D/3D, picking, orbit, drag, exaggeration, v4 sharing and phone controls.");

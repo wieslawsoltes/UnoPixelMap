@@ -2,6 +2,38 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
+## Direct compositor GPU presentation
+
+Commit `e35485601d9cb0afdf426ba300e7f2fbe0fb7f3e` presents retained map textures on Uno's Skia WebGL context. This removes framebuffer readback and the subsequent CPU image upload from that path. A two-fence queue bounds outstanding map submissions; texture drawing follows GL command order without waiting for CPU-visible completion. The detached GLCanvas path remains available when the compositor context cannot support the terrain renderer, using the existing asynchronous pixel-pack transfer queue.
+
+### Paired browser measurements
+
+The recovered comparison uses the exact Release `InterpreterAndAOT` Pages artifacts for baseline `01315510709597d91f1e41397e601b1aa3b41118` and candidate `e35485601d9cb0afdf426ba300e7f2fbe0fb7f3e`. Run `42203874612` executes each baseline/candidate pair on one Intel Xeon Platinum 8573C runner, with affinity 0–2, Chromium 156.0.8078.4 and in-process SwiftShader. Each scenario uses fresh browser processes, a 1200×780 viewport, DPR 1, two seconds of warmup and one requested eight-second sample. External providers are blocked, and bundled data supplies the scene. Held native keys advance play mode; final moving poses can differ between versions.
+
+| Moving scenario | Map submissions/s, baseline → direct | Task CPU, baseline → direct | rAF callbacks/s, baseline → direct | rAF interval p95, baseline → direct |
+| --- | ---: | ---: | ---: | ---: |
+| Walking, first person | 4.247 → 4.998 | 30.93% → 29.51% | 55.71 → 55.85 | 33.3 → 33.3 ms |
+| Walking, chase | 6.086 → 7.977 | 32.11% → 33.19% | 54.53 → 54.59 | 16.8 → 16.8 ms |
+| Driving, chase | 4.241 → 5.367 | 43.79% → 43.26% | 46.15 → 45.68 | 16.8 → 16.8 ms |
+| Driving, first person | 3.249 → 3.828 | 39.79% → 43.08% | 48.23 → 46.43 | 49.9 → 66.5 ms |
+| Free flight | 3.374 → 4.496 | 32.92% → 32.77% | 52.86 → 55.57 | 33.3 → 16.8 ms |
+
+Map submission throughput increases by 17.7–33.2% in these five samples. Every timed moving map uses pixel size 4 at 300×166. The candidate records 214 compositor-context map submissions, zero framebuffer readbacks, zero pixel-pack copies and zero map-sized CPU texture uploads. The baseline records 170 detached-context submissions and 161 completed pixel-pack copies. Every baseline copy follows a correlated signaled, zero-timeout fence poll. Both paths retain at most two outstanding maps, with zero unsafe overwrites, abandoned transfers, premature releases or positive-timeout polls. All twenty report summaries recompute exactly from their raw probes and CDP metrics.
+
+Main-thread CPU and scheduling results are mixed. Driving in first person increases task CPU by 3.29 percentage points and long-task duration from 2,224 to 2,520 ms. First-person walking reduces task CPU but increases long-task duration from 609 to 1,091 ms. Free-flight long-task duration falls from 980 to 930 ms. Map submit-to-signaled-completion p95 improves in all five pairs, but still ranges from 292.7 to 802.5 ms on the candidate's software GPU. The direct-path fences measure completion of submitted GL work; final display presentation remains outside the probe.
+
+All ten idle/stationary samples across the two builds record zero foreground GL draws, transfers, map submissions and long tasks, while rAF stays near 60 callbacks/s. Default-map task CPU is 0.86% → 0.84%, relief-map CPU is 1.51% → 1.48%, and stationary walk/car/free-flight CPU is 4.24% → 4.69%, 4.94% → 4.98% and 3.91% → 4.56%, respectively.
+
+Rates use each actual probe interval, spanning 8,001.8–8,098.6 ms across the pair. Task CPU uses main-thread `threadTicks` divided by the surrounding `Performance.getMetrics` timestamp interval, spanning 8,020.2–9,559.8 ms and including raw-result collection. This denominator differs from the historical probe-duration percentage retained in `play-browser-benchmarks.csv`. Software-GPU worker CPU is excluded. Map submissions, completed transfers and rAF callbacks measure different pipeline stages; none is a direct displayed-frame counter. These single short pairs establish transfer elimination and measured map-throughput gains, with mixed main-thread results. Physical-GPU, Safari/iOS and repeated-run timing remain unmeasured for this change. [All twenty direct-presentation comparison rows](direct-gpu-browser-benchmarks.csv)
+
+### Artifact provenance and verification status
+
+The baseline Pages artifact is `13495501541` from run `42201447082`, with ZIP SHA-256 `8ea612ea149bff3cd445a2898fcf84a39118236138ec6b81c6808d0d8a70b574`. The candidate Pages artifact is `13496024690`, with ZIP SHA-256 `dc5bcad33e587bc8aa7cf8782dbc96eba27f3487a4afe0961e52fb37d8c4e6e5`. Their native WASM SHA-256 values are `e8f074a13099c8616897b1015892cb1c596c1eae551e8c9eab0ff58c72c7793d` and `4b34251a7faa4a3cac6eaf4d876f6eccf108bf27d8597de4c4388b4b73a9f598`, respectively. The shared play harness SHA-256 is `fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44`.
+
+Performance evidence artifact `13497356985`, `atlas-play-performance`, has ZIP SHA-256 `286574cdbfacada1ffc767405dee11d1c21b81eb71e5c475ab1fbbc9a75fcb51`. It retains raw reports, screenshots, selected separate CPU profiles and both builds' resource provenance. The CSV includes all three harness hashes, browser hash, source and artifact identities, metric/probe intervals, pixel sizes, queue accounting and recorded HUD poses. [Paired benchmark and artifacts](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42203874612)
+
+That run's build and paired benchmark succeeded. Browser verification stopped in `terrain.cjs` because its old assertion required a positive readback count from the default GPU path; the direct compositor path correctly recorded none. Deployment was skipped. Terrain verification now distinguishes direct compositor rendering from an explicitly forced asynchronous GLCanvas fallback, and exercises displayed-frame picking while each presentation queue is held. The original run remains failed and is not evidence of deployment or completion of the updated regression suite.
+
 ## Camera input and terrain interaction
 
 Commit `088017aadb3f3b333c2850e5c09f8133fe03cf51` fixes raw browser input ownership and physical camera mathematics. Its Release browser build passed the published Chromium suites and deployed successfully. [Camera build and deployment](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42074751416)

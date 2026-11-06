@@ -96,7 +96,7 @@ jobs:
       actions: read
     env:
       PIXELMAP_BROWSER_ARGS: '["--in-process-gpu","--disable-gpu-watchdog","--renderer-process-limit=1"]'
-      CPU_PROFILE_CASES: map-idle-relief,walk-stationary-firstperson,car-moving-chase,freeflight-moving
+      CPU_PROFILE_CASES: map-idle-relief,walk-stationary-firstperson,car-moving-chase,car-moving-firstperson,freeflight-moving
     steps:
       - uses: actions/checkout@v4
       - name: Select exact baseline and candidate artifacts
