@@ -1,0 +1,24 @@
+<Project>
+  <UsingTask TaskName="PixelMap.Build.VersionWasmPackage"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <Code Type="Class" Language="cs" Source="$(MSBuildThisFileDirectory)VersionWasmPackage.cs" />
+    </Task>
+  </UsingTask>
+
+  <!-- Import this file AFTER Uno.Sdk's Sdk.targets. Our final Publish callback
+       then follows nested AOT publishing, Uno's config/worker/WebGL fixups and
+       all other SDK callbacks. Uno 10.0.98 hashes the package before those steps.
+       This also applies to ordinary local dotnet publish, with no CI-only salt. -->
+  <Target Name="VersionPixelMapWasmPackage"
+          AfterTargets="Publish"
+          Condition="'$(WasmBuildingForNestedPublish)' != 'true' and '$(IsCrossTargetingBuild)' != 'true' and ('$(TargetFramework)' == 'net10.0-browserwasm' or '$(PixelMapPublishWebRoot)' != '')">
+    <PropertyGroup>
+      <PixelMapPublishWebRoot Condition="'$(PixelMapPublishWebRoot)' == ''">$(PublishDir)wwwroot</PixelMapPublishWebRoot>
+    </PropertyGroup>
+    <PixelMap.Build.VersionWasmPackage WebRoot="$(PixelMapPublishWebRoot)" ProjectDirectory="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="PackageName" PropertyName="PixelMapPublishedPackageName" />
+    </PixelMap.Build.VersionWasmPackage>
+  </Target>
+</Project>

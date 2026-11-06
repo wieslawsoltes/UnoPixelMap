@@ -43,7 +43,7 @@ jobs:
       - run: dotnet workload install wasm-tools --skip-manifest-update
       - run: dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o "${{ runner.temp }}/atlas"
       - name: Verify the Pages artifact
-        run: test -s "${{ runner.temp }}/atlas/wwwroot/index.html"
+        run: node tests/packaging/package-identity.cjs "${{ runner.temp }}/atlas/wwwroot"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/atlas/wwwroot
