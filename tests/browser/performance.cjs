@@ -16,6 +16,8 @@ const browserArgs = ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--en
     ...JSON.parse(process.env.PIXELMAP_BROWSER_ARGS || "[]")];
 const requestGpu = process.argv.includes("--gpu");
 const expectCpuFallback = process.argv.includes("--expect-cpu-fallback");
+const requireCompositorGpu = process.argv.includes("--require-compositor-gpu");
+const forceDetachedGpu = process.argv.includes("--force-detached-gpu");
 let runtimeMetadata;
 const views = [];
 for (const layer of ["Map", "Earth"])
@@ -39,6 +41,17 @@ for (const [angle, pitch, lens] of [["overhead", 0, "Orthographic"], ["iso55", 5
         journey: false, terrain: true });
 }
 
+const presentationViews = [
+    ...["Pixel", "Normal", "Minecraft", "Roblox"].map(style => ({
+        name: "presentation-" + style.toLowerCase(), journey: false, terrain: true, renderStyle: style,
+        fragment: `v5/45.875/10.85/12.3/-25/58/Day/Map/Perspective/0/Relief/1.00/${style}/Orbit/0/0/0`
+    })),
+    {name: "presentation-earth-overhead", journey: false, terrain: true,
+        fragment: "v4/45.875/10.85/12.3/-25/0/Day/Earth/Orthographic/0/Relief/1.00"},
+    {name: "presentation-elevation", journey: false, terrain: true,
+        fragment: "v4/45.875/10.85/12.3/-25/55/Night/Elevation/Orthographic/0/Relief/1.00"}
+];
+
 const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -61,8 +74,10 @@ function distribution(values) {
 function installProbe({ observeDraws = false, requireDepthQuality = false, observeTransfers = false } = {}) {
     const state = globalThis.__pixelAtlasPerf = { active: false, frames: [], uploads: [], bootUploads: [], bootAllocations: [],
         bootDraws: [], draws: [], readbacks: [], transfers: [], syncCalls: [], bufferReads: [],
+        bootResolves: [], resolves: [], bootReadbacks: [],
         pendingPixelPacks: 0, maximumPendingPixelPacks: 0, overwrittenPixelPacks: 0,
         abandonedPixelPacks: 0, releasedPixelPacks: 0,
+        pendingDirectFrames: 0, maximumPendingDirectFrames: 0, releasedDirectFrames: 0,
         framebufferAttachments: 0, longTasks: [],
         width: 0, height: 0, quality: null, start: 0 };
     const channels = { 6402: 1, 6403: 1, 6406: 1, 6407: 3, 6408: 4, 6409: 1, 6410: 2,
@@ -79,7 +94,7 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
             durationMs });
     };
     const quality = (width, height) => {
-        for (const pixels of [2, 3, 4])
+        for (const pixels of [1, 2, 3, 4])
             if (width === Math.ceil(state.width / pixels) && height === Math.ceil(state.height / pixels)) return pixels;
         return null;
     };
@@ -155,16 +170,24 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
     }
     if (observeDraws) {
         const contexts = new WeakMap(), attached = new WeakSet();
+        const resolveShaders = new WeakSet(), resolvePrograms = new WeakSet();
         const bufferIds = new WeakMap(), fences = new WeakMap(), pendingReads = new Map();
+        const pendingDirectFrames = new Set();
         const syncMethods = new Set(["fenceSync", "clientWaitSync", "waitSync", "deleteSync", "flush", "finish"]);
-        let nextBufferId = 1, nextReadbackId = 1, nextFenceId = 1;
+        let nextBufferId = 1, nextReadbackId = 1, nextFenceId = 1, nextResolveId = 1;
         const updatePending = () => {
             state.pendingPixelPacks = pendingReads.size;
             if (state.active) state.maximumPendingPixelPacks = Math.max(state.maximumPendingPixelPacks, pendingReads.size);
         };
+        const updateDirectPending = () => {
+            state.pendingDirectFrames = pendingDirectFrames.size;
+            if (state.active) state.maximumPendingDirectFrames =
+                Math.max(state.maximumPendingDirectFrames, pendingDirectFrames.size);
+        };
         for (const type of [globalThis.WebGLRenderingContext, globalThis.WebGL2RenderingContext]) {
             if (!type) continue;
             for (const name of ["bindFramebuffer", "framebufferTexture2D", "viewport", "enable", "disable", "readPixels",
+                "shaderSource", "attachShader", "useProgram",
                 "bindBuffer", "deleteBuffer", "getBufferSubData", ...syncMethods,
                 "drawArrays", "drawElements", "drawArraysInstanced", "drawElementsInstanced"]) {
                 const original = type.prototype[name];
@@ -177,10 +200,20 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
                     const duration = timed ? performance.now() - started : 0;
                     let context = contexts.get(this);
                     if (!context) {
-                        context = { framebuffer: null, width: 0, height: 0, depth: false, pixelPack: null, lastReadback: null };
+                        context = { framebuffer: null, width: 0, height: 0, depth: false, pixelPack: null,
+                            lastReadback: null, lastResolve: null, program: null };
                         contexts.set(this, context);
                     }
-                    if (name === "bindFramebuffer") {
+                    if (name === "shaderSource") {
+                        // Identify the production map resolve program through its existing
+                        // uniforms. No application timing hooks or extra GL queries are needed.
+                        if (args[1].includes("uniform bool uArtworkOnly;") &&
+                            args[1].includes("uniform float uPhotoOpacity;")) resolveShaders.add(args[0]);
+                    } else if (name === "attachShader") {
+                        if (resolveShaders.has(args[1])) resolvePrograms.add(args[0]);
+                    } else if (name === "useProgram") {
+                        context.program = args[0];
+                    } else if (name === "bindFramebuffer") {
                         if (args[0] === this.FRAMEBUFFER || args[0] === this.DRAW_FRAMEBUFFER) context.framebuffer = args[1];
                     } else if (name === "framebufferTexture2D") {
                         if (context.framebuffer && args[3]) { attached.add(context.framebuffer); state.framebufferAttachments++; }
@@ -215,6 +248,8 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
                         }
                         if (state.active) state.readbacks.push([started, duration, args[2], args[3],
                             quality(args[2], args[3]), mode, readback.id, bufferId]);
+                        else if (state.bootReadbacks.length < 2000)
+                            state.bootReadbacks.push({width: args[2], height: args[3], mode});
                     } else if (name === "getBufferSubData") {
                         const bufferId = args[0] === this.PIXEL_PACK_BUFFER && context.pixelPack
                             ? bufferIds.get(context.pixelPack) : null;
@@ -233,17 +268,30 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
                         }
                     } else if (syncMethods.has(name)) {
                         let fence = args[0] && typeof args[0] === "object" ? fences.get(args[0]) : null;
-                        let firstSignalLatencyMs = null;
+                        let firstSignalLatencyMs = null, resolveSignalLatencyMs = null;
                         if (name === "fenceSync" && result) {
-                            fence = { id: nextFenceId++, readback: context.lastReadback, signaled: false };
+                            fence = { id: nextFenceId++, readback: context.lastReadback,
+                                resolve: context.lastResolve, signaled: false };
+                            context.lastResolve = null;
                             fences.set(result, fence);
+                            if (fence.resolve?.compositorContext) {
+                                pendingDirectFrames.add(fence.id);
+                                updateDirectPending();
+                            }
                         } else if (name === "clientWaitSync" && fence && !fence.signaled &&
                             (result === this.ALREADY_SIGNALED || result === this.CONDITION_SATISFIED)) {
                             fence.signaled = true;
+                            if (pendingDirectFrames.delete(fence.id)) updateDirectPending();
                             if (fence.readback) firstSignalLatencyMs =
                                 (timed ? started + duration : performance.now()) - fence.readback.started;
+                            if (fence.resolve) resolveSignalLatencyMs =
+                                (timed ? started + duration : performance.now()) - fence.resolve.time;
                         } else if (name === "deleteSync" && args[0]) {
                             fences.delete(args[0]);
+                            if (pendingDirectFrames.delete(fence?.id)) {
+                                if (state.active) state.releasedDirectFrames++;
+                                updateDirectPending();
+                            }
                             const readback = fence?.readback;
                             if (readback && pendingReads.get(readback.bufferId) === readback) {
                                 pendingReads.delete(readback.bufferId);
@@ -253,6 +301,7 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
                         }
                         if (timed) state.syncCalls.push({ method: name, time: started, durationMs: duration,
                             fenceId: fence?.id ?? null, readbackId: fence?.readback?.id ?? null,
+                            resolveId: fence?.resolve?.id ?? null, resolveSignalLatencyMs,
                             status: name === "clientWaitSync" ? result : null,
                             flags: name === "clientWaitSync" || name === "waitSync" ? args[1] : null,
                             timeoutNs: name === "clientWaitSync" || name === "waitSync" ? Number(args[2]) : null,
@@ -265,6 +314,14 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
                             const pixels = quality(context.width, context.height);
                             if (pixels !== null && (!requireDepthQuality || context.depth)) state.quality = pixels;
                             state.draws.push([context.width, context.height, pixels, context.depth, count]);
+                        }
+                        if (resolvePrograms.has(context.program)) {
+                            const resolve = { id: nextResolveId++, time: performance.now(), width: context.width, height: context.height,
+                                pixelSize: quality(context.width, context.height),
+                                compositorContext: this.canvas?.id === "uno-canvas" };
+                            context.lastResolve = resolve;
+                            if (state.active) state.resolves.push(resolve);
+                            else if (state.bootResolves.length < 2000) state.bootResolves.push(resolve);
                         }
                     }
                     return result;
@@ -297,12 +354,16 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
             artSizedOffscreenDrawsByPixelSize: draws, artSizedCpuUploadsByPixelSize: uploads,
             artSizedDepthTestedDrawsByPixelSize: depthDraws,
             artSizedTextureAllocationsByPixelSize: allocations,
-            allOffscreenViewportDraws: viewports };
+            allOffscreenViewportDraws: viewports,
+            mapResolves: state.bootResolves.map(item => ({...item, pixelSize: quality(item.width, item.height)})),
+            readbacks: state.bootReadbacks.slice() };
     };
     state.resetGpuEvidence = () => {
         state.bootUploads = [];
         state.bootAllocations = [];
         state.bootDraws = [];
+        state.bootResolves = [];
+        state.bootReadbacks = [];
         state.framebufferAttachments = 0;
     };
     new PerformanceObserver(list => {
@@ -327,11 +388,15 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
         state.transfers = [];
         state.syncCalls = [];
         state.bufferReads = [];
+        state.resolves = [];
         state.pixelPacksAtStart = state.pendingPixelPacks;
         state.maximumPendingPixelPacks = state.pendingPixelPacks;
         state.overwrittenPixelPacks = 0;
         state.abandonedPixelPacks = 0;
         state.releasedPixelPacks = 0;
+        state.directFramesAtStart = state.pendingDirectFrames;
+        state.maximumPendingDirectFrames = state.pendingDirectFrames;
+        state.releasedDirectFrames = 0;
         state.longTasks = [];
         state.start = performance.now();
         state.active = true;
@@ -346,10 +411,12 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
         state.active = false;
         return { durationMs: performance.now() - state.start, frames: state.frames,
             uploads: state.uploads, draws: state.draws, readbacks: state.readbacks, transfers: state.transfers,
-            syncCalls: state.syncCalls, bufferReads: state.bufferReads,
+            syncCalls: state.syncCalls, bufferReads: state.bufferReads, resolves: state.resolves,
             pixelPacks: { atStart: state.pixelPacksAtStart, atEnd: state.pendingPixelPacks,
                 maximumPending: state.maximumPendingPixelPacks, overwritten: state.overwrittenPixelPacks,
                 abandoned: state.abandonedPixelPacks, releasedWithoutCopy: state.releasedPixelPacks },
+            directFrames: { atStart: state.directFramesAtStart, atEnd: state.pendingDirectFrames,
+                maximumPending: state.maximumPendingDirectFrames, releasedBeforeSignal: state.releasedDirectFrames },
             longTasks: state.longTasks, finalPixelSize: state.quality };
     };
 }
@@ -360,11 +427,22 @@ async function open(browser, base, view, errors, observe, output) {
     const blocked = {};
     page.on("pageerror", error => errors.push(view.name + " " + error.message));
     page.on("console", message => {
+        if (message.text().startsWith("Pixel Atlas") && message.text().includes("GPU"))
+            console.log("Map GPU", view.name, message.text());
         if (message.type() === "error" && !message.text().includes("ERR_FAILED"))
             console.error("Browser console", view.name, message.text().slice(0, 2000));
     });
     if (observe || requestGpu) await page.addInitScript(installProbe, { observeDraws: true,
         requireDepthQuality: requestGpu && view.terrain && !expectCpuFallback, observeTransfers: requestGpu });
+    if (forceDetachedGpu) await page.addInitScript(() => {
+        // Reject the map renderer's array-texture requirement only on Uno's window
+        // context. The compositor and detached GLCanvas keep their real capabilities.
+        const original = WebGL2RenderingContext.prototype.getParameter;
+        WebGL2RenderingContext.prototype.getParameter = function (parameter) {
+            if (this.canvas?.id === "uno-canvas" && parameter === this.MAX_ARRAY_TEXTURE_LAYERS) return 128;
+            return Reflect.apply(original, this, [parameter]);
+        };
+    });
     const origin = new URL(base).origin;
     await page.route("**/*", route => {
         const address = new URL(route.request().url());
@@ -479,12 +557,26 @@ async function capture(browser, base, view, output, errors) {
         if (requestGpu && view.terrain && !expectCpuFallback)
             assert.ok(Object.values(gpuEvidence.artSizedDepthTestedDrawsByPixelSize).some(count => count > 0),
                 "GPU terrain used hardware depth at the art resolution");
+        if (requireCompositorGpu) {
+            assert.ok(gpuEvidence.mapResolves.length > 0, "The map resolve shader submitted an image");
+            assert.ok(gpuEvidence.mapResolves.every(item => item.compositorContext),
+                "Map images render in Uno's compositor context");
+            assert.equal(gpuEvidence.readbacks.length, 0, "Direct GPU presentation performs zero framebuffer readbacks");
+        }
+        if (forceDetachedGpu) {
+            assert.ok(gpuEvidence.mapResolves.length > 0, "The fallback resolve shader submitted an image");
+            assert.ok(gpuEvidence.mapResolves.every(item => !item.compositorContext),
+                "Unavailable compositor GPU rendering selects the detached GLCanvas fallback");
+            assert.ok(gpuEvidence.readbacks.some(item => item.mode === "pixelPack"),
+                "The fallback retains asynchronous pixel-pack presentation");
+        }
         await writeFile(path.join(output, view.name + ".png"), image.bytes);
         await writeFile(path.join(output, view.name + ".map.png"), PNG.sync.write(image.map));
         await writeFile(path.join(output, view.name + ".txt"), accessibility);
         console.log("Captured", view.name, image.mapHash, gpuEvidence ? JSON.stringify(gpuEvidence) : "");
         return { name: view.name, fragment: view.fragment, mapBounds: opened.map, crop: image.area,
-            mapHash: image.mapHash, canvasHash: image.canvasHash, expectedRestPixelSize: 2,
+            mapHash: image.mapHash, canvasHash: image.canvasHash,
+            expectedRestPixelSize: ["Normal", "Roblox"].includes(view.renderStyle) ? 1 : 2,
             actualBackend: opened.actualBackend, gpuEvidence, blocked: opened.blocked };
     } catch (error) {
         await opened.page.screenshot({ path: path.join(output, view.name + "-failure.png") }).catch(() => {});
@@ -546,7 +638,22 @@ function summarizeProbe(probe, before, after) {
     const bufferReads = (probe.bufferReads || []).filter(item => item.pixelPack);
     const signalLatencies = (probe.syncCalls || []).filter(item => item.firstSignalLatencyMs !== null);
     const positiveTimeoutPolls = (syncByMethod.clientWaitSync || []).filter(item => item.timeoutNs > 0).length;
+    const resolves = probe.resolves || [];
+    const resolveIntervals = resolves.slice(1).map((item, index) => item.time - resolves[index].time);
+    const resolveSignals = (probe.syncCalls || []).filter(item => item.resolveSignalLatencyMs != null);
+    const metricWindowMs = 1000 * (after.Timestamp - before.Timestamp);
     return { durationMs: probe.durationMs, raf: distribution(intervals),
+        metricWindowMs: Number.isFinite(metricWindowMs) ? metricWindowMs : null,
+        mapResolves: { submissions: resolves.length,
+            submissionsPerSecond: resolves.length * 1000 / probe.durationMs,
+            compositorSubmissions: resolves.filter(item => item.compositorContext).length,
+            detachedSubmissions: resolves.filter(item => !item.compositorContext).length,
+            intervals: distribution(resolveIntervals),
+            signaledCompletions: resolveSignals.length,
+            submitToSignal: distribution(resolveSignals.map(item => item.resolveSignalLatencyMs)),
+            byPixelSize: Object.fromEntries([...new Set(resolves.map(item => item.pixelSize))]
+                .map(size => [size, resolves.filter(item => item.pixelSize === size).length])) },
+        directGpuFrames: probe.directFrames || null,
         rafByObservedPixelSize: Object.fromEntries(Object.entries(byQuality).map(([key, values]) => [key, distribution(values)])),
         mapTextureUploadsByPixelSize: uploads, allTextureUploadDimensions: dimensions,
         artSizedOffscreenDrawsByPixelSize: drawsByPixelSize,
@@ -664,10 +771,13 @@ async function main() {
     const base = process.argv[2], output = process.argv[3];
     assert.ok(base && output, "Provide a site URL and output directory");
     assert.ok(!expectCpuFallback || requestGpu, "--expect-cpu-fallback requires --gpu and a software-canvas test environment");
+    assert.ok(!(requireCompositorGpu && forceDetachedGpu), "Select one GPU presentation path");
+    assert.ok(!(requireCompositorGpu || forceDetachedGpu) || requestGpu, "GPU presentation checks require --gpu");
     const measureMotion = process.argv.includes("--motion");
     const measureTerrain = process.argv.includes("--terrain");
     const filter = process.argv.find(arg => arg.startsWith("--case="))?.slice(7).split(",");
-    const cases = (measureTerrain ? terrainViews : views).filter(view => filter ? filter.includes(view.name) : !measureMotion ||
+    const cases = (process.argv.includes("--presentation") ? presentationViews : measureTerrain ? terrainViews : views)
+        .filter(view => filter ? filter.includes(view.name) : !measureMotion ||
         (measureTerrain ? /-day-perspective58$/.test(view.name) :
             ["map-day-iso55", "earth-day-iso55", "map-day-perspective65", "earth-day-perspective65"].includes(view.name)));
     assert.ok(cases.length > 0, "The selected case exists");
@@ -680,6 +790,7 @@ async function main() {
         availableParallelism: os.availableParallelism(), logicalCpuCount: os.cpus().length,
         base, revision: process.env.PIXELMAP_REVISION || null, mode: measureMotion ? "motion" : "visual",
         requestedGpuRendering: requestGpu,
+        requiredCompositorGpu: requireCompositorGpu, forcedDetachedGpu: forceDetachedGpu,
         expectedGpuBackend: requestGpu ? expectCpuFallback ? "CPU fallback" : "GPU active" : null,
         performanceTimeDomain: "threadTicks",
         adaptiveQuality: "Production policy remains active. Resting views use pixel size 2. GPU terrain quality uses depth-tested art viewport dimensions. Shared 3D texture arrays never influence quality inference. CPU and legacy Skia modes use exact 2D upload/viewport dimensions. rAF measures browser scheduling. CPU metrics include the app and observational probe. readPixels records WebGL call duration including synchronization, grouped by art pixel size, dimensions, and client memory or pixel-pack buffer destination. GPU runs also time texture and buffer transfer calls and report uncompressed input bytes. Pixel-pack probes correlate read submissions, fence polling and buffer copies, including queue depth and completion age. These transfer timings cover the page's GL contexts and exclude final display composition.",

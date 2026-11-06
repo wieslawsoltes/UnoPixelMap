@@ -57,12 +57,32 @@ async function serveFixture(directory) {
             const delay = () => new Promise(resolve => setTimeout(resolve, 2));
             const context1 = module._proof_context(0);
             check(context1, 'First native context');
+            check(module._pixel_map_gl_current_context() === context1, 'Native compositor bridge identifies its context');
+            check(module._pixel_map_gl_context_live(context1) === 1, 'Native compositor bridge detects live WebGL2');
             const gl1 = module.GL.currentContext.GLctx;
             const handle1 = module._pixel_map_readback_create();
             check(handle1 > 0, 'First native readback handle');
             const context2 = module._proof_context(1);
             check(context2, 'Second native context');
+            check(module._pixel_map_gl_current_context() === context2, 'Native compositor bridge sees context changes');
+            check(module._pixel_map_gl_make_current(0) === 1 && module._pixel_map_gl_current_context() === 0,
+                'Native compositor bridge can clear the current context');
+            check(module._pixel_map_gl_make_current(context1) === 1 && module._pixel_map_gl_current_context() === context1,
+                'Native compositor bridge can select the originating context');
+            check(module._pixel_map_gl_make_current(context2) === 1, 'Native compositor bridge restores the previous context');
             const gl2 = module.GL.currentContext.GLctx;
+            const fence = module._pixel_map_gl_fence_create();
+            check(fence !== 0, 'Native compositor fence creation retains its opaque handle');
+            module._pixel_map_gl_flush();
+            let fenceStatus = gl2.TIMEOUT_EXPIRED;
+            for (let attempt = 0; attempt < 1000 && fenceStatus === gl2.TIMEOUT_EXPIRED; attempt++) {
+                fenceStatus = module._pixel_map_gl_fence_poll(fence);
+                if (fenceStatus === gl2.TIMEOUT_EXPIRED) await delay();
+            }
+            check(fenceStatus === gl2.ALREADY_SIGNALED || fenceStatus === gl2.CONDITION_SATISFIED,
+                'Native zero-timeout polling uses the correct WebAssembly fence ABI');
+            module._pixel_map_gl_fence_delete(fence);
+            check(gl2.getError() === gl2.NO_ERROR, 'Native compositor fence lifetime leaves clean GL state');
             const handle2 = module._pixel_map_readback_create();
             check(handle2 > 0 && handle2 !== handle1, 'Independent readback handles');
             const destination = module._proof_alloc(65536);
@@ -247,14 +267,22 @@ async function serveFixture(directory) {
             loss.loseContext();
             await delay();
             check(module._pixel_map_readback_poll(handle2, metadata) === -1, 'Context loss is reported');
+            check(module._pixel_map_gl_context_live(context2) === 0, 'Native compositor bridge rejects a lost context');
             module._pixel_map_readback_dispose(handle2);
             check(module['pixelMapReadbacks'].surfaces.size === 0, 'All native queues released');
+            module.GL.deleteContext(context1);
+            check(module._pixel_map_gl_context_live(context1) === 0, 'Native compositor bridge rejects a removed context');
+            check(module._pixel_map_gl_make_current(context1) === 0 && module._pixel_map_gl_current_context() === 0,
+                'Selecting a removed context reports failure and clears the current context');
+            check(module._pixel_map_gl_make_current(0) === 1, 'Native compositor bridge restores the empty context');
             module._proof_free(metadata);
             module._proof_free(destination);
             return { passed: true, cases: ['two contexts', 'foreign framebuffer scope', '64-bit tokens', 'exact RGBA',
                 'pack-state restoration', 'context preservation', 'resize', 'two-slot backpressure',
                 'latest completion coalescing', 'no-copy cancellation', 'no-op paint suppression',
-                'dimension failure', 'context loss', 'disposal', 'unsignaled transfers never force a copy',
+                'dimension failure', 'context loss', 'disposal', 'compositor context selection and removal',
+                'native zero-timeout compositor fence ABI',
+                'unsignaled transfers never force a copy',
                 'unsignaled cancellation remains bounded', 'later valid token after cancellation'] };
         });
         assert.deepEqual(errors, [], 'The native readback fixture has no browser exceptions.');

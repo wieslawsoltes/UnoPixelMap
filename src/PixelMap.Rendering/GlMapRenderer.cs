@@ -29,7 +29,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private ShaderProgram? terrainProgram, buildingProgram, rimProgram, backgroundProgram, resolveProgram;
     private uint screenArray, gridIndices, cubeIndices, beveledIndices, roomTexture, paletteTexture;
     private uint terrainArray, terrainInstanceBuffer, terrainArtworkArray, terrainHeightArray;
-    private uint framebuffer, artworkTexture, depthBuffer, photographTexture, overlayTexture;
+    private uint framebuffer, artworkTexture, depthBuffer, photographTexture, overlayTexture, imageFramebuffer;
     private int artWidth, artHeight, overlayWidth, overlayHeight;
     private int terrainArtworkFilter;
     private PixelPalette? uploadedPalette;
@@ -121,17 +121,33 @@ public sealed unsafe class GlMapRenderer : IDisposable
     public void DrawArtwork(GpuMapFrame frame)
         => DrawCore(frame, null, true);
 
-    private void DrawCore(GpuMapFrame frame, SKBitmap? overlay, bool artworkOnly)
+    /// <summary>Render an immutable texture-backed art image on the caller's current
+    /// Skia OpenGL context. The image owns its texture and can outlive subsequent frames.
+    /// No pixels are transferred to CPU memory. Dispose the image with this context current.</summary>
+    public SKImage DrawArtworkImage(GpuMapFrame frame, GRContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ObjectDisposedException.ThrowIf(context.Handle == IntPtr.Zero, context);
+        if (context.IsAbandoned || context.Backend != GRBackend.OpenGL)
+            throw new NotSupportedException("Texture presentation requires a live Skia OpenGL context.");
+        // Issue preceding Skia commands before modifying its underlying GL context.
+        // CPU synchronization is unnecessary because both renderers share one queue.
+        context.Flush(submit: false);
+        return DrawCore(frame, null, true, context)
+            ?? throw new InvalidOperationException("The GPU frame has no drawable artwork.");
+    }
+
+    private SKImage? DrawCore(GpuMapFrame frame, SKBitmap? overlay, bool artworkOnly, GRContext? imageContext = null)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         ArgumentNullException.ThrowIfNull(frame);
         ObjectDisposedException.ThrowIf(frame.IsDisposed, frame);
-        if (frame.Width <= 0 || frame.Height <= 0 || frame.ArtWidth <= 0 || frame.ArtHeight <= 0) return;
+        if (frame.Width <= 0 || frame.Height <= 0 || frame.ArtWidth <= 0 || frame.ArtHeight <= 0) return null;
         if (frame.ArtWidth > maximumTextureSize || frame.ArtHeight > maximumTextureSize)
             throw new NotSupportedException("The pixel-art framebuffer exceeds the GPU texture limit.");
         if (frame.Terrain.Length > MaximumTerrainDraws)
             throw new NotSupportedException("The terrain frame exceeds the bounded GPU instance count.");
-        long framebufferBytes = (long)frame.ArtWidth * frame.ArtHeight * 12 +
+        long framebufferBytes = (long)frame.ArtWidth * frame.ArtHeight * (imageContext is null ? 12 : 16) +
             (overlay is null ? 0 : (long)overlay.Width * overlay.Height * sizeof(uint));
         if (framebufferBytes > FramebufferBudget)
             throw new NotSupportedException("The map framebuffer exceeds the bounded GPU surface budget.");
@@ -140,6 +156,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
             overlay.ColorType != SKColorType.Bgra8888 || overlay.AlphaType != SKAlphaType.Premul))
             throw new ArgumentException("The map overlay must match the viewport aspect ratio and use BGRA8888 premultiplied pixels.", nameof(overlay));
         long started = Stopwatch.GetTimestamp();
+        uint imageTexture = 0;
+        SKImage? image = null;
         generation++;
         LastUploadBytes = 0;
         LastDrawCalls = 0;
@@ -151,7 +169,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
         foreach (var draw in frame.Buildings)
             if (buildingMeshes.TryGetValue(draw.Mesh.ResourceKey, out var mesh)) mesh.Frame = generation;
         var state = new GlState(gl, embedded);
-        if (artworkOnly && (state.ViewportWidth != frame.ArtWidth || state.ViewportHeight != frame.ArtHeight))
+        if (artworkOnly && imageContext is null &&
+            (state.ViewportWidth != frame.ArtWidth || state.ViewportHeight != frame.ArtHeight))
             throw new InvalidOperationException("The artwork destination viewport must match the frame's art-pixel dimensions.");
         try
         {
@@ -190,19 +209,54 @@ public sealed unsafe class GlMapRenderer : IDisposable
                 if (photographOpacity > 0) CopyPhotograph();
                 DrawBuildings(frame);
                 if (overlay is not null) UploadOverlay(overlay);
-                Resolve(frame, state, photographOpacity, overlay is not null, artworkOnly);
+                if (imageContext is not null)
+                {
+                    imageTexture = CreateTexture();
+                    gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)artWidth, (uint)artHeight,
+                        0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
+                    if (imageFramebuffer == 0) imageFramebuffer = gl.GenFramebuffer();
+                    gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, imageFramebuffer);
+                    gl.FramebufferTexture2D(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.ColorAttachment0,
+                        TextureTarget.Texture2D, imageTexture, 0);
+                    if (gl.CheckFramebufferStatus(FramebufferTarget.DrawFramebuffer) != GLEnum.FramebufferComplete)
+                        throw new NotSupportedException("The GPU cannot allocate the retained artwork texture.");
+                }
+                Resolve(frame, state, photographOpacity, overlay is not null, artworkOnly,
+                    imageContext is null ? 0 : imageFramebuffer);
                 TrimCaches();
+                if (imageContext is not null)
+                {
+                    gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, imageFramebuffer);
+                    gl.FramebufferTexture2D(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.ColorAttachment0,
+                        TextureTarget.Texture2D, 0, 0);
+                    imageContext.ResetContext();
+                    using var texture = new GRBackendTexture(artWidth, artHeight, false,
+                        new GRGlTextureInfo((uint)TextureTarget.Texture2D, imageTexture, (uint)InternalFormat.Rgba8));
+                    image = SKImage.FromAdoptedTexture(imageContext, texture, GRSurfaceOrigin.BottomLeft,
+                        SKColorType.Rgba8888, SKAlphaType.Opaque)
+                        ?? throw new InvalidOperationException("Skia could not adopt the GPU artwork texture.");
+                    imageTexture = 0;
+                }
             }
             finally
             {
+                if (imageContext is not null && imageFramebuffer != 0 && imageTexture != 0)
+                {
+                    // The retained image must be the sole owner of the output texture.
+                    gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, imageFramebuffer);
+                    gl.FramebufferTexture2D(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.ColorAttachment0,
+                        TextureTarget.Texture2D, 0, 0);
+                }
                 state.Restore(gl);
             }
             // Validate the complete transaction once, including host-state restoration.
             // One post-restore check also avoids a second browser GL error query.
             CheckError("drawing the GPU map frame and restoring host state");
+            return image;
         }
         catch
         {
+            image?.Dispose();
             terrainProgram!.InvalidateUniforms();
             buildingProgram!.InvalidateUniforms();
             rimProgram!.InvalidateUniforms();
@@ -214,6 +268,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
         }
         finally
         {
+            if (imageTexture != 0) gl.DeleteTexture(imageTexture);
+            imageContext?.ResetContext();
             LastSubmissionMilliseconds = Stopwatch.GetElapsedTime(started).TotalMilliseconds;
         }
     }
@@ -378,10 +434,20 @@ public sealed unsafe class GlMapRenderer : IDisposable
         program.Integer("uRenderStyle", (int)frame.RenderStyle);
     }
 
-    private void Resolve(GpuMapFrame frame, GlState state, float photographOpacity, bool hasOverlay, bool artworkOnly)
+    private void Resolve(GpuMapFrame frame, GlState state, float photographOpacity, bool hasOverlay, bool artworkOnly,
+        uint outputFramebuffer = 0)
     {
-        gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, (uint)state.DrawFramebuffer);
-        gl.Viewport(state.ViewportX, state.ViewportY, (uint)state.ViewportWidth, (uint)state.ViewportHeight);
+        uint destination = (uint)state.DrawFramebuffer;
+        int x = state.ViewportX, y = state.ViewportY, width = state.ViewportWidth, height = state.ViewportHeight;
+        if (outputFramebuffer != 0)
+        {
+            destination = outputFramebuffer;
+            x = y = 0;
+            width = artWidth;
+            height = artHeight;
+        }
+        gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination);
+        gl.Viewport(x, y, (uint)width, (uint)height);
         gl.Disable(EnableCap.DepthTest);
         gl.DepthMask(false);
         var program = resolveProgram!;
@@ -389,7 +455,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         program.Integer("uArtwork", 0);
         program.Integer("uPhotograph", 1);
         program.Integer("uOverlay", 2);
-        program.Vector4("uViewport", state.ViewportX, state.ViewportY, state.ViewportWidth, state.ViewportHeight);
+        program.Vector4("uViewport", x, y, width, height);
         program.Vector2("uLogicalSize", frame.Width, frame.Height);
         program.Integer2("uArtSize", artWidth, artHeight);
         program.Float("uPixelSize", frame.PixelSize);
@@ -874,6 +940,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         foreach (var mesh in buildingMeshes.Values) DeleteMesh(mesh);
         terrainMeshes.Clear(); buildingMeshes.Clear(); terrainTextures.Clear();
         DeleteFramebuffer();
+        if (imageFramebuffer != 0) gl.DeleteFramebuffer(imageFramebuffer);
         if (overlayTexture != 0) gl.DeleteTexture(overlayTexture);
         if (paletteTexture != 0) gl.DeleteTexture(paletteTexture);
         if (roomTexture != 0) gl.DeleteTexture(roomTexture);

@@ -14,6 +14,46 @@
 
 extern int __real_uno_gl_resolve(const char *name);
 
+// The compositor and GLCanvas use separate WebGL contexts. Texture presentation
+// draws on the compositor's current context and restores it after resource cleanup.
+EM_JS(int, pixel_map_js_current_context, (), {
+    return typeof GL !== 'undefined' && GL.currentContext ? GL.currentContext.handle : 0;
+});
+
+EM_JS(int, pixel_map_js_make_current, (int handle), {
+    return typeof GL !== 'undefined' && GL.makeContextCurrent(handle) ? 1 : 0;
+});
+
+EM_JS(int, pixel_map_js_context_live, (int handle), {
+    const context = typeof GL !== 'undefined' && GL.contexts[handle];
+    return context && context.version >= 2 && !context.GLctx.isContextLost() ? 1 : 0;
+});
+
+EMSCRIPTEN_KEEPALIVE int pixel_map_gl_current_context(void) { return pixel_map_js_current_context(); }
+EMSCRIPTEN_KEEPALIVE int pixel_map_gl_make_current(int handle) { return pixel_map_js_make_current(handle); }
+EMSCRIPTEN_KEEPALIVE int pixel_map_gl_context_live(int handle) { return pixel_map_js_context_live(handle); }
+
+EMSCRIPTEN_KEEPALIVE void *pixel_map_gl_resolve(const char *name)
+{
+    return (void *)(intptr_t)__real_uno_gl_resolve(name);
+}
+
+// Keep the 64-bit GLES timeout inside the native ABI. Mono's browser interpreter
+// cannot invoke emscripten's legalized glClientWaitSync entry through Silk's
+// unmanaged function pointer signature. Every poll remains nonblocking.
+EMSCRIPTEN_KEEPALIVE void *pixel_map_gl_fence_create(void)
+{
+    return glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+}
+
+EMSCRIPTEN_KEEPALIVE int pixel_map_gl_fence_poll(void *sync)
+{
+    return (int)glClientWaitSync((GLsync)sync, 0, 0);
+}
+
+EMSCRIPTEN_KEEPALIVE void pixel_map_gl_fence_delete(void *sync) { glDeleteSync((GLsync)sync); }
+EMSCRIPTEN_KEEPALIVE void pixel_map_gl_flush(void) { glFlush(); }
+
 // Each control owns two transfers. The saved WebGL context permits timer-driven
 // completion without changing Emscripten's current context or scheduling a paint.
 // All temporary bindings are restored before returning to the native GL bridge.

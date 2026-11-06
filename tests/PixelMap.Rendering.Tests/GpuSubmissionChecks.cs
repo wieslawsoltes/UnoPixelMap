@@ -104,6 +104,116 @@ internal static class GpuSubmissionChecks
         Assert(calls.UniformCalls > 0, "A failed frame retained its unverified uniform cache.");
         Reset(gl);
         Console.WriteLine($"Passed {cases} exact shared-GL-state draws, warm uniform/query reuse, float-bit preservation and failed-upload retry.");
+        CheckTextureImages(gl, scene, host, camera, tiles, imagery, terrain);
+    }
+
+    private static void CheckTextureImages(GL gl, PixelMapRenderer scene, HostResources host, MapCamera camera,
+        MapTile[] tiles, ImageryTile[] imagery, TerrainOptions terrain)
+    {
+        using var glInterface = GRGlInterface.CreateGles(name => gl.Context.GetProcAddress(name));
+        using var skia = GRContext.CreateGl(glInterface);
+        Assert(skia is not null, "Skia could not create a context for same-context texture checks.");
+        using var renderer = new GlMapRenderer(gl);
+        var retained = new List<(SKImage Image, byte[] Pixels)>();
+        var nearest = new SKSamplingOptions(SKFilterMode.Nearest, SKMipmapMode.None);
+        try
+        {
+            foreach (var style in Enum.GetValues<MapRenderStyle>())
+            foreach (bool photograph in new[] { false, true })
+            {
+                int width = photograph ? 317 : 391, height = photograph ? 211 : 263;
+                var view = (camera with { Pitch = photograph ? 15 : 55 }).OnTerrain(terrain, height);
+                using var frame = scene.PrepareGpuFrame(width, height, view, tiles, PixelStyle.Day, 3,
+                    photograph ? imagery : null, terrain, style);
+                Reset(gl);
+                byte[] bottomUp = Capture(gl, renderer, frame, artwork: true);
+                int artWidth = (width + frame.PixelSize - 1) / frame.PixelSize;
+                int artHeight = (height + frame.PixelSize - 1) / frame.PixelSize;
+                byte[] expected = new byte[bottomUp.Length];
+                int rowBytes = artWidth * sizeof(uint);
+                for (int y = 0; y < artHeight; y++)
+                    bottomUp.AsSpan((artHeight - y - 1) * rowBytes, rowBytes)
+                        .CopyTo(expected.AsSpan(y * rowBytes, rowBytes));
+                skia!.ResetContext();
+                skia.Flush(submit: false);
+                host.Poison();
+                gl.Viewport(7, 9, 713, 419);
+                var before = Snapshot(gl);
+                var image = renderer.DrawArtworkImage(frame, skia);
+                retained.Add((image, expected));
+                Assert(image.IsTextureBacked && image.Width == artWidth && image.Height == artHeight,
+                    $"{style} photograph {photograph} did not retain an art-sized GPU texture.");
+                var after = Snapshot(gl);
+                Assert(before.OrderBy(p => p.Key).SequenceEqual(after.OrderBy(p => p.Key)),
+                    $"{style} photograph {photograph} texture adoption changed host GL state. " +
+                    string.Join(", ", before.Where(p => after[p.Key] != p.Value).Select(p => $"{p.Key} {p.Value} to {after[p.Key]}")));
+                Assert(expected.AsSpan().SequenceEqual(ReadImage(image)),
+                    $"{style} photograph {photograph} changed exact art pixels during texture adoption.");
+            }
+
+            var first = retained[0];
+            Assert(first.Pixels.AsSpan().SequenceEqual(ReadImage(first.Image)),
+                "Later geometry frames changed the first adopted image before composition.");
+            // The hostile-state fixture intentionally enables rasterizer discard,
+            // which a normal Skia host never enables and Skia does not manage.
+            Reset(gl);
+            skia!.ResetContext();
+            const int scaledWidth = 391, scaledHeight = 263, pixelSize = 3;
+            using var surface = SKSurface.Create(skia!, true,
+                new SKImageInfo(scaledWidth, scaledHeight, SKColorType.Rgba8888, SKAlphaType.Opaque));
+            Assert(surface is not null, "Skia could not allocate a GPU presentation surface.");
+            using var replayFrame = scene.PrepareGpuFrame(scaledWidth, scaledHeight,
+                camera.OnTerrain(terrain, scaledHeight), tiles, PixelStyle.Day, pixelSize, null, terrain);
+            var replayImage = renderer.DrawArtworkImage(replayFrame, skia!);
+            using var recorder = new SKPictureRecorder();
+            var recording = recorder.BeginRecording(new SKRect(0, 0, scaledWidth, scaledHeight));
+            Assert(recording.Context is null, "The replay fixture did not use a deferred picture canvas.");
+            recording.DrawImage(replayImage,
+                new SKRect(0, 0, replayImage.Width * pixelSize, replayImage.Height * pixelSize), nearest);
+            using var recorded = recorder.EndRecording();
+            replayImage.Dispose();
+            surface!.Canvas.Clear(SKColors.Magenta);
+            surface.Canvas.DrawPicture(recorded);
+            using var laterFrame = scene.PrepareGpuFrame(347, 223,
+                (camera with { Bearing = 83 }).OnTerrain(terrain, 223), tiles, PixelStyle.Night, 4, null, terrain);
+            using var laterImage = renderer.DrawArtworkImage(laterFrame, skia!);
+            // The previous Skia draw was still pending when the map submitted another
+            // frame. Both commands must keep their original immutable texture content.
+            using var composed = surface.Snapshot();
+            byte[] composedPixels = ReadImage(composed);
+            for (int y = 0; y < scaledHeight; y++)
+            for (int x = 0; x < scaledWidth; x++)
+            {
+                int source = (y / pixelSize * first.Image.Width + x / pixelSize) * sizeof(uint);
+                int destination = (y * scaledWidth + x) * sizeof(uint);
+                Assert(first.Pixels.AsSpan(source, sizeof(uint)).SequenceEqual(composedPixels.AsSpan(destination, sizeof(uint))),
+                    $"GPU presentation changed nearest-neighbor pixel {x},{y}. " +
+                    $"Expected {Convert.ToHexString(first.Pixels.AsSpan(source, sizeof(uint)))}, " +
+                    $"received {Convert.ToHexString(composedPixels.AsSpan(destination, sizeof(uint)))}.");
+            }
+
+            renderer.Dispose();
+            skia!.ResetContext();
+            foreach (var image in retained)
+                Assert(image.Pixels.AsSpan().SequenceEqual(ReadImage(image.Image)),
+                    "A retained image changed after later styles, viewport resizing or renderer disposal.");
+            Assert(gl.GetError() == GLEnum.NoError, "Same-context texture presentation left a GL error.");
+            Console.WriteLine($"Passed {retained.Count} exact same-context texture images, four styles, Earth blending, shared GL state, deferred picture replay, pending Skia drawing, resize and image lifetime checks.");
+        }
+        finally
+        {
+            foreach (var image in retained) image.Image.Dispose();
+            Reset(gl);
+            skia?.ResetContext();
+        }
+
+        static byte[] ReadImage(SKImage image)
+        {
+            using var bitmap = new SKBitmap(image.Width, image.Height, SKColorType.Rgba8888, SKAlphaType.Opaque);
+            Assert(image.ReadPixels(bitmap.Info, bitmap.GetPixels(), bitmap.RowBytes, 0, 0),
+                "Skia could not read a completed texture image for validation.");
+            return bitmap.GetPixelSpan().ToArray();
+        }
     }
 
     private static void CheckUniformBits(GL gl, CallProbe calls)

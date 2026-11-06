@@ -20,10 +20,12 @@ public sealed partial class PixelMapControl
     {
         private static readonly SKSamplingOptions GpuArtworkSampling = new(SKFilterMode.Nearest, SKMipmapMode.None);
         private GpuTerrainCanvas? _terrainGpu;
+        private BrowserGpuSurface? _textureGpu;
         private GpuPresentation? _gpuReady, _gpuDisplayed;
         private bool _terrainGpuRequested;
         private bool _terrainGpuPresented;
         private bool _terrainGpuFailed;
+        private bool _textureGpuFailed;
         private bool _gpuInitializationQueued;
 
         private PixelMapRenderer? PresentedRenderer
@@ -31,11 +33,14 @@ public sealed partial class PixelMapControl
             get
             {
                 if (!_terrainGpuPresented) return _renderer;
-                if (_terrainGpu is not { IsGLInitialized: true, Renderer: { } renderer } || _gpuDisplayed is not { } displayed) return null;
+                if (GpuRenderer is not { } renderer || _gpuDisplayed is not { } displayed) return null;
                 renderer.ActivateGpuFrame(displayed.Frame);
                 return renderer;
             }
         }
+
+        private PixelMapRenderer? GpuRenderer => _textureGpu is { IsAvailable: true } texture
+            ? texture.Renderer : _terrainGpu is { IsGLInitialized: true } surface ? surface.Renderer : null;
 
         private static bool UsesGpuTerrain(Scene scene) => scene.UseGpuRendering &&
             (scene.RenderStyle != MapRenderStyle.Pixel || scene.Camera.IsFreeLook ||
@@ -49,7 +54,7 @@ public sealed partial class PixelMapControl
                 Invalidate();
                 return;
             }
-            if (!_terrainGpuRequested) _terrainGpuFailed = false;
+            if (!_terrainGpuRequested) _terrainGpuFailed = _textureGpuFailed = false;
             _terrainGpuRequested = true;
             bool redraw = _terrainGpuFailed || _gpuReady is null;
             if (!_terrainGpuFailed)
@@ -70,7 +75,7 @@ public sealed partial class PixelMapControl
                     bool sameVehicle = previousScene.Vehicle == scene.Vehicle;
                     if (!sameVehicle && samePresentation && sameOverlays && previousScene.Vehicle is not null &&
                         scene.Route is null && scene.Gate is null &&
-                        scene.Vehicle is { } vehicle && _terrainGpu is { IsGLInitialized: true, Renderer: { } renderer })
+                        scene.Vehicle is { } vehicle && GpuRenderer is { } renderer)
                     {
                         // A stopped vehicle has a static picture, but its effect clock
                         // still needs each idle sample before movement resumes.
@@ -79,7 +84,12 @@ public sealed partial class PixelMapControl
                     redraw = !samePresentation || !sameOverlays || !sameVehicle;
                     reusable.Request.Scene = scene;
                     SetReadyGpuPresentation(reusable);
+                    _textureGpu?.CancelRequest();
                     _terrainGpu?.CancelRequest();
+                }
+                else if (_textureGpu is { } texture)
+                {
+                    texture.RequestRender();
                 }
                 else if (_terrainGpu is null)
                 {
@@ -96,14 +106,16 @@ public sealed partial class PixelMapControl
 
         private void QueueGpuInitialization()
         {
-            if (_gpuInitializationQueued || _terrainGpu is not null || !_terrainGpuRequested || _terrainGpuFailed) return;
+            if (_gpuInitializationQueued || _textureGpu is not null || _terrainGpu is not null ||
+                !_terrainGpuRequested || _terrainGpuFailed) return;
             _gpuInitializationQueued = true;
             if (!DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
             {
                 lock (_drawing)
                 {
                     _gpuInitializationQueued = false;
-                    if (_scene is not { } scene || !UsesGpuTerrain(scene) || _terrainGpu is not null || _terrainGpuFailed ||
+                    if (_scene is not { } scene || !UsesGpuTerrain(scene) || _textureGpu is not null ||
+                        _terrainGpu is not null || _terrainGpuFailed ||
                         !layers.IsLoaded || layers.ActualWidth <= 0 || layers.ActualHeight <= 0) return;
                     var (width, height) = TerrainViewport;
                     _terrainGpu = new GpuTerrainCanvas(this);
@@ -119,17 +131,78 @@ public sealed partial class PixelMapControl
         {
             _terrainGpuRequested = false;
             _terrainGpuPresented = false;
-            var ready = _gpuReady;
-            var displayed = _gpuDisplayed;
-            _gpuReady = _gpuDisplayed = null;
-            ready?.Dispose();
-            if (!ReferenceEquals(ready, displayed)) displayed?.Dispose();
+            ReleaseGpuPresentations();
+            _textureGpu?.Dispose();
+            _textureGpu = null;
             if (_terrainGpu is { } surface)
             {
                 _terrainGpu = null;
                 surface.Retire();
                 // OnDestroy releases GL resources while Uno has the context current.
                 layers.Children.Remove(surface);
+            }
+        }
+
+        private void ReleaseGpuPresentations()
+        {
+            var ready = _gpuReady;
+            var displayed = _gpuDisplayed;
+            _gpuReady = _gpuDisplayed = null;
+            ready?.Dispose();
+            if (!ReferenceEquals(ready, displayed)) displayed?.Dispose();
+        }
+
+        private void PrepareGpuTexture(SKCanvas canvas)
+        {
+            if (!_terrainGpuRequested || _terrainGpuFailed || _textureGpuFailed || _terrainGpu is not null ||
+                _scene is not { } scene || !UsesGpuTerrain(scene)) return;
+            try
+            {
+                if (_textureGpu is { } previous && !previous.Matches(canvas))
+                {
+                    ReleaseGpuPresentations();
+                    previous.Dispose();
+                    _textureGpu = null;
+                    _terrainGpuPresented = false;
+                }
+                _textureGpu ??= BrowserGpuSurface.TryCreate(canvas, Invalidate);
+                if (_textureGpu is not { } texture)
+                {
+                    _textureGpuFailed = true;
+                    return;
+                }
+                var (width, height) = TerrainViewport;
+                int pixelSize = ArtworkPixelSize(scene);
+                if (_gpuReady?.Request.Matches(scene, width, height, pixelSize) == true) return;
+                if (!texture.CanDraw)
+                {
+                    texture.RequestRender();
+                    return;
+                }
+                var request = new GpuMapRequest(scene, width, height, pixelSize);
+                long started = Stopwatch.GetTimestamp();
+                var frame = texture.Renderer.PrepareGpuFrame(width, height, scene.Camera, request.Tiles,
+                    scene.Palette, pixelSize, request.Imagery, scene.Terrain, scene.RenderStyle);
+                try
+                {
+                    var image = texture.Draw(frame, started);
+                    SetReadyGpuPresentation(new GpuPresentation(request, frame, image,
+                        Stopwatch.GetElapsedTime(started).TotalMilliseconds, bottomUp: false, textureSurface: texture));
+                }
+                catch
+                {
+                    frame.Dispose();
+                    throw;
+                }
+            }
+            catch (Exception error)
+            {
+                ReleaseGpuPresentations();
+                _textureGpu?.Dispose();
+                _textureGpu = null;
+                _terrainGpuPresented = false;
+                _textureGpuFailed = true;
+                Console.WriteLine($"Pixel Atlas GPU texture presentation is unavailable. Using the GLCanvas transfer path. {error}");
             }
         }
 
@@ -199,8 +272,8 @@ public sealed partial class PixelMapControl
 
         private bool DrawGpuPresentation(SKCanvas canvas, Size area)
         {
-            if (_gpuReady is not { } presentation ||
-                _terrainGpu is not { IsGLInitialized: true, Renderer: { } renderer }) return false;
+            PrepareGpuTexture(canvas);
+            if (_gpuReady is not { } presentation || GpuRenderer is not { } renderer) return false;
             long started = Stopwatch.GetTimestamp();
             var frame = presentation.Frame;
             var scene = presentation.Request.Scene;
@@ -239,7 +312,7 @@ public sealed partial class PixelMapControl
             _renderer?.Dispose();
             _renderer = null;
             ReportBackend(true);
-            TrackFrameCost(scene, presentation.MapMilliseconds + Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+            TrackFrameCost(scene, presentation.CompletedMapMilliseconds + Stopwatch.GetElapsedTime(started).TotalMilliseconds);
             if (!ReferenceEquals(_presentedScene, scene))
             {
                 _presentedScene = scene;
@@ -274,17 +347,19 @@ public sealed partial class PixelMapControl
         }
 
         private sealed class GpuPresentation(GpuMapRequest request, GpuMapFrame frame, SKImage image,
-            double mapMilliseconds, bool bottomUp) : IDisposable
+            double mapMilliseconds, bool bottomUp, BrowserGpuSurface? textureSurface = null) : IDisposable
         {
             internal readonly GpuMapRequest Request = request;
             internal readonly GpuMapFrame Frame = frame;
             internal readonly SKImage Image = image;
             internal readonly double MapMilliseconds = mapMilliseconds;
+            internal double CompletedMapMilliseconds => Math.Max(MapMilliseconds, textureSurface?.CompletedMilliseconds ?? 0);
             internal readonly bool BottomUp = bottomUp;
 
             public void Dispose()
             {
-                Image.Dispose();
+                if (textureSurface is null) Image.Dispose();
+                else textureSurface.ReleaseImage(Image);
                 Frame.Dispose();
             }
         }

@@ -115,14 +115,17 @@ async function measure(browser, scenario, ui, report, output, profileCases, save
         result.completedArtFramesPerSecond = copyTimes.length * 1000 / raw.durationMs;
         result.completedArtFrameIntervals = distribution(copyIntervals);
         result.rafPerSecond = raw.frames.length * 1000 / raw.durationMs;
-        result.cpuTaskPercent = result.cpu.TaskDurationMs / raw.durationMs * 100;
+        result.cpuTaskPercent = result.cpu.TaskDurationMs / result.metricWindowMs * 100;
         fs.writeFileSync(path.join(output, scenario.name + "-raw.json"), JSON.stringify({raw, before, after}, null, 2));
         await page.screenshot({path: path.join(output, scenario.name + "-after.png")});
         console.log("PLAY", JSON.stringify({
             name: result.name, wallMs: result.durationMs, cpuMs: result.cpu.TaskDurationMs,
             cpuPercent: result.cpuTaskPercent, raf: result.rafPerSecond,
             rafMedian: result.raf.medianMs, rafP95: result.raf.p95Ms, rafMax: result.raf.maxMs,
-            artFps: result.completedArtFramesPerSecond, artPixelSizes: result.readPixels.byPixelSize,
+            artCopiesPerSecond: result.completedArtFramesPerSecond,
+            mapResolvesPerSecond: result.mapResolves.submissionsPerSecond,
+            compositorResolves: result.mapResolves.compositorSubmissions,
+            artPixelSizes: result.mapResolves.byPixelSize,
             maximumPending: result.pixelPackReadback.maximumPending,
             copyMs: result.pixelPackReadback.getBufferSubData.totalCallMs,
             copyP95: result.pixelPackReadback.getBufferSubData.p95Ms, beforeHud, afterHud
@@ -178,8 +181,11 @@ async function main() {
         productionPerfHarnessSha256: digest(path.join(__dirname, "performance.cjs")),
         originalHarnessSha256: "a0b48ce1fe0bb44ee5ceccbdd9651f71fab20b688e1591e6276cee629a6b3940",
         originalBaselineRevision: "11188d0c265c9688ca8a169200e2f1573ec9fbeb",
-        notes: "rAF measures scheduling cadence. Pixel-pack copies and art uploads count pipeline work. " +
+        notes: "rAF measures scheduling cadence. Map resolves count submitted map images on either presentation path. " +
+            "Compositor-context resolves avoid CPU readback. Detached-context resolves precede pixel-pack completion. " +
+            "Pixel-pack copies and art uploads count pipeline work. " +
             "Final display presentation is outside these probes. Task CPU uses the main thread's threadTicks. " +
+            "CPU percentage uses the Performance.getMetrics Timestamp interval, which includes probe-result transfer. " +
             "External map providers are blocked and bundled data supplies the scene. " +
             "GPU transfer timings include synchronization. CPU profiling runs separately after each selected timing case. " +
             "Moving cases use identical native held-key workloads. Faster simulation can travel farther, " +
