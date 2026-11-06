@@ -2,6 +2,106 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
+## Camera correctness and dense GPU scenes
+
+The camera changes in [`ca0fe45`](https://github.com/wieslawsoltes/UnoPixelMap/commit/ca0fe45ab630aa345856e5d836ff8ffe5f578ada) address paused route following, gesture ownership and dense route fitting:
+
+- Paused route zoom applies the full wheel or browser trackpad pinch delta immediately and retains follow ownership. It resets the tracking spring so the paused journey clock does not have to advance to finish the zoom. Repeated trackpad pinches and their inverse are covered by browser regressions.
+- Zero-delta wheel events and Safari gesture-start events do not cancel an existing flight or take manual ownership. A pure browser trackpad pinch preserves route follow and the free-roam North Up camera. Explicit Safari rotation while following a route detaches follow and rotates the map.
+- Terrain route fitting samples every route vertex's elevation once into a pooled buffer, reusing those heights during the zoom search. The previous evenly spaced limit of 513 vertices could omit an isolated mountain on a dense route. The new regression first reproduced that failure, then passed in orthographic and perspective views. Failed zoom trials exit at the first out-of-bounds vertex; successful trials still validate every vertex against the viewport insets.
+
+The native camera suite also passes all 54 existing inset route fits and 432 steep-terrain zoom anchors. These changes preserve the existing physical-eye, terrain-picking and follow-camera conventions documented below.
+
+### Retained GPU cache pressure
+
+In a live 1800-by-900 Manhattan play session on the preceding deployment, walking caused `GlMapRenderer` to throw `The visible map exceeds the bounded GPU geometry cache.` The application then switched to CPU fallback. The failure occurred because all visible building resources were pinned to the current frame, even when their combined working set exceeded the retained cache budget.
+
+[`9c86002`](https://github.com/wieslawsoltes/UnoPixelMap/commit/9c86002a1efa15be08b4aea29e53a63717e064cf) streams those building resources through the existing 128 MiB retained cache. It evicts unused older resources first, then other resources needed by the current frame when necessary, while protecting the mesh currently being uploaded. Empty selections no longer pin unused tiles. OpenGL retains resources referenced by queued commands until those commands complete.
+
+The renderer still draws all building faces before all roof rims. The rim pass reconstructs evicted edge/model buffers without uploading unused face vertices, preserving depth and occlusion order. A single tile that cannot fit remains an explicit unsupported case; the regression verifies that a subsequent smaller scene recovers correctly.
+
+The 128 MiB figure bounds **retained geometry and texture cache storage**. It excludes framebuffer attachments and resources that the driver must retain until queued commands complete, so it is not a bound on instantaneous total GPU memory. The existing presentation queue still limits outstanding map submissions to two.
+
+The native GLES regression compares 32 frames with a cache large enough for approximately one tile against the ordinary cache. It covers all four styles, moving and physical cameras, retained-frame replay after eviction, exact face/rim draw counts, unchanged warm uploads when the working set fits, the configured retained-memory limit, and oversized-tile recovery. Every constrained frame has exactly the same pixels as its ordinary-cache counterpart. The original 48-case GLES report remains byte-identical across all 192 image-hash fields.
+
+## Terrain mesh preparation and retained LOD layouts
+
+The terrain preparation pass reduces repeated elevation sampling and retains stitched height data while the camera moves within the same level-of-detail layout. It preserves the source resolution, patch count, lighting formulas, seam topology and rendering styles.
+
+- Each 17-by-17 patch reuses a one-sample border for its five-point slope stencil. Elevation queries fall from **1,445 to 357 per new patch**, a 75.3% reduction. The four unused border corners are not sampled. Latitude and ground-distance calculations run once per row, reducing those calculations from 289 to 17. Tile origins and sample steps are binary fractions, so the reused coordinates and subsequent arithmetic preserve the original floating-point results exactly.
+- The ordered patch IDs, repeated-world copies and immutable elevation snapshot identify the stitched height layout. Unchanged layouts retain their shared edges and skirt floors. The geographic height lookup still updates for the current camera, including the nearest repeated-world copy.
+- A GPU mesh skips its repeated height/light comparison only when its render style matches and it was used in the preceding preparation frame. A CPU-only interlude, a changed elevation snapshot or a changed patch layout forces validation. The four-child subdivision list is reused between frames.
+
+### Paired native phase measurements
+
+The comparison uses the renderer at `e35485601d9cb0afdf426ba300e7f2fbe0fb7f3e` and the terrain changes above. Both variants use the same diagnostic harness. Four fresh processes run in baseline, candidate, candidate, baseline order, with CPU affinity 0, two managed processors and disabled tiered compilation. The environment is .NET 10.0.14, SDK 10.0.403, Debian 13 and an AMD EPYC 9V74. Each workload performs 16 warmup iterations and 64 measured iterations at a 1200-by-680 logical viewport with requested pixel size 4.
+
+The fixture uses nine synthetic z14 elevation tiles with 64-by-64 samples, a signed 32-by-32 z0 parent and a mapped ocean polygon. The replacement snapshot includes missing samples that exercise parent fallback. The moving-LOD workload changes bearing and zoom through a deterministic 16-frame cycle. The table reports the median of the two process medians for each variant.
+
+| Preparation workload | Baseline median | Updated median | Speedup |
+| --- | ---: | ---: | ---: |
+| Cold nine-patch source meshes | 0.8431 ms | 0.2626 ms | 3.21× |
+| Orbit within a retained layout | 0.1919 ms | 0.0670 ms | 2.87× |
+| Camera motion across changing LOD | 1.0302 ms | 0.8693 ms | 1.19× |
+| Replacement elevation snapshot | 6.9210 ms | 2.0079 ms | 3.45× |
+| Minecraft orbit within a retained layout | 0.3132 ms | 0.0701 ms | 4.47× |
+
+These timings cover terrain source-mesh or terrain LOD/stitch preparation, depending on the workload. They exclude scene-depth construction, buildings, labels, GL submission and presentation, so they are **not application frame-rate measurements**. Artwork in this diagnostic is a blank deterministic tile. Output hashing runs outside the measured region.
+
+All five phase medians improve in both pairs. Tail latency is mixed for changing LOD: the first baseline-to-candidate pair has p95 **2.6058 → 3.7332 ms**, while the reverse-order pair has **2.6779 → 2.3261 ms**. The raw CSV retains all 1,280 timing/allocation rows, output hashes, runtime information and assembly identities rather than suppressing the slower tail. Ordinary retained-orbit allocation falls from 5,256 to 4,848 bytes per preparation. Other workloads can include cache growth and runtime bookkeeping. [Complete terrain preparation samples](terrain-preparation-benchmarks.csv)
+
+The measured baseline renderer SHA-256 is `944887fd2b326c113f65c9416a20c68b5169c7e905d9fa7009a91a4370517cba`; the candidate is `ca2362514b403faa8ae44d8af8e795438fdc0d9eedccfa51c6f0956a4f73d4c2`. The common harness SHA-256 is `41f0906baf421d33082bc560460b9756a49651be5b9dc80917b565c8e2d8769e`. These phase measurements precede the separate GPU cache-pressure changes.
+
+### Exact output checks
+
+The independent original-stencil reference matches **35,547 height/lighting pairs bit-for-bit** across zooms 0–22, signed elevation, missing samples, ocean masking, longitude wrap and polar borders. Another 28 retained-versus-fresh scene comparisons cover LOD changes, all four styles, changed elevation, CPU/GPU handoffs, resizing and repeated worlds, including terrain picking and physical heights. All 320 measured output hashes match across the four timing processes, accounting for 1,280 recorded hash entries.
+
+The 48-case native GLES report is byte-identical to the preceding renderer, including all 192 CPU, GPU, art-pixel and RGBA-image hashes. The complete native rendering suite also passes. The bounded GPU-cache regression is documented separately from these terrain phase measurements.
+
+To reproduce the phase report, use the same compiled test harness with each renderer and run the processes sequentially:
+
+```sh
+DOTNET_TieredCompilation=0 DOTNET_PROCESSOR_COUNT=2 taskset -c 0 \
+  dotnet tests/PixelMap.Rendering.Tests/bin/Release/net10.0/PixelMap.Rendering.Tests.dll \
+  --terrain-preparation --terrain-output=artifacts/terrain-preparation
+```
+
+## Release browser verification and paired play measurements
+
+The subsequent bootstrap cache-identity fix and its artifact-verification contract are described in [Browser release identity](publishing.md). The performance measurements in this section retain their exact `9c86002` provenance.
+
+The Release `InterpreterAndAOT` build at `9c86002a1efa15be08b4aea29e53a63717e064cf` passed the complete native and Chromium suites, the paired benchmark and Pages deployment in [run 42291311815](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42291311815). Deployment completed at 2026-11-06 21:17:02 UTC. Chromium verification covers paused route zoom and ownership, zero-delta Safari events, explicit route-camera twist, North Up pinch, Pointer Lock, all five driving camera rigs and touch reattachment. The Safari-event checks run through the browser adapter in Chromium; they are not a native Safari validation.
+
+The direct GPU path passes delayed-frame picking and backend recreation with zero framebuffer readbacks or map-sized CPU uploads. The explicitly forced detached path passes the same retained-frame checks using asynchronous pixel-pack transfers. Phone and DPR-2 resizing also pass. All five final stationary map crops in the paired performance evidence match exactly; whole-canvas equality is not claimed because walking/driving footer text differs. Eight of the ten initial map crops match exactly; two differ.
+
+### Paired browser results for this deployment
+
+This run compares the previously deployed `01315510709597d91f1e41397e601b1aa3b41118` with `9c86002a1efa15be08b4aea29e53a63717e064cf`, including the direct compositor change and this camera, terrain and cache pass. Both artifacts run on one AMD EPYC 7763 runner with affinity 0–2, Chromium 156.0.8078.4 and in-process SwiftShader, a 1200-by-780 viewport and DPR 1. Every scenario uses fresh browser processes, two seconds of warmup and one requested eight-second sample, in baseline-then-candidate order. External providers are blocked and bundled data supplies the scene. Held native keys advance play mode, so final moving poses can differ between versions.
+
+| Moving scenario | Map submissions/s, baseline → updated | Throughput change | Task CPU, baseline → updated | rAF callbacks/s, baseline → updated |
+| --- | ---: | ---: | ---: | ---: |
+| Walking, first person | 4.247 → 4.998 | +17.68% | 32.60% → 32.98% | 54.84 → 54.10 |
+| Walking, chase | 6.713 → 8.696 | +29.55% | 33.10% → 35.17% | 53.22 → 53.26 |
+| Driving, chase | 4.873 → 6.244 | +28.15% | 42.05% → 46.82% | 47.48 → 44.84 |
+| Driving, first person | 3.440 → 3.769 | +9.58% | 46.82% → 44.39% | 43.73 → 44.38 |
+| Free flight | 3.748 → 5.120 | +36.58% | 34.68% → 35.85% | 52.98 → 54.32 |
+
+Map submission throughput increases in every moving pair. Main-thread CPU and scheduling remain mixed. Driving chase task CPU rises from 4,117.362 to 4,559.313 ms and cumulative long-task duration rises from 1,884 to 2,295 ms. Driving first person reduces task CPU from 4,137.378 to 3,944.377 ms, but its long-task duration rises from 2,571 to 2,901 ms. Walking first person has slightly less total task CPU, 2,813.782 → 2,778.379 ms, but a higher percentage because the CDP measurement windows differ; its long-task duration rises from 805 to 1,119 ms. Walking-chase and free-flight long-task duration improve from 686 to 679 ms and 1,153 to 1,052 ms. Free-flight submit-to-signaled-completion p95 increases from 748.9 to 858.5 ms, and its maximum rAF gap increases from 150.0 to 250.1 ms.
+
+The five moving candidate samples contain 234 compositor-context map submissions, with zero framebuffer readbacks, pixel-pack copies or map-sized CPU uploads. The baseline contains 187 detached-context submissions and 178 completed pixel-pack copies. Every baseline copy follows a correlated signaled, zero-timeout fence poll. Both paths retain at most two outstanding maps, with zero unsafe overwrites, abandoned transfers, premature releases or positive-timeout polls. Every timed moving submission uses pixel size 4 at 300-by-166 art pixels.
+
+All ten stationary samples across the pair record zero foreground GL draws, transfers, map submissions and long tasks, with approximately 60 rAF callbacks/s. Default-map task CPU is 0.83% → 0.80%; relief-map CPU is 1.41% → 1.51%. Stationary walking, driving and free-flight CPU is 5.03% → 5.05%, 4.82% → 4.78% and 3.86% → 4.22%, respectively.
+
+Actual probe durations span 8,002.6–8,342.4 ms. CPU percentages divide main-thread `threadTicks` by the surrounding CDP metric window, spanning 8,019.346–9,848.814 ms and including raw-result collection. Software-GPU worker CPU is excluded. Map submissions, fence completion, transfer copies and rAF callbacks describe different pipeline stages; final display presentation is outside the probe. These individual short pairs establish transfer elimination and higher measured map throughput, not universal CPU or displayed-frame-rate gains. Physical-GPU, native Safari/iOS and repeated-run timing remain unmeasured. The earlier `e354856` comparison used an Intel Xeon Platinum 8573C, so differences between that separate run and this one cannot isolate the terrain/cache changes.
+
+### Evidence and provenance
+
+All 20 report summaries recompute exactly from the raw probes and CDP metrics, and all ten separate CPU-profile summaries recompute from their `.cpuprofile` files. The profiles include driving in first person. [Complete deployment comparison CSV](camera-terrain-browser-benchmarks.csv)
+
+The [performance evidence artifact](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42291311815/artifacts/13542255328) is 4,090,543 bytes with ZIP SHA-256 `4d50bbc99eeb333986821ebfcee8976a1b33fe6032e29da6ce1ae9528b98f6f1`. Candidate Pages artifact `13539884401` is 88,316,267 bytes with ZIP SHA-256 `f9e8c7d34466085d99a91c6494ad876e271b5ef1d73f887a3cd955e930af221f`; its native WASM SHA-256 is `fdbafedc4238a762f2eae23cff91b57a9402f7ff006a80e0d317a9d9678afa6a`. All 72 candidate boot resources were validated. Baseline Pages artifact `13495501541` and its hashes are also retained in the CSV and the preceding comparison below.
+
+The browser SHA-256 is `4fa61f0ba0b4f89b7bec242c32ca16d3bccf69dbfef0651924a9ba8fede5f9d6`. The common play harness SHA-256 is `fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44`, the probe harness is `0853a3be2ae6c804cacb5e8f50a93a23173d030f3c672a382ba47694f3ab7183`, and the exploration harness is `1048200cb8b4845df96b574a65d9e9d0028f7c2207417fc462083eae18ee255e`.
+
 ## Direct compositor GPU presentation
 
 Commit `e35485601d9cb0afdf426ba300e7f2fbe0fb7f3e` presents retained map textures on Uno's Skia WebGL context. This removes framebuffer readback and the subsequent CPU image upload from that path. A two-fence queue bounds outstanding map submissions; texture drawing follows GL command order without waiting for CPU-visible completion. The detached GLCanvas path remains available when the compositor context cannot support the terrain renderer, using the existing asynchronous pixel-pack transfer queue.
