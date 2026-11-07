@@ -138,7 +138,17 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
     private sealed class TileObstacles
     {
         private const int Cells = 16;
-        private sealed record Obstacle(MapFeature Feature, double WorldX, double WorldY, int BuildingIndex);
+        private sealed record Obstacle(MapFeature Feature, double WorldX, double WorldY, int BuildingIndex,
+            int MinX, int MinY, int MaxX, int MaxY)
+        {
+            // The bucket is a coarse candidate set. Keep inclusive bounds so polygon edge
+            // ownership remains exclusively with Contains/CrossesInterior below.
+            public bool MayContain(double x, double y) => x >= MinX && x <= MaxX && y >= MinY && y <= MaxY;
+
+            public bool MayIntersect(double ax, double ay, double bx, double by) =>
+                Math.Max(ax, bx) >= MinX && Math.Min(ax, bx) <= MaxX &&
+                Math.Max(ay, by) >= MinY && Math.Min(ay, by) <= MaxY;
+        }
         private readonly List<Obstacle>?[] _buckets = new List<Obstacle>?[Cells * Cells];
         private readonly List<Obstacle> _buildings = [];
         private readonly ConditionalWeakTable<ElevationSnapshot, double[]> _foundations = new();
@@ -167,7 +177,7 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
                 var obstacle = new Obstacle(feature,
                     (tile.Id.X + ((double)minX + maxX) / (2d * feature.Extent)) / count,
                     (tile.Id.Y + ((double)minY + maxY) / (2d * feature.Extent)) / count,
-                    feature.Layer == "building" ? _buildings.Count : -1);
+                    feature.Layer == "building" ? _buildings.Count : -1, minX, minY, maxX, maxY);
                 if (obstacle.BuildingIndex >= 0) _buildings.Add(obstacle);
                 double margin = feature.Type == GeometryType.LineString
                     ? HalfWidthMeters(feature) * feature.Extent / minimumTileMeters : 0;
@@ -202,7 +212,8 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
             var entries = _buckets[(int)(ty * Cells) * Cells + (int)(tx * Cells)];
             double[]? foundations = null;
             bool ground = vehicle.Motion is MotionModel.Ground or MotionModel.Pedestrian;
-            bool water = false, building = false, crossing = false, tunnel = false;
+            bool vessel = vehicle.Motion == MotionModel.Vessel;
+            bool water = false, building = false, crossing = false;
             if (entries is not null)
             foreach (var obstacle in entries)
             {
@@ -210,27 +221,34 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
                 double x = tx * feature.Extent, y = ty * feature.Extent;
                 if (feature.Layer == "building")
                 {
+                    if (building || !obstacle.MayContain(x, y)) continue;
                     if (elevation.Count > 0) foundations ??= _foundations.GetValue(elevation, _sampleFoundations);
                     double foundation = foundations is null ? 0 : foundations[obstacle.BuildingIndex];
-                    building |= altitude >= foundation + (feature.MinHeight ?? 0) && altitude < foundation + (feature.Height ?? 8)
+                    building = altitude >= foundation + (feature.MinHeight ?? 0) && altitude < foundation + (feature.Height ?? 8)
                         && Contains(feature.Paths, x, y);
+                    // Only ground vehicles can use a tunnel to override a building contact.
+                    if (building && !ground) return true;
                 }
                 else if (feature.Layer is "water" or "waterway")
                 {
                     // An aqueduct carries water above a ground vehicle's surface.
-                    if (!ground || feature.Brunnel != "bridge") water |= Covers(feature, x, y, tileMeters);
+                    if (!water && (ground || vessel) && (!ground || feature.Brunnel != "bridge") &&
+                        (feature.Type != GeometryType.Polygon || obstacle.MayContain(x, y)))
+                        water = Covers(feature, x, y, tileMeters);
                 }
-                else if (ground && SupportsCrossing(vehicle.Mode, feature) && Covers(feature, x, y, tileMeters))
+                else if (ground && (!crossing || feature.Brunnel == "tunnel") && SupportsCrossing(vehicle.Mode, feature) &&
+                    (feature.Type != GeometryType.Polygon || obstacle.MayContain(x, y)) && Covers(feature, x, y, tileMeters))
                 {
                     crossing = true;
-                    tunnel |= feature.Brunnel == "tunnel";
+                    // A usable tunnel clears both surface buildings and shoreline barriers.
+                    if (feature.Brunnel == "tunnel") return false;
                 }
             }
 
             // Ground vehicles use mapped tunnel passages beneath surface footprints.
             // Bridge decks only provide a crossing over water, preserving building contacts.
-            if (building && !tunnel) return true;
-            if (vehicle.Motion == MotionModel.Vessel) return !water;
+            if (building) return true;
+            if (vessel) return !water;
             return ground && water && !crossing;
         }
 
@@ -249,6 +267,9 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
                 {
                     var feature = obstacle.Feature;
                     if (feature.Layer != "building") continue;
+                    double localAx = ax * feature.Extent, localAy = ay * feature.Extent;
+                    double localBx = bx * feature.Extent, localBy = by * feature.Extent;
+                    if (!obstacle.MayIntersect(localAx, localAy, localBx, localBy)) continue;
                     if (elevation.Count > 0) foundations ??= _foundations.GetValue(elevation, _sampleFoundations);
                     double foundation = foundations is null ? 0 : foundations[obstacle.BuildingIndex];
                     double bottom = foundation + (feature.MinHeight ?? 0), top = foundation + (feature.Height ?? 8);
@@ -262,8 +283,7 @@ public sealed partial class VectorCollisionWorld : IJourneyWorld, IFreeRoamRailW
                         last = Math.Clamp(Math.Max(enter, leave), 0, 1);
                         if (last <= first) continue;
                     }
-                    if (CrossesInterior(feature.Paths, ax * feature.Extent, ay * feature.Extent,
-                        bx * feature.Extent, by * feature.Extent, first, last, sweep)) return true;
+                    if (CrossesInterior(feature.Paths, localAx, localAy, localBx, localBy, first, last, sweep)) return true;
                 }
             }
             return false;
