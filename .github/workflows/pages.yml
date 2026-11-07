@@ -47,6 +47,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/atlas/wwwroot
+          retention-days: 7
   verify:
     needs: browser
     runs-on: ubuntu-latest
@@ -90,13 +91,13 @@ jobs:
       (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-benchmark]')) ||
       (github.event_name == 'workflow_dispatch' && inputs.play_benchmark)
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     permissions:
       contents: read
       actions: read
     env:
       PIXELMAP_BROWSER_ARGS: '["--in-process-gpu","--disable-gpu-watchdog","--renderer-process-limit=1"]'
-      CPU_PROFILE_CASES: map-idle-relief,walk-stationary-firstperson,car-moving-chase,car-moving-firstperson,freeflight-moving
+      CPU_PROFILE_CASES: map-idle-relief,walk-stationary-firstperson,walk-moving-firstperson,walk-moving-chase,car-moving-chase,car-moving-firstperson,freeflight-moving
     steps:
       - uses: actions/checkout@v4
       - name: Select exact baseline and candidate artifacts
@@ -239,7 +240,7 @@ jobs:
               'browser': subprocess.check_output([str(browser), '--version'], text=True).strip(),
               'browser_sha256': hashlib.sha256(browser.read_bytes()).hexdigest(),
               'extra_browser_args': json.loads(os.environ['PIXELMAP_BROWSER_ARGS']),
-              'protocol': 'Each scenario runs baseline then candidate in fresh browser processes on the same runner.'}
+              'protocol': 'Each stationary scenario runs baseline then candidate. Moving scenarios run baseline/candidate then candidate/baseline (ABBA), in fresh browser processes on the same runner. CPU profiles are collected separately after timing, only in the first repetition.'}
           for name in ('play-performance.cjs', 'performance.cjs', 'explore.cjs'):
               record[name + '_sha256'] = hashlib.sha256((Path('tests/browser') / name).read_bytes()).hexdigest()
           (Path(os.environ['RUNNER_TEMP']) / 'play-evidence/environment.json').write_text(json.dumps(record, indent=2) + '\n')
@@ -258,24 +259,50 @@ jobs:
           python3 -m http.server 8100 --bind 127.0.0.1 --directory "$RUNNER_TEMP/play-sites" > "$evidence/server.log" 2>&1 &
           site_server=$!
           trap 'kill "$site_server" 2>/dev/null || true' EXIT
-          status=0
-          for scenario in map-idle-default map-idle-relief walk-stationary-firstperson \
-            walk-moving-firstperson walk-moving-chase car-stationary-chase car-moving-chase \
-            car-moving-firstperson freeflight-stationary freeflight-moving; do
-            for variant in baseline candidate; do
-              revision="$BASELINE_SHA"
-              if [ "$variant" = candidate ]; then revision="$CANDIDATE_SHA"; fi
-              output="$evidence/$variant/$scenario"
-              mkdir -p "$output"
-              if ! PIXELMAP_REVISION="$revision" PROFILE_CASES="$scenario" \
-                taskset -c "$PLAY_AFFINITY" node tests/browser/play-performance.cjs \
-                "http://127.0.0.1:8100/$variant/UnoPixelMap/" "$output" > "$output/run.log" 2>&1; then
-                status=1
-              fi
-              cat "$output/run.log"
-            done
-          done
-          exit "$status"
+          python3 - <<'PY'
+          import datetime, json, os, subprocess
+          from pathlib import Path
+          evidence = Path(os.environ['RUNNER_TEMP']) / 'play-evidence'
+          provenance_path = evidence / 'provenance.json'
+          provenance = json.loads(provenance_path.read_text())
+          execution = provenance['execution'] = []
+          scenarios = (
+              'map-idle-default', 'map-idle-relief', 'walk-stationary-firstperson',
+              'walk-moving-firstperson', 'walk-moving-chase', 'car-stationary-chase',
+              'car-moving-chase', 'car-moving-firstperson', 'freeflight-stationary',
+              'freeflight-moving')
+          profiles = set(os.environ['CPU_PROFILE_CASES'].split(','))
+          failed = False
+          for scenario in scenarios:
+              order = [(1, 'baseline'), (1, 'candidate')]
+              if 'moving' in scenario:
+                  order += [(2, 'candidate'), (2, 'baseline')]
+              for repetition, variant in order:
+                  output = evidence / variant / scenario / f'repetition-{repetition}'
+                  output.mkdir(parents=True)
+                  revision = os.environ[f'{variant.upper()}_SHA']
+                  profile = repetition == 1 and scenario in profiles
+                  entry = {'order': len(execution) + 1, 'scenario': scenario,
+                      'repetition': repetition, 'variant': variant, 'source_sha': revision,
+                      'output': str(output.relative_to(evidence)), 'cpu_profile_requested': profile,
+                      'started_utc': datetime.datetime.now(datetime.timezone.utc).isoformat()}
+                  execution.append(entry)
+                  provenance_path.write_text(json.dumps(provenance, indent=2) + '\n')
+                  environment = os.environ.copy()
+                  environment.update({'PIXELMAP_REVISION': revision, 'PROFILE_CASES': scenario,
+                      'CPU_PROFILE_CASES': scenario if profile else 'none'})
+                  with (output / 'run.log').open('w') as log:
+                      result = subprocess.run(['taskset', '-c', os.environ['PLAY_AFFINITY'],
+                          'node', 'tests/browser/play-performance.cjs',
+                          f'http://127.0.0.1:8100/{variant}/UnoPixelMap/', str(output)],
+                          env=environment, stdout=log, stderr=subprocess.STDOUT)
+                  entry.update({'exit_code': result.returncode,
+                      'completed_utc': datetime.datetime.now(datetime.timezone.utc).isoformat()})
+                  provenance_path.write_text(json.dumps(provenance, indent=2) + '\n')
+                  print((output / 'run.log').read_text(), flush=True)
+                  failed |= result.returncode != 0
+          raise SystemExit(1 if failed else 0)
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
