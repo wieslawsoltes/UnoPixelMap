@@ -1,0 +1,547 @@
+{
+  "schema_version": 1,
+  "decision": "REJECTED",
+  "variant": "fixed8",
+  "decision_basis": "Unconditional8-pixel grid with center-range pruning. Rejected because Normal freeflight and hills Roblox regressed; the walk wall p95 also worsened in that sequence.",
+  "scope": "This is a separate native ABBA sequence against its own c937 controls. Never subtract medians from different prototype sequences to claim an isolated optimization effect. No browser/GPU timings are included.",
+  "protocol": "ABBA fresh processes; identical common harness/dependencies except Rendering.dll; CPU0; tiered compilation disabled; two managed processors; 16 warmup camera phases and64 measured frames per ordinary workload; controls4 warmups/8 samples. Median is lower-middle nearest rank; p95 nearest rank. Total is PrepareGpuFrame including labels plus navigation overlay/picking; GL and presentation excluded.",
+  "original_identity": {
+    "baseline_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "candidate_base": "1cf4c5a7872481ed2715c1d27d460671aad4fe6b",
+    "candidate_uncommitted_patch_sha256": "9a49b284d982a95fc3cdc236230a3577a0d5751b088fa075b9249c9209b49082",
+    "runtime": "10.0.14",
+    "sdk": "10.0.403",
+    "cpu_affinity": [
+      0
+    ],
+    "logical_processors": 2,
+    "tiered_compilation": false,
+    "baseline_flag": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "changed_files": [
+      "PixelMap.Rendering.dll"
+    ]
+  },
+  "renderer_binary_identity": {
+    "path": "PixelMap.Rendering.dll",
+    "baseline_sha256": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+    "baseline_bytes": 425984,
+    "candidate_sha256": "9864216c16b6086e6ad4b6b531bf5829c2e2d5754ecf7911b7125b2e487848c0",
+    "candidate_bytes": 428544
+  },
+  "common_runtime_manifest": "common-runtime.json",
+  "common_runtime_manifest_sha256": "6ad223a269004a69bd1116d7f2a236f5271c32eefba5cddfe9636d2831492bc3",
+  "source": {
+    "patch": "fixed8.patch",
+    "patch_sha256": "9a49b284d982a95fc3cdc236230a3577a0d5751b088fa075b9249c9209b49082",
+    "frozen_GpuSceneDepth_sha256": "01ba149d589cf20736d011d91d4253db770caee776e105f2f8603369a6ebfe03",
+    "published_equivalent_base_commit": "4fe5af199cef1c4ae79c2757d0296c9acb5c49cd",
+    "base_equivalence_proof": "../source-release-53e9c68.json"
+  },
+  "original_evidence_hashes": {
+    "identity_sha256": "6e8820839063bba2ca777ba20403a669ae8bca8272581a2816568c3d795b87ec",
+    "summary_sha256": "258eaa0a9aaaacd16a143afce9f7982db52991a6da1c3babf496f1f243c39072",
+    "samples_csv_sha256": "fc17250f22c6a688c97169a59828fa79a3ac5cff850cd1ae8ef9614b1e3cddf2",
+    "runner_sha256": "0f6c13337085bb0d3e37bd4177aed9b1b7f600c4ec3ad13d0fcbf81cf53128d2",
+    "candidate_fixed8_patch_sha256": "9a49b284d982a95fc3cdc236230a3577a0d5751b088fa075b9249c9209b49082",
+    "candidate_fixed8_source_sha256": "01ba149d589cf20736d011d91d4253db770caee776e105f2f8603369a6ebfe03",
+    "reports": [
+      {
+        "path": "0-baseline/depth-preparation.json",
+        "sha256": "5541568d0596b7c2daa6f1edae1739c9a194d78c4c2a85770ed1a4ac8678997c",
+        "bytes": 836896,
+        "run_log_sha256": "c56cd4b239d821e4359078484cbacc875b21414a898a04a15b3dda0a70c2e8de"
+      },
+      {
+        "path": "1-candidate/depth-preparation.json",
+        "sha256": "02902a4ef1b96883aa1d8f614b053680e1cf850e7bb1f6c0f100f39bb9481939",
+        "bytes": 836846,
+        "run_log_sha256": "76d7594822218e2b9afe65e865f25de88aaf891ce149e6f42a265554286b61fe"
+      },
+      {
+        "path": "2-candidate/depth-preparation.json",
+        "sha256": "48a075d48625821fa949002fa0135b9285cafdf2193b0a105666bc8cfd00b563",
+        "bytes": 836903,
+        "run_log_sha256": "bcc57f5240a3118d38d77ef4b9860a4841d3f32da499636056a99152dfa65d90"
+      },
+      {
+        "path": "3-baseline/depth-preparation.json",
+        "sha256": "ef81b5a15aa3ce271a23dc48d43716baf8a7d4df3099d0647e5d1f67bb7bde9e",
+        "bytes": 836984,
+        "run_log_sha256": "44ee436eef297796fe9ac5f12ac248ad4c65591bed006335a24334a997198fb3"
+      }
+    ]
+  },
+  "audit_validation": {
+    "runtime_file_hashes_checked": 74,
+    "all_recorded_runtime_hashes_match": true,
+    "only_changed_runtime_file": "PixelMap.Rendering.dll",
+    "identity_bytes_field_is_candidate_size": true,
+    "raw_samples": 2112,
+    "recomputed_per_block_summary_fields": 1120,
+    "samples_csv_reconstructed_byte_for_byte": true,
+    "all_published_aggregate_summaries_match_raw_samples": true,
+    "exact_fingerprint_fields": [
+      "QueryHash",
+      "OverlayHash",
+      "MinimumAltitude",
+      "MaximumAltitude",
+      "TerrainPatches",
+      "BuildingTriangles",
+      "ConstructedTriangles"
+    ],
+    "exact_fingerprint_comparisons_against_block_zero": 11088,
+    "all_four_blocks_have_equal_fingerprints_for_every_corresponding_frame": true,
+    "all_index_flags_true": true,
+    "all_active_capacities_below_16MiB": true,
+    "source_patch_file_available_for_recomputing_recorded_patch_hash": true,
+    "reconstructed_fixed8_patch_matches_preexisting_recorded_digest": true
+  },
+  "resource_controls": {
+    "baseline": {
+      "max_recorded_bytes": 2205744,
+      "max_fraction_of_active_16MiB_cap": 0.13147258758544922,
+      "frames_above_8MiB_pool_capacity_threshold": 0
+    },
+    "candidate": {
+      "max_recorded_bytes": 5490896,
+      "max_fraction_of_active_16MiB_cap": 0.3272829055786133,
+      "frames_above_8MiB_pool_capacity_threshold": 0
+    }
+  },
+  "results": [
+    {
+      "workload": "manhattan-walk",
+      "samples_per_variant": 128,
+      "median_ms": [
+        9.2955,
+        7.6434
+      ],
+      "median_change_percent": -17.77311602388253,
+      "p95_ms": [
+        10.9063,
+        15.101700000000001
+      ],
+      "thread_cpu_median_ms": [
+        9.299301999999898,
+        7.569245999999566
+      ],
+      "thread_cpu_p95_ms": [
+        10.911141999999927,
+        9.846783999999843
+      ],
+      "baseline_process_medians_ms": [
+        9.9389,
+        9.0439
+      ],
+      "candidate_process_medians_ms": [
+        7.8234,
+        7.5199
+      ]
+    },
+    {
+      "workload": "manhattan-chase",
+      "samples_per_variant": 128,
+      "median_ms": [
+        13.060500000000001,
+        10.820599999999999
+      ],
+      "median_change_percent": -17.15018567436164,
+      "p95_ms": [
+        14.8476,
+        14.436
+      ],
+      "thread_cpu_median_ms": [
+        13.064755000000332,
+        10.795069999999214
+      ],
+      "thread_cpu_p95_ms": [
+        14.855686999999762,
+        13.230110999999852
+      ],
+      "baseline_process_medians_ms": [
+        13.2655,
+        12.868500000000001
+      ],
+      "candidate_process_medians_ms": [
+        10.9511,
+        10.5507
+      ]
+    },
+    {
+      "workload": "manhattan-freeflight",
+      "samples_per_variant": 128,
+      "median_ms": [
+        9.8162,
+        9.949399999999999
+      ],
+      "median_change_percent": 1.3569405676330915,
+      "p95_ms": [
+        11.594000000000001,
+        11.7749
+      ],
+      "thread_cpu_median_ms": [
+        9.819473000000471,
+        9.952440000000934
+      ],
+      "thread_cpu_p95_ms": [
+        11.528846999999587,
+        11.695115000000442
+      ],
+      "baseline_process_medians_ms": [
+        10.181000000000001,
+        9.3865
+      ],
+      "candidate_process_medians_ms": [
+        10.261000000000001,
+        9.5521
+      ]
+    },
+    {
+      "workload": "manhattan-orbit",
+      "samples_per_variant": 128,
+      "median_ms": [
+        17.154799999999998,
+        16.7497
+      ],
+      "median_change_percent": -2.3614381980553434,
+      "p95_ms": [
+        22.116,
+        19.1329
+      ],
+      "thread_cpu_median_ms": [
+        17.139469000001554,
+        16.75366699999904
+      ],
+      "thread_cpu_p95_ms": [
+        22.12138700000105,
+        19.135981000001266
+      ],
+      "baseline_process_medians_ms": [
+        17.4622,
+        16.0914
+      ],
+      "candidate_process_medians_ms": [
+        17.8447,
+        16.1111
+      ]
+    },
+    {
+      "workload": "manhattan-freeflight-normal",
+      "samples_per_variant": 128,
+      "median_ms": [
+        10.6602,
+        12.490300000000001
+      ],
+      "median_change_percent": 17.167595354683797,
+      "p95_ms": [
+        15.2371,
+        13.7447
+      ],
+      "thread_cpu_median_ms": [
+        10.667069999999512,
+        12.497964999998658
+      ],
+      "thread_cpu_p95_ms": [
+        15.134099999999307,
+        13.665978000002724
+      ],
+      "baseline_process_medians_ms": [
+        10.5212,
+        10.748800000000001
+      ],
+      "candidate_process_medians_ms": [
+        12.6421,
+        12.210700000000001
+      ]
+    },
+    {
+      "workload": "hills-pixel",
+      "samples_per_variant": 128,
+      "median_ms": [
+        1.0729000000000002,
+        1.1114
+      ],
+      "median_change_percent": 3.588405256780658,
+      "p95_ms": [
+        1.5327,
+        1.5663999999999998
+      ],
+      "thread_cpu_median_ms": [
+        1.0750840000000608,
+        1.114573000000746
+      ],
+      "thread_cpu_p95_ms": [
+        1.535926999998992,
+        1.570228999999017
+      ],
+      "baseline_process_medians_ms": [
+        1.1575,
+        1.0332
+      ],
+      "candidate_process_medians_ms": [
+        1.1984,
+        1.06
+      ]
+    },
+    {
+      "workload": "hills-minecraft",
+      "samples_per_variant": 128,
+      "median_ms": [
+        1.3056999999999999,
+        1.362
+      ],
+      "median_change_percent": 4.3118633683082,
+      "p95_ms": [
+        1.6619,
+        1.8426
+      ],
+      "thread_cpu_median_ms": [
+        1.307609000001321,
+        1.3641830000015034
+      ],
+      "thread_cpu_p95_ms": [
+        1.664688999999271,
+        1.8474790000000212
+      ],
+      "baseline_process_medians_ms": [
+        1.3649,
+        1.2093
+      ],
+      "candidate_process_medians_ms": [
+        1.5057,
+        1.2469999999999999
+      ]
+    },
+    {
+      "workload": "hills-roblox",
+      "samples_per_variant": 128,
+      "median_ms": [
+        1.7034000000000002,
+        2.013
+      ],
+      "median_change_percent": 18.17541387812607,
+      "p95_ms": [
+        2.708,
+        3.0834
+      ],
+      "thread_cpu_median_ms": [
+        1.7060600000004342,
+        2.0155090000007476
+      ],
+      "thread_cpu_p95_ms": [
+        2.7120520000007673,
+        3.08802999999898
+      ],
+      "baseline_process_medians_ms": [
+        1.6244,
+        1.8048000000000002
+      ],
+      "candidate_process_medians_ms": [
+        2.1025,
+        1.7694
+      ]
+    },
+    {
+      "workload": "manhattan-zero-query",
+      "samples_per_variant": 16,
+      "median_ms": [
+        12.3917,
+        10.6642
+      ],
+      "median_change_percent": -13.940782943421814,
+      "p95_ms": [
+        32.8678,
+        32.3744
+      ],
+      "thread_cpu_median_ms": [
+        12.399459000000206,
+        10.670635999998922
+      ],
+      "thread_cpu_p95_ms": [
+        32.87574799999493,
+        32.37998199999856
+      ],
+      "baseline_process_medians_ms": [
+        10.7031,
+        13.1248
+      ],
+      "candidate_process_medians_ms": [
+        11.0688,
+        9.4917
+      ]
+    },
+    {
+      "workload": "manhattan-full-query",
+      "samples_per_variant": 16,
+      "median_ms": [
+        13.0781,
+        11.329600000000001
+      ],
+      "median_change_percent": -13.369679081823804,
+      "p95_ms": [
+        30.8265,
+        33.334500000000006
+      ],
+      "thread_cpu_median_ms": [
+        13.083534000004875,
+        11.334991000003356
+      ],
+      "thread_cpu_p95_ms": [
+        30.8256169999986,
+        33.328637999999046
+      ],
+      "baseline_process_medians_ms": [
+        10.207,
+        13.1028
+      ],
+      "candidate_process_medians_ms": [
+        12.7354,
+        9.8558
+      ]
+    }
+  ],
+  "failure_phase_details": {
+    "manhattan-freeflight-normal": {
+      "Prepare": {
+        "median_ms": [
+          9.1487,
+          10.9636
+        ],
+        "change_percent": 19.837791161585795,
+        "thread_cpu_median_ms": [
+          9.153145000000222,
+          10.953214999999545
+        ]
+      },
+      "Navigation": {
+        "median_ms": [
+          1.4583,
+          1.4841
+        ],
+        "change_percent": 1.769183295618193,
+        "thread_cpu_median_ms": [
+          1.4599849999995058,
+          1.4852730000002339
+        ]
+      },
+      "DepthConstruction": {
+        "median_ms": [
+          0.2363,
+          0.2268
+        ],
+        "change_percent": -4.020313161235722,
+        "thread_cpu_median_ms": [
+          0.2368609999994078,
+          0.22742699999980687
+        ]
+      },
+      "SparseQueries": {
+        "median_ms": [
+          7.4276,
+          9.5691
+        ],
+        "change_percent": 28.83165490871884,
+        "thread_cpu_median_ms": [
+          7.430989999998928,
+          9.571414999998524
+        ]
+      }
+    },
+    "hills-roblox": {
+      "Prepare": {
+        "median_ms": [
+          0.853,
+          0.9419
+        ],
+        "change_percent": 10.422039859320043,
+        "thread_cpu_median_ms": [
+          0.8553179999998974,
+          0.9432590000014898
+        ]
+      },
+      "Navigation": {
+        "median_ms": [
+          0.8069,
+          1.0469
+        ],
+        "change_percent": 29.743462634775074,
+        "thread_cpu_median_ms": [
+          0.8082789999989473,
+          1.0478339999990567
+        ]
+      },
+      "DepthConstruction": {
+        "median_ms": [
+          0.0343,
+          0.0338
+        ],
+        "change_percent": -1.4577259475218707,
+        "thread_cpu_median_ms": [
+          0.034752000001390115,
+          0.034139999999752035
+        ]
+      },
+      "SparseQueries": {
+        "median_ms": [
+          4.8478,
+          5.8259
+        ],
+        "change_percent": 20.17616238293658,
+        "thread_cpu_median_ms": [
+          4.849411999999575,
+          5.82056300000113
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "The candidate combines the frozen fixed-8 depth prototype with the renderer changes present at its recorded base commit; these data do not isolate cell size alone.",
+    "Prepare measures real frame preparation including labels; Navigation measures drive route/vehicle/gate/picking stress in every camera. GL/presentation and free-roam simulation are excluded.",
+    "DepthConstruction and SparseQueries concern a second, independent index. PreparedGroups and PreparedCells refer to that index, not the frame used by labels.",
+    "IndexCapacityBytes includes retained pooled capacity from earlier workloads; it is not a measurement of current live memberships or total renderer memory.",
+    "No measured frame enters fallback or exceeds the 8MiB pool threshold, so these data do not measure pressure fallback or pool rejection behavior.",
+    "The 8-query completion threshold is never reached in the ordinary independent sparse-query batches: PreparedCells is zero there for both variants. Actual frame label completion is not recorded.",
+    "The full-query control has 79639 pixels, exceeding the 65536-entry sample cache; its repeated pass is not a pure cache-hit benchmark.",
+    "Walk candidate block 2 has large wall/thread-CPU gaps; the higher observed wall p95 must be reported, but does not establish proportional renderer CPU growth.",
+    "Only two fresh processes per variant are available, with fixed workload order. Pooled medians and per-block medians are descriptive rather than confidence estimates.",
+    "The fixed8 source patch was reconstructed from the later adaptive file by reverting only the grid-policy constants and constructor choice in an isolated temporary work tree. Its canonical git diff matches the preexisting prototype patch digest exactly; the active worktree was not changed."
+  ],
+  "walk_wall_cpu_tail_diagnostics": [
+    {
+      "block": 0,
+      "variant": "baseline",
+      "wall_p95_ms": 11.492799999999999,
+      "thread_cpu_p95_ms": 11.50077599999986,
+      "wall_minus_thread_cpu_gap_p95_ms": 0.015012000000186987,
+      "frames_with_gap_above_2ms": 0,
+      "maximum_gap_ms": 0.11248699999995182
+    },
+    {
+      "block": 1,
+      "variant": "candidate",
+      "wall_p95_ms": 8.9889,
+      "thread_cpu_p95_ms": 8.871167000000014,
+      "wall_minus_thread_cpu_gap_p95_ms": 0.009426000000402723,
+      "frames_with_gap_above_2ms": 1,
+      "maximum_gap_ms": 3.8787010000000226
+    },
+    {
+      "block": 2,
+      "variant": "candidate",
+      "wall_p95_ms": 15.8372,
+      "thread_cpu_p95_ms": 10.139036999999917,
+      "wall_minus_thread_cpu_gap_p95_ms": 7.986368000000164,
+      "frames_with_gap_above_2ms": 9,
+      "maximum_gap_ms": 12.000157000000051
+    },
+    {
+      "block": 3,
+      "variant": "baseline",
+      "wall_p95_ms": 10.2249,
+      "thread_cpu_p95_ms": 10.230362000000014,
+      "wall_minus_thread_cpu_gap_p95_ms": 0.008262999999775644,
+      "frames_with_gap_above_2ms": 0,
+      "maximum_gap_ms": 0.015814000000061057
+    }
+  ]
+}

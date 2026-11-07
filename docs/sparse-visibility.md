@@ -54,6 +54,89 @@ clipping, face rejection, half-open triangle coverage, lazy interpolation-plane
 evaluation and roof-rim DDA sampling. Sparse preparation changes when those
 operations run.
 
+## Selective rejection of empty subpixel coverage
+
+The current implementation additionally rejects some valid projected triangles
+that cannot contribute to any depth query. `Sample` tests triangle coverage at
+artwork-pixel centers, `x + .5f, y + .5f`. A narrow projected triangle can intersect
+the viewport geometrically while covering none of those centers. Retaining it
+would add primitive storage and cell references without changing an answer.
+
+This specialization is limited to triangles whose projected bounding-box width
+**or** height is at most one art pixel. Ordinary faces retain the original
+geometric bins. The range calculations live in the non-inlined
+`AddSubpixelTriangle` helper, so the common ordinary-face path does not carry
+their local state or execute four ceiling operations. The float extent
+subtraction only selects the specialization. Floating-point rounding
+can change that selection without changing coverage, because the helper applies
+the original bounds and `Contains` test. The rejection is exact and adds no
+approximate area threshold or distance-based geometry removal after the existing
+`Triangle.Valid` gate.
+
+For the triangle's half-open horizontal bounds `[L, R)`, an integer pixel `x`
+can pass the original bounding-box test only when:
+
+```text
+L <= x + 0.5 < R
+ceil(L - 0.5) <= x < ceil(R - 0.5)
+```
+
+The implementation intersects that integer interval with the viewport before
+converting it to integer indices. The same calculation applies vertically:
+
+```csharp
+int left   = (int)Math.Clamp(Math.Ceiling((double)triangle.Left   - .5), 0, width);
+int right  = (int)Math.Clamp(Math.Ceiling((double)triangle.Right  - .5), 0, width);
+int top    = (int)Math.Clamp(Math.Ceiling((double)triangle.Top    - .5), 0, height);
+int bottom = (int)Math.Clamp(Math.Ceiling((double)triangle.Bottom - .5), 0, height);
+```
+
+The upper indices are exclusive. Performing subtraction and ceiling in `double`
+preserves the distinction between an exact half-pixel boundary and either
+adjacent `float` value. Clamping before the cast also avoids converting an
+unbounded projected coordinate directly to `int`.
+
+An empty horizontal or vertical interval rejects the primitive. If **both**
+intervals contain exactly one index, the helper calls the unchanged
+`Triangle.Contains` at that sole center. This catches a thin or diagonal
+triangle whose box includes the center while the triangle itself does not.
+A single column with several possible rows, or a single row with several
+possible columns, cannot use that rejection: a later sample may still be
+covered. Surviving specialized triangles are indexed from their first through
+last possible center, avoiding references to cells beyond an exclusive bound.
+
+The lattice argument applies while both artwork dimensions are at most
+`2^23`: every in-range `x + .5f` and `y + .5f` then represents the intended
+half-integer exactly. Larger synthetic viewports retain conservative geometric
+binning, because binary32 rounding changes the center representation at larger
+coordinates. Roof rims retain their existing DDA samples and bins throughout;
+they do not share the triangle-center coverage rule.
+
+This removal affects only the CPU visibility index. OpenGL receives the same
+geometry, and frame altitude bounds still include the original submitted
+terrain and models. Terrain tie-breaking remains exact: removing a primitive
+that cannot cover any center preserves the relative order of every surviving
+triangle within its immutable source group. `CoversAt` can subsequently evaluate
+a terrain plane at the caller's subpixel position, but it first chooses that
+plane through `Sample` at a center. An eliminated triangle could never have
+been selected for that evaluation.
+
+### Grid traversal and retained storage
+
+The base grid remains **16 × 16 art pixels**, with the existing power-of-two
+growth for large viewports. The index computes `cellShift = log2(cellSize)` once
+and maps nonnegative integer pixel indices with shifts. After preparation for
+the current query has completed, the exact cell's candidate handles are read through
+`CollectionsMarshal.AsSpan`; sampling updates interpolation-plane caches but
+does not append to or resize that candidate list.
+
+Prepared triangles remain **84 bytes** and projected-vertex scratch entries
+remain **28 bytes**. There is no additional projected-point cache in each
+vertex. The 16 MiB active membership budget, 8 MiB pooled membership budget,
+two-workspace pool, and pressure fallback described below retain their existing
+limits and semantics. The optimization removes useless primitive work and
+references without enlarging those budgets.
+
 ## Why primitive sorting is unnecessary
 
 The eager implementation submitted all terrain before all buildings. Within
@@ -210,6 +293,22 @@ layers have different physical heights, so a source-order mistake produces an
 observable wrong terrain hit. Separate meshes contain NaN and positive/negative
 infinity in coordinates or heights to check the original finite-depth behavior.
 
+[GpuDepthRasterChecks](../tests/PixelMap.Rendering.Tests/GpuDepthRasterChecks.cs)
+adds **9,063,600 exact comparisons across 562 frames** against the same unchanged
+eager oracle. It injects isolated projected primitives after clipping, then
+compares sampled depth bits, terrain altitude/inverse-depth/physical-height
+outputs, and subpixel `CoversAt` results. These checks complement the complete
+mesh, projection and clipping fixtures above.
+
+The raster fixtures include IEEE predecessors and successors around half-pixel
+and cell boundaries, valid geometry with an empty pixel raster, a sole center
+on or outside a diagonal edge, both windings, terrain/model classification,
+orthographic and perspective interpolation, and single-column/row triangles
+whose first possible center misses while later centers hit. They also verify
+exclusive cell membership, terrain source-order ties after removing intervening
+primitives, reversed preparation order, and the large-coordinate fallback above
+`2^23`. Run this focused gate with `--depth-raster`.
+
 The existing interpolation and clipping checks remain in
 [GpuDepthChecks](../tests/PixelMap.Rendering.Tests/GpuDepthChecks.cs). Label layout
 has its own eager-reference tests in
@@ -292,6 +391,7 @@ For example, on Linux with .NET 10 and the repository's native dependencies:
 ```bash
 dotnet build tests/PixelMap.Rendering.Tests -c Release
 dotnet tests/PixelMap.Rendering.Tests/bin/Release/net10.0/PixelMap.Rendering.Tests.dll --depth-index
+dotnet tests/PixelMap.Rendering.Tests/bin/Release/net10.0/PixelMap.Rendering.Tests.dll --depth-raster
 
 PIXELMAP_TEST_FONT=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf \
 DOTNET_TieredCompilation=0 DOTNET_PROCESSOR_COUNT=2 \
@@ -312,7 +412,92 @@ presentation, tile networking and browser scheduling. The current pass's
 end-to-end evidence and deployment results are documented in
 [performance.md](performance.md).
 
-## Current native results: compact building meshes
+## Current native results: selective subpixel indexing
+
+The selected renderer, SHA-256
+`72434f75685028de2d90979113d7c54c0a9bb3d0cf217b70fe46fbca65cc2f0d`,
+is compared with the unchanged `c937ddd` renderer. This is the complete selected
+rendering source, including the prepared CPU window-row work; it is not an
+isolated timing of one depth-index instruction or a comparison with an earlier
+experimental grid/projection-cache variant. Those
+[rejected prototype records](verification/native-depth-prototypes-20261107/README.md)
+remain separate from the selected results. The selected code retains the
+16-pixel base grid and 28-byte vertex scratch layout described above.
+The [source-release identity](verification/source-release-53e9c68.json) maps the
+measured local trees to the equivalent published `53e9c68` source release while
+preserving the original measurement identities.
+
+Four fresh processes run baseline → candidate → candidate → baseline on CPU 0
+with .NET 10.0.14, SDK 10.0.403, two managed processors, disabled tiered
+compilation, the same explicit font, and identical harness/dependency bytes
+apart from `PixelMap.Rendering.dll`. Ordinary workloads contribute 16 warmups
+and 64 measured frames per process; zero/full-query controls contribute four
+warmups and eight measured frames. The table pools 128 samples per variant for
+each ordinary workload and 16 for each control, using the lower-middle
+nearest-rank median and nearest-rank p95. This aggregation differs from the
+mean-of-run-medians historical table below.
+
+The measured total is `PrepareGpuFrame`, including real label preparation,
+plus the route/vehicle/gate/picking navigation stress pass. It excludes GL
+execution, presentation, tile networking, browser scheduling and free-roam
+simulation. The zero/full-query names describe the separate independent-index
+query controls; their preparation totals still include labels and navigation.
+
+| Workload | `c937ddd` median | Selected median | Change | Baseline → selected p95 |
+| --- | ---: | ---: | ---: | ---: |
+| Manhattan walk | 8.925 ms | 6.915 ms | -22.5% | 10.312 → 9.956 ms |
+| Manhattan chase | 12.193 ms | 9.886 ms | -18.9% | 14.118 → 12.352 ms |
+| Manhattan free flight | 9.244 ms | 9.307 ms | +0.7% | 10.940 → 12.640 ms |
+| Manhattan orbit | 15.912 ms | 16.103 ms | +1.2% | 18.079 → 22.270 ms |
+| Manhattan Normal free flight | 10.126 ms | 10.441 ms | +3.1% | 12.145 → 14.841 ms |
+| Hills Pixel | 1.003 ms | 1.022 ms | +1.9% | 1.311 → 1.214 ms |
+| Hills Minecraft | 1.364 ms | 1.207 ms | -11.5% | 2.028 → 2.206 ms |
+| Hills Roblox | 1.497 ms | 1.520 ms | +1.6% | 2.298 → 2.153 ms |
+| Manhattan zero-query control | 10.037 ms | 11.251 ms | +12.1% | 28.122 → 30.519 ms |
+| Manhattan full-query control | 10.665 ms | 9.870 ms | -7.4% | 29.035 → 30.111 ms |
+
+Walking and chase improve in both candidate processes. Their median prepared
+frame-triangle counts decrease from **34,714 → 10,255** and
+**39,208 → 12,071** respectively, while maximum measured index capacities
+decrease from **520,192 → 260,576 bytes** and **978,064 → 492,560 bytes**.
+The membership capacities include retained buffers from earlier workloads;
+they do not measure total renderer memory. Per-frame managed allocation is
+approximately unchanged: the candidate averages about 47 additional bytes for
+walk and 88 for chase in this sequence.
+
+The regressions remain part of the result. Normal free-flight medians increase
+in both candidate processes. Free flight, orbit and Normal free flight have
+preparation/navigation p95 increases of approximately **15.5%, 23.2% and 22.2%**;
+the corresponding thread-CPU tails also increase. The zero-query control has
+only 16 samples per variant. Two fresh processes per variant and a fixed
+workload order support descriptive comparisons, not a universal speedup or a
+confidence estimate.
+
+All **2,112 corresponding frame observations** preserve their query and overlay
+hashes, altitude bounds and submitted geometry fingerprints. Every measured
+index remains indexed and below the active budget; this timing sequence does
+not exercise pressure fallback. Recorded membership capacities also remain
+below the 8 MiB pool limit, but projected-vertex scratch lengths and other
+pool-admission checks were not recorded. These counters therefore do not
+establish whether every workspace qualified for pooling. The independent
+pressure tests above remain the evidence for fallback and capacity limits.
+
+The [native evidence bundle](verification/native-depth-selective-20261107/README.md)
+retains the [aggregate comparison](verification/native-depth-selective-20261107/summary.json),
+[independent audit](verification/native-depth-selective-20261107/audit.json),
+[raw samples](verification/native-depth-selective-20261107/samples.csv),
+[phase comparison](verification/native-depth-selective-20261107/phase-comparison.csv),
+and exact source/binary identities. The separate
+[final GLES audit](verification/gles-final-20261107-audit.json) preserves a
+byte-identical `checks.json` against `c937ddd`, including the 192 standard case
+hashes and the navigation, ordering, retained-image and context-recreation
+controls. Browser verification of this selected renderer is separate and was
+pending when the native measurements were recorded; these percentages are
+**not browser FPS improvements**.
+
+<a id="current-native-results-compact-building-meshes"></a>
+
+## Earlier native results: compact building meshes
 
 The complete rendering source at `c937ddd192619f48c1a2ec682845b52bc1eebff8`
 is measured against the original `ab765d2` renderer using the same frozen native

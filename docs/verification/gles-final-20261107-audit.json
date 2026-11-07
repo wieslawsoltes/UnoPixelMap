@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "scope": "Final selective subpixel depth pruning and prepared CPU window-row implementation. Native GLES regression validation; no performance claim uses this run.",
+  "baseline_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "baseline_renderer_sha256": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+  "candidate_head_at_freeze": "1cf4c5a7872481ed2715c1d27d460671aad4fe6b",
+  "candidate_renderer_sha256": "72434f75685028de2d90979113d7c54c0a9bb3d0cf217b70fe46fbca65cc2f0d",
+  "candidate_test_assembly_sha256": "f2dab3237bec1b1b59bed16ecc4a67959ca99b7d0b5eacde04c5195c76381285",
+  "context": "EGL 1.5, OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1, Mesa, llvmpipe (LLVM 19.1.7, 256 bits)",
+  "started_utc": "2026-11-07T21:15:06.624676+00:00",
+  "finished_utc": "2026-11-07T21:15:29.874870+00:00",
+  "exit_code": 0,
+  "comparison": {
+    "method": "Parse and compare the complete timing-free checks.json documents recursively, then compare the original bytes. Both comparisons are exact.",
+    "complete_document_equal": true,
+    "byte_for_byte_equal": true,
+    "baseline_checks_sha256": "bd4674613629c8530e52784f3cd1368d492f5ddcab16b83e70988448a115c58a",
+    "candidate_checks_sha256": "bd4674613629c8530e52784f3cd1368d492f5ddcab16b83e70988448a115c58a",
+    "root_fields_compared": [
+      "Context",
+      "Comparison",
+      "Cases",
+      "Navigation",
+      "SourceOrdering",
+      "DuplicateImagery",
+      "Failures"
+    ],
+    "rendered_cases": 48,
+    "case_image_hashes": 192,
+    "case_image_hash_fields": [
+      "CpuHash",
+      "GpuHash",
+      "ArtworkHash",
+      "RgbaArtworkHash"
+    ],
+    "case_control_fields": [
+      "Name",
+      "Width",
+      "Height",
+      "PixelSize",
+      "Difference",
+      "ArtworkDifference",
+      "UploadBytes",
+      "DrawCalls",
+      "ResidentBytes"
+    ],
+    "navigation_configurations": 24,
+    "navigation_frames": 168,
+    "source_ordering_layers": 3,
+    "source_ordering_permutations": 48,
+    "duplicate_imagery_hashes": 3,
+    "failures": []
+  },
+  "identity_checks": {
+    "frozen_runtime_files": 20,
+    "source_files": 124,
+    "changed_runtime_files": [],
+    "changed_source_files": [],
+    "unchanged_gate_source_hashes": {
+      "tests/PixelMap.Rendering.Tests/GlTerrainChecks.cs": "a276447a868f522e4603a4160ddbedd3c49ebd99cb3cfc163483320bb76173b9",
+      "tests/PixelMap.Rendering.Tests/HeadlessGlContext.cs": "c5cfd4b11e410d18a5f40e33fcd79d0306eeff2bfb757e1bc46a3c6caef66dc1",
+      "tests/PixelMap.Rendering.Tests/GpuSubmissionChecks.cs": "66c4fe0b9ff8686c99cd3ca5ede3a379adb8b4def526688871b05d1aa2440c26",
+      "tests/PixelMap.Rendering.Tests/GpuCullingChecks.cs": "e5dddd56a682aae4e933a5b9eeaafc4bc8d89a27c1249a4e650de9255fafc759",
+      "tests/PixelMap.Rendering.Tests/RenderStyleChecks.cs": "e79c07c194059e4da623e383420f4bec76b1ea625c05bc8b124777004ba7c49c",
+      "tests/PixelMap.Rendering.Tests/GpuVisibilityChecks.cs": "1bf396daf2a117274ee9d98e4d5d19731b5b20d598bf33d388abe07286637a2b",
+      "tests/PixelMap.Rendering.Tests/GpuCacheChecks.cs": "8c92719fcb84064428575cbdc13a18ca1bab9c913b2dd4b2eef5bc8d2c6149b8",
+      "tests/PixelMap.Rendering.Tests/PixelWindowChecks.cs": "006e8f93e9cd2f3591c9770cbce0b281aa517cbef1b4de8020a67ba5cc9cec2d"
+    }
+  },
+  "additional_gate_successes": [
+    "Passed 16 exact shared-GL-state draws, warm uniform/query reuse, float-bit preservation and failed-upload retry.",
+    "Passed 8 exact same-context texture images, four styles, Earth blending, shared GL state, deferred picture replay, pending Skia drawing, resize and image lifetime checks.",
+    "Passed 64 exact hardware-culling/fragment-discard comparisons: four styles, art scales, courtyard/disconnected/intersecting/raised/flat caps, orthographic and physical cameras above, below and inside buildings.",
+    "Passed 65,536 exact scalar/SIMD/prepared-row window colors across palettes, signed room boundaries, filter transitions and mip levels.",
+    "Passed 222,912 exact reused-row window samples across signed story/window boundaries and lamp repeats.",
+    "Passed 4,096 signed window-footprint intersections (coverage 0.000058, lamps 0.000044), mip energy and 2,048 exact resolved samples.",
+    "Passed resolved, distant and grazing Pixel fa\u00e7ade fixtures, spatial-reference quality, retained lamp contribution and CPU/GPU footprint parity.",
+    "Passed native GLES rendering, immutable redraw and upload reuse for all four render styles across Map, Earth and Elevation.",
+    "Passed 108 exact physical-camera GLES visibility comparisons, depth queries, retained stream restoration and upload reuse across all styles and terrain layers.",
+    "Passed 32 exact bounded GPU-cache frames across all styles, motion, physical-camera culling and held-frame replay; retained uploads and oversized-tile recovery also pass.",
+    "Passed 408 native GPU/CPU mesh intersection checks and stale-camera rejection.",
+    "Passed retained GPU frame mutation, reactivation, picking and cache identity checks.",
+    "Passed stationary A/B/A route-cache invalidation with delayed building publication.",
+    "Passed 2\u00d7 destination framebuffer, nearest art pixels, physical-resolution text and independent read/draw target restoration.",
+    "Passed six GPU ridge-occluded gate, route and vehicle overlays through full-resolution GL composition.",
+    "Passed 48 native GLES terrain, model, tint, Earth, projection, style, resize and exact redraw checks. Reports /workspace/scratch/d086e7fb6e12/gpu-next-final",
+    "Passed complete EGL context destruction and recreation with identical terrain pixels."
+  ],
+  "artifacts": {
+    "checks": {
+      "path": "docs/verification/gles-final-20261107-checks.json",
+      "sha256": "bd4674613629c8530e52784f3cd1368d492f5ddcab16b83e70988448a115c58a",
+      "bytes": 62627
+    },
+    "identity": {
+      "path": "docs/verification/gles-final-20261107-identity.json",
+      "sha256": "86fb6b915ac520b813e947d0f43afac04fac982d5da8cd15b87738bf91753476",
+      "bytes": 19811
+    },
+    "log": {
+      "path": "docs/verification/gles-final-20261107.log",
+      "sha256": "1369f952df8614e50f7091aec546f98e81ab8666625c5edc0d3db639d0f54065",
+      "bytes": 11209
+    }
+  },
+  "notes": [
+    "The canonical checks artifact is byte-identical for baseline and candidate, so it is stored once.",
+    "The existing CPU-versus-GPU rasterization differences reported by the harness are also unchanged.",
+    "Pixel-window submission timings printed by the functional gate are excluded from performance evidence.",
+    "The runtime and all recorded production/test source hashes were frozen before execution and rechecked afterward."
+  ]
+}

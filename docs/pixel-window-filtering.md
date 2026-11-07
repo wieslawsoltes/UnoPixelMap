@@ -50,6 +50,57 @@ For a finite wall with exactly constant reciprocal W, both footprint dimensions,
 
 For footprints spanning at least two rooms, the lamp-coordinate blend is exactly one. When the finite coordinate has absolute value at least two, its weighted centroid has the same sign and lies within the factor-of-two condition for exact floating-point subtraction. The original centroid-plus-difference expression therefore returns the coordinate exactly, allowing the centroid calculation to be skipped. Smaller and exceptional coordinates keep the original expression.
 
+### Preparing a constant scanline once
+
+The prepared-row specialization reuses the vertical sampling work across an
+eligible scanline. It keeps the existing filter and palette arithmetic; it does
+not approximate the story coordinate or reuse a result across different rows.
+Eligibility starts with the existing finite-attribute proof and **exactly zero**
+horizontal and vertical reciprocal-W gradients. Both prepared footprint
+dimensions must remain finite. The row additionally requires an exactly zero
+horizontal `Z/W` gradient, a nonzero initial `Z/W` numerator, and a nonempty pixel
+interval. `TryFilteredWindowRow` checks that the resulting altitude and story
+coordinate are finite before using the specialization.
+
+These conditions make the reciprocal W, altitude and story coordinate identical
+at every sample on that row. A `SamplingRow` then prepares:
+
+- Vertical periodic window coverage and the story-coordinate lamp lookup.
+- Point-window eligibility and the original wrapped story/seed offset.
+- Mip-row indices, the vertical bilinear weight, and the inter-level blend.
+
+Each covered pixel still computes its horizontal coordinate from the original
+`U/W` accumulator. That accumulator advances with the same repeated float
+addition, including after an occluded pixel; it is not replaced with a
+start-plus-index multiplication. Horizontal coverage, the two horizontal
+bilinear blends, vertical interpolation, mip interpolation, palette mixing and
+final byte rounding retain their original operation order. The prepared state
+contains value fields and references to the existing mip arrays; it creates
+no per-row array or heap cache.
+
+Zero numerators use the general path because repeatedly adding zero can change
+the sign of negative zero. A varying story coordinate, varying reciprocal W,
+nonfinite derived value or failed finite-footprint proof likewise keeps the
+existing per-pixel path. These are semantic guards, not tolerances for deciding
+that a wall is approximately front-facing.
+
+The row body is isolated in a method marked `MethodImplOptions.NoInlining`.
+This keeps its mip-row state and specialized sampling loop out of the ordinary
+`WallTriangle` method's compiled body. The first prototype placed this work in
+the existing wall loop and regressed the native-resolution nearby fixture by
+11.06%; that result is retained in the
+[rejected-prototype record](verification/pixel-row-rejected-prototype-20261107.json).
+The final helper has its own confirmation below, including its smaller residual
+regression. The prototype and confirmation are separate measurements.
+
+The unchanged scalar oracle now checks all entry points, including prepared
+rows, over **65,536 random/boundary samples**. Another **222,912 comparisons**
+reuse each prepared row over 129 changing horizontal coordinates, covering
+signed story/window boundaries, exact transition neighbors, mip extents and
+periodic lamp indices. These additions leave the earlier 405,674-sample
+footprint-bound check and frozen nearby-image checks in place.
+[Row/scalar regression implementation](../tests/PixelMap.Rendering.Tests/PixelWindowColorChecks.cs)
+
 ## Quality evidence
 
 ![Baseline, filtered and spatial-reference façade crops](verification/pixel-window-filter-comparison.png)
@@ -70,6 +121,29 @@ All 32 nearby camera-phase/palette frames preserve the complete 192-by-144 artwo
 
 The integrated native GLES suite passes its existing checks, including all four rendering styles, 64 culling comparisons, 108 physical-camera visibility comparisons, 32 cache-pressure frames, retained images, context recreation, picking and the 48 standard CPU/GPU rendering cases. Comparing that standard report with the original renderer leaves 30 cases and all their 120 image hashes unchanged. The 18 changed cases are precisely the perspective-building cases across three palettes, three art scales and two pitches. Existing structural tolerances were retained.
 
+### Prepared-row quality preservation
+
+The prepared-row pass compares against the already filtered `c937ddd` renderer,
+so its quality requirement is to preserve that output. All **128 CPU phase
+hashes and 128 GPU phase hashes** match their respective baseline captures,
+and every non-timing field in the eight Day/Night quality results is unchanged.
+This is equality between source variants within each backend; the existing
+small CPU/GPU differences in the filtered fixtures remain as measured above.
+
+The independent audit also decodes all 24 saved phase-zero PNG pairs: CPU,
+GPU and spatial-reference captures for the eight fixtures. Their encoded bytes
+and decoded RGBA hashes match. Other phases are checked through their recorded
+hashes, and the audit does not treat the functional capture's submission times
+as performance evidence.
+[Quality audit and metrics](verification/pixel-row-quality-20261107.json) ·
+[Complete benchmark/quality hash list](verification/pixel-row-image-hashes-20261107.csv)
+
+The complete selected renderer, including subsequent selective depth indexing,
+also retains a byte-identical standard GLES `checks.json` against `c937ddd`.
+That is a separate integrated validation, recorded in the
+[final GLES audit](verification/gles-final-20261107-audit.json), rather than a
+replacement identity for the frozen helper binary used in the CPU timing below.
+
 ## Isolated shader cost
 
 The filtering improves quality at a measurable shader cost. The cost fixture deliberately covers almost the entire viewport with one wall. It compares two instances of the same current renderer, with identical geometry, room textures, culling and retained camera frames. A test-only shader-source interceptor replaces the minification branch with `false` for the point-sampled control; the compiler removes its unused footprint calculations. Its four control images match the frozen original renderer's corresponding images exactly. [Cost harness](../tests/PixelMap.Rendering.Tests/PixelWindowChecks.Benchmark.cs)
@@ -88,9 +162,63 @@ Both filtered blocks show the added cost in the minified cases. The far fixture'
 
 The quality baseline is commit `ab765d24c3063c1745867772426720fd47152805`. The quality and isolated-cost snapshots include different stages of unrelated depth work; their exact assembly hashes are recorded separately. The isolated control keeps those changes identical within each comparison, and its image hashes verify the original point-sampled behavior.
 
+## Current CPU confirmation: prepared rows
+
+The final helper comparison uses the unchanged `c937ddd` rendering assembly
+as its baseline and the frozen prepared-row assembly with SHA-256
+`ea5ba63b56be5ecdece04fbf7914f74c3fdac89acffcbc1623c18e965e760929`
+as its candidate. The identical compiled public-API harness and all Data,
+Routing, Skia and native dependency files are verified byte-for-byte; only
+`PixelMap.Rendering.dll` differs. Source SHA-256 and Git blob identities for the
+three owned files are included in the evidence, independently of commit
+metadata used when publishing the source.
+
+This measures complete CPU `PixelMapRenderer.Draw` plus `SKCanvas.Flush` into
+an RGBA bitmap. The five label-free wall fixtures use flat terrain, the Night
+palette, a 768 × 576 viewport and 16 moving camera phases. Geometry preparation,
+CPU rasterization and nearest artwork presentation are included; retained
+picture reuse cannot bypass the changing-camera draw. Fixture construction,
+image capture, hashing and result allocation are outside the timed interval.
+
+Four fresh processes run baseline → candidate → candidate → baseline, pinned
+to CPU 0 with .NET 10.0.14, two managed processors and tiered compilation
+disabled. Each case has 32 warmups and **256 measured draws per process**:
+5,120 raw measurements overall and 512 samples per variant/case. The table uses
+the upper-middle pooled median; the evidence also gives the conventional
+even-sample median, nearest-rank p95, thread-CPU time and individual block
+medians. No samples are removed.
+
+| Wall fixture | `c937ddd` median | Prepared-row median | Change |
+| --- | ---: | ---: | ---: |
+| Nearby, pixel size 4 | 2.8467 ms | 2.7367 ms | -3.86% |
+| Distant, pixel size 4 | 4.2975 ms | 3.5966 ms | -16.31% |
+| Grazing, pixel size 4 | 3.6904 ms | 3.5956 ms | -2.57% |
+| Far, pixel size 4 | 4.7825 ms | 4.7562 ms | -0.55% |
+| Nearby, native artwork resolution | 5.5125 ms | 5.5984 ms | +1.56% |
+
+The native-resolution control still has a **1.56% pooled-median regression**.
+Its baseline block medians are 5.3511 and 5.7762 ms; the candidate blocks are
+5.5799 and 5.6110 ms. These data retain the residual cost and variation instead
+of treating the helper as a universal improvement. In the nearby pixel-size-4
+fixture, measured per-thread managed allocations range from **1,552 to 1,632
+bytes per draw** in both variants; every other case uses **1,552 bytes**. The
+full allocation histograms are equal. Complete CPU draws are not allocation-free.
+
+All 80 full-canvas and 80 artwork-center control hashes match across the four
+processes, and the 20 saved PNGs decode to their recorded phase-zero hashes.
+The comparison is a native CPU wall fixture, not an isolated filter-kernel
+benchmark or a measurement of browser fallback FPS. The candidate assembly
+also contains then-current GPU depth edits that this CPU-only path does not
+execute. Later integrated native and browser measurements retain their own
+binary identities and workloads.
+
+[Confirmation, identities and limitations](verification/pixel-row-confirmation-20261107.json) ·
+[All 5,120 raw timing samples](verification/pixel-row-confirmation-samples-20261107.csv) ·
+[Image controls](verification/pixel-row-image-hashes-20261107.csv)
+
 ## CPU fallback cost
 
-The native CPU comparison measures complete `PixelMapRenderer.Draw` plus `SKCanvas.Flush` into a CPU bitmap, including scene preparation, building rasterization and nearest artwork presentation. It compares the original `ab765d2` renderer with the source at `e086f47`; it does not isolate the filtering branch. The five wall fixtures use the same 768-by-576 viewport and Night palette as the shader cost test. Sixteen moving-camera phases prevent retained-picture reuse from bypassing rasterization.
+This earlier native CPU comparison measures complete `PixelMapRenderer.Draw` plus `SKCanvas.Flush` into a CPU bitmap, including scene preparation, building rasterization and nearest artwork presentation. It compares the original `ab765d2` renderer with the source at `e086f47`; it does not isolate the filtering branch. The five wall fixtures use the same 768-by-576 viewport and Night palette as the shader cost test. Sixteen moving-camera phases prevent retained-picture reuse from bypassing rasterization.
 
 Four separate processes run original / candidate / candidate / original. Each scene has 32 warmups and 64 timed draws per process, giving 128 samples per variant. The environment is .NET 10.0.14 on the same AMD EPYC 9V74, CPU affinity 0, two managed processors and disabled tiered compilation. Fixture construction, image hashes and PNG capture are untimed; table medians use the upper-middle sample.
 
@@ -116,8 +244,10 @@ The later `c937ddd` storage pass changes building vertex representation and
 construction while retaining this filtering algorithm. Its 192 standard GLES
 case image hashes match the preceding bounded-depth renderer exactly. The
 isolated quality/cost measurements above retain their original source and binary
-identities; the [current complete preparation comparison](sparse-visibility.md#current-native-results-compact-building-meshes)
-and browser measurements report the later application separately.
+identities; the [compact-mesh preparation comparison](sparse-visibility.md#earlier-native-results-compact-building-meshes)
+and browser measurements report that later application separately. The
+[selected native preparation results](sparse-visibility.md#current-native-results-selective-subpixel-indexing)
+record the subsequent depth-index pass against `c937ddd`.
 
 ## Reproduction
 

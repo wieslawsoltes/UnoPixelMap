@@ -2,7 +2,179 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
-## Moving-frame preparation and pixel-art filtering · 7 November 2026
+## Selective depth preparation and reusable pixel rows · 7 November 2026
+
+Source release [`53e9c68`](https://github.com/wieslawsoltes/UnoPixelMap/commit/53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b)
+continues from the accepted compact-mesh release `c937ddd`. It removes
+noncontributing subpixel triangles from the CPU visibility index, reuses exact
+Pixel window-filter state across a wall row, and rejects irrelevant collision
+polygons before expensive coverage tests. OpenGL still draws the same geometry.
+The new depth rule changes CPU query preparation, not the camera projection,
+artwork resolution, visual detail or GL shader.
+
+### Choosing the work from the shipped WASM profiles
+
+The new [symbolication script](../scripts/symbolicate-browser-profile.py) resolves
+ordinary Mono AOT methods through the **exact published** Webcil metadata,
+per-assembly method-pointer tables and WASM function table. It validates native
+module identity and byte locations, retains aliases, and leaves unresolved
+native/runtime/generic extras anonymous. An independent metadata reader matches
+115,694 MethodDef rows across 66 assemblies. All seven recovered candidate
+profiles preserve their 46,866 samples and every field except function names.
+
+The previous release's first-person walking profile attributes 1,951.217 ms of
+8,129.817 ms sampled weight to depth visibility; 1,900.424 ms of that is under
+label drawing. Labels also contain 98.0% of sampled depth cost in free flight
+and 98.1% in first-person driving. This identifies depth preparation as useful
+work to reduce. These profiles were captured separately from timed windows;
+sample weights do not measure invocation counts or establish the cause of a
+particular throughput result. GL-state capture and terrain baking remain other
+observed costs. [Exact package, validation, recovered stacks and limitations](verification/browser-rendering-c937ddd-symbolicated.json)
+
+### Exact removal of raster-empty depth geometry
+
+An artwork pixel is queried at `(x + 0.5, y + 0.5)`. For a triangle's original
+half-open horizontal bound `[L, R)`, eligible integer columns are
+`[ceil(L - 0.5), ceil(R - 0.5))`, intersected with the viewport. The vertical
+interval follows the same rule. An empty interval cannot contribute to any
+query. A box containing only one pixel center can also be rejected when the
+original triangle coverage test rejects that center.
+
+The implementation computes those intervals only when at least one projected
+extent is at most one art pixel. Its non-inlined helper keeps the range
+calculations out of the ordinary-face path. Subtraction and ceiling use double
+precision to preserve the float bounds around half-pixel ties, and clamping
+precedes integer conversion. Viewports beyond the exact float half-integer
+range keep the original conservative path. Surviving triangles retain their
+coverage/interpolation arithmetic and source order; roof-rim sampling is
+unchanged. [Derivation and compatibility checks](sparse-visibility.md)
+
+The base grid remains 16 × 16 art pixels. Power-of-two cell lookup uses shifts,
+and an already-prepared cell traverses its contiguous candidate span. The active
+16 MiB membership-buffer limit, 8 MiB pool limit, 16,384-cell bound and exact
+pressure fallback remain unchanged. `Vertex` remains 28 bytes and `Triangle`
+84 bytes. Smaller-grid and cached-projection prototypes were measured and
+rejected because they regressed other workloads. Their data are separate from
+the selected implementation's evidence.
+
+### Paired native preparation measurements
+
+Four fresh processes run baseline → candidate → candidate → baseline, with CPU
+affinity 0, two managed processors, tiered compilation disabled and .NET 10.0.14.
+Both variants use the same harness and dependencies; only `PixelMap.Rendering.dll`
+differs. Ordinary workloads use 16 warmups and 64 measurements per process;
+the two controls use four warmups and eight measurements. The complete export
+contains 2,112 measured frames. Medians use the lower middle sample and p95 uses
+nearest rank over the two corresponding process blocks.
+
+The measured total is `PrepareGpuFrame`, including labels, plus the route,
+vehicle, gate and picking overlay pass. It excludes GL submission, presentation
+and free-roam simulation. These are CPU preparation times, not browser frame
+rates.
+
+| Workload | Median, baseline → selected | Median change | p95, baseline → selected |
+| --- | ---: | ---: | ---: |
+| Manhattan walk | 8.9250 → 6.9148 ms | −22.52% | 10.3123 → 9.9563 ms |
+| Manhattan chase | 12.1925 → 9.8855 ms | −18.92% | 14.1184 → 12.3519 ms |
+| Manhattan Pixel free flight | 9.2437 → 9.3068 ms | +0.68% | 10.9395 → 12.6397 ms |
+| Manhattan orbit | 15.9121 → 16.1028 ms | +1.20% | 18.0794 → 22.2703 ms |
+| Manhattan Normal free flight | 10.1261 → 10.4410 ms | +3.11% | 12.1448 → 14.8408 ms |
+| Hills, Pixel | 1.0033 → 1.0219 ms | +1.85% | 1.3113 → 1.2139 ms |
+| Hills, Minecraft | 1.3639 → 1.2074 ms | −11.47% | 2.0282 → 2.2060 ms |
+| Hills, Roblox | 1.4968 → 1.5203 ms | +1.57% | 2.2980 → 2.1526 ms |
+| Zero independent-query control | 10.0374 → 11.2505 ms | +12.09% | 28.1218 → 30.5191 ms |
+| Full independent-query control | 10.6648 → 9.8703 ms | −7.45% | 29.0350 → 30.1114 ms |
+
+Walking and chase improve in both candidate processes. Flight, orbit and Normal
+have higher wall-time **and thread-CPU p95**, and Normal's median regression is
+present in both candidate processes. The zero-query control's slower total is
+mostly frame preparation, which still includes label queries; only the separate
+diagnostic index receives zero queries. Its 16 samples per variant are not a
+large latency study. The full-query control independently visits 79,639 pixels,
+exceeding the 65,536-entry answer cache, so its repeated query pass is not a
+pure cache-hit measurement. Two processes per variant do not provide confidence
+intervals or establish uniform latency improvement.
+
+Median retained CPU triangles after frame and overlay work fall from 34,714 to
+10,255 for walking and 39,208 to 12,071 for chase. Their maximum recorded
+membership-buffer capacities fall from 520,192 to 260,576 bytes and from
+978,064 to 492,560 bytes, respectively. These counts describe the CPU visibility
+index, not GL mesh reduction or total application memory. The whole-frame
+allocation measurements are essentially unchanged after warmup; pooled capacity
+includes earlier workloads. Every recorded exact/coarse index remains valid,
+and membership-buffer capacities stay below the 8 MiB pool threshold. These
+counters do not measure all other workspace pool-admission limits.
+
+[Complete selected native evidence](verification/native-depth-selective-20261107/)
+contains raw reports, all samples, exact source/binary identities, phase results
+and an independent audit. The auditor reconstructs the CSV byte for byte,
+recomputes 1,120 per-block summary fields, and matches 11,088 corresponding
+query/overlay/depth-range fingerprint fields across the four processes.
+
+### Reusing Pixel window-filter rows
+
+For perspective walls with constant reciprocal depth and no horizontal
+altitude-over-depth gradient, the filter prepares story coverage, lamp-map row
+offsets, interpolation fractions and seed once per raster row. The inner loop
+retains its original horizontal increments, division order, bilinear arithmetic,
+color association and depth test. Exceptional and ineligible rows use the
+general path. The specialized loop lives in a non-inlined helper: an earlier
+inline prototype improved filtered cases but regressed the near-native fixture
+by 11.06%, and was rejected.
+
+The final four-process native CPU `Draw` + `Flush` comparison contains 5,120
+samples. Median changes are **−3.86% near, −16.31% distant, −2.57% grazing,
+−0.55% far and +1.56% near-native**. The remaining near-native difference lies
+within the observed baseline block spread; it is retained as a measured
+regression, not turned into a universal speedup claim. Whole draws still
+allocate 1,552–1,632 measured managed bytes in this fixture. All retained
+quality metrics, reference-image hashes and nearby-frame outputs match the
+previous filter. [Algorithm, exact row oracle, timings and scope](pixel-window-filtering.md)
+
+### Collision candidate reduction
+
+`VectorCollisionWorld` retains inclusive polygon bounds and rejects disjoint
+points or swept building bounds before polygon/interior tests. Aircraft and
+free flight avoid irrelevant water coverage. Established collision facts
+short-circuit further work while preserving bridges, tunnel overrides and
+escape from newly streamed geometry. The frozen previous implementation agrees
+on **69,552 differential sweeps**, and the full simulation suite passes.
+
+Synthetic paired batches reduce dense short-walk median time by **21.60%**,
+dense clear-body time by **26.56%**, and complex-water flight time by **92.73%**.
+The ground cases allocate zero measured managed bytes after warmup; flight
+allocates 83,072 bytes per 9,152-query batch in both variants. Ground-case p95
+increases in this short sequence. This is a same-process ABBA comparison without
+explicit affinity or tiering controls, separate from the native rendering
+protocol. Collision occupies a small part of the sampled browser workload;
+these percentages are not application FPS gains. [Raw batches, oracle provenance
+and independent statistics](verification/collision-broad-phase-20261107.json)
+
+### Regression and release evidence
+
+The complete native rendering suite passes, including the existing 6,612,305
+sparse/eager comparisons, 8,202 memory-pressure comparisons and 845,516 mesh
+vertex comparisons. The new projected-raster suite adds **9,063,600 exact
+comparisons across 562 frames** for half-pixel/cell boundaries, winding, one-row
+and one-column coverage, source-order ties and the large-coordinate fallback.
+The pixel-filter oracle adds 222,912 reused-row samples to the 65,536 exact
+scalar/SIMD/prepared-row comparisons. Existing camera coverage includes 12,424
+already-aligned aim poses, 486 inset-aim cases, 84 physical-camera poses and 432
+steep-terrain follow anchors.
+
+The final native GLES report is byte-for-byte identical to `c937ddd`, including
+all **192 standard image hashes**, three duplicate-imagery hashes, 24 navigation
+configurations, 48 source-order permutations, and draw/upload/residency controls.
+Context destruction/recreation and retained-frame replay also pass.
+[Frozen final GLES audit](verification/gles-final-20261107-audit.json)
+
+Browser release validation and the paired benchmark use
+[run 42415166135](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42415166135),
+with the exact `c937ddd` Pages artifact pinned by baseline run `42377138938`.
+Browser measurements and live-camera acceptance are recorded when that run
+completes; the native measurements above do not substitute for them.
+
+## Previous release: moving-frame preparation and pixel-art filtering · c937ddd
 
 The current pass targets work performed while the camera moves. Conservative screen-space bounds defer exact depth geometry until picking or overlays query it. Visibility then reduces finite terrain, face and rim depths without sorting the cell contents; source-order keys preserve equal-depth terrain picks and the original rim tolerance. The independent eager reference matches **6,612,305 queries across 55 frames**. Label layout rejects off-screen, duplicate and colliding candidates before occlusion where ordering permits, with an exact compatibility path for ambiguous sort ties. Forty synthetic and real-city images preserve the original visible glyphs. [Depth algorithm, proof, bounds and measurement protocol](sparse-visibility.md)
 
@@ -50,7 +222,7 @@ Release verification also exposed a journey-planner race: entering destination c
 
 The browser regression enters an intermediate coordinate and a new destination, then presses Calculate without Enter, Find or an added delay. A read-only capture at pointer-down records both the native editor value and the still-old stop label. CPU and GPU runs both resolve the new destination as Dropped pin and retain the intermediate stop. [Submission implementation](../src/PixelMap.App/JourneyPanel.xaml.cs) · [Journey regression](../tests/browser/journeys.cjs)
 
-### Current paired browser measurements
+### Paired browser measurements for c937ddd
 
 The completed [run 42377138938](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938) compares the exact compact-mesh `c937ddd` Pages artifact with the original cache-identity release `1829855`, pinned to run `42300149918`. Native/GLES tests, strict packaging verification, the complete Chromium suite, the paired benchmark and Pages deployment all passed. The subsequent [independent live-provider camera replay](verification/live-rendering-c937ddd.json) also completed its original native gestures and acknowledged pause/resume/exit controls without a captured managed exception or native abort. [Separate CI and artifact provenance](verification/browser-validation-c937ddd.json)
 

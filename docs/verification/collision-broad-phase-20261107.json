@@ -1,0 +1,1058 @@
+{
+  "schema_version": 1,
+  "audited_utc": "2026-11-07T20:45:50.101035+00:00",
+  "scope": "Synthetic dense city and complex shoreline fixtures. Frozen c937ddd collision implementation and candidate run in the same process over identical precomputed queries; reference/bounded/bounded/reference blocks each measure eight batches after paired warmup. Index creation and query generation excluded. Times are batch medians, not browser frame-rate claims.",
+  "baseline_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "source_identity": {
+    "src/PixelMap.Simulation/VectorCollisionWorld.cs": {
+      "sha256": "a179804755bb4d29f4d2e0ae19407d26ee0ea82c372c39eedb45ec94acaa75ac",
+      "git_blob_sha1": "0ac6b48e2923d4cfe99b0b9bd6fa803fa0e3ff06",
+      "bytes": 20571
+    },
+    "tests/PixelMap.Simulation.Tests/Reference/LegacyVectorCollisionWorld.cs": {
+      "sha256": "11f31faac2019c7111645f9277ae02f9b4951ed89b3d6f2b33747b8f6805213b",
+      "git_blob_sha1": "3513da3d7b3c40ee3da2cfe5163a5c9b37b735b8",
+      "bytes": 19328
+    },
+    "tests/PixelMap.Simulation.Tests/CollisionBroadPhaseChecks.cs": {
+      "sha256": "556d194ad34764b37f29bc25916080fac7702be0e742c184c386e9f78f71cb20",
+      "git_blob_sha1": "6209103abb6cbd8ced7b3b300ed00afac7ef091f",
+      "bytes": 7378
+    },
+    "tests/PixelMap.Simulation.Tests/CollisionBroadPhaseChecks.Benchmark.cs": {
+      "sha256": "f4fe6d66347f8d5f2e6297adaf4cc5cbf4bc72b24705bd9996afbae304c238a2",
+      "git_blob_sha1": "c460c0b330b76d3e0246e7084d417f273c60841b",
+      "bytes": 6365
+    },
+    "tests/PixelMap.Simulation.Tests/Program.cs": {
+      "sha256": "d943a4f67af311788db00b631e4d67275c707e62f4496eb85835d853d659aa40",
+      "git_blob_sha1": "d70fbce3df08a6e4c933224bf0491eaca5887f36",
+      "bytes": 4873
+    }
+  },
+  "baseline_world_source": {
+    "sha256": "43e7288126cb3cd2149e01f4cc96eb6eed9d4b146a6d6cbe0b750ec6239c65bb",
+    "git_blob_sha1": "8216808276dd56cc974071ceb529b495eb000a21",
+    "bytes": 19147
+  },
+  "raw_artifact": {
+    "path_at_measurement": "ci-evidence/collision-broad-phase/collision-broad-phase-cost.json",
+    "sha256": "d92a60bb4361042f0927d98e9ed238834262af5ff2f1ad03f09877c883cdadb3",
+    "bytes": 20083
+  },
+  "runtime": ".NET 10.0.14",
+  "reported_processors": 9,
+  "simulation_sha256": "fdd6ae0222bc0d3a279353bad376408e769db90291f5a09c2e25ef614f68a84e",
+  "simulation_binary_reverified_at_audit": true,
+  "protocol": {
+    "processes": 1,
+    "block_order": [
+      "reference",
+      "bounded",
+      "bounded",
+      "reference"
+    ],
+    "paired_warmup_batches_per_variant": 32,
+    "repeats_per_batch": 16,
+    "measured_batches_per_block": 8,
+    "scenarios": 3,
+    "sample_count": 96,
+    "samples_per_variant_and_scenario": 16,
+    "median": "Arithmetic mean of the two middle sorted samples.",
+    "p95": "Nearest-rank, sorted[ceil(.95*n)-1].",
+    "cpu_affinity": "Not explicitly pinned by the recorded invocation.",
+    "tiered_compilation": "Not explicitly controlled by this benchmark harness.",
+    "counter": "Stopwatch wall time and GC.GetAllocatedBytesForCurrentThread; no thread-CPU counter."
+  },
+  "audit": {
+    "declared_statistics_recomputed_exactly": true,
+    "all_contacts_match_between_variants": true,
+    "reference_source_matches_baseline_after_documented_nonbehavioral_adaptations": true,
+    "timings_rerun_during_audit": false
+  },
+  "functional_validation": {
+    "frozen_reference_sweeps": 69552,
+    "all_existing_simulation_checks": "Passed before the measurement in the producing session.",
+    "build": "Release, zero warnings/errors in the producing session.",
+    "scope": "The complete suite and build were observed during the implementation session. The benchmark entry point repeated the frozen-reference differential gate. This measurement audit did not execute another test run."
+  },
+  "allocation_conclusion": "Both ground scenarios allocate zero measured managed bytes after warmup. Complex-water flight allocates 83072 bytes per 9152-query batch in both variants; there is no measured allocation improvement in that case.",
+  "limitations": [
+    "Synthetic collision workloads isolate broad-phase work; these percentages are not browser frame-rate improvements.",
+    "One process with sixteen measured batches per variant/case and no explicit CPU-affinity or tiering controls.",
+    "The native pixel confirmation has a different protocol and its samples are not pooled with collision measurements."
+  ],
+  "recomputed_summaries": [
+    {
+      "scene": "dense-short-walk",
+      "queries_per_batch": 1504,
+      "reference": {
+        "samples": 16,
+        "median_ms": 0.41774999999999995,
+        "p95_ms": 0.4728,
+        "allocated_bytes_histogram": {
+          "0": 16
+        },
+        "contacts_per_batch": [
+          16
+        ],
+        "block_medians_ms": [
+          0.4165,
+          0.42110000000000003
+        ]
+      },
+      "bounded": {
+        "samples": 16,
+        "median_ms": 0.3275,
+        "p95_ms": 0.8874,
+        "allocated_bytes_histogram": {
+          "0": 16
+        },
+        "contacts_per_batch": [
+          16
+        ],
+        "block_medians_ms": [
+          0.3277,
+          0.3255
+        ]
+      },
+      "median_change_percent": -21.60383004189107
+    },
+    {
+      "scene": "dense-clear-body",
+      "queries_per_batch": 8192,
+      "reference": {
+        "samples": 16,
+        "median_ms": 3.37005,
+        "p95_ms": 3.6483,
+        "allocated_bytes_histogram": {
+          "0": 16
+        },
+        "contacts_per_batch": [
+          0
+        ],
+        "block_medians_ms": [
+          3.3321,
+          3.37005
+        ]
+      },
+      "bounded": {
+        "samples": 16,
+        "median_ms": 2.4751,
+        "p95_ms": 7.296,
+        "allocated_bytes_histogram": {
+          "0": 16
+        },
+        "contacts_per_batch": [
+          0
+        ],
+        "block_medians_ms": [
+          2.4924999999999997,
+          2.46915
+        ]
+      },
+      "median_change_percent": -26.555985816234184
+    },
+    {
+      "scene": "complex-water-flight",
+      "queries_per_batch": 9152,
+      "reference": {
+        "samples": 16,
+        "median_ms": 38.1464,
+        "p95_ms": 39.8854,
+        "allocated_bytes_histogram": {
+          "83072": 16
+        },
+        "contacts_per_batch": [
+          1200
+        ],
+        "block_medians_ms": [
+          37.956450000000004,
+          38.2097
+        ]
+      },
+      "bounded": {
+        "samples": 16,
+        "median_ms": 2.7718499999999997,
+        "p95_ms": 3.578,
+        "allocated_bytes_histogram": {
+          "83072": 16
+        },
+        "contacts_per_batch": [
+          1200
+        ],
+        "block_medians_ms": [
+          2.7718499999999997,
+          2.81595
+        ]
+      },
+      "median_change_percent": -92.73365245475327
+    }
+  ],
+  "raw_samples": [
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 0,
+      "Milliseconds": 0.4246,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 1,
+      "Milliseconds": 0.4165,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 2,
+      "Milliseconds": 0.4292,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 3,
+      "Milliseconds": 0.4059,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 4,
+      "Milliseconds": 0.4165,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 5,
+      "Milliseconds": 0.4062,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 6,
+      "Milliseconds": 0.4037,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 7,
+      "Milliseconds": 0.422,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 0,
+      "Milliseconds": 0.3361,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 1,
+      "Milliseconds": 0.3193,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 2,
+      "Milliseconds": 0.303,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 3,
+      "Milliseconds": 0.303,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 4,
+      "Milliseconds": 0.3005,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 5,
+      "Milliseconds": 0.3663,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 6,
+      "Milliseconds": 0.4004,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 7,
+      "Milliseconds": 0.3381,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 0,
+      "Milliseconds": 0.8874,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 1,
+      "Milliseconds": 0.336,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 2,
+      "Milliseconds": 0.3014,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 3,
+      "Milliseconds": 0.3902,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 4,
+      "Milliseconds": 0.3357,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 5,
+      "Milliseconds": 0.3012,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 6,
+      "Milliseconds": 0.3029,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 7,
+      "Milliseconds": 0.3153,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 0,
+      "Milliseconds": 0.4301,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 1,
+      "Milliseconds": 0.419,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 2,
+      "Milliseconds": 0.4113,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 3,
+      "Milliseconds": 0.4056,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 4,
+      "Milliseconds": 0.4728,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 5,
+      "Milliseconds": 0.4232,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 6,
+      "Milliseconds": 0.4614,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-short-walk",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 7,
+      "Milliseconds": 0.4081,
+      "AllocatedBytes": 0,
+      "Contacts": 16
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 0,
+      "Milliseconds": 3.287,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 1,
+      "Milliseconds": 3.2694,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 2,
+      "Milliseconds": 3.2396,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 3,
+      "Milliseconds": 3.2493,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 4,
+      "Milliseconds": 3.4961,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 5,
+      "Milliseconds": 3.4512,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 6,
+      "Milliseconds": 3.3942,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 7,
+      "Milliseconds": 3.3772,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 0,
+      "Milliseconds": 7.296,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 1,
+      "Milliseconds": 2.3898,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 2,
+      "Milliseconds": 2.3862,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 3,
+      "Milliseconds": 2.5042,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 4,
+      "Milliseconds": 2.4808,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 5,
+      "Milliseconds": 2.368,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 6,
+      "Milliseconds": 2.5454,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 7,
+      "Milliseconds": 2.6282,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 0,
+      "Milliseconds": 2.6251,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 1,
+      "Milliseconds": 2.4694,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 2,
+      "Milliseconds": 2.5483,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 3,
+      "Milliseconds": 2.6044,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 4,
+      "Milliseconds": 2.3883,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 5,
+      "Milliseconds": 2.3778,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 6,
+      "Milliseconds": 2.4244,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 7,
+      "Milliseconds": 2.4689,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 0,
+      "Milliseconds": 3.3708,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 1,
+      "Milliseconds": 3.6483,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 2,
+      "Milliseconds": 3.3693,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 3,
+      "Milliseconds": 3.3586,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 4,
+      "Milliseconds": 3.3316,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 5,
+      "Milliseconds": 3.27,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 6,
+      "Milliseconds": 3.4043,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "dense-clear-body",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 7,
+      "Milliseconds": 3.4963,
+      "AllocatedBytes": 0,
+      "Contacts": 0
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 0,
+      "Milliseconds": 37.0596,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 1,
+      "Milliseconds": 36.9485,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 2,
+      "Milliseconds": 37.7698,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 3,
+      "Milliseconds": 39.0824,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 4,
+      "Milliseconds": 38.818,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 5,
+      "Milliseconds": 38.0381,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 6,
+      "Milliseconds": 37.8748,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 0,
+      "Sample": 7,
+      "Milliseconds": 38.9333,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 0,
+      "Milliseconds": 3.0496,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 1,
+      "Milliseconds": 2.8653,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 2,
+      "Milliseconds": 2.7213,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 3,
+      "Milliseconds": 2.7107,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 4,
+      "Milliseconds": 2.8024,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 5,
+      "Milliseconds": 2.7418,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 6,
+      "Milliseconds": 2.6013,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 1,
+      "Sample": 7,
+      "Milliseconds": 2.8019,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 0,
+      "Milliseconds": 3.4783,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 1,
+      "Milliseconds": 2.6675,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 2,
+      "Milliseconds": 2.7319,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 3,
+      "Milliseconds": 3.578,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 4,
+      "Milliseconds": 2.9,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 5,
+      "Milliseconds": 3.2153,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 6,
+      "Milliseconds": 2.7312,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "bounded",
+      "Block": 2,
+      "Sample": 7,
+      "Milliseconds": 2.6422,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 0,
+      "Milliseconds": 38.2138,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 1,
+      "Milliseconds": 37.43,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 2,
+      "Milliseconds": 38.2056,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 3,
+      "Milliseconds": 38.4133,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 4,
+      "Milliseconds": 39.1856,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 5,
+      "Milliseconds": 39.8854,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 6,
+      "Milliseconds": 37.32,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    },
+    {
+      "Scene": "complex-water-flight",
+      "Variant": "reference",
+      "Block": 3,
+      "Sample": 7,
+      "Milliseconds": 38.0872,
+      "AllocatedBytes": 83072,
+      "Contacts": 1200
+    }
+  ]
+}

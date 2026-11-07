@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "scope": "compact rejected prototype evidence",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2140,
+      "sha256": "162d107c2ab0a6e62acdce48013a31594b99a5c7f641911a1b2a87ae0b7769e5"
+    },
+    {
+      "path": "adaptive.json",
+      "bytes": 15791,
+      "sha256": "ce73bddcdc4c55067ebd91b731b98ea5607bd4ebed188a35fb1be091f54e92cc"
+    },
+    {
+      "path": "adaptive.patch",
+      "bytes": 6090,
+      "sha256": "fd096e19b0f287e9b4de9a292d3fb3c1d3cb551836b26f1f85da0a06ed2db251"
+    },
+    {
+      "path": "common-runtime.json",
+      "bytes": 6403,
+      "sha256": "6ad223a269004a69bd1116d7f2a236f5271c32eefba5cddfe9636d2831492bc3"
+    },
+    {
+      "path": "fixed16.json",
+      "bytes": 16963,
+      "sha256": "762c90fc5129b623377bddeab89b77388fb710b831685ca197b46ad5da1170ee"
+    },
+    {
+      "path": "fixed16.patch",
+      "bytes": 5185,
+      "sha256": "5b4f789c86d42f7fe00eeed2dd05e44c5aab8cb3125c8efae981f2a031ea8357"
+    },
+    {
+      "path": "fixed8.json",
+      "bytes": 16855,
+      "sha256": "69237edfa3f9730fbba386b9d10d4b8e035bd4c6b60f72b441a631f6a00a4722"
+    },
+    {
+      "path": "fixed8.patch",
+      "bytes": 5577,
+      "sha256": "9a49b284d982a95fc3cdc236230a3577a0d5751b088fa075b9249c9209b49082"
+    },
+    {
+      "path": "projection.json",
+      "bytes": 15326,
+      "sha256": "8c11943b6f6e51e829733dbde3972bd2fcfb5ab2eedc08c0c0cf50a59a9ebc12"
+    },
+    {
+      "path": "projection.patch",
+      "bytes": 10929,
+      "sha256": "d01d565635264973ad94353705380cecc35ec6b2a871daf9944f3bfee71d7866"
+    }
+  ]
+}

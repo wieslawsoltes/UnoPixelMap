@@ -1,0 +1,102 @@
+Passed 16 exact shared-GL-state draws, warm uniform/query reuse, float-bit preservation and failed-upload retry.
+Passed 8 exact same-context texture images, four styles, Earth blending, shared GL state, deferred picture replay, pending Skia drawing, resize and image lifetime checks.
+EGL 1.5, OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1, Mesa, llvmpipe (LLVM 19.1.7, 256 bits)
+Passed 64 exact hardware-culling/fragment-discard comparisons: four styles, art scales, courtyard/disconnected/intersecting/raised/flat caps, orthographic and physical cameras above, below and inside buildings.
+Passed 65,536 exact scalar/SIMD/prepared-row window colors across palettes, signed room boundaries, filter transitions and mip levels.
+Passed 222,912 exact reused-row window samples across signed story/window boundaries and lamp repeats.
+Passed 4,096 signed window-footprint intersections (coverage 0.000058, lamps 0.000044), mip energy and 2,048 exact resolved samples.
+Pixel near Day: reference RMS 4.308, mean 0.251, temporal 4.525, CPU/GPU 0.000, submit+complete 1.230 ms.
+Pixel distant Day: reference RMS 2.038, mean 0.011, temporal 1.782, CPU/GPU 0.004, submit+complete 1.400 ms.
+Pixel grazing Day: reference RMS 4.254, mean 0.096, temporal 5.317, CPU/GPU 0.003, submit+complete 1.457 ms.
+Pixel far Day: reference RMS 2.723, mean 0.016, temporal 1.786, CPU/GPU 0.017, submit+complete 1.734 ms.
+Pixel near Night: reference RMS 8.323, mean 0.994, temporal 8.602, CPU/GPU 0.000, submit+complete 1.223 ms.
+Pixel distant Night: reference RMS 4.681, mean 0.091, temporal 4.019, CPU/GPU 0.010, submit+complete 2.270 ms.
+Pixel grazing Night: reference RMS 9.386, mean 0.354, temporal 11.773, CPU/GPU 0.005, submit+complete 1.363 ms.
+Pixel far Night: reference RMS 6.823, mean 0.100, temporal 4.206, CPU/GPU 0.052, submit+complete 1.620 ms.
+Passed resolved, distant and grazing Pixel façade fixtures, spatial-reference quality, retained lamp contribution and CPU/GPU footprint parity.
+Passed native GLES rendering, immutable redraw and upload reuse for all four render styles across Map, Earth and Elevation.
+Passed 108 exact physical-camera GLES visibility comparisons, depth queries, retained stream restoration and upload reuse across all styles and terrain layers.
+Passed 32 exact bounded GPU-cache frames across all styles, motion, physical-camera culling and held-frame replay; retained uploads and oversized-tile recovery also pass.
+GL models-640-420-p2-Day-0-False changed 0/268800, unmatched 0, mean 0.000, draws 5, upload 3725072
+GL models-640-420-p2-Day-55-False changed 0/268800, unmatched 0, mean 0.000, draws 5, upload 5284272
+GL models-640-420-p2-Day-58-True changed 584/268800, unmatched 8, mean 0.006, draws 5, upload 12192072
+GL models-640-420-p2-Day-72-True changed 680/268800, unmatched 0, mean 0.002, draws 5, upload 5319144
+GL models-640-420-p2-Dusk-0-False changed 0/268800, unmatched 0, mean 0.000, draws 5, upload 3697632
+GL models-640-420-p2-Dusk-55-False changed 0/268800, unmatched 0, mean 0.000, draws 5, upload 5277336
+GL models-640-420-p2-Dusk-58-True changed 10640/268800, unmatched 8, mean 0.016, draws 5, upload 12104216
+GL models-640-420-p2-Dusk-72-True changed 4652/268800, unmatched 0, mean 0.007, draws 5, upload 5282152
+GL models-640-420-p2-Night-0-False changed 20/268800, unmatched 0, mean 0.002, draws 5, upload 3697632
+GL models-640-420-p2-Night-55-False changed 0/268800, unmatched 0, mean 0.000, draws 5, upload 5277336
+GL models-640-420-p2-Night-58-True changed 1984/268800, unmatched 12, mean 0.004, draws 5, upload 12104216
+GL models-640-420-p2-Night-72-True changed 2084/268800, unmatched 0, mean 0.003, draws 5, upload 5282152
+GL models-391-233-p3-Day-0-False changed 0/91103, unmatched 0, mean 0.000, draws 5, upload 1413644
+GL models-391-233-p3-Day-55-False changed 0/91103, unmatched 0, mean 0.000, draws 5, upload 2728836
+GL models-391-233-p3-Day-58-True changed 756/91103, unmatched 0, mean 0.003, draws 5, upload 6972964
+GL models-391-233-p3-Day-72-True changed 666/91103, unmatched 18, mean 0.021, draws 5, upload 628124
+GL models-391-233-p3-Dusk-0-False changed 0/91103, unmatched 0, mean 0.000, draws 5, upload 1413644
+GL models-391-233-p3-Dusk-55-False changed 0/91103, unmatched 0, mean 0.000, draws 5, upload 2733460
+GL models-391-233-p3-Dusk-58-True changed 1845/91103, unmatched 0, mean 0.007, draws 5, upload 6929036
+GL models-391-233-p3-Dusk-72-True changed 1491/91103, unmatched 18, mean 0.018, draws 5, upload 628124
+GL models-391-233-p3-Night-0-False changed 0/91103, unmatched 0, mean 0.000, draws 5, upload 1413644
+GL models-391-233-p3-Night-55-False changed 9/91103, unmatched 0, mean 0.002, draws 5, upload 2733460
+GL models-391-233-p3-Night-58-True changed 2412/91103, unmatched 0, mean 0.010, draws 5, upload 6929036
+GL models-391-233-p3-Night-72-True changed 2313/91103, unmatched 18, mean 0.013, draws 5, upload 628124
+GL models-641-421-p4-Day-0-False changed 0/269861, unmatched 0, mean 0.000, draws 5, upload 2137924
+GL models-641-421-p4-Day-55-False changed 0/269861, unmatched 0, mean 0.000, draws 5, upload 2917156
+GL models-641-421-p4-Day-58-True changed 560/269861, unmatched 0, mean 0.001, draws 5, upload 7667076
+GL models-641-421-p4-Day-72-True changed 768/269861, unmatched 0, mean 0.007, draws 5, upload 2670380
+GL models-641-421-p4-Dusk-0-False changed 0/269861, unmatched 0, mean 0.000, draws 5, upload 2128676
+GL models-641-421-p4-Dusk-55-False changed 0/269861, unmatched 0, mean 0.000, draws 5, upload 2917156
+GL models-641-421-p4-Dusk-58-True changed 10768/269861, unmatched 0, mean 0.013, draws 5, upload 7648580
+GL models-641-421-p4-Dusk-72-True changed 3864/269861, unmatched 0, mean 0.009, draws 5, upload 2665756
+GL models-641-421-p4-Night-0-False changed 0/269861, unmatched 0, mean 0.000, draws 5, upload 2128676
+GL models-641-421-p4-Night-55-False changed 0/269861, unmatched 0, mean 0.000, draws 5, upload 2917156
+GL models-641-421-p4-Night-58-True changed 2000/269861, unmatched 0, mean 0.004, draws 5, upload 7648580
+GL models-641-421-p4-Night-72-True changed 1984/269861, unmatched 0, mean 0.004, draws 5, upload 2665756
+GL surface-reliefFalse-tintFalse-x1 changed 0/268800, unmatched 0, mean 0.000, draws 3, upload 8481872
+GL surface-reliefFalse-tintFalse-x4 changed 0/268800, unmatched 0, mean 0.000, draws 3, upload 1076768
+GL surface-reliefFalse-tintTrue-x1 changed 1720/268800, unmatched 0, mean 0.002, draws 3, upload 1141504
+GL surface-reliefFalse-tintTrue-x4 changed 1720/268800, unmatched 0, mean 0.002, draws 3, upload 1076768
+GL surface-reliefTrue-tintFalse-x1 changed 0/268800, unmatched 0, mean 0.000, draws 3, upload 6063136
+GL surface-reliefTrue-tintFalse-x4 changed 0/268800, unmatched 0, mean 0.000, draws 3, upload 3726400
+GL surface-reliefTrue-tintTrue-x1 changed 9440/268800, unmatched 0, mean 0.012, draws 3, upload 1096272
+GL surface-reliefTrue-tintTrue-x4 changed 440/268800, unmatched 0, mean 0.001, draws 3, upload 1095712
+GL earth-overhead-blend-0 changed 20/268800, unmatched 0, mean 0.002, draws 5, upload 3724736
+GL earth-overhead-blend-15 changed 0/268800, unmatched 0, mean 0.000, draws 5, upload 3697200
+GL earth-overhead-blend-29 changed 4/268800, unmatched 0, mean 0.000, draws 5, upload 1075760
+GL earth-overhead-blend-30 changed 0/268800, unmatched 0, mean 0.000, draws 5, upload 1075760
+Passed 408 native GPU/CPU mesh intersection checks and stale-camera rejection.
+Passed retained GPU frame mutation, reactivation, picking and cache identity checks.
+Passed stationary A/B/A route-cache invalidation with delayed building publication.
+Passed 2× destination framebuffer, nearest art pixels, physical-resolution text and independent read/draw target restoration.
+GL navigation-Walk-Day-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Bike-Day-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 0
+GL navigation-Drive-Day-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 0
+GL navigation-Train-Day-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Boat-Day-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Flight-Day-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Walk-Dusk-p3-x2 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Bike-Dusk-p3-x2 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 0
+GL navigation-Drive-Dusk-p3-x2 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 0
+GL navigation-Train-Dusk-p3-x2 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 0
+GL navigation-Boat-Dusk-p3-x2 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Flight-Dusk-p3-x2 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Walk-Night-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Bike-Night-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Drive-Night-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Train-Night-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Boat-Night-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Flight-Night-p2-x1 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Walk-Night-p4-x4 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Bike-Night-p4-x4 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Drive-Night-p4-x4 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 0
+GL navigation-Train-Night-p4-x4 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 0
+GL navigation-Boat-Night-p4-x4 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+GL navigation-Flight-Night-p4-x4 overlay differences 0, composite unmatched 0, artwork unmatched 0, maximum delta 1
+Passed six GPU ridge-occluded gate, route and vehicle overlays through full-resolution GL composition.
+GL source ordering Map, 16 priority orders, warm/reordered uploads 2072/2072 bytes, exact terrain pixels.
+GL source ordering Earth, 16 priority orders, warm/reordered uploads 2072/2072 bytes, exact terrain pixels.
+GL source ordering Elevation, 16 priority orders, warm/reordered uploads 2072/2072 bytes, exact terrain pixels.
+GL duplicate imagery preserves last-source order, changed 268800 pixels, retained/reordered uploads 560/2622000 bytes.
+Passed 48 native GLES terrain, model, tint, Earth, projection, style, resize and exact redraw checks. Reports /workspace/scratch/d086e7fb6e12/gpu-next-final
+Passed complete EGL context destruction and recreation with identical terrain pixels.

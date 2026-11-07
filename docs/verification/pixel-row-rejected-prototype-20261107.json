@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "audited_utc": "2026-11-07T20:45:50.101035+00:00",
+  "status": "rejected; excluded from final confirmation statistics",
+  "scope": "Rejected initial prepared-row prototype; separate from the final non-inlined row-helper implementation.",
+  "decision": "The near-native control regressed by 11.06324219828776 percent in this short run. This is not the final accepted helper result.",
+  "baseline_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "renderer_sha256": {
+    "baseline": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+    "candidate": "07ce6b875169020f9dbf5ca51f58ca54a8acba6a34afadea0f7cda66d4168514"
+  },
+  "protocol": "ABBA fresh processes, CPU0, tiered compilation disabled, two managed processors. Each of five cases uses32 warmups and64 timed complete CPU Draw+Flush calls per run. Table median uses upper-middle pooled sample; p95 uses nearest-rank. PNG capture, hashing and fixture construction are untimed.",
+  "samples": 1280,
+  "raw_artifacts": {
+    "identity.json": {
+      "path_at_measurement": "pixel-row-cost/identity.json",
+      "sha256": "c5e418f111df4a21b5767b1045aaf1c9eeefa647cce057d115e59dc2a964ad45",
+      "bytes": 6665
+    },
+    "samples.csv": {
+      "path_at_measurement": "pixel-row-cost/samples.csv",
+      "sha256": "d1a7229919b341e17057acc17ce821bffa0da15f36306cd9895c6da989c3e251",
+      "bytes": 72055
+    },
+    "summary.json": {
+      "path_at_measurement": "pixel-row-cost/summary.json",
+      "sha256": "6cd6c73c9c186c680591811b450687cd13533f607a5cc0384ce9c888939478b0",
+      "bytes": 4332
+    },
+    "candidate-runtime-manifest.json": {
+      "path_at_measurement": "pixel-row-cost/candidate-runtime-manifest.json",
+      "sha256": "12bc9b461e6a0aa31b10ea9ad6057d1205dc2c1d09b4394460fd14d610246f15",
+      "bytes": 5935
+    }
+  },
+  "recomputed_summaries": [
+    {
+      "scene": "near",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 128,
+        "median_ms": 2.8647,
+        "p95_ms": 3.2556,
+        "thread_cpu_median_ms": 2.8643480000000068,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1632,
+        "block_medians_ms": [
+          2.8382,
+          2.896
+        ],
+        "conventional_even_sample_median_ms": 2.8645,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 126,
+          "1632": 2
+        }
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 2.7759,
+        "p95_ms": 2.9944,
+        "thread_cpu_median_ms": 2.776547999999991,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1632,
+        "block_medians_ms": [
+          2.7527,
+          2.8365
+        ],
+        "conventional_even_sample_median_ms": 2.7759,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 126,
+          "1632": 2
+        }
+      },
+      "median_change_percent": -3.099801026285476
+    },
+    {
+      "scene": "distant",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 128,
+        "median_ms": 4.4456,
+        "p95_ms": 5.0213,
+        "thread_cpu_median_ms": 4.424863000000073,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          4.2733,
+          4.5957
+        ],
+        "conventional_even_sample_median_ms": 4.43885,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 3.6199,
+        "p95_ms": 4.0581,
+        "thread_cpu_median_ms": 3.6206999999999425,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          3.5562,
+          3.6586
+        ],
+        "conventional_even_sample_median_ms": 3.6186,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "median_change_percent": -18.573420910563254
+    },
+    {
+      "scene": "grazing",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 128,
+        "median_ms": 3.6251,
+        "p95_ms": 3.9793,
+        "thread_cpu_median_ms": 3.6255570000000716,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          3.5707,
+          3.692
+        ],
+        "conventional_even_sample_median_ms": 3.62475,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 3.5902,
+        "p95_ms": 3.8957,
+        "thread_cpu_median_ms": 3.5908459999998286,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          3.5881,
+          3.5984
+        ],
+        "conventional_even_sample_median_ms": 3.58915,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "median_change_percent": -0.9627320625637981
+    },
+    {
+      "scene": "far",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 128,
+        "median_ms": 4.6856,
+        "p95_ms": 6.0213,
+        "thread_cpu_median_ms": 4.687310999999681,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          4.7189,
+          4.668
+        ],
+        "conventional_even_sample_median_ms": 4.68525,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 4.75,
+        "p95_ms": 5.2461,
+        "thread_cpu_median_ms": 4.751427000000149,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          4.8142,
+          4.6973
+        ],
+        "conventional_even_sample_median_ms": 4.7455,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "median_change_percent": 1.3744237664333303
+    },
+    {
+      "scene": "near-native",
+      "pixel_size": 1,
+      "baseline": {
+        "samples": 128,
+        "median_ms": 5.4315,
+        "p95_ms": 6.4287,
+        "thread_cpu_median_ms": 5.4269389999999476,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          5.5168,
+          5.3824
+        ],
+        "conventional_even_sample_median_ms": 5.430199999999999,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 6.0324,
+        "p95_ms": 6.7733,
+        "thread_cpu_median_ms": 6.034128999999666,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          6.1584,
+          5.9275
+        ],
+        "conventional_even_sample_median_ms": 6.02885,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 128
+        }
+      },
+      "median_change_percent": 11.06324219828776
+    }
+  ],
+  "audit": {
+    "declared_statistics_match": true,
+    "raw_reports_match_csv": true,
+    "all_reported_camera_and_image_controls_equal": true
+  }
+}

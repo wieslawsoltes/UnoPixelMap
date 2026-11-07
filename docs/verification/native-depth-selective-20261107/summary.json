@@ -1,0 +1,329 @@
+{
+  "protocol": "ABBA fresh processes; identical common harness/dependencies except Rendering.dll; CPU0; tiered compilation disabled; two managed processors; 16 warmup camera phases and64 measured frames per ordinary workload; controls4 warmups/8 samples. Median is lower-middle nearest rank; p95 nearest rank. Total is PrepareGpuFrame including labels plus navigation overlay/picking; GL and presentation excluded.",
+  "sample_count": 2112,
+  "exact_assertions": 11616,
+  "identity_sha256": "da2a8c77d3ec4b456bcc3a17013924bfb0955907bb386d9ff667d475631d82bc",
+  "samples_sha256": "26c3a9b5e57bdfa05244727c9e6373ff73597c152c8f2e2e9bd30054f6a614c1",
+  "summaries": [
+    {
+      "workload": "manhattan-walk",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 8.924999999999999,
+        "p95_ms": 10.312299999999999,
+        "thread_cpu_median_ms": 8.903455000000122,
+        "allocated_bytes_mean": 607589.0625,
+        "depth_query_median_ms": 4.4662999999999995,
+        "prepared_triangles_median": 34714,
+        "index_capacity_bytes_max": 520192,
+        "block_medians_ms": [
+          8.7395,
+          9.0876
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 6.9148,
+        "p95_ms": 9.956299999999999,
+        "thread_cpu_median_ms": 6.918410999999878,
+        "allocated_bytes_mean": 607636.0,
+        "depth_query_median_ms": 4.0649,
+        "prepared_triangles_median": 10255,
+        "index_capacity_bytes_max": 260576,
+        "block_medians_ms": [
+          6.9571,
+          6.8953
+        ]
+      },
+      "median_change_percent": -22.523249299719883
+    },
+    {
+      "workload": "manhattan-chase",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 12.1925,
+        "p95_ms": 14.1184,
+        "thread_cpu_median_ms": 12.19511600000078,
+        "allocated_bytes_mean": 724915.3125,
+        "depth_query_median_ms": 6.0849,
+        "prepared_triangles_median": 39208,
+        "index_capacity_bytes_max": 978064,
+        "block_medians_ms": [
+          12.1903,
+          12.197500000000002
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 9.885499999999999,
+        "p95_ms": 12.351899999999999,
+        "thread_cpu_median_ms": 9.884739999998601,
+        "allocated_bytes_mean": 725003.5625,
+        "depth_query_median_ms": 5.6612,
+        "prepared_triangles_median": 12071,
+        "index_capacity_bytes_max": 492560,
+        "block_medians_ms": [
+          9.9713,
+          9.7674
+        ]
+      },
+      "median_change_percent": -18.921468115644878
+    },
+    {
+      "workload": "manhattan-freeflight",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 9.2437,
+        "p95_ms": 10.9395,
+        "thread_cpu_median_ms": 9.24669399999948,
+        "allocated_bytes_mean": 1411525.8125,
+        "depth_query_median_ms": 6.451,
+        "prepared_triangles_median": 33277,
+        "index_capacity_bytes_max": 1283456,
+        "block_medians_ms": [
+          9.135399999999999,
+          9.4431
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 9.3068,
+        "p95_ms": 12.639700000000001,
+        "thread_cpu_median_ms": 9.310649000000012,
+        "allocated_bytes_mean": 1411437.875,
+        "depth_query_median_ms": 6.5587,
+        "prepared_triangles_median": 27089,
+        "index_capacity_bytes_max": 755328,
+        "block_medians_ms": [
+          9.3614,
+          9.1733
+        ]
+      },
+      "median_change_percent": 0.6826270865562423
+    },
+    {
+      "workload": "manhattan-orbit",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 15.9121,
+        "p95_ms": 18.0794,
+        "thread_cpu_median_ms": 15.916043999999602,
+        "allocated_bytes_mean": 16755.6875,
+        "depth_query_median_ms": 12.6739,
+        "prepared_triangles_median": 36423,
+        "index_capacity_bytes_max": 1457280,
+        "block_medians_ms": [
+          16.5075,
+          15.4851
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 16.1028,
+        "p95_ms": 22.270300000000002,
+        "thread_cpu_median_ms": 16.10816000000159,
+        "allocated_bytes_mean": 16755.6875,
+        "depth_query_median_ms": 12.8231,
+        "prepared_triangles_median": 30949,
+        "index_capacity_bytes_max": 942720,
+        "block_medians_ms": [
+          16.1122,
+          16.0505
+        ]
+      },
+      "median_change_percent": 1.1984590343197876
+    },
+    {
+      "workload": "manhattan-freeflight-normal",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 10.126100000000001,
+        "p95_ms": 12.1448,
+        "thread_cpu_median_ms": 10.129021999999168,
+        "allocated_bytes_mean": 1399122.875,
+        "depth_query_median_ms": 7.431500000000001,
+        "prepared_triangles_median": 36149,
+        "index_capacity_bytes_max": 1782576,
+        "block_medians_ms": [
+          10.1223,
+          10.126100000000001
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 10.440999999999999,
+        "p95_ms": 14.8408,
+        "thread_cpu_median_ms": 10.444679999998698,
+        "allocated_bytes_mean": 1399117.0,
+        "depth_query_median_ms": 7.589200000000001,
+        "prepared_triangles_median": 33788,
+        "index_capacity_bytes_max": 1751088,
+        "block_medians_ms": [
+          10.2591,
+          10.5413
+        ]
+      },
+      "median_change_percent": 3.109785603539339
+    },
+    {
+      "workload": "hills-pixel",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 1.0032999999999999,
+        "p95_ms": 1.3113000000000001,
+        "thread_cpu_median_ms": 1.0051410000014585,
+        "allocated_bytes_mean": 38433.9375,
+        "depth_query_median_ms": 1.6057000000000001,
+        "prepared_triangles_median": 1506,
+        "index_capacity_bytes_max": 1819344,
+        "block_medians_ms": [
+          1.0049000000000001,
+          1.0001
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 1.0219,
+        "p95_ms": 1.2139,
+        "thread_cpu_median_ms": 1.0257710000005318,
+        "allocated_bytes_mean": 38435.875,
+        "depth_query_median_ms": 1.5938,
+        "prepared_triangles_median": 1506,
+        "index_capacity_bytes_max": 1771984,
+        "block_medians_ms": [
+          0.9952000000000001,
+          1.0594999999999999
+        ]
+      },
+      "median_change_percent": 1.8538821887770451
+    },
+    {
+      "workload": "hills-minecraft",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 1.3639000000000001,
+        "p95_ms": 2.0282,
+        "thread_cpu_median_ms": 1.3550710000017716,
+        "allocated_bytes_mean": 78309.375,
+        "depth_query_median_ms": 2.4196,
+        "prepared_triangles_median": 766,
+        "index_capacity_bytes_max": 1819536,
+        "block_medians_ms": [
+          1.4348999999999998,
+          1.3210000000000002
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 1.2074,
+        "p95_ms": 2.206,
+        "thread_cpu_median_ms": 1.208944000001793,
+        "allocated_bytes_mean": 78309.375,
+        "depth_query_median_ms": 2.3156,
+        "prepared_triangles_median": 766,
+        "index_capacity_bytes_max": 1777296,
+        "block_medians_ms": [
+          1.1513,
+          1.2982
+        ]
+      },
+      "median_change_percent": -11.474448273333826
+    },
+    {
+      "workload": "hills-roblox",
+      "baseline": {
+        "samples": 128,
+        "median_ms": 1.4968,
+        "p95_ms": 2.298,
+        "thread_cpu_median_ms": 1.4996339999979682,
+        "allocated_bytes_mean": 220705.6875,
+        "depth_query_median_ms": 4.4797,
+        "prepared_triangles_median": 2443,
+        "index_capacity_bytes_max": 2001216,
+        "block_medians_ms": [
+          1.5189,
+          1.3708
+        ]
+      },
+      "candidate": {
+        "samples": 128,
+        "median_ms": 1.5203,
+        "p95_ms": 2.1526,
+        "thread_cpu_median_ms": 1.5222480000011274,
+        "allocated_bytes_mean": 220705.6875,
+        "depth_query_median_ms": 4.5120000000000005,
+        "prepared_triangles_median": 2443,
+        "index_capacity_bytes_max": 1955776,
+        "block_medians_ms": [
+          1.3536,
+          1.5455
+        ]
+      },
+      "median_change_percent": 1.570016034206323
+    },
+    {
+      "workload": "manhattan-zero-query",
+      "baseline": {
+        "samples": 16,
+        "median_ms": 10.037400000000002,
+        "p95_ms": 28.1218,
+        "thread_cpu_median_ms": 9.842936999999438,
+        "allocated_bytes_mean": 1948636.5,
+        "depth_query_median_ms": 0.1862,
+        "prepared_triangles_median": 33016,
+        "index_capacity_bytes_max": 2174480,
+        "block_medians_ms": [
+          9.5481,
+          10.4518
+        ]
+      },
+      "candidate": {
+        "samples": 16,
+        "median_ms": 11.2505,
+        "p95_ms": 30.5191,
+        "thread_cpu_median_ms": 11.256118999999671,
+        "allocated_bytes_mean": 1946821.5,
+        "depth_query_median_ms": 0.2104,
+        "prepared_triangles_median": 26830,
+        "index_capacity_bytes_max": 2123824,
+        "block_medians_ms": [
+          10.6939,
+          11.2944
+        ]
+      },
+      "median_change_percent": 12.085799111323636
+    },
+    {
+      "workload": "manhattan-full-query",
+      "baseline": {
+        "samples": 16,
+        "median_ms": 10.6648,
+        "p95_ms": 29.035,
+        "thread_cpu_median_ms": 10.670806999998604,
+        "allocated_bytes_mean": 1933399.0,
+        "depth_query_median_ms": 199.0095,
+        "prepared_triangles_median": 33016,
+        "index_capacity_bytes_max": 2204592,
+        "block_medians_ms": [
+          9.6617,
+          10.6648
+        ]
+      },
+      "candidate": {
+        "samples": 16,
+        "median_ms": 9.8703,
+        "p95_ms": 30.1114,
+        "thread_cpu_median_ms": 9.875546999999642,
+        "allocated_bytes_mean": 1933658.0,
+        "depth_query_median_ms": 180.21460000000002,
+        "prepared_triangles_median": 26830,
+        "index_capacity_bytes_max": 2138160,
+        "block_medians_ms": [
+          9.8703,
+          9.6763
+        ]
+      },
+      "median_change_percent": -7.449741204710813
+    }
+  ]
+}

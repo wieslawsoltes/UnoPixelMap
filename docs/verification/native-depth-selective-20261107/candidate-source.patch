@@ -1,0 +1,109 @@
+diff --git a/src/PixelMap.Rendering/GpuSceneDepth.cs b/src/PixelMap.Rendering/GpuSceneDepth.cs
+index 270fea9..3839852 100644
+--- a/src/PixelMap.Rendering/GpuSceneDepth.cs
++++ b/src/PixelMap.Rendering/GpuSceneDepth.cs
+@@ -1,6 +1,7 @@
+ using SkiaSharp;
+ using System.Buffers;
+ using System.Collections.Concurrent;
++using System.Numerics;
+ using System.Runtime.CompilerServices;
+ using System.Runtime.InteropServices;
+ 
+@@ -24,8 +25,8 @@ internal sealed class GpuSceneDepth
+     private static int pooledStorage;
+     private static long nextRevision;
+     internal long Revision { get; } = long.MinValue + Interlocked.Increment(ref nextRevision);
+-    private readonly int width, height, cellSize, columns, rows;
+-    private readonly bool perspective;
++    private readonly int width, height, cellSize, cellShift, columns, rows;
++    private readonly bool perspective, exactPixelCenters;
+     private readonly float pixelsPerMeter;
+     private readonly TileTransform lens;
+     private readonly GpuMapFrame frame;
+@@ -50,9 +51,11 @@ internal sealed class GpuSceneDepth
+         this.frame = frame;
+         width = frame.ArtWidth;
+         height = frame.ArtHeight;
++        exactPixelCenters = width <= (1 << 23) && height <= (1 << 23);
+         cellSize = CellSize;
+         while (((long)width + cellSize - 1) / cellSize * (((long)height + cellSize - 1) / cellSize) > MaximumIndexCells)
+             cellSize *= 2;
++        cellShift = BitOperations.TrailingZeroCount((uint)cellSize);
+         columns = (int)(((long)width + cellSize - 1) / cellSize);
+         rows = (int)(((long)height + cellSize - 1) / cellSize);
+         if (pool.TryTake(out var recycled))
+@@ -156,7 +159,7 @@ internal sealed class GpuSceneDepth
+         int offset = y * width + x;
+         if (samples.TryGetValue(offset, out var cached)) return cached;
+         float sx = x + .5f, sy = y + .5f;
+-        int cell = (y / cellSize) * columns + x / cellSize;
++        int cell = (y >> cellShift) * columns + (x >> cellShift);
+         if (!preparedCells[cell]) PrepareCell(cell, sx, sy, ++cellQueries[cell] >= CompleteCellAfterQueries);
+         var hit = new HitAccumulator();
+         if (hasExactIndex)
+@@ -164,7 +167,7 @@ internal sealed class GpuSceneDepth
+             var preparedTriangles = CollectionsMarshal.AsSpan(triangles);
+             var preparedEdges = CollectionsMarshal.AsSpan(edges);
+             if (cells[cell] is { } candidates)
+-                foreach (int primitive in candidates)
++                foreach (int primitive in CollectionsMarshal.AsSpan(candidates))
+                 {
+                     if (primitive >= 0) hit.AddTriangle(ref preparedTriangles[primitive], primitive, sx, sy, perspective);
+                     else hit.AddEdge(in preparedEdges[~primitive], x, y, perspective);
+@@ -491,11 +494,42 @@ internal sealed class GpuSceneDepth
+     {
+         var triangle = new Triangle(a, b, c, terrain, perspective, preparingOrder);
+         if (!triangle.Valid) return;
++        if (exactPixelCenters && (triangle.Right - triangle.Left <= 1 || triangle.Bottom - triangle.Top <= 1))
++        {
++            AddSubpixelTriangle(in triangle);
++            return;
++        }
++        // Ordinary faces cannot have an empty center interval. Keep their cheap
++        // geometric bins, also used when huge views exceed exact float centers.
+         int index = triangles.Count;
+         triangles.Add(triangle);
+         Bin(index, triangle.Left, triangle.Top, triangle.Right, triangle.Bottom);
+     }
+ 
++    [MethodImpl(MethodImplOptions.NoInlining)]
++    private void AddSubpixelTriangle(in Triangle triangle)
++    {
++        // Keep this specialization's range calculations off the ordinary-face
++        // path, which has no empty raster box to eliminate.
++        // Picking and occlusion sample only integer artwork-pixel centers. A valid
++        // subpixel face can have no such sample even though its geometric box
++        // intersects the viewport. Do not retain or index that empty raster box.
++        // Use double for the half-pixel subtraction: float rounding at a boundary
++        // must not move a center across Contains' original half-open bounds.
++        int left = (int)Math.Clamp(Math.Ceiling((double)triangle.Left - .5), 0, width);
++        int right = (int)Math.Clamp(Math.Ceiling((double)triangle.Right - .5), 0, width);
++        if (left >= right) return;
++        int top = (int)Math.Clamp(Math.Ceiling((double)triangle.Top - .5), 0, height);
++        int bottom = (int)Math.Clamp(Math.Ceiling((double)triangle.Bottom - .5), 0, height);
++        if (top >= bottom) return;
++        // A one-center box still need not cover its center (thin/diagonal roofs
++        // are common in distant city views). Preserve the exact scanline test.
++        if (right == left + 1 && bottom == top + 1 && !triangle.Contains(left + .5f, top + .5f)) return;
++        int index = triangles.Count;
++        triangles.Add(triangle);
++        BinCells(index, left >> cellShift, top >> cellShift, (right - 1) >> cellShift, (bottom - 1) >> cellShift);
++    }
++
+     private void AddEdge(H a, H b, float far)
+     {
+         float lo = 0, hi = 1;
+@@ -523,6 +557,12 @@ internal sealed class GpuSceneDepth
+         int lastX = Math.Clamp((int)MathF.Floor(right / cellSize), 0, columns - 1);
+         int firstY = Math.Clamp((int)MathF.Floor(top / cellSize), 0, rows - 1);
+         int lastY = Math.Clamp((int)MathF.Floor(bottom / cellSize), 0, rows - 1);
++        BinCells(primitive, firstX, firstY, lastX, lastY);
++    }
++
++    private void BinCells(int primitive, int firstX, int firstY, int lastX, int lastY)
++    {
++        if (!hasExactIndex) return;
+         for (int y = firstY; y <= lastY; y++)
+         for (int x = firstX; x <= lastX; x++)
+         {

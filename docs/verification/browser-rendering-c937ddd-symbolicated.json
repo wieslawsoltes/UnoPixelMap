@@ -1,0 +1,1307 @@
+{
+  "schema_version": 1,
+  "source_commit": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "scope": "Exact-package symbolication of the candidate repetition-1 diagnostic CPU profiles from the existing c937 browser artifact; no new browser performance run.",
+  "artifacts": {
+    "workflow_run": 42377138938,
+    "performance": {
+      "id": 13576479398,
+      "name": "atlas-play-performance",
+      "bytes": 6039859,
+      "zip_sha256": "4bf247e49cab16f85836b3ebf6bb6a555564b4ad8de176c6839018599f37f501",
+      "zip_members": 181
+    },
+    "pages": {
+      "id": 13576502635,
+      "name": "github-pages",
+      "bytes": 88286013,
+      "zip_sha256": "ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb",
+      "tar_bytes": 162365440,
+      "tar_sha256": "256e08a34dcc6e1022c7441ebd2cf588cc4d5074091bc3070372594dc31713e7",
+      "tar_members": 404
+    }
+  },
+  "application": {
+    "package": "package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+    "loader": "dotnet.3bwjsd43eu.js",
+    "loader_sha256": "4f1a73ec0925cf906e9a1a2b09546b39cc2b59844257c2d46fb6632a7afe2685",
+    "native_wasm": "dotnet.native.3l7hksc7hn.wasm",
+    "native_bytes": 65940623,
+    "native_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+    "verified_boot_resources": 72,
+    "native_custom_sections": 0,
+    "relevant_modules": [
+      {
+        "assembly": "PixelMap.Controls",
+        "file": "PixelMap.Controls.dznawm573g.wasm",
+        "sha256": "1720083369bbd1d2ff94d1e9719baaf65c32a8684e3521254f5f534dfb214654",
+        "metadata_offset": 45664,
+        "method_count": 439,
+        "get_method_export": "mono_aot_PixelMap_Controls_get_method",
+        "get_method_function": 90474,
+        "table_address": 10905712
+      },
+      {
+        "assembly": "PixelMap.Rendering",
+        "file": "PixelMap.Rendering.66degbrj6x.wasm",
+        "sha256": "d2399744c90513daa45207caccad29a4e281ca218c27f93747273acdd9e7a01b",
+        "metadata_offset": 174412,
+        "method_count": 1127,
+        "get_method_export": "mono_aot_PixelMap_Rendering_get_method",
+        "get_method_function": 93335,
+        "table_address": 10912272
+      },
+      {
+        "assembly": "PixelMap.Simulation",
+        "file": "PixelMap.Simulation.jipcrwnhjn.wasm",
+        "sha256": "2b373da302044a2c023b50f3be2fc34792e0f78ab320b95cf262a00d168d7258",
+        "metadata_offset": 30200,
+        "method_count": 287,
+        "get_method_export": "mono_aot_PixelMap_Simulation_get_method",
+        "get_method_function": 94155,
+        "table_address": 10925456
+      }
+    ]
+  },
+  "symbolication": {
+    "implementation": "scripts/symbolicate-browser-profile.py",
+    "implementation_commit": "ef7a15675b5608545c6f8edbdfca8d38affeb5ac",
+    "algorithm": [
+      "Read normal zero-based MethodDef indices from the exact linked Webcil metadata.",
+      "Decode the exported per-assembly Mono AOT method accessor to recover its constant method-pointer table address.",
+      "Read each pointer from active WASM data segments; resolve its indirect-function-table entry through the WASM element section.",
+      "Require matching native module filenames and matching function byte locations before renaming profile frames.",
+      "Retain aliases and leave generic extras, native/runtime functions and separate dynamic WASM modules anonymous."
+    ],
+    "runtime_source_reference": "https://github.com/dotnet/runtime/blob/v10.0.14/src/mono/mono/mini/aot-compiler.c",
+    "independent_metadata_validation": {
+      "independent_reader": "System.Reflection.Metadata in .NET SDK 10.0.403",
+      "metadata_rows_checked": 115694,
+      "assemblies_checked": 66,
+      "fields_checked": [
+        "row",
+        "token",
+        "type",
+        "name",
+        "rva",
+        "signature"
+      ],
+      "profiles_symbolicated": 7,
+      "wrong_revision_profile_rejected": true,
+      "wrong_revision_error": "Symbolication failed: Profile native module 'dotnet.native.5hk7zno2rb.wasm' does not match 'dotnet.native.3l7hksc7hn.wasm'",
+      "profile_samples_preserved": 46866,
+      "profile_fields_preserved_except_function_names": true,
+      "self_sample_weight_conserved": true,
+      "foreign_dynamic_wasm_frames_not_renamed": true,
+      "wrong_native_sha256_rejected": true,
+      "wrong_function_byte_offset_rejected": true
+    },
+    "reproduce": "python scripts/symbolicate-browser-profile.py --framework <exact-pages-package>/_framework --expected-native-sha256 a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912 --profile <candidate-repetition-1-profile.cpuprofile> --output <output-directory>"
+  },
+  "metric_definitions": {
+    "functions": "Each value is [self_sampled_ms, inclusive_union_sampled_ms, self_sample_count, inclusive_union_sample_count]. These counts are profiler samples, not method invocations.",
+    "subtree_union_ms": "For each sampled leaf, add its sample weight once when any ancestor belongs to the named method/type group. Recursive or repeated occurrences do not double count.",
+    "depth_labels_vehicle_partition": "Depth-under-labels, depth-under-vehicle and depth-other partition depth_union. Other includes scene construction/indexing and remaining callers.",
+    "overlap": "Function inclusive columns and separate subtree groups can overlap and must not be added. Self sampled times are additive.",
+    "zero": "Zero means no sample observed for that function/group in this capture, not that the method never ran."
+  },
+  "symbols": {
+    "prepare_frame": {
+      "method": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x060001af",
+      "aot_method_index": 430,
+      "table_index": 89219,
+      "wasm_function_index": 91779
+    },
+    "draw_labels": {
+      "method": "PixelMap.Rendering.PixelMapRenderer.DrawLabels",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x060001ab",
+      "aot_method_index": 426,
+      "table_index": 89215,
+      "wasm_function_index": 91737
+    },
+    "sample": {
+      "method": "PixelMap.Rendering.GpuSceneDepth.Sample",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x06000151",
+      "aot_method_index": 336,
+      "table_index": 89125,
+      "wasm_function_index": 91579
+    },
+    "prepare_cell": {
+      "method": "PixelMap.Rendering.GpuSceneDepth.PrepareCell",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x06000157",
+      "aot_method_index": 342,
+      "table_index": 89131,
+      "wasm_function_index": 91583
+    },
+    "add_building": {
+      "method": "PixelMap.Rendering.GpuSceneDepth.AddBuilding",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x0600015b",
+      "aot_method_index": 346,
+      "table_index": 89135,
+      "wasm_function_index": 91598
+    },
+    "add_terrain": {
+      "method": "PixelMap.Rendering.GpuSceneDepth.AddTerrain",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x0600015a",
+      "aot_method_index": 345,
+      "table_index": 89134,
+      "wasm_function_index": 91599
+    },
+    "contains": {
+      "method": "PixelMap.Rendering.GpuSceneDepth+Triangle.Contains",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x06000196",
+      "aot_method_index": 405,
+      "table_index": 89194,
+      "wasm_function_index": 91590
+    },
+    "triangle_ctor": {
+      "method": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x06000194",
+      "aot_method_index": 403,
+      "table_index": 89192,
+      "wasm_function_index": 91608
+    },
+    "bin": {
+      "method": "PixelMap.Rendering.GpuSceneDepth.Bin",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x06000163",
+      "aot_method_index": 354,
+      "table_index": 89143,
+      "wasm_function_index": 91609
+    },
+    "gl_draw_core": {
+      "method": "PixelMap.Rendering.GlMapRenderer.DrawCore",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x06000075",
+      "aot_method_index": 116,
+      "table_index": 88906,
+      "wasm_function_index": 91274
+    },
+    "gl_capture": {
+      "method": "PixelMap.Rendering.GlMapRenderer+GlState..ctor",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x060000bd",
+      "aot_method_index": 188,
+      "table_index": 88977,
+      "wasm_function_index": 91265
+    },
+    "gl_restore": {
+      "method": "PixelMap.Rendering.GlMapRenderer+GlState.Restore",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x060000be",
+      "aot_method_index": 189,
+      "table_index": 88978,
+      "wasm_function_index": 91272
+    },
+    "bake_terrain_texture": {
+      "method": "PixelMap.Rendering.PixelMapRenderer.BakeTerrainTexture",
+      "assembly": "PixelMap.Rendering",
+      "method_token": "0x060001c2",
+      "aot_method_index": 449,
+      "table_index": 89238,
+      "wasm_function_index": 91824
+    },
+    "update_free_roam_camera": {
+      "method": "PixelMap.Controls.PixelMapControl.UpdateFreeRoamCamera",
+      "assembly": "PixelMap.Controls",
+      "method_token": "0x0600009d",
+      "aot_method_index": 156,
+      "table_index": 87673,
+      "wasm_function_index": 89998
+    },
+    "on_journey_changed": {
+      "method": "PixelMap.Controls.PixelMapControl.OnJourneyChanged",
+      "assembly": "PixelMap.Controls",
+      "method_token": "0x060000b2",
+      "aot_method_index": 177,
+      "table_index": 87694,
+      "wasm_function_index": 90021
+    }
+  },
+  "profiles": [
+    {
+      "scenario": "car-moving-chase",
+      "profile": "candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile",
+      "profile_sha256": "98d03b11573d1db5052e928792e56c4f078cacc3edd9c9bfeffe9348f5342e25",
+      "profile_duration_ms": 8193.354,
+      "sample_weight_ms": 8191.893,
+      "sample_count": 6387,
+      "mapped_wasm_functions": 679,
+      "referenced_wasm_functions": 1682,
+      "mapped_wasm_self_ms": 638.037,
+      "unresolved_native_module_wasm_self_ms": 911.875,
+      "other_dynamic_wasm_self_ms": 5.126,
+      "subtree_union_ms": {
+        "depth_union": 206.352,
+        "depth_under_labels": 171.664,
+        "gl_renderer_union": 258.539,
+        "gl_capture": 161.518,
+        "collision_union": 73.081,
+        "depth_under_vehicle": 23.378,
+        "depth_other": 11.31,
+        "gl_restore": 5.552
+      },
+      "subtree_union_samples": {
+        "depth_union": 151,
+        "depth_under_labels": 123,
+        "gl_renderer_union": 195,
+        "gl_capture": 117,
+        "collision_union": 65,
+        "depth_under_vehicle": 19,
+        "depth_other": 9,
+        "gl_restore": 5
+      },
+      "functions": {
+        "prepare_frame": [
+          0.0,
+          536.4,
+          0,
+          381
+        ],
+        "draw_labels": [
+          19.862,
+          297.327,
+          8,
+          200
+        ],
+        "sample": [
+          4.643,
+          193.217,
+          4,
+          141
+        ],
+        "prepare_cell": [
+          8.537,
+          181.139,
+          8,
+          132
+        ],
+        "add_building": [
+          44.738,
+          71.669,
+          32,
+          52
+        ],
+        "add_terrain": [
+          33.006,
+          85.122,
+          27,
+          65
+        ],
+        "contains": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "triangle_ctor": [
+          1.747,
+          1.747,
+          1,
+          1
+        ],
+        "bin": [
+          6.861,
+          6.861,
+          5,
+          5
+        ],
+        "gl_draw_core": [
+          0.0,
+          254.856,
+          0,
+          191
+        ],
+        "gl_capture": [
+          0.0,
+          161.518,
+          0,
+          117
+        ],
+        "gl_restore": [
+          0.0,
+          5.552,
+          0,
+          5
+        ],
+        "bake_terrain_texture": [
+          0.0,
+          119.904,
+          0,
+          94
+        ],
+        "update_free_roam_camera": [
+          0.965,
+          52.408,
+          1,
+          45
+        ],
+        "on_journey_changed": [
+          0.0,
+          57.887,
+          0,
+          52
+        ]
+      },
+      "selected_webgl_self_ms": {
+        "getParameter": 158.144,
+        "getError": 25.659,
+        "checkFramebufferStatus": 38.701,
+        "bindFramebuffer": 3.937,
+        "uniform2f": 0.497,
+        "uniform4f": 2.059
+      },
+      "getParameter_self_ms_under_gl_capture": 158.144
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "profile": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile",
+      "profile_sha256": "480e48eef1d0cc8c0589183d1c77d4a2de49c4940ddf0328f3d9ffd3beb08606",
+      "profile_duration_ms": 8136.357,
+      "sample_weight_ms": 8135.947,
+      "sample_count": 6436,
+      "mapped_wasm_functions": 696,
+      "referenced_wasm_functions": 1664,
+      "mapped_wasm_self_ms": 1759.326,
+      "unresolved_native_module_wasm_self_ms": 1840.893,
+      "other_dynamic_wasm_self_ms": 8.894,
+      "subtree_union_ms": {
+        "collision_union": 50.217,
+        "depth_union": 1478.381,
+        "depth_under_labels": 1449.724,
+        "gl_renderer_union": 254.772,
+        "gl_capture": 121.578,
+        "depth_other": 28.657,
+        "gl_restore": 7.763
+      },
+      "subtree_union_samples": {
+        "collision_union": 52,
+        "depth_union": 1161,
+        "depth_under_labels": 1138,
+        "gl_renderer_union": 197,
+        "gl_capture": 98,
+        "depth_other": 23,
+        "gl_restore": 3
+      },
+      "functions": {
+        "prepare_frame": [
+          2.129,
+          2857.7,
+          2,
+          2192
+        ],
+        "draw_labels": [
+          4.014,
+          1544.108,
+          3,
+          1215
+        ],
+        "sample": [
+          279.143,
+          1398.842,
+          238,
+          1095
+        ],
+        "prepare_cell": [
+          17.22,
+          647.272,
+          11,
+          483
+        ],
+        "add_building": [
+          163.031,
+          364.999,
+          119,
+          272
+        ],
+        "add_terrain": [
+          70.431,
+          229.559,
+          42,
+          175
+        ],
+        "contains": [
+          237.797,
+          237.797,
+          175,
+          175
+        ],
+        "triangle_ctor": [
+          81.555,
+          81.555,
+          72,
+          72
+        ],
+        "bin": [
+          75.127,
+          75.127,
+          61,
+          61
+        ],
+        "gl_draw_core": [
+          4.338,
+          253.702,
+          4,
+          196
+        ],
+        "gl_capture": [
+          0.0,
+          121.578,
+          0,
+          98
+        ],
+        "gl_restore": [
+          0.0,
+          7.763,
+          0,
+          3
+        ],
+        "bake_terrain_texture": [
+          1.063,
+          931.1,
+          1,
+          687
+        ],
+        "update_free_roam_camera": [
+          0.0,
+          54.069,
+          0,
+          46
+        ],
+        "on_journey_changed": [
+          0.0,
+          56.503,
+          0,
+          49
+        ]
+      },
+      "selected_webgl_self_ms": {
+        "getParameter": 119.47,
+        "checkFramebufferStatus": 62.724,
+        "getError": 18.655,
+        "bindTexture": 0.272,
+        "bindFramebuffer": 1.064,
+        "uniform4f": 4.64,
+        "uniform2f": 1.67
+      },
+      "getParameter_self_ms_under_gl_capture": 119.47
+    },
+    {
+      "scenario": "freeflight-moving",
+      "profile": "candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile",
+      "profile_sha256": "813a6f5d35e9f19e560bf6a2fd1d871d3b2c6360e64d2faa5f99640bba7b6394",
+      "profile_duration_ms": 8132.442,
+      "sample_weight_ms": 8131.555,
+      "sample_count": 6181,
+      "mapped_wasm_functions": 718,
+      "referenced_wasm_functions": 1779,
+      "mapped_wasm_self_ms": 1359.412,
+      "unresolved_native_module_wasm_self_ms": 1003.841,
+      "other_dynamic_wasm_self_ms": 10.859,
+      "subtree_union_ms": {
+        "depth_union": 1012.037,
+        "depth_other": 20.115,
+        "depth_under_labels": 991.922,
+        "gl_renderer_union": 285.402,
+        "gl_capture": 163.142,
+        "collision_union": 22.321
+      },
+      "subtree_union_samples": {
+        "depth_union": 764,
+        "depth_other": 15,
+        "depth_under_labels": 749,
+        "gl_renderer_union": 220,
+        "gl_capture": 121,
+        "collision_union": 23
+      },
+      "functions": {
+        "prepare_frame": [
+          0.0,
+          1193.941,
+          0,
+          879
+        ],
+        "draw_labels": [
+          5.376,
+          1079.258,
+          4,
+          799
+        ],
+        "sample": [
+          215.634,
+          950.08,
+          165,
+          718
+        ],
+        "prepare_cell": [
+          3.858,
+          462.949,
+          4,
+          339
+        ],
+        "add_building": [
+          144.931,
+          316.852,
+          94,
+          230
+        ],
+        "add_terrain": [
+          38.294,
+          124.911,
+          31,
+          96
+        ],
+        "contains": [
+          139.127,
+          139.127,
+          104,
+          104
+        ],
+        "triangle_ctor": [
+          46.793,
+          46.793,
+          39,
+          39
+        ],
+        "bin": [
+          62.96,
+          62.96,
+          47,
+          47
+        ],
+        "gl_draw_core": [
+          1.061,
+          283.767,
+          1,
+          218
+        ],
+        "gl_capture": [
+          0.0,
+          163.142,
+          0,
+          121
+        ],
+        "gl_restore": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "bake_terrain_texture": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "update_free_roam_camera": [
+          1.069,
+          67.504,
+          1,
+          58
+        ],
+        "on_journey_changed": [
+          0.0,
+          70.797,
+          0,
+          61
+        ]
+      },
+      "selected_webgl_self_ms": {
+        "getParameter": 158.84,
+        "checkFramebufferStatus": 43.813,
+        "getError": 42.468,
+        "bindFramebuffer": 9.133,
+        "uniform2f": 1.166,
+        "uniform1f": 1.431,
+        "texImage2D": 0.947,
+        "uniform4f": 2.131
+      },
+      "getParameter_self_ms_under_gl_capture": 158.84
+    },
+    {
+      "scenario": "map-idle-relief",
+      "profile": "candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile",
+      "profile_sha256": "686af5b83e4f15069f373a52cd892ea2343575faac1c24fa7484e809d998e3fc",
+      "profile_duration_ms": 8118.141,
+      "sample_weight_ms": 8117.422,
+      "sample_count": 7514,
+      "mapped_wasm_functions": 85,
+      "referenced_wasm_functions": 142,
+      "mapped_wasm_self_ms": 1.057,
+      "unresolved_native_module_wasm_self_ms": 11.213,
+      "other_dynamic_wasm_self_ms": 0.0,
+      "subtree_union_ms": {},
+      "subtree_union_samples": {},
+      "functions": {
+        "prepare_frame": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "draw_labels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "sample": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "prepare_cell": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "add_building": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "add_terrain": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "contains": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "triangle_ctor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "bin": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "gl_draw_core": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "gl_capture": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "gl_restore": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "bake_terrain_texture": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "update_free_roam_camera": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "on_journey_changed": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "selected_webgl_self_ms": {},
+      "getParameter_self_ms_under_gl_capture": 0.0
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "profile": "candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile",
+      "profile_sha256": "854d2c69d2e12e5d3bf4b17845376f74a743e4661c43bd3bab85def14b57096c",
+      "profile_duration_ms": 8181.312,
+      "sample_weight_ms": 8179.932,
+      "sample_count": 6318,
+      "mapped_wasm_functions": 606,
+      "referenced_wasm_functions": 1469,
+      "mapped_wasm_self_ms": 610.704,
+      "unresolved_native_module_wasm_self_ms": 617.199,
+      "other_dynamic_wasm_self_ms": 6.546,
+      "subtree_union_ms": {
+        "collision_union": 54.927,
+        "depth_union": 218.326,
+        "depth_under_labels": 117.456,
+        "gl_renderer_union": 352.963,
+        "gl_capture": 212.966,
+        "depth_under_vehicle": 75.925,
+        "depth_other": 24.945,
+        "gl_restore": 5.289
+      },
+      "subtree_union_samples": {
+        "collision_union": 61,
+        "depth_union": 175,
+        "depth_under_labels": 97,
+        "gl_renderer_union": 259,
+        "gl_capture": 152,
+        "depth_under_vehicle": 59,
+        "depth_other": 19,
+        "gl_restore": 5
+      },
+      "functions": {
+        "prepare_frame": [
+          1.149,
+          395.007,
+          1,
+          287
+        ],
+        "draw_labels": [
+          12.703,
+          300.402,
+          11,
+          216
+        ],
+        "sample": [
+          3.99,
+          193.367,
+          4,
+          156
+        ],
+        "prepare_cell": [
+          17.175,
+          182.944,
+          14,
+          146
+        ],
+        "add_building": [
+          28.452,
+          32.525,
+          26,
+          30
+        ],
+        "add_terrain": [
+          47.945,
+          103.781,
+          36,
+          81
+        ],
+        "contains": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "triangle_ctor": [
+          1.052,
+          1.052,
+          1,
+          1
+        ],
+        "bin": [
+          5.547,
+          5.547,
+          5,
+          5
+        ],
+        "gl_draw_core": [
+          0.0,
+          350.809,
+          0,
+          257
+        ],
+        "gl_capture": [
+          0.0,
+          212.966,
+          0,
+          152
+        ],
+        "gl_restore": [
+          0.0,
+          5.289,
+          0,
+          5
+        ],
+        "bake_terrain_texture": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "update_free_roam_camera": [
+          0.0,
+          59.92,
+          0,
+          52
+        ],
+        "on_journey_changed": [
+          1.064,
+          63.319,
+          1,
+          55
+        ]
+      },
+      "selected_webgl_self_ms": {
+        "getParameter": 200.466,
+        "checkFramebufferStatus": 52.836,
+        "getError": 38.293,
+        "uniform4f": 1.385,
+        "uniform2f": 4.745,
+        "bindTexture": 2.376,
+        "bindFramebuffer": 3.007
+      },
+      "getParameter_self_ms_under_gl_capture": 200.466
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "profile": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile",
+      "profile_sha256": "b11610f541e23cf8427d1498b5301416dde0d4713aacc8c71446910b8541dcf5",
+      "profile_duration_ms": 8130.4,
+      "sample_weight_ms": 8129.817,
+      "sample_count": 6526,
+      "mapped_wasm_functions": 602,
+      "referenced_wasm_functions": 1433,
+      "mapped_wasm_self_ms": 2066.055,
+      "unresolved_native_module_wasm_self_ms": 854.797,
+      "other_dynamic_wasm_self_ms": 5.337,
+      "subtree_union_ms": {
+        "collision_union": 58.135,
+        "depth_union": 1951.217,
+        "depth_other": 50.793,
+        "depth_under_labels": 1900.424,
+        "gl_renderer_union": 294.906,
+        "gl_capture": 178.685,
+        "gl_restore": 2.123
+      },
+      "subtree_union_samples": {
+        "collision_union": 57,
+        "depth_union": 1514,
+        "depth_other": 37,
+        "depth_under_labels": 1477,
+        "gl_renderer_union": 221,
+        "gl_capture": 131,
+        "gl_restore": 2
+      },
+      "functions": {
+        "prepare_frame": [
+          1.074,
+          2269.275,
+          1,
+          1725
+        ],
+        "draw_labels": [
+          16.19,
+          2056.936,
+          11,
+          1583
+        ],
+        "sample": [
+          452.758,
+          1832.997,
+          372,
+          1417
+        ],
+        "prepare_cell": [
+          28.868,
+          806.225,
+          15,
+          594
+        ],
+        "add_building": [
+          181.768,
+          468.67,
+          133,
+          347
+        ],
+        "add_terrain": [
+          65.542,
+          264.019,
+          46,
+          201
+        ],
+        "contains": [
+          271.65,
+          271.65,
+          211,
+          211
+        ],
+        "triangle_ctor": [
+          92.93,
+          92.93,
+          65,
+          65
+        ],
+        "bin": [
+          125.457,
+          125.457,
+          96,
+          96
+        ],
+        "gl_draw_core": [
+          2.109,
+          286.881,
+          2,
+          217
+        ],
+        "gl_capture": [
+          0.0,
+          178.685,
+          0,
+          131
+        ],
+        "gl_restore": [
+          0.0,
+          2.123,
+          0,
+          2
+        ],
+        "bake_terrain_texture": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "update_free_roam_camera": [
+          4.795,
+          50.213,
+          2,
+          39
+        ],
+        "on_journey_changed": [
+          0.0,
+          54.308,
+          0,
+          44
+        ]
+      },
+      "selected_webgl_self_ms": {
+        "getParameter": 171.33,
+        "checkFramebufferStatus": 37.124,
+        "getError": 34.973,
+        "bindFramebuffer": 3.023
+      },
+      "getParameter_self_ms_under_gl_capture": 171.33
+    },
+    {
+      "scenario": "walk-stationary-firstperson",
+      "profile": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile",
+      "profile_sha256": "09b6eee17d3f7988b04222af8b6ba759def2a94cc358c8fc3f3fb728cc957afe",
+      "profile_duration_ms": 8120.432,
+      "sample_weight_ms": 8119.398,
+      "sample_count": 7504,
+      "mapped_wasm_functions": 200,
+      "referenced_wasm_functions": 354,
+      "mapped_wasm_self_ms": 64.295,
+      "unresolved_native_module_wasm_self_ms": 73.851,
+      "other_dynamic_wasm_self_ms": 0.0,
+      "subtree_union_ms": {
+        "collision_union": 30.132
+      },
+      "subtree_union_samples": {
+        "collision_union": 28
+      },
+      "functions": {
+        "prepare_frame": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "draw_labels": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "sample": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "prepare_cell": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "add_building": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "add_terrain": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "contains": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "triangle_ctor": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "bin": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "gl_draw_core": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "gl_capture": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "gl_restore": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "bake_terrain_texture": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "update_free_roam_camera": [
+          2.123,
+          15.941,
+          2,
+          15
+        ],
+        "on_journey_changed": [
+          1.064,
+          26.626,
+          1,
+          25
+        ]
+      },
+      "selected_webgl_self_ms": {},
+      "getParameter_self_ms_under_gl_capture": 0.0
+    }
+  ],
+  "timed_window_texture_allocations": {
+    "separate_from_profile_capture": true,
+    "windows": 20,
+    "total_submissions": 1291,
+    "every_window_has_one_null_texImage2D_per_submission": true,
+    "allocation_dimensions": [
+      300,
+      166
+    ],
+    "rows": [
+      {
+        "variant": "baseline",
+        "scenario": "car-moving-chase",
+        "submissions": [
+          65,
+          68
+        ],
+        "texImage2D_allocations": [
+          65,
+          68
+        ],
+        "synchronous_texImage2D_ms": [
+          0.5,
+          0.9
+        ]
+      },
+      {
+        "variant": "baseline",
+        "scenario": "car-moving-firstperson",
+        "submissions": [
+          46,
+          44
+        ],
+        "texImage2D_allocations": [
+          46,
+          44
+        ],
+        "synchronous_texImage2D_ms": [
+          1.1,
+          0.3
+        ]
+      },
+      {
+        "variant": "baseline",
+        "scenario": "freeflight-moving",
+        "submissions": [
+          60,
+          58
+        ],
+        "texImage2D_allocations": [
+          60,
+          58
+        ],
+        "synchronous_texImage2D_ms": [
+          0,
+          0.3
+        ]
+      },
+      {
+        "variant": "baseline",
+        "scenario": "walk-moving-chase",
+        "submissions": [
+          95,
+          95
+        ],
+        "texImage2D_allocations": [
+          95,
+          95
+        ],
+        "synchronous_texImage2D_ms": [
+          0.9,
+          0.4
+        ]
+      },
+      {
+        "variant": "baseline",
+        "scenario": "walk-moving-firstperson",
+        "submissions": [
+          56,
+          56
+        ],
+        "texImage2D_allocations": [
+          56,
+          56
+        ],
+        "synchronous_texImage2D_ms": [
+          0.4,
+          0.2
+        ]
+      },
+      {
+        "variant": "candidate",
+        "scenario": "car-moving-chase",
+        "submissions": [
+          68,
+          67
+        ],
+        "texImage2D_allocations": [
+          68,
+          67
+        ],
+        "synchronous_texImage2D_ms": [
+          0.2,
+          0.5
+        ]
+      },
+      {
+        "variant": "candidate",
+        "scenario": "car-moving-firstperson",
+        "submissions": [
+          45,
+          46
+        ],
+        "texImage2D_allocations": [
+          45,
+          46
+        ],
+        "synchronous_texImage2D_ms": [
+          0,
+          0
+        ]
+      },
+      {
+        "variant": "candidate",
+        "scenario": "freeflight-moving",
+        "submissions": [
+          54,
+          59
+        ],
+        "texImage2D_allocations": [
+          54,
+          59
+        ],
+        "synchronous_texImage2D_ms": [
+          1.5,
+          0
+        ]
+      },
+      {
+        "variant": "candidate",
+        "scenario": "walk-moving-chase",
+        "submissions": [
+          96,
+          97
+        ],
+        "texImage2D_allocations": [
+          96,
+          97
+        ],
+        "synchronous_texImage2D_ms": [
+          0.3,
+          0.9
+        ]
+      },
+      {
+        "variant": "candidate",
+        "scenario": "walk-moving-firstperson",
+        "submissions": [
+          58,
+          58
+        ],
+        "texImage2D_allocations": [
+          58,
+          58
+        ],
+        "synchronous_texImage2D_ms": [
+          0.8,
+          0.3
+        ]
+      }
+    ],
+    "interpretation": "Synchronous null texImage2D call durations are small in these timed captures. They do not measure deferred driver work or establish that allocation has no indirect cost."
+  },
+  "findings": [
+    "In walk first-person, depth visibility consumes 1951.217 ms of 8129.817 ms sample weight; 1900.424 ms (97.4% of depth cost) is below DrawLabels.",
+    "In freeflight, depth visibility consumes 1012.037 ms; 991.922 ms (98.0%) is below DrawLabels. In car first-person, labels account for 1449.724 of 1478.381 ms (98.1%).",
+    "Walk first-person Sample self time is 452.758 ms, Triangle.Contains 271.650 ms, AddBuilding 181.768 ms and Bin 125.457 ms. Sample inclusive time also contains lazy geometry construction and is not additive with those descendants.",
+    "Every sampled getParameter self interval in the moving profiles is under GlState construction. Its inclusive cost is 178.685 ms in walk first-person, 163.142 ms in freeflight and 212.966 ms in walk chase.",
+    "Car first-person additionally spends 931.100 ms below BakeTerrainTexture. Camera/simulation/collision paths are much smaller than the first-person rendering preparation paths."
+  ],
+  "limitations": [
+    "Diagnostic CPU profiles are collected after the timed windows. They identify sampled hot paths but cannot establish the cause or size of a timed-window regression or improvement.",
+    "Only one profile per scenario/variant was captured, with movement continuing during profiling; camera position, visibility and cache state differ from the timed window.",
+    "Profiles measure main-thread sampled stacks and elapsed sample weights, not GPU/compositor execution, driver deferred work, invocation counts or precise per-call latency.",
+    "No explicit managed phase timers or GpuSceneDepth invocation counters exist in these raw captures.",
+    "Native helpers and generic AOT extras remain unresolved; their cost is included when they are descendants of a recovered managed method.",
+    "The browser environment uses CPU-affined headless Chrome and SwiftShader; these observations are not a hardware-GPU performance guarantee.",
+    "Baseline WASM function numbers differ and cannot be compared to candidate numbers without its own exact package mapping. Only the candidate was symbolicated here."
+  ]
+}

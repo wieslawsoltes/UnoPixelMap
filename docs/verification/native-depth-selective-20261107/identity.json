@@ -1,0 +1,277 @@
+{
+  "baseline_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "candidate_base": "1cf4c5a7872481ed2715c1d27d460671aad4fe6b",
+  "candidate_uncommitted_patch_sha256": "c34e6f357060a75a29091d3abb92086c136baf1862d565684d7284b3299a44ed",
+  "runtime": "10.0.14",
+  "sdk": "10.0.403",
+  "cpu_affinity": [
+    0
+  ],
+  "logical_processors": 2,
+  "tiered_compilation": false,
+  "baseline_flag": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "changed_files": [
+    "PixelMap.Rendering.dll"
+  ],
+  "binaries": [
+    {
+      "path": "LibTessDotNet.Double.dll",
+      "baseline_sha256": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "candidate_sha256": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "candidate_bytes": 36864,
+      "baseline_bytes": 36864
+    },
+    {
+      "path": "LibTessDotNet.dll",
+      "baseline_sha256": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921",
+      "candidate_sha256": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921",
+      "candidate_bytes": 35840,
+      "baseline_bytes": 35840
+    },
+    {
+      "path": "Microsoft.DotNet.PlatformAbstractions.dll",
+      "baseline_sha256": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "candidate_sha256": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "candidate_bytes": 23424,
+      "baseline_bytes": 23424
+    },
+    {
+      "path": "Microsoft.Extensions.DependencyModel.dll",
+      "baseline_sha256": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "candidate_sha256": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "candidate_bytes": 75888,
+      "baseline_bytes": 75888
+    },
+    {
+      "path": "PixelMap.Data.dll",
+      "baseline_sha256": "3b2ad91eac25c56fab85a8c7b5aab0ce202461303809c19bf2ef8d0045974a0e",
+      "candidate_sha256": "3b2ad91eac25c56fab85a8c7b5aab0ce202461303809c19bf2ef8d0045974a0e",
+      "candidate_bytes": 3159040,
+      "baseline_bytes": 3159040
+    },
+    {
+      "path": "PixelMap.Data.pdb",
+      "baseline_sha256": "652c4ef2231c3592419cce7931f72c73228c454b557f9d1d26fbcfb4e9dff9b7",
+      "candidate_sha256": "652c4ef2231c3592419cce7931f72c73228c454b557f9d1d26fbcfb4e9dff9b7",
+      "candidate_bytes": 29364,
+      "baseline_bytes": 29364
+    },
+    {
+      "path": "PixelMap.Rendering.Tests",
+      "baseline_sha256": "3d9c678caec05a5349970fd5d6152b849368adb1666fa0ec4daec9de5d607751",
+      "candidate_sha256": "3d9c678caec05a5349970fd5d6152b849368adb1666fa0ec4daec9de5d607751",
+      "candidate_bytes": 78192,
+      "baseline_bytes": 78192
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.deps.json",
+      "baseline_sha256": "0edc31e57ad5b7a1db378b769291ca0163c34b1c1eadacbfbdd760c2ed21daa0",
+      "candidate_sha256": "0edc31e57ad5b7a1db378b769291ca0163c34b1c1eadacbfbdd760c2ed21daa0",
+      "candidate_bytes": 10690,
+      "baseline_bytes": 10690
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.dll",
+      "baseline_sha256": "cc20781647b5a8ac709dfc3b0c6afd5a0be53512980eb00acd2e238cbd1fa977",
+      "candidate_sha256": "cc20781647b5a8ac709dfc3b0c6afd5a0be53512980eb00acd2e238cbd1fa977",
+      "candidate_bytes": 537600,
+      "baseline_bytes": 537600
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.pdb",
+      "baseline_sha256": "8d56513fac4091af616130067961e5d1026dc24305f96a4a4adeffe8e1bc78cd",
+      "candidate_sha256": "8d56513fac4091af616130067961e5d1026dc24305f96a4a4adeffe8e1bc78cd",
+      "candidate_bytes": 122344,
+      "baseline_bytes": 122344
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.runtimeconfig.json",
+      "baseline_sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "candidate_sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "candidate_bytes": 330,
+      "baseline_bytes": 330
+    },
+    {
+      "path": "PixelMap.Rendering.dll",
+      "baseline_sha256": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+      "candidate_sha256": "72434f75685028de2d90979113d7c54c0a9bb3d0cf217b70fe46fbca65cc2f0d",
+      "candidate_bytes": 429056,
+      "baseline_bytes": 425984
+    },
+    {
+      "path": "PixelMap.Rendering.pdb",
+      "baseline_sha256": "f106c7f160ad6511583b54e93fe9ebba575f80e7765623ee38c743816aad609e",
+      "candidate_sha256": "f106c7f160ad6511583b54e93fe9ebba575f80e7765623ee38c743816aad609e",
+      "candidate_bytes": 109976,
+      "baseline_bytes": 109976
+    },
+    {
+      "path": "PixelMap.Routing.dll",
+      "baseline_sha256": "611e1cb3bdc18b3a7d178635c3d2d5a4ac63fc682b420c14efa2b099f6f277d6",
+      "candidate_sha256": "611e1cb3bdc18b3a7d178635c3d2d5a4ac63fc682b420c14efa2b099f6f277d6",
+      "candidate_bytes": 76288,
+      "baseline_bytes": 76288
+    },
+    {
+      "path": "PixelMap.Routing.pdb",
+      "baseline_sha256": "f14f3199c2f31643cb3f1acd6d22403f73d247dce227cd0762f58e3f0fe47dd5",
+      "candidate_sha256": "f14f3199c2f31643cb3f1acd6d22403f73d247dce227cd0762f58e3f0fe47dd5",
+      "candidate_bytes": 23792,
+      "baseline_bytes": 23792
+    },
+    {
+      "path": "Silk.NET.Core.dll",
+      "baseline_sha256": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "candidate_sha256": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "candidate_bytes": 134088,
+      "baseline_bytes": 134088
+    },
+    {
+      "path": "Silk.NET.Maths.dll",
+      "baseline_sha256": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "candidate_sha256": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "candidate_bytes": 341448,
+      "baseline_bytes": 341448
+    },
+    {
+      "path": "Silk.NET.OpenGL.dll",
+      "baseline_sha256": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "candidate_sha256": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "candidate_bytes": 2798536,
+      "baseline_bytes": 2798536
+    },
+    {
+      "path": "SkiaSharp.dll",
+      "baseline_sha256": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "candidate_sha256": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "candidate_bytes": 490016,
+      "baseline_bytes": 490016
+    },
+    {
+      "path": "runtimes/linux-arm/native/libSkiaSharp.so",
+      "baseline_sha256": "0a7a1e605f4e210068970f3bc91cbf780f87689ca36c50764d0ecb2c1854d398",
+      "candidate_sha256": "0a7a1e605f4e210068970f3bc91cbf780f87689ca36c50764d0ecb2c1854d398",
+      "candidate_bytes": 8321144,
+      "baseline_bytes": 8321144
+    },
+    {
+      "path": "runtimes/linux-arm64/native/libSkiaSharp.so",
+      "baseline_sha256": "8adc84fa17c497c2e59efcd60e04cc4840e75959669dabb52555d3730d0b140d",
+      "candidate_sha256": "8adc84fa17c497c2e59efcd60e04cc4840e75959669dabb52555d3730d0b140d",
+      "candidate_bytes": 11292808,
+      "baseline_bytes": 11292808
+    },
+    {
+      "path": "runtimes/linux-loongarch64/native/libSkiaSharp.so",
+      "baseline_sha256": "c64076022dee01a1089c5de7199dc9a2b0c42bf74816b238ace45486c7e9ad17",
+      "candidate_sha256": "c64076022dee01a1089c5de7199dc9a2b0c42bf74816b238ace45486c7e9ad17",
+      "candidate_bytes": 10987880,
+      "baseline_bytes": 10987880
+    },
+    {
+      "path": "runtimes/linux-musl-arm/native/libSkiaSharp.so",
+      "baseline_sha256": "d340a9b6d35c3d6ac44402441e23e3aa30cc1d1b4a3f7bf298aaffc9916f4632",
+      "candidate_sha256": "d340a9b6d35c3d6ac44402441e23e3aa30cc1d1b4a3f7bf298aaffc9916f4632",
+      "candidate_bytes": 14668640,
+      "baseline_bytes": 14668640
+    },
+    {
+      "path": "runtimes/linux-musl-arm64/native/libSkiaSharp.so",
+      "baseline_sha256": "40f4e889a2694397d289e93148c03f06bbde0e398458814068ed85ee287002fb",
+      "candidate_sha256": "40f4e889a2694397d289e93148c03f06bbde0e398458814068ed85ee287002fb",
+      "candidate_bytes": 18551912,
+      "baseline_bytes": 18551912
+    },
+    {
+      "path": "runtimes/linux-musl-loongarch64/native/libSkiaSharp.so",
+      "baseline_sha256": "b0edf27e6fd55a7ad38694896d891f96e9ef4538b38af48cd4fdc6020f25655c",
+      "candidate_sha256": "b0edf27e6fd55a7ad38694896d891f96e9ef4538b38af48cd4fdc6020f25655c",
+      "candidate_bytes": 11911400,
+      "baseline_bytes": 11911400
+    },
+    {
+      "path": "runtimes/linux-musl-riscv64/native/libSkiaSharp.so",
+      "baseline_sha256": "1874a97cd04ad501ded373f60b830e6ec2ef1b6d68e889f264e92961a7a412c8",
+      "candidate_sha256": "1874a97cd04ad501ded373f60b830e6ec2ef1b6d68e889f264e92961a7a412c8",
+      "candidate_bytes": 9978144,
+      "baseline_bytes": 9978144
+    },
+    {
+      "path": "runtimes/linux-musl-x64/native/libSkiaSharp.so",
+      "baseline_sha256": "b8e9c3cbd4073cc3fb176a56d293d37a990c21ce1987bf0be6c6f02868e51e9e",
+      "candidate_sha256": "b8e9c3cbd4073cc3fb176a56d293d37a990c21ce1987bf0be6c6f02868e51e9e",
+      "candidate_bytes": 18455312,
+      "baseline_bytes": 18455312
+    },
+    {
+      "path": "runtimes/linux-riscv64/native/libSkiaSharp.so",
+      "baseline_sha256": "28e4dbe2729dfbc0a26cf94de002fd8c856038d5131e27edde657d99649300b0",
+      "candidate_sha256": "28e4dbe2729dfbc0a26cf94de002fd8c856038d5131e27edde657d99649300b0",
+      "candidate_bytes": 9033440,
+      "baseline_bytes": 9033440
+    },
+    {
+      "path": "runtimes/linux-x64/native/libSkiaSharp.so",
+      "baseline_sha256": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387",
+      "candidate_sha256": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387",
+      "candidate_bytes": 11178144,
+      "baseline_bytes": 11178144
+    },
+    {
+      "path": "runtimes/linux-x86/native/libSkiaSharp.so",
+      "baseline_sha256": "75d904907f6ec5853daeffc5c542ba07e6425494f6aa8be8b32e4b2eafc134d0",
+      "candidate_sha256": "75d904907f6ec5853daeffc5c542ba07e6425494f6aa8be8b32e4b2eafc134d0",
+      "candidate_bytes": 10803432,
+      "baseline_bytes": 10803432
+    },
+    {
+      "path": "runtimes/osx/native/libSkiaSharp.dylib",
+      "baseline_sha256": "f0db1a978ba6568b6a99c79afacc74dfd988b81d3e06ae703832f3dd1eee5d0b",
+      "candidate_sha256": "f0db1a978ba6568b6a99c79afacc74dfd988b81d3e06ae703832f3dd1eee5d0b",
+      "candidate_bytes": 15383440,
+      "baseline_bytes": 15383440
+    },
+    {
+      "path": "runtimes/win-arm64/native/libSkiaSharp.dll",
+      "baseline_sha256": "a6a09d02db0fe21148369b8bf0a9b44aa165c7ec4ea97c2de8ac706ac113f389",
+      "candidate_sha256": "a6a09d02db0fe21148369b8bf0a9b44aa165c7ec4ea97c2de8ac706ac113f389",
+      "candidate_bytes": 10408992,
+      "baseline_bytes": 10408992
+    },
+    {
+      "path": "runtimes/win-arm64/native/libSkiaSharp.pdb",
+      "baseline_sha256": "a439e0afbcb08786b16fdf3c3049866191a705fb7d1d4b95cb01e7cccbc9e2d1",
+      "candidate_sha256": "a439e0afbcb08786b16fdf3c3049866191a705fb7d1d4b95cb01e7cccbc9e2d1",
+      "candidate_bytes": 84815872,
+      "baseline_bytes": 84815872
+    },
+    {
+      "path": "runtimes/win-x64/native/libSkiaSharp.dll",
+      "baseline_sha256": "8b097d433db94fe61aba85213184938fb36118afd542d33252dd83794fdd9afc",
+      "candidate_sha256": "8b097d433db94fe61aba85213184938fb36118afd542d33252dd83794fdd9afc",
+      "candidate_bytes": 11611680,
+      "baseline_bytes": 11611680
+    },
+    {
+      "path": "runtimes/win-x64/native/libSkiaSharp.pdb",
+      "baseline_sha256": "f1c1354dd1cccc001247d6fa5515600b09e4cb70ff6d01d60e593ee67f337b89",
+      "candidate_sha256": "f1c1354dd1cccc001247d6fa5515600b09e4cb70ff6d01d60e593ee67f337b89",
+      "candidate_bytes": 83832832,
+      "baseline_bytes": 83832832
+    },
+    {
+      "path": "runtimes/win-x86/native/libSkiaSharp.dll",
+      "baseline_sha256": "0a8a5ce7f24837d78b622b123eff0956bdd81437d7aa8554cb1282d4eae186b0",
+      "candidate_sha256": "0a8a5ce7f24837d78b622b123eff0956bdd81437d7aa8554cb1282d4eae186b0",
+      "candidate_bytes": 10101792,
+      "baseline_bytes": 10101792
+    },
+    {
+      "path": "runtimes/win-x86/native/libSkiaSharp.pdb",
+      "baseline_sha256": "950e882d4277de2cacae5a6ab6b185306290e4a1e16d276c108c71c8e1bba891",
+      "candidate_sha256": "950e882d4277de2cacae5a6ab6b185306290e4a1e16d276c108c71c8e1bba891",
+      "candidate_bytes": 86552576,
+      "baseline_bytes": 86552576
+    }
+  ]
+}

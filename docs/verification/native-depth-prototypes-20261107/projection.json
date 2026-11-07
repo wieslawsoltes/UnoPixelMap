@@ -1,0 +1,473 @@
+{
+  "schema_version": 1,
+  "decision": "REJECTED",
+  "variant": "projection",
+  "decision_basis": "Adaptive grid plus lazy exact projection cache and3.5MiB scratch-pool byte cap. Correctness passed, but Pixel freeflight regressed consistently in both candidate processes.",
+  "scope": "This is a separate native ABBA sequence against its own c937 controls. Never subtract medians from different prototype sequences to claim an isolated optimization effect. No browser/GPU timings are included.",
+  "protocol": "ABBA fresh processes; identical common harness/dependencies except Rendering.dll; CPU0; tiered compilation disabled; two managed processors; 16 warmup camera phases and64 measured frames per ordinary workload; controls4 warmups/8 samples. Median is lower-middle nearest rank; p95 nearest rank. Total is PrepareGpuFrame including labels plus navigation overlay/picking; GL and presentation excluded.",
+  "original_identity": {
+    "baseline_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "candidate_base": "1cf4c5a7872481ed2715c1d27d460671aad4fe6b",
+    "candidate_uncommitted_patch_sha256": "d01d565635264973ad94353705380cecc35ec6b2a871daf9944f3bfee71d7866",
+    "runtime": "10.0.14",
+    "sdk": "10.0.403",
+    "cpu_affinity": [
+      0
+    ],
+    "logical_processors": 2,
+    "tiered_compilation": false,
+    "baseline_flag": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "changed_files": [
+      "PixelMap.Rendering.dll"
+    ]
+  },
+  "renderer_binary_identity": {
+    "path": "PixelMap.Rendering.dll",
+    "baseline_sha256": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+    "baseline_bytes": 425984,
+    "candidate_sha256": "cadd5198e5ff91dfd20a3e4b982fedc6fcfbdb1ec0723d9f0d06bc664f00da2d",
+    "candidate_bytes": 429056
+  },
+  "common_runtime_manifest": "common-runtime.json",
+  "common_runtime_manifest_sha256": "6ad223a269004a69bd1116d7f2a236f5271c32eefba5cddfe9636d2831492bc3",
+  "source": {
+    "patch": "projection.patch",
+    "patch_sha256": "d01d565635264973ad94353705380cecc35ec6b2a871daf9944f3bfee71d7866",
+    "frozen_GpuSceneDepth_sha256": "beb750ad00bd1fa577190598db1ba515580a9097cb356af6287e45485a1ffad7",
+    "published_equivalent_base_commit": "4fe5af199cef1c4ae79c2757d0296c9acb5c49cd",
+    "base_equivalence_proof": "../source-release-53e9c68.json"
+  },
+  "original_evidence_hashes": {
+    "identity_sha256": "040bee3b09947688711003a01aff7af44eac35ef7330cf42ea8cff66fe8bc6ad",
+    "summary_sha256": "49b743c0b9f4bff928a0898d41260c2e1ecdf04da3e3b02b72075e6618c8d61f",
+    "samples_csv_sha256": "f25425d36cb9fd7e94f85f5d877762cfe75565a8a312a84ad17eeca237a46ef2",
+    "runner_sha256": "0f6c13337085bb0d3e37bd4177aed9b1b7f600c4ec3ad13d0fcbf81cf53128d2",
+    "candidate_projection_patch_sha256": "d01d565635264973ad94353705380cecc35ec6b2a871daf9944f3bfee71d7866",
+    "candidate_projection_source_sha256": "beb750ad00bd1fa577190598db1ba515580a9097cb356af6287e45485a1ffad7",
+    "reports": [
+      {
+        "path": "0-baseline/depth-preparation.json",
+        "sha256": "c6a3ccafa79048348fe294b5ffd1ba004a136f851d812f3329b504dc1f1f0297",
+        "bytes": 836922,
+        "run_log_sha256": "2717d8c9565ccf6b971bfbc71fb093e23b505fbec35b70de694bed0f5eb2e74e"
+      },
+      {
+        "path": "1-candidate/depth-preparation.json",
+        "sha256": "26593d79d8b770ee39e058892394769dd8636f6873bcc2135ed526afa18a9808",
+        "bytes": 836742,
+        "run_log_sha256": "1cd5f36e6f6dd939d0b24a7eff016abe1a89d75e7c9008480bc870b8fb7f7c8c"
+      },
+      {
+        "path": "2-candidate/depth-preparation.json",
+        "sha256": "3bfaf2957ffe239c129f86c9aeb4215f9cab43e33674d523019d19a1e0a3de47",
+        "bytes": 836807,
+        "run_log_sha256": "20379d6ae8861550cf25327b70298381194ef64b8a984e62f9dc1a2c21a1d8b5"
+      },
+      {
+        "path": "3-baseline/depth-preparation.json",
+        "sha256": "85b0c15e13b6b3d237c47d3c16d1f7736db7e10db3f07e44f470a0c48af813ee",
+        "bytes": 836861,
+        "run_log_sha256": "cde0bed475e2b6fc3fec4ad5183a3ed1a738b6c66478f3a1b06158db2a756071"
+      }
+    ]
+  },
+  "audit_validation": {
+    "runtime_file_hashes_checked": 74,
+    "all_recorded_runtime_hashes_match": true,
+    "only_changed_runtime_file": "PixelMap.Rendering.dll",
+    "identity_has_verified_separate_baseline_and_candidate_bytes": true,
+    "raw_samples": 2112,
+    "recomputed_per_block_summary_fields": 1120,
+    "samples_csv_reconstructed_byte_for_byte": true,
+    "all_published_aggregate_summaries_match_raw_samples": true,
+    "exact_fingerprint_fields": [
+      "QueryHash",
+      "OverlayHash",
+      "MinimumAltitude",
+      "MaximumAltitude",
+      "TerrainPatches",
+      "BuildingTriangles",
+      "ConstructedTriangles"
+    ],
+    "exact_fingerprint_comparisons_against_block_zero": 11088,
+    "all_four_blocks_have_equal_fingerprints_for_every_corresponding_frame": true,
+    "all_index_flags_true": true,
+    "all_active_capacities_below_16MiB": true,
+    "source_patch_file_available_for_recomputing_recorded_patch_hash": true,
+    "saved_projection_patch_matches_preexisting_recorded_digest": true
+  },
+  "resource_controls": {
+    "baseline": {
+      "max_recorded_bytes": 2205744,
+      "max_fraction_of_active_16MiB_cap": 0.13147258758544922,
+      "frames_above_8MiB_pool_capacity_threshold": 0
+    },
+    "candidate": {
+      "max_recorded_bytes": 2090336,
+      "max_fraction_of_active_16MiB_cap": 0.12459373474121094,
+      "frames_above_8MiB_pool_capacity_threshold": 0
+    }
+  },
+  "results": [
+    {
+      "workload": "manhattan-walk",
+      "samples_per_variant": 128,
+      "median_ms": [
+        9.4875,
+        7.7118
+      ],
+      "median_change_percent": -18.716205533596842,
+      "p95_ms": [
+        12.7089,
+        9.9185
+      ],
+      "thread_cpu_median_ms": [
+        9.491887000000133,
+        7.713050000000294
+      ],
+      "thread_cpu_p95_ms": [
+        12.622010000000046,
+        9.690460999999686
+      ],
+      "baseline_process_medians_ms": [
+        9.851700000000001,
+        9.3582
+      ],
+      "candidate_process_medians_ms": [
+        7.543,
+        7.96
+      ]
+    },
+    {
+      "workload": "manhattan-chase",
+      "samples_per_variant": 128,
+      "median_ms": [
+        12.040299999999998,
+        10.2525
+      ],
+      "median_change_percent": -14.848467230882944,
+      "p95_ms": [
+        16.4489,
+        13.57
+      ],
+      "thread_cpu_median_ms": [
+        12.043921999999839,
+        10.24800900000082
+      ],
+      "thread_cpu_p95_ms": [
+        16.45407199999954,
+        13.37047000000075
+      ],
+      "baseline_process_medians_ms": [
+        12.282200000000001,
+        11.7425
+      ],
+      "candidate_process_medians_ms": [
+        10.1465,
+        10.5958
+      ]
+    },
+    {
+      "workload": "manhattan-freeflight",
+      "samples_per_variant": 128,
+      "median_ms": [
+        9.7427,
+        10.9474
+      ],
+      "median_change_percent": 12.365155449721343,
+      "p95_ms": [
+        12.0535,
+        13.6545
+      ],
+      "thread_cpu_median_ms": [
+        9.747566999999435,
+        10.95233400000052
+      ],
+      "thread_cpu_p95_ms": [
+        11.888492000000952,
+        13.518448999999237
+      ],
+      "baseline_process_medians_ms": [
+        9.419699999999999,
+        9.8885
+      ],
+      "candidate_process_medians_ms": [
+        10.7062,
+        11.2634
+      ]
+    },
+    {
+      "workload": "manhattan-orbit",
+      "samples_per_variant": 128,
+      "median_ms": [
+        16.8833,
+        16.8952
+      ],
+      "median_change_percent": 0.07048385090593356,
+      "p95_ms": [
+        22.6885,
+        19.911199999999997
+      ],
+      "thread_cpu_median_ms": [
+        16.88865699999951,
+        16.86524300000201
+      ],
+      "thread_cpu_p95_ms": [
+        22.69604000000072,
+        19.91783900000155
+      ],
+      "baseline_process_medians_ms": [
+        16.7609,
+        17.0067
+      ],
+      "candidate_process_medians_ms": [
+        16.9262,
+        16.8476
+      ]
+    },
+    {
+      "workload": "manhattan-freeflight-normal",
+      "samples_per_variant": 128,
+      "median_ms": [
+        10.3764,
+        10.3582
+      ],
+      "median_change_percent": -0.1753980185806303,
+      "p95_ms": [
+        13.805900000000001,
+        11.6977
+      ],
+      "thread_cpu_median_ms": [
+        10.381365999999616,
+        10.340125000000626
+      ],
+      "thread_cpu_p95_ms": [
+        12.494574999998804,
+        11.545713999999862
+      ],
+      "baseline_process_medians_ms": [
+        10.8918,
+        10.0625
+      ],
+      "candidate_process_medians_ms": [
+        10.5034,
+        10.1614
+      ]
+    },
+    {
+      "workload": "hills-pixel",
+      "samples_per_variant": 128,
+      "median_ms": [
+        1.0034,
+        1.0421
+      ],
+      "median_change_percent": 3.8568865856089207,
+      "p95_ms": [
+        1.5832,
+        1.2579
+      ],
+      "thread_cpu_median_ms": [
+        1.005912000000535,
+        1.0463120000003983
+      ],
+      "thread_cpu_p95_ms": [
+        1.5857620000006136,
+        1.2641750000002503
+      ],
+      "baseline_process_medians_ms": [
+        1.1336,
+        0.9705
+      ],
+      "candidate_process_medians_ms": [
+        1.0615999999999999,
+        1.0213
+      ]
+    },
+    {
+      "workload": "hills-minecraft",
+      "samples_per_variant": 128,
+      "median_ms": [
+        1.2326000000000001,
+        1.2663
+      ],
+      "median_change_percent": 2.734058088593194,
+      "p95_ms": [
+        1.8685,
+        1.5285000000000002
+      ],
+      "thread_cpu_median_ms": [
+        1.235421999997925,
+        1.2683319999996456
+      ],
+      "thread_cpu_p95_ms": [
+        1.8734580000000278,
+        1.5315719999998691
+      ],
+      "baseline_process_medians_ms": [
+        1.2976999999999999,
+        1.1827
+      ],
+      "candidate_process_medians_ms": [
+        1.2923,
+        1.2316
+      ]
+    },
+    {
+      "workload": "hills-roblox",
+      "samples_per_variant": 128,
+      "median_ms": [
+        1.4757,
+        1.5043
+      ],
+      "median_change_percent": 1.9380632919970164,
+      "p95_ms": [
+        2.3042,
+        2.374
+      ],
+      "thread_cpu_median_ms": [
+        1.478744000000006,
+        1.5074260000001232
+      ],
+      "thread_cpu_p95_ms": [
+        2.32856399999946,
+        2.3405000000002474
+      ],
+      "baseline_process_medians_ms": [
+        1.558,
+        1.4104999999999999
+      ],
+      "candidate_process_medians_ms": [
+        1.5043,
+        1.459
+      ]
+    },
+    {
+      "workload": "manhattan-zero-query",
+      "samples_per_variant": 16,
+      "median_ms": [
+        9.6704,
+        9.8512
+      ],
+      "median_change_percent": 1.8696227663798748,
+      "p95_ms": [
+        29.3169,
+        28.6582
+      ],
+      "thread_cpu_median_ms": [
+        9.676030000000537,
+        9.85581799999818
+      ],
+      "thread_cpu_p95_ms": [
+        29.325000999999247,
+        28.661968000000343
+      ],
+      "baseline_process_medians_ms": [
+        9.6704,
+        9.155700000000001
+      ],
+      "candidate_process_medians_ms": [
+        9.5924,
+        9.9008
+      ]
+    },
+    {
+      "workload": "manhattan-full-query",
+      "samples_per_variant": 16,
+      "median_ms": [
+        10.0023,
+        9.9426
+      ],
+      "median_change_percent": -0.5968627215740319,
+      "p95_ms": [
+        27.8724,
+        33.2887
+      ],
+      "thread_cpu_median_ms": [
+        9.887664000001678,
+        9.94701200000054
+      ],
+      "thread_cpu_p95_ms": [
+        27.879566999999952,
+        33.167083999996976
+      ],
+      "baseline_process_medians_ms": [
+        10.0023,
+        9.882499999999999
+      ],
+      "candidate_process_medians_ms": [
+        9.8621,
+        10.1099
+      ]
+    }
+  ],
+  "failure_phase_details": {
+    "manhattan-freeflight": {
+      "Prepare": {
+        "median_ms": [
+          8.7364,
+          9.9474
+        ],
+        "change_percent": 13.86154480106223,
+        "thread_cpu_median_ms": [
+          8.740012000000206,
+          9.934753000000455
+        ]
+      },
+      "Navigation": {
+        "median_ms": [
+          0.977,
+          1.0178
+        ],
+        "change_percent": 4.176049129989767,
+        "thread_cpu_median_ms": [
+          0.9783910000005562,
+          1.01911199999995
+        ]
+      },
+      "DepthConstruction": {
+        "median_ms": [
+          0.2055,
+          0.2413
+        ],
+        "change_percent": 17.420924574209252,
+        "thread_cpu_median_ms": [
+          0.20595500000035827,
+          0.24169900000015332
+        ]
+      },
+      "SparseQueries": {
+        "median_ms": [
+          6.5069,
+          7.6147
+        ],
+        "change_percent": 17.02500422628288,
+        "thread_cpu_median_ms": [
+          6.511066000000028,
+          7.617416999999477
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "The candidate combines adaptive grid selection, raster-empty primitive pruning and lazy projection caching with the renderer changes present at its recorded base commit. Its ABBA baseline is c937; these data do not isolate the incremental effect of caching against the uncached adaptive prototype.",
+    "Prepare measures real frame preparation including labels; Navigation measures drive route/vehicle/gate/picking stress in every camera. GL/presentation and free-roam simulation are excluded.",
+    "DepthConstruction and SparseQueries concern a second, independent index. PreparedGroups and PreparedCells refer to that index, not the frame used by labels.",
+    "IndexCapacityBytes includes retained pooled capacity from earlier workloads; it is not a measurement of current live memberships or total renderer memory.",
+    "No measured frame enters fallback or exceeds the 8MiB pool threshold, so these data do not measure pressure fallback or pool rejection behavior.",
+    "The 8-query completion threshold is never reached in the ordinary independent sparse-query batches: PreparedCells is zero there for both variants. Actual frame label completion is not recorded.",
+    "The full-query control has 79639 pixels, exceeding the 65536-entry sample cache; its repeated pass is not a pure cache-hit benchmark.",
+    "Per-block wall/thread-CPU diagnostics are recorded for this projection-cache dataset independently. Tail conclusions from the fixed8 or uncached adaptive prototypes are not carried forward.",
+    "Only two fresh processes per variant are available, with fixed workload order. Pooled medians and per-block medians are descriptive rather than confidence estimates.",
+    "The frozen projection-cache source file reproduces its saved canonical git diff and preexisting patch digest exactly when compared with its recorded base in an isolated temporary work tree. The active worktree was not changed.",
+    "Projected-vertex scratch lengths and scratch-pool rejections are not recorded. Index-list capacity measurements cannot establish whether the separate 3.5MiB projected-scratch pool ceiling was reached."
+  ],
+  "projection_cache_memory": {
+    "H_bytes": 20,
+    "Vertex_uncached_bytes": 28,
+    "Vertex_cached_bytes": 44,
+    "Triangle_bytes_unchanged": 84,
+    "pooled_projected_scratch_bytes": 3670016,
+    "cached_vertex_pool_count_limit": 83409,
+    "interpretation": "Larger scratch Vertex footprint/copies are a plausible tradeoff, not a causally established explanation. Correctness passed; performance acceptance failed."
+  }
+}

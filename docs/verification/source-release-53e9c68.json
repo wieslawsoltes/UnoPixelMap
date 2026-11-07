@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "baseline_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "previous_main": "02f9264518480b0fcca7d1c465603277d7ced518",
+  "source_release": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+  "source_tree": "6f096d890b575ad270ffc21904887a758e6ea8d9",
+  "workflow_run": 42415166135,
+  "baseline_workflow_run": 42377138938,
+  "commits": [
+    {
+      "local": "0c30ee36207929494f85c92eb0015ed9cc68bb23",
+      "remote": "b2f10620f05c39d6be11bb6d78939078b84db551",
+      "tree": "ec905b87d026f9b7bcdf397f1f402866af26b997"
+    },
+    {
+      "local": "cfbd8203f8034ea4929019add4258755d3f6c4e2",
+      "remote": "ef7a15675b5608545c6f8edbdfca8d38affeb5ac",
+      "tree": "0469fa2631dcc7b4200acd2df1ae27e00c8fdfef"
+    },
+    {
+      "local": "1cf4c5a7872481ed2715c1d27d460671aad4fe6b",
+      "remote": "4fe5af199cef1c4ae79c2757d0296c9acb5c49cd",
+      "tree": "8b2a256371ac25656e4bbfe10a579df944cafe45"
+    },
+    {
+      "local": "56c57061a070435a0dcac14d90983099899d8799",
+      "remote": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "tree": "6f096d890b575ad270ffc21904887a758e6ea8d9"
+    }
+  ],
+  "scope": "Measurements froze local source and binary identities before publication. Each published commit has exactly the corresponding local commit tree. GitHub commit metadata changes the commit object identity; it does not change the source tree. Raw measurement identities are retained rather than rewritten.",
+  "native_depth_renderer_sha256": "72434f75685028de2d90979113d7c54c0a9bb3d0cf217b70fe46fbca65cc2f0d",
+  "native_depth_baseline_renderer_sha256": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+  "native_benchmark_harness_sha256": "cc20781647b5a8ac709dfc3b0c6afd5a0be53512980eb00acd2e238cbd1fa977",
+  "native_full_suite_harness_sha256": "f2dab3237bec1b1b59bed16ecc4a67959ca99b7d0b5eacde04c5195c76381285"
+}

@@ -1,0 +1,834 @@
+{
+  "schema_version": 1,
+  "audited_utc": "2026-11-07T20:45:50.101035+00:00",
+  "status": "final prepared-row helper confirmation; native CPU renderer fixture",
+  "baseline_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "candidate_identity_policy": "Owned source SHA-256 and Git blob identities plus the frozen measured DLL identify this result. Local commit metadata is not used as a published application identity.",
+  "scope": "Complete CPU PixelMapRenderer.Draw plus SKCanvas.Flush into an RGBA8888 opaque SKBitmap; includes scene preparation, building rasterization and nearest artwork presentation. One label-free wall, flat terrain, no GPU path. Camera changes every draw. Fixture construction, image hashing, PNG capture, and result allocation are untimed. Managed allocation is per current thread; thread CPU uses CLOCK_THREAD_CPUTIME_ID. This is a whole-renderer baseline/candidate comparison, not an isolated filter-branch benchmark.",
+  "protocol": "ABBA fresh processes, CPU0, tiered compilation disabled, two managed processors. Each of five cases uses 32 warmups and 256 timed complete CPU Draw+Flush calls per run. Table median uses upper-middle pooled sample; p95 uses nearest-rank. PNG capture, hashing and fixture construction are untimed.",
+  "statistics": {
+    "median": "Upper-middle pooled sample, sorted[n // 2], matching the original reports. The conventional even-sample median is also provided.",
+    "p95": "Nearest-rank, sorted[ceil(.95*n)-1].",
+    "sample_count": 5120,
+    "per_case_per_variant": 512,
+    "block_order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "outliers_removed": 0
+  },
+  "environment": {
+    "runtime": ".NET 10.0.14",
+    "operating_system": "Debian GNU/Linux 13 (trixie)",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "cpu_affinity": [
+      0
+    ],
+    "environment_overrides": {
+      "DOTNET_TieredCompilation": "0",
+      "DOTNET_PROCESSOR_COUNT": "2",
+      "DOTNET_ROOT": "/tmp/unopixelmap-dotnet"
+    },
+    "reported_managed_processors": 2
+  },
+  "sources": {
+    "src/PixelMap.Rendering/PixelWindowFilter.cs": {
+      "baseline": {
+        "sha256": "16c59e2a1c0e8874daab32e52cbb4fe97011bda07906ba101d6a58df0c09ebfe",
+        "git_blob_sha1": "a212fc3469eb1676ffb7ceba0cc1b732e3c87284",
+        "bytes": 10947
+      },
+      "candidate": {
+        "sha256": "140d0074aa26cc36a15e8b6677cdc12c6803a4cf57027b2f72543626235fb1c8",
+        "git_blob_sha1": "4442c68611de666f1a205a21920737ad38112e82",
+        "bytes": 15610
+      },
+      "matches_working_tree_at_audit": true
+    },
+    "src/PixelMap.Rendering/BuildingRasterizer.Perspective.cs": {
+      "baseline": {
+        "sha256": "469d0c37018f142cb2b79b39e685f87c8657293d3ab8b036dac5d620b8e61c54",
+        "git_blob_sha1": "6f8b63d4a3c7b593c07ad3ba9e9e8ac102eac039",
+        "bytes": 27069
+      },
+      "candidate": {
+        "sha256": "01452190a35c2a42d78ccf87d6247bd9186cb91c43e54d3a92f5b639b5a4ce22",
+        "git_blob_sha1": "4461d0adef30c3f11212f3f1de5265353a2c7385",
+        "bytes": 28686
+      },
+      "matches_working_tree_at_audit": true
+    },
+    "tests/PixelMap.Rendering.Tests/PixelWindowColorChecks.cs": {
+      "baseline": {
+        "sha256": "f7d4afc4e55e515ebb5e62206420dad5fad474628850de5d8e3914427eb54893",
+        "git_blob_sha1": "93ad5673c98b157eb645182d26ba09809f5cfd2c",
+        "bytes": 2901
+      },
+      "candidate": {
+        "sha256": "733c1b3a1fe2e1b2c9b2c4ee82f214ad4c70e864d2bebce035a84e823dc96f92",
+        "git_blob_sha1": "ed260ca6fe886ee55a65099db7db2c98416aea12",
+        "bytes": 5010
+      },
+      "matches_working_tree_at_audit": true
+    }
+  },
+  "measured_files": {
+    "baseline": {
+      "Silk.NET.Maths.dll": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "PixelMap.Rendering.dll": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+      "SkiaSharp.dll": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "PixelMap.Data.dll": "b9059530103a17f1eae760744bba110f9089e05cb4affb6c4bfd3b7308e9fe0e",
+      "Silk.NET.OpenGL.dll": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "LibTessDotNet.Double.dll": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "PixelWindowCpu": "b48b3379cdddf64455913c75e8a2c95a74e2574f68f39493a68faa26efde4486",
+      "PixelWindowCpu.runtimeconfig.json": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "PixelWindowCpu.deps.json": "a1971992469c95724e163b246e8266e7baa7ed0cccf18fe34ceff3539559088e",
+      "Silk.NET.Core.dll": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "PixelWindowCpu.dll": "1f9be0b0d597fdda87fab94bdce72a5ce2072b9d157a91a5ac6d299c6b21d3d3",
+      "PixelMap.Routing.dll": "fda12de3c8b2cdfcc17f93170f0a9a22f7df0c407d8a82e9a16ee7c3b8a07a5d",
+      "libSkiaSharp.so": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387",
+      "Microsoft.Extensions.DependencyModel.dll": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "LibTessDotNet.dll": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921"
+    },
+    "candidate": {
+      "Silk.NET.Maths.dll": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "PixelMap.Rendering.dll": "ea5ba63b56be5ecdece04fbf7914f74c3fdac89acffcbc1623c18e965e760929",
+      "SkiaSharp.dll": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "PixelMap.Data.dll": "b9059530103a17f1eae760744bba110f9089e05cb4affb6c4bfd3b7308e9fe0e",
+      "Silk.NET.OpenGL.dll": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "LibTessDotNet.Double.dll": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "PixelWindowCpu": "b48b3379cdddf64455913c75e8a2c95a74e2574f68f39493a68faa26efde4486",
+      "PixelWindowCpu.runtimeconfig.json": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "PixelWindowCpu.deps.json": "a1971992469c95724e163b246e8266e7baa7ed0cccf18fe34ceff3539559088e",
+      "Silk.NET.Core.dll": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "PixelWindowCpu.dll": "1f9be0b0d597fdda87fab94bdce72a5ce2072b9d157a91a5ac6d299c6b21d3d3",
+      "PixelMap.Routing.dll": "fda12de3c8b2cdfcc17f93170f0a9a22f7df0c407d8a82e9a16ee7c3b8a07a5d",
+      "libSkiaSharp.so": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387",
+      "Microsoft.Extensions.DependencyModel.dll": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "LibTessDotNet.dll": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921"
+    }
+  },
+  "source_manifest": {
+    "artifact": {
+      "path_at_measurement": "pixel-row-helper-confirmation/candidate-runtime-manifest.json",
+      "sha256": "583993b4ba5242d2b4bf43c5c0d47e7b9f51e86a794a84fc503b9d0c7573d66e",
+      "bytes": 13608
+    },
+    "renderer_scope": "NoInlining prepared-row helper candidate. All CPU source changes listed. GPU depth edits in same binary are unused by CPU harness.",
+    "rendering_sources_sha256_at_freeze": {
+      "src/PixelMap.Rendering/BuildingRasterizer.Perspective.cs": "01452190a35c2a42d78ccf87d6247bd9186cb91c43e54d3a92f5b639b5a4ce22",
+      "src/PixelMap.Rendering/BuildingRasterizer.cs": "e573e909ce1a913ba39a1830245b73fe4a7025ae662b17774c9032e3d4494616",
+      "src/PixelMap.Rendering/BuildingStyle.cs": "88e481a598de9858c5956d98d349f3e98f67425997f6bf59cf03e802fa84ac5e",
+      "src/PixelMap.Rendering/EarthRaster.cs": "80cb70f6d6ba04d1e3384f7535a3de9eda56f82512646e367ad5f3c5c9f5ff34",
+      "src/PixelMap.Rendering/GlMapRenderer.cs": "a04b50c13fafaeb9bc5b9272d64e98a421cfe759cbcf2c78b8c31aad59859e45",
+      "src/PixelMap.Rendering/GlMapShaders.cs": "5499933e555293352b31d26051ea0b985ecbc5633f15c9bcaa1b57988c844243",
+      "src/PixelMap.Rendering/GpuBuildingMesh.cs": "1ae8b5d47050b84d3ccd89a6c4a020c35f818cf747a90700f78945cfff2d3a77",
+      "src/PixelMap.Rendering/GpuBuildingSelection.cs": "5a2cbec3adcbd9075bd9521d6e7ef6ebf51ce4c474e045020d56e92b7ea40fce",
+      "src/PixelMap.Rendering/GpuFrameSurface.cs": "fde65c739a1abd49ebafddb17f7809e16c1a2ee3995a894c39e1556d733019f4",
+      "src/PixelMap.Rendering/GpuMapFrame.cs": "9831e038e3495eddaee3edf8f2b23ed8ea4159581db07c241b0439ad0858dcce",
+      "src/PixelMap.Rendering/GpuSceneDepth.cs": "8b61e8139b032acea67dace24209362f8acc50bef9d76a1b0ced7510e9728e85",
+      "src/PixelMap.Rendering/JourneyGate.cs": "4eaafabfddd7f0a0ea3b37f83280c2da9dd34e51be85adf704b90fac72305553",
+      "src/PixelMap.Rendering/MapCamera.Terrain.cs": "a17eaf56c8949aee7e221ad70588b3940357a003d9bf1b7476d47c750c9b8475",
+      "src/PixelMap.Rendering/MapCamera.cs": "063965a358482a5c8028e88030b580169e85db1ee9fbaacba202c33860623342",
+      "src/PixelMap.Rendering/MapRenderStyle.cs": "5a0e4de30cd783be44b7e9acb73ab20c856d04d7f1501372ce36c71c77faa845",
+      "src/PixelMap.Rendering/PixelMap.Rendering.csproj": "15f1cf505bfd703afcc334e03e3c1dce58c679247454196b4124ec8ca0fb4a31",
+      "src/PixelMap.Rendering/PixelMapRenderer.Collision.cs": "617d0f0fea21cc5fda442d7838dae93a6e4880b0bd0cece807b2659a8fa39d21",
+      "src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs": "522f56bc2f33bf6b77b11e187f48f9afabacd87d45760882219b1b3b8a282003",
+      "src/PixelMap.Rendering/PixelMapRenderer.Picking.cs": "6ac9bff3ed8892c5219f5308cdf7fd025cac4021df157575c202749efb5eaf0b",
+      "src/PixelMap.Rendering/PixelMapRenderer.Terrain.cs": "2d5e2d5537a113173866d031c4b11b97cb5a447067f168fd68fc9f8a56636dce",
+      "src/PixelMap.Rendering/PixelMapRenderer.cs": "c34504534db1e7d1548710b8759251506032b72aeb8ef154f004a3c6381d4eaf",
+      "src/PixelMap.Rendering/PixelPalette.cs": "90aaa698becadcc2e40f128d1075a0921aa5bbea941a41f1e69387d7666a55f6",
+      "src/PixelMap.Rendering/PixelWindowFilter.cs": "140d0074aa26cc36a15e8b6677cdc12c6803a4cf57027b2f72543626235fb1c8",
+      "src/PixelMap.Rendering/RouteOverlay.cs": "9c39911ede0b1fd7b9ae38e8f09c560d48d7d7dd758ce8377fb4091463b230ae",
+      "src/PixelMap.Rendering/TerrainBlockMesh.cs": "4335faae6a1fcbfe43e7a2540df473ec3a40c64cc94d7bde8296e9331b5bf7e4",
+      "src/PixelMap.Rendering/TerrainCache.cs": "06de4d98b29b115fb377e77ced6806547b34445ce55b11bbcb9bdd86f1d35422",
+      "src/PixelMap.Rendering/TerrainOptions.cs": "a84bc2bba9a35529e621af58b6402d867e8f2ae0c22255efb67f45240f2b663f",
+      "src/PixelMap.Rendering/TerrainSurface.cs": "2c5d85677c381f831752606826112a697cb57feafacb21861919e898c89bc002",
+      "src/PixelMap.Rendering/TileGeometry.cs": "121e93ab4a9e9ae35096ab3afaa7c2a72963054cf5ad1a54a967951adde308ef",
+      "src/PixelMap.Rendering/TileProjection.cs": "d3ebc35a50739e77f6cd793bb7c87d60a996564b9e43763edc80a26b15c88961",
+      "src/PixelMap.Rendering/TileTransform.cs": "7385314184cfe7202465fa72495cd5aacec140fdcd4c05f23d55a6f99c89f92d",
+      "src/PixelMap.Rendering/VehicleEffects.cs": "17469418a65cc21c28df1878275529b45bf318c0cb210b646b7025843bf5a379",
+      "src/PixelMap.Rendering/VehicleSprite.cs": "51cf0bd7eefb5f6761d74b008294024edbdf2d47eb9eeeb279a136175e006719",
+      "src/PixelMap.Rendering/WorldVehicle.cs": "046cf9eb845e4ac2be977ca3ecbf191e649f6eb501ecbb14556f1dc676242248"
+    }
+  },
+  "harness_source": {
+    "docs/verification/pixel-window-cpu-harness/Program.cs": {
+      "sha256": "64fbeca059914c0758d3f33b47104a57cad3261db07c89c07858df52f69ce024",
+      "git_blob_sha1": "374e7ea873b47db004bbecde903d6360e73be122",
+      "bytes": 8029
+    },
+    "docs/verification/pixel-window-cpu-harness/PixelWindowCpu.csproj": {
+      "sha256": "e1e619bfac79a1b1a566e939a38c41258f24c7bd7f479a6da00e1be4090b5168",
+      "git_blob_sha1": "49acf84face714eeb77bc23fbf9ed18a59cd3b7a",
+      "bytes": 581
+    }
+  },
+  "raw_artifacts": {
+    "identity.json": {
+      "path_at_measurement": "pixel-row-helper-confirmation/identity.json",
+      "sha256": "b805f5046c3ab4076a1310901012fa26139387e12a3fe6831b99e722e2c8633f",
+      "bytes": 6808
+    },
+    "summary.json": {
+      "path_at_measurement": "pixel-row-helper-confirmation/summary.json",
+      "sha256": "b57bf95e69c5c6f82068651c6891c395b674308b825ebf64a572915fb89e3d7e",
+      "bytes": 4338
+    },
+    "samples.csv": {
+      "path_at_measurement": "pixel-row-helper-confirmation/samples.csv",
+      "sha256": "a724a5c99910acb3646ad43bf298d57af2e744a3b7824dd0caa2efc7542521ca",
+      "bytes": 291826
+    },
+    "run.py": {
+      "path_at_measurement": "pixel-row-helper-confirmation/run.py",
+      "sha256": "72b1a68ef4ab5bd1e5678fff1f2ef806f03dceffdb72983b591ae68f11260db6",
+      "bytes": 6515
+    }
+  },
+  "runs": [
+    {
+      "variant": "baseline",
+      "block": 0,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/baseline-harness/PixelWindowCpu.dll",
+        "--output=/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/0-baseline",
+        "--variant=baseline",
+        "--block=0",
+        "--warmups=32",
+        "--samples=256"
+      ],
+      "started_utc": "2026-11-07T20:36:01.307037+00:00",
+      "finished_utc": "2026-11-07T20:36:08.580050+00:00",
+      "exit_code": 0,
+      "report_sha256": "8d4285f1905de54fe5feea308b99fbcd2a84ed40f898d165e548e099c2b77460"
+    },
+    {
+      "variant": "candidate",
+      "block": 1,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/candidate-harness/PixelWindowCpu.dll",
+        "--output=/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/1-candidate",
+        "--variant=candidate",
+        "--block=1",
+        "--warmups=32",
+        "--samples=256"
+      ],
+      "started_utc": "2026-11-07T20:36:08.580589+00:00",
+      "finished_utc": "2026-11-07T20:36:15.341126+00:00",
+      "exit_code": 0,
+      "report_sha256": "6130c8000c6f8a90dca3177f7dcc9b16bff66296e4247ff8a734a8e2c1fc64c0"
+    },
+    {
+      "variant": "candidate",
+      "block": 2,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/candidate-harness/PixelWindowCpu.dll",
+        "--output=/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/2-candidate",
+        "--variant=candidate",
+        "--block=2",
+        "--warmups=32",
+        "--samples=256"
+      ],
+      "started_utc": "2026-11-07T20:36:15.341700+00:00",
+      "finished_utc": "2026-11-07T20:36:22.208055+00:00",
+      "exit_code": 0,
+      "report_sha256": "675f76a3d13d0f5eb06a3c601adf7b121c2934af858b03a9dfc9fcd157e0afb1"
+    },
+    {
+      "variant": "baseline",
+      "block": 3,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/baseline-harness/PixelWindowCpu.dll",
+        "--output=/workspace/scratch/d086e7fb6e12/pixel-row-helper-confirmation/3-baseline",
+        "--variant=baseline",
+        "--block=3",
+        "--warmups=32",
+        "--samples=256"
+      ],
+      "started_utc": "2026-11-07T20:36:22.208580+00:00",
+      "finished_utc": "2026-11-07T20:36:29.384696+00:00",
+      "exit_code": 0,
+      "report_sha256": "fa154edbc96d7ea8fcda6505a434153a887c4b34617586d7aea38e31b1673808"
+    }
+  ],
+  "audit": {
+    "report_hashes_verified": 4,
+    "runtime_directories_match_identity": true,
+    "only_variant_binary_difference": "PixelMap.Rendering.dll",
+    "raw_reports_match_every_csv_value": true,
+    "declared_statistics_reproduced": true,
+    "allocation_histograms_equal_between_variants": true,
+    "camera_and_image_controls_equal_across_all_four_runs": true,
+    "full_canvas_controls_per_run": 80,
+    "artwork_controls_per_run": 80,
+    "independently_decoded_cpu_pngs": 20,
+    "decoded_png_hashes_match_phase_zero_controls": true
+  },
+  "preserved_raw_samples": {
+    "file": "pixel-row-confirmation-samples-20261107.csv",
+    "sha256": "a724a5c99910acb3646ad43bf298d57af2e744a3b7824dd0caa2efc7542521ca",
+    "rows": 5120
+  },
+  "image_hash_csv": {
+    "file": "pixel-row-image-hashes-20261107.csv",
+    "sha256": "848f838dbd1e3727ab02dc7bbc300cb95824120ad4481b597d3ed98a60e01960",
+    "cpu_confirmation_rows": 160
+  },
+  "camera_controls": [
+    {
+      "Scene": "near",
+      "PixelSize": 4,
+      "DistanceMeters": 64,
+      "Bearing": 0,
+      "CameraSha256": "56a6d6708264ff07b3ad355a8bc671607b748543a1fa102b8cf2fe814a0621b0",
+      "FinalPhase": 15,
+      "FinalHash": "bafadf99c8af64d43b7eb99a82a8f06fce057788f76c3975cb4ef50acf18c9e6"
+    },
+    {
+      "Scene": "distant",
+      "PixelSize": 4,
+      "DistanceMeters": 320,
+      "Bearing": 0,
+      "CameraSha256": "93fcb586c90a7d92f3c8935d7fe90a7cf6c59c7c40bf0d78459b9414dc059a14",
+      "FinalPhase": 15,
+      "FinalHash": "30c94d661198cb5ee1cd59ca9e5f64efd30ad3789dcf6a2a7b6a3964f94e9e1e"
+    },
+    {
+      "Scene": "grazing",
+      "PixelSize": 4,
+      "DistanceMeters": 160,
+      "Bearing": 75,
+      "CameraSha256": "283ee4ca7dbcf6099b13b513305a88323b209528c63c1224d0735b9017d97e73",
+      "FinalPhase": 15,
+      "FinalHash": "a212a72ca1e7bc13fdc707dcc4835683df2326e77c5e2ae856df1ebb6dc5b878"
+    },
+    {
+      "Scene": "far",
+      "PixelSize": 4,
+      "DistanceMeters": 720,
+      "Bearing": 20,
+      "CameraSha256": "a8d3470ee620c06275dd65b1fcc3c765cde047150648ec13771fe5770427736c",
+      "FinalPhase": 15,
+      "FinalHash": "395e36f892cec99da705a274b89ec1b81a78f6648e2517280c84b65812f92cc7"
+    },
+    {
+      "Scene": "near-native",
+      "PixelSize": 1,
+      "DistanceMeters": 64,
+      "Bearing": 0,
+      "CameraSha256": "56a6d6708264ff07b3ad355a8bc671607b748543a1fa102b8cf2fe814a0621b0",
+      "FinalPhase": 15,
+      "FinalHash": "c994665017a51e2bbc9229586de1d89bb4a3019e7770af2d751707d366e0b2cb"
+    }
+  ],
+  "recomputed_summaries": [
+    {
+      "scene": "near",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 512,
+        "median_ms": 2.8467,
+        "p95_ms": 3.4855,
+        "thread_cpu_median_ms": 2.8482040000000097,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1632,
+        "block_medians_ms": [
+          3.0495,
+          2.7308
+        ],
+        "conventional_even_sample_median_ms": 2.8465999999999996,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 510,
+          "1632": 2
+        }
+      },
+      "candidate": {
+        "samples": 512,
+        "median_ms": 2.7367,
+        "p95_ms": 3.0891,
+        "thread_cpu_median_ms": 2.7360170000000608,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1632,
+        "block_medians_ms": [
+          2.7284,
+          2.8009
+        ],
+        "conventional_even_sample_median_ms": 2.73665,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 510,
+          "1632": 2
+        }
+      },
+      "median_change_percent": -3.8641233709207135
+    },
+    {
+      "scene": "distant",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 512,
+        "median_ms": 4.2975,
+        "p95_ms": 5.246,
+        "thread_cpu_median_ms": 4.2976229999999305,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          4.4609,
+          4.2013
+        ],
+        "conventional_even_sample_median_ms": 4.2971,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "candidate": {
+        "samples": 512,
+        "median_ms": 3.5966,
+        "p95_ms": 3.9751,
+        "thread_cpu_median_ms": 3.5974350000001323,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          3.5954,
+          3.6019
+        ],
+        "conventional_even_sample_median_ms": 3.5966,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "median_change_percent": -16.30948225712624
+    },
+    {
+      "scene": "grazing",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 512,
+        "median_ms": 3.6904,
+        "p95_ms": 4.6179,
+        "thread_cpu_median_ms": 3.687198999999964,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          3.7556,
+          3.6362
+        ],
+        "conventional_even_sample_median_ms": 3.6891,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "candidate": {
+        "samples": 512,
+        "median_ms": 3.5956,
+        "p95_ms": 3.9996,
+        "thread_cpu_median_ms": 3.5923979999997755,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          3.5556,
+          3.6663
+        ],
+        "conventional_even_sample_median_ms": 3.5945,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "median_change_percent": -2.568827227400816
+    },
+    {
+      "scene": "far",
+      "pixel_size": 4,
+      "baseline": {
+        "samples": 512,
+        "median_ms": 4.7825,
+        "p95_ms": 5.8323,
+        "thread_cpu_median_ms": 4.78121099999953,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          4.7965,
+          4.7733
+        ],
+        "conventional_even_sample_median_ms": 4.7822,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "candidate": {
+        "samples": 512,
+        "median_ms": 4.7562,
+        "p95_ms": 5.7544,
+        "thread_cpu_median_ms": 4.757325999999921,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          4.7571,
+          4.7562
+        ],
+        "conventional_even_sample_median_ms": 4.755599999999999,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "median_change_percent": -0.5499215891270226
+    },
+    {
+      "scene": "near-native",
+      "pixel_size": 1,
+      "baseline": {
+        "samples": 512,
+        "median_ms": 5.5125,
+        "p95_ms": 6.6988,
+        "thread_cpu_median_ms": 5.513817000000017,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          5.3511,
+          5.7762
+        ],
+        "conventional_even_sample_median_ms": 5.511950000000001,
+        "blocks": [
+          0,
+          3
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "candidate": {
+        "samples": 512,
+        "median_ms": 5.5984,
+        "p95_ms": 6.0636,
+        "thread_cpu_median_ms": 5.596770999999535,
+        "allocated_bytes_min": 1552,
+        "allocated_bytes_max": 1552,
+        "block_medians_ms": [
+          5.5799,
+          5.611
+        ],
+        "conventional_even_sample_median_ms": 5.59715,
+        "blocks": [
+          1,
+          2
+        ],
+        "allocated_bytes_histogram": {
+          "1552": 512
+        }
+      },
+      "median_change_percent": 1.5582766439909301
+    }
+  ],
+  "allocation_conclusion": "No added measured per-thread managed allocation: near ranges from 1552 to 1632 bytes/draw in both variants; all other cases use 1552 bytes/draw. Complete draws are not allocation-free.",
+  "limits": [
+    "Single native CPU/software-raster fixture, one label-free facade, flat terrain and Night palette; no browser or live-camera frame-rate inference.",
+    "This is a whole-renderer comparison using a common harness, not an isolated filter-kernel timing.",
+    "The candidate DLL also contains then-current GPU depth edits, which this CPU-only Draw path does not execute. Later integrated renderer builds require their own validation.",
+    "The near-native control remains 1.5582766439909301 percent slower by pooled median. Baseline blocks vary from 5.3511 to 5.7762 ms; candidate blocks from 5.5799 to 5.6110 ms. These data do not establish universal speedups."
+  ],
+  "same_binary_short_pilot": {
+    "role": "diagnostic only; excluded from confirmation pool",
+    "samples": 1280,
+    "artifacts": {
+      "identity.json": {
+        "path_at_measurement": "pixel-row-helper-cost/identity.json",
+        "sha256": "478d7e3ed1e576baa05003294b4002dd9dc8b9d5caf3b17108f7d03c84ea655f",
+        "bytes": 6740
+      },
+      "summary.json": {
+        "path_at_measurement": "pixel-row-helper-cost/summary.json",
+        "sha256": "5b00d816b5ece0bfba1c3b368a16cea4352970e3a88ea74f9a17016a1ad27fc0",
+        "bytes": 4328
+      },
+      "samples.csv": {
+        "path_at_measurement": "pixel-row-helper-cost/samples.csv",
+        "sha256": "912dd55760036cd9ee612373f05032fc95c9a82ec0391001d44678093ed13cbb",
+        "bytes": 72099
+      }
+    },
+    "recomputed_summaries": [
+      {
+        "scene": "near",
+        "pixel_size": 4,
+        "baseline": {
+          "samples": 128,
+          "median_ms": 2.7496,
+          "p95_ms": 3.2519,
+          "thread_cpu_median_ms": 2.7503489999999147,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1632,
+          "block_medians_ms": [
+            2.721,
+            2.8194
+          ],
+          "conventional_even_sample_median_ms": 2.74865,
+          "blocks": [
+            0,
+            3
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 126,
+            "1632": 2
+          }
+        },
+        "candidate": {
+          "samples": 128,
+          "median_ms": 2.7531,
+          "p95_ms": 3.826,
+          "thread_cpu_median_ms": 2.755566999999985,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1632,
+          "block_medians_ms": [
+            2.7258,
+            2.9385
+          ],
+          "conventional_even_sample_median_ms": 2.75195,
+          "blocks": [
+            1,
+            2
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 126,
+            "1632": 2
+          }
+        },
+        "median_change_percent": 0.1272912423625261
+      },
+      {
+        "scene": "distant",
+        "pixel_size": 4,
+        "baseline": {
+          "samples": 128,
+          "median_ms": 4.2523,
+          "p95_ms": 4.5512,
+          "thread_cpu_median_ms": 4.25385899999992,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            4.2086,
+            4.2956
+          ],
+          "conventional_even_sample_median_ms": 4.2513000000000005,
+          "blocks": [
+            0,
+            3
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "candidate": {
+          "samples": 128,
+          "median_ms": 3.5973,
+          "p95_ms": 4.5576,
+          "thread_cpu_median_ms": 3.5986369999999397,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            3.5659,
+            3.7895
+          ],
+          "conventional_even_sample_median_ms": 3.596,
+          "blocks": [
+            1,
+            2
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "median_change_percent": -15.403428732685832
+      },
+      {
+        "scene": "grazing",
+        "pixel_size": 4,
+        "baseline": {
+          "samples": 128,
+          "median_ms": 3.7038,
+          "p95_ms": 4.2367,
+          "thread_cpu_median_ms": 3.705175000000054,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            3.6133,
+            3.7984
+          ],
+          "conventional_even_sample_median_ms": 3.6992000000000003,
+          "blocks": [
+            0,
+            3
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "candidate": {
+          "samples": 128,
+          "median_ms": 3.5987,
+          "p95_ms": 4.8951,
+          "thread_cpu_median_ms": 3.600560000000087,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            3.5458,
+            3.6419
+          ],
+          "conventional_even_sample_median_ms": 3.5984499999999997,
+          "blocks": [
+            1,
+            2
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "median_change_percent": -2.837626221718237
+      },
+      {
+        "scene": "far",
+        "pixel_size": 4,
+        "baseline": {
+          "samples": 128,
+          "median_ms": 4.7445,
+          "p95_ms": 5.2446,
+          "thread_cpu_median_ms": 4.743274999999812,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            4.6746,
+            4.855
+          ],
+          "conventional_even_sample_median_ms": 4.7433,
+          "blocks": [
+            0,
+            3
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "candidate": {
+          "samples": 128,
+          "median_ms": 4.8527,
+          "p95_ms": 6.4118,
+          "thread_cpu_median_ms": 4.810324000000037,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            4.6795,
+            4.9467
+          ],
+          "conventional_even_sample_median_ms": 4.8308,
+          "blocks": [
+            1,
+            2
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "median_change_percent": 2.28053535672883
+      },
+      {
+        "scene": "near-native",
+        "pixel_size": 1,
+        "baseline": {
+          "samples": 128,
+          "median_ms": 5.5282,
+          "p95_ms": 6.0281,
+          "thread_cpu_median_ms": 5.529509999999846,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            5.5023,
+            5.5947
+          ],
+          "conventional_even_sample_median_ms": 5.5280000000000005,
+          "blocks": [
+            0,
+            3
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "candidate": {
+          "samples": 128,
+          "median_ms": 5.6633,
+          "p95_ms": 6.4287,
+          "thread_cpu_median_ms": 5.665391999999883,
+          "allocated_bytes_min": 1552,
+          "allocated_bytes_max": 1552,
+          "block_medians_ms": [
+            5.4934,
+            5.8561
+          ],
+          "conventional_even_sample_median_ms": 5.66305,
+          "blocks": [
+            1,
+            2
+          ],
+          "allocated_bytes_histogram": {
+            "1552": 128
+          }
+        },
+        "median_change_percent": 2.44383343583805
+      }
+    ]
+  },
+  "rejected_prototype_record": "pixel-row-rejected-prototype-20261107.json",
+  "quality_record": "pixel-row-quality-20261107.json"
+}

@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "description": "Common baseline/candidate runtime files for all four rejected prototypes and the selected native sequence; Rendering.dll identities are recorded separately.",
+  "files": [
+    {
+      "path": "LibTessDotNet.Double.dll",
+      "bytes": 36864,
+      "sha256": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a"
+    },
+    {
+      "path": "LibTessDotNet.dll",
+      "bytes": 35840,
+      "sha256": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921"
+    },
+    {
+      "path": "Microsoft.DotNet.PlatformAbstractions.dll",
+      "bytes": 23424,
+      "sha256": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3"
+    },
+    {
+      "path": "Microsoft.Extensions.DependencyModel.dll",
+      "bytes": 75888,
+      "sha256": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078"
+    },
+    {
+      "path": "PixelMap.Data.dll",
+      "bytes": 3159040,
+      "sha256": "3b2ad91eac25c56fab85a8c7b5aab0ce202461303809c19bf2ef8d0045974a0e"
+    },
+    {
+      "path": "PixelMap.Data.pdb",
+      "bytes": 29364,
+      "sha256": "652c4ef2231c3592419cce7931f72c73228c454b557f9d1d26fbcfb4e9dff9b7"
+    },
+    {
+      "path": "PixelMap.Rendering.Tests",
+      "bytes": 78192,
+      "sha256": "3d9c678caec05a5349970fd5d6152b849368adb1666fa0ec4daec9de5d607751"
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.deps.json",
+      "bytes": 10690,
+      "sha256": "0edc31e57ad5b7a1db378b769291ca0163c34b1c1eadacbfbdd760c2ed21daa0"
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.dll",
+      "bytes": 537600,
+      "sha256": "cc20781647b5a8ac709dfc3b0c6afd5a0be53512980eb00acd2e238cbd1fa977"
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.pdb",
+      "bytes": 122344,
+      "sha256": "8d56513fac4091af616130067961e5d1026dc24305f96a4a4adeffe8e1bc78cd"
+    },
+    {
+      "path": "PixelMap.Rendering.Tests.runtimeconfig.json",
+      "bytes": 330,
+      "sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f"
+    },
+    {
+      "path": "PixelMap.Rendering.pdb",
+      "bytes": 109976,
+      "sha256": "f106c7f160ad6511583b54e93fe9ebba575f80e7765623ee38c743816aad609e"
+    },
+    {
+      "path": "PixelMap.Routing.dll",
+      "bytes": 76288,
+      "sha256": "611e1cb3bdc18b3a7d178635c3d2d5a4ac63fc682b420c14efa2b099f6f277d6"
+    },
+    {
+      "path": "PixelMap.Routing.pdb",
+      "bytes": 23792,
+      "sha256": "f14f3199c2f31643cb3f1acd6d22403f73d247dce227cd0762f58e3f0fe47dd5"
+    },
+    {
+      "path": "Silk.NET.Core.dll",
+      "bytes": 134088,
+      "sha256": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73"
+    },
+    {
+      "path": "Silk.NET.Maths.dll",
+      "bytes": 341448,
+      "sha256": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2"
+    },
+    {
+      "path": "Silk.NET.OpenGL.dll",
+      "bytes": 2798536,
+      "sha256": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded"
+    },
+    {
+      "path": "SkiaSharp.dll",
+      "bytes": 490016,
+      "sha256": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540"
+    },
+    {
+      "path": "runtimes/linux-arm/native/libSkiaSharp.so",
+      "bytes": 8321144,
+      "sha256": "0a7a1e605f4e210068970f3bc91cbf780f87689ca36c50764d0ecb2c1854d398"
+    },
+    {
+      "path": "runtimes/linux-arm64/native/libSkiaSharp.so",
+      "bytes": 11292808,
+      "sha256": "8adc84fa17c497c2e59efcd60e04cc4840e75959669dabb52555d3730d0b140d"
+    },
+    {
+      "path": "runtimes/linux-loongarch64/native/libSkiaSharp.so",
+      "bytes": 10987880,
+      "sha256": "c64076022dee01a1089c5de7199dc9a2b0c42bf74816b238ace45486c7e9ad17"
+    },
+    {
+      "path": "runtimes/linux-musl-arm/native/libSkiaSharp.so",
+      "bytes": 14668640,
+      "sha256": "d340a9b6d35c3d6ac44402441e23e3aa30cc1d1b4a3f7bf298aaffc9916f4632"
+    },
+    {
+      "path": "runtimes/linux-musl-arm64/native/libSkiaSharp.so",
+      "bytes": 18551912,
+      "sha256": "40f4e889a2694397d289e93148c03f06bbde0e398458814068ed85ee287002fb"
+    },
+    {
+      "path": "runtimes/linux-musl-loongarch64/native/libSkiaSharp.so",
+      "bytes": 11911400,
+      "sha256": "b0edf27e6fd55a7ad38694896d891f96e9ef4538b38af48cd4fdc6020f25655c"
+    },
+    {
+      "path": "runtimes/linux-musl-riscv64/native/libSkiaSharp.so",
+      "bytes": 9978144,
+      "sha256": "1874a97cd04ad501ded373f60b830e6ec2ef1b6d68e889f264e92961a7a412c8"
+    },
+    {
+      "path": "runtimes/linux-musl-x64/native/libSkiaSharp.so",
+      "bytes": 18455312,
+      "sha256": "b8e9c3cbd4073cc3fb176a56d293d37a990c21ce1987bf0be6c6f02868e51e9e"
+    },
+    {
+      "path": "runtimes/linux-riscv64/native/libSkiaSharp.so",
+      "bytes": 9033440,
+      "sha256": "28e4dbe2729dfbc0a26cf94de002fd8c856038d5131e27edde657d99649300b0"
+    },
+    {
+      "path": "runtimes/linux-x64/native/libSkiaSharp.so",
+      "bytes": 11178144,
+      "sha256": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387"
+    },
+    {
+      "path": "runtimes/linux-x86/native/libSkiaSharp.so",
+      "bytes": 10803432,
+      "sha256": "75d904907f6ec5853daeffc5c542ba07e6425494f6aa8be8b32e4b2eafc134d0"
+    },
+    {
+      "path": "runtimes/osx/native/libSkiaSharp.dylib",
+      "bytes": 15383440,
+      "sha256": "f0db1a978ba6568b6a99c79afacc74dfd988b81d3e06ae703832f3dd1eee5d0b"
+    },
+    {
+      "path": "runtimes/win-arm64/native/libSkiaSharp.dll",
+      "bytes": 10408992,
+      "sha256": "a6a09d02db0fe21148369b8bf0a9b44aa165c7ec4ea97c2de8ac706ac113f389"
+    },
+    {
+      "path": "runtimes/win-arm64/native/libSkiaSharp.pdb",
+      "bytes": 84815872,
+      "sha256": "a439e0afbcb08786b16fdf3c3049866191a705fb7d1d4b95cb01e7cccbc9e2d1"
+    },
+    {
+      "path": "runtimes/win-x64/native/libSkiaSharp.dll",
+      "bytes": 11611680,
+      "sha256": "8b097d433db94fe61aba85213184938fb36118afd542d33252dd83794fdd9afc"
+    },
+    {
+      "path": "runtimes/win-x64/native/libSkiaSharp.pdb",
+      "bytes": 83832832,
+      "sha256": "f1c1354dd1cccc001247d6fa5515600b09e4cb70ff6d01d60e593ee67f337b89"
+    },
+    {
+      "path": "runtimes/win-x86/native/libSkiaSharp.dll",
+      "bytes": 10101792,
+      "sha256": "0a8a5ce7f24837d78b622b123eff0956bdd81437d7aa8554cb1282d4eae186b0"
+    },
+    {
+      "path": "runtimes/win-x86/native/libSkiaSharp.pdb",
+      "bytes": 86552576,
+      "sha256": "950e882d4277de2cacae5a6ab6b185306290e4a1e16d276c108c71c8e1bba891"
+    }
+  ]
+}

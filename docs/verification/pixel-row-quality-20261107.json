@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "audited_utc": "2026-11-07T20:45:50.101035+00:00",
+  "scope": "Image and analytical-quality preservation for the final CPU prepared-row helper. GPU submission timings in the functional capture reports are excluded from performance claims.",
+  "baseline_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "renderer_sha256": {
+    "baseline": "e735501e4057549bd7e3fdf058f3b9fe2d4fcaaf389295f749b4a051e9a6c9a3",
+    "candidate": "ea5ba63b56be5ecdece04fbf7914f74c3fdac89acffcbc1623c18e965e760929"
+  },
+  "source_identity": {
+    "src/PixelMap.Rendering/PixelWindowFilter.cs": {
+      "baseline": {
+        "sha256": "16c59e2a1c0e8874daab32e52cbb4fe97011bda07906ba101d6a58df0c09ebfe",
+        "git_blob_sha1": "a212fc3469eb1676ffb7ceba0cc1b732e3c87284",
+        "bytes": 10947
+      },
+      "candidate": {
+        "sha256": "140d0074aa26cc36a15e8b6677cdc12c6803a4cf57027b2f72543626235fb1c8",
+        "git_blob_sha1": "4442c68611de666f1a205a21920737ad38112e82",
+        "bytes": 15610
+      },
+      "matches_working_tree_at_audit": true
+    },
+    "src/PixelMap.Rendering/BuildingRasterizer.Perspective.cs": {
+      "baseline": {
+        "sha256": "469d0c37018f142cb2b79b39e685f87c8657293d3ab8b036dac5d620b8e61c54",
+        "git_blob_sha1": "6f8b63d4a3c7b593c07ad3ba9e9e8ac102eac039",
+        "bytes": 27069
+      },
+      "candidate": {
+        "sha256": "01452190a35c2a42d78ccf87d6247bd9186cb91c43e54d3a92f5b639b5a4ce22",
+        "git_blob_sha1": "4461d0adef30c3f11212f3f1de5265353a2c7385",
+        "bytes": 28686
+      },
+      "matches_working_tree_at_audit": true
+    },
+    "tests/PixelMap.Rendering.Tests/PixelWindowColorChecks.cs": {
+      "baseline": {
+        "sha256": "f7d4afc4e55e515ebb5e62206420dad5fad474628850de5d8e3914427eb54893",
+        "git_blob_sha1": "93ad5673c98b157eb645182d26ba09809f5cfd2c",
+        "bytes": 2901
+      },
+      "candidate": {
+        "sha256": "733c1b3a1fe2e1b2c9b2c4ee82f214ad4c70e864d2bebce035a84e823dc96f92",
+        "git_blob_sha1": "ed260ca6fe886ee55a65099db7db2c98416aea12",
+        "bytes": 5010
+      },
+      "matches_working_tree_at_audit": true
+    }
+  },
+  "capture": {
+    "Context": "EGL 1.5, OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1, Mesa, llvmpipe (LLVM 19.1.7, 256 bits)",
+    "Reference": "Box average of 4x4 art samples from the unchanged Normal fa\u00e7ade shader; central-left 64x72 art-pixel wall crop, excluding sky and geometric silhouettes. Timings measure warm GL submission plus completion, excluding preparation and readback.",
+    "Width": 768,
+    "Height": 576,
+    "PixelSize": 4,
+    "Phases": 16
+  },
+  "raw_artifacts": {
+    "baseline": {
+      "path_at_measurement": "pixel-row-baseline-quality/pixel-windows.json",
+      "sha256": "42ee3c8de65119fa04669bc9ad8875488cfc0b5ba5ca24cbf011563748446c15",
+      "bytes": 24667
+    },
+    "candidate": {
+      "path_at_measurement": "pixel-row-helper-quality/pixel-windows.json",
+      "sha256": "b2628a3f19752874e1eb4a917afd1e50aac1bfc8e206bc52982d5254c5a466d8",
+      "bytes": 24668
+    },
+    "producer_audit": {
+      "path_at_measurement": "pixel-row-helper-quality-audit.json",
+      "sha256": "d3f6fc9012e5507ae506683b923993f6b068f2dfb3c47a93c3fbfb9f36ff78f0",
+      "bytes": 25978
+    }
+  },
+  "audit": {
+    "result_pairs": 8,
+    "cpu_phase_hash_pairs": 128,
+    "gpu_phase_hash_pairs": 128,
+    "all_non_timing_result_fields_equal": true,
+    "decoded_png_pairs_checked": 24,
+    "all_png_bytes_and_decoded_rgba_hashes_equal": true,
+    "quality_metrics_recomputed_from_pixels": false,
+    "limitation": "Spatial/temporal metrics and phase hashes were compared exactly between complete raw reports; the 24 phase-zero PNG pairs were independently decoded and hashed. Other phase images were not rerendered during audit."
+  },
+  "reported_functional_gates": {
+    "scalar_random_comparisons": 65536,
+    "scalar_reused_row_comparisons": 222912,
+    "footprint_accumulated_samples": 405674,
+    "nearby_cpu_images": 32,
+    "analytical_window_intersections": 4096,
+    "resolved_scalar_samples": 2048
+  },
+  "gate_scope": "These functional pass counts are producer-reported from focused compiled tests; this audit independently verifies source identities and preserved quality outputs and does not rerun those tests.",
+  "hash_csv": {
+    "file": "pixel-row-image-hashes-20261107.csv",
+    "sha256": "848f838dbd1e3727ab02dc7bbc300cb95824120ad4481b597d3ed98a60e01960",
+    "quality_rows": 256
+  },
+  "metrics": [
+    {
+      "Name": "near",
+      "Palette": 0,
+      "Distance": 64,
+      "Bearing": 0,
+      "ReferenceError": 4.3579222946243314,
+      "MeanLuminanceError": 0.25988139919704895,
+      "TemporalError": 3.8530973241273743,
+      "CpuGpuError": 0,
+      "FirstFrameHash": "574D297D7D1A7411322A7C67084DF8CA3C3D240EEA896BF7A17BA2E7185E110F",
+      "ReferenceHash": "10EA6BA439235B38B2E7C0AC7259D1DD0004075821A1FA6FE2BB87B2A5474D58"
+    },
+    {
+      "Name": "distant",
+      "Palette": 0,
+      "Distance": 320,
+      "Bearing": 0,
+      "ReferenceError": 2.0267054307587795,
+      "MeanLuminanceError": 0.012869995117187541,
+      "TemporalError": 1.9617865043322749,
+      "CpuGpuError": 0.004105179398148148,
+      "FirstFrameHash": "7745A2FC0F614B818F34E114851CBC260C4DAA31BE8D10AE7D9871D0D4185DCC",
+      "ReferenceHash": "A76381DA2F65343C01361E7550D3E4AD6B9DF24EB3F52DE7273BC6C3179CDED7"
+    },
+    {
+      "Name": "grazing",
+      "Palette": 0,
+      "Distance": 160,
+      "Bearing": 75,
+      "ReferenceError": 4.126736293705881,
+      "MeanLuminanceError": 0.0573787163628474,
+      "TemporalError": 4.772769197246519,
+      "CpuGpuError": 0.0030110677083333335,
+      "FirstFrameHash": "491216D2DDE1EF004E1AB2EE9AF60A834A6D2FDAABE8BD7852237E8F417F4B7F",
+      "ReferenceHash": "47335787D3D216D46F2F109E06CC9F0153B11076FE84ADE098BA306B742B2067"
+    },
+    {
+      "Name": "far",
+      "Palette": 0,
+      "Distance": 720,
+      "Bearing": 20,
+      "ReferenceError": 2.7186128038499606,
+      "MeanLuminanceError": 0.03449080132378492,
+      "TemporalError": 2.0859509018966524,
+      "CpuGpuError": 0.016515661168981483,
+      "FirstFrameHash": "8623425D4977C65C50EE856C660EED04C0B59DE79196B5A976E64D94160AE247",
+      "ReferenceHash": "06793AB9E061020657AD6B3668D6AA8730FD67FE20CA409466C3AAC503CA4A6E"
+    },
+    {
+      "Name": "near",
+      "Palette": 2,
+      "Distance": 64,
+      "Bearing": 0,
+      "ReferenceError": 8.607058560705799,
+      "MeanLuminanceError": 0.9669009412977433,
+      "TemporalError": 7.272213137143124,
+      "CpuGpuError": 0,
+      "FirstFrameHash": "79E0AA4D40BD18314D0C883CC78D5608040C83E8D91A837A517759CEB6251C02",
+      "ReferenceHash": "0DE717C0364947EBFFCEF6087943D16ABB4A4F85E993D10180F037C7853167FF"
+    },
+    {
+      "Name": "distant",
+      "Palette": 2,
+      "Distance": 320,
+      "Bearing": 0,
+      "ReferenceError": 4.649789962369816,
+      "MeanLuminanceError": 0.08762331271701339,
+      "TemporalError": 4.532158540248854,
+      "CpuGpuError": 0.009629991319444444,
+      "FirstFrameHash": "8A7C06BB2505A9C69F74EF2F8168B7A160079DBD02E894D6862490357BE82284",
+      "ReferenceHash": "60F30FFF028EE7FF1953DC1DAC363962FEA18AAF6B8F3679595B06B56D236B5C"
+    },
+    {
+      "Name": "grazing",
+      "Palette": 2,
+      "Distance": 160,
+      "Bearing": 75,
+      "ReferenceError": 8.973719022894123,
+      "MeanLuminanceError": 0.2202323432074656,
+      "TemporalError": 10.2394708887613,
+      "CpuGpuError": 0.005429868344907407,
+      "FirstFrameHash": "46274AB8E0F6FA2F052EED6327720F9CDE41CE3F6EFACBD28B1AB3B6ADBE0A91",
+      "ReferenceHash": "562B3B889724C86EC697D822B8330AFC0C634FF7D98B03D404870615D8505CD3"
+    },
+    {
+      "Name": "far",
+      "Palette": 2,
+      "Distance": 720,
+      "Bearing": 20,
+      "ReferenceError": 6.754086527687913,
+      "MeanLuminanceError": 0.15310004069010316,
+      "TemporalError": 4.652988179322357,
+      "CpuGpuError": 0.050568757233796294,
+      "FirstFrameHash": "E7544C84AED21CDBFB9CCACF36175C0D229C1EF7B71FA68B466630665C42D575",
+      "ReferenceHash": "D853AFAF5ED2E0DC11243822A2E934B11D590B7B3E68105600291904A5FBE4D5"
+    }
+  ],
+  "phase_zero_pngs": [
+    {
+      "file": "near-Day.png",
+      "encoded_png_sha256": "70509ee15cd7ff1de197fc5c60cbfc4c5958acc948777d7d2c1066fe1c4e1d62",
+      "decoded_rgba_sha256": "574d297d7d1a7411322a7c67084df8ca3c3d240eea896bf7a17ba2e7185e110f"
+    },
+    {
+      "file": "near-Day-cpu.png",
+      "encoded_png_sha256": "70509ee15cd7ff1de197fc5c60cbfc4c5958acc948777d7d2c1066fe1c4e1d62",
+      "decoded_rgba_sha256": "574d297d7d1a7411322a7c67084df8ca3c3d240eea896bf7a17ba2e7185e110f"
+    },
+    {
+      "file": "near-Day-reference.png",
+      "encoded_png_sha256": "fd61a95b80e925734ffc270e0996ba641cf9fada7cef3ba756581121b7a21588",
+      "decoded_rgba_sha256": "10ea6ba439235b38b2e7c0ac7259d1dd0004075821a1fa6fe2bb87b2a5474d58"
+    },
+    {
+      "file": "distant-Day.png",
+      "encoded_png_sha256": "4b05d7818e7fd4135440b01ae43b5f9acb308cc6fb3482edb0e66e44456f68f2",
+      "decoded_rgba_sha256": "7745a2fc0f614b818f34e114851cbc260c4daa31be8d10ae7d9871d0d4185dcc"
+    },
+    {
+      "file": "distant-Day-cpu.png",
+      "encoded_png_sha256": "f0f24d2add87e0821788d9942b892189c76528819e2af457adc80388ffa14435",
+      "decoded_rgba_sha256": "8d43f3c62be4531bf5bb68bade15468356bd7c61383a296fbf76b138ae77f7d6"
+    },
+    {
+      "file": "distant-Day-reference.png",
+      "encoded_png_sha256": "9bb8d4215c7910ef586b3d812505e9fb711bef883f748a1e3153abc2707849b0",
+      "decoded_rgba_sha256": "a76381da2f65343c01361e7550d3e4ad6b9df24eb3f52de7273bc6c3179cded7"
+    },
+    {
+      "file": "grazing-Day.png",
+      "encoded_png_sha256": "a69ca5c3871e49e68a27d55daab98e45840c6d94efb08200f7aa3ee8ff010820",
+      "decoded_rgba_sha256": "491216d2dde1ef004e1ab2ee9af60a834a6d2fdaabe8bd7852237e8f417f4b7f"
+    },
+    {
+      "file": "grazing-Day-cpu.png",
+      "encoded_png_sha256": "612ea701b271da69a72e468befeb899007eac4f63c653bd45191a0b28794a453",
+      "decoded_rgba_sha256": "512c439c157c5a609ff99ad3b71e5e1a074eab4d2cb9207099e1e0f46784fdbf"
+    },
+    {
+      "file": "grazing-Day-reference.png",
+      "encoded_png_sha256": "f3d8ada65e1f97253aa592ab4ebf8e7de7ccd4a227affa4fa44c87132f88f03c",
+      "decoded_rgba_sha256": "47335787d3d216d46f2f109e06cc9f0153b11076fe84ade098ba306b742b2067"
+    },
+    {
+      "file": "far-Day.png",
+      "encoded_png_sha256": "62e61b12706a27a6ecbc320c85610b26b5626cedced876788b0b47352358b9dd",
+      "decoded_rgba_sha256": "8623425d4977c65c50ee856c660eed04c0b59de79196b5a976e64d94160ae247"
+    },
+    {
+      "file": "far-Day-cpu.png",
+      "encoded_png_sha256": "f895b5937e57dd323f05f8d1bff4ccea330383a573da773121807c08d67b5ddf",
+      "decoded_rgba_sha256": "f33be13b7f203b8eaf185b2df138f4b5b0761c918c61b2d28425147d4f25d378"
+    },
+    {
+      "file": "far-Day-reference.png",
+      "encoded_png_sha256": "bb23c8d2209dde8d26858fdd646c20fc99bfaed10e62392912de1d32ba84fe11",
+      "decoded_rgba_sha256": "06793ab9e061020657ad6b3668d6aa8730fd67fe20ca409466c3aac503ca4a6e"
+    },
+    {
+      "file": "near-Night.png",
+      "encoded_png_sha256": "532f54afce73a20b199f52b9c55956d91c127b95518cfb05f246eeb03fda104b",
+      "decoded_rgba_sha256": "79e0aa4d40bd18314d0c883cc78d5608040c83e8d91a837a517759ceb6251c02"
+    },
+    {
+      "file": "near-Night-cpu.png",
+      "encoded_png_sha256": "532f54afce73a20b199f52b9c55956d91c127b95518cfb05f246eeb03fda104b",
+      "decoded_rgba_sha256": "79e0aa4d40bd18314d0c883cc78d5608040c83e8d91a837a517759ceb6251c02"
+    },
+    {
+      "file": "near-Night-reference.png",
+      "encoded_png_sha256": "06eb68d0b4d3e0ddaf02758182aa655d80c1a943ce0e9deee0d125d6b88f0b11",
+      "decoded_rgba_sha256": "0de717c0364947ebffcef6087943d16abb4a4f85e993d10180f037c7853167ff"
+    },
+    {
+      "file": "distant-Night.png",
+      "encoded_png_sha256": "73b4ed0c79f57855e585f655acbd7f74974e643c7ea8c8aaea22bfb10426c436",
+      "decoded_rgba_sha256": "8a7c06bb2505a9c69f74ef2f8168b7a160079dbd02e894d6862490357be82284"
+    },
+    {
+      "file": "distant-Night-cpu.png",
+      "encoded_png_sha256": "b04792f7301309c17c8922e154170f638cc4cfe1f74d1a27ebb7021e65288e21",
+      "decoded_rgba_sha256": "de5ebaf7550c698fba118187cc09d3f5154312b1b0f2b6a1316e8dc3d6d635de"
+    },
+    {
+      "file": "distant-Night-reference.png",
+      "encoded_png_sha256": "161fcef535e32920fbf88590e28d493d81bde2589de5a23c61139ed8c2f04180",
+      "decoded_rgba_sha256": "60f30fff028ee7ff1953dc1dac363962fea18aaf6b8f3679595b06b56d236b5c"
+    },
+    {
+      "file": "grazing-Night.png",
+      "encoded_png_sha256": "aa6132c97c84e38ff460e7e900c20412b6a26acec1e131308155b00036fb01f5",
+      "decoded_rgba_sha256": "46274ab8e0f6fa2f052eed6327720f9cde41ce3f6efacbd28b1ab3b6adbe0a91"
+    },
+    {
+      "file": "grazing-Night-cpu.png",
+      "encoded_png_sha256": "3bc9b0ec60c1852aee9c171f95c1f1943106ef8b550a3a12cbb0f77b0653beba",
+      "decoded_rgba_sha256": "f0157ccbeed7f609673b3dd448d2517bddd12e008442371b8199870807e45459"
+    },
+    {
+      "file": "grazing-Night-reference.png",
+      "encoded_png_sha256": "7ebce434e570a0d9c5513a21ea0fddabbc5777d6c3e9df3f43349f47ec45703d",
+      "decoded_rgba_sha256": "562b3b889724c86ec697d822b8330afc0c634ff7d98b03d404870615d8505cd3"
+    },
+    {
+      "file": "far-Night.png",
+      "encoded_png_sha256": "17ed72f42d70d1fd2735392af826905cc2bd11825d739a1e01e63a47372778a2",
+      "decoded_rgba_sha256": "e7544c84aed21cdbfb9ccacf36175c0d229c1ef7b71fa68b466630665c42d575"
+    },
+    {
+      "file": "far-Night-cpu.png",
+      "encoded_png_sha256": "56e938b99df2600ccf9996cbf9173c0978d703c31b1d53d236cc67db25d2a858",
+      "decoded_rgba_sha256": "53c61ecb5602d5eddb8625e833f4d790c720a22bf31dd95cd85efc58e10bbb44"
+    },
+    {
+      "file": "far-Night-reference.png",
+      "encoded_png_sha256": "5657b2d0bbd5dc59d5cd0df8559650fb84183b975e1cb0f71734da26d5cca29f",
+      "decoded_rgba_sha256": "d853afaf5ed2e0dc11243822a2e934b11d590b7b3e68105600291904a5fbe4d5"
+    }
+  ]
+}
