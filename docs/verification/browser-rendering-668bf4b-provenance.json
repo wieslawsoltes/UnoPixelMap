@@ -1,0 +1,4020 @@
+{
+  "schema_version": 1,
+  "stage": "Application source 668bf4b was measured against the original deployed baseline. Test-only source 9171e95 has the identical application src tree and passed Release CI, complete Chromium verification and Pages deployment. Its subsequent live online close-camera validation failed with a native Skia allocation abort, so the release is not accepted. Successful CI/deployment facts, measured and deployed artifact identities, and the separate live failure are retained without relabeling the measurements.",
+  "measurement_artifact": {
+    "id": 13573165547,
+    "name": "atlas-play-performance",
+    "size_in_bytes": 5940714,
+    "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13573165547",
+    "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13573165547/zip",
+    "expired": false,
+    "created_at": "2026-11-07T11:33:48Z",
+    "expires_at": "2026-12-07T11:33:46Z",
+    "updated_at": "2026-11-07T11:33:48Z",
+    "digest": "sha256:a92b726bad712673e11abbb3d1f0d9ed982cf497204fce899f1777c6900cd676",
+    "workflow_run": {
+      "id": 42366657287,
+      "repository_id": 1443492055,
+      "head_repository_id": 1443492055,
+      "head_branch": "main",
+      "head_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f"
+    }
+  },
+  "provenance": {
+    "baseline_selection": {
+      "source": "commit-marker",
+      "requested_run_id": 42300149918,
+      "workflow_input": null,
+      "commit_marker": "42300149918",
+      "resolved_run_id": 42300149918
+    },
+    "baseline": {
+      "run_id": 42300149918,
+      "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42300149918",
+      "artifact_id": 13543114803,
+      "artifact_digest": "sha256:7ccce72bc8c2ae046377824d8606b977a533ea325da7978ee8e41a3b9a28c58d",
+      "artifact_size_bytes": 88312197,
+      "runtime_mode": "InterpreterAndAOT",
+      "resources": [
+        {
+          "group": "jsModuleNative",
+          "name": "dotnet.native.nz766qomp0.js",
+          "sha256": "0d24514a156c1b16bef4fffbceff8b861399140c3e2892150adf2d8611cf6528"
+        },
+        {
+          "group": "jsModuleRuntime",
+          "name": "dotnet.runtime.5nc8i5dl74.js",
+          "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d"
+        },
+        {
+          "group": "wasmNative",
+          "name": "dotnet.native.5hk7zno2rb.wasm",
+          "sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_CJK.tjcz0u77k5.dat",
+          "sha256": "4992ed42745cd09930a8769bd155153fb4f7b813d2798cf1cc39e9c4fa549c79"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_EFIGS.tptq2av103.dat",
+          "sha256": "f1f22d7ad618f24434c30ea8c704cb893de85e50701caba66de3f6a51178c937"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_no_CJK.lfu7j35m59.dat",
+          "sha256": "2fbb15ecd1183f7eff42bd853c278fa39709a918135d1c061eec05e50fb435fb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "CommonServiceLocator.ukyzr3es9y.wasm",
+          "sha256": "329f6f7c3651c3118f398f95dbef3e7f491b1340359eb8a79faf0e9197fac208"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "HarfBuzzSharp.lwf1lgi861.wasm",
+          "sha256": "3b646f6e48032206a913f499fe461b98795c4b94cd75ad823731054b822fc731"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "LibTessDotNet.crzkfkf89i.wasm",
+          "sha256": "082149dde1c08d7c54870523d654106d328324a3dc6c639437511cb75edbe7f5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.Abstractions.mpr032n10k.wasm",
+          "sha256": "b69874361df91da4f3a22acefdcd8f3730160dcb1859eaa440767dafcbf2ba4d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.qmh9uu1lj0.wasm",
+          "sha256": "7ed83b989a8094f8fd109d2e280658a4bfe6db756b1d8c988c40fac1fbe81e92"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Options.g14ttqkiwj.wasm",
+          "sha256": "b45eda73d20aca050e34ae2695375a3b5e114d6c280aa1cc872b911b9e401038"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.App.hmdoxrl3lm.wasm",
+          "sha256": "07887d1aca63ac86f1b4d91e31da15bd921a6e72381f0a5079ef7b48043c129c"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Audio.759xh6x41p.wasm",
+          "sha256": "75bab56e2f992640eeee3cd611dbc2a80c819fb337de7e2a3ef3690d2d5797a3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Controls.yf2797teu8.wasm",
+          "sha256": "1e7d70284e9d17c264eca4266bdc1e9390c167300ed62589d4836c3693318bb7"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Data.jdxc8dm0ot.wasm",
+          "sha256": "0910d85a276a43a5d27cc1610945bc8d890f5083a28b8a53900bb58b79511132"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Rendering.33udvica83.wasm",
+          "sha256": "8f205b0471d9e8901adb254be2340297ac5ec54927c1a5b398bbe8020f7d010e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Routing.pceqhs92wa.wasm",
+          "sha256": "297c6c35d85910e54ff85ab6f290e1fe437f87b0d57ea7d3e8d76cf90cf32290"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Simulation.rhwjygc64b.wasm",
+          "sha256": "3f0dfad4dfd5f13567d483380833344778437b5d002b9778aaec6440a3eed907"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.Core.irny1tzrsi.wasm",
+          "sha256": "ced1ea04885913057f48865cd0aa4b4041ba8eda9e75e310e31c5687060327d8"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.OpenGL.oqaey3i54h.wasm",
+          "sha256": "e0db2f0b3f446bcb3c9daa3fe6b48d719e4c07aff1c4976ef479bec718b16411"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+          "sha256": "3330bc28a3f1c22072d7ca8ec3aca5e68a42f6774d9bd7bcd575c3b539bb67d2"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+          "sha256": "83a0935a743e40eb8ea87daded2abd8a765855a37b20e08eb399fd78928cd17c"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+          "sha256": "8bec56cec65707287a4d7a1473c9fa0a91b24b1f36ff4c1d85523c7efe97019f"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.6bzq5bigir.wasm",
+          "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Concurrent.ajnvvkksra.wasm",
+          "sha256": "e617759820fe62f1694633f132ec7a59cd08255f0c912804e15b9e84cd110dd1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Immutable.rqpx5bg4jl.wasm",
+          "sha256": "6dcef119932aa14daf126b20b24b43518682c3329e1142dca954f132c7ee0317"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.NonGeneric.kkxpvokdtg.wasm",
+          "sha256": "34d56f8fdb74a452306948f7598cdc3ea745c0da6076ef1de306f4ec2dbce64e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Specialized.j3sjtyx29u.wasm",
+          "sha256": "0156b2f518bc6f339d8d55feb99a95c9156f7d7f1a81e8307fe6a8e645b547bf"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.vcygonji41.wasm",
+          "sha256": "116a113890f40036d6c8f2f1818cb8de215a4cde4cd2215737b4066e8e4938c3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.g3pwvcjcrg.wasm",
+          "sha256": "f459ba180c859a26f524ba65827066a70b9affe548e5de42c0b89cb1db846b55"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.Primitives.t2v0oareoy.wasm",
+          "sha256": "554d3049cd02483d27d963b45681035a4244fdbf327fe910ce6fdaf8a7cf6221"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.TypeConverter.2acv8geycx.wasm",
+          "sha256": "eaf7747eeba897fb131bc4a00557425335dc53b711875ea1974094730b9106b6"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Console.8asle477ur.wasm",
+          "sha256": "7010e8671ead33807e1d63efc3af5a5b801fba280eb2cdde2d20143e050c36f3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.Primitives.nn7jqfbl79.wasm",
+          "sha256": "7d6cfcf6af203d16c1e896264ae07395782c4a4e59d2bc6f01685efc70d5fddc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.nxsyxvwmnf.wasm",
+          "sha256": "fbe3be42f3ae0a9641a516c2490147c20b2c0abd4bee59a015221bdadd1f4a47"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Compression.t357pfbby0.wasm",
+          "sha256": "672586bcafa825d9a73bfe5f750eb8750623ef7d1d6c5d54da7b57b4c0d5ab0d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Pipelines.bs0ouzxqxi.wasm",
+          "sha256": "050ccde057a06086e4b69b83fd06bc8f47ebb633f577795564cbb38a17267338"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.Expressions.7zweb26hu8.wasm",
+          "sha256": "8d8eabb9a9d4c623e818ee9067b0a5710b89c69e8d4d3102346b072ac30fd364"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.q457punoy8.wasm",
+          "sha256": "ba76376857e644ce76008f0ff4d3c0d41d11685768a302a39175cf52c4fa44e1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Memory.2acfgvgghp.wasm",
+          "sha256": "ead7a8eed580f4f1556448d0ddc7fbb2eb408d9e638d60ef7d6032e74e437b64"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Http.5jkdru1ctm.wasm",
+          "sha256": "31ec0be616b394a143a1d6eefd88e7028ed0a82ff64c5a10d3ebfd908a81650a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Primitives.wr5ku4tjce.wasm",
+          "sha256": "3c58c1da45d55b0d08af9cdf8f1d298b3781e3108936c145c9e503095b33562b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ObjectModel.av0m9ib997.wasm",
+          "sha256": "e6cef0c31897e62d519f27229adc1484b32cd51faf8c4de76f4015742ce02afa"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.CoreLib.1057lq6w8n.wasm",
+          "sha256": "efad059d6747765ae5fbbce88460c69a1c8dfde311a608c10f168c7322a69002"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Uri.nmnyz2eidv.wasm",
+          "sha256": "1f57dbf1a140f1b0759fb1a85e283143bfdec024197f4b7c7c5d7682557831f1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Xml.x61a4mvfse.wasm",
+          "sha256": "778f5be3f71adaf091aa2f4f95ceb178756fc6da1a6125211ca9a1c20ba6f9ab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Runtime.InteropServices.JavaScript.wjudxd2z05.wasm",
+          "sha256": "142ff9a62a316de9ddaafcb43b80913dc7c7db0a7c96626a124db9ea9738116d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Security.Cryptography.hjdh28m8dh.wasm",
+          "sha256": "cd2013526aad255162483e2f04b1e160480ed035d418e53b87f68e58436dbb22"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Encodings.Web.409810hzt0.wasm",
+          "sha256": "6caf10192a477ab1a4e1a8b94038dc546eaf97137401a4b3a631aee5346c4019"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Json.2m50hjpw08.wasm",
+          "sha256": "6a89fe893fbe127f14346f5bcd5f607dcf278bfc7a93a3e5a90029eda3f82060"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.RegularExpressions.77jjwmegg8.wasm",
+          "sha256": "0d00bd1d87b8e23de4d412a01fb634c520bb448806f506a45e8b48b339200084"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.a3z5tpzyvn.wasm",
+          "sha256": "1ace5b022a74634ed8eeb764e02627a73ac1786a6502e7450042d410b7c1cbcd"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.fmbs8vjlnx.wasm",
+          "sha256": "d77d0f49f7ed269f4695e96a90e32876d52951de359a3bc7f301f3c8aa2e96a3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.tx34v3idjk.wasm",
+          "sha256": "f1b778e5b3f876bc740760449dc7a53b77cfbb78a03c2859922ad3e84c87d0bc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.Singleton.goqx5ykemm.wasm",
+          "sha256": "b04d1b452c9b0b34d6a9da77aaf23928be2139c14f84a24f1f46127c824ea244"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Diagnostics.Eventing.bsz5ci2pgy.wasm",
+          "sha256": "9547bed7d3e2c2aede5c04e506eed66f7ab29316ebc5756e036cf5dc29e1eb75"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Logging.renv1nr86x.wasm",
+          "sha256": "4395972a1ff8e3cd085138146236bd57f1ee922a33de379ffc8d00e3d5486288"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Runtime.WebAssembly.km8s5j6taq.wasm",
+          "sha256": "ac0be8e2f502505553fece7d263bd26c6f309d6b2265edfbc17cdb22fc7d19eb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.vlgc9ffcv7.wasm",
+          "sha256": "1314f7e0992b094d521fa4e3d05f65201e0f71bfc152a8800f9945ac41524527"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+          "sha256": "38e6dc99802d58d0c7896562d0728ca54ff882192c727e3d3ada7e6d00451079"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+          "sha256": "865d99094ccf1a2783b59bcc2b739cc354dee641e81c62047c213c425adfa51e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+          "sha256": "48c9648a0591741d6c8ffa82fb762c9fc24ffbfa6eb79ea7cc5f26882843f583"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+          "sha256": "f7e11c9a2a010cf5e9d498b8b0e107d8b0d63a0c308770023ac20ab7f48dd01a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Lottie.o8obruisre.wasm",
+          "sha256": "78a2dc965e0dbe0335dd2204795d840bb120f2ec295053ac07e15f8ab16a9ef5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+          "sha256": "d765dd49065cffb92d2ab80c36362b98115aab26182cb8b84950180cb26ae385"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+          "sha256": "17f211fb69fe6084a3954bfeb458842f77b2a5b6fe11700f13cfeb2e71d1d79b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+          "sha256": "f90fbdc306d961a83af29cf06e2b6a15c4791ab21148b43e983df91161a97859"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.4m88unnvnt.wasm",
+          "sha256": "9ca7fa14fd307a2c5d4c70919fa54b156aa3e916ae48a81b5b658708454a6fab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics2DSK.kw64qixynf.wasm",
+          "sha256": "f46d25c54ab7cad77f89a51960ad506855d7e52b68dab1ab9004439f9d260784"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics3DGL.f1ii2wdxps.wasm",
+          "sha256": "2d0238035a8d20d282870ae9d90afeb256ea8af9b4f116f1f5f0962ba3d52a38"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Xaml.ddg0hhofs5.wasm",
+          "sha256": "1fd8978cd634488fca207f13d6f64a7868ca4469968699f522a5d3bf7d725a01"
+        }
+      ],
+      "index_sha256": "72f39f24dd6eef71d379e42afddb4303f99be88eedc256d02d3001dd908876c8",
+      "config_sha256": "53739062648e7431ee6b6b69ade22db3c9e7f26acd4e9074ad67ee70d9594ec7",
+      "loader_sha256": "ca9d6075d9b67ddbdf41d95ccbcfd72ce6b6ecdc7c9c52b04eb0a46c48525b63"
+    },
+    "candidate": {
+      "run_id": 42366657287,
+      "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+      "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42366657287",
+      "artifact_id": 13571524430,
+      "artifact_digest": "sha256:fe57ca3bef3e916c020d0ab701e8226665472f466674f6104dbad6397fc4b034",
+      "artifact_size_bytes": 88294808,
+      "runtime_mode": "InterpreterAndAOT",
+      "resources": [
+        {
+          "group": "jsModuleNative",
+          "name": "dotnet.native.tmo31e415o.js",
+          "sha256": "8b473fd368e98adf895746e5131968b6d461fe6aa5823d67037ec7ecc1194bc6"
+        },
+        {
+          "group": "jsModuleRuntime",
+          "name": "dotnet.runtime.5nc8i5dl74.js",
+          "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d"
+        },
+        {
+          "group": "wasmNative",
+          "name": "dotnet.native.6bgcemz0ng.wasm",
+          "sha256": "92f36f73384945b24d2d49aec2a72dca3b022368d6753c1a6f8f1b55caa64fa1"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_CJK.tjcz0u77k5.dat",
+          "sha256": "4992ed42745cd09930a8769bd155153fb4f7b813d2798cf1cc39e9c4fa549c79"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_EFIGS.tptq2av103.dat",
+          "sha256": "f1f22d7ad618f24434c30ea8c704cb893de85e50701caba66de3f6a51178c937"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_no_CJK.lfu7j35m59.dat",
+          "sha256": "2fbb15ecd1183f7eff42bd853c278fa39709a918135d1c061eec05e50fb435fb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "CommonServiceLocator.ukyzr3es9y.wasm",
+          "sha256": "329f6f7c3651c3118f398f95dbef3e7f491b1340359eb8a79faf0e9197fac208"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "HarfBuzzSharp.lwf1lgi861.wasm",
+          "sha256": "3b646f6e48032206a913f499fe461b98795c4b94cd75ad823731054b822fc731"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "LibTessDotNet.crzkfkf89i.wasm",
+          "sha256": "082149dde1c08d7c54870523d654106d328324a3dc6c639437511cb75edbe7f5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.Abstractions.mpr032n10k.wasm",
+          "sha256": "b69874361df91da4f3a22acefdcd8f3730160dcb1859eaa440767dafcbf2ba4d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.qmh9uu1lj0.wasm",
+          "sha256": "7ed83b989a8094f8fd109d2e280658a4bfe6db756b1d8c988c40fac1fbe81e92"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Options.g14ttqkiwj.wasm",
+          "sha256": "b45eda73d20aca050e34ae2695375a3b5e114d6c280aa1cc872b911b9e401038"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.App.41zao64gwa.wasm",
+          "sha256": "28003967c3878ce29154936cb3d433734f18723334ff0eee5e78e9ea0d805545"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Audio.7cm6yt5unp.wasm",
+          "sha256": "977ca28d1aff0ef517a49cfca67b9e2c20951417b4bd93fce26fc6888b79f385"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Controls.hgi6btdfi3.wasm",
+          "sha256": "0f4eb5a99d50f7ddf97400dcf684acfcbf52cbeb301128ba0d68906a4631f798"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Data.lxfxpoz5i6.wasm",
+          "sha256": "e957c839a213deec6ef1d35fa2029c38d55c5e287c9795a12c95b62f50dc2f38"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Rendering.yclxnylhyv.wasm",
+          "sha256": "9e464463887ffa22cca9f942fbed5ab2c27792777da2be80217f4404a7dad4fe"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Routing.muk4knesdn.wasm",
+          "sha256": "8e721330a1ac69211a7183f84ce3636f11344595e3bdfc887b910723e50f9834"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Simulation.8jy45kqvm2.wasm",
+          "sha256": "2c2318ff50deecb0ee5cdad9e827e250f92fa5f11b31cac5f51cf6ec90823c20"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.Core.irny1tzrsi.wasm",
+          "sha256": "ced1ea04885913057f48865cd0aa4b4041ba8eda9e75e310e31c5687060327d8"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.OpenGL.pyabgkja9u.wasm",
+          "sha256": "bf637b3a39c5d52ab8cba2da3c036ddee90689e3cc39db62d76599c307830e9b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+          "sha256": "3330bc28a3f1c22072d7ca8ec3aca5e68a42f6774d9bd7bcd575c3b539bb67d2"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+          "sha256": "83a0935a743e40eb8ea87daded2abd8a765855a37b20e08eb399fd78928cd17c"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+          "sha256": "8bec56cec65707287a4d7a1473c9fa0a91b24b1f36ff4c1d85523c7efe97019f"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.6bzq5bigir.wasm",
+          "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Concurrent.ajnvvkksra.wasm",
+          "sha256": "e617759820fe62f1694633f132ec7a59cd08255f0c912804e15b9e84cd110dd1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Immutable.rqpx5bg4jl.wasm",
+          "sha256": "6dcef119932aa14daf126b20b24b43518682c3329e1142dca954f132c7ee0317"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.NonGeneric.kkxpvokdtg.wasm",
+          "sha256": "34d56f8fdb74a452306948f7598cdc3ea745c0da6076ef1de306f4ec2dbce64e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Specialized.j3sjtyx29u.wasm",
+          "sha256": "0156b2f518bc6f339d8d55feb99a95c9156f7d7f1a81e8307fe6a8e645b547bf"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.vcygonji41.wasm",
+          "sha256": "116a113890f40036d6c8f2f1818cb8de215a4cde4cd2215737b4066e8e4938c3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.g3pwvcjcrg.wasm",
+          "sha256": "f459ba180c859a26f524ba65827066a70b9affe548e5de42c0b89cb1db846b55"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.Primitives.t2v0oareoy.wasm",
+          "sha256": "554d3049cd02483d27d963b45681035a4244fdbf327fe910ce6fdaf8a7cf6221"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.TypeConverter.2acv8geycx.wasm",
+          "sha256": "eaf7747eeba897fb131bc4a00557425335dc53b711875ea1974094730b9106b6"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Console.8asle477ur.wasm",
+          "sha256": "7010e8671ead33807e1d63efc3af5a5b801fba280eb2cdde2d20143e050c36f3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.Primitives.nn7jqfbl79.wasm",
+          "sha256": "7d6cfcf6af203d16c1e896264ae07395782c4a4e59d2bc6f01685efc70d5fddc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.nxsyxvwmnf.wasm",
+          "sha256": "fbe3be42f3ae0a9641a516c2490147c20b2c0abd4bee59a015221bdadd1f4a47"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Compression.t357pfbby0.wasm",
+          "sha256": "672586bcafa825d9a73bfe5f750eb8750623ef7d1d6c5d54da7b57b4c0d5ab0d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Pipelines.bs0ouzxqxi.wasm",
+          "sha256": "050ccde057a06086e4b69b83fd06bc8f47ebb633f577795564cbb38a17267338"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.Expressions.7zweb26hu8.wasm",
+          "sha256": "8d8eabb9a9d4c623e818ee9067b0a5710b89c69e8d4d3102346b072ac30fd364"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.q457punoy8.wasm",
+          "sha256": "ba76376857e644ce76008f0ff4d3c0d41d11685768a302a39175cf52c4fa44e1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Memory.2acfgvgghp.wasm",
+          "sha256": "ead7a8eed580f4f1556448d0ddc7fbb2eb408d9e638d60ef7d6032e74e437b64"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Http.5jkdru1ctm.wasm",
+          "sha256": "31ec0be616b394a143a1d6eefd88e7028ed0a82ff64c5a10d3ebfd908a81650a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Primitives.wr5ku4tjce.wasm",
+          "sha256": "3c58c1da45d55b0d08af9cdf8f1d298b3781e3108936c145c9e503095b33562b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ObjectModel.av0m9ib997.wasm",
+          "sha256": "e6cef0c31897e62d519f27229adc1484b32cd51faf8c4de76f4015742ce02afa"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.CoreLib.0jgd5hx6dl.wasm",
+          "sha256": "14d2d9952efa3823fe7d0ab39f2957dc012aad7031f7862e84cbdb030e73d78b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Uri.nmnyz2eidv.wasm",
+          "sha256": "1f57dbf1a140f1b0759fb1a85e283143bfdec024197f4b7c7c5d7682557831f1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Xml.x61a4mvfse.wasm",
+          "sha256": "778f5be3f71adaf091aa2f4f95ceb178756fc6da1a6125211ca9a1c20ba6f9ab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Runtime.InteropServices.JavaScript.wjudxd2z05.wasm",
+          "sha256": "142ff9a62a316de9ddaafcb43b80913dc7c7db0a7c96626a124db9ea9738116d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Security.Cryptography.hjdh28m8dh.wasm",
+          "sha256": "cd2013526aad255162483e2f04b1e160480ed035d418e53b87f68e58436dbb22"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Encodings.Web.409810hzt0.wasm",
+          "sha256": "6caf10192a477ab1a4e1a8b94038dc546eaf97137401a4b3a631aee5346c4019"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Json.2m50hjpw08.wasm",
+          "sha256": "6a89fe893fbe127f14346f5bcd5f607dcf278bfc7a93a3e5a90029eda3f82060"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.RegularExpressions.77jjwmegg8.wasm",
+          "sha256": "0d00bd1d87b8e23de4d412a01fb634c520bb448806f506a45e8b48b339200084"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.a3z5tpzyvn.wasm",
+          "sha256": "1ace5b022a74634ed8eeb764e02627a73ac1786a6502e7450042d410b7c1cbcd"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.fmbs8vjlnx.wasm",
+          "sha256": "d77d0f49f7ed269f4695e96a90e32876d52951de359a3bc7f301f3c8aa2e96a3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.tx34v3idjk.wasm",
+          "sha256": "f1b778e5b3f876bc740760449dc7a53b77cfbb78a03c2859922ad3e84c87d0bc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.Singleton.goqx5ykemm.wasm",
+          "sha256": "b04d1b452c9b0b34d6a9da77aaf23928be2139c14f84a24f1f46127c824ea244"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Diagnostics.Eventing.bsz5ci2pgy.wasm",
+          "sha256": "9547bed7d3e2c2aede5c04e506eed66f7ab29316ebc5756e036cf5dc29e1eb75"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Logging.renv1nr86x.wasm",
+          "sha256": "4395972a1ff8e3cd085138146236bd57f1ee922a33de379ffc8d00e3d5486288"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Runtime.WebAssembly.km8s5j6taq.wasm",
+          "sha256": "ac0be8e2f502505553fece7d263bd26c6f309d6b2265edfbc17cdb22fc7d19eb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.vlgc9ffcv7.wasm",
+          "sha256": "1314f7e0992b094d521fa4e3d05f65201e0f71bfc152a8800f9945ac41524527"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+          "sha256": "38e6dc99802d58d0c7896562d0728ca54ff882192c727e3d3ada7e6d00451079"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+          "sha256": "865d99094ccf1a2783b59bcc2b739cc354dee641e81c62047c213c425adfa51e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+          "sha256": "48c9648a0591741d6c8ffa82fb762c9fc24ffbfa6eb79ea7cc5f26882843f583"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+          "sha256": "f7e11c9a2a010cf5e9d498b8b0e107d8b0d63a0c308770023ac20ab7f48dd01a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Lottie.o8obruisre.wasm",
+          "sha256": "78a2dc965e0dbe0335dd2204795d840bb120f2ec295053ac07e15f8ab16a9ef5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+          "sha256": "d765dd49065cffb92d2ab80c36362b98115aab26182cb8b84950180cb26ae385"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+          "sha256": "17f211fb69fe6084a3954bfeb458842f77b2a5b6fe11700f13cfeb2e71d1d79b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+          "sha256": "f90fbdc306d961a83af29cf06e2b6a15c4791ab21148b43e983df91161a97859"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.4m88unnvnt.wasm",
+          "sha256": "9ca7fa14fd307a2c5d4c70919fa54b156aa3e916ae48a81b5b658708454a6fab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics2DSK.kw64qixynf.wasm",
+          "sha256": "f46d25c54ab7cad77f89a51960ad506855d7e52b68dab1ab9004439f9d260784"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics3DGL.f1ii2wdxps.wasm",
+          "sha256": "2d0238035a8d20d282870ae9d90afeb256ea8af9b4f116f1f5f0962ba3d52a38"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Xaml.ddg0hhofs5.wasm",
+          "sha256": "1fd8978cd634488fca207f13d6f64a7868ca4469968699f522a5d3bf7d725a01"
+        }
+      ],
+      "index_sha256": "d4f4e22cdcbad489408760d4c29e1d132afb72365415cd0f918b7a9ebb7a86d5",
+      "config_sha256": "4fa222434e1bffd38a933e2a0b726d5d3aa7e8046002e8d15bb69cb3fb31afff",
+      "loader_sha256": "f54b05fd7c3b434388c3360952ff5314a46dbaf6818f292abca178f8185e6131"
+    },
+    "execution": [
+      {
+        "order": 1,
+        "scenario": "map-idle-default",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/map-idle-default/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:18:35.847335+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:18:52.723837+00:00"
+      },
+      {
+        "order": 2,
+        "scenario": "map-idle-default",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/map-idle-default/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:18:52.725282+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:19:07.297333+00:00"
+      },
+      {
+        "order": 3,
+        "scenario": "map-idle-relief",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/map-idle-relief/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:19:07.298782+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:19:37.190380+00:00"
+      },
+      {
+        "order": 4,
+        "scenario": "map-idle-relief",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/map-idle-relief/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:19:37.191726+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:20:08.202905+00:00"
+      },
+      {
+        "order": 5,
+        "scenario": "walk-stationary-firstperson",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/walk-stationary-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:20:08.204394+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:20:42.077768+00:00"
+      },
+      {
+        "order": 6,
+        "scenario": "walk-stationary-firstperson",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/walk-stationary-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:20:42.079150+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:21:16.322153+00:00"
+      },
+      {
+        "order": 7,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/walk-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:21:16.323498+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:21:51.517685+00:00"
+      },
+      {
+        "order": 8,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/walk-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:21:51.519079+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:22:27.112970+00:00"
+      },
+      {
+        "order": 9,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/walk-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:22:27.114445+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:22:52.925805+00:00"
+      },
+      {
+        "order": 10,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/walk-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:22:52.927139+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:23:18.917303+00:00"
+      },
+      {
+        "order": 11,
+        "scenario": "walk-moving-chase",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/walk-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:23:18.918824+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:23:55.564572+00:00"
+      },
+      {
+        "order": 12,
+        "scenario": "walk-moving-chase",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/walk-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:23:55.566090+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:24:32.343748+00:00"
+      },
+      {
+        "order": 13,
+        "scenario": "walk-moving-chase",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/walk-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:24:32.345349+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:25:00.678011+00:00"
+      },
+      {
+        "order": 14,
+        "scenario": "walk-moving-chase",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/walk-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:25:00.679703+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:25:27.585353+00:00"
+      },
+      {
+        "order": 15,
+        "scenario": "car-stationary-chase",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/car-stationary-chase/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:25:27.586761+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:25:55.501463+00:00"
+      },
+      {
+        "order": 16,
+        "scenario": "car-stationary-chase",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/car-stationary-chase/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:25:55.502931+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:26:23.347998+00:00"
+      },
+      {
+        "order": 17,
+        "scenario": "car-moving-chase",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/car-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:26:23.349505+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:27:01.794190+00:00"
+      },
+      {
+        "order": 18,
+        "scenario": "car-moving-chase",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/car-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:27:01.795491+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:27:41.511066+00:00"
+      },
+      {
+        "order": 19,
+        "scenario": "car-moving-chase",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/car-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:27:41.512450+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:28:11.969184+00:00"
+      },
+      {
+        "order": 20,
+        "scenario": "car-moving-chase",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/car-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:28:11.970535+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:28:40.728570+00:00"
+      },
+      {
+        "order": 21,
+        "scenario": "car-moving-firstperson",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/car-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:28:40.730082+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:29:18.712748+00:00"
+      },
+      {
+        "order": 22,
+        "scenario": "car-moving-firstperson",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/car-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:29:18.714201+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:29:56.975099+00:00"
+      },
+      {
+        "order": 23,
+        "scenario": "car-moving-firstperson",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/car-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:29:56.976562+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:30:26.203377+00:00"
+      },
+      {
+        "order": 24,
+        "scenario": "car-moving-firstperson",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/car-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:30:26.204783+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:30:53.523805+00:00"
+      },
+      {
+        "order": 25,
+        "scenario": "freeflight-stationary",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/freeflight-stationary/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:30:53.525306+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:31:18.284375+00:00"
+      },
+      {
+        "order": 26,
+        "scenario": "freeflight-stationary",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/freeflight-stationary/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:31:18.285816+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:31:43.187141+00:00"
+      },
+      {
+        "order": 27,
+        "scenario": "freeflight-moving",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/freeflight-moving/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:31:43.188589+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:32:18.762357+00:00"
+      },
+      {
+        "order": 28,
+        "scenario": "freeflight-moving",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/freeflight-moving/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-07T11:32:18.763964+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:32:54.360819+00:00"
+      },
+      {
+        "order": 29,
+        "scenario": "freeflight-moving",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "output": "candidate/freeflight-moving/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:32:54.362231+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:33:20.453376+00:00"
+      },
+      {
+        "order": 30,
+        "scenario": "freeflight-moving",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "output": "baseline/freeflight-moving/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-07T11:33:20.454766+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-07T11:33:46.632229+00:00"
+      }
+    ]
+  },
+  "environment": {
+    "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+    "cpu_affinity": "0,1,2",
+    "cpu_description": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               GenuineIntel\nModel name:                              INTEL(R) XEON(R) PLATINUM 8573C\nCPU family:                              6\nModel:                                   207\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                2\nCPU(s) scaling MHz:                      106%\nCPU max MHz:                             2300.0000\nCPU min MHz:                             800.0000\nBogoMIPS:                                4600.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology tsc_reliable nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch tpr_shadow ept vpid fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves vnmi avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq la57 rdpid fsrm arch_capabilities\nVirtualization:                          VT-x\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               96 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                4 MiB (2 instances)\nL3 cache:                                260 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Mitigation; Aligned branch/return thunks\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Vulnerable\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Retpoline\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Vulnerable: Clear CPU buffers attempted, no microcode; SMT Host state unknown\nVulnerability Vmscape:                   Not affected\n",
+    "node": "v22.23.4",
+    "browser": "Google Chrome for Testing 156.0.8078.4",
+    "browser_sha256": "4fa61f0ba0b4f89b7bec242c32ca16d3bccf69dbfef0651924a9ba8fede5f9d6",
+    "extra_browser_args": [
+      "--in-process-gpu",
+      "--disable-gpu-watchdog",
+      "--renderer-process-limit=1"
+    ],
+    "protocol": "Each stationary scenario runs baseline then candidate. Moving scenarios run baseline/candidate then candidate/baseline (ABBA), in fresh browser processes on the same runner. CPU profiles are collected separately after timing, only in the first repetition.",
+    "play-performance.cjs_sha256": "fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44",
+    "performance.cjs_sha256": "0853a3be2ae6c804cacb5e8f50a93a23173d030f3c672a382ba47694f3ab7183",
+    "explore.cjs_sha256": "f78a3c913eeaba808b37e28bfdf49b37f78cacd19fa574c59999a0755f26690c"
+  },
+  "settings": {
+    "viewport": {
+      "width": 1200,
+      "height": 780
+    },
+    "deviceScaleFactor": 1,
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "availableParallelism": 3,
+    "backend": "GPU active, SwiftShader",
+    "browserArgs": [
+      "--disable-dev-shm-usage",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      "--in-process-gpu",
+      "--disable-gpu-watchdog",
+      "--renderer-process-limit=1"
+    ],
+    "durationRequestedMs": 8000,
+    "warmupMs": 2000,
+    "metricsTimeDomain": "threadTicks",
+    "harnessSha256": "fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44",
+    "explorationHarnessSha256": "f78a3c913eeaba808b37e28bfdf49b37f78cacd19fa574c59999a0755f26690c",
+    "productionPerfHarnessSha256": "0853a3be2ae6c804cacb5e8f50a93a23173d030f3c672a382ba47694f3ab7183",
+    "browser": "156.0.8078.4"
+  },
+  "audit": {
+    "completed_runs": 30,
+    "paired_cases": 10,
+    "cpu_profiles": 14,
+    "raw_summaries_recomputed": true,
+    "identical_harness_browser_driver_viewport_and_affinity": true,
+    "all_moving_cases_advanced": true,
+    "execution_order_verified": true,
+    "totals": {
+      "read_pixels_calls": 0,
+      "client_memory_readbacks": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_copies": 0,
+      "art_image_uploads": 0,
+      "direct_released_before_signal": 0,
+      "positive_timeout_polls": 0,
+      "map_submissions": 866,
+      "map_compositor_submissions": 866,
+      "map_detached_submissions": 0
+    },
+    "independent_audit": {
+      "file": "browser-rendering-668bf4b-independent-audit.json",
+      "sha256": "b0996bd1785f47efff9e16db75d9a5846bd0315ffbc305593a01b2811e5893f6",
+      "assertions": 1413,
+      "raw_runs": 30,
+      "comparison_rows": 10,
+      "scope": "Independent recomputation from all raw captures and the exported summary rows; numeric relative tolerance1e-12 and absolute tolerance1e-9."
+    },
+    "independent_csv_aggregate_checks": 560,
+    "original_baseline_and_candidate_pages_resources_verified": true
+  },
+  "aggregation": "Arithmetic mean of the independent per-run metrics; minima/maxima describe repeated runs, not confidence bounds. Stationary cases have one pair. Moving cases have two pairs in ABBA order.",
+  "limitations": [
+    "Main-thread task CPU uses CDP threadTicks and includes the metric interval/probe transfer.",
+    "rAF is scheduling cadence; map resolves are submissions. Neither is final display presentation.",
+    "SwiftShader is a software GPU; these measurements are not hardware-GPU FPS.",
+    "Held-key moving workloads are identical inputs but faster simulation can travel farther; public HUD poses are retained for every run.",
+    "Wall-clock timing and moving endpoint differences mean stationary images are the appropriate direct before/after visual comparison. Pixel-window changes are intentional in minified Perspective Pixel fa\u00e7ades.",
+    "Two timed runs per moving variant and one pair per stationary case do not establish confidence intervals.",
+    "Each candidate is compared only with the original baseline measured on the same runner; cross-run timing differences are not attributed to individual follow-up changes.",
+    "A moving run contains 30\u201365 map submissions, so its p95 depends on few tail observations.",
+    "The performance artifact contains source 668bf4b measurements, not a benchmark of the 9171e95 acceptance binary. Full application-source equality is verified separately; package/runtime identities remain distinct.",
+    "An improvement in the mean of two p95 values does not establish a tail improvement in each repetition. Per-repetition direction and execution order are retained in moving_pair_changes.",
+    "The e086 revision passed earlier CI but subsequently failed a live DPR2 close-camera check with OutOfMemoryException. Its benchmark evidence remains intermediate; the added bundled-data regression and synthetic index-pressure fixtures have separate scopes.",
+    "The repository preserves audited rows and provenance. Complete raw browser records, screenshots and profiles are in the Actions performance artifact until 2026-12-07T11:33:46Z."
+  ],
+  "files": [
+    {
+      "file": "browser-rendering-668bf4b-runs.csv",
+      "rows": 30,
+      "columns": 74,
+      "sha256": "f6ac0403638efdda84c3c1427102355bc927e8cde5a8dba8e15cd586c3baa73f"
+    },
+    {
+      "file": "browser-rendering-668bf4b-comparison.csv",
+      "rows": 10,
+      "columns": 58,
+      "sha256": "729f0705e921e49e6b32dffb2f9fd8d30954e82bb8bdaaddab2c485f47844fed"
+    }
+  ],
+  "raw_files": [
+    {
+      "file": "baseline/map-idle-default/repetition-1/map-idle-default-raw.json",
+      "sha256": "2ac250ca45b4a51e9256765c263d5414979df68ac874b8dd0bb15e4b0fee3718",
+      "report_sha256": "780fc61e4dbe5401a7952cf77e047e372cdffc84b0d1889e269ae47767c7a8f5"
+    },
+    {
+      "file": "candidate/map-idle-default/repetition-1/map-idle-default-raw.json",
+      "sha256": "d74bcee8e1ac1960baa93044936a33eb1092549ed1ac4a9712c5f20e94a65e05",
+      "report_sha256": "560a4f1aba89cf60849e21f114d53a09e72a44530692c6aaf0016c86979f4857"
+    },
+    {
+      "file": "baseline/map-idle-relief/repetition-1/map-idle-relief-raw.json",
+      "sha256": "6fc73f35fbf371af28b853b211cd7d6bacd8e2e0fcf0d96780e55cf3adcc539c",
+      "report_sha256": "3beefe3383d8e530288b1658b2142e2a16ca9c599492cbc07d74444039c357be"
+    },
+    {
+      "file": "candidate/map-idle-relief/repetition-1/map-idle-relief-raw.json",
+      "sha256": "dac59a8161c53486d725d6a3d4181207a3528e13fc64c29a91da856a37ff457b",
+      "report_sha256": "cddf1adeada122c996a1ff0855fab16315dc9f47eae9f06df725a47a254521ee"
+    },
+    {
+      "file": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json",
+      "sha256": "d839ef3689ee686769dee5f1b2547c3878b62bd1aaab03b204d1ca2110f7cca4",
+      "report_sha256": "b23a8f80c3ac849a6cb9b6fd0a77053565cedc39d29c8424f2b821c7cb97d5e4"
+    },
+    {
+      "file": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json",
+      "sha256": "72022bbef6d684c938b07528a6d5205dfcb3e0b4b9617df2239dd2922f75e31b",
+      "report_sha256": "98b6b06748110613178b58b0b6b2b29e94e4ca28df5d680322b240f531501c48"
+    },
+    {
+      "file": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json",
+      "sha256": "96ca67ea9ef0db50503cd9b454adf506f11d3f7177ff0190c32a2371202a27e2",
+      "report_sha256": "180cd19c243757dd271859a6eb68fa7e67f3401850b1f202a96fa6bcdfc41d1e"
+    },
+    {
+      "file": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json",
+      "sha256": "38e3ca4261ffce65237d4d830623d06364146d669c35273c7fc8b648a61460f1",
+      "report_sha256": "22a20398dabb2b687933fc48b4efa17e642687bb888ced42d47f482ac4349e76"
+    },
+    {
+      "file": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json",
+      "sha256": "56eee4869bd37293642436ba1c34fd1ade95842addcbe959e7dc88516c87d9ad",
+      "report_sha256": "182447289e4e204c04dbe2ba825f788960d97e56afd7ead772f4995d812e58f9"
+    },
+    {
+      "file": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json",
+      "sha256": "c5437fdbbb4dc022206d128447b748b412f0bd7107b67e9ab33ba9cf53ec6231",
+      "report_sha256": "e66a7d64239106ddcc794fddf7f9d3ccca37ded8b9033085a12c44d6e9d6d818"
+    },
+    {
+      "file": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-raw.json",
+      "sha256": "010386b0232c7815fb9f4401eea8fbe19508c2777f50ca9eb396ed61c52a7e5a",
+      "report_sha256": "317931b0c20b6ffba77a6616f3f84605476c074a0e2a8a28004c78da63d83e30"
+    },
+    {
+      "file": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-raw.json",
+      "sha256": "eea1845472ae78874ca862f174c45c601aaabd6ef41c04accd7490e70345f404",
+      "report_sha256": "74ec6755a01d10bca58d7f1409360269a28c076c092b09353aecee85c2e6cf23"
+    },
+    {
+      "file": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-raw.json",
+      "sha256": "636a9f2347e42b9b42006a554b3c24a9a744168e1e106ec40bb67ac6f017a0f4",
+      "report_sha256": "5d06da29c933f6cd962b6cceccc4e513ef5e9894ac5443ca4b33f6106d32b431"
+    },
+    {
+      "file": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-raw.json",
+      "sha256": "535a449b5e971b8e32191f824e03d7ace051446e4d73b6d63946766bae7e9ce0",
+      "report_sha256": "1b0f2464f461d5c504e22b5668a7599af3d9db62c612dda03487ca26e9af7918"
+    },
+    {
+      "file": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-raw.json",
+      "sha256": "f1e425798bc9087ba48bd3ec3f9309a32a360314feafaf5a920893378747fb27",
+      "report_sha256": "db920550453b36946ac01fb93e9b0b3d9c814e2628f2953ec40d9c03f1fb2b30"
+    },
+    {
+      "file": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-raw.json",
+      "sha256": "36e6a8f02a73a8c9200ab0085ee9857cc0e5950605695fe6b9aa909780ad956a",
+      "report_sha256": "140f4200c844482a5b9a1aacfcc0211c026d379f90d7dbce31b3af8a5e4e1432"
+    },
+    {
+      "file": "baseline/car-moving-chase/repetition-1/car-moving-chase-raw.json",
+      "sha256": "5490d55bfaeca9c3618852c8abe84363c99db0a89f47e6d70a26b8cf80b1f1b3",
+      "report_sha256": "1b09281a6a7d2f4f66fe59d60ba61560f4fef79f6f254eafa08e11c6c1c8eb70"
+    },
+    {
+      "file": "candidate/car-moving-chase/repetition-1/car-moving-chase-raw.json",
+      "sha256": "de06564e5c196c83f827ece0b674120eef4b3789d13c9dc55b315bafe2722616",
+      "report_sha256": "d209179025623222da0c696e0128e700ab1cb515e22d89e877ac0c2bb09034c7"
+    },
+    {
+      "file": "candidate/car-moving-chase/repetition-2/car-moving-chase-raw.json",
+      "sha256": "c77320df10ae824a5a9cbf3c14641940dbbd5fb5ef97bdf609a317ac62609653",
+      "report_sha256": "5ee1175dd42c354c012ad4d809a0bfbd3c2a74bafb0ecfba64ee382a1bca878c"
+    },
+    {
+      "file": "baseline/car-moving-chase/repetition-2/car-moving-chase-raw.json",
+      "sha256": "831d99b2b397e205d7245e3955582a1fecb17bf8ad634654a2eebdc6dabaee8f",
+      "report_sha256": "d9c785773fe0c0f65028939ef9deac11d62f71e2ac3ff89f81d7b4a2214e567a"
+    },
+    {
+      "file": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json",
+      "sha256": "9e569c2f7207db812187b19ba0fba0c97000eb3a5f11a8c608df012d6e006168",
+      "report_sha256": "9a1912a0122a849b57a034d22ad51b6c96c5146c0f2eecd2473912352c2630c9"
+    },
+    {
+      "file": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json",
+      "sha256": "a6a9f3afebff7324a474fa95eb7d60d469797b859bee90d63a921ab29f1c6ef2",
+      "report_sha256": "44605d4f6ed3d69f3efda30ecde60096632e969a6e2fecdb70c13aa6aa709a45"
+    },
+    {
+      "file": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json",
+      "sha256": "aacec53ac2e6cfe3b98148547272cfbbce8a6c37f54953b21776dc57d3c5e2c9",
+      "report_sha256": "7467ba540eb89796f80dfe46ddf0a8dd315b105f91541dc8427d60bff9ff180d"
+    },
+    {
+      "file": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json",
+      "sha256": "ac86c754f18f1ed461c56158fd49e28f9546a9effb990d49a6fe1454464f5ea8",
+      "report_sha256": "7b9dd4e93a97816532e8ab10ed2b687b9398116063baa7247e1fc25f620516e7"
+    },
+    {
+      "file": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-raw.json",
+      "sha256": "87b2599ad36b949e484f6d6c19f5c92ffc8814d862a1fe01056d60b64c58507c",
+      "report_sha256": "40efef9357b598db6dae670f602b655c894358179a6d733aa106adcd094c551a"
+    },
+    {
+      "file": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-raw.json",
+      "sha256": "b35a45572edcb1fa0bbac057a9fe3cb16b052c2046903ac7e0960f864004fad5",
+      "report_sha256": "2691431337c504d9fb6b1034c8da8cfa063c9beba23f72a7649d04de8d493eca"
+    },
+    {
+      "file": "baseline/freeflight-moving/repetition-1/freeflight-moving-raw.json",
+      "sha256": "3e8fd0b6b3f567ba01210406a227f792f05fad8e31e8c74189b03976225a7af8",
+      "report_sha256": "2d7ef55935e9fad5d2f79811c8c1eab32ffdeff27d3620d0da290727d412e2e7"
+    },
+    {
+      "file": "candidate/freeflight-moving/repetition-1/freeflight-moving-raw.json",
+      "sha256": "2adb8cf2f21b70aeae5a7dd6d8dfa8de1df70d4155a5d10e6fb48ce70faa6524",
+      "report_sha256": "70dfbd460a56d56ecb24b19e3e4b7cb5e3168dd8eff11eb5a70c881e067ac695"
+    },
+    {
+      "file": "candidate/freeflight-moving/repetition-2/freeflight-moving-raw.json",
+      "sha256": "f136b0f13944b1db5f562b51682ef81e6514c642774125fef230c003aba98db7",
+      "report_sha256": "2c3b94352c033e6e81dda64d9339e457995ae9448799239c72aba57956ac00d3"
+    },
+    {
+      "file": "baseline/freeflight-moving/repetition-2/freeflight-moving-raw.json",
+      "sha256": "35b6c20060be350ebcdb14f6f0e84db116e9a7ba9ca7692339ac08b8d6919767",
+      "report_sha256": "31a585d0f58c294cf1a51b1357ff09068f4dad6feb9bd30dcf78d154799a7847"
+    }
+  ],
+  "cpu_profiles": [
+    {
+      "file": "baseline/map-idle-relief/repetition-1/map-idle-relief.cpuprofile",
+      "sha256": "c09a61dcc634c5837f9cf4869799fe3e62d61a5693fc163fe1d014e8da68c831",
+      "samples": 7501,
+      "duration_ms": 8150.185
+    },
+    {
+      "file": "candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile",
+      "sha256": "4bc2a1245c9a0238d234e6a07dd61f19b9927dad22e2d33e2d5cf9364365194e",
+      "samples": 7501,
+      "duration_ms": 8141.81
+    },
+    {
+      "file": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile",
+      "sha256": "dab8ede37a00688f121b512e4269f2243f4dc6f001d67415247d246608c89f71",
+      "samples": 7480,
+      "duration_ms": 8153.078
+    },
+    {
+      "file": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile",
+      "sha256": "821bb7649470b78fef52677b981dc9153f008a3c9d1348c8a9160e38c5c301b5",
+      "samples": 7495,
+      "duration_ms": 8159.255
+    },
+    {
+      "file": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile",
+      "sha256": "e08c0ad6a09f0363f1163402390de401c2e456ff4cd3b22743bf3b88d5341bf6",
+      "samples": 6301,
+      "duration_ms": 8165.066
+    },
+    {
+      "file": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile",
+      "sha256": "4d00642e1f2d1e671ceae27cea5af07889a1bf624efb0912dc3c8ce6a0a72c1c",
+      "samples": 6311,
+      "duration_ms": 8180.089
+    },
+    {
+      "file": "baseline/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile",
+      "sha256": "47d5a0d10e2bbdae068eea0b475438da5b284939d49728634e326022f1781661",
+      "samples": 5939,
+      "duration_ms": 8226.34
+    },
+    {
+      "file": "candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile",
+      "sha256": "6cce214ee1c205565462725080f9e3f62082beb05d2a44389bfd5748c9c5d4d8",
+      "samples": 6030,
+      "duration_ms": 8205.048
+    },
+    {
+      "file": "baseline/car-moving-chase/repetition-1/car-moving-chase.cpuprofile",
+      "sha256": "0ef1da4e0e210a2011352d228811c99bd0154302407d221689f26ad61a37ccb6",
+      "samples": 6176,
+      "duration_ms": 8197.773
+    },
+    {
+      "file": "candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile",
+      "sha256": "81aba58b4e5d6ee753c4d3c489aaab98a77a49c4ac693b397370d515e2a3e8ed",
+      "samples": 6142,
+      "duration_ms": 8241.42
+    },
+    {
+      "file": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile",
+      "sha256": "83cac6317b6e640b1c0bcb2983324cbbb7eff30df738cb226d9c071f1c648e35",
+      "samples": 6210,
+      "duration_ms": 8242.032
+    },
+    {
+      "file": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile",
+      "sha256": "dcf528cab59a12fbaa1fdc390b448dced8c3d21686da966944a0bd6f95c5a379",
+      "samples": 6096,
+      "duration_ms": 8155.691
+    },
+    {
+      "file": "baseline/freeflight-moving/repetition-1/freeflight-moving.cpuprofile",
+      "sha256": "084c567d8f298abd3a10d65775b39c38a993efe89dab7d4c1d983681ee814228",
+      "samples": 5969,
+      "duration_ms": 8158.765
+    },
+    {
+      "file": "candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile",
+      "sha256": "e591e2a6bdde51cf23e8da6bb8950d3ab12e2ded9d1b14bc6aac0adba33e343d",
+      "samples": 5975,
+      "duration_ms": 8155.872
+    }
+  ],
+  "images": [
+    {
+      "file": "baseline/map-idle-default/repetition-1/map-idle-default-before.png",
+      "sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb"
+    },
+    {
+      "file": "baseline/map-idle-default/repetition-1/map-idle-default-after.png",
+      "sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb"
+    },
+    {
+      "file": "candidate/map-idle-default/repetition-1/map-idle-default-before.png",
+      "sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb"
+    },
+    {
+      "file": "candidate/map-idle-default/repetition-1/map-idle-default-after.png",
+      "sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb"
+    },
+    {
+      "file": "baseline/map-idle-relief/repetition-1/map-idle-relief-before.png",
+      "sha256": "4f8532cf0c9e4f117924119a47731c8b6ebfba1a47ccfcc0a6a1a9ce2dc23f46"
+    },
+    {
+      "file": "baseline/map-idle-relief/repetition-1/map-idle-relief-after.png",
+      "sha256": "4f8532cf0c9e4f117924119a47731c8b6ebfba1a47ccfcc0a6a1a9ce2dc23f46"
+    },
+    {
+      "file": "candidate/map-idle-relief/repetition-1/map-idle-relief-before.png",
+      "sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3"
+    },
+    {
+      "file": "candidate/map-idle-relief/repetition-1/map-idle-relief-after.png",
+      "sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3"
+    },
+    {
+      "file": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-before.png",
+      "sha256": "da5685dad306f0e4da344f24f2179d58c1c22f61f7315ec853a4aa023dbf7e8d"
+    },
+    {
+      "file": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-after.png",
+      "sha256": "da5685dad306f0e4da344f24f2179d58c1c22f61f7315ec853a4aa023dbf7e8d"
+    },
+    {
+      "file": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-before.png",
+      "sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797"
+    },
+    {
+      "file": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-after.png",
+      "sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797"
+    },
+    {
+      "file": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-before.png",
+      "sha256": "da5685dad306f0e4da344f24f2179d58c1c22f61f7315ec853a4aa023dbf7e8d"
+    },
+    {
+      "file": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-after.png",
+      "sha256": "bb8f6d7edafe1eb38d8bf1114702fa3152e2f9eb5e84f367d8768a6739dbf00e"
+    },
+    {
+      "file": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-before.png",
+      "sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797"
+    },
+    {
+      "file": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-after.png",
+      "sha256": "c67e630daabbfa7d44c43504d95afc7e9aead1aa68d0bc5c60db0f06edc9b331"
+    },
+    {
+      "file": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-before.png",
+      "sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797"
+    },
+    {
+      "file": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-after.png",
+      "sha256": "54d2fa071cb382e1cfe021fb181bb31aebf9217bdc7d2f903871644d7709b4cd"
+    },
+    {
+      "file": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-before.png",
+      "sha256": "da5685dad306f0e4da344f24f2179d58c1c22f61f7315ec853a4aa023dbf7e8d"
+    },
+    {
+      "file": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-after.png",
+      "sha256": "e3eac98de464c8405f7a97845270867dac2e71f4a1ab70055960533496e1551f"
+    },
+    {
+      "file": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-before.png",
+      "sha256": "ffec279f2390628412c98438ad3222ed18dff32d1bc43ad10493f9ce2a09d88e"
+    },
+    {
+      "file": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-after.png",
+      "sha256": "3846cec5b6e338e85977423353a75f5487bd8ce413d87cbaa82411410c104a62"
+    },
+    {
+      "file": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-before.png",
+      "sha256": "912ffff725e8a1b796335d71e1a15a041981d7e677a3e7f9613d3447fca066ff"
+    },
+    {
+      "file": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-after.png",
+      "sha256": "223dd74ba4549815302b200b1a6404fe375561a8a9566d785889e3d4acef5739"
+    },
+    {
+      "file": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-before.png",
+      "sha256": "912ffff725e8a1b796335d71e1a15a041981d7e677a3e7f9613d3447fca066ff"
+    },
+    {
+      "file": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-after.png",
+      "sha256": "d8b9d41fb994ec708735b2ff3a95c98d883da2d5ad3df1b2687812a87dd548c3"
+    },
+    {
+      "file": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-before.png",
+      "sha256": "ffec279f2390628412c98438ad3222ed18dff32d1bc43ad10493f9ce2a09d88e"
+    },
+    {
+      "file": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-after.png",
+      "sha256": "cc8c79a4a15ddbdd525c7079909312cb6840df9cd2066497ad9c93e837bd2451"
+    },
+    {
+      "file": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-before.png",
+      "sha256": "39c4c56a5cbac415847ccdf88b019f98e69daf873bd91a7187a50c83a7ef5aa5"
+    },
+    {
+      "file": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-after.png",
+      "sha256": "39c4c56a5cbac415847ccdf88b019f98e69daf873bd91a7187a50c83a7ef5aa5"
+    },
+    {
+      "file": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-before.png",
+      "sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2"
+    },
+    {
+      "file": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-after.png",
+      "sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2"
+    },
+    {
+      "file": "baseline/car-moving-chase/repetition-1/car-moving-chase-before.png",
+      "sha256": "39c4c56a5cbac415847ccdf88b019f98e69daf873bd91a7187a50c83a7ef5aa5"
+    },
+    {
+      "file": "baseline/car-moving-chase/repetition-1/car-moving-chase-after.png",
+      "sha256": "4b31a256bb4358c00647892fe982dd15e2991955463148353e83db8a9cc8cb34"
+    },
+    {
+      "file": "candidate/car-moving-chase/repetition-1/car-moving-chase-before.png",
+      "sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2"
+    },
+    {
+      "file": "candidate/car-moving-chase/repetition-1/car-moving-chase-after.png",
+      "sha256": "0b348c4a15453d8da8b43f067f6367bfa92075b2948f40e360e37489bb5f01df"
+    },
+    {
+      "file": "candidate/car-moving-chase/repetition-2/car-moving-chase-before.png",
+      "sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2"
+    },
+    {
+      "file": "candidate/car-moving-chase/repetition-2/car-moving-chase-after.png",
+      "sha256": "e661ccf2d7baf95020abe5207b58219bb23ffc39634298ea348b2ef0da2da109"
+    },
+    {
+      "file": "baseline/car-moving-chase/repetition-2/car-moving-chase-before.png",
+      "sha256": "39c4c56a5cbac415847ccdf88b019f98e69daf873bd91a7187a50c83a7ef5aa5"
+    },
+    {
+      "file": "baseline/car-moving-chase/repetition-2/car-moving-chase-after.png",
+      "sha256": "3f0919a1384732dbd739c2b8cac59f3b4a5695f35ba8f0aa74ee6a849cf7a010"
+    },
+    {
+      "file": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-before.png",
+      "sha256": "313f18960f4fa6b6a52872aa7e2a36ba5665da8972dc5d4e048dee29cbaf9c2a"
+    },
+    {
+      "file": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-after.png",
+      "sha256": "272c02ba354dc4f4b690a043a2031487264ff8dbe7ec76c63e01a1a1f066973a"
+    },
+    {
+      "file": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-before.png",
+      "sha256": "7740b2bc828d9a85163eff6d15b409bdcab8a76fc6d0757cd582909c6565e2ec"
+    },
+    {
+      "file": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-after.png",
+      "sha256": "8016061eca76351d15e73cf2b81f970792987d4c61245c2423f2abee0392fe95"
+    },
+    {
+      "file": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-before.png",
+      "sha256": "7740b2bc828d9a85163eff6d15b409bdcab8a76fc6d0757cd582909c6565e2ec"
+    },
+    {
+      "file": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-after.png",
+      "sha256": "d785e6af84d1aad6a5d52c78fcffca61870add06341641f92345d8f4e15fc7e4"
+    },
+    {
+      "file": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-before.png",
+      "sha256": "313f18960f4fa6b6a52872aa7e2a36ba5665da8972dc5d4e048dee29cbaf9c2a"
+    },
+    {
+      "file": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-after.png",
+      "sha256": "b6fd5cca9c0f385eca5c55f3ea963f98a6e21008e8415c0d3491d2deaf7b4c76"
+    },
+    {
+      "file": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-before.png",
+      "sha256": "36748eb6c58dbe9822747d4ffc8b5333fafce5de1deb31ad82feb5c26146ec53"
+    },
+    {
+      "file": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-after.png",
+      "sha256": "36748eb6c58dbe9822747d4ffc8b5333fafce5de1deb31ad82feb5c26146ec53"
+    },
+    {
+      "file": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-before.png",
+      "sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a"
+    },
+    {
+      "file": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-after.png",
+      "sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a"
+    },
+    {
+      "file": "baseline/freeflight-moving/repetition-1/freeflight-moving-before.png",
+      "sha256": "36748eb6c58dbe9822747d4ffc8b5333fafce5de1deb31ad82feb5c26146ec53"
+    },
+    {
+      "file": "baseline/freeflight-moving/repetition-1/freeflight-moving-after.png",
+      "sha256": "2fec04533c856f5ce7dc4f32e8011c7ff82389e9bc2c5b0f33153291119ef3a5"
+    },
+    {
+      "file": "candidate/freeflight-moving/repetition-1/freeflight-moving-before.png",
+      "sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a"
+    },
+    {
+      "file": "candidate/freeflight-moving/repetition-1/freeflight-moving-after.png",
+      "sha256": "e7ab2f3fd46604a44bb006ee8cc3857510688de591474a7511b2321c33310ffe"
+    },
+    {
+      "file": "candidate/freeflight-moving/repetition-2/freeflight-moving-before.png",
+      "sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a"
+    },
+    {
+      "file": "candidate/freeflight-moving/repetition-2/freeflight-moving-after.png",
+      "sha256": "cf294b9c46cbd4e46957d5c1e28f95ca002ab17d6c89dd69604a5b8ad33206ec"
+    },
+    {
+      "file": "baseline/freeflight-moving/repetition-2/freeflight-moving-before.png",
+      "sha256": "36748eb6c58dbe9822747d4ffc8b5333fafce5de1deb31ad82feb5c26146ec53"
+    },
+    {
+      "file": "baseline/freeflight-moving/repetition-2/freeflight-moving-after.png",
+      "sha256": "e1ca1be48d12c6932b87849239de35358c2dec7c2503116e65b7a3be4e5ea050"
+    }
+  ],
+  "stationary_images": {
+    "scope": "1200\u00d7780 browser PNGs. Map rectangle x0,y60,width1200,height663 excludes toolbar/footer but includes identical stationary HUD overlays. Additional x345,y60,width850,height520 crop excludes upper-left settings HUD and bottom touch controls. Pixel differences are reported, not treated as failures because minified Perspective Pixel windows intentionally change.",
+    "results": [
+      {
+        "scenario": "map-idle-default",
+        "baseline_candidate_before_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "baseline_candidate_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "baseline_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "candidate_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "baseline_candidate_before_unobstructed_crop": {
+          "region": [
+            345,
+            60,
+            850,
+            520
+          ],
+          "total_pixels": 442000,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        }
+      },
+      {
+        "scenario": "map-idle-relief",
+        "baseline_candidate_before_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 125379,
+          "changed_percent": 15.759049773755656,
+          "maximum_channel_delta": 66,
+          "mean_absolute_channel_delta": 0.6858622423328306,
+          "difference_bounds": [
+            0,
+            60,
+            1200,
+            723
+          ]
+        },
+        "baseline_candidate_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 125379,
+          "changed_percent": 15.759049773755656,
+          "maximum_channel_delta": 66,
+          "mean_absolute_channel_delta": 0.6858622423328306,
+          "difference_bounds": [
+            0,
+            60,
+            1200,
+            723
+          ]
+        },
+        "baseline_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "candidate_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "baseline_candidate_before_unobstructed_crop": {
+          "region": [
+            345,
+            60,
+            850,
+            520
+          ],
+          "total_pixels": 442000,
+          "changed_pixels": 70985,
+          "changed_percent": 16.059954751131222,
+          "maximum_channel_delta": 65,
+          "mean_absolute_channel_delta": 0.7932697963800905,
+          "difference_bounds": [
+            345,
+            60,
+            1195,
+            580
+          ]
+        }
+      },
+      {
+        "scenario": "walk-stationary-firstperson",
+        "baseline_candidate_before_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 49251,
+          "changed_percent": 6.190422322775264,
+          "maximum_channel_delta": 66,
+          "mean_absolute_channel_delta": 0.4535953996983409,
+          "difference_bounds": [
+            448,
+            60,
+            728,
+            412
+          ]
+        },
+        "baseline_candidate_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 49251,
+          "changed_percent": 6.190422322775264,
+          "maximum_channel_delta": 66,
+          "mean_absolute_channel_delta": 0.4535953996983409,
+          "difference_bounds": [
+            448,
+            60,
+            728,
+            412
+          ]
+        },
+        "baseline_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "candidate_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "baseline_candidate_before_unobstructed_crop": {
+          "region": [
+            345,
+            60,
+            850,
+            520
+          ],
+          "total_pixels": 442000,
+          "changed_pixels": 49251,
+          "changed_percent": 11.142760180995475,
+          "maximum_channel_delta": 66,
+          "mean_absolute_channel_delta": 0.8164717194570136,
+          "difference_bounds": [
+            448,
+            60,
+            728,
+            412
+          ]
+        }
+      },
+      {
+        "scenario": "car-stationary-chase",
+        "baseline_candidate_before_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 5936,
+          "changed_percent": 0.7461035696329814,
+          "maximum_channel_delta": 62,
+          "mean_absolute_channel_delta": 0.06457013574660633,
+          "difference_bounds": [
+            460,
+            60,
+            696,
+            188
+          ]
+        },
+        "baseline_candidate_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 5936,
+          "changed_percent": 0.7461035696329814,
+          "maximum_channel_delta": 62,
+          "mean_absolute_channel_delta": 0.06457013574660633,
+          "difference_bounds": [
+            460,
+            60,
+            696,
+            188
+          ]
+        },
+        "baseline_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "candidate_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "baseline_candidate_before_unobstructed_crop": {
+          "region": [
+            345,
+            60,
+            850,
+            520
+          ],
+          "total_pixels": 442000,
+          "changed_pixels": 5936,
+          "changed_percent": 1.3429864253393664,
+          "maximum_channel_delta": 62,
+          "mean_absolute_channel_delta": 0.11622624434389141,
+          "difference_bounds": [
+            460,
+            60,
+            696,
+            188
+          ]
+        }
+      },
+      {
+        "scenario": "freeflight-stationary",
+        "baseline_candidate_before_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 12144,
+          "changed_percent": 1.5263951734539971,
+          "maximum_channel_delta": 31,
+          "mean_absolute_channel_delta": 0.057531422825540475,
+          "difference_bounds": [
+            368,
+            60,
+            1200,
+            120
+          ]
+        },
+        "baseline_candidate_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 12144,
+          "changed_percent": 1.5263951734539971,
+          "maximum_channel_delta": 31,
+          "mean_absolute_channel_delta": 0.057531422825540475,
+          "difference_bounds": [
+            368,
+            60,
+            1200,
+            120
+          ]
+        },
+        "baseline_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "candidate_before_after_map": {
+          "region": [
+            0,
+            60,
+            1200,
+            663
+          ],
+          "total_pixels": 795600,
+          "changed_pixels": 0,
+          "changed_percent": 0,
+          "maximum_channel_delta": 0,
+          "mean_absolute_channel_delta": 0,
+          "difference_bounds": null
+        },
+        "baseline_candidate_before_unobstructed_crop": {
+          "region": [
+            345,
+            60,
+            850,
+            520
+          ],
+          "total_pixels": 442000,
+          "changed_pixels": 11844,
+          "changed_percent": 2.6796380090497736,
+          "maximum_channel_delta": 31,
+          "mean_absolute_channel_delta": 0.10071266968325791,
+          "difference_bounds": [
+            368,
+            60,
+            1195,
+            120
+          ]
+        }
+      }
+    ]
+  },
+  "cpu_profile_observations": {
+    "scope": "Separate post-measurement profiles, one per selected scenario/variant. Sampled elapsed weights are diagnostic and not the timed CDP thread-CPU measurement. The measured native WASM has no name/custom symbol section, so wasm-function indices are revision-local and cannot be mapped to C# method names or compared as stable method identities.",
+    "grouping": "Self samples: (idle), (program), wasm-function names/.wasm URL, selected named WebGL binding functions, (garbage collector), other. Inclusive categories are not added.",
+    "results": [
+      {
+        "scenario": "map-idle-relief",
+        "variant": "baseline",
+        "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "profile_duration_ms": 8150.185,
+        "samples": 7501,
+        "self_sampled_ms": {
+          "idle": 8003.324000000068,
+          "program": 146.691,
+          "wasm": 0,
+          "webgl_binding": 0,
+          "garbage_collection": 0,
+          "other": 0
+        },
+        "top_named_non_wasm_self": []
+      },
+      {
+        "scenario": "map-idle-relief",
+        "variant": "candidate",
+        "source_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "profile_duration_ms": 8141.81,
+        "samples": 7501,
+        "self_sampled_ms": {
+          "idle": 7977.131999999979,
+          "program": 152.42900000000003,
+          "wasm": 0,
+          "webgl_binding": 0,
+          "garbage_collection": 11.920000000000002,
+          "other": 0
+        },
+        "top_named_non_wasm_self": []
+      },
+      {
+        "scenario": "walk-stationary-firstperson",
+        "variant": "baseline",
+        "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "profile_duration_ms": 8153.078,
+        "samples": 7480,
+        "self_sampled_ms": {
+          "idle": 7672.822000000006,
+          "program": 203.10599999999994,
+          "wasm": 169.655,
+          "webgl_binding": 2.123,
+          "garbage_collection": 29.165999999999997,
+          "other": 75.49900000000002
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "fetch",
+            "milliseconds": 26.646999999999995
+          },
+          {
+            "name": "k",
+            "milliseconds": 12.941
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 9.652
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 9.072999999999999
+          },
+          {
+            "name": "_emscripten_get_now",
+            "milliseconds": 3.2439999999999998
+          },
+          {
+            "name": "clearTimeout",
+            "milliseconds": 2.123
+          },
+          {
+            "name": "setTimeout",
+            "milliseconds": 2.109
+          },
+          {
+            "name": "js-to-wasm::i",
+            "milliseconds": 1.49
+          }
+        ]
+      },
+      {
+        "scenario": "walk-stationary-firstperson",
+        "variant": "candidate",
+        "source_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "profile_duration_ms": 8159.255,
+        "samples": 7495,
+        "self_sampled_ms": {
+          "idle": 7685.000000000044,
+          "program": 205.6119999999999,
+          "wasm": 158.44900000000004,
+          "webgl_binding": 1.112,
+          "garbage_collection": 28.08299999999999,
+          "other": 80.703
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "fetch",
+            "milliseconds": 34.822
+          },
+          {
+            "name": "k",
+            "milliseconds": 14.958000000000002
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 7.4830000000000005
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 6.344
+          },
+          {
+            "name": "setTimeout",
+            "milliseconds": 5.317
+          },
+          {
+            "name": "wasm-to-js",
+            "milliseconds": 3.2
+          },
+          {
+            "name": "now",
+            "milliseconds": 2.137
+          },
+          {
+            "name": "clearImmediate",
+            "milliseconds": 1.112
+          }
+        ]
+      },
+      {
+        "scenario": "walk-moving-firstperson",
+        "variant": "baseline",
+        "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "profile_duration_ms": 8165.066,
+        "samples": 6301,
+        "self_sampled_ms": {
+          "idle": 5102.513999999995,
+          "program": 404.8389999999998,
+          "wasm": 2177.502999999999,
+          "webgl_binding": 195.183,
+          "garbage_collection": 42.582000000000015,
+          "other": 241.32399999999996
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 158.35399999999998
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 39.725
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 34.431999999999995
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 23.947
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 23.051000000000002
+          },
+          {
+            "name": "getError",
+            "milliseconds": 18.173
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 16.193
+          },
+          {
+            "name": "setTimeout",
+            "milliseconds": 14.536
+          }
+        ]
+      },
+      {
+        "scenario": "walk-moving-firstperson",
+        "variant": "candidate",
+        "source_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "profile_duration_ms": 8180.089,
+        "samples": 6311,
+        "self_sampled_ms": {
+          "idle": 4780.579999999988,
+          "program": 421.74199999999996,
+          "wasm": 2463.791999999998,
+          "webgl_binding": 176.07700000000006,
+          "garbage_collection": 37.282,
+          "other": 300.257
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 127.50799999999998
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 53.516
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 36.132999999999996
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 33.288000000000004
+          },
+          {
+            "name": "getError",
+            "milliseconds": 31.845999999999997
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 18.88
+          },
+          {
+            "name": "k",
+            "milliseconds": 16.686999999999998
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 14.270999999999999
+          }
+        ]
+      },
+      {
+        "scenario": "walk-moving-chase",
+        "variant": "baseline",
+        "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "profile_duration_ms": 8226.34,
+        "samples": 5939,
+        "self_sampled_ms": {
+          "idle": 5731.686999999988,
+          "program": 529.517,
+          "wasm": 1425.5739999999964,
+          "webgl_binding": 174.9470000000001,
+          "garbage_collection": 0,
+          "other": 363.16699999999986
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 103.26899999999999
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 48.76000000000001
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 48.699999999999996
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 43.83800000000001
+          },
+          {
+            "name": "getError",
+            "milliseconds": 27.907
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 25.465
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 19.705
+          },
+          {
+            "name": "_emscripten_get_now",
+            "milliseconds": 13.078
+          }
+        ]
+      },
+      {
+        "scenario": "walk-moving-chase",
+        "variant": "candidate",
+        "source_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "profile_duration_ms": 8205.048,
+        "samples": 6030,
+        "self_sampled_ms": {
+          "idle": 5925.032999999989,
+          "program": 468.93400000000025,
+          "wasm": 1284.3799999999987,
+          "webgl_binding": 187.33400000000006,
+          "garbage_collection": 2.3040000000000003,
+          "other": 336.5950000000002
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 132.329
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 52.84499999999999
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 41.827
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 35.565999999999995
+          },
+          {
+            "name": "getError",
+            "milliseconds": 33.181000000000004
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 29.387
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 28.905000000000005
+          },
+          {
+            "name": "k",
+            "milliseconds": 13.822
+          }
+        ]
+      },
+      {
+        "scenario": "car-moving-chase",
+        "variant": "baseline",
+        "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "profile_duration_ms": 8197.773,
+        "samples": 6176,
+        "self_sampled_ms": {
+          "idle": 4832.381999999997,
+          "program": 415.5540000000001,
+          "wasm": 2527.5890000000054,
+          "webgl_binding": 160.76799999999994,
+          "garbage_collection": 0,
+          "other": 261.01700000000005
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 75.87799999999997
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 33.04900000000001
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 29.392
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 27.807999999999996
+          },
+          {
+            "name": "wasm-to-js",
+            "milliseconds": 26.104
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 21.212999999999994
+          },
+          {
+            "name": "getError",
+            "milliseconds": 17.576
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 17.095999999999997
+          }
+        ]
+      },
+      {
+        "scenario": "car-moving-chase",
+        "variant": "candidate",
+        "source_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "profile_duration_ms": 8241.42,
+        "samples": 6142,
+        "self_sampled_ms": {
+          "idle": 5848.549000000008,
+          "program": 536.6250000000001,
+          "wasm": 1414.2,
+          "webgl_binding": 171.28199999999995,
+          "garbage_collection": 17.410999999999998,
+          "other": 251.75200000000007
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 69.674
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 34.308
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 32.614
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 32.399
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 30.818000000000005
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 17.193
+          },
+          {
+            "name": "vertexAttribPointer",
+            "milliseconds": 16.802
+          },
+          {
+            "name": "bindBuffer",
+            "milliseconds": 13.679999999999998
+          }
+        ]
+      },
+      {
+        "scenario": "car-moving-firstperson",
+        "variant": "baseline",
+        "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "profile_duration_ms": 8242.032,
+        "samples": 6210,
+        "self_sampled_ms": {
+          "idle": 4276.448000000003,
+          "program": 357.683,
+          "wasm": 3171.702000000002,
+          "webgl_binding": 147.05399999999995,
+          "garbage_collection": 1.338,
+          "other": 286.64000000000004
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 80.224
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 56.512000000000015
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 39.405
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 38.529
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 26.756
+          },
+          {
+            "name": "getError",
+            "milliseconds": 17.69
+          },
+          {
+            "name": "k",
+            "milliseconds": 14.508999999999999
+          },
+          {
+            "name": "bindTexture",
+            "milliseconds": 9.741999999999999
+          }
+        ]
+      },
+      {
+        "scenario": "car-moving-firstperson",
+        "variant": "candidate",
+        "source_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "profile_duration_ms": 8155.691,
+        "samples": 6096,
+        "self_sampled_ms": {
+          "idle": 4170.736000000007,
+          "program": 344.165,
+          "wasm": 3196.2189999999955,
+          "webgl_binding": 165.80200000000002,
+          "garbage_collection": 1.07,
+          "other": 277.3229999999999
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 109.45299999999997
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 55.090999999999994
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 34.695
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 34.525000000000006
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 21.372
+          },
+          {
+            "name": "getError",
+            "milliseconds": 19.814999999999994
+          },
+          {
+            "name": "k",
+            "milliseconds": 15.214
+          },
+          {
+            "name": "wasm-to-js",
+            "milliseconds": 14.721999999999998
+          }
+        ]
+      },
+      {
+        "scenario": "freeflight-moving",
+        "variant": "baseline",
+        "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+        "profile_duration_ms": 8158.765,
+        "samples": 5969,
+        "self_sampled_ms": {
+          "idle": 4768.132000000004,
+          "program": 517.3679999999998,
+          "wasm": 2398.437000000002,
+          "webgl_binding": 150.10500000000005,
+          "garbage_collection": 32.98700000000001,
+          "other": 290.633
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 98.22300000000001
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 45.551
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 32.346
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 26.494000000000003
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 21.081000000000003
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 20.319000000000003
+          },
+          {
+            "name": "getError",
+            "milliseconds": 18.973
+          },
+          {
+            "name": "k",
+            "milliseconds": 13.114
+          }
+        ]
+      },
+      {
+        "scenario": "freeflight-moving",
+        "variant": "candidate",
+        "source_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+        "profile_duration_ms": 8155.872,
+        "samples": 5975,
+        "self_sampled_ms": {
+          "idle": 5347.229999999993,
+          "program": 490.67699999999985,
+          "wasm": 1884.3720000000026,
+          "webgl_binding": 134.87099999999998,
+          "garbage_collection": 41.46699999999999,
+          "other": 256.61300000000006
+        },
+        "top_named_non_wasm_self": [
+          {
+            "name": "getParameter",
+            "milliseconds": 66.936
+          },
+          {
+            "name": "fetch",
+            "milliseconds": 44.96099999999999
+          },
+          {
+            "name": "postMessage",
+            "milliseconds": 25.587
+          },
+          {
+            "name": "checkFramebufferStatus",
+            "milliseconds": 25.35600000000001
+          },
+          {
+            "name": "setImmediate",
+            "milliseconds": 24.1
+          },
+          {
+            "name": "k",
+            "milliseconds": 15.621
+          },
+          {
+            "name": "requestAnimationFrame",
+            "milliseconds": 13.629000000000001
+          },
+          {
+            "name": "bufferSubData",
+            "milliseconds": 11.642
+          }
+        ]
+      }
+    ],
+    "candidate_wasm_section_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      13,
+      6,
+      7,
+      9,
+      12,
+      10,
+      11
+    ],
+    "candidate_wasm_custom_sections": []
+  },
+  "presentation_verification": {
+    "artifact": {
+      "id": 13574098406,
+      "name": "atlas-browser-screens",
+      "size_in_bytes": 29353353,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13574098406",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13574098406/zip",
+      "expired": false,
+      "created_at": "2026-11-07T12:30:06Z",
+      "expires_at": "2027-02-05T12:04:19Z",
+      "updated_at": "2026-11-07T12:30:06Z",
+      "digest": "sha256:474de3affd1d59d2d78e5c7e025d7f673e2acf8186a8c02428d47aa7af9215aa",
+      "workflow_run": {
+        "id": 42370846132,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "main",
+        "head_sha": "9171e95efab06db930a97dde212d754b8da48f60"
+      }
+    },
+    "cases": [
+      {
+        "name": "presentation-pixel",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-normal",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-minecraft",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-roblox",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-earth-overhead",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-elevation",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      }
+    ],
+    "direct_readbacks": 0,
+    "detached_readbacks": 6,
+    "all_detached_readbacks_use_pixel_pack": true,
+    "direct_compositor_and_detached_contexts_observed": true,
+    "map_hashes": {
+      "presentation-pixel": "579abce08c71ef4a1eba2f5b02413a5a46ac7b93981006b2363a37f203cafd45",
+      "presentation-normal": "4e2590d990e202630ddfa0f8412fd63dde1f63296168e33390aa2030d6a37849",
+      "presentation-minecraft": "00a9cc539e2ea1377c88b3617ccf54a14264012b38a3a4d318d4485d66df31e5",
+      "presentation-roblox": "31392c0d38d7d456b85e40899efc3c5ef64ae2ddcb785fc5fb346aa5e6f1755c",
+      "presentation-earth-overhead": "167e2e3413d4e2e5cd7f4321139ad66f2e1779810139cabb516e0a7395782fd0",
+      "presentation-elevation": "3b2275ca2848b05b168234f04a97788a01c8eddd8f65820cce90d788f7a3d543"
+    },
+    "files": {
+      "gpu-direct/visual.json": "66d85b3f48390664ecf07efcf9acf1f273750ed434f383a94b48d6692ae690e8",
+      "gpu-transfer/visual.json": "c021fa5721fff90cc03b2d558bd1d8c2de549e6962deffe30c3bd925fd2130d0",
+      "gpu-direct/comparison.json": "9e12867d8aee13f1c0fc49c1a576d03dc1bef25498812c09eb00ae22904c2ef0"
+    }
+  },
+  "high_dpi_camera_verification": {
+    "record": {
+      "fragment": "v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00",
+      "geometry": {
+        "width": 1800,
+        "height": 924,
+        "ratio": 2,
+        "canvasWidth": 3600,
+        "canvasHeight": 1848
+      },
+      "mapBounds": {
+        "x": 0,
+        "y": 59.5,
+        "width": 1800,
+        "height": 807.5
+      },
+      "data": "Bundled Manhattan; external tile, imagery, elevation and routing hosts are blocked.",
+      "checkpoints": [
+        {
+          "name": "north-up",
+          "input": null,
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": 0
+          },
+          "depthDraws": 63,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          }
+        },
+        {
+          "name": "ground-clamped-close-orbit",
+          "input": {
+            "deltaX": 0,
+            "deltaY": 480,
+            "deltaMode": 0,
+            "ctrl": false,
+            "meta": false,
+            "prevented": true
+          },
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": -15
+          },
+          "depthDraws": 101,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          }
+        },
+        {
+          "name": "orbit-camera-selection",
+          "input": null,
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": -15
+          },
+          "depthDraws": 101,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          },
+          "cameraPicker": {
+            "combo": {
+              "id": "uno-semantics-140818",
+              "role": "combobox",
+              "name": "Free roam camera",
+              "selected": null,
+              "expanded": "true",
+              "controls": "uno-semantics-277522",
+              "activeDescendant": "uno-semantics-288034"
+            },
+            "popup": {
+              "id": "uno-semantics-277522",
+              "role": "listbox",
+              "name": "Free roam camera",
+              "selected": null
+            },
+            "activeOption": {
+              "id": "uno-semantics-288034",
+              "role": "option",
+              "name": "Orbit",
+              "selected": null
+            },
+            "options": [
+              {
+                "id": "uno-semantics-278258",
+                "role": "option",
+                "name": "Third person",
+                "selected": null
+              },
+              {
+                "id": "uno-semantics-277026",
+                "role": "option",
+                "name": "First person",
+                "selected": null
+              },
+              {
+                "id": "uno-semantics-284594",
+                "role": "option",
+                "name": "Cockpit",
+                "selected": null
+              },
+              {
+                "id": "uno-semantics-288034",
+                "role": "option",
+                "name": "Orbit",
+                "selected": null
+              },
+              {
+                "id": "uno-semantics-290834",
+                "role": "option",
+                "name": "North up",
+                "selected": null
+              }
+            ],
+            "ariaSnapshot": "- listbox \"Free roam camera\":\n  - option \"Third person\"\n  - option \"First person\"\n  - option \"Cockpit\"\n  - option \"Orbit\"\n  - option \"North up\""
+          }
+        },
+        {
+          "name": "near-horizon",
+          "input": {
+            "deltaX": 0,
+            "deltaY": -240,
+            "deltaMode": 0,
+            "ctrl": false,
+            "meta": false,
+            "prevented": true
+          },
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": -15
+          },
+          "depthDraws": 136,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          }
+        },
+        {
+          "name": "elevated-orbit",
+          "input": {
+            "deltaX": 0,
+            "deltaY": -240,
+            "deltaMode": 0,
+            "ctrl": false,
+            "meta": false,
+            "prevented": true
+          },
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": -15
+          },
+          "depthDraws": 152,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          }
+        },
+        {
+          "name": "near-horizon-again",
+          "input": {
+            "deltaX": 0,
+            "deltaY": 240,
+            "deltaMode": 0,
+            "ctrl": false,
+            "meta": false,
+            "prevented": true
+          },
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": -15
+          },
+          "depthDraws": 167,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          }
+        },
+        {
+          "name": "ground-clamped-again",
+          "input": {
+            "deltaX": 0,
+            "deltaY": 240,
+            "deltaMode": 0,
+            "ctrl": false,
+            "meta": false,
+            "prevented": true
+          },
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": -15
+          },
+          "depthDraws": 182,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          }
+        },
+        {
+          "name": "paused-close-camera",
+          "input": null,
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 24,
+            "bearing": -15
+          },
+          "depthDraws": 187,
+          "telemetry": {
+            "speed": 0,
+            "altitude": 44.2,
+            "clearance": 0,
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "distance": 0
+          }
+        },
+        {
+          "name": "returned-to-map",
+          "input": null,
+          "camera": {
+            "latitude": 40.7087,
+            "longitude": -74.0104,
+            "zoom": 16.5,
+            "bearing": -15
+          },
+          "depthDraws": 211,
+          "telemetry": null
+        }
+      ],
+      "failures": []
+    },
+    "file": "explore/high-dpi-close-camera.json",
+    "sha256": "6a33a6a8aed820c93ba89dce92aa6911540f7212ea22dcc0c5ecdfc60f0ca0fa",
+    "scope": "DPR2 input/camera/runtime regression with bundled Manhattan and relief explicitly enabled. This does not reproduce the uncaptured broader live tile set or total live process heap.",
+    "images": [
+      {
+        "file": "explore/high-dpi-close-camera-recovered.png",
+        "sha256": "a02b31017360f177fa438c34326821dde8bf1c200f0e2456dece9f81445042ab"
+      },
+      {
+        "file": "explore/high-dpi-ground-clamped-orbit.png",
+        "sha256": "82eeb73b8c15a4cb2f66345d5b79e4d491e4e69a052458afc133eaf2cbf992ba"
+      },
+      {
+        "file": "explore/high-dpi-north-up.png",
+        "sha256": "96a47064fe1a8e31862a76749874a1202e8ae337cda79d5fc2dd720d17d92152"
+      }
+    ],
+    "retained_trace_file": "browser-close-camera-9171e95.json"
+  },
+  "regression_traces": {
+    "source_sha": "9171e95efab06db930a97dde212d754b8da48f60",
+    "run_id": 42370846132,
+    "verify_job_id": 128401356048,
+    "artifact_id": 13574098406,
+    "artifact_zip_sha256": "474de3affd1d59d2d78e5c7e025d7f673e2acf8186a8c02428d47aa7af9215aa",
+    "artifact_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132/artifacts/13574098406",
+    "retention": "These three exact raw JSON files are retained in the repository independently of Actions artifact expiry.",
+    "files": [
+      {
+        "file": "browser-close-camera-9171e95.json",
+        "original_artifact_path": "explore/high-dpi-close-camera.json",
+        "bytes": 6316,
+        "sha256": "6a33a6a8aed820c93ba89dce92aa6911540f7212ea22dcc0c5ecdfc60f0ca0fa"
+      },
+      {
+        "file": "browser-journey-draft-cpu-9171e95.json",
+        "original_artifact_path": "journey-plan-via-input.json",
+        "bytes": 376,
+        "sha256": "6efa408e1f9b07d4691c49cd5b35700d8b34d16850fd846230f194e41e51e7fd",
+        "calculate_pointer_down_records": 1,
+        "pending_coordinate_value_observed": true
+      },
+      {
+        "file": "browser-journey-draft-gpu-9171e95.json",
+        "original_artifact_path": "gpu/journey-plan-via-input.json",
+        "bytes": 376,
+        "sha256": "43029e81ada12d1364fd4142ba5547e5f26279941f84fcf633f606b264b98fff",
+        "calculate_pointer_down_records": 1,
+        "pending_coordinate_value_observed": true
+      }
+    ]
+  },
+  "source_equivalence": {
+    "measured_source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+    "accepted_source_sha": "9171e95efab06db930a97dde212d754b8da48f60",
+    "shared_src_tree": "be18099689edbe6a951b9e604691adb28af13365",
+    "changed_paths": [
+      "tests/browser/explore.cjs"
+    ],
+    "scope": "The full src tree is identical. The only change is the browser test assertion for the actual selected camera option. Assembly metadata and package/runtime identities may differ between builds."
+  },
+  "measurement_verification": {
+    "run_id": 42366657287,
+    "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+    "run_conclusion": "failure",
+    "benchmark_job_id": 128388806903,
+    "benchmark_conclusion": "success",
+    "preceding_verify_failure": "The newly added DPR2 test attempted to read the selected value from a closed ComboBox accessibility snapshot, which exposes only its name. The first two close-camera checkpoints and both CPU/GPU immediate-submit journey checks passed; full acceptance follows from the corrected test-only source."
+  },
+  "superseded_acceptance_attempts": [
+    {
+      "source_sha": "af20f373853401c3c5d9dd92515025a8b51b9f7b",
+      "run_id": 42368597816,
+      "verify_job_id": 128394053471,
+      "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42368597816",
+      "verify_conclusion": "failure",
+      "deploy_conclusion": "skipped",
+      "reason": "The test required aria-selected=true on a virtualized option whose initial selection is exposed by the ComboBox aria-activedescendant instead. The actual popup screenshot shows Orbit selected and its ARIA snapshot contains the named Orbit option without selected state. No application source changed in the correction.",
+      "failure_audit": {
+        "source_sha": "af20f373853401c3c5d9dd92515025a8b51b9f7b",
+        "run_id": 42368597816,
+        "verify_job_id": 128394053471,
+        "conclusion": "failure",
+        "deploy_conclusion": "skipped",
+        "artifact_id": 13573422364,
+        "artifact_zip_sha256": "40cbb58de514c81bf266ab0417f54c03e3226353c64665c1eceeaf10f4763a16",
+        "failure": "The test required aria-selected=true on the already-selected Orbit option. The opened listbox and option exist, but the actual popup AX snapshot contains no selected option state. The screenshot visibly marks Orbit as selected.",
+        "actual_popup_name": "Free roam camera",
+        "actual_option_names": [
+          "Third person",
+          "First person",
+          "Cockpit",
+          "Orbit",
+          "North up"
+        ],
+        "observed_selected_option_in_screenshot": "Orbit",
+        "console_failures_in_checkpoint_trace": [],
+        "scope": "Two camera checkpoints passed; horizon traversal, pause/resume/exit and later exploration checks were not reached. This is not full release acceptance.",
+        "files": {
+          "explore/explore-failure.txt": {
+            "bytes": 2089,
+            "sha256": "3ca0e5cc5fcaaab48a77517be61643d8c15fc0d908a046b45d819b9658e18ac6"
+          },
+          "explore/explore-failure.png": {
+            "bytes": 280367,
+            "sha256": "0c66f2b7fbec8ab94ed6e983d5f0774d015dc6110a79e54a573794708ddbfcfb"
+          },
+          "explore/high-dpi-close-camera.json": {
+            "bytes": 1390,
+            "sha256": "71341a3494a36feb0392903eb96315871b296e4c46af168cfe8b9545090343cf"
+          },
+          "journey-plan-via-input.json": {
+            "bytes": 375,
+            "sha256": "71c892b33b3ccbad37f8c49533ea0ef0e9674dabc5f1fc73d8069d2f4a78b38f"
+          },
+          "gpu/journey-plan-via-input.json": {
+            "bytes": 375,
+            "sha256": "31484fd4f37c3802598380f6964acbe4b15303dada509ffa6b77d8c912827995"
+          }
+        }
+      }
+    }
+  ],
+  "release_verification": {
+    "run_id": 42370846132,
+    "run_conclusion": "success",
+    "source_sha": "9171e95efab06db930a97dde212d754b8da48f60",
+    "source_tree": "a66042efc796242b5a8152d17d720e1416944b70",
+    "run_created_utc": "2026-11-07T12:04:19Z",
+    "run_updated_utc": "2026-11-07T12:30:25Z",
+    "deploy_reported_success_utc": "2026-11-07T12:30:22.8567933Z",
+    "url": "https://wieslawsoltes.github.io/UnoPixelMap/",
+    "jobs": [
+      {
+        "id": 128398461918,
+        "name": "browser",
+        "conclusion": "success",
+        "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132/job/128398461918"
+      },
+      {
+        "id": 128401356048,
+        "name": "verify",
+        "conclusion": "success",
+        "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132/job/128401356048"
+      },
+      {
+        "id": 128401356988,
+        "name": "play-benchmark",
+        "conclusion": "skipped",
+        "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132/job/128401356988"
+      },
+      {
+        "id": 128404089291,
+        "name": "deploy",
+        "conclusion": "success",
+        "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132/job/128404089291"
+      }
+    ],
+    "high_dpi_camera_success_utc": "2026-11-07T12:27:23.3173054Z",
+    "all_exploration_checks_passed_utc": "2026-11-07T12:30:02.6746600Z",
+    "strict_packaging": {
+      "package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+      "boot_resources": 72,
+      "compressed_representations": 250,
+      "idempotence_passes": 2,
+      "all_paths_and_bytes_unchanged": true
+    },
+    "log_sha256": {
+      "build": "7118cf78b6b9ddfda2c60521f987f6d1d1bb7f3bc4dbfb2ebbecbd8bf833cf69",
+      "verify": "b5ebdc990a5f9fec5394c33690eb845ae11bd19f625294672a03eec40e6b521b",
+      "deploy": "55dc304afdc955bdb8309922ab550d4de9f03ec1f519bb9c688b08f869155099"
+    }
+  },
+  "measurement_identity": {
+    "artifact_zip_sha256": "fe57ca3bef3e916c020d0ab701e8226665472f466674f6104dbad6397fc4b034",
+    "source_sha": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+    "runtime_mode": "InterpreterAndAOT",
+    "active_package": "package_5000649e82e094724cb1d59b86e20497c6c6d19eb9dd0283102132a1c1804cc4",
+    "index": {
+      "name": "index.html",
+      "sha256": "d4f4e22cdcbad489408760d4c29e1d132afb72365415cd0f918b7a9ebb7a86d5",
+      "bytes": 2137
+    },
+    "bootstrap": {
+      "name": "package_5000649e82e094724cb1d59b86e20497c6c6d19eb9dd0283102132a1c1804cc4/uno-bootstrap.js",
+      "sha256": "d708d71bcf811612c237c915d551d9143e97d7a87f8392a90514634d34019fd8",
+      "bytes": 62314
+    },
+    "config": {
+      "name": "package_5000649e82e094724cb1d59b86e20497c6c6d19eb9dd0283102132a1c1804cc4/uno-config.js",
+      "sha256": "4fa222434e1bffd38a933e2a0b726d5d3aa7e8046002e8d15bb69cb3fb31afff",
+      "bytes": 1828
+    },
+    "loader": {
+      "name": "_framework/dotnet.n9zuuu9c24.js",
+      "sha256": "f54b05fd7c3b434388c3360952ff5314a46dbaf6818f292abca178f8185e6131",
+      "bytes": 56567
+    },
+    "adapters": [
+      {
+        "name": "audio/journey-audio.js",
+        "sha256": "3558402843455fe43db70e5fae77c275799020db712c4dfdb613e2ccd13a5523",
+        "bytes": 8134
+      },
+      {
+        "name": "input/map-input.js",
+        "sha256": "f29e5c0343298556cdb003cc0d601d19edb0a25ac5dbea1c7c2a64f6ac0cefca",
+        "bytes": 14061
+      }
+    ],
+    "verified_resource_count": 72
+  },
+  "published_identity": {
+    "artifact_zip_sha256": "2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73",
+    "source_sha": "9171e95efab06db930a97dde212d754b8da48f60",
+    "runtime_mode": "InterpreterAndAOT",
+    "active_package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+    "index": {
+      "name": "index.html",
+      "sha256": "0340cba99bdf6fdc2f58c96622feef3cd3e32e25d01da25d572d3d235fade482",
+      "bytes": 2137
+    },
+    "bootstrap": {
+      "name": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9/uno-bootstrap.js",
+      "sha256": "d708d71bcf811612c237c915d551d9143e97d7a87f8392a90514634d34019fd8",
+      "bytes": 62314
+    },
+    "config": {
+      "name": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9/uno-config.js",
+      "sha256": "08b551f05f714fc557811596e254cb74960d64ac228d1ab29030264e7e69f581",
+      "bytes": 1828
+    },
+    "loader": {
+      "name": "_framework/dotnet.9a2r0bvpc9.js",
+      "sha256": "5180ff773f69c6b957827d123d9e984355af1054fe31f558dd2cc3de8f6462df",
+      "bytes": 56567
+    },
+    "adapters": [
+      {
+        "name": "audio/journey-audio.js",
+        "sha256": "3558402843455fe43db70e5fae77c275799020db712c4dfdb613e2ccd13a5523",
+        "bytes": 8134
+      },
+      {
+        "name": "input/map-input.js",
+        "sha256": "f29e5c0343298556cdb003cc0d601d19edb0a25ac5dbea1c7c2a64f6ac0cefca",
+        "bytes": 14061
+      }
+    ],
+    "verified_resource_count": 72
+  },
+  "accepted_pages_artifact": {
+    "id": 13574430917,
+    "name": "github-pages",
+    "size_in_bytes": 88296669,
+    "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13574430917",
+    "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13574430917/zip",
+    "expired": false,
+    "created_at": "2026-11-07T12:17:35Z",
+    "expires_at": "2026-11-14T12:17:29Z",
+    "updated_at": "2026-11-07T12:17:35Z",
+    "digest": "sha256:2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73",
+    "workflow_run": {
+      "id": 42370846132,
+      "repository_id": 1443492055,
+      "head_repository_id": 1443492055,
+      "head_branch": "main",
+      "head_sha": "9171e95efab06db930a97dde212d754b8da48f60"
+    }
+  },
+  "accepted_boot_resources": [
+    {
+      "group": "jsModuleNative",
+      "name": "dotnet.native.tmo31e415o.js",
+      "sha256": "8b473fd368e98adf895746e5131968b6d461fe6aa5823d67037ec7ecc1194bc6",
+      "bytes": 414058
+    },
+    {
+      "group": "jsModuleRuntime",
+      "name": "dotnet.runtime.5nc8i5dl74.js",
+      "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d",
+      "bytes": 198480
+    },
+    {
+      "group": "wasmNative",
+      "name": "dotnet.native.r40ls9zxle.wasm",
+      "sha256": "153cd183a5572ea9be22944ab059a586d75c7b45a1fa272f21abbe5df96d43c7",
+      "bytes": 65940113
+    },
+    {
+      "group": "icu",
+      "name": "icudt_CJK.tjcz0u77k5.dat",
+      "sha256": "4992ed42745cd09930a8769bd155153fb4f7b813d2798cf1cc39e9c4fa549c79",
+      "bytes": 956416
+    },
+    {
+      "group": "icu",
+      "name": "icudt_EFIGS.tptq2av103.dat",
+      "sha256": "f1f22d7ad618f24434c30ea8c704cb893de85e50701caba66de3f6a51178c937",
+      "bytes": 550832
+    },
+    {
+      "group": "icu",
+      "name": "icudt_no_CJK.lfu7j35m59.dat",
+      "sha256": "2fbb15ecd1183f7eff42bd853c278fa39709a918135d1c061eec05e50fb435fb",
+      "bytes": 1107168
+    },
+    {
+      "group": "coreAssembly",
+      "name": "CommonServiceLocator.ukyzr3es9y.wasm",
+      "sha256": "329f6f7c3651c3118f398f95dbef3e7f491b1340359eb8a79faf0e9197fac208",
+      "bytes": 4885
+    },
+    {
+      "group": "coreAssembly",
+      "name": "HarfBuzzSharp.lwf1lgi861.wasm",
+      "sha256": "3b646f6e48032206a913f499fe461b98795c4b94cd75ad823731054b822fc731",
+      "bytes": 28949
+    },
+    {
+      "group": "coreAssembly",
+      "name": "LibTessDotNet.crzkfkf89i.wasm",
+      "sha256": "082149dde1c08d7c54870523d654106d328324a3dc6c639437511cb75edbe7f5",
+      "bytes": 31509
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Microsoft.Extensions.Logging.Abstractions.mpr032n10k.wasm",
+      "sha256": "b69874361df91da4f3a22acefdcd8f3730160dcb1859eaa440767dafcbf2ba4d",
+      "bytes": 12053
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Microsoft.Extensions.Logging.qmh9uu1lj0.wasm",
+      "sha256": "7ed83b989a8094f8fd109d2e280658a4bfe6db756b1d8c988c40fac1fbe81e92",
+      "bytes": 16149
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Microsoft.Extensions.Options.g14ttqkiwj.wasm",
+      "sha256": "b45eda73d20aca050e34ae2695375a3b5e114d6c280aa1cc872b911b9e401038",
+      "bytes": 6421
+    },
+    {
+      "group": "coreAssembly",
+      "name": "PixelMap.App.1oqhi4q9on.wasm",
+      "sha256": "bf9cff2df064431bd741989287d57a02668ac699c165f81ff4de934fa3b05e99",
+      "bytes": 6207257
+    },
+    {
+      "group": "coreAssembly",
+      "name": "PixelMap.Audio.31xqkmbnlb.wasm",
+      "sha256": "b7455ce35ce991740ac6558a11eb409071cb94d61151d2a046489d3777485c8a",
+      "bytes": 9493
+    },
+    {
+      "group": "coreAssembly",
+      "name": "PixelMap.Controls.br4b75mhjv.wasm",
+      "sha256": "29d8e28cc8a9a454a63fc3706a5a56c2c042a53518fec16b263852bfc363ab9e",
+      "bytes": 104725
+    },
+    {
+      "group": "coreAssembly",
+      "name": "PixelMap.Data.sa28nblaf8.wasm",
+      "sha256": "5cef2dd41b776b0a8b2028809192e9fcee0b1cbcf63234a4dc68841fe478495e",
+      "bytes": 3151641
+    },
+    {
+      "group": "coreAssembly",
+      "name": "PixelMap.Rendering.x3p64tvzp3.wasm",
+      "sha256": "9d8c0abcfe27555f10b0a42e646b5e847c390f26ca32ba6ee233ad4a5ab4b991",
+      "bytes": 333077
+    },
+    {
+      "group": "coreAssembly",
+      "name": "PixelMap.Routing.iufnsx0uxf.wasm",
+      "sha256": "faef650edfe1673615d5887b3711e479a0c92f93f1e9c0b095d9cfb222e676a4",
+      "bytes": 69397
+    },
+    {
+      "group": "coreAssembly",
+      "name": "PixelMap.Simulation.44aiz12041.wasm",
+      "sha256": "b4caee85d038c4762f672f569851c8445ccf74c085d07f4a1a347f9df8f5513d",
+      "bytes": 56085
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Silk.NET.Core.irny1tzrsi.wasm",
+      "sha256": "ced1ea04885913057f48865cd0aa4b4041ba8eda9e75e310e31c5687060327d8",
+      "bytes": 14613
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Silk.NET.OpenGL.pyabgkja9u.wasm",
+      "sha256": "bf637b3a39c5d52ab8cba2da3c036ddee90689e3cc39db62d76599c307830e9b",
+      "bytes": 230165
+    },
+    {
+      "group": "coreAssembly",
+      "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+      "sha256": "3330bc28a3f1c22072d7ca8ec3aca5e68a42f6774d9bd7bcd575c3b539bb67d2",
+      "bytes": 6421
+    },
+    {
+      "group": "coreAssembly",
+      "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+      "sha256": "83a0935a743e40eb8ea87daded2abd8a765855a37b20e08eb399fd78928cd17c",
+      "bytes": 8981
+    },
+    {
+      "group": "coreAssembly",
+      "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+      "sha256": "8bec56cec65707287a4d7a1473c9fa0a91b24b1f36ff4c1d85523c7efe97019f",
+      "bytes": 13077
+    },
+    {
+      "group": "coreAssembly",
+      "name": "SkiaSharp.6bzq5bigir.wasm",
+      "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82",
+      "bytes": 143637
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Collections.Concurrent.ajnvvkksra.wasm",
+      "sha256": "e617759820fe62f1694633f132ec7a59cd08255f0c912804e15b9e84cd110dd1",
+      "bytes": 28437
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Collections.Immutable.rqpx5bg4jl.wasm",
+      "sha256": "6dcef119932aa14daf126b20b24b43518682c3329e1142dca954f132c7ee0317",
+      "bytes": 54037
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Collections.NonGeneric.kkxpvokdtg.wasm",
+      "sha256": "34d56f8fdb74a452306948f7598cdc3ea745c0da6076ef1de306f4ec2dbce64e",
+      "bytes": 11541
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Collections.Specialized.j3sjtyx29u.wasm",
+      "sha256": "0156b2f518bc6f339d8d55feb99a95c9156f7d7f1a81e8307fe6a8e645b547bf",
+      "bytes": 10005
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Collections.vcygonji41.wasm",
+      "sha256": "116a113890f40036d6c8f2f1818cb8de215a4cde4cd2215737b4066e8e4938c3",
+      "bytes": 36629
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.ComponentModel.g3pwvcjcrg.wasm",
+      "sha256": "f459ba180c859a26f524ba65827066a70b9affe548e5de42c0b89cb1db846b55",
+      "bytes": 4885
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.ComponentModel.Primitives.t2v0oareoy.wasm",
+      "sha256": "554d3049cd02483d27d963b45681035a4244fdbf327fe910ce6fdaf8a7cf6221",
+      "bytes": 10005
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.ComponentModel.TypeConverter.2acv8geycx.wasm",
+      "sha256": "eaf7747eeba897fb131bc4a00557425335dc53b711875ea1974094730b9106b6",
+      "bytes": 87829
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Console.8asle477ur.wasm",
+      "sha256": "7010e8671ead33807e1d63efc3af5a5b801fba280eb2cdde2d20143e050c36f3",
+      "bytes": 14613
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Drawing.Primitives.nn7jqfbl79.wasm",
+      "sha256": "7d6cfcf6af203d16c1e896264ae07395782c4a4e59d2bc6f01685efc70d5fddc",
+      "bytes": 10517
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Drawing.nxsyxvwmnf.wasm",
+      "sha256": "fbe3be42f3ae0a9641a516c2490147c20b2c0abd4bee59a015221bdadd1f4a47",
+      "bytes": 4885
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.IO.Compression.t357pfbby0.wasm",
+      "sha256": "672586bcafa825d9a73bfe5f750eb8750623ef7d1d6c5d54da7b57b4c0d5ab0d",
+      "bytes": 29973
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.IO.Pipelines.bs0ouzxqxi.wasm",
+      "sha256": "050ccde057a06086e4b69b83fd06bc8f47ebb633f577795564cbb38a17267338",
+      "bytes": 5909
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Linq.Expressions.7zweb26hu8.wasm",
+      "sha256": "8d8eabb9a9d4c623e818ee9067b0a5710b89c69e8d4d3102346b072ac30fd364",
+      "bytes": 367893
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Linq.q457punoy8.wasm",
+      "sha256": "ba76376857e644ce76008f0ff4d3c0d41d11685768a302a39175cf52c4fa44e1",
+      "bytes": 93973
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Memory.2acfgvgghp.wasm",
+      "sha256": "ead7a8eed580f4f1556448d0ddc7fbb2eb408d9e638d60ef7d6032e74e437b64",
+      "bytes": 14101
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Net.Http.5jkdru1ctm.wasm",
+      "sha256": "31ec0be616b394a143a1d6eefd88e7028ed0a82ff64c5a10d3ebfd908a81650a",
+      "bytes": 140565
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Net.Primitives.wr5ku4tjce.wasm",
+      "sha256": "3c58c1da45d55b0d08af9cdf8f1d298b3781e3108936c145c9e503095b33562b",
+      "bytes": 7445
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.ObjectModel.av0m9ib997.wasm",
+      "sha256": "e6cef0c31897e62d519f27229adc1484b32cd51faf8c4de76f4015742ce02afa",
+      "bytes": 15637
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Private.CoreLib.0jgd5hx6dl.wasm",
+      "sha256": "14d2d9952efa3823fe7d0ab39f2957dc012aad7031f7862e84cbdb030e73d78b",
+      "bytes": 1930517
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Private.Uri.nmnyz2eidv.wasm",
+      "sha256": "1f57dbf1a140f1b0759fb1a85e283143bfdec024197f4b7c7c5d7682557831f1",
+      "bytes": 72981
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Private.Xml.x61a4mvfse.wasm",
+      "sha256": "778f5be3f71adaf091aa2f4f95ceb178756fc6da1a6125211ca9a1c20ba6f9ab",
+      "bytes": 531733
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Runtime.InteropServices.JavaScript.wjudxd2z05.wasm",
+      "sha256": "142ff9a62a316de9ddaafcb43b80913dc7c7db0a7c96626a124db9ea9738116d",
+      "bytes": 48917
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Security.Cryptography.hjdh28m8dh.wasm",
+      "sha256": "cd2013526aad255162483e2f04b1e160480ed035d418e53b87f68e58436dbb22",
+      "bytes": 6933
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Text.Encodings.Web.409810hzt0.wasm",
+      "sha256": "6caf10192a477ab1a4e1a8b94038dc546eaf97137401a4b3a631aee5346c4019",
+      "bytes": 29461
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Text.Json.2m50hjpw08.wasm",
+      "sha256": "6a89fe893fbe127f14346f5bcd5f607dcf278bfc7a93a3e5a90029eda3f82060",
+      "bytes": 250645
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.Text.RegularExpressions.77jjwmegg8.wasm",
+      "sha256": "0d00bd1d87b8e23de4d412a01fb634c520bb448806f506a45e8b48b339200084",
+      "bytes": 165653
+    },
+    {
+      "group": "coreAssembly",
+      "name": "System.a3z5tpzyvn.wasm",
+      "sha256": "1ace5b022a74634ed8eeb764e02627a73ac1786a6502e7450042d410b7c1cbcd",
+      "bytes": 4885
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.fmbs8vjlnx.wasm",
+      "sha256": "d77d0f49f7ed269f4695e96a90e32876d52951de359a3bc7f301f3c8aa2e96a3",
+      "bytes": 694549
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.Core.Extensions.Logging.tx34v3idjk.wasm",
+      "sha256": "f1b778e5b3f876bc740760449dc7a53b77cfbb78a03c2859922ad3e84c87d0bc",
+      "bytes": 6421
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.Core.Extensions.Logging.Singleton.goqx5ykemm.wasm",
+      "sha256": "b04d1b452c9b0b34d6a9da77aaf23928be2139c14f84a24f1f46127c824ea244",
+      "bytes": 7957
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.Diagnostics.Eventing.bsz5ci2pgy.wasm",
+      "sha256": "9547bed7d3e2c2aede5c04e506eed66f7ab29316ebc5756e036cf5dc29e1eb75",
+      "bytes": 8981
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.Foundation.Logging.renv1nr86x.wasm",
+      "sha256": "4395972a1ff8e3cd085138146236bd57f1ee922a33de379ffc8d00e3d5486288",
+      "bytes": 11029
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.Foundation.Runtime.WebAssembly.km8s5j6taq.wasm",
+      "sha256": "ac0be8e2f502505553fece7d263bd26c6f309d6b2265edfbc17cdb22fc7d19eb",
+      "bytes": 57621
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.Foundation.vlgc9ffcv7.wasm",
+      "sha256": "1314f7e0992b094d521fa4e3d05f65201e0f71bfc152a8800f9945ac41524527",
+      "bytes": 98581
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+      "sha256": "38e6dc99802d58d0c7896562d0728ca54ff882192c727e3d3ada7e6d00451079",
+      "bytes": 250133
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+      "sha256": "865d99094ccf1a2783b59bcc2b739cc354dee641e81c62047c213c425adfa51e",
+      "bytes": 26389
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+      "sha256": "48c9648a0591741d6c8ffa82fb762c9fc24ffbfa6eb79ea7cc5f26882843f583",
+      "bytes": 3157273
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+      "sha256": "f7e11c9a2a010cf5e9d498b8b0e107d8b0d63a0c308770023ac20ab7f48dd01a",
+      "bytes": 14101
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.Lottie.o8obruisre.wasm",
+      "sha256": "78a2dc965e0dbe0335dd2204795d840bb120f2ec295053ac07e15f8ab16a9ef5",
+      "bytes": 58133
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+      "sha256": "d765dd49065cffb92d2ab80c36362b98115aab26182cb8b84950180cb26ae385",
+      "bytes": 881941
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+      "sha256": "17f211fb69fe6084a3954bfeb458842f77b2a5b6fe11700f13cfeb2e71d1d79b",
+      "bytes": 15637
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+      "sha256": "f90fbdc306d961a83af29cf06e2b6a15c4791ab21148b43e983df91161a97859",
+      "bytes": 60693
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.UI.4m88unnvnt.wasm",
+      "sha256": "9ca7fa14fd307a2c5d4c70919fa54b156aa3e916ae48a81b5b658708454a6fab",
+      "bytes": 9681177
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.WinUI.Graphics2DSK.kw64qixynf.wasm",
+      "sha256": "f46d25c54ab7cad77f89a51960ad506855d7e52b68dab1ab9004439f9d260784",
+      "bytes": 6933
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.WinUI.Graphics3DGL.f1ii2wdxps.wasm",
+      "sha256": "2d0238035a8d20d282870ae9d90afeb256ea8af9b4f116f1f5f0962ba3d52a38",
+      "bytes": 17685
+    },
+    {
+      "group": "coreAssembly",
+      "name": "Uno.Xaml.ddg0hhofs5.wasm",
+      "sha256": "1fd8978cd634488fca207f13d6f64a7868ca4469968699f522a5d3bf7d725a01",
+      "bytes": 80661
+    }
+  ],
+  "sampling": {
+    "requested_warmup_ms": 2000,
+    "requested_measurement_ms": 8000,
+    "moving_runs": 20,
+    "stationary_runs": 10,
+    "moving_submissions_per_run_minimum": 30,
+    "moving_submissions_per_run_maximum": 65,
+    "actual_moving_duration_ms_minimum": 8003.20000000007,
+    "actual_moving_duration_ms_maximum": 8261.600000000035,
+    "all_moving_submissions_use_pixel_size_4": true
+  },
+  "observed_regressions": [
+    {
+      "scenario": "map-idle-relief",
+      "map_submissions_change_percent": null,
+      "submission_interval_p95_change_percent": null,
+      "task_cpu_change_percentage_points": 0.04083644964884603
+    },
+    {
+      "scenario": "walk-stationary-firstperson",
+      "map_submissions_change_percent": null,
+      "submission_interval_p95_change_percent": null,
+      "task_cpu_change_percentage_points": 0.21176666099252994
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "map_submissions_change_percent": 2.1025070017925307,
+      "submission_interval_p95_change_percent": -12.824058071198829,
+      "task_cpu_change_percentage_points": 1.6985838758497813
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "map_submissions_change_percent": -0.4884260399248941,
+      "submission_interval_p95_change_percent": -3.5879374862401003,
+      "task_cpu_change_percentage_points": 0.4014908031121074
+    },
+    {
+      "scenario": "car-stationary-chase",
+      "map_submissions_change_percent": null,
+      "submission_interval_p95_change_percent": null,
+      "task_cpu_change_percentage_points": 0.4316233934470777
+    },
+    {
+      "scenario": "car-moving-chase",
+      "map_submissions_change_percent": 2.3359606025661117,
+      "submission_interval_p95_change_percent": -1.0439210693914514,
+      "task_cpu_change_percentage_points": 0.14205513754545507
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "map_submissions_change_percent": 6.131847817473912,
+      "submission_interval_p95_change_percent": -7.560009898537523,
+      "task_cpu_change_percentage_points": 0.240033145887395
+    },
+    {
+      "scenario": "freeflight-stationary",
+      "map_submissions_change_percent": null,
+      "submission_interval_p95_change_percent": null,
+      "task_cpu_change_percentage_points": 0.10847993777631526
+    },
+    {
+      "scenario": "freeflight-moving",
+      "map_submissions_change_percent": 3.0574352092479273,
+      "submission_interval_p95_change_percent": -2.039715087418925,
+      "task_cpu_change_percentage_points": 0.2881505703011058
+    }
+  ],
+  "moving_pair_changes": [
+    {
+      "scenario": "walk-moving-firstperson",
+      "repetition": 1,
+      "execution_order": "baseline then candidate",
+      "map_submissions_change_percent": 2.403206996818308,
+      "task_cpu_change_percentage_points": 2.1329185503683767,
+      "submission_interval_p95_change_percent": -12.612612612612617
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "repetition": 2,
+      "execution_order": "candidate then baseline",
+      "map_submissions_change_percent": 1.8018408131194708,
+      "task_cpu_change_percentage_points": 1.2642492013311788,
+      "submission_interval_p95_change_percent": -13.018930587830113
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "repetition": 1,
+      "execution_order": "baseline then candidate",
+      "map_submissions_change_percent": -1.2987798973563058,
+      "task_cpu_change_percentage_points": 0.02335311317626676,
+      "submission_interval_p95_change_percent": -8.079930495211018
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "repetition": 2,
+      "execution_order": "candidate then baseline",
+      "map_submissions_change_percent": 0.3231441048037853,
+      "task_cpu_change_percentage_points": 0.779628493047948,
+      "submission_interval_p95_change_percent": 1.0263275323465493
+    },
+    {
+      "scenario": "car-moving-chase",
+      "repetition": 1,
+      "execution_order": "baseline then candidate",
+      "map_submissions_change_percent": 2.3963033834079495,
+      "task_cpu_change_percentage_points": -0.2780094218221407,
+      "submission_interval_p95_change_percent": -4.283870967765968
+    },
+    {
+      "scenario": "car-moving-chase",
+      "repetition": 2,
+      "execution_order": "candidate then baseline",
+      "map_submissions_change_percent": 2.2770240875620296,
+      "task_cpu_change_percentage_points": 0.5621196969130651,
+      "submission_interval_p95_change_percent": 2.1105527638249466
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "repetition": 1,
+      "execution_order": "baseline then candidate",
+      "map_submissions_change_percent": 8.945173783392502,
+      "task_cpu_change_percentage_points": 0.867015315220705,
+      "submission_interval_p95_change_percent": -15.263285610295274
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "repetition": 2,
+      "execution_order": "candidate then baseline",
+      "map_submissions_change_percent": 3.456263899184586,
+      "task_cpu_change_percentage_points": -0.386949023445915,
+      "submission_interval_p95_change_percent": 0.4544306993301328
+    },
+    {
+      "scenario": "freeflight-moving",
+      "repetition": 1,
+      "execution_order": "baseline then candidate",
+      "map_submissions_change_percent": 6.051014289996992,
+      "task_cpu_change_percentage_points": -2.1348159463543936,
+      "submission_interval_p95_change_percent": -13.272120200330317
+    },
+    {
+      "scenario": "freeflight-moving",
+      "repetition": 2,
+      "execution_order": "candidate then baseline",
+      "map_submissions_change_percent": 0.07119927052063879,
+      "task_cpu_change_percentage_points": 2.711117086956598,
+      "submission_interval_p95_change_percent": 9.991059454615803
+    }
+  ],
+  "live_validation": {
+    "source_sha": "9171e95efab06db930a97dde212d754b8da48f60",
+    "workflow_run_id": 42370846132,
+    "status": "failed",
+    "release_accepted": false,
+    "first_abort_utc": "2026-11-07T12:36:14.277Z",
+    "observed_package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+    "evidence_file": "live-native-raster-failure-9171e95.json",
+    "confirmed_failure": "Exact WASM disassembly and pinned Skia source identify native allocation failure in sk_malloc_flags, called by SkArenaAlloc::ensureSpace while SkEdgeBuilder::buildPoly allocated edge pointers during SkScan::FillPath CPU rasterization. The runtime then aborted; no managed OutOfMemoryException was logged for this failure.",
+    "configured_linear_memory_maximum_bytes": 2147483648,
+    "usage_at_abort_observed": false,
+    "allocation_request_size_observed": false,
+    "scope": "The successful bundled-data CI checks remain valid. This live check used online provider data and native input delivery, whose exact data/input sequence differs from CI and was not fully captured. The configured 2 GiB ceiling is not a measurement that the heap reached that size. Native allocation failure is established; the mechanism of heap exhaustion or growth failure remains under investigation."
+  }
+}

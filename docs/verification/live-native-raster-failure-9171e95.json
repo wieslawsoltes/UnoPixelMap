@@ -1,0 +1,97 @@
+{
+  "SourceRevision": "9171e95efab06db930a97dde212d754b8da48f60",
+  "Status": "Live acceptance failed after successful CI and deployment; later screenshots and DOM states were stale.",
+  "WorkflowRun": 42370846132,
+  "Package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+  "NativeWasm": {
+    "File": "dotnet.native.r40ls9zxle.wasm",
+    "Sha256": "153cd183a5572ea9be22944ab059a586d75c7b45a1fa272f21abbe5df96d43c7"
+  },
+  "Url": "https://wieslawsoltes.github.io/UnoPixelMap/#v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00",
+  "Geometry": {
+    "CssWidth": 1800,
+    "CssHeight": 924,
+    "DevicePixelRatio": 2,
+    "CanvasWidth": 3600,
+    "CanvasHeight": 1848,
+    "LogicalMap": {
+      "X": 0,
+      "Y": 59.5,
+      "Width": 1800,
+      "Height": 807.5
+    }
+  },
+  "SourceIdentity": "Visible DOM selected the exact finalized package and both matching adapter query parameters.",
+  "DataScope": "Public vector and detailed elevation providers enabled; live ground10.8m versus bundled-CI ground44.2m.",
+  "Observations": [
+    {
+      "Phase": "North Up",
+      "State": "Map ready, Terrain ready, GPU active; z24,bearing0; physical position40.70870,-74.01040, distance0m."
+    },
+    {
+      "Phase": "Requested native scroll +480",
+      "Input": {
+        "X": 1100,
+        "Y": 480,
+        "ScrollX": 0,
+        "ScrollY": 480
+      },
+      "Outcome": "Input.synthesizeScrollGesture timed out after10000ms. Subsequent state showed paused close Orbit; map50/64 and terrain71/75 loading, then bothready."
+    },
+    {
+      "Phase": "Control recovery before abort",
+      "Outcome": "Resume changed Game paused to Walking; expanding settings and opening/dismissing the picker worked. aria-activedescendant resolved to the Orbit option inside the controlled listbox. Relief remained checked; physical distance remained0m."
+    },
+    {
+      "Phase": "Further native scroll -240",
+      "Input": {
+        "X": 1100,
+        "Y": 480,
+        "ScrollX": 0,
+        "ScrollY": -240
+      },
+      "Outcome": "A later console inspection found native abort at12:36:14.277UTC. The frozen UI showed map60/63, Terrain ready, GPU active, z24,bearing−15, physical distance0m."
+    },
+    {
+      "Phase": "Post-abort actions",
+      "Outcome": "Further gestures and a Pause click did not change the displayed state. Their completed browser-control commands did not establish application responsiveness."
+    }
+  ],
+  "InputLimitation": "Raw delivered WheelEvents were not recorded. Legacy wheel notch fields and burst timing can distinguish Pan from zoom, while the rounded z24 footer remains unchanged. These requests are not equated with the CI synthetic Pan sequence.",
+  "FirstCapturedAbort": {
+    "level": "error",
+    "message": "Unhandled dispatcher exception: undefined (Error\n    at Xe (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.9a2r0bvpc9.js:4:23402)\n    at Object.Ke [as onAbort] (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.9a2r0bvpc9.js:4:23013)\n    at abort (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.tmo31e415o.js:583:22)\n    at _abort (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.tmo31e415o.js:4309:7)\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.r40ls9zxle.wasm:wasm-function[181125]:0x316bd30\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.r40ls9zxle.wasm:wasm-function[182829]:0x31e8c5b\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.r40ls9zxle.wasm:wasm-function[190107]:0x3479e6d\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.r40ls9zxle.wasm:wasm-function[190110]:0x347a8ec\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.r40ls9zxle.wasm:wasm-function[179272]:0x30f6b3e\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.r40ls9zxle.wasm:wasm-function[179280]:0x30f7cdd)",
+    "timestamp": "2026-11-07T12:36:14.277Z",
+    "url": "https://wieslawsoltes.github.io/UnoPixelMap/package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9/Uno.Wasm.js"
+  },
+  "StructuralStackMapping": [
+    "SkScan::FillPath",
+    "sk_fill_path",
+    "SkEdgeBuilder::buildEdges",
+    "SkEdgeBuilder::buildPoly",
+    "SkArenaAlloc::ensureSpace",
+    "sk_malloc_flags",
+    "env.abort"
+  ],
+  "StructuralMappingEvidence": "The exact stripped WASM's six captured bodies and reported call PCs were matched to the pinned Skia source by control flow, constants, argument layout and allocation sequence. No modified binary was executed.",
+  "SkiaSharpVersion": "3.119.2",
+  "SkiaSourceCommit": "927041a58f130e0dd0562ba86cb4170989ad39e9",
+  "ConfirmedFailure": "A nonzero native allocation returned null with the throw-on-failure flag set. The caller was arena expansion for buildPoly's edge-pointer array during CPU path scan conversion.",
+  "WasmMemory": {
+    "InitialBytes": 47251456,
+    "ConfiguredMaximumBytes": 2147483648,
+    "ActualSizeAtAbort": null,
+    "FailedAllocationBytes": null
+  },
+  "Unresolved": [
+    "The application draw site above the captured native frames.",
+    "The path point/verb count and failed allocation size.",
+    "Whether shared-heap residency, a large individual path, growth constraints or fragmentation exhausted the native allocator."
+  ],
+  "FailureScreenshot": {
+    "File": "live-9171e95-frozen-after-abort.png",
+    "Sha256": "afeefb75e3ff8e3edb8ed7feef80f3578eb651c07557da1518feec5553dcc3ff",
+    "Meaning": "Frozen last frame; not a successful live verification screenshot."
+  },
+  "Followup": "Frozen917 AOT replay with live corpus capture, trusted input observation and linear-memory growth instrumentation is being prepared."
+}

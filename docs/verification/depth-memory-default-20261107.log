@@ -1,0 +1,36 @@
+Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order, picking and cross-tile shadow checks.
+Passed Earth quadrants, pitch, wrap, missing tile, model composition, palette (69 inks on RGB fixture), seam phase and determinism.
+Passed 24 exact eager/deferred label images, 12 ambiguous-sort tie fallbacks; 12 crowded views reduced depth queries from 8004 to 324.
+Exact Manhattan walk labels: 1741 -> 701 depth queries across four moving views; 187 retained candidates, 20 placed labels.
+Exact Manhattan chase labels: 2788 -> 692 depth queries across four moving views; 236 retained candidates, 24 placed labels.
+Exact Manhattan freeflight labels: 2970 -> 507 depth queries across four moving views; 160 retained candidates, 21 placed labels.
+Exact Manhattan orbit labels: 3324 -> 834 depth queries across four moving views; 146 retained candidates, 24 placed labels.
+Passed 16 real-city exact label images, including 16 with visible glyphs.
+Passed 12424 already-aligned aim poses with exact yaw/pitch preservation, repeated aims, resized viewports and clipped-target rejection.
+Passed 486 fixed-eye inset aim cases, worst screen error 0.000099px.
+Passed 84 free-camera poses, physical-eye interpolation, analytic inset aim, physical near/far clipping, terrain datum, close model picking, bounded horizon requests and v5 style/view links.
+Passed camera orbit, fit, short-arc flight, six vehicle symbols, pause/seek effects and route wrap checks.
+Perspective projection worst residual 0.0000000px; orbit 0.0000001px; drag 0.0000000px
+Passed true perspective frustum, ray inverse, anchors, target altitude, inset route fit, homogeneous raster registration, model depth, holes, picking and navigation alignment.
+Passed 432 steep-slope follow anchors with 0.0117px maximum projection error.
+Passed 54 elevated route fits with top, bottom and side UI insets.
+Passed full-vertex terrain fitting for dense routes with unevenly sampled mountain peaks.
+Passed terrain camera datum, height-field inverse, orbit/zoom/drag and flight-follow anchors, signed heights and v1–v4 view links.
+Passed 35,547 exact terrain height/lighting pairs across zoom 0–22, signed DEMs, void fallback, ocean masking, longitude wrap and polar borders.
+Passed 28 exact retained terrain layouts across motion, LOD, style, DEM, CPU/GPU handoffs, resizing and repeated worlds.
+Pixel Atlas GPU fallback. A GPU-backed destination canvas is unavailable.
+Passed elevation relief, flat compatibility, height-field picking (0.0001px), 2D tint, signed datum, foundations, thin models, ridge occlusion, stale-view picking, wrapped LOD seams, Earth draping and cache invalidation. Warm terrain orbit 11.9 ms/frame at 640×420 / 2.
+Passed 128 exact GPU depth interpolation comparisons across projection, terrain, near-plane weights and winding.
+Passed 936 exact direct clipping-code comparisons across viewport and near/far boundaries.
+Passed 8,202 exact pressure queries: active exact/coarse budgets, source-order terrain ties, model rims, cached/held frames, pooled capacity reuse and adaptive large grids.
+Terrain cache: 118 moving-chase tiles; new textures per 16-view cycle 118/0/0; exact CPU fallback and retained-frame hashes.
+Passed opaque/nonopaque terrain texture round trips, 48 MiB mixed-cache budget, CPU fallback, retained frames and source invalidation.
+Passed independent building face/rim reuse, changed-stream invalidation, retained contents and cold-selection equivalence from 1122 physical-camera poses.
+Passed 405,674 float-accumulated samples in 291 resolved footprint bounds, 221 general-path cases, exceptional inputs and 32 exact nearby CPU images.
+Passed 6,612,305 exact sparse/eager depth queries across 55 frames: all styles, projection modes, near-plane crossings, raised/courtyard roofs, signed terrain, wrapped worlds, bounded overflow and retained A→B→A frames.
+Passed 24 terrain navigation cases covering routes, six vehicle types, heading, paused/seeked effects, gates, LOD, palettes, exaggeration, flat tint and public mesh projection, plus 25 grazing-slope gates and building occlusion.
+Passed disconnected footprint and enclosing courtyard clipping checks.
+Passed 48 exact standalone idle/reuse/resume pixel and effects-state comparisons, pose guards and route/mode/reset transitions.
+Passed four render styles, bounded voxel/bevel topology, immutable frame switching, terrain height/picking, Pixel restoration and world-scale standalone vehicles.
+Pixel Atlas GPU fallback. A GPU-backed destination canvas is unavailable.
+Passed 360 exact GPU fallback, toggle, cached-redraw and resize checks on CPU canvases.

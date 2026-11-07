@@ -1,0 +1,721 @@
+{
+  "schema": 1,
+  "purpose": "Incomplete frozen-release diagnostic with live provider corpus and transparent native memory/input observations; original live abort remains unresolved.",
+  "release_accepted": false,
+  "related_live_failure": "live-native-raster-failure-9171e95.json",
+  "application": {
+    "source": "9171e95efab06db930a97dde212d754b8da48f60",
+    "run_id": 42370846132,
+    "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132",
+    "ci_conclusion": "success",
+    "deployment_conclusion": "success",
+    "src_tree": "be18099689edbe6a951b9e604691adb28af13365",
+    "pages_artifact_id": 13574430917,
+    "pages_artifact_bytes": 88296669,
+    "pages_artifact_zip_sha256": "2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73",
+    "pages_artifact_tar_sha256": "6c5576660410404d31e9b7f96b0df47db633cc0bdd7c32f4c780269130ca9b09",
+    "package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+    "runtime": {
+      "jsModuleNative": {
+        "name": "dotnet.native.tmo31e415o.js",
+        "sha256": "8b473fd368e98adf895746e5131968b6d461fe6aa5823d67037ec7ecc1194bc6",
+        "bytes": 414058
+      },
+      "jsModuleRuntime": {
+        "name": "dotnet.runtime.5nc8i5dl74.js",
+        "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d",
+        "bytes": 198480
+      },
+      "wasmNative": {
+        "name": "dotnet.native.r40ls9zxle.wasm",
+        "sha256": "153cd183a5572ea9be22944ab059a586d75c7b45a1fa272f21abbe5df96d43c7",
+        "bytes": 65940113
+      },
+      "loader": {
+        "name": "dotnet.9a2r0bvpc9.js",
+        "bytes": 56567,
+        "sha256": "5180ff773f69c6b957827d123d9e984355af1054fe31f558dd2cc3de8f6462df"
+      },
+      "index": {
+        "bytes": 2137,
+        "sha256": "0340cba99bdf6fdc2f58c96622feef3cd3e32e25d01da25d572d3d235fade482"
+      }
+    },
+    "boot_resources_verified": 72,
+    "rebuilt_for_diagnostic": false
+  },
+  "diagnostic": {
+    "source": "b094eed0967cdffb292e950eb97d62a37b76d845",
+    "tree": "20fb66156fdf3a0ba29ff11dc88e09c7ecdfe48c",
+    "branch": "diagnostic/live-memory",
+    "run_id": 42375461089,
+    "job_id": 128412016546,
+    "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42375461089",
+    "conclusion": "failure",
+    "deployment_attempted": false,
+    "sources": {
+      ".github/workflows/pages.yml": {
+        "bytes": 7850,
+        "sha256": "67d39c2335c7effdc190688d37eb91129360bb885158769161fe7280e2551373"
+      },
+      "tests/browser/live-memory.cjs": {
+        "bytes": 28544,
+        "sha256": "63b5f0c63a3892c2871e250d5965ae557de028636b056d2ec66eb3800b533142"
+      },
+      "tests/browser/explore.cjs": {
+        "bytes": 60849,
+        "sha256": "83d83491198362e499b67a07d1ddcc5ed2f3daaf451dd9493017c48153bae49b"
+      },
+      "tests/browser/package-lock.json": {
+        "bytes": 1544,
+        "sha256": "847ef7a309c654cd2bffd65c0ceecbcffbf268dae0134e1b59f0b0cddcd820be"
+      }
+    },
+    "artifact": {
+      "id": 13575826155,
+      "name": "atlas-live-memory-9171e95",
+      "bytes": 15200330,
+      "sha256": "a97dcc2d2778c0f745036cb8367c2820e5e96319d7901fa079bc97d70c3dba21",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42375461089/artifacts/13575826155",
+      "expires_at": "2026-11-14T13:08:42Z",
+      "file_count": 185
+    },
+    "node": "v22.23.4",
+    "playwright": "Version 1.64.1",
+    "chromium": "156.0.8078.4",
+    "browser": "Playwright chromium-headless-shell v1248 with SwiftShader",
+    "viewport_css": [
+      1800,
+      924
+    ],
+    "device_scale_factor": 2,
+    "canvas_pixels": [
+      3600,
+      1848
+    ],
+    "map_bounds_css": {
+      "x": 0,
+      "y": 59.5,
+      "width": 1800,
+      "height": 807.5
+    },
+    "fragment": "v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00"
+  },
+  "outcome": {
+    "runtime_abort_observed": false,
+    "runtime_error_count": 0,
+    "native_resize_failures": 0,
+    "native_grow_failures": 0,
+    "stop_reason": "Camera combo remained closed after programmatic focus plus Enter. The open-popup observation timed out; final screenshot visibly displays Orbit.",
+    "stop_time_utc": "2026-11-07T13:08:41.806Z",
+    "stop_observed_ms": 75061.51,
+    "original_test_error": "page.waitForFunction: Timeout 25000ms exceeded at live-memory.cjs:386 (observe-orbit-selection).",
+    "finalization_error": "TypeError: bodies.size is not a function at live-memory.cjs:433. The Set.size() typo prevented summary.json and corpus-manifest.json writes.",
+    "last_complete_checkpoint": "04-paused-close-ready",
+    "later_horizon_gesture_executed": false,
+    "original_evidence_preserved": true,
+    "not_reproduced_is_not_acceptance": true
+  },
+  "memory": {
+    "measure": "Allocated WebAssembly linear-memory length, not live managed/native bytes, free allocator bytes or process RSS.",
+    "initial_bytes": 47251456,
+    "configured_maximum_bytes": 2147483648,
+    "peak_allocated_bytes": 1918697472,
+    "peak_percent_of_configured_maximum": 89.3463134765625,
+    "successful_growth_calls": 26,
+    "false_resize_results": 0,
+    "live_occupancy_observed": false,
+    "garbage_collection_observed": false,
+    "last_provider_finish_observed_ms": 44052.262,
+    "last_growth_observed_ms": 44507.262,
+    "last_growth_utc": "2026-11-07T13:08:11.252Z",
+    "last_sample_observed_ms": 73326.38,
+    "no_further_growth_duration_to_last_sample_ms": 28819.118,
+    "no_further_draw_calls_from_sample_ms": 51311.755,
+    "last_gl_draw_calls": 5500,
+    "last_gl_depth_draw_calls": 558,
+    "interpretation": "Growth overlaps loading and camera change. It plateaus after loading, but subsequent samples contain no new draw calls; this does not establish a steady memory bound during movement. Linear memory need not shrink after allocations become free, so retained and transient memory cannot be separated from this trace.",
+    "frame_count_observed": false,
+    "growth_columns": [
+      "observed_ms",
+      "requested_total_heap_bytes",
+      "before_bytes",
+      "after_bytes"
+    ],
+    "growth": [
+      [
+        2055.063,
+        48309296,
+        47251456,
+        56754176
+      ],
+      [
+        2061.139,
+        57017392,
+        56754176,
+        68157440
+      ],
+      [
+        2088.637,
+        68158512,
+        68157440,
+        81788928
+      ],
+      [
+        2164.129,
+        86135856,
+        81788928,
+        98172928
+      ],
+      [
+        2553.282,
+        98243632,
+        98172928,
+        117833728
+      ],
+      [
+        3134.624,
+        117851184,
+        117833728,
+        141426688
+      ],
+      [
+        3228.251,
+        141427760,
+        141426688,
+        169738240
+      ],
+      [
+        3623.061,
+        171123760,
+        169738240,
+        203685888
+      ],
+      [
+        4148.76,
+        203686960,
+        203685888,
+        244449280
+      ],
+      [
+        4538.987,
+        257197104,
+        244449280,
+        293339136
+      ],
+      [
+        5617.582,
+        305005616,
+        293339136,
+        352059392
+      ],
+      [
+        8590.481,
+        352207920,
+        352059392,
+        422510592
+      ],
+      [
+        10163,
+        423113776,
+        422510592,
+        507052032
+      ],
+      [
+        13448.908,
+        508150832,
+        507052032,
+        608501760
+      ],
+      [
+        22304.164,
+        614302768,
+        608501760,
+        714997760
+      ],
+      [
+        24397.168,
+        715719728,
+        714997760,
+        816447488
+      ],
+      [
+        25968.606,
+        821052464,
+        816447488,
+        921763840
+      ],
+      [
+        27817.581,
+        921986096,
+        921763840,
+        1022689280
+      ],
+      [
+        29167.919,
+        1022952496,
+        1022689280,
+        1123680256
+      ],
+      [
+        31937.024,
+        1125299248,
+        1123680256,
+        1225981952
+      ],
+      [
+        34006.955,
+        1247888432,
+        1225981952,
+        1348599808
+      ],
+      [
+        36161.8,
+        1355908144,
+        1348599808,
+        1456603136
+      ],
+      [
+        37360.017,
+        1468134448,
+        1456603136,
+        1568800768
+      ],
+      [
+        38977.438,
+        1580254256,
+        1568800768,
+        1680932864
+      ],
+      [
+        40227.139,
+        1685787696,
+        1680932864,
+        1786511360
+      ],
+      [
+        44507.262,
+        1818006576,
+        1786511360,
+        1918697472
+      ]
+    ],
+    "sample_columns": [
+      "observed_ms",
+      "wasm_allocated_bytes",
+      "gl_draw_calls",
+      "gl_depth_draw_calls",
+      "cdp_task_duration_seconds",
+      "cdp_js_heap_used_bytes"
+    ],
+    "samples": [
+      [
+        5411.566,
+        293339136,
+        85,
+        19,
+        1.970641,
+        20471800
+      ],
+      [
+        7551.715,
+        352059392,
+        273,
+        57,
+        5.963749,
+        18828104
+      ],
+      [
+        9283.735,
+        422510592,
+        799,
+        57,
+        7.260199,
+        18007104
+      ],
+      [
+        14019.121,
+        608501760,
+        911,
+        98,
+        8.964223,
+        18189568
+      ],
+      [
+        15286.321,
+        608501760,
+        2366,
+        98,
+        12.571032,
+        19768900
+      ],
+      [
+        17292.538,
+        608501760,
+        2481,
+        98,
+        12.63972,
+        19200664
+      ],
+      [
+        19601.594,
+        608501760,
+        2793,
+        104,
+        14.541488,
+        20210288
+      ],
+      [
+        25291.86,
+        null,
+        null,
+        null,
+        16.111616,
+        20320272
+      ],
+      [
+        26478.044,
+        921763840,
+        3019,
+        107,
+        20.11368,
+        20376936
+      ],
+      [
+        27636.836,
+        921763840,
+        3386,
+        116,
+        22.089483,
+        19628020
+      ],
+      [
+        29311.78,
+        1123680256,
+        3872,
+        128,
+        24.044738,
+        19230228
+      ],
+      [
+        31726.442,
+        1123680256,
+        4005,
+        162,
+        25.747859,
+        19656992
+      ],
+      [
+        33787.125,
+        1225981952,
+        4083,
+        191,
+        27.748234,
+        19882712
+      ],
+      [
+        36537.224,
+        1456603136,
+        4287,
+        252,
+        29.711282,
+        19411252
+      ],
+      [
+        39230.558,
+        1680932864,
+        4466,
+        317,
+        31.644838,
+        19872576
+      ],
+      [
+        40139.583,
+        1680932864,
+        4549,
+        350,
+        33.641816,
+        19345184
+      ],
+      [
+        41808.055,
+        1786511360,
+        4720,
+        418,
+        35.640384,
+        20071256
+      ],
+      [
+        43320.679,
+        1786511360,
+        4815,
+        453,
+        37.546499,
+        19807852
+      ],
+      [
+        47361.095,
+        1918697472,
+        5235,
+        523,
+        39.483678,
+        19678920
+      ],
+      [
+        49884.313,
+        1918697472,
+        5338,
+        558,
+        43.434123,
+        19775984
+      ],
+      [
+        51311.755,
+        1918697472,
+        5500,
+        558,
+        44.160099,
+        20116864
+      ],
+      [
+        53309.42,
+        1918697472,
+        5500,
+        558,
+        44.203899,
+        19521100
+      ],
+      [
+        55309.887,
+        1918697472,
+        5500,
+        558,
+        44.242242,
+        19619808
+      ],
+      [
+        57312.526,
+        1918697472,
+        5500,
+        558,
+        44.309036,
+        19259948
+      ],
+      [
+        59313.803,
+        1918697472,
+        5500,
+        558,
+        44.352777,
+        19386496
+      ],
+      [
+        61316.544,
+        1918697472,
+        5500,
+        558,
+        44.391394,
+        19531096
+      ],
+      [
+        63317.724,
+        1918697472,
+        5500,
+        558,
+        44.427106,
+        19880356
+      ],
+      [
+        65319.14,
+        1918697472,
+        5500,
+        558,
+        44.462487,
+        19981104
+      ],
+      [
+        67321.287,
+        1918697472,
+        5500,
+        558,
+        44.495439,
+        20081984
+      ],
+      [
+        69322.484,
+        1918697472,
+        5500,
+        558,
+        44.535525,
+        19385228
+      ],
+      [
+        71324.579,
+        1918697472,
+        5500,
+        558,
+        44.568892,
+        19489384
+      ],
+      [
+        73326.38,
+        1918697472,
+        5500,
+        558,
+        44.603312,
+        19859644
+      ]
+    ]
+  },
+  "input": {
+    "command": "Input.synthesizeScrollGesture",
+    "first_parameters": {
+      "x": 1100,
+      "y": 480,
+      "yDistance": -480,
+      "speed": 800,
+      "gestureSourceType": "mouse",
+      "preventFling": true
+    },
+    "trusted_wheel_count": 3,
+    "actual_delta_y_sum": 240.0,
+    "events": [
+      {
+        "timeMs": 29608.499,
+        "eventTime": 28312.200000000004,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": 2.5,
+        "deltaMode": 0,
+        "wheelDelta": -2,
+        "wheelDeltaY": -2,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": false
+      },
+      {
+        "timeMs": 31425.918,
+        "eventTime": 28328.799999999996,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": 7,
+        "deltaMode": 0,
+        "wheelDelta": -7,
+        "wheelDeltaY": -7,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": false
+      },
+      {
+        "timeMs": 31722.315,
+        "eventTime": 28904.700000000004,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": 230.5,
+        "deltaMode": 0,
+        "wheelDelta": -230,
+        "wheelDeltaY": -230,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": false
+      }
+    ],
+    "synthetic_pan_substituted": false,
+    "cancellation_caveat": "The first harness observed defaultPrevented in a microtask, which can run before later native event listeners. Its false values do not prove Uno failed to handle the wheel."
+  },
+  "checkpoints": [
+    {
+      "name": "01-initial-map",
+      "observed_ms": 7232.647,
+      "status": "Loading map \u00b7 9/20 \u00b7 Loading terrain \u00b7 5/35 \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z16.5   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 352059392,
+      "gl_draw_calls": 188,
+      "gl_depth_draw_calls": 38,
+      "paused": false,
+      "active": false
+    },
+    {
+      "name": "02-north-up-live-ready",
+      "observed_ms": 28664.581,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   0\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 1022689280,
+      "gl_draw_calls": 3754,
+      "gl_depth_draw_calls": 125,
+      "paused": false,
+      "active": true
+    },
+    {
+      "name": "03-native-close-orbit",
+      "observed_ms": 39235.13,
+      "status": "Loading map \u00b7 48/63 \u00b7 Loading terrain \u00b7 65/75 \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 1680932864,
+      "gl_draw_calls": 4419,
+      "gl_depth_draw_calls": 317,
+      "paused": false,
+      "active": true
+    },
+    {
+      "name": "04-paused-close-ready",
+      "observed_ms": 44155.235,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 1786511360,
+      "gl_draw_calls": 5020,
+      "gl_depth_draw_calls": 488,
+      "paused": true,
+      "active": false
+    }
+  ],
+  "corpus": {
+    "requests": 165,
+    "responses": 165,
+    "all_status_200": true,
+    "vector_tiles": 68,
+    "elevation_tiles": 96,
+    "catalogs": 1,
+    "unique_bodies": 165,
+    "decoded_bytes": 19322575,
+    "all_body_sizes_and_sha256_verified": true,
+    "bytes_format": "Decoded HTTP response bodies, not compressed wire bytes. Strip content-encoding/content-length for replay.",
+    "large_body_files_location": "Original Actions artifact corpus/ directory; not copied into the repository.",
+    "reconstruction": {
+      "separate_from_original": true,
+      "manifest_sha256": "cf5aa95099c11eef481726e438ab0c3f69298e1a469a1dee08a6bd4569384e25",
+      "analysis_sha256": "daa4f891cb6c0e9497e4980be8580898c4171015ad91bb397a9f86996408d811",
+      "source_event_sha256": "9e6eab584bfdd8472493856b8b307fd72409df7d3834ed56f33277db027afda0",
+      "method": "Recover requests by id/url/method/requestedMs (provider kind overwrote event kind), join response/finish/body events by id, verify every corpus file SHA256 and length. All 830 event order numbers and all 165 request IDs are contiguous.",
+      "timing_limit": "Response/body/finish timestamps are streamed event observation times; missing original internal timestamps are not fabricated."
+    }
+  },
+  "original_evidence_file_sha256": {
+    "events.ndjson": "9e6eab584bfdd8472493856b8b307fd72409df7d3834ed56f33277db027afda0",
+    "checkpoints.json": "488c926aa8cca607fc10ee78d88e339a2ebaf05a5f2b6c7bc8869d239ffcddc5",
+    "final-dom.json": "81dd0e026e2b68d98b016bc1f5a0ca59ed6770018faf1b212cfc212adfc06889",
+    "final-ax.txt": "6e031bf943dac1a864bf346708484818a64e7e2dbd5b1afb37a264890f9b37c1",
+    "final.png": "6c829f583a0946e97fce820b5abd0e88a705766e403144dcda3fc3c14c720a59",
+    "verified-provenance.json": "d596e2494c863f55e6218fde43ae7b8d3584d6fcec005e82c76be51eb83bda2d",
+    "source-run.json": "ac7fdebe6e5bbbc0816a73d123a6e61250706c1fa6a2e9495a5807c84242e268",
+    "source-artifact.json": "c2dcef00a3b6d6cace0f7e75637ed197fb7f713cfe046e1137ebbcae66d14930",
+    "diagnostic.log": "67afa7216f4b8af1062b3410a9d81d454d013378512e392ae91c7a7fff05a20d"
+  },
+  "limitations": [
+    "Public live providers and trusted CDP mouse-scroll delivery differ from the earlier bundled-data CI test and from the original connected-browser failure.",
+    "Memory hooks, exposed-event bindings, screenshots, provider-body capture and WebGL probes add diagnostic overhead; this is not a performance measurement.",
+    "No managed heap split, live allocator occupancy, native allocation-site attribution, or GC event stream was captured.",
+    "The \u2212240 follow-up gesture and the original native abort were not reached. No production fix or release acceptance is claimed."
+  ]
+}

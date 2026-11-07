@@ -1,0 +1,5 @@
+Unhandled exception. System.InvalidOperationException: Active index buffers exceeded their 16 MiB budget: 70,508,400 bytes.
+   at GpuDepthMemoryChecks.CheckCapacity(GpuSceneDepth depth) in /workspace/scratch/d086e7fb6e12/UnoPixelMap/tests/PixelMap.Rendering.Tests/GpuDepthMemoryChecks.cs:line 257
+   at GpuDepthMemoryChecks.RunPressureChecks() in /workspace/scratch/d086e7fb6e12/UnoPixelMap/tests/PixelMap.Rendering.Tests/GpuDepthMemoryChecks.cs:line 42
+   at Program.<Main>$(String[] args) in /workspace/scratch/d086e7fb6e12/UnoPixelMap/tests/PixelMap.Rendering.Tests/Program.cs:line 7
+   at Program.<Main>(String[] args)

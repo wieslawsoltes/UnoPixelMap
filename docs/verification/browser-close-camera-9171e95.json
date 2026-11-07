@@ -1,0 +1,275 @@
+{
+  "fragment": "v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00",
+  "geometry": {
+    "width": 1800,
+    "height": 924,
+    "ratio": 2,
+    "canvasWidth": 3600,
+    "canvasHeight": 1848
+  },
+  "mapBounds": {
+    "x": 0,
+    "y": 59.5,
+    "width": 1800,
+    "height": 807.5
+  },
+  "data": "Bundled Manhattan; external tile, imagery, elevation and routing hosts are blocked.",
+  "checkpoints": [
+    {
+      "name": "north-up",
+      "input": null,
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": 0
+      },
+      "depthDraws": 63,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      }
+    },
+    {
+      "name": "ground-clamped-close-orbit",
+      "input": {
+        "deltaX": 0,
+        "deltaY": 480,
+        "deltaMode": 0,
+        "ctrl": false,
+        "meta": false,
+        "prevented": true
+      },
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": -15
+      },
+      "depthDraws": 101,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      }
+    },
+    {
+      "name": "orbit-camera-selection",
+      "input": null,
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": -15
+      },
+      "depthDraws": 101,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      },
+      "cameraPicker": {
+        "combo": {
+          "id": "uno-semantics-140818",
+          "role": "combobox",
+          "name": "Free roam camera",
+          "selected": null,
+          "expanded": "true",
+          "controls": "uno-semantics-277522",
+          "activeDescendant": "uno-semantics-288034"
+        },
+        "popup": {
+          "id": "uno-semantics-277522",
+          "role": "listbox",
+          "name": "Free roam camera",
+          "selected": null
+        },
+        "activeOption": {
+          "id": "uno-semantics-288034",
+          "role": "option",
+          "name": "Orbit",
+          "selected": null
+        },
+        "options": [
+          {
+            "id": "uno-semantics-278258",
+            "role": "option",
+            "name": "Third person",
+            "selected": null
+          },
+          {
+            "id": "uno-semantics-277026",
+            "role": "option",
+            "name": "First person",
+            "selected": null
+          },
+          {
+            "id": "uno-semantics-284594",
+            "role": "option",
+            "name": "Cockpit",
+            "selected": null
+          },
+          {
+            "id": "uno-semantics-288034",
+            "role": "option",
+            "name": "Orbit",
+            "selected": null
+          },
+          {
+            "id": "uno-semantics-290834",
+            "role": "option",
+            "name": "North up",
+            "selected": null
+          }
+        ],
+        "ariaSnapshot": "- listbox \"Free roam camera\":\n  - option \"Third person\"\n  - option \"First person\"\n  - option \"Cockpit\"\n  - option \"Orbit\"\n  - option \"North up\""
+      }
+    },
+    {
+      "name": "near-horizon",
+      "input": {
+        "deltaX": 0,
+        "deltaY": -240,
+        "deltaMode": 0,
+        "ctrl": false,
+        "meta": false,
+        "prevented": true
+      },
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": -15
+      },
+      "depthDraws": 136,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      }
+    },
+    {
+      "name": "elevated-orbit",
+      "input": {
+        "deltaX": 0,
+        "deltaY": -240,
+        "deltaMode": 0,
+        "ctrl": false,
+        "meta": false,
+        "prevented": true
+      },
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": -15
+      },
+      "depthDraws": 152,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      }
+    },
+    {
+      "name": "near-horizon-again",
+      "input": {
+        "deltaX": 0,
+        "deltaY": 240,
+        "deltaMode": 0,
+        "ctrl": false,
+        "meta": false,
+        "prevented": true
+      },
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": -15
+      },
+      "depthDraws": 167,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      }
+    },
+    {
+      "name": "ground-clamped-again",
+      "input": {
+        "deltaX": 0,
+        "deltaY": 240,
+        "deltaMode": 0,
+        "ctrl": false,
+        "meta": false,
+        "prevented": true
+      },
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": -15
+      },
+      "depthDraws": 182,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      }
+    },
+    {
+      "name": "paused-close-camera",
+      "input": null,
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 24,
+        "bearing": -15
+      },
+      "depthDraws": 187,
+      "telemetry": {
+        "speed": 0,
+        "altitude": 44.2,
+        "clearance": 0,
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "distance": 0
+      }
+    },
+    {
+      "name": "returned-to-map",
+      "input": null,
+      "camera": {
+        "latitude": 40.7087,
+        "longitude": -74.0104,
+        "zoom": 16.5,
+        "bearing": -15
+      },
+      "depthDraws": 211,
+      "telemetry": null
+    }
+  ],
+  "failures": []
+}

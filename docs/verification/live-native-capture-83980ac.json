@@ -1,0 +1,977 @@
+{
+  "schema": 1,
+  "purpose": "Complete frozen-release live-data/native-input diagnostic. It did not reproduce the original live native abort; release acceptance remains withheld.",
+  "release_accepted": false,
+  "related_live_failure": "live-native-raster-failure-9171e95.json",
+  "previous_partial_capture": "live-native-capture-b094eed.json",
+  "application": {
+    "source": "9171e95efab06db930a97dde212d754b8da48f60",
+    "run_id": 42370846132,
+    "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132",
+    "ci_conclusion": "success",
+    "deployment_conclusion": "success",
+    "src_tree": "be18099689edbe6a951b9e604691adb28af13365",
+    "pages_artifact_id": 13574430917,
+    "pages_artifact_bytes": 88296669,
+    "pages_artifact_zip_sha256": "2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73",
+    "pages_artifact_tar_sha256": "6c5576660410404d31e9b7f96b0df47db633cc0bdd7c32f4c780269130ca9b09",
+    "package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+    "runtime": {
+      "jsModuleNative": {
+        "name": "dotnet.native.tmo31e415o.js",
+        "sha256": "8b473fd368e98adf895746e5131968b6d461fe6aa5823d67037ec7ecc1194bc6",
+        "bytes": 414058
+      },
+      "jsModuleRuntime": {
+        "name": "dotnet.runtime.5nc8i5dl74.js",
+        "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d",
+        "bytes": 198480
+      },
+      "wasmNative": {
+        "name": "dotnet.native.r40ls9zxle.wasm",
+        "sha256": "153cd183a5572ea9be22944ab059a586d75c7b45a1fa272f21abbe5df96d43c7",
+        "bytes": 65940113
+      },
+      "loader": {
+        "name": "dotnet.9a2r0bvpc9.js",
+        "bytes": 56567,
+        "sha256": "5180ff773f69c6b957827d123d9e984355af1054fe31f558dd2cc3de8f6462df"
+      },
+      "index": {
+        "bytes": 2137,
+        "sha256": "0340cba99bdf6fdc2f58c96622feef3cd3e32e25d01da25d572d3d235fade482"
+      }
+    },
+    "boot_resources_verified": 72,
+    "rebuilt_for_diagnostic": false
+  },
+  "diagnostic": {
+    "source": "83980ac3b2da59970321bf183dfe8b48f876d9ec",
+    "tree": "c2dba5c81b0e906f15703eb832ba43fd81edc6f0",
+    "branch": "diagnostic/live-memory",
+    "run_id": 42376068987,
+    "job_id": 128413792707,
+    "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42376068987",
+    "conclusion": "success",
+    "deployment_attempted": false,
+    "sources": {
+      ".github/workflows/pages.yml": {
+        "bytes": 7850,
+        "sha256": "67d39c2335c7effdc190688d37eb91129360bb885158769161fe7280e2551373"
+      },
+      "tests/browser/live-memory.cjs": {
+        "bytes": 32873,
+        "sha256": "da0725bada1d97b462fe87cbd968274c86b1ce07aba28fd6adf12aa50e25256a"
+      },
+      "tests/browser/explore.cjs": {
+        "bytes": 60849,
+        "sha256": "83d83491198362e499b67a07d1ddcc5ed2f3daaf451dd9493017c48153bae49b"
+      },
+      "tests/browser/package-lock.json": {
+        "bytes": 1544,
+        "sha256": "847ef7a309c654cd2bffd65c0ceecbcffbf268dae0134e1b59f0b0cddcd820be"
+      }
+    },
+    "artifact": {
+      "id": 13575726810,
+      "name": "atlas-live-memory-9171e95",
+      "bytes": 17338602,
+      "sha256": "017c91bd60ae21db6da9e9b1b96ce55ad0b00fa021b44b6788c9f937321f8581",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42376068987/artifacts/13575726810",
+      "expires_at": "2026-11-14T13:16:47Z",
+      "file_count": 197
+    },
+    "node": "v22.23.4",
+    "playwright": "Version 1.64.1",
+    "chromium": "156.0.8078.4",
+    "browser": "Playwright chromium-headless-shell v1248 with SwiftShader",
+    "viewport_css": [
+      1800,
+      924
+    ],
+    "device_scale_factor": 2,
+    "canvas_pixels": [
+      3600,
+      1848
+    ],
+    "map_bounds_css": {
+      "x": 0,
+      "y": 59.5,
+      "width": 1800,
+      "height": 807.5
+    },
+    "fragment": "v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00"
+  },
+  "outcome": {
+    "protocol_completed": true,
+    "original_live_abort_reproduced": false,
+    "runtime_abort_observed": false,
+    "runtime_error_count": 0,
+    "native_resize_failures": 0,
+    "native_grow_failures": 0,
+    "summary_outcome": "not-reproduced",
+    "elapsed_ms_including_final_capture_and_cleanup": 95805.139,
+    "complete_checkpoints": 9,
+    "completion_observed_ms": 93102.43,
+    "completion_utc": "2026-11-07T13:16:44.508Z",
+    "later_horizon_gesture_executed": true,
+    "pause_resume_horizon_dwell_and_exit_completed": true,
+    "original_summary_and_manifest_written": true,
+    "event_count": 902,
+    "dropped_events": 0,
+    "not_reproduced_is_not_acceptance": true
+  },
+  "memory": {
+    "measure": "Allocated WebAssembly linear-memory length, not live managed/native bytes, free allocator bytes or process RSS.",
+    "initial_bytes": 47251456,
+    "configured_maximum_bytes": 2147483648,
+    "peak_allocated_bytes": 2115305472,
+    "peak_percent_of_configured_maximum": 98.5015869140625,
+    "remaining_configured_growth_bytes": 32178176,
+    "remaining_configured_growth_mib": 30.6875,
+    "remaining_growth_is_free_allocation_bytes": false,
+    "live_occupancy_observed": false,
+    "garbage_collection_observed": false,
+    "successful_growth_calls": 28,
+    "false_resize_results": 0,
+    "last_growth_observed_ms": 60014.019,
+    "last_growth_utc": "2026-11-07T13:16:11.420Z",
+    "last_sample_observed_ms": 92582.462,
+    "no_further_growth_duration_to_last_sample_ms": 32568.443,
+    "interpretation": "Linear memory reached 98.5% of the configured ceiling. It stopped growing during the horizon pause/resume/dwell and subsequent exit. The stationary dwell stopped new draw calls, while exiting later added draws without further growth. This proves a high-water mark with little further configured growth headroom; it does not separate retained objects from free blocks, fragmentation or reclaimable garbage.",
+    "frame_count_observed": false,
+    "growth_columns": [
+      "observed_ms",
+      "requested_total_heap_bytes",
+      "before_bytes",
+      "after_bytes"
+    ],
+    "growth": [
+      [
+        1372.057,
+        48309296,
+        47251456,
+        56754176
+      ],
+      [
+        1378.105,
+        57017392,
+        56754176,
+        68157440
+      ],
+      [
+        1406.359,
+        68158512,
+        68157440,
+        81788928
+      ],
+      [
+        1472.634,
+        86135856,
+        81788928,
+        98172928
+      ],
+      [
+        1864.844,
+        98243632,
+        98172928,
+        117833728
+      ],
+      [
+        2516.231,
+        117851184,
+        117833728,
+        141426688
+      ],
+      [
+        2610.901,
+        141427760,
+        141426688,
+        169738240
+      ],
+      [
+        3020.781,
+        171025456,
+        169738240,
+        203685888
+      ],
+      [
+        3545.189,
+        203686960,
+        203685888,
+        244449280
+      ],
+      [
+        3922.501,
+        256934960,
+        244449280,
+        293339136
+      ],
+      [
+        4859.878,
+        304743472,
+        293339136,
+        352059392
+      ],
+      [
+        7206.097,
+        352076848,
+        352059392,
+        422510592
+      ],
+      [
+        8487.465,
+        423162928,
+        422510592,
+        507052032
+      ],
+      [
+        12143.848,
+        508527664,
+        507052032,
+        608501760
+      ],
+      [
+        21373.271,
+        609715248,
+        608501760,
+        710410240
+      ],
+      [
+        22869.478,
+        711345200,
+        710410240,
+        812056576
+      ],
+      [
+        24513.127,
+        816907312,
+        812056576,
+        917635072
+      ],
+      [
+        26400.827,
+        926696496,
+        917635072,
+        1027407872
+      ],
+      [
+        30291.655,
+        1051690032,
+        1027407872,
+        1152385024
+      ],
+      [
+        31748.365,
+        1157768240,
+        1152385024,
+        1258487808
+      ],
+      [
+        33188.889,
+        1260815408,
+        1258487808,
+        1361510400
+      ],
+      [
+        36320.432,
+        1380668464,
+        1361510400,
+        1481375744
+      ],
+      [
+        38359.77,
+        1481966640,
+        1481375744,
+        1582694400
+      ],
+      [
+        38875.899,
+        1591735344,
+        1582694400,
+        1692401664
+      ],
+      [
+        40946.757,
+        1699947568,
+        1692401664,
+        1800667136
+      ],
+      [
+        45773.109,
+        1804583984,
+        1800667136,
+        1905262592
+      ],
+      [
+        51518.351,
+        1911915568,
+        1905262592,
+        2012610560
+      ],
+      [
+        60014.019,
+        2014626864,
+        2012610560,
+        2115305472
+      ]
+    ],
+    "sample_columns": [
+      "observed_ms",
+      "wasm_allocated_bytes",
+      "gl_draw_calls",
+      "gl_depth_draw_calls",
+      "cdp_task_duration_seconds",
+      "cdp_js_heap_used_bytes"
+    ],
+    "samples": [
+      [
+        4677.915,
+        293339136,
+        85,
+        19,
+        1.943883,
+        20344844
+      ],
+      [
+        6613.297,
+        352059392,
+        374,
+        57,
+        5.936328,
+        20094444
+      ],
+      [
+        12270.877,
+        608501760,
+        769,
+        98,
+        7.195226,
+        18306828
+      ],
+      [
+        12849.373,
+        608501760,
+        971,
+        98,
+        11.133823,
+        18572928
+      ],
+      [
+        14525.753,
+        608501760,
+        2453,
+        98,
+        12.018696,
+        19984648
+      ],
+      [
+        17195.132,
+        608501760,
+        2764,
+        101,
+        12.631453,
+        19534804
+      ],
+      [
+        18554.26,
+        608501760,
+        2908,
+        104,
+        14.616434,
+        20535992
+      ],
+      [
+        24533.123,
+        null,
+        null,
+        null,
+        15.827983,
+        20867968
+      ],
+      [
+        26801.847,
+        1027407872,
+        3105,
+        107,
+        19.828691,
+        20943612
+      ],
+      [
+        28881.809,
+        1027407872,
+        3233,
+        136,
+        23.76674,
+        19771192
+      ],
+      [
+        31635.521,
+        1152385024,
+        3398,
+        194,
+        25.775803,
+        19078116
+      ],
+      [
+        33076.96,
+        1258487808,
+        3491,
+        224,
+        27.769271,
+        19350056
+      ],
+      [
+        35042.576,
+        1361510400,
+        3684,
+        286,
+        29.762281,
+        19340948
+      ],
+      [
+        38059.374,
+        1481375744,
+        3860,
+        353,
+        31.755375,
+        19426188
+      ],
+      [
+        38804.713,
+        1582694400,
+        3948,
+        387,
+        33.750973,
+        19649060
+      ],
+      [
+        40542.394,
+        1692401664,
+        4122,
+        457,
+        35.69461,
+        19783260
+      ],
+      [
+        43050.668,
+        1800667136,
+        4401,
+        527,
+        37.643378,
+        19573528
+      ],
+      [
+        45558.169,
+        1800667136,
+        4594,
+        562,
+        39.621578,
+        19608680
+      ],
+      [
+        48093.707,
+        1905262592,
+        4743,
+        597,
+        41.581364,
+        19409444
+      ],
+      [
+        48550.826,
+        1905262592,
+        5942,
+        597,
+        43.34677,
+        19563508
+      ],
+      [
+        50553.749,
+        1905262592,
+        6691,
+        597,
+        43.488728,
+        19294428
+      ],
+      [
+        52549.218,
+        2012610560,
+        7031,
+        667,
+        44.765857,
+        19733612
+      ],
+      [
+        54833.377,
+        2012610560,
+        7070,
+        702,
+        45.578464,
+        19831588
+      ],
+      [
+        56552.985,
+        2012610560,
+        7328,
+        772,
+        46.990232,
+        20117928
+      ],
+      [
+        58550.76,
+        2012610560,
+        7419,
+        807,
+        47.52646,
+        19656896
+      ],
+      [
+        61149.421,
+        2115305472,
+        7575,
+        842,
+        48.86897,
+        20151968
+      ],
+      [
+        64178.497,
+        2115305472,
+        7720,
+        877,
+        49.722636,
+        19942532
+      ],
+      [
+        64553.539,
+        2115305472,
+        7760,
+        877,
+        51.365308,
+        20421128
+      ],
+      [
+        66554.177,
+        2115305472,
+        7760,
+        877,
+        51.398972,
+        20499892
+      ],
+      [
+        68555.391,
+        2115305472,
+        7760,
+        877,
+        51.422056,
+        19777004
+      ],
+      [
+        70557.134,
+        2115305472,
+        7760,
+        877,
+        51.445181,
+        19854012
+      ],
+      [
+        72559.119,
+        2115305472,
+        7760,
+        877,
+        51.471079,
+        20207084
+      ],
+      [
+        74564.586,
+        2115305472,
+        7760,
+        877,
+        51.49413,
+        20284572
+      ],
+      [
+        76562.616,
+        2115305472,
+        7760,
+        877,
+        51.518317,
+        20364308
+      ],
+      [
+        78565.401,
+        2115305472,
+        7760,
+        877,
+        51.54056,
+        20441560
+      ],
+      [
+        84565.418,
+        null,
+        null,
+        null,
+        52.719099,
+        20550860
+      ],
+      [
+        87495.928,
+        2115305472,
+        8042,
+        1043,
+        59.528494,
+        20707408
+      ],
+      [
+        88571.31,
+        2115305472,
+        8156,
+        1084,
+        59.823439,
+        19963328
+      ],
+      [
+        90573.338,
+        2115305472,
+        8265,
+        1125,
+        59.915281,
+        20052508
+      ],
+      [
+        92582.462,
+        2115305472,
+        8265,
+        1125,
+        59.93176,
+        20411912
+      ]
+    ]
+  },
+  "input": {
+    "command": "Input.synthesizeScrollGesture",
+    "gestures": [
+      {
+        "timeMs": 26815.647,
+        "stage": "03-native-close-orbit",
+        "requestedWheelY": 480,
+        "parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -480,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        }
+      },
+      {
+        "timeMs": 51363.714,
+        "stage": "06-native-horizon",
+        "requestedWheelY": -240,
+        "parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        }
+      }
+    ],
+    "trusted_wheel_count": 6,
+    "actual_close_delta_y_sum": 240.0,
+    "actual_horizon_delta_y_sum": -120.0,
+    "all_post_dispatch_prevented": true,
+    "events": [
+      {
+        "timeMs": 26887.759,
+        "eventTime": 26352.9,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": 3.5,
+        "deltaMode": 0,
+        "wheelDelta": -3,
+        "wheelDeltaY": -3,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": true,
+        "eventPhase": 0,
+        "observedAfterDispatch": true
+      },
+      {
+        "timeMs": 28901.293,
+        "eventTime": 26360.600000000006,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": 3,
+        "deltaMode": 0,
+        "wheelDelta": -3,
+        "wheelDeltaY": -3,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": true,
+        "eventPhase": 0,
+        "observedAfterDispatch": true
+      },
+      {
+        "timeMs": 28902.386,
+        "eventTime": 26943.800000000003,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": 233.5,
+        "deltaMode": 0,
+        "wheelDelta": -233,
+        "wheelDeltaY": -233,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": true,
+        "eventPhase": 0,
+        "observedAfterDispatch": true
+      },
+      {
+        "timeMs": 51388.934,
+        "eventTime": 50859.600000000006,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": -3,
+        "deltaMode": 0,
+        "wheelDelta": 3,
+        "wheelDeltaY": 3,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": true,
+        "eventPhase": 0,
+        "observedAfterDispatch": true
+      },
+      {
+        "timeMs": 51900.797,
+        "eventTime": 50868.100000000006,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": -3.5,
+        "deltaMode": 0,
+        "wheelDelta": 3,
+        "wheelDeltaY": 3,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": true,
+        "eventPhase": 0,
+        "observedAfterDispatch": true
+      },
+      {
+        "timeMs": 52456.586,
+        "eventTime": 51151.100000000006,
+        "trusted": true,
+        "deltaX": 0,
+        "deltaY": -113.5,
+        "deltaMode": 0,
+        "wheelDelta": 113,
+        "wheelDeltaY": 113,
+        "ctrl": false,
+        "meta": false,
+        "alt": false,
+        "shift": false,
+        "clientX": 1100,
+        "clientY": 480,
+        "targetId": "uno-canvas",
+        "prevented": true,
+        "eventPhase": 0,
+        "observedAfterDispatch": true
+      }
+    ],
+    "synthetic_pan_substituted": false,
+    "picker": {
+      "head": {
+        "id": "uno-semantics-140818",
+        "role": "combobox",
+        "name": "Free roam camera",
+        "expanded": "true",
+        "controls": "uno-semantics-282994",
+        "activeDescendant": "uno-semantics-293506",
+        "selected": null,
+        "type": null
+      },
+      "popup": {
+        "id": "uno-semantics-282994",
+        "role": "listbox",
+        "name": "Free roam camera",
+        "expanded": null,
+        "controls": null,
+        "activeDescendant": null,
+        "selected": null,
+        "type": null
+      },
+      "active_option": {
+        "id": "uno-semantics-293506",
+        "role": "option",
+        "name": "Orbit",
+        "expanded": null,
+        "controls": null,
+        "activeDescendant": null,
+        "selected": null,
+        "type": null
+      },
+      "selected_property_required": false
+    },
+    "native_scroll_parameter_and_wheel_delta_note": "At DPR2 the captured wheel delta totals were half the requested CDP y distance magnitude. The original native parameters were retained and the actual delivery is recorded explicitly."
+  },
+  "checkpoints": [
+    {
+      "name": "01-initial-map",
+      "observed_ms": 6415.026,
+      "status": "Loading map \u00b7 9/20 \u00b7 Loading terrain \u00b7 6/35 \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z16.5   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 352059392,
+      "gl_draw_calls": 273,
+      "gl_depth_draw_calls": 57,
+      "paused": false,
+      "active": false
+    },
+    {
+      "name": "02-north-up-live-ready",
+      "observed_ms": 20104.285,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   0\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 608501760,
+      "gl_draw_calls": 2980,
+      "gl_depth_draw_calls": 104,
+      "paused": false,
+      "active": true
+    },
+    {
+      "name": "03-native-close-orbit",
+      "observed_ms": 35042.167,
+      "status": "Loading map \u00b7 45/63 \u00b7 Loading terrain \u00b7 63/75 \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 1361510400,
+      "gl_draw_calls": 3684,
+      "gl_depth_draw_calls": 286,
+      "paused": false,
+      "active": true
+    },
+    {
+      "name": "04-paused-close-ready",
+      "observed_ms": 43071.34,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 1800667136,
+      "gl_draw_calls": 4556,
+      "gl_depth_draw_calls": 527,
+      "paused": true,
+      "active": false
+    },
+    {
+      "name": "05-orbit-picker",
+      "observed_ms": 48392.74,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 1905262592,
+      "gl_draw_calls": 5085,
+      "gl_depth_draw_calls": 597,
+      "paused": false,
+      "active": true
+    },
+    {
+      "name": "06-native-horizon",
+      "observed_ms": 57450.639,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 2012610560,
+      "gl_draw_calls": 7419,
+      "gl_depth_draw_calls": 807,
+      "paused": false,
+      "active": true
+    },
+    {
+      "name": "07-horizon-paused-ready",
+      "observed_ms": 61164.586,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 2115305472,
+      "gl_draw_calls": 7615,
+      "gl_depth_draw_calls": 842,
+      "paused": true,
+      "active": false
+    },
+    {
+      "name": "08-horizon-responsive",
+      "observed_ms": 79189.793,
+      "status": "Map ready \u00b7 Terrain ready \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z24.0   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 2115305472,
+      "gl_draw_calls": 7760,
+      "gl_depth_draw_calls": 877,
+      "paused": false,
+      "active": true
+    },
+    {
+      "name": "09-returned-to-map",
+      "observed_ms": 87529.518,
+      "status": "Map ready \u00b7 Loading terrain \u00b7 34/35 \u00b7 GPU active   \u00b7   Pixel rendering   \u00b7   40.7087\u00b0, -74.0104\u00b0   \u00b7   z16.5   \u00b7   -15\u00b0   \u00b7   11 m elevation",
+      "wasm_allocated_bytes": 2115305472,
+      "gl_draw_calls": 8042,
+      "gl_depth_draw_calls": 1043,
+      "paused": false,
+      "active": false
+    }
+  ],
+  "corpus": {
+    "requests": 170,
+    "responses": 170,
+    "all_status_200": true,
+    "request_kinds": {
+      "vector-catalog": 1,
+      "elevation": 101,
+      "vector": 68
+    },
+    "unique_bodies": 165,
+    "unique_urls": 165,
+    "decoded_bytes": 19322575,
+    "repeated_requests": 5,
+    "repeated_request_kind": "elevation",
+    "corpus_truncated": false,
+    "all_body_sizes_and_sha256_verified": true,
+    "same_unique_url_body_pairs_as_b094eed": true,
+    "sorted_url_sha256_pairs_digest": "7496952261040b4e23a72774c7803fd050883af4e3e2fd1dc082b5bf77eb1e7c",
+    "pair_digest_serialization": "UTF-8 JSON array of [url,sha256] pairs sorted lexicographically by URL; separators comma/colon, ensure_ascii=false.",
+    "bytes_format": "Decoded HTTP response bodies, not compressed wire bytes. Strip content-encoding/content-length for replay.",
+    "large_body_files_location": "Original Actions artifact corpus/ directory; not copied into the repository.",
+    "manifest_is_original_uploaded_file": true,
+    "manifest_sha256": "d66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606"
+  },
+  "original_evidence_file_sha256": {
+    "events.ndjson": "97f83b7398eeaa729936b44d5cf832a2e707f1cbe3b8efe99dd22937ba0652f1",
+    "checkpoints.json": "9c710f67680836c223c3abd0f353016196e75c212e7c766370a2e9481e3f3c63",
+    "summary.json": "7bd16ff9c696bab67374bfb161a2502ed71cb43edb59e464de45c2c42fdb79ee",
+    "corpus-manifest.json": "d66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606",
+    "final-dom.json": "a0ffadbad25db75e837d343437057e89fa6d92d797fc6cea6728848c655df9dd",
+    "final-ax.txt": "df5af4b6858259e008c3c6e3d36e45d036c128267c01fa92db0745326c6f1167",
+    "final.png": "99942d0c432b2974074b35db4aa8a2b52cd58ba7ffb9e0cdaa85961338446d20",
+    "verified-provenance.json": "4a03dd3c64d427570763f8ba3c0c9f63e41bb706637bdf307c1a14cdf4b22b12",
+    "source-run.json": "ac7fdebe6e5bbbc0816a73d123a6e61250706c1fa6a2e9495a5807c84242e268",
+    "source-artifact.json": "c2dcef00a3b6d6cace0f7e75637ed197fb7f713cfe046e1137ebbcae66d14930",
+    "diagnostic.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "limitations": [
+    "The same 917 binary that failed in the connected browser completed this particular scripted diagnostic. Input timing, browser, provider delivery and execution scheduling differ; no abort reproduction or fix is claimed.",
+    "Memory hooks, exposed-event bindings, screenshots, provider-body capture and WebGL probes add diagnostic overhead; this is not a performance measurement.",
+    "No managed heap split, allocator occupancy, native allocation-site attribution, or GC event stream was captured. The remaining 32,178,176 bytes measure configured growth headroom, not free allocation capacity.",
+    "The protocol includes a stationary dwell, not sustained movement or an exhaustive camera/data matrix."
+  ]
+}

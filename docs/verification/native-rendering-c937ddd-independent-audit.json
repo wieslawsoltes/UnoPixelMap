@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "raw_samples": 2112,
+  "native_runs": 4,
+  "workloads": 10,
+  "assertions": 97153,
+  "numeric_tolerance": {
+    "relative": 1e-12,
+    "absolute": 1e-09
+  },
+  "query_and_image_hashes": "exact string equality across every corresponding frame",
+  "source_tree": "57356c5b6d841b51c0d913c5ce491996a65eb4ed",
+  "source_commit": "c937ddd192619f48c1a2ec682845b52bc1eebff8"
+}

@@ -1,0 +1,24 @@
+{
+  "measurement_run": 42366657287,
+  "candidate_revision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+  "assertions": 1413,
+  "raw_runs": 30,
+  "comparison_rows": 10,
+  "moving_submission_range_per_run": [
+    30,
+    65
+  ],
+  "stationary_runs": 10,
+  "totals": {
+    "submissions": 866,
+    "direct_submissions": 866,
+    "readbacks": 0,
+    "copies": 0,
+    "art_uploads": 0,
+    "early_releases": 0,
+    "positive_timeout_polls": 0
+  },
+  "source_scope": "Measured application sources at 668bf4b; af20f37 changes only the camera test. No af20f37 binary equivalence is claimed.",
+  "relative_tolerance": 1e-12,
+  "absolute_tolerance": 1e-09
+}

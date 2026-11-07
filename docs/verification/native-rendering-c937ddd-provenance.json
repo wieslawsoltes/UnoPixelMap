@@ -1,0 +1,400 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-11-07",
+  "stage": "Published compact-mesh source c937ddd; AOT/browser/live acceptance was pending when this native evidence was exported.",
+  "source": {
+    "repository": "https://github.com/wieslawsoltes/UnoPixelMap",
+    "baseline_commit": "ab765d24c3063c1745867772426720fd47152805",
+    "candidate_commit": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "candidate_tree": "57356c5b6d841b51c0d913c5ce491996a65eb4ed",
+    "candidate_commit_url": "https://github.com/wieslawsoltes/UnoPixelMap/commit/c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "candidate_git_api": {
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/git/commits/c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "tree": "57356c5b6d841b51c0d913c5ce491996a65eb4ed",
+      "metadata_sha256": "401d26a856bf6a2aed341e3902aa6ab31b3cebeccd5367de9c1d9efb279f904b"
+    },
+    "candidate_scope": "Complete rendering patch including lossless 32-byte building vertices, exact mesh allocation, lazy CPU edge tables, the bounded depth index, label rejection, terrain texture retention, selection stream reuse, culling and pixel-window filtering. No isolated component attribution.",
+    "baseline_browser_source_equivalent_commit": "1829855ea07d1fd43b66d4478210398a605bb3c9"
+  },
+  "host": {
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "platform": "Debian GNU/Linux 13 (trixie)",
+    "kernel": "6.18.57",
+    "architecture": "x64",
+    "benchmark_affinity": [
+      0
+    ],
+    "runtime": ".NET 10.0.14",
+    "sdk": "10.0.403",
+    "environment": {
+      "DOTNET_PROCESSOR_COUNT": "2",
+      "DOTNET_TieredCompilation": "0",
+      "PIXELMAP_TEST_FONT": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    },
+    "graphics": "Native GLES correctness uses Mesa llvmpipe; timed depth workload is CPU-only."
+  },
+  "identity": {
+    "baseline": {
+      "Microsoft.Extensions.DependencyModel.dll": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "SkiaSharp.dll": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "LibTessDotNet.Double.dll": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "Silk.NET.Maths.dll": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "PixelMap.Routing.dll": "8ee5f067f810777f0a697b20a8bd29a5a18a1cc49a47fd3416e28ea4419f827c",
+      "Silk.NET.Core.dll": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "PixelMap.Rendering.Tests.dll": "febc5fa183d5bdff4c31945aecc6dbf6fe797cfca32a352f22ccf5f0e9cb8ae9",
+      "PixelMap.Rendering.dll": "4fcc7c7dc4fa75f168039b2b2271748f1462527c33ba46b0190410c7dc851703",
+      "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "PixelMap.Data.dll": "bccee797fe9b34ccbb0da25cb39a9f6459137532bb7f6d91f9111f610f41e819",
+      "Silk.NET.OpenGL.dll": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "LibTessDotNet.dll": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921"
+    },
+    "candidate": {
+      "Microsoft.Extensions.DependencyModel.dll": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "SkiaSharp.dll": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "LibTessDotNet.Double.dll": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "Silk.NET.Maths.dll": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "PixelMap.Routing.dll": "995cc72a8aa6d2df462fad0fd58397a2eaff5f28731d87189c0df32bef7fe2c2",
+      "Silk.NET.Core.dll": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "PixelMap.Rendering.Tests.dll": "febc5fa183d5bdff4c31945aecc6dbf6fe797cfca32a352f22ccf5f0e9cb8ae9",
+      "PixelMap.Rendering.dll": "0aa5e2b9dec7f8f12a7cab3a92b905e5e403941b9cacf57303484a34c027fba9",
+      "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "PixelMap.Data.dll": "be88e1043c593ad634394c51cd64889f9b1f62337c797b352e43a20fcbb5520a",
+      "Silk.NET.OpenGL.dll": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "LibTessDotNet.dll": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921"
+    },
+    "font": {
+      "path": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+      "sha256": "57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e"
+    },
+    "frozen_utc": "2026-11-07T13:29:13.180864+00:00",
+    "source_tree": "57356c5b6d841b51c0d913c5ce491996a65eb4ed",
+    "candidate_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "source_sha256": {
+      "src/PixelMap.Audio/JourneySound.cs": "4f416f548a90dca44dfdb52b0465cba4ac81c7ddd6f80a211db742a79a73a622",
+      "src/PixelMap.Routing/RouteTrack.cs": "5982b91bf9d61c25d8c3a7cd26f6b3f374fba08d079605b51b451b312007787e",
+      "src/PixelMap.Routing/MappedTransitProvider.cs": "37da52c1ac3e6b90bea644bb54c80e3f42ecce83cf2e59e6d6e72024f8747a5a",
+      "src/PixelMap.Routing/RouteDemos.cs": "e4598ff7950a553f420f593241db39334173e0e336b23587aab810561a78cba0",
+      "src/PixelMap.Routing/OsrmRouteProvider.cs": "e475706e25314caa24711fdf08dbb5c440a7f1a37877d0787268ef81afe6c9fe",
+      "src/PixelMap.Routing/RoutePlan.cs": "17763eb230e5319a6e6f3ca8ead2633a0a57d610c72b78ebc17df2dda368ea55",
+      "src/PixelMap.Routing/TransitGraph.cs": "16e0a362b7249da452c3b47f659df6e50a7b988355955861cb399b74ace04f2f",
+      "src/PixelMap.Routing/RoutePlanner.cs": "a1e724d57bd157603bcaedb0345a748c832321b41f86cae09ffc569619bf2d1c",
+      "src/PixelMap.App/GameStick.cs": "4b0d43da2a2237fd8da0f761eb1a6c38498098c85a79425b10cde0182072478c",
+      "src/PixelMap.App/App.xaml.cs": "5d16960c29ea0b9822eec2fb4f9f25bba8f2c8898edd6576f82d27f8711bddb1",
+      "src/PixelMap.App/MainPage.xaml.cs": "0d7f60540a8d1e052ff0fbead8f14ef16dba2fdaf785600cfbab76f648dac5f7",
+      "src/PixelMap.App/MapViewLink.cs": "fe0102c6716bb5cf73f3b796a991992113adb93f834aa71dc96c3bb774e89cd4",
+      "src/PixelMap.App/GamePanel.xaml.cs": "595bc756de693b1f4809b31dfd258ae849be191b7940ec3f15fdd7b5e22bf2ba",
+      "src/PixelMap.App/JourneyPanel.xaml.cs": "e213f6e68bc0fc9616e4e33011118585ddf57273c6312f9ab7ece4a00ef42f7c",
+      "src/PixelMap.Controls/GpuTerrainSurface.cs": "68d86b277d9eee0c4587a05b67e0864d646858e693e9105483fa0c1b06b85d10",
+      "src/PixelMap.Controls/JourneyNavigation.cs": "08e3aaed18b72fe2a28e4204264356ea86592665c6b07aaeeef1f17127df3364",
+      "src/PixelMap.Controls/PixelMapControl.cs": "32e0dcb699932ea734545819ad40f3fe157d9752569ca28741896e74874adb31",
+      "src/PixelMap.Controls/TerrainNavigation.cs": "5037b9a515b30ce2352ab340f1ca0163d5e8d81b9cd5196fce288ac53d2f6d8b",
+      "src/PixelMap.Controls/TileViewport.cs": "181f35cdfcbbdccc579a7dc46dd4a843f84ae8df583010dacefa447663fbd1aa",
+      "src/PixelMap.Controls/MapNavigation.cs": "0f631e1a9af8a063d1e6451a6580ad5a2343922eb0c63e5bc3f0bf75e2f713bb",
+      "src/PixelMap.Controls/FreeRoamNavigation.cs": "890055a7d1bc92befd5b5cfeedde78b7063c814bf34a8ca7ded9730726983b32",
+      "src/PixelMap.Simulation/FreeRoamInput.cs": "85778e4ff4d94473ee987b18ebacf119d5fd6709b91546f135f9efdc4104bf59",
+      "src/PixelMap.Simulation/JourneySession.cs": "eee3a4beb805c0573ccdd0f446de1d35eb1afd7f2c13b8bc327e0bb5a101493f",
+      "src/PixelMap.Simulation/VectorCollisionWorld.Rails.cs": "68df9863a2cecc01ed77f5fc6c4d1faf7ce925731432c588a78a196769cda9ab",
+      "src/PixelMap.Simulation/Vehicles.cs": "b917af5e1e8606e30043d709d6305102b0a9fc3a0e22e749d3e2abec08c1f5ab",
+      "src/PixelMap.Simulation/VectorCollisionWorld.cs": "43e7288126cb3cd2149e01f4cc96eb6eed9d4b146a6d6cbe0b750ec6239c65bb",
+      "src/PixelMap.Simulation/JourneySession.FreeRoam.cs": "9762ddcf13fbc03d9eee85fd6332554376c7632dc669f971e391ef7a66fec98e",
+      "src/PixelMap.Rendering/WorldVehicle.cs": "046cf9eb845e4ac2be977ca3ecbf191e649f6eb501ecbb14556f1dc676242248",
+      "src/PixelMap.Rendering/TileGeometry.cs": "121e93ab4a9e9ae35096ab3afaa7c2a72963054cf5ad1a54a967951adde308ef",
+      "src/PixelMap.Rendering/TerrainBlockMesh.cs": "4335faae6a1fcbfe43e7a2540df473ec3a40c64cc94d7bde8296e9331b5bf7e4",
+      "src/PixelMap.Rendering/BuildingStyle.cs": "88e481a598de9858c5956d98d349f3e98f67425997f6bf59cf03e802fa84ac5e",
+      "src/PixelMap.Rendering/TerrainCache.cs": "06de4d98b29b115fb377e77ced6806547b34445ce55b11bbcb9bdd86f1d35422",
+      "src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs": "522f56bc2f33bf6b77b11e187f48f9afabacd87d45760882219b1b3b8a282003",
+      "src/PixelMap.Rendering/BuildingRasterizer.Perspective.cs": "469d0c37018f142cb2b79b39e685f87c8657293d3ab8b036dac5d620b8e61c54",
+      "src/PixelMap.Rendering/TerrainOptions.cs": "a84bc2bba9a35529e621af58b6402d867e8f2ae0c22255efb67f45240f2b663f",
+      "src/PixelMap.Rendering/GlMapRenderer.cs": "a04b50c13fafaeb9bc5b9272d64e98a421cfe759cbcf2c78b8c31aad59859e45",
+      "src/PixelMap.Rendering/VehicleSprite.cs": "51cf0bd7eefb5f6761d74b008294024edbdf2d47eb9eeeb279a136175e006719",
+      "src/PixelMap.Rendering/PixelWindowFilter.cs": "16c59e2a1c0e8874daab32e52cbb4fe97011bda07906ba101d6a58df0c09ebfe",
+      "src/PixelMap.Rendering/GlMapShaders.cs": "5499933e555293352b31d26051ea0b985ecbc5633f15c9bcaa1b57988c844243",
+      "src/PixelMap.Rendering/JourneyGate.cs": "4eaafabfddd7f0a0ea3b37f83280c2da9dd34e51be85adf704b90fac72305553",
+      "src/PixelMap.Rendering/TileTransform.cs": "7385314184cfe7202465fa72495cd5aacec140fdcd4c05f23d55a6f99c89f92d",
+      "src/PixelMap.Rendering/GpuBuildingMesh.cs": "1ae8b5d47050b84d3ccd89a6c4a020c35f818cf747a90700f78945cfff2d3a77",
+      "src/PixelMap.Rendering/GpuFrameSurface.cs": "fde65c739a1abd49ebafddb17f7809e16c1a2ee3995a894c39e1556d733019f4",
+      "src/PixelMap.Rendering/PixelMapRenderer.Terrain.cs": "2d5e2d5537a113173866d031c4b11b97cb5a447067f168fd68fc9f8a56636dce",
+      "src/PixelMap.Rendering/MapCamera.Terrain.cs": "a17eaf56c8949aee7e221ad70588b3940357a003d9bf1b7476d47c750c9b8475",
+      "src/PixelMap.Rendering/GpuSceneDepth.cs": "2224f501b6f12f1e56da5c692e639c4287ed41b94e5be35ad8970e98e497d0c1",
+      "src/PixelMap.Rendering/GpuBuildingSelection.cs": "5a2cbec3adcbd9075bd9521d6e7ef6ebf51ce4c474e045020d56e92b7ea40fce",
+      "src/PixelMap.Rendering/GpuMapFrame.cs": "9831e038e3495eddaee3edf8f2b23ed8ea4159581db07c241b0439ad0858dcce",
+      "src/PixelMap.Rendering/VehicleEffects.cs": "17469418a65cc21c28df1878275529b45bf318c0cb210b646b7025843bf5a379",
+      "src/PixelMap.Rendering/PixelMapRenderer.Collision.cs": "617d0f0fea21cc5fda442d7838dae93a6e4880b0bd0cece807b2659a8fa39d21",
+      "src/PixelMap.Rendering/TerrainSurface.cs": "2c5d85677c381f831752606826112a697cb57feafacb21861919e898c89bc002",
+      "src/PixelMap.Rendering/EarthRaster.cs": "80cb70f6d6ba04d1e3384f7535a3de9eda56f82512646e367ad5f3c5c9f5ff34",
+      "src/PixelMap.Rendering/PixelMapRenderer.Picking.cs": "6ac9bff3ed8892c5219f5308cdf7fd025cac4021df157575c202749efb5eaf0b",
+      "src/PixelMap.Rendering/PixelPalette.cs": "90aaa698becadcc2e40f128d1075a0921aa5bbea941a41f1e69387d7666a55f6",
+      "src/PixelMap.Rendering/TileProjection.cs": "d3ebc35a50739e77f6cd793bb7c87d60a996564b9e43763edc80a26b15c88961",
+      "src/PixelMap.Rendering/RouteOverlay.cs": "9c39911ede0b1fd7b9ae38e8f09c560d48d7d7dd758ce8377fb4091463b230ae",
+      "src/PixelMap.Rendering/PixelMapRenderer.cs": "c34504534db1e7d1548710b8759251506032b72aeb8ef154f004a3c6381d4eaf",
+      "src/PixelMap.Rendering/MapCamera.cs": "063965a358482a5c8028e88030b580169e85db1ee9fbaacba202c33860623342",
+      "src/PixelMap.Rendering/BuildingRasterizer.cs": "e573e909ce1a913ba39a1830245b73fe4a7025ae662b17774c9032e3d4494616",
+      "src/PixelMap.Rendering/MapRenderStyle.cs": "5a0e4de30cd783be44b7e9acb73ab20c856d04d7f1501372ce36c71c77faa845",
+      "src/PixelMap.Data/VectorTileDecoder.cs": "abdb131c7442b67626aec125fe5bcb04ecf0720a053f1452f31a3060ea14b616",
+      "src/PixelMap.Data/MapTile.cs": "e9d5a39ecf115387f7956a5128d4a1bed19f7837168207bf3d7eb1f50ae32f7f",
+      "src/PixelMap.Data/ElevationSurfaceIndex.cs": "aa64fcc107ecfcbee74b3b11f83732d8ab48a351e364e96f6189b05188265fa1",
+      "src/PixelMap.Data/ElevationSurfaceCoverage.cs": "43e06fda5f6b5bfee80000dc9d10e6bbdc89652e1d448f3e249b0efcc95951fe",
+      "src/PixelMap.Data/ElevationSnapshot.cs": "752dbc0902616d0af6bead68743db4eced94895801244c028348e69f538f7731",
+      "src/PixelMap.Data/EarthImagerySource.cs": "5ddeb53fc79efe46ed4bc7659eb7c187bd081d2e92faa2e6d66e4d3a55f2b476",
+      "src/PixelMap.Data/TileRequestCache.cs": "bac3769d2e87361a7a55e427166c5b0fbcc6a8207d5c235477fa62f9511a2a17",
+      "src/PixelMap.Data/TilePayload.cs": "0b0699919e44471b99fa6d4bc8eda9489966c0cd8a776e006af778fb00bb22db",
+      "src/PixelMap.Data/VectorTileSource.cs": "8519114d53e66b6947edd9422914b42be7a4d01faab13f092bb29ce9991d8d38",
+      "src/PixelMap.Data/ElevationTile.cs": "cf87b51ec5bebd5df72b187d45c1445422f0f91524181fddeb20b838886bf1e7",
+      "src/PixelMap.Data/Geocoding.cs": "08d58e55846fe9deef8e693385edb885bfe9ce5f0620a99ba299e0a52f94025b",
+      "src/PixelMap.Data/TerrariumDecoder.cs": "c4f971e807f9fdfc4afcd7e9a1031e465e65e522a8a2c5268043776f536631a1",
+      "src/PixelMap.Data/ElevationTileSource.cs": "a8dd3d3f8d64439f46b4ce4e1ad1e2f324c823da18a483a2b870c6474d209320",
+      "src/PixelMap.Data/ProtoReader.cs": "d6710a8d67e49749912758180ad299859f921c306cab7a90328802f18f1d7581",
+      "src/PixelMap.App/Platforms/WebAssembly/Program.cs": "36912e836c63c9e5a335c48c9fd2fad443de113df21139a79cb42cb9d5deae9e",
+      "src/PixelMap.Controls/Browser/BrowserMapInput.cs": "861fef1df34addfbd0e7bd25d41d684227d9e3234f2fb950123c5b111485277a",
+      "src/PixelMap.Controls/Browser/BrowserGpuSurface.cs": "078c7a9b8fe702db43a918cee6966fa992d3cd2b5565682b125c36ae19f5ef5a",
+      "src/PixelMap.Controls/Browser/BrowserGpuContext.cs": "f372bce4e5fed6f7bf397fbf4ce2e9ab9332696e449dd270df1ec107579046b0",
+      "src/PixelMap.Controls/Browser/BrowserGpuReadback.cs": "7f74c4f4b033cbbdc9a148da1c039e2dc000c7ac609327381dc37a8f3e87b43d"
+    }
+  },
+  "protocol": {
+    "execution_order": "baseline 1, candidate 1, candidate 2, baseline 2",
+    "fresh_processes": 4,
+    "workloads": 10,
+    "samples_per_process": 528,
+    "total_samples": 2112,
+    "warmup_frames": 16,
+    "measured_frames": 64,
+    "stress_warmup_frames": 4,
+    "stress_measured_frames": 8,
+    "viewport": {
+      "width": 1100,
+      "height": 650,
+      "requested_pixel_size": 3
+    },
+    "label_font": "DejaVu Sans; 6253 glyphs; SHA256 57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e",
+    "scope": "CPU-only moving PrepareGpuFrame including labels, followed by DrawGpuOverlay/Drive route/vehicle/gate/picking for every camera: navigation overlay stress, not a free-roam simulation. Independent depth construction plus 144 sparse first/repeated query pairs, or zero/full-pixel stress. Query percentiles describe whole batches. GL/presentation excluded; hashes/delegate creation untimed. Thread CPU uses CLOCK_THREAD_CPUTIME_ID.",
+    "profiler_during_timing": false,
+    "concurrent_native_workload": false,
+    "percentile": "Nearest rank: sorted values[ceil(n*p)-1], for median p=0.5 and p95 p=0.95.",
+    "aggregation": "Arithmetic mean of two independent run medians and two run p95s. Allocation is arithmetic mean of per-run means. Combined phases are summed per sample before calculating percentiles. Run and sample ranges remain separate.",
+    "units": {
+      "wall": "milliseconds",
+      "thread_cpu": "milliseconds; CLOCK_THREAD_CPUTIME_ID",
+      "allocation": "bytes; GC.GetAllocatedBytesForCurrentThread"
+    },
+    "null_meaning": "Missing/unavailable instrumentation or a percentage with a zero baseline; not zero. Old eager depth has null coarse/exact-index flags.",
+    "style_enum": {
+      "0": "Pixel",
+      "1": "Normal",
+      "2": "Minecraft",
+      "3": "Roblox"
+    }
+  },
+  "execution": [
+    {
+      "order": 1,
+      "variant": "baseline",
+      "repetition": 1,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/baseline-bin/PixelMap.Rendering.Tests.dll",
+        "--depth-benchmark",
+        "--depth-output=/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/baseline-1"
+      ],
+      "environment": {
+        "DOTNET_ROOT": "/tmp/unopixelmap-dotnet",
+        "DOTNET_TieredCompilation": "0",
+        "DOTNET_PROCESSOR_COUNT": "2",
+        "PIXELMAP_TEST_FONT": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+      },
+      "started_utc": "2026-11-07T13:30:45.509673+00:00",
+      "completed_utc": "2026-11-07T13:31:10.047924+00:00",
+      "exit_code": 0,
+      "file": "baseline-1/depth-preparation.json",
+      "sha256": "008206c94ab81bf77f553053af1017b858c6d51dd044f93762534312eb109aae"
+    },
+    {
+      "order": 2,
+      "variant": "candidate",
+      "repetition": 1,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/candidate-bin/PixelMap.Rendering.Tests.dll",
+        "--depth-benchmark",
+        "--depth-output=/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/candidate-1"
+      ],
+      "environment": {
+        "DOTNET_ROOT": "/tmp/unopixelmap-dotnet",
+        "DOTNET_TieredCompilation": "0",
+        "DOTNET_PROCESSOR_COUNT": "2",
+        "PIXELMAP_TEST_FONT": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+      },
+      "started_utc": "2026-11-07T13:31:10.048338+00:00",
+      "completed_utc": "2026-11-07T13:31:31.524207+00:00",
+      "exit_code": 0,
+      "file": "candidate-1/depth-preparation.json",
+      "sha256": "a6b57d24cf7c1fc862f44a492fea865cd5937892b7c0b467dca5d981b9d3675c"
+    },
+    {
+      "order": 3,
+      "variant": "candidate",
+      "repetition": 2,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/candidate-bin/PixelMap.Rendering.Tests.dll",
+        "--depth-benchmark",
+        "--depth-output=/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/candidate-2"
+      ],
+      "environment": {
+        "DOTNET_ROOT": "/tmp/unopixelmap-dotnet",
+        "DOTNET_TieredCompilation": "0",
+        "DOTNET_PROCESSOR_COUNT": "2",
+        "PIXELMAP_TEST_FONT": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+      },
+      "started_utc": "2026-11-07T13:31:31.524603+00:00",
+      "completed_utc": "2026-11-07T13:31:53.923166+00:00",
+      "exit_code": 0,
+      "file": "candidate-2/depth-preparation.json",
+      "sha256": "75b0f178e97cf97048a876137683a97857c680d1396a3e2e795b5e0086d4c6e5"
+    },
+    {
+      "order": 4,
+      "variant": "baseline",
+      "repetition": 2,
+      "command": [
+        "taskset",
+        "-c",
+        "0",
+        "/tmp/unopixelmap-dotnet/dotnet",
+        "/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/baseline-bin/PixelMap.Rendering.Tests.dll",
+        "--depth-benchmark",
+        "--depth-output=/workspace/scratch/d086e7fb6e12/perf-compact-mesh-20261107/baseline-2"
+      ],
+      "environment": {
+        "DOTNET_ROOT": "/tmp/unopixelmap-dotnet",
+        "DOTNET_TieredCompilation": "0",
+        "DOTNET_PROCESSOR_COUNT": "2",
+        "PIXELMAP_TEST_FONT": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+      },
+      "started_utc": "2026-11-07T13:31:53.923675+00:00",
+      "completed_utc": "2026-11-07T13:32:19.663458+00:00",
+      "exit_code": 0,
+      "file": "baseline-2/depth-preparation.json",
+      "sha256": "628dc603ef97ad1ed953774d2661b0a996a6a28186a9cd376da5b2d53ac92b0d"
+    }
+  ],
+  "memory": {
+    "active_index_capacity_limit_bytes": 16777216,
+    "pool_admission_index_capacity_limit_bytes": 8388608,
+    "maximum_pooled_workspaces": 2,
+    "maximum_index_cells": 16384,
+    "scope": "Capacity payload of exact cell, coarse cell and large-proxy integer arrays. Primitive/source geometry, array/list object headers, sampled-hit caches, GL/compositor resources and caller-held frames are separate.",
+    "observed_candidate_frame_maximum_bytes": 2204592,
+    "observed_candidate_independent_maximum_bytes": 2205744,
+    "flags": {
+      "frame_coarse_index": {
+        "indexed_samples": 1056,
+        "scan_samples": 0
+      },
+      "frame_exact_index": {
+        "indexed_samples": 1056,
+        "scan_samples": 0
+      },
+      "independent_coarse_index": {
+        "indexed_samples": 1056,
+        "scan_samples": 0
+      },
+      "independent_exact_index": {
+        "indexed_samples": 1056,
+        "scan_samples": 0
+      }
+    }
+  },
+  "audit": {
+    "all_source_hashes_match_candidate_tree": true,
+    "observations_checked": 2112,
+    "corresponding_frame_positions": 528,
+    "compared_fields": [
+      "Frame",
+      "QueryHash",
+      "OverlayHash",
+      "MinimumAltitude",
+      "MaximumAltitude",
+      "TerrainPatches",
+      "BuildingTriangles"
+    ],
+    "all_query_hashes_equal": true,
+    "all_overlay_hashes_equal": true,
+    "all_geometry_counts_equal": true,
+    "all_altitude_bounds_equal": true,
+    "identical_font_and_harness": true,
+    "all_summary_metrics_recomputed_from_raw_samples": true,
+    "raw_summary_checks": 1120,
+    "all_candidate_index_capacity_measurements_within_budget": true,
+    "correctness_logs": [
+      {
+        "file": "default.log",
+        "sha256": "ff3b18af66941fdfcfcb6db0999ce2c7e2b7f42b2eac0778f6ab22168897b3f4"
+      },
+      {
+        "file": "gles.log",
+        "sha256": "6e18a3defa5ec6606e62468e0fad6af3acf5ee52384cfe2bf6e23baa578a2f0f"
+      }
+    ]
+  },
+  "observed_complete_workload_regressions": [],
+  "observed_complete_workload_tail_regressions": [
+    {
+      "case": "manhattan-freeflight",
+      "baseline_p95_ms": 12.91375,
+      "candidate_p95_ms": 12.9544
+    },
+    {
+      "case": "manhattan-full-query",
+      "baseline_p95_ms": 29.3031,
+      "candidate_p95_ms": 34.639399999999995
+    }
+  ],
+  "release_validation": {
+    "accepted": false,
+    "source_commit": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "workflow_run": 42377138938,
+    "status": "AOT/browser validation and live acceptance pending"
+  },
+  "limitations": [
+    "Two runs per variant do not establish confidence intervals or broad FPS claims; read both run medians and p95s.",
+    "These compare complete renderer releases against ab765, not the isolated c937 mesh representation change. Earlier 6bc and 668 measurements remain revision-specific.",
+    "Zero/full-query labels apply to the independent depth diagnostic. Prepare+navigation still performs normal map-label and route queries.",
+    "Independent constructor speed alone is misleading because sparse work moves to the first query; use constructor+first-query totals.",
+    "Native workload omits GPU submission, compositor/presentation and browser scheduling. Browser ABBA is separate evidence.",
+    "Native DejaVu Sans is explicit and identical across variants; browser rendering uses the app font/runtime.",
+    "This nine-tile timing fixture is distinct from the 68-vector/96-DEM captured live-provider corpus and does not reproduce the browser heap or its allocation abort. Corpus accounting and browser memory replay are separate evidence."
+  ],
+  "files": [
+    {
+      "file": "native-rendering-c937ddd-samples.csv",
+      "rows": 2112,
+      "columns": 50,
+      "bytes": 1010262,
+      "sha256": "5e550e2fcc6d50dfd66cb8af8ec46694bd2d95c16728883c7fc1765980a638b6"
+    },
+    {
+      "file": "native-rendering-c937ddd-runs.csv",
+      "rows": 40,
+      "columns": 70,
+      "bytes": 23043,
+      "sha256": "f55137f5855bba53def6c2747238338e0cd39a519fcb37a6ac85e4032c297ea5"
+    },
+    {
+      "file": "native-rendering-c937ddd-comparison.csv",
+      "rows": 10,
+      "columns": 86,
+      "bytes": 11390,
+      "sha256": "3ec2bdf0700cc822e2a654d0378a264b04f1a0a1d26e9fd06eb93801c9565a6c"
+    }
+  ]
+}

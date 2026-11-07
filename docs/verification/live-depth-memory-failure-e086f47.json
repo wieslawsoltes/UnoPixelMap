@@ -1,0 +1,112 @@
+{
+  "observed_at_utc": "2026-11-07T09:50:38.342Z",
+  "source": "e086f47d268a709f6a318c672d2ff135688e3b19",
+  "workflow_run_id": 42359263968,
+  "package": "package_2cc8550cdb6446c90f4d78faaff30fdfd83ab8722955e2f892b9d52b07beb194",
+  "url": "https://wieslawsoltes.github.io/UnoPixelMap/",
+  "viewport": {
+    "width": 1800,
+    "height": 924,
+    "canvasWidth": 3600,
+    "canvasHeight": 1848,
+    "canvasCssWidth": 1800,
+    "canvasCssHeight": 924,
+    "device_pixel_ratio": 2,
+    "logical_map_width": 1800,
+    "logical_map_height": 807,
+    "art_grid_if_pixel_size_2": {
+      "width": 900,
+      "height": 404
+    },
+    "depth_art_size_at_failure": "Not captured; computed grid above is the pixel-size-two case."
+  },
+  "scene": {
+    "latitude": 40.7087,
+    "longitude": -74.0104,
+    "map_zoom_before_play": 16.5,
+    "stored_bearing_degrees": -15,
+    "palette": "Night",
+    "mode": "Walk",
+    "initial_camera": "North Up",
+    "game_terrain_relief": true,
+    "displayed_vehicle_elevation_m": 10.8
+  },
+  "input": {
+    "position": [
+      1100,
+      480
+    ],
+    "scroll_x": 0,
+    "scroll_y": 480,
+    "requested_keypress": [
+      "Control"
+    ],
+    "delivered_modifier_and_classification": "Not captured. Visible Orbit/bearing behavior is consistent with continuous Pan; this is not evidence of a Ctrl/Meta pinch-routing defect."
+  },
+  "observation": "North Up initially rendered at zoom24/bearing0. The close view showed bearing-15, followed by an out-of-memory exception during depth preparation and a dispatcher/runtime abort; Settings and Escape no longer responded.",
+  "limitations": "The complete loaded tile set and process heap were not captured. The native nine-tile fixture traverses the camera region but does not itself reproduce out-of-memory. Device pixel ratio affects the compositor canvas, not logical depth-art dimensions.",
+  "relevant_console_messages": [
+    {
+      "level": "log",
+      "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+      "timestamp": "2026-11-07T09:48:14.339Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js"
+    },
+    {
+      "level": "log",
+      "message": "Pixel Atlas GPU texture presentation is unavailable. Using the GLCanvas transfer path. System.OutOfMemoryException: Arg_OutOfMemoryException",
+      "timestamp": "2026-11-07T09:50:38.342Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js"
+    },
+    {
+      "level": "log",
+      "message": "   at PixelMap.Rendering.GpuSceneDepth.PrepareCell(Int32 , Single , Single , Boolean )",
+      "timestamp": "2026-11-07T09:50:38.342Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js"
+    },
+    {
+      "level": "log",
+      "message": "   at PixelMap.Rendering.GpuSceneDepth.Sample(Int32 , Int32 )",
+      "timestamp": "2026-11-07T09:50:38.342Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js"
+    },
+    {
+      "level": "log",
+      "message": "   at PixelMap.Rendering.PixelMapRenderer.DrawLabels(SKCanvas , Int32 , Int32 , Double , Int32 , PixelPalette )",
+      "timestamp": "2026-11-07T09:50:38.343Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js"
+    },
+    {
+      "level": "log",
+      "message": "   at PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame(Int32 , Int32 , MapCamera , IReadOnlyList`1 , PixelStyle , Int32 , IReadOnlyList`1 , TerrainOptions , MapRenderStyle )",
+      "timestamp": "2026-11-07T09:50:38.343Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js"
+    },
+    {
+      "level": "log",
+      "message": "   at PixelMap.Controls.PixelMapControl.MapSurface.PrepareGpuTexture(SKCanvas )",
+      "timestamp": "2026-11-07T09:50:38.343Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js"
+    },
+    {
+      "level": "error",
+      "message": "Unhandled dispatcher exception: undefined (Error\n    at Xe (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.774pm958ey.js:4:23402)\n    at Object.Ke [as onAbort] (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.774pm958ey.js:4:23013)\n    at abort (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js:583:22)\n    at _abort (https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.1d9hjxpmo8.js:4309:7)\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.84k5irgd85.wasm:wasm-function[181114]:0x316b042\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.84k5irgd85.wasm:wasm-function[182818]:0x31e7f6d\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.84k5irgd85.wasm:wasm-function[190095]:0x34790c8\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.84k5irgd85.wasm:wasm-function[190096]:0x347913d\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.84k5irgd85.wasm:wasm-function[190099]:0x3479bfe\n    at https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.84k5irgd85.wasm:wasm-function[179261]:0x30f5e50)",
+      "timestamp": "2026-11-07T09:50:39.266Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/package_2cc8550cdb6446c90f4d78faaff30fdfd83ab8722955e2f892b9d52b07beb194/Uno.Wasm.js"
+    },
+    {
+      "level": "error",
+      "message": "ExitStatus",
+      "timestamp": "2026-11-07T09:50:39.268Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/package_2cc8550cdb6446c90f4d78faaff30fdfd83ab8722955e2f892b9d52b07beb194/Uno.Wasm.js"
+    },
+    {
+      "level": "error",
+      "message": "MONO_WASM: Assert failed: .NET runtime already exited with 1 undefined. You can use runtime.runMain() which doesn't exit the runtime. Error: Assert failed: .NET runtime already exited with 1 undefined. You can use runtime.runMain() which doesn't exit the runtime.",
+      "timestamp": "2026-11-07T09:50:39.268Z",
+      "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.774pm958ey.js"
+    }
+  ],
+  "original_capture_sha256": "ace8932e71ed3b7435f97fd6ad15eaf2ec04c04562f4148eee0e38467f479514",
+  "original_screenshot_sha256": "7f5bb0f77093cd958a6fbbc241513256ff5fc05bb870725fda7cff40eb4af212"
+}

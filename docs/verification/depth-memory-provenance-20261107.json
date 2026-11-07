@@ -1,0 +1,168 @@
+{
+  "CandidateRevision": "6bc776122bdb3a766c9190bfaddf506bde6703b0",
+  "CandidateTree": "afd91b3c0c864b3af9b511e1c8bca0c2756c9634",
+  "PreviousReleaseRevision": "e086f47d268a709f6a318c672d2ff135688e3b19",
+  "NativeBinaryNote": "Binaries were frozen and tested before metadata-only local/API commit creation; source content hashes match the committed tree. Publication/live acceptance is tracked separately.",
+  "RendererBeforeSha256": "5f9ece6b0e5f34e5ff89ebf70ed3a48a904f15046ddb8cb9becab7eb7269c806",
+  "RendererAfterSha256": "db3c43d69e0de4ad984a49439225e830b880110e6196ff873201388cdb779bef",
+  "PressureHarnessSha256": "febc5fa183d5bdff4c31945aecc6dbf6fe797cfca32a352f22ccf5f0e9cb8ae9",
+  "ActiveIndexBufferBudgetBytes": 16777216,
+  "PooledIndexBufferBudgetBytes": 8388608,
+  "MaximumGridCells": 16384,
+  "IndexHandleBytesBefore": 8,
+  "IndexHandleBytesAfter": 4,
+  "TriangleStateBytesBefore": 80,
+  "TriangleStateBytesAfter": 84,
+  "BudgetScope": "Capacities of currently retained exact-cell, pending-cell and large-proxy index arrays. This is not a total renderer, WASM heap or GPU memory limit; source/projected geometry, labels, dictionary entries, object headers and reallocation/GC transients are separate.",
+  "PressureRegression": {
+    "EntryPoint": "--depth-memory-pressure",
+    "BeforeExitCode": 134,
+    "AfterExitCode": 0,
+    "OldObservedIndexCapacityBytes": 70508400,
+    "NewExactAndCoarseExhaustedCapacityBytes": 16777216,
+    "EagerComparisonQueries": 8202,
+    "Fixture": "Real clipped terrain primitives in a 2048 × 2048 synthetic frame: a folded left patch creates excessive exact memberships after a right-hand pixel is cached; a later-source small patch tests terrain ties, and a model tests rims first demanded after fallback. A separate fixture places 65,537 degenerate groups with 8 × 8 cell bounds before a valid late group. Reused 512 × 384 → 4096 × 2160 → 384 × 640 frames exercise capacity accounting and grid coarsening.",
+    "Assertions": [
+      "Exact and coarse exhaustion use the full 16 MiB budget without exceeding it.",
+      "Cached and cache-cleared pre-transition pixels retain exact answers.",
+      "Independent eager terrain/occlusion answers match, including source-order ties and rims.",
+      "A retained pressure frame survives another frame.",
+      "Coarse fallback includes the valid group appended after indexing stopped.",
+      "Actual buffer capacity equals the accounted value across pool reuse and grid replacement; cell array length stays at or below 16,384."
+    ],
+    "BeforeLog": "depth-memory-pressure-before-20261107.log",
+    "AfterLog": "depth-memory-pressure-after-20261107.log"
+  },
+  "HorizonDiagnostic": {
+    "FramesPerVariant": 32,
+    "AllQueryHashesMatch": true,
+    "AllCandidateIndicesRemainEnabled": true,
+    "PeaksByViewport": [
+      {
+        "Width": 1800,
+        "Height": 807,
+        "PixelSize": 2,
+        "Style": 0,
+        "BeforePeakIndexBytes": 4832144,
+        "AfterPeakIndexBytes": 2515216
+      },
+      {
+        "Width": 1800,
+        "Height": 924,
+        "PixelSize": 2,
+        "Style": 0,
+        "BeforePeakIndexBytes": 4420080,
+        "AfterPeakIndexBytes": 2305312
+      },
+      {
+        "Width": 3600,
+        "Height": 1848,
+        "PixelSize": 2,
+        "Style": 0,
+        "BeforePeakIndexBytes": 8083280,
+        "AfterPeakIndexBytes": 4141008
+      },
+      {
+        "Width": 1800,
+        "Height": 807,
+        "PixelSize": 1,
+        "Style": 1,
+        "BeforePeakIndexBytes": 9437888,
+        "AfterPeakIndexBytes": 5691328
+      }
+    ],
+    "Scope": "Nine bundled Manhattan tiles with flat visual terrain and a constant-ground reference pose, whereas the live failure had relief enabled. Logical map 1800 × 807, alternate logical 1800 × 924, enlarged logical stress 3600 × 1848, and Normal pixel size 1. Pixel size 2 is a diagnostic choice; the live artwork resolution was not captured. The observed compositor DPR 2 alone does not enlarge depth dimensions. The live vector cache can contain more than these nine tiles.",
+    "Limitations": [
+      "This deterministic nine-tile native subset did not reproduce the browser OOM.",
+      "The browser failure had visual relief and a potentially larger live tile cache; this probe uses flat visual terrain and a constant-ground reference pose.",
+      "Compositor DPR2 was observed, but the actual failing artwork pixel size was not captured. Pixel size2 is a diagnostic choice.",
+      "Index capacities include retained pooled buffers. Some later candidate frames retain more capacity because the smaller buffers remain eligible for pooling; compare complete sequence peaks as well as individual rows."
+    ]
+  },
+  "CorrectnessGates": {
+    "DefaultExitCode": 0,
+    "GlesExitCode": 0,
+    "DefaultLog": "depth-memory-default-20261107.log",
+    "GlesLog": "depth-memory-gles-20261107.log",
+    "ExistingDepthOracleQueries": 6612305,
+    "ExistingDepthOracleFrames": 55
+  },
+  "NativePerformanceEvidence": "native-depth-bounded-provenance-20261107.json",
+  "SourceSha256": {
+    "src/PixelMap.Rendering/GpuSceneDepth.cs": "052628b821d814dd960430b8eab4e1a4d7216715a997d29b91774e672e5aa899",
+    "tests/PixelMap.Rendering.Tests/GpuDepthMemoryChecks.cs": "9e79f914ba2887ca4d6f5cc20614f7c70535022d069a834f8ee2a572adef7af2",
+    "tests/PixelMap.Rendering.Tests/GpuDepthChecks.cs": "a55131b4498ec6af70355104d0fb2ab3004a2a641218415ca232c2902f3746d9",
+    "tests/PixelMap.Rendering.Tests/GpuDepthIndexChecks.cs": "bd07d73d8759126f7df1f51fe84ed908b6e8fef05fa201da77ed84388bf4acca",
+    "tests/PixelMap.Rendering.Tests/DepthPreparationBenchmark.cs": "b352ab80a11b19666ddb19e44abafe5ff6afa5835c17431ae0e8dc7905669cb2"
+  },
+  "ArtifactSha256": {
+    "depth-memory-default-20261107.log": "dfdeff3762c36b51f76c74adf478b6ecc9e1bf9bf0978e852667b96f46ff38ea",
+    "depth-memory-gles-20261107.log": "0f1c20e8ffb53277628f951f5ff6ecba54079171e06281db2ac3e70ece7db44b",
+    "depth-memory-horizon-after-20261107.json": "da6c7b4da085c17007ab0667aee6aa6f8033318d28bd8f6b7a5dba300a218b3f",
+    "depth-memory-horizon-before-20261107.json": "b2b2fb941c9294e799ad7b975a7a719e8872453de816605b8a926358baa9907b",
+    "depth-memory-independent-audit-20261107.json": "275aef558f5890bd6430e30e51f42aa0a66bcf111a1c233a6cebc44068f226e3",
+    "depth-memory-pressure-after-20261107.log": "461aba11df6b0d54e5c45b38cf402736b8f30a195e76a7e305355471f2f7a604",
+    "depth-memory-pressure-before-20261107.log": "36e1be04be043dabdc523c9d5d0b73d51b2b431148e984756356a606d3e3f11e"
+  },
+  "PublishedSourceRevision": "6bc776122bdb3a766c9190bfaddf506bde6703b0",
+  "BrowserValidationRun": 42364819198,
+  "BrowserValidationNote": "Initial run42364819198 passed native/AOT checks but stopped on a journey draft race, subsequently fixed in668bf4b. This initial run is not final acceptance. The current release is tracked separately below.",
+  "IndependentNativeAudit": {
+    "Report": "depth-memory-independent-audit-20261107.json",
+    "Assertions": 97207,
+    "MeasuredSamples": 2112,
+    "RecomputedSummaryFields": 1120,
+    "QueryAndImageHashes": "exact",
+    "NumericRelativeTolerance": 1e-12,
+    "NumericAbsoluteTolerance": 1e-09
+  },
+  "GlesReportEquality": {
+    "PreviousRevision": "e086f47d268a709f6a318c672d2ff135688e3b19",
+    "CurrentRevision": "6bc776122bdb3a766c9190bfaddf506bde6703b0",
+    "Cases": 48,
+    "ImageHashes": 192,
+    "CompleteReportBytesEqual": true,
+    "Sha256": "ff43370d62438c64f275472e9dad4f2305f81a448ecdf7ecc9ce9d06dd091259"
+  },
+  "ReleaseValidation": {
+    "SourceRevision": "9171e95efab06db930a97dde212d754b8da48f60",
+    "WorkflowRun": 42370846132,
+    "WorkflowUrl": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42370846132",
+    "Stage": "Native, Release AOT/package, full Chromium and Pages deployment passed. Independent live replay subsequently failed with native Skia allocation abort; live acceptance is not complete.",
+    "ApplicationSourceTree": "be18099689edbe6a951b9e604691adb28af13365",
+    "MeasuredApplicationRevision": "668bf4b880d0004b8a6a1801f1d0b0abb065bd9f",
+    "IdentityNote": "The complete src tree matches the measured668bf4b application. Browser binary identities remain separate; no binary-equivalence claim.",
+    "PagesArtifact": {
+      "Id": 13574430917,
+      "Bytes": 88296669,
+      "ZipSha256": "2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73",
+      "ExpiresAt": "2026-11-14T12:17:29Z"
+    },
+    "Package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+    "RuntimeFiles": [
+      {
+        "name": "dotnet.9a2r0bvpc9.js",
+        "bytes": 56567,
+        "sha256": "5180ff773f69c6b957827d123d9e984355af1054fe31f558dd2cc3de8f6462df"
+      },
+      {
+        "name": "dotnet.native.tmo31e415o.js",
+        "bytes": 414058,
+        "sha256": "8b473fd368e98adf895746e5131968b6d461fe6aa5823d67037ec7ecc1194bc6"
+      },
+      {
+        "name": "dotnet.native.r40ls9zxle.wasm",
+        "bytes": 65940113,
+        "sha256": "153cd183a5572ea9be22944ab059a586d75c7b45a1fa272f21abbe5df96d43c7"
+      }
+    ],
+    "IndexSha256": "0340cba99bdf6fdc2f58c96622feef3cd3e32e25d01da25d572d3d235fade482",
+    "BothAdapterVersionsMatch": true,
+    "BootResourceHashesVerified": 72,
+    "CompressedRepresentationsVerified": 250,
+    "BytePreservingFinalizerPasses": 2,
+    "BrowserTrace": "browser-close-camera-9171e95.json",
+    "LiveFailure": "live-native-raster-failure-9171e95.json",
+    "DeployedAt": "2026-11-07T12:30:22.8567933Z"
+  }
+}

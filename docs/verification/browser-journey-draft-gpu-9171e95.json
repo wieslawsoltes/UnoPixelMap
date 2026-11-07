@@ -1,0 +1,16 @@
+[
+  {
+    "time": 16342.799999999988,
+    "x": 191,
+    "y": 513.5,
+    "activeRole": null,
+    "activeLabel": "Find a route stop",
+    "activeValue": "40.6895, -74.1745",
+    "nativeInputValue": "40.6895, -74.1745",
+    "stopLabels": [
+      "Set Start: LaGuardia Airport",
+      "Set Via 1: 40.7457°, -74.0415°",
+      "Set Destination: Newark Liberty Airport"
+    ]
+  }
+]
