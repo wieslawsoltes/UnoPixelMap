@@ -6,10 +6,8 @@ const {createWriteStream} = require("node:fs");
 const {mkdir, writeFile} = require("node:fs/promises");
 const {join, resolve} = require("node:path");
 const {performance} = require("node:perf_hooks");
-const {chromium} = require("playwright");
-const {action, choose, see, telemetry, waitForSettledFocus} = require("./explore.cjs");
-
-const base = new URL(process.argv[2] || "http://127.0.0.1:8100/UnoPixelMap/");
+const base = new URL(process.argv[2] && process.argv[2] !== "--self-check"
+    ? process.argv[2] : "http://127.0.0.1:8100/UnoPixelMap/");
 const output = resolve(process.env.PIXELMAP_LIVE_OUTPUT || process.argv[3] || "artifacts/live-memory");
 const fragment = "v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00";
 const source = "9171e95efab06db930a97dde212d754b8da48f60";
@@ -78,7 +76,8 @@ function watchProviders(page) {
             requestedMs: elapsed(), requestedStage: stage};
         requests.push(entry);
         requestLookup.set(request, entry);
-        record("provider-request", entry);
+        const {kind: providerKind, ...requestData} = entry;
+        record("provider-request", {providerKind, ...requestData});
     });
     page.on("requestfinished", request => {
         const entry = requestLookup.get(request);
@@ -232,7 +231,10 @@ function installObservation() {
             ctrl: event.ctrlKey, meta: event.metaKey, alt: event.altKey, shift: event.shiftKey,
             clientX: event.clientX, clientY: event.clientY, targetId: event.target?.id,
             targetRole: event.target?.getAttribute?.("role")};
-        queueMicrotask(() => emit("wheel", {...data, prevented: event.defaultPrevented}));
+        // Native dispatch can run microtasks between listeners. A following task
+        // observes cancellation after Uno's routed wheel handler has finished.
+        setTimeout(() => emit("wheel", {...data, prevented: event.defaultPrevented,
+            eventPhase: event.eventPhase, observedAfterDispatch: event.eventPhase === 0}), 0);
     }, {capture: true, passive: true});
     const gl = WebGL2RenderingContext.prototype;
     for (const name of ["drawElements", "drawElementsInstanced", "drawArrays", "drawArraysInstanced"]) {
@@ -267,7 +269,51 @@ function publicState() {
         observation: globalThis.pixelLiveObservation?.()};
 }
 
+function buildReports(state) {
+    const {source, fragment, elapsedMs, fatal, fatalKind, error, checkpoints, requests, responseOrder,
+        storedBytes, bodies, corpusLimit, corpusTruncated, eventCount, droppedEvents} = state;
+    const summary = {source, fragment, inputVariant: "native-synthesized-scroll", elapsedMs,
+        outcome: fatal ? fatalKind : error ? "diagnostic-step-failure" : "not-reproduced",
+        error: error?.stack || null, fatal: fatal?.stack || null, checkpoints: checkpoints.length,
+        requestCount: requests.length, responseCount: responseOrder, storedBytes, uniqueBodies: bodies.size,
+        corpusLimit, corpusTruncated, eventCount, droppedEvents,
+        limitations: ["Public DOM/request/API observations only; no decoded geometry, managed heap or retained-frame internals.",
+            "Wasm byteLength is allocated linear memory, not live native/managed allocation or process RSS.",
+            "Body files are decoded HTTP bytes; response order/timing are preserved separately. Browser/provider state is live.",
+            "No synthetic input fallback is silently substituted for the native gesture."]};
+    const manifest = {source, corpusLimit, storedBytes, corpusTruncated,
+        bodyFormat: "decoded HTTP response bytes", requests};
+    return {summary, manifest};
+}
+
+function checkReports() {
+    const requests = [{id: 1, kind: "vector", url: "https://tiles.openfreemap.org/test/14/4823/6160.pbf",
+        responseOrder: 1, finishedMs: 42, capture: "saved", body: "corpus/a.bin", sha256: "a"},
+        {id: 2, kind: "elevation", capture: "corpus-limit"}];
+    const fixture = {source: "fixture", fragment: "fixture-view", elapsedMs: 50, checkpoints: [{}], requests,
+        responseOrder: 2, storedBytes: 12, bodies: new Set(["a", "a", "b"]), corpusLimit: 16,
+        corpusTruncated: true, eventCount: 7, droppedEvents: 1};
+    const result = JSON.parse(JSON.stringify(buildReports(fixture)));
+    assert.equal(result.summary.uniqueBodies, 2);
+    assert.equal(result.summary.requestCount, 2);
+    assert.equal(result.summary.responseCount, 2);
+    assert.equal(result.summary.checkpoints, 1);
+    assert.equal(result.summary.outcome, "not-reproduced");
+    assert.equal(result.summary.corpusTruncated, true);
+    assert.equal(result.manifest.storedBytes, 12);
+    assert.deepEqual(result.manifest.requests, requests);
+    const error = new Error("fixture failure");
+    assert.equal(buildReports({...fixture, error}).summary.outcome, "diagnostic-step-failure");
+    const failed = buildReports({...fixture, error, fatal: error, fatalKind: "runtime-failure"});
+    assert.equal(failed.summary.outcome, "runtime-failure");
+    assert.equal(failed.summary.fatal, error.stack);
+    assert.equal(failed.summary.error, error.stack);
+}
+
 async function run() {
+    const {chromium} = require("playwright");
+    const {action, choose, see, telemetry, waitForSettledFocus} = require("./explore.cjs");
+    checkReports();
     await mkdir(join(output, "corpus"), {recursive: true});
     events = createWriteStream(join(output, "events.ndjson"));
     record("protocol", {source, fragment, input: "native CDP Input.synthesizeScrollGesture; no synthetic Pan fallback",
@@ -380,9 +426,30 @@ async function run() {
         const expand = page.getByRole("button", {name: "Expand game settings", exact: true});
         if (await expand.count()) await step("expand-game-settings", () => action(page, "Expand game settings"));
         const camera = page.getByRole("combobox", {name: "Free roam camera", exact: true});
-        await step("focus-camera-picker", () => camera.focus());
-        await step("picker-focus-settled", () => waitForSettledFocus(page, camera));
-        await step("open-camera-picker", () => page.keyboard.press("Enter"));
+        await step("open-camera-picker", async () => {
+            // Match the physical tap used by explore.cjs. The frozen runtime did
+            // not open this picker after programmatic focus plus Enter.
+            await camera.waitFor({state: "visible"});
+            await page.waitForTimeout(150);
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            const bounds = await camera.evaluate(element => {
+                const {x, y, width, height} = element.getBoundingClientRect();
+                const portal = element.closest('[elementtype="ScrollContentPresenter"]');
+                const region = document.querySelector('[aria-label="Free roam settings content"]');
+                if (!portal || portal.closest('[role="dialog"]') || !region) return {x, y, width, height};
+                const native = portal.getBoundingClientRect(), visible = region.getBoundingClientRect();
+                return {x: x + visible.x - native.x, y: y + visible.y - native.y, width, height};
+            });
+            const viewport = page.viewportSize();
+            const left = Math.max(0, bounds.x), right = Math.min(viewport.width, bounds.x + bounds.width);
+            const top = Math.max(0, bounds.y), bottom = Math.min(viewport.height, bounds.y + bounds.height);
+            assert.ok(right > left && bottom > top, "The visible camera picker intersects the viewport");
+            const point = {x: (left + right) / 2, y: bottom - Math.min(16, (bottom - top) / 2)};
+            record("picker-native-tap", {bounds, point});
+            await page.mouse.click(point.x, point.y);
+        });
+        await step("picker-opened", () => page.waitForFunction(() =>
+            document.querySelector('[role="combobox"][aria-label="Free roam camera"]')?.getAttribute("aria-expanded") === "true"));
         await step("observe-orbit-selection", () => page.waitForFunction(() => {
             const head = document.querySelector('[role="combobox"][aria-label="Free roam camera"]');
             const list = document.getElementById(head?.getAttribute("aria-controls") ?? "");
@@ -427,21 +494,19 @@ async function run() {
         await limit(Promise.allSettled([...pendingBodies]), 10000, "provider capture drain", false).catch(failure => record("capture-drain-timeout", {error: String(failure)}));
         closing = true;
         if (browser) await limit(browser.close(), 10000, "browser close", false).catch(failure => record("close-error", {error: String(failure)}));
-        const summary = {source, fragment, inputVariant: "native-synthesized-scroll", elapsedMs: elapsed(),
-            outcome: fatal ? fatalKind : error ? "diagnostic-step-failure" : "not-reproduced",
-            error: error?.stack || null, fatal: fatal?.stack || null, checkpoints: checkpoints.length,
-            requestCount: requests.length, responseCount: responseOrder, storedBytes, uniqueBodies: bodies.size(),
-            corpusLimit, corpusTruncated, eventCount, droppedEvents,
-            limitations: ["Public DOM/request/API observations only; no decoded geometry, managed heap or retained-frame internals.",
-                "Wasm byteLength is allocated linear memory, not live native/managed allocation or process RSS.",
-                "Body files are decoded HTTP bytes; response order/timing are preserved separately. Browser/provider state is live.",
-                "No synthetic input fallback is silently substituted for the native gesture."]};
+        const {summary, manifest} = buildReports({source, fragment, elapsedMs: elapsed(), fatal, fatalKind, error,
+            checkpoints, requests, responseOrder, storedBytes, bodies, corpusLimit, corpusTruncated, eventCount, droppedEvents});
         await writeFile(join(output, "summary.json"), JSON.stringify(summary, null, 2));
-        await writeFile(join(output, "corpus-manifest.json"), JSON.stringify({source, corpusLimit, storedBytes, corpusTruncated,
-            bodyFormat: "decoded HTTP response bytes", requests}, null, 2));
+        await writeFile(join(output, "corpus-manifest.json"), JSON.stringify(manifest, null, 2));
         await new Promise(resolve => events.end(resolve));
     }
     if (error || fatal) process.exitCode = 1;
 }
 
-run().catch(error => { console.error(error); process.exitCode = 1; });
+module.exports = {buildReports, checkReports};
+if (require.main === module) {
+    if (process.argv.includes("--self-check")) {
+        checkReports();
+        console.log("Diagnostic summary/manifest self-check passed with nonempty body Set, requests, truncation and failure records.");
+    } else run().catch(error => { console.error(error); process.exitCode = 1; });
+}
