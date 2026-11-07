@@ -75,6 +75,12 @@ if (args.Contains("--depth-index", StringComparer.Ordinal))
     return;
 }
 
+if (args.Contains("--depth-raster", StringComparer.Ordinal))
+{
+    GpuDepthRasterChecks.Run();
+    return;
+}
+
 if (args.Contains("--terrain-preparation", StringComparer.Ordinal))
 {
     TerrainMeshChecks.Run(args);
@@ -184,6 +190,7 @@ GpuBuildingSelectionChecks.Run();
 await GpuBuildingMeshChecks.RunAsync();
 PixelWindowFootprintChecks.Run();
 GpuDepthIndexChecks.Run();
+GpuDepthRasterChecks.Run();
 TerrainNavigationChecks.Run();
 RingFixtures.Run();
 RenderStyleChecks.Run();

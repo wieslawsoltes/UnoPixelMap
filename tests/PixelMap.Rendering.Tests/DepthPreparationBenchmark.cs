@@ -91,6 +91,7 @@ internal static class DepthPreparationBenchmark
             using var bitmap = new SKBitmap(Width, Height, SKColorType.Bgra8888, SKAlphaType.Premul);
             using var canvas = new SKCanvas(bitmap);
             var values = new List<Sample>();
+            int coarseCellSize = 16;
             int caseSamples = workload.QueryStride != 0 ? Math.Min(samples, 8) : samples;
             int caseWarmup = workload.QueryStride != 0 ? Math.Min(warmup, 4) : warmup;
             var probes = Probes(workload.Style is MapRenderStyle.Normal or MapRenderStyle.Roblox ? 1 : Pixels, workload.QueryStride);
@@ -104,6 +105,7 @@ internal static class DepthPreparationBenchmark
                 var prepare = Measure(() => frame = renderer.PrepareGpuFrame(Width, Height, camera, workload.Tiles,
                     PixelStyle.Day, Pixels, null, workload.Terrain, workload.Style));
                 using var current = frame!;
+                coarseCellSize = (int?)depthType.GetField("cellSize", Members)?.GetValue(Property<object>(current, "Depth")) ?? 16;
                 canvas.Clear(SKColors.Transparent);
                 var position = track.Sample(route.DistanceMeters * .35 + phase * 1.5);
                 var gate = track.Sample(route.DistanceMeters * .35 + phase * 1.5 + 100);
@@ -152,7 +154,8 @@ internal static class DepthPreparationBenchmark
                 DepthConstructionAndQueries = Summarize(values.Select(value => Combine(value.DepthConstruction, value.SparseQueries)))
             };
             reports.Add(new { workload.Name, Features = workload.Tiles.Sum(tile => tile.Features.Count), workload.Style,
-                Probes = probes.Length, QueryCells = probes.Select(value => (value.X / 16, value.Y / 16)).Distinct().Count(),
+                Probes = probes.Length, CoarseCellSize = coarseCellSize,
+                QueryCells = probes.Select(value => (value.X / coarseCellSize, value.Y / coarseCellSize)).Distinct().Count(),
                 Warmup = caseWarmup, MeasuredSamples = caseSamples, Summary = summary, Samples = values });
             Console.WriteLine($"Depth {workload.Name}: prepare {Median(values.Select(value => value.Prepare.WallMs)):F3} ms, " +
                 $"navigation {Median(values.Select(value => value.Navigation.WallMs)):F3} ms, construction {Median(values.Select(value => value.DepthConstruction.WallMs)):F3} ms, " +
@@ -161,7 +164,7 @@ internal static class DepthPreparationBenchmark
         }
         File.WriteAllText(Path.Combine(output, "depth-preparation.json"), JsonSerializer.Serialize(new
         {
-            Baseline = "ab765d24c3063c1745867772426720fd47152805", Runtime = RuntimeInformation.FrameworkDescription,
+            Baseline = Value(arguments, "--depth-baseline=") ?? "ab765d24c3063c1745867772426720fd47152805", Runtime = RuntimeInformation.FrameworkDescription,
             Platform = RuntimeInformation.OSDescription, Processors = Environment.ProcessorCount, LabelFont = labelFont,
             RendererSha256 = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(PixelMapRenderer).Assembly.Location))),
             HarnessSha256 = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(DepthPreparationBenchmark).Assembly.Location))),
