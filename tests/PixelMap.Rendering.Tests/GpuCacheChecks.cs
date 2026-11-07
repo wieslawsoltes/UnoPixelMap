@@ -98,7 +98,7 @@ internal static class GpuCacheChecks
             object mesh = Property(draw, "Mesh");
             int texels = Math.Max(2, (Field<float[]>(mesh, "Models").Length + 3) / 4);
             int width = Math.Min(textureLimit, texels), height = (texels + width - 1) / width;
-            return Field<float[]>(mesh, "Vertices").LongLength * sizeof(float) +
+            return Field<GpuBuildingVertex[]>(mesh, "Vertices").LongLength * GpuBuildingVertex.Size +
                 Field<uint[]>(mesh, "Indices").LongLength * sizeof(uint) +
                 Field<float[]>(mesh, "RoofEdges").LongLength * sizeof(float) + (long)width * height * 4 * sizeof(float);
         }).ToArray();

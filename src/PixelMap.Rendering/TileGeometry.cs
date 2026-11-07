@@ -60,22 +60,29 @@ internal sealed class Building(MapFeature feature, SKRect bounds, float unit, fl
             var previous = ring[^1];
             foreach (var point in ring)
             {
-                float x = point.X * unit, y = point.Y * unit;
-                float dx = point.X - previous.X, dy = point.Y - previous.Y;
-                float length = MathF.Sqrt(dx * dx + dy * dy);
-                float light = Math.Clamp(.5f + (dx * .75f - dy * .55f) / (length * 2), 0, 1);
-                // Keep both formulas in their original coordinate spaces. Nonstandard
-                // MVT extents can round their facade lighting differently after scaling.
-                float normalizedDx = x - previous.X * unit, normalizedDy = y - previous.Y * unit;
-                float normalizedLength = MathF.Sqrt(normalizedDx * normalizedDx + normalizedDy * normalizedDy);
-                float normalizedLight = Math.Clamp(.5f + (normalizedDx * .75f - normalizedDy * .55f) / (2 * normalizedLength), 0, 1);
-                bool tileCut = previous.X == point.X && (previous.X <= 0 || previous.X >= feature.Extent) ||
-                    previous.Y == point.Y && (previous.Y <= 0 || previous.Y >= feature.Extent);
-                vertices[index++] = new(new(x, y), length * unit, normalizedLength, light, normalizedLight, tileCut);
+                vertices[index++] = PrepareVertex(previous, point, unit, feature.Extent);
                 previous = point;
             }
         }
         return vertices;
+    }
+
+    // GPU construction consumes one edge at a time. Keep the CPU's lazy table
+    // available without retaining a second complete edge array for every GPU model.
+    internal static BuildingVertex PrepareVertex(TilePoint previous, TilePoint point, float unit, int extent)
+    {
+        float x = point.X * unit, y = point.Y * unit;
+        float dx = point.X - previous.X, dy = point.Y - previous.Y;
+        float length = MathF.Sqrt(dx * dx + dy * dy);
+        float light = Math.Clamp(.5f + (dx * .75f - dy * .55f) / (length * 2), 0, 1);
+        // Keep both formulas in their original coordinate spaces. Nonstandard
+        // MVT extents can round their facade lighting differently after scaling.
+        float normalizedDx = x - previous.X * unit, normalizedDy = y - previous.Y * unit;
+        float normalizedLength = MathF.Sqrt(normalizedDx * normalizedDx + normalizedDy * normalizedDy);
+        float normalizedLight = Math.Clamp(.5f + (normalizedDx * .75f - normalizedDy * .55f) / (2 * normalizedLength), 0, 1);
+        bool tileCut = previous.X == point.X && (previous.X <= 0 || previous.X >= extent) ||
+            previous.Y == point.Y && (previous.Y <= 0 || previous.Y >= extent);
+        return new(new(x, y), length * unit, normalizedLength, light, normalizedLight, tileCut);
     }
 }
 

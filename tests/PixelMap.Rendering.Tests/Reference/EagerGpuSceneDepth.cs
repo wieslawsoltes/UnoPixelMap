@@ -211,23 +211,23 @@ internal sealed class EagerGpuSceneDepth
             float eye = perspective ? transform.TargetZ + transform.CosPitch / transform.InverseFocal : float.PositiveInfinity;
             for (int i = 0; i < range.VertexCount; i++)
             {
-                int offset = (range.FirstVertex + i) * GpuBuildingMesh.VertexStride;
-                int face = (int)source[offset + 11];
+                ref readonly var vertex = ref source[range.FirstVertex + i];
+                int face = vertex.Face;
                 // Caps have separate vertices and their same face test precedes
                 // index traversal, so hidden caps never read this scratch entry.
                 if (face == 1 && top >= eye || face == 2 && (!perspective || bottom <= eye)) continue;
-                float altitude = (source[offset + 2] + foundation) * pixelsPerMeter;
-                projected[i] = new(transform.Vertex(source[offset], source[offset + 1], altitude));
+                float altitude = ((vertex.Bottom ? model.Bottom : model.Top) + foundation) * pixelsPerMeter;
+                projected[i] = new(transform.Vertex(vertex.X, vertex.Y, altitude));
             }
             for (int i = range.FirstIndex, end = i + range.IndexCount; i < end; i += 3)
             {
                 int first = (int)mesh.Indices[i];
-                int offset = first * GpuBuildingMesh.VertexStride;
-                int face = (int)source[offset + 11];
+                ref readonly var vertex = ref source[first];
+                int face = vertex.Face;
                 if (face == 1 && top >= eye || face == 2 && (!perspective || bottom <= eye)) continue;
                 if (face == 0)
                 {
-                    if (!perspective && (rise - baseRise < .35f || -(transform.XX * source[offset + 8] + transform.XY * source[offset + 9]) < .01f)) continue;
+                    if (!perspective && (rise - baseRise < .35f || -(transform.XX * vertex.Dx + transform.XY * vertex.Dy) < .01f)) continue;
                     var a = projected[first - range.FirstVertex].Screen;
                     var b = projected[(int)mesh.Indices[i + 1] - range.FirstVertex].Screen;
                     var c = projected[(int)mesh.Indices[i + 2] - range.FirstVertex].Screen;

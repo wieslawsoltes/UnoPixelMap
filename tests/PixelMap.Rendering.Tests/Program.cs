@@ -2,6 +2,12 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--gpu-building-mesh", StringComparer.Ordinal))
+{
+    await GpuBuildingMeshChecks.RunAsync();
+    return;
+}
+
 if (args.Contains("--depth-memory-pressure", StringComparer.Ordinal))
 {
     GpuDepthMemoryChecks.RunPressureChecks();
@@ -175,6 +181,7 @@ GpuDepthChecks.Run();
 GpuDepthMemoryChecks.RunPressureChecks();
 await TerrainTextureCacheChecks.RunAsync();
 GpuBuildingSelectionChecks.Run();
+await GpuBuildingMeshChecks.RunAsync();
 PixelWindowFootprintChecks.Run();
 GpuDepthIndexChecks.Run();
 TerrainNavigationChecks.Run();

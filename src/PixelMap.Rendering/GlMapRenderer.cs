@@ -594,12 +594,14 @@ public sealed unsafe class GlMapRenderer : IDisposable
             gl.BindVertexArray(mesh.Array);
             gl.BindBuffer(BufferTargetARB.ArrayBuffer, mesh.Vertices);
             gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, mesh.Indices);
-            for (uint attribute = 0; attribute < 3; attribute++)
-            {
-                gl.EnableVertexAttribArray(attribute);
-                gl.VertexAttribPointer(attribute, 4, VertexAttribPointerType.Float, false,
-                    GpuBuildingMesh.VertexStride * sizeof(float), (void*)(attribute * 4 * sizeof(float)));
-            }
+            gl.EnableVertexAttribArray(0);
+            gl.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, GpuBuildingVertex.Size, (void*)0);
+            gl.EnableVertexAttribArray(1);
+            gl.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, GpuBuildingVertex.Size, (void*)(2 * sizeof(float)));
+            gl.EnableVertexAttribArray(2);
+            gl.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GpuBuildingVertex.Size, (void*)(5 * sizeof(float)));
+            gl.EnableVertexAttribArray(3);
+            gl.VertexAttribIPointer(3, 1, GLEnum.UnsignedInt, GpuBuildingVertex.Size, (void*)(7 * sizeof(float)));
             gl.BindVertexArray(mesh.EdgeArray);
             gl.BindBuffer(BufferTargetARB.ArrayBuffer, mesh.Edges);
             for (uint endpoint = 0; endpoint < 2; endpoint++)

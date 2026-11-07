@@ -240,9 +240,10 @@ internal static class GlMapShaders
         """;
 
     internal const string BuildingVertex = """
-        layout(location = 0) in vec4 aPosition;
-        layout(location = 1) in vec4 aSurface;
-        layout(location = 2) in vec4 aEdge;
+        layout(location = 0) in vec2 aPosition;
+        layout(location = 1) in vec3 aSurface;
+        layout(location = 2) in vec2 aEdge;
+        layout(location = 3) in uint aPacked;
         uniform float uTileUnitsToMeters;
         out vec2 vFacade;
         flat out vec4 vWall;
@@ -251,12 +252,14 @@ internal static class GlMapShaders
 
         void main()
         {
-            int modelIndex = int(aPosition.w + 0.5);
+            int modelIndex = int(aPacked >> 4u);
             vec4 model = modelData(modelIndex, 0);
             vec4 bounds = modelData(modelIndex, 1);
             float foundation = localFoundation(model.x);
-            float altitude = (foundation + aPosition.z) * uGround.z;
-            int face = int(aEdge.w + 0.5);
+            float height = (aPacked & 4u) != 0u ? bounds.z : model.w;
+            float along = (aPacked & 8u) != 0u ? aSurface.x : 0.0;
+            float altitude = (foundation + height) * uGround.z;
+            int face = int(aPacked & 3u);
             if (tinyModel(model, bounds, foundation) ||
                 (uPerspective && ((face == 1 && altitude >= uLens.y) ||
                                   (face == 2 && altitude <= uLens.y))) ||
@@ -265,15 +268,15 @@ internal static class GlMapShaders
                 gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
                 return;
             }
-            gl_Position = clipPosition(screenPosition(aPosition.xy, altitude));
-            float edgeLength = max(aSurface.y, 0.00001);
-            vec2 endpoint = aPosition.xy + aEdge.xy * (1.0 - aSurface.x / edgeLength);
+            gl_Position = clipPosition(screenPosition(aPosition, altitude));
+            float edgeLength = max(aSurface.x, 0.00001);
+            vec2 endpoint = aPosition + aEdge * (1.0 - along / edgeLength);
             float endpointX = dot(uScreenX, vec4(endpoint, 0.0, 1.0));
-            float span = -dot(uScreenX.xy, aEdge.xy);
-            float worldLength = aSurface.y * length(uScreenX.xy);
-            vFacade = vec2(aSurface.x * length(aEdge.xy) / edgeLength * uTileUnitsToMeters, aPosition.z);
-            if (uRenderStyle != 0 && face != 0) vFacade = aPosition.xy * uTileUnitsToMeters;
-            vWall = vec4(endpointX, span, worldLength, uPerspective ? aSurface.w : aSurface.z);
+            float span = -dot(uScreenX.xy, aEdge);
+            float worldLength = aSurface.x * length(uScreenX.xy);
+            vFacade = vec2(along * length(aEdge) / edgeLength * uTileUnitsToMeters, height);
+            if (uRenderStyle != 0 && face != 0) vFacade = aPosition * uTileUnitsToMeters;
+            vWall = vec4(endpointX, span, worldLength, uPerspective ? aSurface.z : aSurface.y);
             vBuilding = vec2(model.w - bounds.z, model.w);
             vModel = ivec3(int(model.y + 0.5), int(model.z + 0.5), face);
         }
