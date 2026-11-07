@@ -443,12 +443,27 @@ async function highDensityCloseCamera(browser) {
     await page.waitForFunction(() => document.querySelector('[role="combobox"][aria-label="Free roam camera"]')?.getAttribute("aria-expanded") === "true");
     await page.waitForFunction(() => document.activeElement?.getAttribute("elementtype") === "ScrollContentPresenter");
     const cameraOptions = page.getByRole("listbox", {name: "Free roam camera", exact: true});
-    // The closed ComboBox exposes its name only. Its virtual popup options
-    // expose aria-selected, so inspect them without issuing selection keys.
-    await cameraOptions.getByRole("option", {name: "Orbit", exact: true, selected: true}).waitFor({state: "attached"});
-    assert.equal(await cameraOptions.getByRole("option", {selected: true}).count(), 1,
-        "The continuous gesture selects Orbit as the sole camera rig");
-    const cameraPicker = await cameraOptions.ariaSnapshot();
+    // Uno's virtual options do not initialize aria-selected. On opening, the
+    // ComboBox points aria-activedescendant at its selected item instead.
+    const pickerState = await page.waitForFunction(() => {
+        const combo = document.querySelector('[role="combobox"][aria-label="Free roam camera"]');
+        const popup = document.getElementById(combo?.getAttribute("aria-controls") ?? "");
+        const active = document.getElementById(combo?.getAttribute("aria-activedescendant") ?? "");
+        if (combo?.getAttribute("aria-expanded") !== "true" ||
+            popup?.getAttribute("role") !== "listbox" || popup.getAttribute("aria-label") !== "Free roam camera" ||
+            active?.getAttribute("role") !== "option" || active.getAttribute("aria-label") !== "Orbit" ||
+            !popup.contains(active)) return null;
+        const describe = element => ({id: element.id, role: element.getAttribute("role"),
+            name: element.getAttribute("aria-label"), selected: element.getAttribute("aria-selected")});
+        return {combo: {...describe(combo), expanded: combo.getAttribute("aria-expanded"),
+                controls: combo.getAttribute("aria-controls"), activeDescendant: combo.getAttribute("aria-activedescendant")},
+            popup: describe(popup), activeOption: describe(active),
+            options: Array.from(popup.querySelectorAll('[role="option"]'), describe)};
+    });
+    let cameraPicker;
+    try { cameraPicker = await pickerState.jsonValue(); }
+    finally { await pickerState.dispose(); }
+    cameraPicker.ariaSnapshot = await cameraOptions.ariaSnapshot();
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => document.querySelector('[role="combobox"][aria-label="Free roam camera"]')?.getAttribute("aria-expanded") === "false");
     await cameraOptions.waitFor({state: "hidden"});
@@ -1011,7 +1026,20 @@ async function run() {
             await Promise.allSettled([
                 page.screenshot({path: join(evidence, "explore-failure.png"), timeout: 10000}),
                 page.locator("body").ariaSnapshot({timeout: 10000})
-                    .then(snapshot => writeFile(join(evidence, "explore-failure.txt"), snapshot))
+                    .then(snapshot => writeFile(join(evidence, "explore-failure.txt"), snapshot)),
+                Promise.race([
+                    page.evaluate(() => {
+                        const describe = element => element ? {tag: element.tagName,
+                            attributes: Object.fromEntries(Array.from(element.attributes)
+                                .filter(attribute => attribute.name.startsWith("aria-") ||
+                                    ["id", "role", "elementtype", "tabindex"].includes(attribute.name))
+                                .map(attribute => [attribute.name, attribute.value]))} : null;
+                        return {focus: describe(document.activeElement),
+                            controls: Array.from(document.querySelectorAll('[role="combobox"], [role="listbox"], [role="option"]'), describe)};
+                    }).then(state => writeFile(join(evidence, "explore-failure-dom.json"),
+                        JSON.stringify({error: String(error), ...state}, null, 2))),
+                    new Promise(resolve => setTimeout(resolve, 10000).unref())
+                ])
             ]);
         }
         throw error;
