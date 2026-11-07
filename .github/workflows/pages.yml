@@ -25,7 +25,7 @@ jobs:
     env:
       PIXELMAP_LIVE_SECONDS: '540'
       PIXELMAP_CORPUS_MIB: '256'
-      PIXELMAP_APPLICATION_SOURCE: '9171e95efab06db930a97dde212d754b8da48f60'
+      PIXELMAP_APPLICATION_SOURCE: 'c937ddd192619f48c1a2ec682845b52bc1eebff8'
       PIXELMAP_REPLAY_MANIFEST_SHA256: 'd66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606'
       PIXELMAP_LIVE_REPEAT_CYCLES: '3'
     steps:
@@ -46,8 +46,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$PIXELMAP_LIVE_OUTPUT"
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/42370846132" > "$PIXELMAP_LIVE_OUTPUT/source-run.json"
-          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/13574430917" > "$PIXELMAP_LIVE_OUTPUT/source-artifact.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/42377138938" > "$PIXELMAP_LIVE_OUTPUT/source-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/jobs/128416964285" > "$PIXELMAP_LIVE_OUTPUT/source-build-job.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/13576502635" > "$PIXELMAP_LIVE_OUTPUT/source-artifact.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/42376068987" > "$PIXELMAP_LIVE_OUTPUT/capture-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/13575726810" > "$PIXELMAP_LIVE_OUTPUT/capture-artifact.json"
           python3 - <<'PY'
@@ -55,17 +56,20 @@ jobs:
           from pathlib import Path
           root = Path(os.environ['PIXELMAP_LIVE_OUTPUT'])
           run = json.loads((root / 'source-run.json').read_text())
+          build = json.loads((root / 'source-build-job.json').read_text())
           artifact = json.loads((root / 'source-artifact.json').read_text())
-          source = '9171e95efab06db930a97dde212d754b8da48f60'
-          digest = 'sha256:2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73'
-          assert run['id'] == 42370846132 and run['head_sha'] == source
+          source = 'c937ddd192619f48c1a2ec682845b52bc1eebff8'
+          digest = 'sha256:ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb'
+          assert run['id'] == 42377138938 and run['head_sha'] == source
           assert run['repository']['full_name'] == os.environ['GITHUB_REPOSITORY']
           assert run['repository']['id'] == 1443492055
-          assert run['head_branch'] == 'main' and run['conclusion'] == 'success'
-          assert artifact['id'] == 13574430917 and artifact['name'] == 'github-pages' and not artifact['expired']
+          assert run['head_branch'] == 'main' and run['status'] in ('queued', 'in_progress', 'completed')
+          assert build['id'] == 128416964285 and build['run_id'] == run['id'] and build['head_sha'] == source
+          assert build['name'] == 'browser' and build['status'] == 'completed' and build['conclusion'] == 'success'
+          assert artifact['id'] == 13576502635 and artifact['name'] == 'github-pages' and not artifact['expired']
           assert artifact['workflow_run']['id'] == run['id']
           assert artifact['workflow_run']['head_sha'] == source
-          assert artifact['digest'] == digest and artifact['size_in_bytes'] == 88296669
+          assert artifact['digest'] == digest and artifact['size_in_bytes'] == 88286013
           assert source == os.environ['PIXELMAP_APPLICATION_SOURCE']
           capture_run = json.loads((root / 'capture-run.json').read_text())
           capture_artifact = json.loads((root / 'capture-artifact.json').read_text())
@@ -79,14 +83,14 @@ jobs:
           assert capture_artifact['workflow_run']['id'] == capture_run['id']
           assert capture_artifact['workflow_run']['head_sha'] == capture_source
           assert capture_artifact['digest'] == 'sha256:017c91bd60ae21db6da9e9b1b96ce55ad0b00fa021b44b6788c9f937321f8581'
-          print('Verified frozen 9171e95 application and 83980ac capture runs, exact artifact IDs, sizes and ZIP digest metadata.')
+          print('Verified frozen c937ddd application, successful browser build, 83980ac capture and exact artifact metadata. Overall release validation remains pending.')
           PY
       - uses: actions/download-artifact@v4
         with:
-          artifact-ids: '13574430917'
+          artifact-ids: '13576502635'
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
-          run-id: '42370846132'
+          run-id: '42377138938'
           merge-multiple: true
           path: ${{ runner.temp }}/frozen-pages
       - uses: actions/download-artifact@v4
@@ -110,14 +114,14 @@ jobs:
           manifest_hash = hashlib.sha256(manifest_bytes).hexdigest()
           assert manifest_hash == os.environ['PIXELMAP_REPLAY_MANIFEST_SHA256']
           manifest = json.loads(manifest_bytes)
-          assert manifest['source'] == os.environ['PIXELMAP_APPLICATION_SOURCE']
+          assert manifest['source'] == '9171e95efab06db930a97dde212d754b8da48f60'
           assert manifest['bodyFormat'] == 'decoded HTTP response bytes' and manifest['corpusTruncated'] is False
           assert len(manifest['requests']) == 170 and manifest['storedBytes'] == 19322575
           assert len({entry['sha256'] for entry in manifest['requests']}) == 165
           (evidence / 'replay-input-manifest.json').write_bytes(manifest_bytes)
           archive = root / 'frozen-pages/artifact.tar'
           tar_hash = hashlib.sha256(archive.read_bytes()).hexdigest()
-          assert tar_hash == '6c5576660410404d31e9b7f96b0df47db633cc0bdd7c32f4c780269130ca9b09'
+          assert tar_hash == '256e08a34dcc6e1022c7441ebd2cf588cc4d5074091bc3070372594dc31713e7'
           site = root / 'preview/UnoPixelMap'
           site.mkdir(parents=True)
           with tarfile.open(archive) as package:
@@ -125,13 +129,13 @@ jobs:
           configs = list(site.glob('package_*/uno-config.js'))
           assert len(configs) == 1
           config_path = configs[0]
-          assert config_path.parent.name == 'package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9'
+          assert config_path.parent.name == 'package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825'
           config = config_path.read_text()
           mode = re.search(r'\["UNO_BOOTSTRAP_MONO_RUNTIME_MODE"\]\s*=\s*"([^"]+)"', config)
           assert mode and mode.group(1) == 'InterpreterAndAOT'
           loader_name = re.search(r'config\.dotnet_js_filename\s*=\s*"([\w.-]+)"', config).group(1)
           loader = site / '_framework' / loader_name
-          assert hashlib.sha256(loader.read_bytes()).hexdigest() == '5180ff773f69c6b957827d123d9e984355af1054fe31f558dd2cc3de8f6462df'
+          assert hashlib.sha256(loader.read_bytes()).hexdigest() == '4f1a73ec0925cf906e9a1a2b09546b39cc2b59844257c2d46fb6632a7afe2685'
           boot = json.loads(loader.read_text().split('/*json-start*/', 1)[1].split('/*json-end*/', 1)[0])
           resources = []
           for group, entries in boot['resources'].items():
@@ -145,11 +149,17 @@ jobs:
                       assert entry['hash'] == 'sha256-' + base64.b64encode(digest).decode(), entry['name']
                   resources.append({'group': group, 'name': entry['name'], 'sha256': digest.hex(), 'bytes': path.stat().st_size})
           native = next(value for value in resources if value['group'] == 'wasmNative')
-          assert native['sha256'] == '153cd183a5572ea9be22944ab059a586d75c7b45a1fa272f21abbe5df96d43c7'
+          assert native['sha256'] == 'a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912'
           assert len(resources) == 72
-          provenance = {'application_source': '9171e95efab06db930a97dde212d754b8da48f60',
-              'application_run': 42370846132, 'artifact_id': 13574430917,
-              'artifact_zip_sha256': '2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73',
+          source_run = json.loads((evidence / 'source-run.json').read_text())
+          provenance = {'application_source': 'c937ddd192619f48c1a2ec682845b52bc1eebff8',
+              'application_run': 42377138938, 'application_build_job': 128416964285,
+              'application_build_conclusion': 'success',
+              'source_run_status_at_validation': source_run['status'],
+              'source_run_conclusion_at_validation': source_run['conclusion'],
+              'release_validation': 'pending; this diagnostic verifies a successful build artifact and does not deploy or accept the release',
+              'artifact_id': 13576502635,
+              'artifact_zip_sha256': 'ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb',
               'archive_verification': 'API ZIP digest checked; download-artifact retrieves/extracts ZIP; exact artifact.tar SHA256 checked independently against the audited ZIP member.',
               'artifact_tar_sha256': tar_hash, 'runtime_mode': mode.group(1), 'package': config_path.parent.name,
               'diagnostic_source': os.environ['GITHUB_SHA'], 'diagnostic_run': os.environ['GITHUB_RUN_ID'],
@@ -185,7 +195,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-corpus-memory-9171e95
+          name: atlas-corpus-memory-c937ddd
           path: ${{ runner.temp }}/corpus-memory
           if-no-files-found: warn
           retention-days: 7
