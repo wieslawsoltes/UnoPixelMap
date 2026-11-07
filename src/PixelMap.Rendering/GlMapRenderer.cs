@@ -373,6 +373,10 @@ public sealed unsafe class GlMapRenderer : IDisposable
 
     private void DrawBuildings(GpuMapFrame frame)
     {
+        // Reject back-facing walls before rasterization instead of invoking the
+        // fragment shader only to discard them. Caps share the outward winding.
+        gl.CullFace(GLEnum.Back);
+        gl.Enable(EnableCap.CullFace);
         var program = buildingProgram!;
         program.Use();
         program.Integer("uModels", 0);
@@ -395,6 +399,8 @@ public sealed unsafe class GlMapRenderer : IDisposable
             LastDrawCalls++;
         }
 
+        // Roof rims are screen-space strips and remain two-sided.
+        gl.Disable(EnableCap.CullFace);
         program = rimProgram!;
         program.Use();
         program.Integer("uModels", 0);
@@ -1109,7 +1115,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         private readonly int activeTexture, texture0, texture1, texture2, sampler0, sampler1, sampler2;
         private readonly int textureArray0, textureArray1;
         private readonly int unpackAlignment, unpackRowLength, unpackSkipRows, unpackSkipPixels, unpackImageHeight, unpackSkipImages;
-        private readonly int depthFunction, frontFace;
+        private readonly int depthFunction, frontFace, cullFace;
         private readonly bool blend, cull, scissor, stencil, depth, dither, rasterizerDiscard, polygonOffset, alphaCoverage;
         private readonly bool depthMask, redMask, greenMask, blueMask, alphaMask, embedded, framebufferSrgb;
         private readonly double depthNear, depthFar;
@@ -1143,6 +1149,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
             unpackSkipImages = gl.GetInteger(GLEnum.UnpackSkipImages);
             depthFunction = gl.GetInteger(GLEnum.DepthFunc);
             frontFace = gl.GetInteger(GLEnum.FrontFace);
+            cullFace = gl.GetInteger(GLEnum.CullFaceMode);
             blend = gl.IsEnabled(EnableCap.Blend); cull = gl.IsEnabled(EnableCap.CullFace);
             scissor = gl.IsEnabled(EnableCap.ScissorTest); stencil = gl.IsEnabled(EnableCap.StencilTest);
             depth = gl.IsEnabled(EnableCap.DepthTest); dither = gl.IsEnabled(EnableCap.Dither);
@@ -1189,6 +1196,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
             gl.PixelStore(PixelStoreParameter.UnpackSkipImages, unpackSkipImages);
             gl.DepthFunc((DepthFunction)depthFunction);
             gl.FrontFace((FrontFaceDirection)frontFace);
+            gl.CullFace((GLEnum)cullFace);
             gl.DepthMask(depthMask);
             gl.ColorMask(redMask, greenMask, blueMask, alphaMask);
             if (embedded)

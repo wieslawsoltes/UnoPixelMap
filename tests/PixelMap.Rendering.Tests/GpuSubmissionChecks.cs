@@ -271,7 +271,7 @@ internal static class GpuSubmissionChecks
             GLEnum.CurrentProgram, GLEnum.VertexArrayBinding, GLEnum.ArrayBufferBinding, GLEnum.ElementArrayBufferBinding,
             GLEnum.PixelUnpackBufferBinding, GLEnum.RenderbufferBinding, GLEnum.ActiveTexture, GLEnum.UnpackAlignment,
             GLEnum.UnpackRowLength, GLEnum.UnpackSkipRows, GLEnum.UnpackSkipPixels, GLEnum.UnpackImageHeight,
-            GLEnum.UnpackSkipImages, GLEnum.DepthFunc, GLEnum.FrontFace })
+            GLEnum.UnpackSkipImages, GLEnum.DepthFunc, GLEnum.FrontFace, GLEnum.CullFaceMode })
             result[parameter.ToString()] = gl.GetInteger(parameter);
         foreach (var capability in Capabilities) result[capability.ToString()] = gl.IsEnabled(capability) ? 1 : 0;
         result["DepthMask"] = gl.GetBoolean(GLEnum.DepthWritemask) ? 1 : 0;
@@ -315,6 +315,7 @@ internal static class GpuSubmissionChecks
         gl.DepthRange(0f, 1f);
         gl.ClearDepth(1f);
         gl.FrontFace(FrontFaceDirection.Ccw);
+        gl.CullFace(GLEnum.Back);
         gl.DepthFunc(DepthFunction.Less);
         gl.PixelStore(PixelStoreParameter.UnpackAlignment, 4);
         foreach (var parameter in new[] { PixelStoreParameter.UnpackRowLength, PixelStoreParameter.UnpackSkipRows,
@@ -369,6 +370,7 @@ internal static class GpuSubmissionChecks
             gl.DepthRange(.2f, .7f);
             gl.ClearDepth(.25f);
             gl.FrontFace(FrontFaceDirection.CW);
+            gl.CullFace(GLEnum.FrontAndBack);
             gl.DepthFunc(DepthFunction.Never);
             gl.Scissor(2, 3, 1, 1);
             gl.PixelStore(PixelStoreParameter.UnpackAlignment, 8);

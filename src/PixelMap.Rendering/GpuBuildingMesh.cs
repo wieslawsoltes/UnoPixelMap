@@ -137,8 +137,11 @@ internal sealed class GpuBuildingMesh
         {
             int a = tessellator.Elements[i * 3], b = tessellator.Elements[i * 3 + 1], c = tessellator.Elements[i * 3 + 2];
             if (a < 0 || b < 0 || c < 0) continue;
-            indices.Add(first + (uint)a * 2); indices.Add(first + (uint)b * 2); indices.Add(first + (uint)c * 2);
-            indices.Add(first + (uint)a * 2 + 1); indices.Add(first + (uint)c * 2 + 1); indices.Add(first + (uint)b * 2 + 1);
+            // Tile coordinates have a downward Y axis, while GL's clip-space Y
+            // points up. Reverse the tessellator's +Z winding so roofs and their
+            // undersides have the same outward-facing convention as the walls.
+            indices.Add(first + (uint)a * 2); indices.Add(first + (uint)c * 2); indices.Add(first + (uint)b * 2);
+            indices.Add(first + (uint)a * 2 + 1); indices.Add(first + (uint)b * 2 + 1); indices.Add(first + (uint)c * 2 + 1);
         }
     }
 

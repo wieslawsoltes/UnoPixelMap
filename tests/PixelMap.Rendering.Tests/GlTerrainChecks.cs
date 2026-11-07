@@ -32,6 +32,7 @@ internal static class GlTerrainChecks
         using var context = new HeadlessGlContext(1200, 800);
         Console.WriteLine(context.Description);
         var gl = context.Gl;
+        GpuCullingChecks.Run(gl);
         RenderStyleChecks.RunGl(gl);
         GpuVisibilityChecks.Run(gl);
         GpuCacheChecks.Run(gl);
