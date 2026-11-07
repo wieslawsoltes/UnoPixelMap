@@ -108,12 +108,36 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BASELINE_RUN_INPUT: ${{ inputs.baseline_run_id }}
+          BASELINE_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
           metadata="$RUNNER_TEMP/play-metadata"
           mkdir -p "$metadata" "$RUNNER_TEMP/play-evidence"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > "$metadata/candidate-run.json"
-          baseline_run="$BASELINE_RUN_INPUT"
+          # A push may pin an older successful artifact without a separate
+          # dispatch: [play-benchmark] [play-baseline:42300149918]. Treat the
+          # message as data, never interpolate it into shell/Python source.
+          baseline_run=$(python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          explicit = os.environ['BASELINE_RUN_INPUT'].strip()
+          message = os.environ['BASELINE_COMMIT_MESSAGE']
+          matches = re.findall(r'\[play-baseline:([1-9][0-9]*)\]', message)
+          if '[play-baseline' in message and (len(matches) != 1 or message.count('[play-baseline') != 1):
+              raise SystemExit('Use exactly one [play-baseline:positive-run-id] marker')
+          marker = matches[0] if matches else ''
+          if explicit and not re.fullmatch('[1-9][0-9]*', explicit):
+              raise SystemExit('The baseline workflow input must be a positive run ID')
+          if explicit and marker and explicit != marker:
+              raise SystemExit('The baseline workflow input and commit marker disagree')
+          selected = explicit or marker
+          selection = {'source': 'workflow-input' if explicit else 'commit-marker' if marker else 'latest-successful-main',
+              'requested_run_id': int(selected) if selected else None,
+              'workflow_input': explicit or None, 'commit_marker': marker or None}
+          (Path(os.environ['RUNNER_TEMP']) / 'play-metadata/baseline-selection.json').write_text(json.dumps(selection, indent=2) + '\n')
+          print(selected)
+          PY
+          )
           if [ -z "$baseline_run" ]; then
             gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/pages.yml/runs" \
               -f branch=main -f status=success -f per_page=50 > "$metadata/runs.json"
@@ -143,7 +167,7 @@ jobs:
           candidate = json.loads((metadata / 'candidate-run.json').read_text())
           assert candidate['id'] == int(os.environ['GITHUB_RUN_ID'])
           assert candidate['head_sha'] == os.environ['GITHUB_SHA']
-          provenance = {}
+          provenance = {'baseline_selection': json.loads((metadata / 'baseline-selection.json').read_text())}
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               for variant in ('baseline', 'candidate'):
                   run = json.loads((metadata / f'{variant}-run.json').read_text())
@@ -165,6 +189,7 @@ jobs:
                   output.write(f'{variant}_run_id={run["id"]}\n')
                   output.write(f'{variant}_artifact_id={artifact["id"]}\n')
                   output.write(f'{variant}_sha={run["head_sha"]}\n')
+          provenance['baseline_selection']['resolved_run_id'] = provenance['baseline']['run_id']
           (root / 'play-evidence/provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
           PY
       - uses: actions/download-artifact@v4

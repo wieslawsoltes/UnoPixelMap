@@ -22,7 +22,9 @@ internal static class DepthPreparationBenchmark
     private sealed record Sample(int Frame, Metric Prepare, Metric Navigation, Metric DepthConstruction,
         Metric SparseQueries, Metric RepeatedQueries, int TerrainPatches, int BuildingTriangles,
         int FramePreparedTriangles, int ConstructedTriangles, int PreparedTriangles, int PreparedEdges,
-        int? PreparedGroups, int? PreparedCells, string QueryHash, string OverlayHash, float MinimumAltitude, float MaximumAltitude);
+        int? PreparedGroups, int? PreparedCells, long FrameIndexCapacityBytes, long IndependentIndexCapacityBytes,
+        bool? FrameCoarseIndex, bool? FrameExactIndex, bool? IndependentCoarseIndex, bool? IndependentExactIndex,
+        string QueryHash, string OverlayHash, float MinimumAltitude, float MaximumAltitude);
     private sealed record Workload(string Name, MapTile[] Tiles, TerrainOptions? Terrain, MapRenderStyle Style,
         MapCamera[] Cameras, RoutePlan Route, int QueryStride = 0);
 
@@ -130,7 +132,9 @@ internal static class DepthPreparationBenchmark
                     values.Add(new(i, prepare, navigation, construction, sparse, repeated,
                         current.TerrainPatchCount, current.BuildingTriangleCount, Count(Property<object>(current, "Depth"), "triangles"),
                         constructedTriangles, Count(depth!, "triangles"), Count(depth!, "edges"),
-                        PreparedGroups(depth!), PreparedCells(depth!),
+                        PreparedGroups(depth!), PreparedCells(depth!), IndexCapacityBytes(Property<object>(current, "Depth")), IndexCapacityBytes(depth!),
+                        IndexFlag(Property<object>(current, "Depth"), "hasCoarseIndex"), IndexFlag(Property<object>(current, "Depth"), "hasExactIndex"),
+                        IndexFlag(depth!, "hasCoarseIndex"), IndexFlag(depth!, "hasExactIndex"),
                         Convert.ToHexStringLower(SHA256.HashData(MemoryMarshal.AsBytes(bits.AsSpan()))),
                         Convert.ToHexStringLower(SHA256.HashData(bitmap.GetPixelSpan())),
                         Property<float>(current, "MinimumAltitude"), Property<float>(current, "MaximumAltitude")));
@@ -227,6 +231,17 @@ internal static class DepthPreparationBenchmark
         ? groups.Cast<object>().Count(group => (int)group.GetType().GetField("FirstTriangle", Members)!.GetValue(group)! >= 0) : null;
     private static int? PreparedCells(object depth) => depth.GetType().GetField("preparedCells", Members)?.GetValue(depth) is bool[] cells
         ? cells.Count(value => value) : null;
+    internal static long IndexCapacityBytes(object depth)
+    {
+        long bytes = 0;
+        foreach (string name in new[] { "cells", "pendingCells" })
+            if (depth.GetType().GetField(name, Members)?.GetValue(depth) is System.Collections.IEnumerable cells)
+                foreach (object? cell in cells)
+                    bytes += cell switch { List<int> values => values.Capacity * 4L, List<ulong> values => values.Capacity * 8L, _ => 0 };
+        if (depth.GetType().GetField("largeProxies", Members)?.GetValue(depth) is List<int> overflow) bytes += overflow.Capacity * 4L;
+        return bytes;
+    }
+    internal static bool? IndexFlag(object depth, string name) => depth.GetType().GetField(name, Members)?.GetValue(depth) as bool?;
     private static double ThreadCpu()
     {
         if (!OperatingSystem.IsLinux() || clock_gettime(3, out var time) != 0)

@@ -21,7 +21,7 @@ internal static class GpuDepthChecks
         var contains = triangle.GetMethod("Contains", Members)!;
         var preparedPlanes = triangle.GetField("preparedPlanes", Members)!;
         var size = typeof(Unsafe).GetMethod(nameof(Unsafe.SizeOf))!.MakeGenericMethod(triangle);
-        Assert((int)size.Invoke(null, null)! == 80, "Lazy depth planes increased per-triangle storage.");
+        Assert((int)size.Invoke(null, null)! == 84, "Depth planes and one source-order key exceeded their per-triangle storage budget.");
         int comparisons = 0;
         foreach (bool perspective in new[] { false, true })
         foreach (bool terrain in new[] { false, true })
@@ -32,7 +32,7 @@ internal static class GpuDepthChecks
             var b = Point(83, 31, perspective ? weight * 1.7f : 1, -32.25f, -16.5f);
             var c = Point(29, 101, perspective ? weight * .65f : 1, 286.75f, 2320.125f);
             if (reverse) (b, c) = (c, b);
-            object value = triangleConstructor.Invoke([Vertex(a), Vertex(b), Vertex(c), terrain, perspective]);
+            object value = triangleConstructor.Invoke([Vertex(a), Vertex(b), Vertex(c), terrain, perspective, 0]);
             Assert((bool)triangle.GetField("Valid", Members)!.GetValue(value)!, "A depth fixture became degenerate.");
             int prepared = (terrain || perspective ? 0 : 1) | (terrain || !perspective ? 0 : 2) | (terrain ? 0 : 4);
             Assert((byte)preparedPlanes.GetValue(value)! == prepared, "A triangle eagerly prepared an unused depth plane.");

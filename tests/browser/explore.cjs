@@ -10,6 +10,7 @@ const evidence = process.env.PIXELMAP_SHOTS;
 const mountainView = "v4/45.875/10.85/12.3/-25/58/Day/Elevation/Perspective/0/Relief/1.00";
 // The bundled Pine Street road center gives movement checks room before a wall.
 const cityView = "v4/40.706846/-74.008817/17/-51/55/Day/Map/Perspective/0/Relief/1.00";
+const closeCityView = "v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00";
 const failures = [];
 
 async function see(page, expected, timeout = 25000) {
@@ -148,10 +149,10 @@ async function choose(page, name, index, touch = false, selectedIndex = 0) {
     await page.getByRole("listbox", {name, exact: true}).waitFor({state: "hidden"});
 }
 
-async function open(browser, hash, phone = false) {
+async function open(browser, hash, phone = false, display = {}) {
     const context = await browser.newContext({
-        viewport: phone ? {width: 390, height: 844} : {width: 1200, height: 800},
-        deviceScaleFactor: 1, isMobile: phone, hasTouch: phone
+        viewport: display.viewport ?? (phone ? {width: 390, height: 844} : {width: 1200, height: 800}),
+        deviceScaleFactor: display.deviceScaleFactor ?? 1, isMobile: phone, hasTouch: phone
     });
     const page = await context.newPage();
     await page.addInitScript(() => {
@@ -173,7 +174,9 @@ async function open(browser, hash, phone = false) {
     page.on("console", message => {
         if (message.text().includes("Pixel Atlas") && /GPU|readback|input adapter/.test(message.text()))
             console.log(message.text());
-        if (message.type() === "error" && /Unhandled (?:managed )?exception|RuntimeError:|System\.[\w.]*Exception/.test(message.text()))
+        // A failed direct frame can log its managed exception before falling back.
+        // An OOM must fail the test even if a later runtime abort never arrives.
+        if (/Unhandled (?:managed |dispatcher )?exception|RuntimeError:|System\.[\w.]*Exception|MONO_WASM: Assert failed|\.NET runtime already exited|^ExitStatus\b/.test(message.text()))
             failures.push(message.text());
     });
     for (const host of ["tiles.openfreemap.org", "tiles.maps.eox.at", "s3.amazonaws.com/elevation-tiles-prod",
@@ -363,6 +366,100 @@ async function defaultView(browser) {
     await page.keyboard.press("Escape");
     await context.close();
     console.log("Default view opened with GPU-active Pixel rendering.");
+}
+
+async function highDensityCloseCamera(browser) {
+    const {context, page} = await open(browser, closeCityView, false, {
+        viewport: {width: 1800, height: 924}, deviceScaleFactor: 2
+    });
+    const initialFailures = failures.length;
+    const geometry = await page.evaluate(() => {
+        const canvas = document.getElementById("uno-canvas");
+        return {width: innerWidth, height: innerHeight, ratio: devicePixelRatio,
+            canvasWidth: canvas.width, canvasHeight: canvas.height};
+    });
+    assert.deepEqual(geometry, {width: 1800, height: 924, ratio: 2, canvasWidth: 3600, canvasHeight: 1848},
+        "The close-camera regression uses the actual DPR2 native canvas");
+    const map = await page.locator('[aria-label="Interactive world map"]').boundingBox();
+    assert.ok(map?.width === 1800 && map.height > 700 && map.height < 924,
+        "The dense scene occupies the large logical map viewport");
+    const checkpoints = [];
+    async function checkpoint(name, active = true, input = null) {
+        const state = {name, input, camera: await readCamera(page),
+            depthDraws: await page.evaluate(() => window.pixelExploreGpu.depthDraws),
+            telemetry: active ? await telemetry(page) : null};
+        checkpoints.push(state);
+        if (evidence) await writeFile(join(evidence, "high-dpi-close-camera.json"), JSON.stringify({
+            fragment: closeCityView, geometry, mapBounds: map,
+            data: "Bundled Manhattan; external tile, imagery, elevation and routing hosts are blocked.",
+            checkpoints, failures: failures.slice(initialFailures)
+        }, null, 2));
+        assert.deepEqual(failures.slice(initialFailures), [], "Close-camera rendering has no managed or runtime failures");
+        return state;
+    }
+    async function pan(y, name, dwell) {
+        const previous = await page.evaluate(() => window.pixelExploreGpu.depthDraws);
+        const input = await page.evaluate(y => {
+            const event = new WheelEvent("wheel", {bubbles: true, cancelable: true,
+                clientX: 1100, clientY: 480, deltaMode: WheelEvent.DOM_DELTA_PIXEL, deltaX: 0, deltaY: y});
+            // Explicitly model a continuous pixel device. A legacy 120-unit notch
+            // would select zoom, and Ctrl/Meta would preserve the NorthUp rig.
+            Object.defineProperties(event, {wheelDelta: {value: 0}, wheelDeltaY: {value: 0}});
+            document.getElementById("uno-canvas").dispatchEvent(event);
+            return {deltaX: event.deltaX, deltaY: event.deltaY, deltaMode: event.deltaMode,
+                ctrl: event.ctrlKey, meta: event.metaKey, prevented: event.defaultPrevented};
+        }, y);
+        assert.deepEqual(input, {deltaX: 0, deltaY: y, deltaMode: 0, ctrl: false, meta: false, prevented: true},
+            "The live map owns the continuous camera gesture");
+        await page.waitForFunction(previous => window.pixelExploreGpu.depthDraws > previous, previous);
+        // The NorthUp→Orbit transition first produces the ordinary elevated rig;
+        // its spring then reaches the ground-clamped, upward-looking view. Keep
+        // exercising that later view instead of checking only the first frame.
+        await page.waitForTimeout(dwell);
+        await see(page, /GPU active.+Pixel rendering/);
+        return checkpoint(name, true, input);
+    }
+    await see(page, /GPU active.+Pixel rendering/);
+    await tap(page, page.getByRole("button", {name: "Open free roam game", exact: true}));
+    const relief = page.getByRole("switch", {name: "Game terrain relief", exact: true});
+    if (await relief.getAttribute("aria-checked") !== "true") await action(page, "Game terrain relief");
+    assert.equal(await relief.getAttribute("aria-checked"), "true",
+        "The high-density close-camera regression explicitly enables terrain relief");
+    await choose(page, "Free roam camera", 4);
+    await action(page, "Start free roam at map center");
+    await see(page, /Walking/);
+    await see(page, /rendering.+?·\s*z24\.0\s*·\s*0°/);
+    const north = await checkpoint("north-up");
+    assert.equal(north.camera.bearing, 0, "The high-density walker starts north-up");
+    await screen(page, "high-dpi-north-up");
+
+    const close = await pan(480, "ground-clamped-close-orbit", 3500);
+    assert.equal(close.camera.zoom, 24, "The regression reaches the extreme close camera");
+    assert.equal(close.camera.bearing, -15, "Continuous look restores the walker's orbit bearing");
+    await expandSettings(page);
+    assert.match(await page.getByRole("combobox", {name: "Free roam camera", exact: true}).ariaSnapshot(), /Orbit/,
+        "The continuous gesture actually changes NorthUp to Orbit");
+    await action(page, "Collapse game settings");
+    await screen(page, "high-dpi-ground-clamped-orbit");
+
+    for (const [y, name] of [[-240, "near-horizon"], [-240, "elevated-orbit"],
+        [240, "near-horizon-again"], [240, "ground-clamped-again"]])
+        await pan(y, name, 1200);
+    assert.equal((await telemetry(page)).distance, north.telemetry.distance,
+        "Extreme camera gestures preserve the stationary physical walker");
+    await action(page, "Pause free roam");
+    await see(page, /Resume free roam/);
+    await assertSettledGpu(page);
+    await checkpoint("paused-close-camera");
+    await action(page, "Resume free roam");
+    await see(page, /Pause free roam/);
+    await action(page, "Exit free roam");
+    await page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true}).waitFor({state: "visible"});
+    await see(page, /GPU active.+Pixel rendering/);
+    await checkpoint("returned-to-map", false);
+    await screen(page, "high-dpi-close-camera-recovered");
+    await context.close();
+    console.log("DPR2 dense-city NorthUp→ground-clamped Orbit, horizon changes and runtime recovery passed.");
 }
 
 async function telemetry(page) {
@@ -875,6 +972,7 @@ async function run() {
     });
     try {
         await defaultView(browser);
+        await highDensityCloseCamera(browser);
         const terrain = await open(browser, mountainView);
         await see(terrain.page, /GPU active.+Pixel rendering/);
         await renderingStyles(terrain.page);

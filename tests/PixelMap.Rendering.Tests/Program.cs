@@ -2,6 +2,18 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--depth-memory-pressure", StringComparer.Ordinal))
+{
+    GpuDepthMemoryChecks.RunPressureChecks();
+    return;
+}
+
+if (args.Contains("--depth-memory", StringComparer.Ordinal))
+{
+    await GpuDepthMemoryChecks.RunAsync(args);
+    return;
+}
+
 if (args.Contains("--free-camera", StringComparer.Ordinal))
 {
     FreeCameraChecks.Run();
@@ -160,6 +172,7 @@ PerspectiveChecks.Run();
 TerrainCameraChecks.Run();
 TerrainRenderingChecks.Run();
 GpuDepthChecks.Run();
+GpuDepthMemoryChecks.RunPressureChecks();
 await TerrainTextureCacheChecks.RunAsync();
 GpuBuildingSelectionChecks.Run();
 PixelWindowFootprintChecks.Run();
