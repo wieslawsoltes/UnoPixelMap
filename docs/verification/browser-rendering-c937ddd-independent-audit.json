@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "measurement_run": 42377138938,
+  "measurement_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938",
+  "candidate_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "baseline_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+  "baseline_run": 42300149918,
+  "scope": "Independent recomputation from raw CI samples. No imported JavaScript summary functions; no deployment or live acceptance claim.",
+  "assertions": 26040,
+  "assertions_by_category": {
+    "identity": 2470,
+    "structure": 268,
+    "numeric": 720,
+    "profile_structure": 14,
+    "profile_summary": 21421,
+    "comparison": 580,
+    "file_hash": 198,
+    "image": 369
+  },
+  "raw_runs": 30,
+  "comparison_rows": 10,
+  "cpu_profiles": 14,
+  "moving_submission_range_per_run": [
+    44,
+    97
+  ],
+  "stationary_runs": 10,
+  "stationary_image_cases": 5,
+  "totals": {
+    "submissions": 1291,
+    "direct_submissions": 1291,
+    "detached_submissions": 0,
+    "readbacks": 0,
+    "pixel_pack_copies": 0,
+    "art_uploads": 0,
+    "early_releases": 0,
+    "positive_timeout_polls": 0
+  },
+  "map_submissions_by_pixel_size": {
+    "4": 1291
+  },
+  "relative_tolerance": 1e-12,
+  "absolute_tolerance": 1e-09,
+  "protocol": {
+    "stationary": "One baseline/candidate pair for each of five cases.",
+    "moving": "Two repetitions per variant in ABBA order for each of five cases.",
+    "profile": "Fourteen separate post-measurement profiles; sampled elapsed weights are not the timed main-thread task-CPU metric."
+  },
+  "source_files": {
+    "raw_provenance_sha256": "22835e9b846535ad8ce38892717401c52e3076007df0a3f3d5498c6e8fc18cac",
+    "environment_sha256": "c87051476c885537dda3cf913e6cf9fccfbe329616612abbebf307b741ba741e",
+    "runs_csv_sha256": "d9367c84e499dc61c44d4855d156f9947c31e41424d617a7d68c0d3e710b3548",
+    "comparison_csv_sha256": "0850a9f30a2c849ab95fd742337d4179dee4333bd773530a06af575c5902cfa1",
+    "exported_provenance_sha256": "e81bb430d802e2f89e2f8b80011fa7470edfd8b4537aacf7836595f2f8f87935",
+    "auditor_sha256": "24aee7067a68f6de65a5de82cdd24b360e0c57eba86a488f9abba7655cf1a101"
+  },
+  "profile_results": [
+    {
+      "scenario": "map-idle-relief",
+      "variant": "baseline",
+      "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "native_wasm_sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95",
+      "sha256": "c3b8cd19f4177d7ad38afa0b1e6f41d4beb5e174893e98f03ddffbd6b51a5e58",
+      "native_wasm_urls_observed": [],
+      "samples": 7524,
+      "duration_ms": 8120.438,
+      "self_sampled_ms": {
+        "idle": 8003.312999999912,
+        "program": 114.946,
+        "wasm": 0.0,
+        "webgl_binding": 0.0,
+        "garbage_collection": 0.0,
+        "other": 1.08
+      }
+    },
+    {
+      "scenario": "map-idle-relief",
+      "variant": "candidate",
+      "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "native_wasm_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+      "sha256": "686af5b83e4f15069f373a52cd892ea2343575faac1c24fa7484e809d998e3fc",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/candidate/UnoPixelMap/_framework/dotnet.native.3l7hksc7hn.wasm"
+      ],
+      "samples": 7514,
+      "duration_ms": 8118.141,
+      "self_sampled_ms": {
+        "idle": 7967.356000000037,
+        "program": 118.254,
+        "wasm": 12.269999999999998,
+        "webgl_binding": 0.0,
+        "garbage_collection": 0.998,
+        "other": 18.544
+      }
+    },
+    {
+      "scenario": "walk-stationary-firstperson",
+      "variant": "baseline",
+      "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "native_wasm_sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95",
+      "sha256": "c87fcd3cace5366620712adbe3b58ce9bb86cace89016d2cbe215aa233989433",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/baseline/UnoPixelMap/_framework/dotnet.native.5hk7zno2rb.wasm"
+      ],
+      "samples": 7500,
+      "duration_ms": 8129.175,
+      "self_sampled_ms": {
+        "idle": 7738.242999999921,
+        "program": 175.6429999999999,
+        "wasm": 142.4219999999999,
+        "webgl_binding": 0.0,
+        "garbage_collection": 19.727000000000004,
+        "other": 52.88300000000002
+      }
+    },
+    {
+      "scenario": "walk-stationary-firstperson",
+      "variant": "candidate",
+      "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "native_wasm_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+      "sha256": "09b6eee17d3f7988b04222af8b6ba759def2a94cc358c8fc3f3fb728cc957afe",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/candidate/UnoPixelMap/_framework/dotnet.native.3l7hksc7hn.wasm"
+      ],
+      "samples": 7504,
+      "duration_ms": 8120.432,
+      "self_sampled_ms": {
+        "idle": 7788.483999999859,
+        "program": 145.504,
+        "wasm": 138.146,
+        "webgl_binding": 0.0,
+        "garbage_collection": 2.448,
+        "other": 44.81600000000001
+      }
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "variant": "baseline",
+      "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "native_wasm_sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95",
+      "sha256": "2fe714dfe2403622c10f379099d60d177a4ff584e4a0dfffbefa2d8ef656d257",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/baseline/UnoPixelMap/_framework/dotnet.native.5hk7zno2rb.wasm"
+      ],
+      "samples": 6531,
+      "duration_ms": 8128.194,
+      "self_sampled_ms": {
+        "idle": 4532.644000000008,
+        "program": 345.1199999999999,
+        "wasm": 2812.5680000000025,
+        "webgl_binding": 178.75299999999996,
+        "garbage_collection": 37.754000000000005,
+        "other": 220.248
+      }
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "variant": "candidate",
+      "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "native_wasm_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+      "sha256": "b11610f541e23cf8427d1498b5301416dde0d4713aacc8c71446910b8541dcf5",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/candidate/UnoPixelMap/_framework/dotnet.native.3l7hksc7hn.wasm"
+      ],
+      "samples": 6526,
+      "duration_ms": 8130.4,
+      "self_sampled_ms": {
+        "idle": 4290.729000000014,
+        "program": 368.571,
+        "wasm": 2927.2490000000016,
+        "webgl_binding": 212.67600000000002,
+        "garbage_collection": 33.590999999999994,
+        "other": 297.00099999999986
+      }
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "variant": "baseline",
+      "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "native_wasm_sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95",
+      "sha256": "152ccb83da3f57917c2efc15dcb7c6971d4b7d02dddbf4469094837b7334d1ac",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/baseline/UnoPixelMap/_framework/dotnet.native.5hk7zno2rb.wasm"
+      ],
+      "samples": 6207,
+      "duration_ms": 8174.332,
+      "self_sampled_ms": {
+        "idle": 5499.148000000023,
+        "program": 501.90499999999975,
+        "wasm": 1486.131999999999,
+        "webgl_binding": 297.24999999999994,
+        "garbage_collection": 36.925,
+        "other": 352.144
+      }
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "variant": "candidate",
+      "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "native_wasm_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+      "sha256": "854d2c69d2e12e5d3bf4b17845376f74a743e4661c43bd3bab85def14b57096c",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/candidate/UnoPixelMap/_framework/dotnet.native.3l7hksc7hn.wasm"
+      ],
+      "samples": 6318,
+      "duration_ms": 8181.312,
+      "self_sampled_ms": {
+        "idle": 5809.955000000007,
+        "program": 502.5789999999997,
+        "wasm": 1234.6539999999998,
+        "webgl_binding": 283.3010000000001,
+        "garbage_collection": 44.843999999999994,
+        "other": 304.5990000000001
+      }
+    },
+    {
+      "scenario": "car-moving-chase",
+      "variant": "baseline",
+      "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "native_wasm_sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95",
+      "sha256": "e810cfdd10e850778e0a40f05357eb83ddac357bee87a082aaa980781592c9f7",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/baseline/UnoPixelMap/_framework/dotnet.native.5hk7zno2rb.wasm"
+      ],
+      "samples": 6427,
+      "duration_ms": 8201.005,
+      "self_sampled_ms": {
+        "idle": 4411.699000000007,
+        "program": 412.352,
+        "wasm": 2902.5450000000037,
+        "webgl_binding": 212.68600000000006,
+        "garbage_collection": 0.0,
+        "other": 260.66099999999983
+      }
+    },
+    {
+      "scenario": "car-moving-chase",
+      "variant": "candidate",
+      "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "native_wasm_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+      "sha256": "98d03b11573d1db5052e928792e56c4f078cacc3edd9c9bfeffe9348f5342e25",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/candidate/UnoPixelMap/_framework/dotnet.native.3l7hksc7hn.wasm"
+      ],
+      "samples": 6387,
+      "duration_ms": 8193.354,
+      "self_sampled_ms": {
+        "idle": 5694.567000000011,
+        "program": 432.892,
+        "wasm": 1556.1770000000029,
+        "webgl_binding": 228.154,
+        "garbage_collection": 0.0,
+        "other": 280.10299999999984
+      }
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "variant": "baseline",
+      "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "native_wasm_sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95",
+      "sha256": "9314e72ae8a2552c713e6c0318a707cde5add672c3401fa15acc11d1453ecb43",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/baseline/UnoPixelMap/_framework/dotnet.native.5hk7zno2rb.wasm"
+      ],
+      "samples": 6487,
+      "duration_ms": 8126.153,
+      "self_sampled_ms": {
+        "idle": 3660.010000000003,
+        "program": 390.1960000000001,
+        "wasm": 3629.588999999995,
+        "webgl_binding": 151.03699999999998,
+        "garbage_collection": 19.191,
+        "other": 275.73
+      }
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "variant": "candidate",
+      "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "native_wasm_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+      "sha256": "480e48eef1d0cc8c0589183d1c77d4a2de49c4940ddf0328f3d9ffd3beb08606",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/candidate/UnoPixelMap/_framework/dotnet.native.3l7hksc7hn.wasm"
+      ],
+      "samples": 6436,
+      "duration_ms": 8136.357,
+      "self_sampled_ms": {
+        "idle": 3538.5260000000003,
+        "program": 449.88,
+        "wasm": 3609.112999999989,
+        "webgl_binding": 180.38799999999992,
+        "garbage_collection": 36.243,
+        "other": 321.7969999999998
+      }
+    },
+    {
+      "scenario": "freeflight-moving",
+      "variant": "baseline",
+      "source_revision": "1829855ea07d1fd43b66d4478210398a605bb3c9",
+      "native_wasm_sha256": "97dd179318ebe0bdfc5ac0ed4427f47182ed1773f476dce30fbb08f192b52f95",
+      "sha256": "e30f822afb8206e7cdea130ee4886bd52087c4881d6c97e4dc0bd3933ff4b9c3",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/baseline/UnoPixelMap/_framework/dotnet.native.5hk7zno2rb.wasm"
+      ],
+      "samples": 6264,
+      "duration_ms": 8133.855,
+      "self_sampled_ms": {
+        "idle": 4307.879999999999,
+        "program": 413.5269999999997,
+        "wasm": 2895.6499999999965,
+        "webgl_binding": 209.77299999999988,
+        "garbage_collection": 0.0,
+        "other": 306.6449999999999
+      }
+    },
+    {
+      "scenario": "freeflight-moving",
+      "variant": "candidate",
+      "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "native_wasm_sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+      "sha256": "813a6f5d35e9f19e560bf6a2fd1d871d3b2c6360e64d2faa5f99640bba7b6394",
+      "native_wasm_urls_observed": [
+        "http://127.0.0.1:8100/candidate/UnoPixelMap/_framework/dotnet.native.3l7hksc7hn.wasm"
+      ],
+      "samples": 6181,
+      "duration_ms": 8132.442,
+      "self_sampled_ms": {
+        "idle": 4632.612000000006,
+        "program": 554.6870000000006,
+        "wasm": 2374.1120000000037,
+        "webgl_binding": 216.56400000000008,
+        "garbage_collection": 35.137,
+        "other": 318.443
+      }
+    }
+  ]
+}

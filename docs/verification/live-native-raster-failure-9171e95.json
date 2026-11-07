@@ -50,7 +50,7 @@
         "ScrollX": 0,
         "ScrollY": -240
       },
-      "Outcome": "A later console inspection found native abort at12:36:14.277UTC. The frozen UI showed map60/63, Terrain ready, GPU active, z24,bearing−15, physical distance0m."
+      "Outcome": "A later console inspection found native abort at12:36:14.277UTC. The frozen UI showed map60/63, Terrain ready, GPU active, z24,bearing\u221215, physical distance0m."
     },
     {
       "Phase": "Post-abort actions",
@@ -93,5 +93,13 @@
     "Sha256": "afeefb75e3ff8e3edb8ed7feef80f3578eb651c07557da1518feec5553dcc3ff",
     "Meaning": "Frozen last frame; not a successful live verification screenshot."
   },
-  "Followup": "Frozen917 AOT replay with live corpus capture, trusted input observation and linear-memory growth instrumentation is being prepared."
+  "Followup": {
+    "FrozenApplicationCapture": "The unchanged 9171e95 AOT artifact completed a later native-input live-provider capture at diagnostic source 83980ac; allocated Wasm memory reached 2,115,305,472 bytes. This did not reproduce the original abort.",
+    "CaptureEvidence": "live-native-capture-83980ac.json",
+    "CapturedSceneAccounting": "The captured union exposed avoidable building-mesh buffers and eager CPU edge arrays. Source c937ddd reduces constructor allocation by 53.6% and exact retained mesh/edge payload by 146,310,824 bytes in the native harness.",
+    "NativeAccountingEvidence": "building-mesh-memory-c937ddd.json",
+    "Scope": "The original failure remains a failed live acceptance. Later successful diagnostics do not identify the original allocation request, exact retained browser scene or allocator state. Candidate AOT replay and independent live acceptance are recorded separately.",
+    "CandidateLiveEvidence": "live-rendering-c937ddd.json",
+    "FrozenCorpusComparison": "corpus-memory-comparison-c937ddd.json"
+  }
 }

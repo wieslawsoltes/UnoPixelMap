@@ -49,10 +49,47 @@ The CPU rasterizer still requests `Building.Vertices` lazily. GPU construction n
 
 This changes ownership without changing the source features. A later CPU fallback can still materialize the same table. Ground paths, shadows, labels and source tiles remain available, and GPU frames keep immutable vertex/index/rim arrays while foundation updates replace only the small model metadata array.
 
+## Captured-scene native measurements
+
+The same accounting harness loads all 68 captured vector tiles and 96 elevation tiles into the original `9171e95` renderer and the compact `c937ddd` renderer. It measures construction before traversing five fixed camera poses, retains two GPU frame descriptions, and records array ownership and full-GC checkpoints. This is a CoreCLR x64 run without a GL context; it measures construction and retained data, not browser presentation speed.
+
+| Measure | Original | Compact | Change |
+| --- | ---: | ---: | ---: |
+| Building-constructor allocated bytes, including tessellation | 2,471,008,544 | 1,147,196,088 | −53.6% |
+| Retained building-mesh arrays, including model metadata and ranges | 425,732,592 | 313,152,752 | −112,579,840 bytes |
+| Prepared CPU edge arrays | 33,730,984 | 0 | −33,730,984 bytes |
+| Final tracked array payload across the scene | 524,626,099 | 378,315,275 | −146,310,824 bytes |
+| Final managed bytes after full GC | 725,473,784 | 578,913,760 | −146,560,024 bytes |
+
+The direct mesh-plus-edge reduction is **146,310,824 bytes**, or **139.533 MiB**, at every measured camera pose. Vertex payload falls from 337,739,520 to 225,159,680 bytes; index and roof-rim payloads remain unchanged. Source geometry, camera values, depth capacities, bake inputs and resulting shadow paths agree between the two runs. Full-GC object totals include other managed objects and runtime effects, so their difference is not used to define the exact array saving.
+
+The [complete measurement record](verification/building-mesh-memory-c937ddd.json) includes each tile's constructor measurements, all five scene-retention checkpoints, source/binary identities and the 878-assertion export audit. The [reusable harness](verification/building-mesh-harness/README.md) accepts an explicit source revision and body-root path. Its captured union remains a comparison workload, not a reconstruction of the browser's precise retained tile membership or native allocator state at the earlier abort.
+
+## Frozen-corpus AOT replay
+
+The original and compact AOT artifacts each replay the same 165 captured response bodies through the same native input protocol at 1800 × 924 CSS pixels and DPR 2. The protocol covers the initial North Up walker, close Orbit transitions, three additional camera cycles, and acknowledged pause, resume and exit controls.
+
+| Recorded browser result | Original `9171e95` | Compact `c937ddd` |
+| --- | ---: | ---: |
+| Peak allocated Wasm linear-memory length | 2,077,556,736 bytes | 1,908,146,176 bytes |
+| Additional growth below the configured 2 GiB maximum | 66.6875 MiB | 228.25 MiB |
+| Completed public-state checkpoints | 27 | 27 |
+| Native gesture acknowledgements | 8 | 8 |
+| Provider request occurrences / unique bodies | 170 / 165 | 170 / 165 |
+| Bounded sampler timeouts | 13 | 6 |
+
+The observed high-water mark falls by **169,410,560 bytes**, or **161.5625 MiB / 8.1543%**. Both runs complete without a recorded runtime abort, failed memory growth, replay failure or input failure. The sampler timeouts are retained as observation failures: successful checkpoints do not imply continuously responsive UI. Memory-growth records use a separate binding and include growth events during timed-out polling intervals.
+
+This is one measurement per artifact, with identical bodies and aggregate gesture deltas. Request order differs at 48 of 170 positions between the two runs; wheel-event packetization and frame scheduling also differ. It is not a frame-by-frame deterministic or statistical timing comparison. Neither replay reproduces the earlier live abort. The difference from the memory ceiling is possible linear-memory growth, not guaranteed allocator free space or a bound on total process/GPU memory. [Pinned comparison and raw observations](verification/corpus-memory-comparison-c937ddd.json) · [Independent 5,174-assertion audit](verification/browser-memory-replay-c937ddd-independent-audit.json)
+
+After deployment, the independent connected-browser replay also passes the original live-provider camera sequence at the same viewport and DPR. Both native scroll requests complete, the picker confirms Orbit, pause/resume acknowledge twice, and exit restores the original ready GPU overview. One bounded DOM inspection times out during the first pause phase; the following independent snapshot shows the paused, ready state. No captured managed exception or native abort occurs. [Live observations](verification/live-rendering-c937ddd.json) · [Close view](verification/live-c937ddd-close-camera.jpg) · [Restored overview](verification/live-c937ddd-manhattan-overview.jpg)
+
 ## Verification scope
 
 The legacy builder is preserved as an independent test reference. Regression checks compare every logical original vertex attribute by its IEEE 754 bits, every index and rim endpoint, model metadata and range boundaries. They also check the packed struct's size/offsets, array sharing across foundation updates, lazy edge ownership and allocation behavior on dense geometry.
 
 Image and depth gates cover the consumers of the new representation: the eager depth oracle, ordinary rendering, cache eviction and held-frame replay, building selection, terrain/navigation overlays and GLES output. The pixel-window filtering algorithm is unchanged by this storage pass. Browser validation additionally exercises the captured provider corpus and acknowledged close-camera controls; retained array measurements and Wasm growth measurements remain separate.
+
+The compact-mesh gate compares **845,516 vertices across 22 cases**, including all four visual styles, nonstandard tile extents, dense Manhattan tiles, holes, crossing contours, degenerate edges and signed zero. The full depth oracle compares **6,612,305 queries across 55 frames**. The GLES comparison preserves all **192 case image hashes across 48 cases**; only the expected uploaded/resident byte counters decrease.
 
 See [rendering performance](performance.md), [sparse depth bounds](sparse-visibility.md), and [pixel-window filtering](pixel-window-filtering.md) for the other parts of this rendering pass.

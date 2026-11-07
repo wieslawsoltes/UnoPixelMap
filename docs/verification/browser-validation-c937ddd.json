@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "recorded_utc": "2026-11-07T14:03:21.060515+00:00",
+  "application_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "application_tree": "57356c5b6d841b51c0d913c5ce491996a65eb4ed",
+  "application_src_tree": "fafa8c1d7e88889e6ac23a68259e6d8b20af1639",
+  "workflow_run": {
+    "id": 42377138938,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938",
+    "head_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-11-07T13:28:49Z",
+    "updated_at": "2026-11-07T13:57:42Z"
+  },
+  "jobs": [
+    {
+      "id": 128416964285,
+      "name": "browser",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-07T13:28:52Z",
+      "completed_at": "2026-11-07T13:43:32Z",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938/job/128416964285"
+    },
+    {
+      "id": 128420265442,
+      "name": "verify",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-07T13:43:35Z",
+      "completed_at": "2026-11-07T13:53:02Z",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938/job/128420265442"
+    },
+    {
+      "id": 128420265489,
+      "name": "play-benchmark",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-07T13:43:35Z",
+      "completed_at": "2026-11-07T13:57:41Z",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938/job/128420265489"
+    },
+    {
+      "id": 128422396222,
+      "name": "deploy",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-07T13:53:07Z",
+      "completed_at": "2026-11-07T13:53:18Z",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938/job/128422396222"
+    }
+  ],
+  "deployment": {
+    "job_id": 128422396222,
+    "source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "reported_success_utc": "2026-11-07T13:53:16.4088026Z",
+    "url": "https://wieslawsoltes.github.io/UnoPixelMap/"
+  },
+  "pages_artifact": {
+    "id": 13576502635,
+    "name": "github-pages",
+    "size_in_bytes": 88286013,
+    "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576502635",
+    "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576502635/zip",
+    "expired": false,
+    "created_at": "2026-11-07T13:43:28Z",
+    "expires_at": "2026-11-14T13:43:23Z",
+    "updated_at": "2026-11-07T13:43:28Z",
+    "digest": "sha256:ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb",
+    "workflow_run": {
+      "id": 42377138938,
+      "repository_id": 1443492055,
+      "head_repository_id": 1443492055,
+      "head_branch": "main",
+      "head_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8"
+    }
+  },
+  "pages_tar_sha256": "256e08a34dcc6e1022c7441ebd2cf588cc4d5074091bc3070372594dc31713e7",
+  "runtime": {
+    "mode": "InterpreterAndAOT",
+    "package": "package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+    "verified_boot_resources": 72,
+    "index": {
+      "name": "index.html",
+      "sha256": "69f7ba97caaa9d55b268b2d573b5355c337cf07a9673b1e79c8c15812a370d68",
+      "bytes": 2137
+    },
+    "config": {
+      "name": "package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/uno-config.js",
+      "sha256": "46804107d55f79f7dad9bd2932d339b06161a876d9a4f503186b3348e7bfd15f",
+      "bytes": 1828
+    },
+    "loader": {
+      "name": "_framework/dotnet.3bwjsd43eu.js",
+      "sha256": "4f1a73ec0925cf906e9a1a2b09546b39cc2b59844257c2d46fb6632a7afe2685",
+      "bytes": 56567
+    },
+    "native_files": [
+      {
+        "group": "jsModuleNative",
+        "name": "dotnet.native.55qcjjnjf2.js",
+        "sha256": "595e0a9c7fd699394ab24c87fc152cb482b59ea4a65ac1e17877d68a0e2f95fa",
+        "bytes": 414058
+      },
+      {
+        "group": "wasmNative",
+        "name": "dotnet.native.3l7hksc7hn.wasm",
+        "sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+        "bytes": 65940623
+      }
+    ],
+    "adapters": [
+      {
+        "name": "audio/journey-audio.js",
+        "sha256": "3558402843455fe43db70e5fae77c275799020db712c4dfdb613e2ccd13a5523",
+        "bytes": 8134
+      },
+      {
+        "name": "input/map-input.js",
+        "sha256": "f29e5c0343298556cdb003cc0d601d19edb0a25ac5dbea1c7c2a64f6ac0cefca",
+        "bytes": 14061
+      }
+    ],
+    "adapter_query_digest": "a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825"
+  },
+  "browser_verification_artifact": {
+    "id": 13576154880,
+    "name": "atlas-browser-screens",
+    "size_in_bytes": 29300696,
+    "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576154880",
+    "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576154880/zip",
+    "expired": false,
+    "created_at": "2026-11-07T13:53:00Z",
+    "expires_at": "2027-02-05T13:28:49Z",
+    "updated_at": "2026-11-07T13:53:00Z",
+    "digest": "sha256:4e4c87a169aa6d84151da1d32b980816b350197f6473207fae2aee1d4117ab7d",
+    "workflow_run": {
+      "id": 42377138938,
+      "repository_id": 1443492055,
+      "head_repository_id": 1443492055,
+      "head_branch": "main",
+      "head_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8"
+    }
+  },
+  "copied_evidence": [
+    {
+      "file": "browser-close-camera-c937ddd.json",
+      "artifact_member": "explore/high-dpi-close-camera.json",
+      "sha256": "2849944a07743ac232494bb9d753d01bc4b002caf4b06e4209752bdd7b3d99f3",
+      "bytes": 6316
+    },
+    {
+      "file": "browser-journey-draft-cpu-c937ddd.json",
+      "artifact_member": "journey-plan-via-input.json",
+      "sha256": "b2739e4ac53587f0e2882bbe767d66cae4975c850bba51cc64eeaa48416d3a5d",
+      "bytes": 365
+    },
+    {
+      "file": "browser-journey-draft-gpu-c937ddd.json",
+      "artifact_member": "gpu/journey-plan-via-input.json",
+      "sha256": "e3305443ab089b9d20e926ed5674dfc7d2632404a136dee9b716944537038125",
+      "bytes": 376
+    }
+  ],
+  "close_camera": {
+    "viewport_and_canvas": {
+      "width": 1800,
+      "height": 924,
+      "ratio": 2,
+      "canvasWidth": 3600,
+      "canvasHeight": 1848
+    },
+    "map_bounds": {
+      "x": 0,
+      "y": 59.5,
+      "width": 1800,
+      "height": 807.5
+    },
+    "data_scope": "Bundled Manhattan; external tile, imagery, elevation and routing hosts are blocked.",
+    "checkpoints": [
+      "north-up",
+      "ground-clamped-close-orbit",
+      "orbit-camera-selection",
+      "near-horizon",
+      "elevated-orbit",
+      "near-horizon-again",
+      "ground-clamped-again",
+      "paused-close-camera",
+      "returned-to-map"
+    ],
+    "recorded_failures": [],
+    "orbit_active_descendant_verified": true,
+    "input_scope": "Synthetic continuous wheel events through the public browser adapter. The native-scroll captured-corpus and connected live-browser replays are separate evidence."
+  },
+  "journey_immediate_submit": {
+    "native_input": "40.6895, -74.1745",
+    "cpu_and_gpu_planVia_passed": true,
+    "trace_scope": "Pre-submit native textbox evidence; the existing Destination label still names Newark. The succeeding test assertions verify immediate Calculate consumes the coordinate draft without Enter/Find."
+  },
+  "verification_log_confirmations": [
+    "2026-11-07T13:45:16.8793896Z Passed journey scenario planVia",
+    "2026-11-07T13:46:31.0814658Z Passed journey scenario planVia",
+    "2026-11-07T13:50:58.5312069Z DPR2 dense-city NorthUp→ground-clamped Orbit, horizon changes and runtime recovery passed.",
+    "2026-11-07T13:52:58.1159317Z Exploration checks passed for GPU defaults, four styles, native gestures, free movement, physical cameras, terrain and mobile controls."
+  ],
+  "source_record_hashes": {
+    "c937ddd-final-run.json": "0781544917ae9f7acc8f03c2b98cfaf9b4f7d967523b4ee3f51c2c02af2d43ea",
+    "c937ddd-final-jobs.json": "d22751b2c64825a8acea39c96cc3001106148426a21a1859005dedbd7fe43de0",
+    "c937ddd-verify-job.log": "ed6e7c983b4827a9d833bc57f9f2826c05b171ca015b40b6e3ae01b5f5452a54",
+    "c937ddd-deploy-job.log": "acc90ca19dc4a15a3216591bdc2c4a5e1d51dd45be85934688bb7d0bc6b6d05c"
+  },
+  "scope": "This record establishes exact-artifact CI verification and deployment. Live-browser acceptance, pinned-corpus memory observations and paired performance measurements are separate records."
+}

@@ -1,0 +1,381 @@
+{
+  "schema_version": 1,
+  "source_revision": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+  "workflow_run": 42377138938,
+  "status": "Passed the independent connected-browser camera sequence, with acknowledged pause/resume/exit controls and no captured managed/native runtime failures.",
+  "first_captured_console_utc": "2026-11-07T13:54:06.248Z",
+  "completed_by_utc": "2026-11-07T13:59:26Z",
+  "url": "https://wieslawsoltes.github.io/UnoPixelMap/#v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00",
+  "identity": {
+    "package": "package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+    "observed_native_javascript": "dotnet.native.55qcjjnjf2.js",
+    "artifact_id": 13576502635,
+    "artifact_zip_sha256": "ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb",
+    "scope": "Visible DOM selected the exact finalized package and both matching adapter query parameters. The captured console identifies its native JavaScript URL. Full loader/native WASM hashes are independently verified in the archived Pages artifact; this UI check does not read hidden runtime state."
+  },
+  "geometry": {
+    "css_width": 1800,
+    "css_height": 924,
+    "device_pixel_ratio": 2,
+    "canvas_width": 3600,
+    "canvas_height": 1848,
+    "logical_map": {
+      "x": 0,
+      "y": 59.5,
+      "width": 1800,
+      "height": 807.5
+    }
+  },
+  "data_scope": "Live public vector and detailed elevation providers; ground elevation 10.8 m, physical position 40.70870,-74.01040, distance 0 m. This live run does not reuse the frozen provider corpus.",
+  "input_scope": "Two native connected-browser scroll requests (+480 and -240) at (1100,480), with no requested modifiers. Raw delivered WheelEvents were not instrumented here. Do not equate their packet timing with the separate CI CDP replay.",
+  "observations": [
+    {
+      "phase": "initial",
+      "action": "Open published Night/Relief Manhattan URL and inspect package, canvas and console.",
+      "tool_reported_error": false,
+      "results": [
+        {
+          "canvases": [
+            {
+              "height": 1848,
+              "rect": {
+                "bottom": 924,
+                "height": 924,
+                "left": 0,
+                "right": 1800,
+                "top": 0,
+                "width": 1800,
+                "x": 0,
+                "y": 0
+              },
+              "width": 3600
+            }
+          ],
+          "links": [
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/normalize.css",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/uno-bootstrap.css",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/uno.css"
+          ],
+          "scripts": [
+            "https://wieslawsoltes.github.io/UnoPixelMap/audio/journey-audio.js?pixelmap-build=a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+            "https://wieslawsoltes.github.io/UnoPixelMap/input/map-input.js?pixelmap-build=a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/require.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/uno-bootstrap.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/AppManifest.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/Uno.Runtime.Wasm.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/setImmediate.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/Uno.Wasm.js"
+          ],
+          "viewport": {
+            "height": 924,
+            "width": 1800
+          }
+        },
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:54:06.248Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ],
+        "- button \"Enable accessibility\"\n- status \"Opening Pixel Atlas\":\n  - img \"Pixel Atlas\"\n  - progressbar \"Loading the atlas\"\n- generic \"Application content\""
+      ]
+    },
+    {
+      "phase": "accessibility_and_play",
+      "action": "Enable accessibility; the resulting view exposes free-roam settings.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\" [active]\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\"\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z16.5 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Free roam\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Collapse game settings\"\n    - button \"Exit free roam\"\n    - combobox \"Free roam vehicle\"\n    - combobox \"Free roam camera\"\n    - combobox \"Game rendering style\"\n    - combobox \"Game map layer\"\n    - switch \"Game terrain relief\" [checked]\n    - button \"Start free roam at map center\"\n    - paragraph: WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch."
+      ]
+    },
+    {
+      "phase": "north_up_selection",
+      "action": "Choose North up from the visible camera picker.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\"\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z16.5 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Free roam\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Collapse game settings\"\n    - button \"Exit free roam\"\n    - combobox \"Free roam vehicle\"\n    - combobox \"Free roam camera\" [active]\n    - combobox \"Game rendering style\"\n    - combobox \"Game map layer\"\n    - switch \"Game terrain relief\" [checked]\n    - button \"Start free roam at map center\"\n    - paragraph: WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch.",
+        {
+          "bottom": 364,
+          "height": 38,
+          "left": 21,
+          "right": 321,
+          "top": 326,
+          "width": 300,
+          "x": 21,
+          "y": 326
+        }
+      ]
+    },
+    {
+      "phase": "start",
+      "action": "Start the walker at map center.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic: Start walking here\n- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\" [active]\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Loading map · 20/54 · Loading terrain · 35/73 · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · 0° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Expand game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"",
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:54:06.248Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ]
+      ]
+    },
+    {
+      "phase": "north_up_ready",
+      "action": "Wait for map/terrain readiness and inspect physical position and map bounds.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\" [active]\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · 0° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Expand game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"",
+        {
+          "bottom": 867,
+          "height": 807.5,
+          "left": 0,
+          "right": 1800,
+          "top": 59.5,
+          "width": 1800,
+          "x": 0,
+          "y": 59.5
+        },
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:54:06.248Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ]
+      ]
+    },
+    {
+      "phase": "native_scroll_positive",
+      "action": "Native browser scroll request at (1100,480), scrollX=0, scrollY=480.",
+      "tool_reported_error": false,
+      "results": [
+        {
+          "scrollY": 480,
+          "command": "completed"
+        },
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:54:06.248Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ],
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\" [active]\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Loading map · 40/64 · Loading terrain · 51/75 · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Expand game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\""
+      ]
+    },
+    {
+      "phase": "first_pause_tool_result",
+      "action": "Attempt native Pause action and inspect the result; one bounded DOM observation timed out.",
+      "tool_reported_error": true,
+      "results": [
+        "Error: Timed out after 3000ms evaluating selector internal:role=button[name=\"Pause free roam\"s]: Timed out after 1034ms waiting for CDP command DOM.resolveNode."
+      ]
+    },
+    {
+      "phase": "first_pause_acknowledgement",
+      "action": "Inspect console and public state after the timeout; Game paused and Map/Terrain ready were visible.",
+      "tool_reported_error": false,
+      "results": [
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:54:06.248Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ],
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\" [active]\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Game paused\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Expand game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Resume free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\""
+      ]
+    },
+    {
+      "phase": "first_resume_acknowledgement",
+      "action": "Native Resume changes Game paused to Walking.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\" [active]\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Expand game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"",
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:56:52.673Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ]
+      ]
+    },
+    {
+      "phase": "expand_settings",
+      "action": "Expand free-roam settings.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\"\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Collapse game settings\" [active]\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"\n    - combobox \"Free roam vehicle\"\n    - combobox \"Free roam camera\"\n    - combobox \"Game rendering style\"\n    - combobox \"Game map layer\"\n    - switch \"Game terrain relief\" [checked]\n    - button \"Start free roam at map center\"\n    - paragraph: WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch.",
+        {
+          "bottom": 190,
+          "height": 59.5,
+          "left": 183,
+          "right": 329,
+          "top": 130.5,
+          "width": 146,
+          "x": 183,
+          "y": 130.5
+        }
+      ]
+    },
+    {
+      "phase": "orbit_picker",
+      "action": "Open camera picker; expanded combobox's active descendant is the Orbit option inside its controlled listbox. Dismiss with Escape before the next gesture.",
+      "tool_reported_error": false,
+      "results": [
+        {
+          "active": "uno-semantics-288610",
+          "activeName": "Orbit",
+          "activeText": "",
+          "contained": true,
+          "controls": "uno-semantics-278098",
+          "expanded": "true"
+        },
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\"\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Collapse game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"\n    - combobox \"Free roam vehicle\"\n    - combobox \"Free roam camera\" [expanded]\n    - combobox \"Game rendering style\"\n    - combobox \"Game map layer\"\n    - switch \"Game terrain relief\" [checked]\n    - button \"Start free roam at map center\"\n    - paragraph: WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch.\n    - dialog \"Podręczny\"\n  - listbox \"Free roam camera\":\n    - option \"Third person\"\n    - option \"First person\"\n    - option \"Cockpit\"\n    - option \"Orbit\"\n    - option \"North up\""
+      ]
+    },
+    {
+      "phase": "native_scroll_negative",
+      "action": "Native browser scroll request at (1100,480), scrollX=0, scrollY=-240.",
+      "tool_reported_error": false,
+      "results": [
+        {
+          "scrollY": -240,
+          "command": "completed"
+        },
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:56:52.673Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ],
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\"\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Loading map · 62/63 · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Collapse game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"\n    - combobox \"Free roam vehicle\"\n    - combobox \"Free roam camera\" [active]\n    - combobox \"Game rendering style\"\n    - combobox \"Game map layer\"\n    - switch \"Game terrain relief\" [checked]\n    - button \"Start free roam at map center\"\n    - paragraph: WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch."
+      ]
+    },
+    {
+      "phase": "second_pause_acknowledgement",
+      "action": "Native Pause changes Walking to Game paused; both data sources are ready.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic: Resume\n- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\" [active]\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Game paused\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Collapse game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Resume free roam\"\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"\n    - combobox \"Free roam vehicle\"\n    - combobox \"Free roam camera\"\n    - combobox \"Game rendering style\"\n    - combobox \"Game map layer\"\n    - switch \"Game terrain relief\" [checked]\n    - button \"Start free roam at map center\"\n    - paragraph: WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch.",
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:56:52.673Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ]
+      ]
+    },
+    {
+      "phase": "second_resume_acknowledgement",
+      "action": "Native Resume changes Game paused to Walking.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\"\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\"\n      - group \"Free roam game\":\n        - group \"Free roam settings\":\n          - region \"Free roam settings content\"\n        - group \"Free roam touch controls\":\n          - group \"Free roam movement controls\":\n            - paragraph: MOVE\n            - group \"Free roam movement stick\"\n          - group \"Free roam action controls\":\n            - button \"Free roam jump or brake\"\n            - button \"Free roam boost\"\n          - group \"Free roam look controls\":\n            - paragraph: LOOK\n            - group \"Free roam look stick\"\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z24.0 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution\n    - group \"Walking\"\n    - paragraph: EXPLORE THE WORLD\n    - button \"Collapse game settings\"\n    - button \"Exit free roam\"\n    - group \"Free roam playback controls\":\n      - button \"Pause free roam\" [active]\n      - button \"Respawn free roam vehicle\"\n      - button \"Free roam sound\"\n    - group \"Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled\"\n    - combobox \"Free roam vehicle\"\n    - combobox \"Free roam camera\"\n    - combobox \"Game rendering style\"\n    - combobox \"Game map layer\"\n    - switch \"Game terrain relief\" [checked]\n    - button \"Start free roam at map center\"\n    - paragraph: WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch.",
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:56:52.673Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ]
+      ]
+    },
+    {
+      "phase": "exit_acknowledgement",
+      "action": "Native Exit removes the free-roam UI and restores the original map overview.",
+      "tool_reported_error": false,
+      "results": [
+        "- generic \"Application content\":\n  - application:\n    - group \"Map toolbar\":\n      - group \"Pixel Atlas\"\n      - paragraph: Pixel Atlas\n      - paragraph: UNO / OPEN MAP EXPLORER\n      - group \"Map commands\":\n        - button \"Open free roam game\" [active]\n        - button \"Browse city guide\"\n        - button \"Map appearance\":\n          - paragraph: View\n    - group \"Map explorer\":\n      - group \"Interactive world map\"\n      - button \"Reset bearing to north\"\n      - button \"Zoom in\"\n      - button \"Zoom out\"\n      - button \"Rotate left 45 degrees\"\n      - button \"Rotate right 45 degrees\"\n      - group \"Map layers and location\":\n        - group \"Map layers and projection\":\n          - button \"Map layer\" [pressed]:\n            - paragraph: Map\n          - button \"Earth imagery layer\":\n            - paragraph: Earth\n          - button \"Elevation layer\":\n            - paragraph: Elevation\n          - button \"Switch to 2D overhead\"\n        - paragraph: DESTINATION\n        - paragraph: Shared view\n      - textbox \"Search places or latitude and longitude\":\n        - /placeholder: Search places or coordinates\n      - button \"Search map\"\n      - button \"Open route planner\":\n        - paragraph: Route\n    - group \"Map ready · Terrain ready · GPU active · Pixel rendering · 40.7087°, -74.0104° · z16.5 · -15° · 11 m elevation\"\n    - paragraph: 20 m\n    - paragraph: OpenFreeMap · OpenMapTiles · © OpenStreetMap\n    - paragraph: Terrain Tiles / Mapzen · Elevation data sources and attribution",
+        [
+          {
+            "level": "log",
+            "message": "Pixel Atlas GPU texture presentation uses the Skia WebGL context. WebKit WebGL",
+            "timestamp": "2026-11-07T13:56:52.673Z",
+            "url": "https://wieslawsoltes.github.io/UnoPixelMap/_framework/dotnet.native.55qcjjnjf2.js"
+          }
+        ]
+      ]
+    },
+    {
+      "phase": "final_identity",
+      "action": "Capture the healthy overview and inspect its DOM package references and canvas.",
+      "tool_reported_error": false,
+      "results": [
+        {
+          "canvas": [
+            {
+              "height": 1848,
+              "rect": {
+                "bottom": 924,
+                "height": 924,
+                "left": 0,
+                "right": 1800,
+                "top": 0,
+                "width": 1800,
+                "x": 0,
+                "y": 0
+              },
+              "width": 3600
+            }
+          ],
+          "scripts": [
+            "https://wieslawsoltes.github.io/UnoPixelMap/audio/journey-audio.js?pixelmap-build=a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+            "https://wieslawsoltes.github.io/UnoPixelMap/input/map-input.js?pixelmap-build=a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/require.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/uno-bootstrap.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/AppManifest.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/Uno.Runtime.Wasm.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/setImmediate.js",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/Uno.Wasm.js"
+          ],
+          "styles": [
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/normalize.css",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/uno-bootstrap.css",
+            "https://wieslawsoltes.github.io/UnoPixelMap/package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825/uno.css"
+          ],
+          "viewport": {
+            "height": 924,
+            "width": 1800
+          }
+        },
+        "https://wieslawsoltes.github.io/UnoPixelMap/#v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00"
+      ]
+    }
+  ],
+  "observation_limitations": [
+    "A three-second DOM.resolveNode inspection timed out during the first pause step. The next independent snapshot showed Game paused and ready data; later Resume, Pause, Resume and Exit all acknowledged. The expired inspection does not establish precise action latency.",
+    "Console capture requested debug, log, info, warn and error levels after each critical gesture and control phase. No managed exception, native abort, GPU fallback or context-loss message was returned.",
+    "This is a functional live acceptance, not a browser frame-time or heap-occupancy benchmark. Later successful checks do not retroactively accept the failed 9171e95 release."
+  ],
+  "screenshots": [
+    {
+      "file": "live-c937ddd-close-camera.jpg",
+      "bytes": 73549,
+      "sha256": "e39cfda8d04b1fa7d8deedbee81c29a610798e5a8afe4b96cd1ac495f88d2ff0",
+      "meaning": "Paused close Orbit view after the return gesture, while controls and GPU rendering remain healthy."
+    },
+    {
+      "file": "live-c937ddd-manhattan-overview.jpg",
+      "bytes": 286194,
+      "sha256": "21f72809705be7dda115d3774bdb9ed4849cbff04457ba1d1d16c8df464d3618",
+      "meaning": "Restored overview after acknowledged exit; Map ready, Terrain ready and GPU active."
+    }
+  ],
+  "screenshot_format": "Original returned JPEG bytes, saved without re-encoding. The browser tool labeled image content as image/png; the actual JFIF signatures were checked before choosing .jpg filenames."
+}

@@ -76,6 +76,31 @@ The run passed native tests, the complete Chromium suite and Pages deployment, w
 
 The paired browser measurements remain attached to the exact `668bf4b` artifact. Its complete application `src` tree, `be18099689edbe6a951b9e604691adb28af13365`, also identifies the source above: the intervening changes correct the browser regression's ComboBox selection assertion. This source equivalence is not a claim that the two compiled artifacts are byte-identical. [Measurements and separate acceptance provenance](verification/browser-rendering-668bf4b-provenance.json)
 
+## Compact-mesh rendering artifact
+
+The compact building-mesh source `c937ddd192619f48c1a2ec682845b52bc1eebff8` is built by [run 42377138938](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938). Its successful `browser` build job is `128416964285`. The `github-pages` artifact `13576502635` contains **88,286,013 bytes**, with ZIP SHA-256 `ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb`; its extracted `artifact.tar` has SHA-256 `256e08a34dcc6e1022c7441ebd2cf588cc4d5074091bc3070372594dc31713e7`.
+
+| Resource | Identity |
+| --- | --- |
+| Finalized package | `package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825` |
+| Index SHA-256 | `69f7ba97caaa9d55b268b2d573b5355c337cf07a9673b1e79c8c15812a370d68` |
+| Loader | `dotnet.3bwjsd43eu.js` |
+| Loader SHA-256 | `4f1a73ec0925cf906e9a1a2b09546b39cc2b59844257c2d46fb6632a7afe2685` |
+| Native JavaScript | `dotnet.native.55qcjjnjf2.js` |
+| Native JavaScript SHA-256 | `595e0a9c7fd699394ab24c87fc152cb482b59ea4a65ac1e17877d68a0e2f95fa` |
+| Native WASM | `dotnet.native.3l7hksc7hn.wasm`, 65,940,623 bytes |
+| Native WASM SHA-256 | `a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912` |
+
+All 72 boot resources, the index, bootstrap, configuration and both versioned browser adapters were independently rehashed against the extracted archive. The runtime remains `InterpreterAndAOT`. Browser-suite completion, paired performance measurements, Pages deployment and independent live acceptance are tracked separately from this successful artifact-build gate.
+
+The complete run finished successfully: native/GLES and packaging checks, the Chromium suite, the paired performance job and Pages deployment all passed. Deployment reported success at **2026-11-07 13:53:16.4088026 UTC**. The bundled-data browser suite includes nine acknowledged DPR-2 close-camera checkpoints and immediate journey submission with both CPU and GPU rendering. [Exact CI jobs, artifacts and traces](verification/browser-validation-c937ddd.json)
+
+The connected browser then loaded the package above at 1800 × 924 CSS pixels, DPR 2, using detailed live Manhattan data. Starting a North Up walker with Night and terrain relief, applying the original native +480/−240 scroll requests, checking the Orbit picker, and acknowledging pause/resume twice and exit completed without a captured managed exception or native abort. Exit restored the ready GPU overview. A bounded DOM inspection timed out during the first pause step; subsequent state and control acknowledgements are recorded explicitly. This finite functional check does not measure allocator free space or establish performance on all hardware. [Complete live evidence](verification/live-rendering-c937ddd.json)
+
+![Ready Manhattan overview after the acknowledged live camera replay and exit](verification/live-c937ddd-manhattan-overview.jpg)
+
+The [frozen-corpus memory comparison](verification/corpus-memory-comparison-c937ddd.json) separately measures the original and compact artifacts against the same captured response bodies and three camera cycles. The [paired browser performance record](verification/browser-rendering-c937ddd-provenance.json) compares this exact candidate artifact with pinned baseline run `42300149918`; its mixed timing results are retained in [performance.md](performance.md#current-paired-browser-measurements).
+
 ## Pinning performance baselines
 
 A push that runs the Pages workflow can request a paired play benchmark and pin

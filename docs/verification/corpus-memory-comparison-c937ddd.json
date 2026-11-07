@@ -1,0 +1,2478 @@
+{
+  "schema_version": 1,
+  "comparison": "Frozen 9171e95 versus compact-mesh c937ddd on the same immediate provider corpus and native input protocol",
+  "release_acceptance": "Not determined by this diagnostic. Main CI/deployment and independent live verification are separate records.",
+  "measurement_count": {
+    "baseline": 1,
+    "candidate": 1
+  },
+  "corpus_origin": {
+    "application_source": "9171e95efab06db930a97dde212d754b8da48f60",
+    "capture_source": "83980ac3b2da59970321bf183dfe8b48f876d9ec",
+    "capture_run": 42376068987,
+    "artifact_id": 13575726810,
+    "artifact_zip_sha256": "017c91bd60ae21db6da9e9b1b96ce55ad0b00fa021b44b6788c9f937321f8581",
+    "manifest_sha256": "d66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606"
+  },
+  "headline": {
+    "baseline_peak_bytes": 2077556736,
+    "candidate_peak_bytes": 1908146176,
+    "candidate_minus_baseline_bytes": -169410560,
+    "candidate_minus_baseline_mib": -161.5625,
+    "candidate_peak_change_percent": -8.154316898520552,
+    "baseline_remaining_configured_growth_bytes": 69926912,
+    "candidate_remaining_configured_growth_bytes": 239337472,
+    "completed_checkpoints_each": 27,
+    "native_gestures_each": 8,
+    "baseline_candidate_request_order_position_differences": 48,
+    "baseline_observer_timeouts": 13,
+    "candidate_observer_timeouts": 6
+  },
+  "baseline": {
+    "application_source": "9171e95efab06db930a97dde212d754b8da48f60",
+    "application_run": 42370846132,
+    "application_pages_artifact": {
+      "id": 13574430917,
+      "name": "github-pages",
+      "size_in_bytes": 88296669,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13574430917",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13574430917/zip",
+      "expired": false,
+      "created_at": "2026-11-07T12:17:35Z",
+      "expires_at": "2026-11-14T12:17:29Z",
+      "updated_at": "2026-11-07T12:17:35Z",
+      "digest": "sha256:2d75cd54800e363c496c1548c22b53c4611c14d9a3633dbeb80c13878cbaae73",
+      "workflow_run": {
+        "id": 42370846132,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "main",
+        "head_sha": "9171e95efab06db930a97dde212d754b8da48f60"
+      }
+    },
+    "active_package": "package_a0ae44c1d7a17c40e475a043b19e258b0e2701134e71946f2c140b5b4093f6d9",
+    "application_index": {
+      "name": "index.html",
+      "sha256": "0340cba99bdf6fdc2f58c96622feef3cd3e32e25d01da25d572d3d235fade482",
+      "bytes": 2137
+    },
+    "runtime_files": [
+      {
+        "name": "_framework/dotnet.9a2r0bvpc9.js",
+        "sha256": "5180ff773f69c6b957827d123d9e984355af1054fe31f558dd2cc3de8f6462df",
+        "bytes": 56567
+      },
+      {
+        "group": "jsModuleNative",
+        "name": "dotnet.native.tmo31e415o.js",
+        "sha256": "8b473fd368e98adf895746e5131968b6d461fe6aa5823d67037ec7ecc1194bc6",
+        "bytes": 414058
+      },
+      {
+        "group": "wasmNative",
+        "name": "dotnet.native.r40ls9zxle.wasm",
+        "sha256": "153cd183a5572ea9be22944ab059a586d75c7b45a1fa272f21abbe5df96d43c7",
+        "bytes": 65940113
+      }
+    ],
+    "verified_boot_resource_count": 72,
+    "wasm_memory_definition": {
+      "flags": 1,
+      "initial_pages": 721,
+      "maximum_pages": 32768,
+      "initial_bytes": 47251456,
+      "maximum_bytes": 2147483648,
+      "shared": false,
+      "memory64": false
+    },
+    "diagnostic_source": "9e1b4363493ab557f504083e0d2601a7fc517402",
+    "diagnostic_run": 42377469094,
+    "diagnostic_run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377469094",
+    "diagnostic_script_url": "https://github.com/wieslawsoltes/UnoPixelMap/blob/9e1b4363493ab557f504083e0d2601a7fc517402/tests/browser/live-memory.cjs",
+    "diagnostic_script_sha256": "6a7e1d1a734f746bb2aeefe68c3859c233d6970c38be1036fe185ff4a8437ae8",
+    "output_artifact": {
+      "id": 13576342055,
+      "name": "atlas-corpus-memory-9171e95",
+      "size_in_bytes": 16564270,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576342055",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576342055/zip",
+      "expired": false,
+      "created_at": "2026-11-07T13:36:54Z",
+      "expires_at": "2026-11-14T13:36:53Z",
+      "updated_at": "2026-11-07T13:36:54Z",
+      "digest": "sha256:9f48026022d52733c7f8b782d0b9aa21413d93cc2326c05aa575a690754da60d",
+      "workflow_run": {
+        "id": 42377469094,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "diagnostic/live-memory",
+        "head_sha": "9e1b4363493ab557f504083e0d2601a7fc517402"
+      }
+    },
+    "raw_file_hashes": {
+      "events.ndjson": {
+        "sha256": "20c566ccba4c0d4f5823356f9065f8cd5defdca7a3cee396eb586e2d587deb75",
+        "bytes": 614390
+      },
+      "summary.json": {
+        "sha256": "37312d03f95adf1da2fbe72d6629978ba97accab1f955340508fbe438c9afc7d",
+        "bytes": 1604
+      },
+      "checkpoints.json": {
+        "sha256": "7f65d32a8a632d0252c06e59843da38fb024f80cf7c57fb0cbc5d7116605bf13",
+        "bytes": 50445
+      },
+      "corpus-manifest.json": {
+        "sha256": "fa41e416d33424b5a3bc846d0a1be19b5de65c615b89e98bcd3fd629917d41e2",
+        "bytes": 214878
+      },
+      "verified-provenance.json": {
+        "sha256": "982c0bcb97ecef17138149dd8eb3a38fe65d668ba2d4149d4155a9b3bfb0ec23",
+        "bytes": 16227
+      },
+      "replay-input-manifest.json": {
+        "sha256": "d66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606",
+        "bytes": 217518
+      }
+    },
+    "node_version": "v22.23.4",
+    "playwright_version": "Version 1.64.1",
+    "protocol_outcome": "not-reproduced",
+    "elapsed_including_cleanup_ms": 201373.635,
+    "input_variant": "replay-immediate/native-synthesized-scroll/bounded-close-horizon-cycles",
+    "repeat_cycles": 3,
+    "corpus": {
+      "mode": "immediate",
+      "captureSource": "9171e95efab06db930a97dde212d754b8da48f60",
+      "manifestPath": "/home/runner/work/_temp/frozen-corpus/corpus-manifest.json",
+      "manifestSha256": "d66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606",
+      "bytes": 19322575,
+      "uniqueBodies": 165,
+      "capturedRequests": 170,
+      "uniqueUrls": 165,
+      "actualRequests": 170,
+      "extraRepetitions": 0,
+      "orderDifferences": 46,
+      "unknownRequests": [],
+      "unrequestedUrls": [],
+      "verified_observed_body_bytes": 19322575,
+      "sorted_unique_url_sha256_pairs_digest": "7496952261040b4e23a72774c7803fd050883af4e3e2fd1dc082b5bf77eb1e7c"
+    },
+    "memory": {
+      "peak_allocated_linear_bytes": 2077556736,
+      "peak_mib": 1981.3125,
+      "remaining_configured_growth_bytes": 69926912,
+      "remaining_configured_growth_mib": 66.6875,
+      "grow_count": 27,
+      "last_growth_received_ms": 128665.241,
+      "last_periodic_sample_received_ms": 187699.866,
+      "failed_resize_results": [],
+      "growth_events": [
+        {
+          "order": 13,
+          "timeMs": 1549.18,
+          "stage": "wait-native-canvas",
+          "before": 47251456,
+          "after": 56754176,
+          "result": 721,
+          "requested_pages_argument": 145.99998474121094,
+          "actual_pages_added": 145
+        },
+        {
+          "order": 16,
+          "timeMs": 1557.214,
+          "stage": "wait-native-canvas",
+          "before": 56754176,
+          "after": 68157440,
+          "result": 866,
+          "requested_pages_argument": 174.99998474121094,
+          "actual_pages_added": 174
+        },
+        {
+          "order": 19,
+          "timeMs": 1588.489,
+          "stage": "wait-native-canvas",
+          "before": 68157440,
+          "after": 81788928,
+          "result": 1040,
+          "requested_pages_argument": 208.99998474121094,
+          "actual_pages_added": 208
+        },
+        {
+          "order": 22,
+          "timeMs": 1670.191,
+          "stage": "wait-native-canvas",
+          "before": 81788928,
+          "after": 98172928,
+          "result": 1248,
+          "requested_pages_argument": 250.99998474121094,
+          "actual_pages_added": 250
+        },
+        {
+          "order": 28,
+          "timeMs": 2115.206,
+          "stage": "wait-native-canvas",
+          "before": 98172928,
+          "after": 117833728,
+          "result": 1498,
+          "requested_pages_argument": 300.99998474121094,
+          "actual_pages_added": 300
+        },
+        {
+          "order": 32,
+          "timeMs": 2818.799,
+          "stage": "enable-accessibility",
+          "before": 117833728,
+          "after": 141426688,
+          "result": 1798,
+          "requested_pages_argument": 360.99998474121094,
+          "actual_pages_added": 360
+        },
+        {
+          "order": 35,
+          "timeMs": 2928.254,
+          "stage": "enable-accessibility",
+          "before": 141426688,
+          "after": 169738240,
+          "result": 2158,
+          "requested_pages_argument": 432.99998474121094,
+          "actual_pages_added": 432
+        },
+        {
+          "order": 49,
+          "timeMs": 3405.993,
+          "stage": "enable-accessibility",
+          "before": 169738240,
+          "after": 203685888,
+          "result": 2590,
+          "requested_pages_argument": 518.9999847412109,
+          "actual_pages_added": 518
+        },
+        {
+          "order": 52,
+          "timeMs": 3983.401,
+          "stage": "enable-accessibility",
+          "before": 203685888,
+          "after": 244449280,
+          "result": 3108,
+          "requested_pages_argument": 622.9999847412109,
+          "actual_pages_added": 622
+        },
+        {
+          "order": 55,
+          "timeMs": 4392.647,
+          "stage": "enable-accessibility",
+          "before": 244449280,
+          "after": 293339136,
+          "result": 3730,
+          "requested_pages_argument": 746.9999847412109,
+          "actual_pages_added": 746
+        },
+        {
+          "order": 96,
+          "timeMs": 5480.874,
+          "stage": "enable-accessibility",
+          "before": 293339136,
+          "after": 352059392,
+          "result": 4476,
+          "requested_pages_argument": 896.9999847412109,
+          "actual_pages_added": 896
+        },
+        {
+          "order": 287,
+          "timeMs": 7788.657,
+          "stage": "GPU-ready",
+          "before": 352059392,
+          "after": 422510592,
+          "result": 5372,
+          "requested_pages_argument": 1075.999984741211,
+          "actual_pages_added": 1075
+        },
+        {
+          "order": 291,
+          "timeMs": 12861.02,
+          "stage": "GPU-ready",
+          "before": 422510592,
+          "after": 507052032,
+          "result": 6447,
+          "requested_pages_argument": 1290.999984741211,
+          "actual_pages_added": 1290
+        },
+        {
+          "order": 294,
+          "timeMs": 14335.852,
+          "stage": "GPU-ready",
+          "before": 507052032,
+          "after": 608501760,
+          "result": 7737,
+          "requested_pages_argument": 1548.999984741211,
+          "actual_pages_added": 1548
+        },
+        {
+          "order": 675,
+          "timeMs": 27610.259,
+          "stage": "north-up-live-data-ready",
+          "before": 608501760,
+          "after": 711196672,
+          "result": 9285,
+          "requested_pages_argument": 1567.999984741211,
+          "actual_pages_added": 1567
+        },
+        {
+          "order": 678,
+          "timeMs": 28978.73,
+          "stage": "north-up-live-data-ready",
+          "before": 711196672,
+          "after": 813236224,
+          "result": 10852,
+          "requested_pages_argument": 1557.999984741211,
+          "actual_pages_added": 1557
+        },
+        {
+          "order": 681,
+          "timeMs": 30599.053,
+          "stage": "north-up-live-data-ready",
+          "before": 813236224,
+          "after": 917831680,
+          "result": 12409,
+          "requested_pages_argument": 1596.999984741211,
+          "actual_pages_added": 1596
+        },
+        {
+          "order": 684,
+          "timeMs": 32612.366,
+          "stage": "north-up-live-data-ready",
+          "before": 917831680,
+          "after": 1019084800,
+          "result": 14005,
+          "requested_pages_argument": 1545.999984741211,
+          "actual_pages_added": 1545
+        },
+        {
+          "order": 710,
+          "timeMs": 36915.458,
+          "stage": "03-native-close-orbit",
+          "before": 1019084800,
+          "after": 1135280128,
+          "result": 15550,
+          "requested_pages_argument": 1773.999984741211,
+          "actual_pages_added": 1773
+        },
+        {
+          "order": 737,
+          "timeMs": 39515.872,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1135280128,
+          "after": 1248395264,
+          "result": 17323,
+          "requested_pages_argument": 1726.999984741211,
+          "actual_pages_added": 1726
+        },
+        {
+          "order": 940,
+          "timeMs": 41003.469,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1248395264,
+          "after": 1349320704,
+          "result": 19049,
+          "requested_pages_argument": 1540.999984741211,
+          "actual_pages_added": 1540
+        },
+        {
+          "order": 943,
+          "timeMs": 43885.015,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1349320704,
+          "after": 1453654016,
+          "result": 20589,
+          "requested_pages_argument": 1592.999984741211,
+          "actual_pages_added": 1592
+        },
+        {
+          "order": 950,
+          "timeMs": 44859.244,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1453654016,
+          "after": 1596391424,
+          "result": 22181,
+          "requested_pages_argument": 2178.999984741211,
+          "actual_pages_added": 2178
+        },
+        {
+          "order": 954,
+          "timeMs": 47114.991,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1596391424,
+          "after": 1736048640,
+          "result": 24359,
+          "requested_pages_argument": 2131.999984741211,
+          "actual_pages_added": 2131
+        },
+        {
+          "order": 995,
+          "timeMs": 59381.287,
+          "stage": "06-native-horizon",
+          "before": 1736048640,
+          "after": 1854668800,
+          "result": 26490,
+          "requested_pages_argument": 1810.999984741211,
+          "actual_pages_added": 1810
+        },
+        {
+          "order": 1038,
+          "timeMs": 92285.275,
+          "stage": "repeat-1-close",
+          "before": 1854668800,
+          "after": 1970667520,
+          "result": 28300,
+          "requested_pages_argument": 1770.999984741211,
+          "actual_pages_added": 1770
+        },
+        {
+          "order": 1107,
+          "timeMs": 128665.241,
+          "stage": "repeat-2-close-data-ready",
+          "before": 1970667520,
+          "after": 2077556736,
+          "result": 30070,
+          "requested_pages_argument": 1631.999984741211,
+          "actual_pages_added": 1631
+        }
+      ]
+    },
+    "gestures": [
+      {
+        "name": "03-native-close-orbit",
+        "start_ms": 33052.009,
+        "requested_wheel_y": 480,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -480,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 37194.012,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 240.0,
+        "wheel_records_received_after_cdp_ack": 2,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            2.5
+          ],
+          [
+            0,
+            3.5
+          ],
+          [
+            0,
+            234
+          ]
+        ]
+      },
+      {
+        "name": "06-native-horizon",
+        "start_ms": 59234.609,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 64142.605,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -3
+          ],
+          [
+            0,
+            -3.5
+          ],
+          [
+            0,
+            -113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-1-close",
+        "start_ms": 91450.068,
+        "requested_wheel_y": 240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 93085.609,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            2.5
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-1-horizon",
+        "start_ms": 105381.938,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 107693.896,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -2.5
+          ],
+          [
+            0,
+            -7
+          ],
+          [
+            0,
+            -110.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-2-close",
+        "start_ms": 118885.214,
+        "requested_wheel_y": 240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 121451.585,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            3.5
+          ],
+          [
+            0,
+            113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-2-horizon",
+        "start_ms": 133744.577,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 134868.671,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -3
+          ],
+          [
+            0,
+            -6.5
+          ],
+          [
+            0,
+            -110.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-3-close",
+        "start_ms": 146861.536,
+        "requested_wheel_y": 240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 149421.763,
+        "delivered_wheel_events": 4,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            3.5
+          ],
+          [
+            0,
+            3.5
+          ],
+          [
+            0,
+            110
+          ]
+        ]
+      },
+      {
+        "name": "repeat-3-horizon",
+        "start_ms": 160329.991,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 162593.009,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -2.5
+          ],
+          [
+            0,
+            -7
+          ],
+          [
+            0,
+            -110.5
+          ]
+        ]
+      }
+    ],
+    "checkpoint_public_states": [
+      {
+        "status": [
+          "Loading map · 9/20 · Loading terrain · 5/35 · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z16.5   ·   -15°   ·   11 m elevation"
+        ],
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 54,
+          "width": 1800,
+          "height": 819
+        }
+      },
+      {
+        "status": [
+          "Map ready · Terrain ready · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z24.0   ·   0°   ·   11 m elevation"
+        ],
+        "telemetry": "Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled",
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      },
+      {
+        "status": [
+          "Loading map · 60/63 · Terrain ready · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z24.0   ·   -15°   ·   11 m elevation"
+        ],
+        "telemetry": "Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled",
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      },
+      {
+        "status": [
+          "Map ready · Terrain ready · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z24.0   ·   -15°   ·   11 m elevation"
+        ],
+        "telemetry": "Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled",
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      },
+      {
+        "status": [
+          "Map ready · Terrain ready · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z16.5   ·   -15°   ·   11 m elevation"
+        ],
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      }
+    ],
+    "checkpoint_state_format": "Each checkpoint public_state_index selects the exact status, telemetry, viewport and map bounds in checkpoint_public_states.",
+    "checkpoints": [
+      {
+        "name": "01-initial-map",
+        "timeMs": 6838.152,
+        "paused": false,
+        "active": false,
+        "public_state_index": 0,
+        "memory_bytes": [
+          352059392
+        ],
+        "draw_calls": 189,
+        "depth_draw_calls": 38
+      },
+      {
+        "name": "02-north-up-live-ready",
+        "timeMs": 24972.211,
+        "paused": false,
+        "active": true,
+        "public_state_index": 1,
+        "memory_bytes": [
+          608501760
+        ],
+        "draw_calls": 2476,
+        "depth_draw_calls": 104
+      },
+      {
+        "name": "03-native-close-orbit",
+        "timeMs": 44437.199,
+        "paused": false,
+        "active": true,
+        "public_state_index": 2,
+        "memory_bytes": [
+          1453654016
+        ],
+        "draw_calls": 3066,
+        "depth_draw_calls": 234
+      },
+      {
+        "name": "04-paused-close-ready",
+        "timeMs": 50985.308,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1736048640
+        ],
+        "draw_calls": 3397,
+        "depth_draw_calls": 339
+      },
+      {
+        "name": "05-orbit-picker",
+        "timeMs": 55481.682,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1736048640
+        ],
+        "draw_calls": 3829,
+        "depth_draw_calls": 374
+      },
+      {
+        "name": "06-native-horizon",
+        "timeMs": 67647.038,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1854668800
+        ],
+        "draw_calls": 5842,
+        "depth_draw_calls": 549
+      },
+      {
+        "name": "07-horizon-paused-ready",
+        "timeMs": 72258.279,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1854668800
+        ],
+        "draw_calls": 6129,
+        "depth_draw_calls": 619
+      },
+      {
+        "name": "08-horizon-responsive",
+        "timeMs": 91276.456,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1854668800
+        ],
+        "draw_calls": 6263,
+        "depth_draw_calls": 654
+      },
+      {
+        "name": "repeat-1-close",
+        "timeMs": 96714.669,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1970667520
+        ],
+        "draw_calls": 6721,
+        "depth_draw_calls": 829
+      },
+      {
+        "name": "repeat-1-close-paused-ready",
+        "timeMs": 102554.062,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1970667520
+        ],
+        "draw_calls": 6959,
+        "depth_draw_calls": 899
+      },
+      {
+        "name": "repeat-1-close-resumed",
+        "timeMs": 105379.366,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1970667520
+        ],
+        "draw_calls": 7099,
+        "depth_draw_calls": 934
+      },
+      {
+        "name": "repeat-1-horizon",
+        "timeMs": 111198.596,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1970667520
+        ],
+        "draw_calls": 7475,
+        "depth_draw_calls": 1074
+      },
+      {
+        "name": "repeat-1-horizon-paused-ready",
+        "timeMs": 116259.368,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1970667520
+        ],
+        "draw_calls": 7719,
+        "depth_draw_calls": 1144
+      },
+      {
+        "name": "repeat-1-horizon-resumed",
+        "timeMs": 118883.924,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1970667520
+        ],
+        "draw_calls": 7825,
+        "depth_draw_calls": 1179
+      },
+      {
+        "name": "repeat-2-close",
+        "timeMs": 125396.5,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1970667520
+        ],
+        "draw_calls": 8275,
+        "depth_draw_calls": 1354
+      },
+      {
+        "name": "repeat-2-close-paused-ready",
+        "timeMs": 130870.818,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 8473,
+        "depth_draw_calls": 1389
+      },
+      {
+        "name": "repeat-2-close-resumed",
+        "timeMs": 133742.377,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 8616,
+        "depth_draw_calls": 1424
+      },
+      {
+        "name": "repeat-2-horizon",
+        "timeMs": 138756.736,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 8993,
+        "depth_draw_calls": 1564
+      },
+      {
+        "name": "repeat-2-horizon-paused-ready",
+        "timeMs": 144274.185,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 9149,
+        "depth_draw_calls": 1599
+      },
+      {
+        "name": "repeat-2-horizon-resumed",
+        "timeMs": 146858.835,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 9255,
+        "depth_draw_calls": 1634
+      },
+      {
+        "name": "repeat-3-close",
+        "timeMs": 152926.352,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 9676,
+        "depth_draw_calls": 1774
+      },
+      {
+        "name": "repeat-3-close-paused-ready",
+        "timeMs": 157527.129,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 9815,
+        "depth_draw_calls": 1809
+      },
+      {
+        "name": "repeat-3-close-resumed",
+        "timeMs": 160328.716,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 9956,
+        "depth_draw_calls": 1844
+      },
+      {
+        "name": "repeat-3-horizon",
+        "timeMs": 166097.76,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 10332,
+        "depth_draw_calls": 1984
+      },
+      {
+        "name": "repeat-3-horizon-paused-ready",
+        "timeMs": 171115.834,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 10576,
+        "depth_draw_calls": 2054
+      },
+      {
+        "name": "repeat-3-horizon-resumed",
+        "timeMs": 173809.138,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 10723,
+        "depth_draw_calls": 2089
+      },
+      {
+        "name": "09-returned-to-map",
+        "timeMs": 176584.986,
+        "paused": false,
+        "active": false,
+        "public_state_index": 4,
+        "memory_bytes": [
+          2077556736
+        ],
+        "draw_calls": 11150,
+        "depth_draw_calls": 2214
+      }
+    ],
+    "errors": {
+      "fatal": null,
+      "protocol_error": null,
+      "runtime_replay_input_or_other_event_errors": [],
+      "console_errors": [],
+      "bounded_observer_errors": [
+        {
+          "event_order": 296,
+          "time_ms": 14621.503,
+          "stage": "GPU-ready",
+          "sample_type": "public DOM / Wasm memory",
+          "error": "Error: DOM/memory sample timed out after 4000ms"
+        },
+        {
+          "event_order": 296,
+          "time_ms": 14621.503,
+          "stage": "GPU-ready",
+          "sample_type": "CDP Memory.getDOMCounters",
+          "error": "Error: DOM counters timed out after 4000ms"
+        },
+        {
+          "event_order": 296,
+          "time_ms": 14621.503,
+          "stage": "GPU-ready",
+          "sample_type": "CDP Runtime.getHeapUsage",
+          "error": "Error: JS heap usage timed out after 4000ms"
+        },
+        {
+          "event_order": 686,
+          "time_ms": 32629.035,
+          "stage": "north-up-live-data-ready",
+          "sample_type": "public DOM / Wasm memory",
+          "error": "Error: DOM/memory sample timed out after 4000ms"
+        },
+        {
+          "event_order": 686,
+          "time_ms": 32629.035,
+          "stage": "north-up-live-data-ready",
+          "sample_type": "CDP Memory.getDOMCounters",
+          "error": "Error: DOM counters timed out after 4000ms"
+        },
+        {
+          "event_order": 686,
+          "time_ms": 32629.035,
+          "stage": "north-up-live-data-ready",
+          "sample_type": "CDP Runtime.getHeapUsage",
+          "error": "Error: JS heap usage timed out after 4000ms"
+        },
+        {
+          "event_order": 1211,
+          "time_ms": 180720.356,
+          "stage": "map-restored",
+          "sample_type": "public DOM / Wasm memory",
+          "error": "Error: DOM/memory sample timed out after 4000ms"
+        },
+        {
+          "event_order": 1211,
+          "time_ms": 180720.356,
+          "stage": "map-restored",
+          "sample_type": "CDP Memory.getDOMCounters",
+          "error": "Error: DOM counters timed out after 4000ms"
+        },
+        {
+          "event_order": 1211,
+          "time_ms": 180720.356,
+          "stage": "map-restored",
+          "sample_type": "CDP Runtime.getHeapUsage",
+          "error": "Error: JS heap usage timed out after 4000ms"
+        },
+        {
+          "event_order": 1212,
+          "time_ms": 184722.304,
+          "stage": "map-restored",
+          "sample_type": "public DOM / Wasm memory",
+          "error": "Error: DOM/memory sample timed out after 4000ms"
+        },
+        {
+          "event_order": 1212,
+          "time_ms": 184722.304,
+          "stage": "map-restored",
+          "sample_type": "CDP Performance.getMetrics",
+          "error": "Error: performance metrics timed out after 4000ms"
+        },
+        {
+          "event_order": 1212,
+          "time_ms": 184722.304,
+          "stage": "map-restored",
+          "sample_type": "CDP Memory.getDOMCounters",
+          "error": "Error: DOM counters timed out after 4000ms"
+        },
+        {
+          "event_order": 1212,
+          "time_ms": 184722.304,
+          "stage": "map-restored",
+          "sample_type": "CDP Runtime.getHeapUsage",
+          "error": "Error: JS heap usage timed out after 4000ms"
+        }
+      ],
+      "bounded_observer_error_counts": {
+        "public DOM / Wasm memory": 4,
+        "CDP Memory.getDOMCounters": 4,
+        "CDP Runtime.getHeapUsage": 4,
+        "CDP Performance.getMetrics": 1
+      },
+      "grow_messages_during_timed_out_poll_intervals": [
+        {
+          "poll_completed_ms": 14621.503,
+          "grow_messages_received_ms": [
+            12861.02,
+            14335.852
+          ]
+        },
+        {
+          "poll_completed_ms": 32629.035,
+          "grow_messages_received_ms": [
+            28978.73,
+            30599.053,
+            32612.366
+          ]
+        },
+        {
+          "poll_completed_ms": 180720.356,
+          "grow_messages_received_ms": []
+        },
+        {
+          "poll_completed_ms": 184722.304,
+          "grow_messages_received_ms": []
+        }
+      ]
+    },
+    "event_count": 1231,
+    "dropped_events": 0
+  },
+  "candidate": {
+    "application_source": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "application_run": 42377138938,
+    "application_pages_artifact": {
+      "id": 13576502635,
+      "name": "github-pages",
+      "size_in_bytes": 88286013,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576502635",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576502635/zip",
+      "expired": false,
+      "created_at": "2026-11-07T13:43:28Z",
+      "expires_at": "2026-11-14T13:43:23Z",
+      "updated_at": "2026-11-07T13:43:28Z",
+      "digest": "sha256:ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb",
+      "workflow_run": {
+        "id": 42377138938,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "main",
+        "head_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8"
+      }
+    },
+    "active_package": "package_a319a6ccf9e1718d6a1abc14d362e7625d4a191633147981653b6bcc9d604825",
+    "application_index": {
+      "name": "index.html",
+      "sha256": "69f7ba97caaa9d55b268b2d573b5355c337cf07a9673b1e79c8c15812a370d68",
+      "bytes": 2137
+    },
+    "runtime_files": [
+      {
+        "name": "_framework/dotnet.3bwjsd43eu.js",
+        "sha256": "4f1a73ec0925cf906e9a1a2b09546b39cc2b59844257c2d46fb6632a7afe2685",
+        "bytes": 56567
+      },
+      {
+        "group": "jsModuleNative",
+        "name": "dotnet.native.55qcjjnjf2.js",
+        "sha256": "595e0a9c7fd699394ab24c87fc152cb482b59ea4a65ac1e17877d68a0e2f95fa",
+        "bytes": 414058
+      },
+      {
+        "group": "wasmNative",
+        "name": "dotnet.native.3l7hksc7hn.wasm",
+        "sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912",
+        "bytes": 65940623
+      }
+    ],
+    "verified_boot_resource_count": 72,
+    "wasm_memory_definition": {
+      "flags": 1,
+      "initial_pages": 721,
+      "maximum_pages": 32768,
+      "initial_bytes": 47251456,
+      "maximum_bytes": 2147483648,
+      "shared": false,
+      "memory64": false
+    },
+    "diagnostic_source": "56dff7b87572af493479f2cf95be4e7ba1012344",
+    "diagnostic_run": 42378626094,
+    "diagnostic_run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42378626094",
+    "diagnostic_script_url": "https://github.com/wieslawsoltes/UnoPixelMap/blob/56dff7b87572af493479f2cf95be4e7ba1012344/tests/browser/live-memory.cjs",
+    "diagnostic_script_sha256": "6a7e1d1a734f746bb2aeefe68c3859c233d6970c38be1036fe185ff4a8437ae8",
+    "output_artifact": {
+      "id": 13576781621,
+      "name": "atlas-corpus-memory-c937ddd",
+      "size_in_bytes": 17366305,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576781621",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13576781621/zip",
+      "expired": false,
+      "created_at": "2026-11-07T13:52:03Z",
+      "expires_at": "2026-11-14T13:52:01Z",
+      "updated_at": "2026-11-07T13:52:03Z",
+      "digest": "sha256:940da683a21b509031d13a6083b708ab37ce48d26869c9c0d0a93f7946986589",
+      "workflow_run": {
+        "id": 42378626094,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "diagnostic/live-memory",
+        "head_sha": "56dff7b87572af493479f2cf95be4e7ba1012344"
+      }
+    },
+    "raw_file_hashes": {
+      "events.ndjson": {
+        "sha256": "68a5a6200f14b9f96e9b5569fba3efc7f6ba0b1cd2e200b335c8f159afaaebcc",
+        "bytes": 607519
+      },
+      "summary.json": {
+        "sha256": "3814af386b4912ed944164a2ac8ac2d5490bfc64a28af854e589fbd69c086313",
+        "bytes": 1604
+      },
+      "checkpoints.json": {
+        "sha256": "7adcad738fad8468a4dfa4f0745fec64d2afaaec263f893a9fc4c7fb31ebb4d1",
+        "bytes": 50532
+      },
+      "corpus-manifest.json": {
+        "sha256": "291bc259b5a4feafbe45fd4cca3a3818795ac0143206c0c93092915e401976fb",
+        "bytes": 214888
+      },
+      "verified-provenance.json": {
+        "sha256": "4c8fe74e950629f351cf2639697e0e9c9b7fcbcb65d1be2d02fba1eec51181c6",
+        "bytes": 16543
+      },
+      "replay-input-manifest.json": {
+        "sha256": "d66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606",
+        "bytes": 217518
+      }
+    },
+    "node_version": "v22.23.4",
+    "playwright_version": "Version 1.64.1",
+    "protocol_outcome": "not-reproduced",
+    "elapsed_including_cleanup_ms": 191450.165,
+    "input_variant": "replay-immediate/native-synthesized-scroll/bounded-close-horizon-cycles",
+    "repeat_cycles": 3,
+    "corpus": {
+      "mode": "immediate",
+      "captureSource": "9171e95efab06db930a97dde212d754b8da48f60",
+      "manifestPath": "/home/runner/work/_temp/frozen-corpus/corpus-manifest.json",
+      "manifestSha256": "d66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606",
+      "bytes": 19322575,
+      "uniqueBodies": 165,
+      "capturedRequests": 170,
+      "uniqueUrls": 165,
+      "actualRequests": 170,
+      "extraRepetitions": 0,
+      "orderDifferences": 46,
+      "unknownRequests": [],
+      "unrequestedUrls": [],
+      "verified_observed_body_bytes": 19322575,
+      "sorted_unique_url_sha256_pairs_digest": "7496952261040b4e23a72774c7803fd050883af4e3e2fd1dc082b5bf77eb1e7c"
+    },
+    "memory": {
+      "peak_allocated_linear_bytes": 1908146176,
+      "peak_mib": 1819.75,
+      "remaining_configured_growth_bytes": 239337472,
+      "remaining_configured_growth_mib": 228.25,
+      "grow_count": 26,
+      "last_growth_received_ms": 115717.113,
+      "last_periodic_sample_received_ms": 182770.294,
+      "failed_resize_results": [],
+      "growth_events": [
+        {
+          "order": 13,
+          "timeMs": 1745.518,
+          "stage": "wait-native-canvas",
+          "before": 47251456,
+          "after": 56754176,
+          "result": 721,
+          "requested_pages_argument": 145.99998474121094,
+          "actual_pages_added": 145
+        },
+        {
+          "order": 16,
+          "timeMs": 1753.364,
+          "stage": "wait-native-canvas",
+          "before": 56754176,
+          "after": 68157440,
+          "result": 866,
+          "requested_pages_argument": 174.99998474121094,
+          "actual_pages_added": 174
+        },
+        {
+          "order": 19,
+          "timeMs": 1787.314,
+          "stage": "wait-native-canvas",
+          "before": 68157440,
+          "after": 81788928,
+          "result": 1040,
+          "requested_pages_argument": 208.99998474121094,
+          "actual_pages_added": 208
+        },
+        {
+          "order": 22,
+          "timeMs": 1987.46,
+          "stage": "wait-native-canvas",
+          "before": 81788928,
+          "after": 98172928,
+          "result": 1248,
+          "requested_pages_argument": 250.99998474121094,
+          "actual_pages_added": 250
+        },
+        {
+          "order": 28,
+          "timeMs": 2439.733,
+          "stage": "wait-native-canvas",
+          "before": 98172928,
+          "after": 117833728,
+          "result": 1498,
+          "requested_pages_argument": 300.99998474121094,
+          "actual_pages_added": 300
+        },
+        {
+          "order": 33,
+          "timeMs": 3222.597,
+          "stage": "enable-accessibility",
+          "before": 117833728,
+          "after": 141426688,
+          "result": 1798,
+          "requested_pages_argument": 360.99998474121094,
+          "actual_pages_added": 360
+        },
+        {
+          "order": 36,
+          "timeMs": 3365.504,
+          "stage": "enable-accessibility",
+          "before": 141426688,
+          "after": 169738240,
+          "result": 2158,
+          "requested_pages_argument": 432.99998474121094,
+          "actual_pages_added": 432
+        },
+        {
+          "order": 50,
+          "timeMs": 3887.042,
+          "stage": "enable-accessibility",
+          "before": 169738240,
+          "after": 203685888,
+          "result": 2590,
+          "requested_pages_argument": 518.9999847412109,
+          "actual_pages_added": 518
+        },
+        {
+          "order": 53,
+          "timeMs": 4872.609,
+          "stage": "enable-accessibility",
+          "before": 203685888,
+          "after": 244449280,
+          "result": 3108,
+          "requested_pages_argument": 622.9999847412109,
+          "actual_pages_added": 622
+        },
+        {
+          "order": 78,
+          "timeMs": 6163.223,
+          "stage": "enable-accessibility",
+          "before": 244449280,
+          "after": 293339136,
+          "result": 3730,
+          "requested_pages_argument": 746.9999847412109,
+          "actual_pages_added": 746
+        },
+        {
+          "order": 93,
+          "timeMs": 8250.64,
+          "stage": "enable-accessibility",
+          "before": 293339136,
+          "after": 352059392,
+          "result": 4476,
+          "requested_pages_argument": 896.9999847412109,
+          "actual_pages_added": 896
+        },
+        {
+          "order": 290,
+          "timeMs": 11187.783,
+          "stage": "GPU-ready",
+          "before": 352059392,
+          "after": 422510592,
+          "result": 5372,
+          "requested_pages_argument": 1075.999984741211,
+          "actual_pages_added": 1075
+        },
+        {
+          "order": 293,
+          "timeMs": 15432.67,
+          "stage": "GPU-ready",
+          "before": 422510592,
+          "after": 507052032,
+          "result": 6447,
+          "requested_pages_argument": 1290.999984741211,
+          "actual_pages_added": 1290
+        },
+        {
+          "order": 673,
+          "timeMs": 26775.389,
+          "stage": "north-up-live-data-ready",
+          "before": 507052032,
+          "after": 608501760,
+          "result": 7737,
+          "requested_pages_argument": 1548.999984741211,
+          "actual_pages_added": 1548
+        },
+        {
+          "order": 676,
+          "timeMs": 28951.115,
+          "stage": "north-up-live-data-ready",
+          "before": 608501760,
+          "after": 709230592,
+          "result": 9285,
+          "requested_pages_argument": 1537.999984741211,
+          "actual_pages_added": 1537
+        },
+        {
+          "order": 680,
+          "timeMs": 32129.832,
+          "stage": "north-up-live-data-ready",
+          "before": 709230592,
+          "after": 811008000,
+          "result": 10822,
+          "requested_pages_argument": 1553.999984741211,
+          "actual_pages_added": 1553
+        },
+        {
+          "order": 689,
+          "timeMs": 33481.492,
+          "stage": "03-native-close-orbit",
+          "before": 811008000,
+          "after": 915865600,
+          "result": 12375,
+          "requested_pages_argument": 1600.999984741211,
+          "actual_pages_added": 1600
+        },
+        {
+          "order": 711,
+          "timeMs": 36317.699,
+          "stage": "03-native-close-orbit",
+          "before": 915865600,
+          "after": 1021116416,
+          "result": 13975,
+          "requested_pages_argument": 1606.999984741211,
+          "actual_pages_added": 1606
+        },
+        {
+          "order": 734,
+          "timeMs": 38848.372,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1021116416,
+          "after": 1150550016,
+          "result": 15581,
+          "requested_pages_argument": 1975.999984741211,
+          "actual_pages_added": 1975
+        },
+        {
+          "order": 924,
+          "timeMs": 45297.285,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1150550016,
+          "after": 1251475456,
+          "result": 17556,
+          "requested_pages_argument": 1540.999984741211,
+          "actual_pages_added": 1540
+        },
+        {
+          "order": 927,
+          "timeMs": 45472.779,
+          "stage": "03-native-close-orbit-settling",
+          "before": 1251475456,
+          "after": 1362624512,
+          "result": 19096,
+          "requested_pages_argument": 1696.999984741211,
+          "actual_pages_added": 1696
+        },
+        {
+          "order": 954,
+          "timeMs": 48479.313,
+          "stage": "pause-acknowledged",
+          "before": 1362624512,
+          "after": 1471283200,
+          "result": 20792,
+          "requested_pages_argument": 1658.999984741211,
+          "actual_pages_added": 1658
+        },
+        {
+          "order": 966,
+          "timeMs": 53541.452,
+          "stage": "resume-acknowledged",
+          "before": 1471283200,
+          "after": 1592131584,
+          "result": 22450,
+          "requested_pages_argument": 1844.999984741211,
+          "actual_pages_added": 1844
+        },
+        {
+          "order": 995,
+          "timeMs": 59698.394,
+          "stage": "06-native-horizon",
+          "before": 1592131584,
+          "after": 1692991488,
+          "result": 24294,
+          "requested_pages_argument": 1539.999984741211,
+          "actual_pages_added": 1539
+        },
+        {
+          "order": 1008,
+          "timeMs": 67463.553,
+          "stage": "06-native-horizon-settling",
+          "before": 1692991488,
+          "after": 1805451264,
+          "result": 25833,
+          "requested_pages_argument": 1716.999984741211,
+          "actual_pages_added": 1716
+        },
+        {
+          "order": 1084,
+          "timeMs": 115717.113,
+          "stage": "repeat-1-horizon-resume-acknowledged",
+          "before": 1805451264,
+          "after": 1908146176,
+          "result": 27549,
+          "requested_pages_argument": 1567.999984741211,
+          "actual_pages_added": 1567
+        }
+      ]
+    },
+    "gestures": [
+      {
+        "name": "03-native-close-orbit",
+        "start_ms": 33375.65,
+        "requested_wheel_y": 480,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -480,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 38598.287,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 240.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            6.5
+          ],
+          [
+            0,
+            230.5
+          ]
+        ]
+      },
+      {
+        "name": "06-native-horizon",
+        "start_ms": 59486.258,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 60986.369,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -3.5
+          ],
+          [
+            0,
+            -3
+          ],
+          [
+            0,
+            -113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-1-close",
+        "start_ms": 90193.073,
+        "requested_wheel_y": 240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 91699.816,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            3.5
+          ],
+          [
+            0,
+            113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-1-horizon",
+        "start_ms": 104370.762,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 104925.332,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -3
+          ],
+          [
+            0,
+            -6.5
+          ],
+          [
+            0,
+            -110.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-2-close",
+        "start_ms": 117446.573,
+        "requested_wheel_y": 240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 118091.126,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            3.5
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-2-horizon",
+        "start_ms": 130844.339,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 131457.868,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -3
+          ],
+          [
+            0,
+            -3.5
+          ],
+          [
+            0,
+            -113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-3-close",
+        "start_ms": 143744.97,
+        "requested_wheel_y": 240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": -240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 144440.928,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": 120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            3.5
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            113.5
+          ]
+        ]
+      },
+      {
+        "name": "repeat-3-horizon",
+        "start_ms": 157256.714,
+        "requested_wheel_y": -240,
+        "cdp_parameters": {
+          "x": 1100,
+          "y": 480,
+          "yDistance": 240,
+          "speed": 800,
+          "gestureSourceType": "mouse",
+          "preventFling": true
+        },
+        "acknowledged_ms": 157806.155,
+        "delivered_wheel_events": 3,
+        "delivered_delta_x": 0,
+        "delivered_delta_y": -120.0,
+        "wheel_records_received_after_cdp_ack": 0,
+        "all_trusted": true,
+        "all_prevented_after_dispatch": true,
+        "all_modifiers_false": true,
+        "wheel_deltas": [
+          [
+            0,
+            -3.5
+          ],
+          [
+            0,
+            -6
+          ],
+          [
+            0,
+            -110.5
+          ]
+        ]
+      }
+    ],
+    "checkpoint_public_states": [
+      {
+        "status": [
+          "Loading map · 9/20 · Loading terrain · 5/35 · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z16.5   ·   -15°   ·   11 m elevation"
+        ],
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 54,
+          "width": 1800,
+          "height": 819
+        }
+      },
+      {
+        "status": [
+          "Map ready · Terrain ready · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z24.0   ·   0°   ·   11 m elevation"
+        ],
+        "telemetry": "Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled",
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      },
+      {
+        "status": [
+          "Loading map · 52/63 · Loading terrain · 71/75 · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z24.0   ·   -15°   ·   11 m elevation"
+        ],
+        "telemetry": "Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled",
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      },
+      {
+        "status": [
+          "Map ready · Terrain ready · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z24.0   ·   -15°   ·   11 m elevation"
+        ],
+        "telemetry": "Free roam telemetry · 0.0 km/h · 10.8 m elevation · 0.0 m clearance 40.70870°, -74.01040° · 0 m travelled",
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      },
+      {
+        "status": [
+          "Map ready · Terrain ready · GPU active   ·   Pixel rendering   ·   40.7087°, -74.0104°   ·   z16.5   ·   -15°   ·   11 m elevation"
+        ],
+        "geometry": {
+          "width": 1800,
+          "height": 924,
+          "dpr": 2,
+          "canvasWidth": 3600,
+          "canvasHeight": 1848
+        },
+        "map": {
+          "x": 0,
+          "y": 59.5,
+          "width": 1800,
+          "height": 807.5
+        }
+      }
+    ],
+    "checkpoint_state_format": "Each checkpoint public_state_index selects the exact status, telemetry, viewport and map bounds in checkpoint_public_states.",
+    "checkpoints": [
+      {
+        "name": "01-initial-map",
+        "timeMs": 8802.45,
+        "paused": false,
+        "active": false,
+        "public_state_index": 0,
+        "memory_bytes": [
+          352059392
+        ],
+        "draw_calls": 273,
+        "depth_draw_calls": 57
+      },
+      {
+        "name": "02-north-up-live-ready",
+        "timeMs": 24771.119,
+        "paused": false,
+        "active": true,
+        "public_state_index": 1,
+        "memory_bytes": [
+          507052032
+        ],
+        "draw_calls": 2646,
+        "depth_draw_calls": 104
+      },
+      {
+        "name": "03-native-close-orbit",
+        "timeMs": 43744.534,
+        "paused": false,
+        "active": true,
+        "public_state_index": 2,
+        "memory_bytes": [
+          1150550016
+        ],
+        "draw_calls": 3222,
+        "depth_draw_calls": 233
+      },
+      {
+        "name": "04-paused-close-ready",
+        "timeMs": 51724.155,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1471283200
+        ],
+        "draw_calls": 3663,
+        "depth_draw_calls": 373
+      },
+      {
+        "name": "05-orbit-picker",
+        "timeMs": 56273.858,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1592131584
+        ],
+        "draw_calls": 4094,
+        "depth_draw_calls": 408
+      },
+      {
+        "name": "06-native-horizon",
+        "timeMs": 64569.34,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1692991488
+        ],
+        "draw_calls": 5940,
+        "depth_draw_calls": 513
+      },
+      {
+        "name": "07-horizon-paused-ready",
+        "timeMs": 68099.147,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1805451264
+        ],
+        "draw_calls": 6414,
+        "depth_draw_calls": 618
+      },
+      {
+        "name": "08-horizon-responsive",
+        "timeMs": 89966.893,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1805451264
+        ],
+        "draw_calls": 6650,
+        "depth_draw_calls": 688
+      },
+      {
+        "name": "repeat-1-close",
+        "timeMs": 95202.913,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1805451264
+        ],
+        "draw_calls": 7108,
+        "depth_draw_calls": 863
+      },
+      {
+        "name": "repeat-1-close-paused-ready",
+        "timeMs": 100962.531,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1805451264
+        ],
+        "draw_calls": 7346,
+        "depth_draw_calls": 933
+      },
+      {
+        "name": "repeat-1-close-resumed",
+        "timeMs": 104369.498,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1805451264
+        ],
+        "draw_calls": 7489,
+        "depth_draw_calls": 968
+      },
+      {
+        "name": "repeat-1-horizon",
+        "timeMs": 108756.853,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1805451264
+        ],
+        "draw_calls": 7866,
+        "depth_draw_calls": 1108
+      },
+      {
+        "name": "repeat-1-horizon-paused-ready",
+        "timeMs": 114487.551,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1805451264
+        ],
+        "draw_calls": 8110,
+        "depth_draw_calls": 1178
+      },
+      {
+        "name": "repeat-1-horizon-resumed",
+        "timeMs": 117445.219,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 8256,
+        "depth_draw_calls": 1213
+      },
+      {
+        "name": "repeat-2-close",
+        "timeMs": 121822.681,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 8567,
+        "depth_draw_calls": 1353
+      },
+      {
+        "name": "repeat-2-close-paused-ready",
+        "timeMs": 127499.878,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 8811,
+        "depth_draw_calls": 1423
+      },
+      {
+        "name": "repeat-2-close-resumed",
+        "timeMs": 130839.105,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 8992,
+        "depth_draw_calls": 1458
+      },
+      {
+        "name": "repeat-2-horizon",
+        "timeMs": 135274.064,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 9369,
+        "depth_draw_calls": 1598
+      },
+      {
+        "name": "repeat-2-horizon-paused-ready",
+        "timeMs": 140862.31,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 9613,
+        "depth_draw_calls": 1668
+      },
+      {
+        "name": "repeat-2-horizon-resumed",
+        "timeMs": 143743.834,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 9718,
+        "depth_draw_calls": 1703
+      },
+      {
+        "name": "repeat-3-close",
+        "timeMs": 148357.226,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 10084,
+        "depth_draw_calls": 1843
+      },
+      {
+        "name": "repeat-3-close-paused-ready",
+        "timeMs": 153975.847,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 10328,
+        "depth_draw_calls": 1913
+      },
+      {
+        "name": "repeat-3-close-resumed",
+        "timeMs": 157255.636,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 10508,
+        "depth_draw_calls": 1948
+      },
+      {
+        "name": "repeat-3-horizon",
+        "timeMs": 161549.127,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 10836,
+        "depth_draw_calls": 2088
+      },
+      {
+        "name": "repeat-3-horizon-paused-ready",
+        "timeMs": 167369.083,
+        "paused": true,
+        "active": false,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 11130,
+        "depth_draw_calls": 2158
+      },
+      {
+        "name": "repeat-3-horizon-resumed",
+        "timeMs": 170317.901,
+        "paused": false,
+        "active": true,
+        "public_state_index": 3,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 11275,
+        "depth_draw_calls": 2193
+      },
+      {
+        "name": "09-returned-to-map",
+        "timeMs": 173284.751,
+        "paused": false,
+        "active": false,
+        "public_state_index": 4,
+        "memory_bytes": [
+          1908146176
+        ],
+        "draw_calls": 11702,
+        "depth_draw_calls": 2318
+      }
+    ],
+    "errors": {
+      "fatal": null,
+      "protocol_error": null,
+      "runtime_replay_input_or_other_event_errors": [],
+      "console_errors": [],
+      "bounded_observer_errors": [
+        {
+          "event_order": 678,
+          "time_ms": 30681.779,
+          "stage": "north-up-live-data-ready",
+          "sample_type": "public DOM / Wasm memory",
+          "error": "Error: DOM/memory sample timed out after 4000ms"
+        },
+        {
+          "event_order": 678,
+          "time_ms": 30681.779,
+          "stage": "north-up-live-data-ready",
+          "sample_type": "CDP Memory.getDOMCounters",
+          "error": "Error: DOM counters timed out after 4000ms"
+        },
+        {
+          "event_order": 678,
+          "time_ms": 30681.779,
+          "stage": "north-up-live-data-ready",
+          "sample_type": "CDP Runtime.getHeapUsage",
+          "error": "Error: JS heap usage timed out after 4000ms"
+        },
+        {
+          "event_order": 1204,
+          "time_ms": 178763.86,
+          "stage": "map-restored",
+          "sample_type": "public DOM / Wasm memory",
+          "error": "Error: DOM/memory sample timed out after 4000ms"
+        },
+        {
+          "event_order": 1204,
+          "time_ms": 178763.86,
+          "stage": "map-restored",
+          "sample_type": "CDP Memory.getDOMCounters",
+          "error": "Error: DOM counters timed out after 4000ms"
+        },
+        {
+          "event_order": 1204,
+          "time_ms": 178763.86,
+          "stage": "map-restored",
+          "sample_type": "CDP Runtime.getHeapUsage",
+          "error": "Error: JS heap usage timed out after 4000ms"
+        }
+      ],
+      "bounded_observer_error_counts": {
+        "public DOM / Wasm memory": 2,
+        "CDP Memory.getDOMCounters": 2,
+        "CDP Runtime.getHeapUsage": 2
+      },
+      "grow_messages_during_timed_out_poll_intervals": [
+        {
+          "poll_completed_ms": 30681.779,
+          "grow_messages_received_ms": [
+            26775.389,
+            28951.115
+          ]
+        },
+        {
+          "poll_completed_ms": 178763.86,
+          "grow_messages_received_ms": []
+        }
+      ]
+    },
+    "event_count": 1224,
+    "dropped_events": 0
+  },
+  "limitations": [
+    "Wasm buffer length is allocated linear-memory length, not live native or managed allocation, allocator free space, process RSS, or a memory-leak measurement.",
+    "Remaining configured growth is the difference from the statically decoded 2 GiB maximum. It is not guaranteed allocatable headroom.",
+    "Each artifact was measured once, in separate processes. This is a capacity observation, not a statistical timing or FPS benchmark.",
+    "Bodies, URLs, byte counts and gesture totals match, but immediate replay blocks service workers and changes original network/cache timing. Baseline and candidate request sequences differ at 48 of 170 positions; each differs at 46 positions from the original capture.",
+    "Wheel event chunking and actual frame counts differ. The same public camera/data-ready/pause/resume checkpoints completed; this is not a frame-by-frame identical execution.",
+    "Two baseline first-gesture wheel records arrive at Node after the CDP command acknowledgment but before the camera checkpoint. These are asynchronous observation receipt times; the full delivered delta is retained.",
+    "Grow/resize hooks stream scalar records through a binding independent of periodic sampling, and recorded growth during timed-out polls. Timestamps are Node receipt times and may be delayed; abrupt browser termination could lose pending records.",
+    "Bounded observation calls timed out in both runs. Every recorded error and affected timestamp is retained; successful protocol completion does not imply continuously responsive UI.",
+    "Neither replay reproduced the original live native allocation abort. Passing this finite corpus and three cycles does not prove all live tile sets or future interactions are safe."
+  ],
+  "independent_audit": {
+    "file": "browser-memory-replay-c937ddd-independent-audit.json",
+    "sha256": "88f24ccf31c4fe23b662c7055042fbd4d3181a0904e7c9058de3c7b3e4a4f4d4",
+    "assertions": 5174
+  },
+  "exporter_sha256": "ab1193211c1a685c58ef45be49276542efafe68ffce08dafcacd826da706f760"
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "recorded_date": "2026-11-07",
-  "stage": "Published compact-mesh source c937ddd; AOT/browser/live acceptance was pending when this native evidence was exported.",
+  "stage": "Native c937ddd measurements preserve their original source, binaries and samples. Separate Release CI, corpus replay and independent live validation completed successfully; their scope is recorded under release_validation.",
   "source": {
     "repository": "https://github.com/wieslawsoltes/UnoPixelMap",
     "baseline_commit": "ab765d24c3063c1745867772426720fd47152805",
@@ -360,10 +360,27 @@
     }
   ],
   "release_validation": {
-    "accepted": false,
+    "accepted": true,
     "source_commit": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
     "workflow_run": 42377138938,
-    "status": "AOT/browser validation and live acceptance pending"
+    "workflow_conclusion": "success",
+    "workflow_completed_by_utc": "2026-11-07T13:57:42Z",
+    "deployment_success_utc": "2026-11-07T13:53:16.4088026Z",
+    "live_completed_by_utc": "2026-11-07T13:59:26Z",
+    "status": "Full Release CI and Pages deployment passed; independent live-provider close-camera sequence and public controls passed.",
+    "ci": {
+      "file": "browser-validation-c937ddd.json",
+      "sha256": "fffffe29c2a99ab8e69639f120c3de0c6ba86c9f123e3fe44e06aeffe0d30418"
+    },
+    "corpus_replay": {
+      "file": "corpus-memory-comparison-c937ddd.json",
+      "sha256": "b92efcd80cbb796f064763acbda9d48da983880e0fa04f8d95fcba4f8308b66c"
+    },
+    "live": {
+      "file": "live-rendering-c937ddd.json",
+      "sha256": "7b7c53e927dd7666b229a28b0373582e59ccfced470f1bdb9ccb4e9b68da900c"
+    },
+    "scope": "Finite correctness and responsiveness validation. These fields do not relabel the native benchmark as browser frame time, guarantee every future live scene, or imply uniformly improved browser timing."
   },
   "limitations": [
     "Two runs per variant do not establish confidence intervals or broad FPS claims; read both run medians and p95s.",
