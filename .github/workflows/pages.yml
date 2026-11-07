@@ -23,12 +23,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/diagnostic-browsers
-      PIXELMAP_LIVE_OUTPUT: ${{ runner.temp }}/live-memory
       PIXELMAP_LIVE_SECONDS: '540'
       PIXELMAP_CORPUS_MIB: '256'
     steps:
       - uses: actions/checkout@v4
+      - name: Initialize diagnostic directories
+        run: |
+          printf 'PLAYWRIGHT_BROWSERS_PATH=%s/diagnostic-browsers\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'PIXELMAP_LIVE_OUTPUT=%s/live-memory\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
