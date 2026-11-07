@@ -127,6 +127,9 @@ internal sealed class GpuTerrainMesh(object resourceKey, PixelMap.Data.TileId id
     internal readonly PixelMap.Data.TileId Id = id;
     internal readonly int Copy = copy;
     internal readonly float[] Vertices = vertices;
+    // Immutable source bounds avoid rescanning expanded block vertices for each
+    // moving camera's sparse depth index. Height conversion stays frame-specific.
+    internal readonly (SKRect Area, float Minimum, float Maximum) Bounds = FindBounds(vertices);
     internal readonly long Revision = revision;
     internal readonly MapRenderStyle RenderStyle = renderStyle;
     internal readonly float[]? HeightLight = heightLight;
@@ -138,6 +141,19 @@ internal sealed class GpuTerrainMesh(object resourceKey, PixelMap.Data.TileId id
     };
     internal long Frame;
     internal static readonly ushort[] Indices = CreateIndices();
+
+    private static (SKRect, float, float) FindBounds(float[] vertices)
+    {
+        float left = float.PositiveInfinity, top = float.PositiveInfinity, low = float.PositiveInfinity;
+        float right = float.NegativeInfinity, bottom = float.NegativeInfinity, high = float.NegativeInfinity;
+        for (int i = 0; i < vertices.Length; i += VertexStride)
+        {
+            left = Math.Min(left, vertices[i]); right = Math.Max(right, vertices[i]);
+            top = Math.Min(top, vertices[i + 1]); bottom = Math.Max(bottom, vertices[i + 1]);
+            low = Math.Min(low, vertices[i + 2]); high = Math.Max(high, vertices[i + 2]);
+        }
+        return (new(left, top, right, bottom), low, high);
+    }
 
     private static ushort[] CreateIndices()
     {

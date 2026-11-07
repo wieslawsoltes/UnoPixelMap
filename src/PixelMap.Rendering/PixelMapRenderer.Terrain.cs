@@ -147,7 +147,7 @@ public sealed partial class PixelMapRenderer
         imageryOrder.Sort(static (a, b) => a.Id.Z.CompareTo(b.Id.Z));
         float meters = (float)(camera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
             Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
-        buildings.Begin(w, h, (float)Math.Sin(camera.PitchRadians), meters, camera.Perspective);
+        buildings.Begin(w, h, (float)Math.Sin(camera.PitchRadians), meters, camera.Perspective, renderStyle);
         var projection = new TileProjection(camera, width, height, pixelSize);
         buildings.BeginTerrain(projection.Get(new(0, 0, 0), 0).Transform, reliefSurface);
         bool preservePhoto = imageryOrder.Count > 0 && camera.Zoom >= 12 && camera.Pitch < 30;

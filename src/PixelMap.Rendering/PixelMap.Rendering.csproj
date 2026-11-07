@@ -6,6 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="PixelMap.Rendering.Tests" />
     <ProjectReference Include="../PixelMap.Routing/PixelMap.Routing.csproj" />
     <ProjectReference Include="../PixelMap.Data/PixelMap.Data.csproj" />
     <PackageReference Include="SkiaSharp" Version="3.119.2" />

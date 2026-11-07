@@ -304,8 +304,40 @@ internal static class GlMapShaders
             return texelFetch(uRooms, ivec2(index, 0), 0).r < 0.001;
         }
 
+        vec2 windowCoverage(vec2 room, vec2 footprint)
+        {
+            const vec2 start = vec2(0.17, 0.23), duty = vec2(0.76, 0.75) - start;
+            vec2 width = max(footprint, vec2(0.0001));
+            vec2 a = room - width * 0.5, b = room + width * 0.5;
+            vec2 first = floor(a), last = floor(b);
+            return clamp(((last - first) * duty + clamp(b - last - start, vec2(0.0), duty) -
+                clamp(a - first - start, vec2(0.0), duty)) / width, vec2(0.0), vec2(1.0));
+        }
+
+        vec2 windowCentroid(vec2 room, vec2 footprint)
+        {
+            const vec2 start = vec2(0.17, 0.23), end = vec2(0.76, 0.75);
+            vec2 width = clamp(footprint, vec2(0.0001), vec2(1.0));
+            vec2 a = room - width * 0.5, b = a + width, cell = floor(a);
+            vec2 first = max(vec2(0.0), min(b, cell + end) - max(a, cell + start));
+            vec2 second = max(vec2(0.0), min(b, cell + vec2(1.0) + end) - max(a, cell + vec2(1.0) + start));
+            return cell + vec2(0.5) + second / max(first + second, vec2(0.000001));
+        }
+
         void main()
         {
+            vec2 facadeFootprint = vec2(0.0);
+            if (uRenderStyle == 0 && uPerspective)
+            {
+                // Take derivatives before any varying-dependent branch or discard.
+                // The numerator and reciprocal W are affine, so their quotient
+                // derivative matches the CPU's art-pixel facade footprint.
+                float inverse = gl_FragCoord.w;
+                vec2 numerator = vFacade * inverse;
+                vec2 dx = (dFdx(numerator) - vFacade * dFdx(inverse)) / inverse;
+                vec2 dy = (dFdy(numerator) - vFacade * dFdy(inverse)) / inverse;
+                facadeFootprint = abs(dx) + abs(dy);
+            }
             if (vModel.z != 0)
             {
                 vec3 roof = material(vModel.z == 1 ? 0 : 2);
@@ -348,6 +380,39 @@ internal static class GlMapShaders
             float bayMeters = 3.2 + float((vModel.x >> 2) & 3) * 0.6;
             if (uPerspective)
             {
+                if (uRenderStyle == 0)
+                {
+                    vec2 room = vFacade / vec2(bayMeters, floorMeters);
+                    vec2 footprint = facadeFootprint / vec2(bayMeters, floorMeters);
+                    float span = max(footprint.x, footprint.y);
+                    if (span > 0.2)
+                    {
+                        vec2 axes = windowCoverage(room, footprint);
+                        float coverage = axes.x * axes.y;
+                        if (coverage > 0.0)
+                        {
+                            // The two-channel atlas keeps the original R lookup and
+                            // stores deterministic lamp coverage in G. These are the
+                            // same byte mip levels sampled by the CPU fallback.
+                            vec2 lookup = mix(windowCentroid(room, footprint), room,
+                                smoothstep(vec2(1.0), vec2(2.0), footprint)) + vec2(float(vModel.x), 0.0);
+                            float lod = span <= 1.0 ? 0.0 : min(8.0, log2(span));
+                            float lamps = textureLod(uRooms, lookup / vec2(256.0, 16.0), lod).g;
+                            color = mix(wall, mix(material(5), material(6), lamps), coverage);
+                            if (span < 0.5)
+                            {
+                                vec2 within = fract(room);
+                                vec3 point = wall;
+                                if (uGround.z * gl_FragCoord.w > 0.40 && within.y > 0.23 && within.y < 0.75 &&
+                                    within.x > 0.17 && within.x < 0.76)
+                                    point = material(lamp(int(floor(room.x)), int(floor(room.y))) ? 6 : 5);
+                                color = mix(point, color, smoothstep(0.2, 0.5, span));
+                            }
+                        }
+                        outputColor = vec4(color / 255.0, 1.0);
+                        return;
+                    }
+                }
                 if (uGround.z * gl_FragCoord.w > 0.40)
                 {
                     vec2 room = vec2(vFacade.x / bayMeters, vFacade.y / floorMeters);

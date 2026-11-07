@@ -726,17 +726,19 @@ public sealed unsafe class GlMapRenderer : IDisposable
 
     private void CreateRoomTexture()
     {
-        Span<byte> rooms = stackalloc byte[256];
-        var random = new Random(859);
-        for (int i = 0; i < rooms.Length; i += 2)
-        {
-            rooms[i] = (byte)random.Next(4);
-            rooms[i + 1] = random.Next(3) == 0 ? (byte)random.Next(4) : rooms[i];
-        }
         roomTexture = CreateTexture();
         BindTexture(0, roomTexture);
-        fixed (byte* pixels = rooms)
-            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.R8, 256, 1, 0, PixelFormat.Red, PixelType.UnsignedByte, pixels);
+        for (int index = 0; index < PixelWindowFilter.Levels.Length; index++)
+        {
+            var level = PixelWindowFilter.Levels[index];
+            fixed (byte* pixels = level.Pixels)
+                gl.TexImage2D(TextureTarget.Texture2D, index, InternalFormat.RG8, (uint)level.Width, (uint)level.Height,
+                    0, PixelFormat.RG, PixelType.UnsignedByte, pixels);
+        }
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
     }
 
     private void UploadOverlay(SKBitmap overlay)

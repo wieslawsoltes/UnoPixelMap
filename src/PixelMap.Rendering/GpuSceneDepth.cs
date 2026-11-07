@@ -5,13 +5,17 @@ using System.Runtime.InteropServices;
 
 namespace PixelMap.Rendering;
 
-/// <summary>A screen-space primitive index for picking and overlay visibility. Preparing
-/// a frame projects vertices and bins triangle bounds. Depth is evaluated only for pixels
-/// actually queried by labels, navigation or pointer input, leaving fragment rendering to GL.</summary>
+/// <summary>A sparse screen-space index for picking and overlay visibility. Frame
+/// preparation bins conservative terrain/model bounds; a queried cell prepares only
+/// its contributing geometry. Exact clipped primitives are retained for later queries,
+/// leaving unqueried vertices and all fragment rendering to GL.</summary>
 internal sealed class GpuSceneDepth
 {
     private const int CellSize = 16;
+    private const int MaximumCellsPerProxy = 64;
+    private const int CompleteCellAfterQueries = 8;
     private const int MaximumPooledStorage = 2;
+    private const int MaximumPooledIndices = 2 * 1024 * 1024;
     private const int MaximumCachedPixels = 65536;
     private static readonly ConcurrentBag<Storage> pool = [];
     private static int pooledStorage;
@@ -21,16 +25,24 @@ internal sealed class GpuSceneDepth
     private readonly bool perspective;
     private readonly float pixelsPerMeter;
     private readonly TileTransform lens;
+    private readonly GpuMapFrame frame;
     private readonly List<Triangle> triangles;
     private readonly List<Edge> edges;
-    private readonly List<int>?[] cells;
+    private readonly List<Group> groups;
+    private readonly List<int> largeProxies;
+    private readonly List<int>?[] pendingCells;
+    private readonly List<ulong>?[] cells;
+    private readonly bool[] preparedCells;
+    private readonly byte[] cellQueries;
     private readonly Dictionary<int, PixelHit> samples;
     private readonly Storage storage;
+    private int preparingOrder;
     private int references;
     private float minimumAltitude = float.PositiveInfinity, maximumAltitude = float.NegativeInfinity;
 
     internal GpuSceneDepth(GpuMapFrame frame)
     {
+        this.frame = frame;
         width = frame.ArtWidth;
         height = frame.ArtHeight;
         columns = (width + CellSize - 1) / CellSize;
@@ -43,14 +55,25 @@ internal sealed class GpuSceneDepth
         else storage = new();
         triangles = storage.Triangles;
         edges = storage.Edges;
+        groups = storage.Groups;
+        largeProxies = storage.LargeProxies;
         samples = storage.Samples;
-        if (storage.Cells.Length < columns * rows) storage.Cells = new List<int>?[columns * rows];
+        if (storage.Cells.Length < columns * rows)
+        {
+            storage.Cells = new List<ulong>?[columns * rows];
+            storage.PendingCells = new List<int>?[columns * rows];
+            storage.PreparedCells = new bool[columns * rows];
+            storage.CellQueries = new byte[columns * rows];
+        }
         cells = storage.Cells;
+        pendingCells = storage.PendingCells;
+        preparedCells = storage.PreparedCells;
+        cellQueries = storage.CellQueries;
         perspective = frame.Camera.Perspective;
         pixelsPerMeter = frame.PixelsPerMeter;
         lens = new TileProjection(frame.Camera, frame.Width, frame.Height, frame.PixelSize).Get(new(0, 0, 0), 0).Transform;
-        foreach (var draw in frame.Terrain) AddTerrain(draw, frame);
-        foreach (var draw in frame.Buildings) AddBuildings(draw, frame);
+        for (int i = 0; i < frame.Terrain.Length; i++) IndexTerrain(i);
+        for (int i = 0; i < frame.Buildings.Length; i++) IndexBuildings(i);
         frame.MinimumAltitude = float.IsFinite(minimumAltitude) ? minimumAltitude - 1 : -1;
         frame.MaximumAltitude = float.IsFinite(maximumAltitude) ? Math.Max(frame.MinimumAltitude + 1, maximumAltitude + 1) : 1;
     }
@@ -63,7 +86,13 @@ internal sealed class GpuSceneDepth
         // Keep two ordinary moving-frame workspaces. Oversized/offscreen renders release
         // their arrays normally instead of permanently enlarging the shared pool.
         if (triangles.Capacity > 262144 || edges.Capacity > 65536 || samples.EnsureCapacity(0) > 131072 ||
-            storage.ProjectedVertices.Length > 131072 || storage.VisibleModels.Length > 16384) return;
+            storage.ProjectedVertices.Length > 131072 || groups.Capacity > 65536 || cells.Length > 16384) return;
+        // Screen-filling and changing views can accumulate different cell high-water
+        // marks. Limit all retained exact/coarse index arrays to 8 MiB per workspace.
+        long indices = largeProxies.Capacity;
+        foreach (var cell in cells) { indices += (cell?.Capacity ?? 0) * 2L; cell?.Clear(); }
+        foreach (var cell in pendingCells) { indices += cell?.Capacity ?? 0; cell?.Clear(); }
+        if (indices > MaximumPooledIndices) return;
         if (Interlocked.Increment(ref pooledStorage) > MaximumPooledStorage)
         {
             Interlocked.Decrement(ref pooledStorage);
@@ -71,8 +100,11 @@ internal sealed class GpuSceneDepth
         }
         triangles.Clear();
         edges.Clear();
+        groups.Clear();
+        largeProxies.Clear();
         samples.Clear();
-        foreach (var cell in cells) cell?.Clear();
+        Array.Clear(preparedCells);
+        Array.Clear(cellQueries);
         pool.Add(storage);
     }
 
@@ -114,12 +146,18 @@ internal sealed class GpuSceneDepth
         if (samples.TryGetValue(offset, out var cached)) return cached;
         float sx = x + .5f, sy = y + .5f;
         float nearest = float.NegativeInfinity, terrainDepth = float.NegativeInfinity;
+        float modelDepth = float.NegativeInfinity, edgeDepth = float.NegativeInfinity;
         int terrainIndex = -1;
-        bool surfaceIsTerrain = false, hasSurface = false;
+        ulong terrainOrder = 0;
+        bool hasSurface = false;
+        int cell = (y / CellSize) * columns + x / CellSize;
+        if (!preparedCells[cell]) PrepareCell(cell, sx, sy, ++cellQueries[cell] >= CompleteCellAfterQueries);
         var preparedTriangles = CollectionsMarshal.AsSpan(triangles);
-        if (cells[(y / CellSize) * columns + x / CellSize] is { } candidates)
-            foreach (int primitive in candidates)
+        if (cells[cell] is { } candidates)
+            foreach (ulong key in candidates)
             {
+                int primitive = (int)((uint)key >> 1);
+                if ((key & 1) != 0) primitive = ~primitive;
                 float depth;
                 bool isTerrain;
                 if (primitive >= 0)
@@ -136,23 +174,114 @@ internal sealed class GpuSceneDepth
                     isTerrain = false;
                 }
                 if (!float.IsFinite(depth)) continue;
-                if (isTerrain && depth >= terrainDepth)
+                if (isTerrain && (depth > terrainDepth || depth == terrainDepth && key >= terrainOrder))
                 {
                     terrainDepth = depth;
                     terrainIndex = primitive;
+                    terrainOrder = key;
                 }
-                // Roof-rim DDA samples have the same small inverse-depth tolerance as
-                // the CPU edge pass, while retaining the nearer stored depth value.
-                float tolerance = perspective && primitive < 0 ? 1e-6f : 0;
-                if (depth < nearest - tolerance) continue;
+                else if (!isTerrain)
+                {
+                    if (primitive < 0) edgeDepth = Math.Max(edgeDepth, depth);
+                    else modelDepth = Math.Max(modelDepth, depth);
+                }
                 nearest = Math.Max(nearest, depth);
                 hasSurface = true;
-                surfaceIsTerrain = isTerrain;
             }
+        // Every terrain primitive precedes every model primitive in the eager pass.
+        // Once a model covers terrain, no later primitive can restore terrain status.
+        // Thus only these maxima matter; cell entries need no ordering or sorting.
+        // Rims retain the original small inverse-depth tolerance, without changing
+        // the stored maximum. Equal-depth terrain picks still use source order.
+        bool surfaceIsTerrain = terrainIndex >= 0 && modelDepth < terrainDepth &&
+            edgeDepth < terrainDepth - (perspective ? 1e-6f : 0);
         var result = new PixelHit(nearest, terrainIndex, hasSurface, surfaceIsTerrain);
         if (samples.Count >= MaximumCachedPixels) samples.Clear();
         samples.Add(offset, result);
         return result;
+    }
+
+    private void IndexTerrain(int drawIndex)
+    {
+        var draw = frame.Terrain[drawIndex];
+        var bounds = draw.Mesh.Bounds;
+        float low = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, bounds.Minimum) * pixelsPerMeter;
+        float high = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, bounds.Maximum) * pixelsPerMeter;
+        IncludeAltitude(low); IncludeAltitude(high);
+        // Terrain did not previously have a box-frustum rejection. Keep that exact
+        // clipping behavior, including patches meeting a screen/near-plane boundary.
+        if (!Bounds(bounds.Area, low, high, draw.Transform, rejectOutside: false, out var screen, out var cells)) return;
+        int group = groups.Count;
+        groups.Add(new(drawIndex, -1, 0, low, high, screen, cells));
+        IndexProxy(group);
+    }
+
+    private void IndexBuildings(int drawIndex)
+    {
+        var draw = frame.Buildings[drawIndex];
+        var mesh = draw.Mesh;
+        var transform = draw.Transform;
+        for (int modelIndex = 0; modelIndex < mesh.Ranges.Length; modelIndex++)
+        {
+            var model = mesh.Ranges[modelIndex].Model;
+            float foundation = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, mesh.Models[modelIndex * GpuBuildingMesh.ModelStride]);
+            float top = (model.Top + foundation) * pixelsPerMeter, bottom = (model.Bottom + foundation) * pixelsPerMeter;
+            // GL's normalized depth range includes every submitted model, even when
+            // its physical-camera selection or screen-space bounds reject it.
+            IncludeAltitude(top); IncludeAltitude(bottom);
+            if (draw.Selection is { } selected && selected.Models[modelIndex] == 0) continue;
+            if (!Bounds(model.Bounds, bottom, top, transform, rejectOutside: true, out var screen, out var cells)) continue;
+            float rx = (Math.Abs(transform.XX) * model.Bounds.Width + Math.Abs(transform.XY) * model.Bounds.Height) * .5f;
+            float ry = (Math.Abs(transform.YX) * model.Bounds.Width + Math.Abs(transform.YY) * model.Bounds.Height) * .5f;
+            float rise = top * transform.SinPitch, baseRise = bottom * transform.SinPitch;
+            if (!perspective && rx < .28f && ry + (foundation == 0 ? rise : rise - baseRise) < .5f) continue;
+            int group = groups.Count;
+            groups.Add(new(drawIndex, modelIndex, foundation, bottom, top, screen, cells));
+            IndexProxy(group);
+        }
+    }
+
+    private void IndexProxy(int group)
+    {
+        var bounds = groups[group].Cells;
+        if ((bounds.Right - bounds.Left + 1) * (bounds.Bottom - bounds.Top + 1) > MaximumCellsPerProxy)
+        {
+            // Near-plane crossings and screen-filling terrain/models must not grow
+            // a model×viewport-cell index. One overflow entry bounds their storage.
+            largeProxies.Add(group);
+            return;
+        }
+        for (int y = bounds.Top; y <= bounds.Bottom; y++)
+        for (int x = bounds.Left; x <= bounds.Right; x++)
+            (pendingCells[y * columns + x] ??= []).Add(group);
+    }
+
+    private void PrepareCell(int cell, float sx, float sy, bool complete)
+    {
+        int x = cell % columns, y = cell / columns;
+        var local = pendingCells[cell];
+        if (local is not null)
+            foreach (int group in local) PrepareAt(group, sx, sy, complete);
+        foreach (int group in largeProxies)
+            if (groups[group].Cells.Contains(x, y)) PrepareAt(group, sx, sy, complete);
+        preparedCells[cell] = complete;
+    }
+
+    private void PrepareAt(int group, float sx, float sy, bool complete)
+    {
+        var screen = groups[group].Screen;
+        if (complete || sx >= screen.Left && sx <= screen.Right && sy >= screen.Top && sy <= screen.Bottom)
+            PrepareGroup(group);
+    }
+
+    private void PrepareGroup(int index)
+    {
+        ref var group = ref CollectionsMarshal.AsSpan(groups)[index];
+        if (group.FirstTriangle >= 0) return;
+        group.FirstTriangle = triangles.Count;
+        preparingOrder = index;
+        if (group.Model < 0) AddTerrain(frame.Terrain[group.Draw], frame);
+        else AddBuilding(frame.Buildings[group.Draw], group);
     }
 
     private void AddTerrain(TerrainGpuDraw draw, GpuMapFrame frame)
@@ -168,7 +297,6 @@ internal sealed class GpuSceneDepth
                 int offset = i * GpuTerrainMesh.VertexStride;
                 float raw = vertices[offset + 2];
                 float altitude = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, raw) * pixelsPerMeter;
-                IncludeAltitude(altitude);
                 projected[i] = new(draw.Transform.Vertex(vertices[offset], vertices[offset + 1], altitude), raw);
             }
             var indices = draw.Mesh.TriangleIndices;
@@ -178,100 +306,106 @@ internal sealed class GpuSceneDepth
         finally { if (storage is not null) ArrayPool<Vertex>.Shared.Return(storage); }
     }
 
-    private void AddBuildings(GpuBuildingDraw draw, GpuMapFrame frame)
+    private void AddBuilding(GpuBuildingDraw draw, in Group group)
     {
         var mesh = draw.Mesh;
         var transform = draw.Transform;
         var source = mesh.Vertices;
+        var range = mesh.Ranges[group.Model];
         var projected = storage.ProjectedVertices;
-        if (storage.VisibleModels.Length < mesh.Ranges.Length) storage.VisibleModels = new bool[mesh.Ranges.Length];
-        var visible = storage.VisibleModels.AsSpan(0, mesh.Ranges.Length);
-        visible.Clear();
-        for (int modelIndex = 0; modelIndex < mesh.Ranges.Length; modelIndex++)
+        if (projected.Length < range.VertexCount)
+            storage.ProjectedVertices = projected = new Vertex[range.VertexCount];
+        float top = group.Top, bottom = group.Bottom, foundation = group.Foundation;
+        float rise = top * transform.SinPitch, baseRise = bottom * transform.SinPitch;
+        float eye = perspective ? transform.TargetZ + transform.CosPitch / transform.InverseFocal : float.PositiveInfinity;
+        for (int i = 0; i < range.VertexCount; i++)
         {
-            var range = mesh.Ranges[modelIndex];
-            var model = range.Model;
-            float foundation = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, mesh.Models[modelIndex * GpuBuildingMesh.ModelStride]);
-            float top = (model.Top + foundation) * pixelsPerMeter, bottom = (model.Bottom + foundation) * pixelsPerMeter;
-            IncludeAltitude(top); IncludeAltitude(bottom);
-            if (draw.Selection is { } selected && selected.Models[modelIndex] == 0) continue;
-            if (Outside(model.Bounds, bottom, top, transform)) continue;
-            float rx = (Math.Abs(transform.XX) * model.Bounds.Width + Math.Abs(transform.XY) * model.Bounds.Height) * .5f;
-            float ry = (Math.Abs(transform.YX) * model.Bounds.Width + Math.Abs(transform.YY) * model.Bounds.Height) * .5f;
-            float rise = top * transform.SinPitch, baseRise = bottom * transform.SinPitch;
-            if (!perspective && rx < .28f && ry + (foundation == 0 ? rise : rise - baseRise) < .5f) continue;
-            visible[modelIndex] = true;
-            if (projected.Length < range.VertexCount)
-            {
-                projected = new Vertex[range.VertexCount];
-                storage.ProjectedVertices = projected;
-            }
-            float eye = perspective ? transform.TargetZ + transform.CosPitch / transform.InverseFocal : float.PositiveInfinity;
-            for (int i = 0; i < range.VertexCount; i++)
-            {
-                int offset = (range.FirstVertex + i) * GpuBuildingMesh.VertexStride;
-                int face = (int)source[offset + 11];
-                // Caps have separate vertices and their same face test precedes
-                // index traversal, so hidden caps never read this scratch entry.
-                if (face == 1 && top >= eye || face == 2 && (!perspective || bottom <= eye)) continue;
-                float altitude = (source[offset + 2] + foundation) * pixelsPerMeter;
-                projected[i] = new(transform.Vertex(source[offset], source[offset + 1], altitude));
-            }
-            for (int i = range.FirstIndex, end = i + range.IndexCount; i < end; i += 3)
-            {
-                int first = (int)mesh.Indices[i];
-                int offset = first * GpuBuildingMesh.VertexStride;
-                int face = (int)source[offset + 11];
-                if (face == 1 && top >= eye || face == 2 && (!perspective || bottom <= eye)) continue;
-                if (face == 0)
-                {
-                    if (!perspective && (rise - baseRise < .35f || -(transform.XX * source[offset + 8] + transform.XY * source[offset + 9]) < .01f)) continue;
-                    var a = projected[first - range.FirstVertex].Screen;
-                    var b = projected[(int)mesh.Indices[i + 1] - range.FirstVertex].Screen;
-                    var c = projected[(int)mesh.Indices[i + 2] - range.FirstVertex].Screen;
-                    if (perspective && Orientation(a, b, c) >= -.00001f) continue;
-                }
-                AddTriangle(ref projected[first - range.FirstVertex],
-                    ref projected[(int)mesh.Indices[i + 1] - range.FirstVertex],
-                    ref projected[(int)mesh.Indices[i + 2] - range.FirstVertex], transform.Far, false);
-            }
+            int offset = (range.FirstVertex + i) * GpuBuildingMesh.VertexStride;
+            int face = (int)source[offset + 11];
+            // Caps have separate vertices and their same face test precedes index
+            // traversal, so hidden caps never read an uninitialized scratch entry.
+            if (face == 1 && top >= eye || face == 2 && (!perspective || bottom <= eye)) continue;
+            float altitude = (source[offset + 2] + foundation) * pixelsPerMeter;
+            projected[i] = new(transform.Vertex(source[offset], source[offset + 1], altitude));
         }
-        for (int modelIndex = 0; modelIndex < mesh.Ranges.Length; modelIndex++)
+        for (int i = range.FirstIndex, end = i + range.IndexCount; i < end; i += 3)
         {
-            if (!visible[modelIndex]) continue;
-            var range = mesh.Ranges[modelIndex];
-            var model = range.Model;
-            float foundation = (float)frame.TerrainOptions.LocalAltitude(frame.Camera, mesh.Models[modelIndex * GpuBuildingMesh.ModelStride]);
-            float top = (model.Top + foundation) * pixelsPerMeter;
-            if (perspective)
+            int first = (int)mesh.Indices[i];
+            int offset = first * GpuBuildingMesh.VertexStride;
+            int face = (int)source[offset + 11];
+            if (face == 1 && top >= eye || face == 2 && (!perspective || bottom <= eye)) continue;
+            if (face == 0)
             {
-                if (top >= transform.TargetZ + transform.CosPitch / transform.InverseFocal) continue;
+                if (!perspective && (rise - baseRise < .35f || -(transform.XX * source[offset + 8] + transform.XY * source[offset + 9]) < .01f)) continue;
+                var a = projected[first - range.FirstVertex].Screen;
+                var b = projected[(int)mesh.Indices[i + 1] - range.FirstVertex].Screen;
+                var c = projected[(int)mesh.Indices[i + 2] - range.FirstVertex].Screen;
+                if (perspective && Orientation(a, b, c) >= -.00001f) continue;
             }
-            else
-            {
-                float rx = (Math.Abs(transform.XX) * model.Bounds.Width + Math.Abs(transform.XY) * model.Bounds.Height) * .5f;
-                float ry = (Math.Abs(transform.YX) * model.Bounds.Width + Math.Abs(transform.YY) * model.Bounds.Height) * .5f;
-                if (rx < 3 || ry < 1.5f) continue;
-            }
-            for (int i = range.FirstEdge, end = i + range.EdgeCount; i < end; i += 2)
-            {
-                int a = i * GpuBuildingMesh.EdgeStride, b = a + GpuBuildingMesh.EdgeStride;
-                AddEdge(transform.Vertex(mesh.RoofEdges[a], mesh.RoofEdges[a + 1], top),
-                    transform.Vertex(mesh.RoofEdges[b], mesh.RoofEdges[b + 1], top), transform.Far);
-            }
+            AddTriangle(ref projected[first - range.FirstVertex],
+                ref projected[(int)mesh.Indices[i + 1] - range.FirstVertex],
+                ref projected[(int)mesh.Indices[i + 2] - range.FirstVertex], transform.Far, false);
+        }
+        if (perspective)
+        {
+            if (top >= eye) return;
+        }
+        else
+        {
+            float rx = (Math.Abs(transform.XX) * range.Model.Bounds.Width + Math.Abs(transform.XY) * range.Model.Bounds.Height) * .5f;
+            float ry = (Math.Abs(transform.YX) * range.Model.Bounds.Width + Math.Abs(transform.YY) * range.Model.Bounds.Height) * .5f;
+            if (rx < 3 || ry < 1.5f) return;
+        }
+        for (int i = range.FirstEdge, end = i + range.EdgeCount; i < end; i += 2)
+        {
+            int a = i * GpuBuildingMesh.EdgeStride, b = a + GpuBuildingMesh.EdgeStride;
+            AddEdge(transform.Vertex(mesh.RoofEdges[a], mesh.RoofEdges[a + 1], top),
+                transform.Vertex(mesh.RoofEdges[b], mesh.RoofEdges[b + 1], top), transform.Far);
         }
     }
 
-    private bool Outside(SKRect bounds, float bottom, float top, TileTransform transform)
+    private bool Bounds(SKRect bounds, float bottom, float top, TileTransform transform,
+        bool rejectOutside, out SKRect screen, out CellBounds result)
     {
         int common = 63;
+        bool crossesNear = false;
+        float left = float.PositiveInfinity, upper = float.PositiveInfinity;
+        float right = float.NegativeInfinity, lower = float.NegativeInfinity;
         for (int i = 0; i < 8; i++)
         {
             var corner = transform.Vertex((i & 1) == 0 ? bounds.Left : bounds.Right,
                 (i & 2) == 0 ? bounds.Top : bounds.Bottom, (i & 4) == 0 ? bottom : top);
             common &= OutCode(corner, transform.Far);
-            if (common == 0) return false;
+            if (!(corner.W >= lens.Near)) { crossesNear = true; continue; }
+            var point = corner.Point;
+            if (!float.IsFinite(point.X) || !float.IsFinite(point.Y)) { crossesNear = true; continue; }
+            left = Math.Min(left, point.X); upper = Math.Min(upper, point.Y);
+            right = Math.Max(right, point.X); lower = Math.Max(lower, point.Y);
         }
+        result = default;
+        screen = default;
+        if (rejectOutside && common != 0) return false;
+        if (crossesNear)
+        {
+            // A box crossing the eye/near plane can project outside every corner.
+            // Its bounded overflow proxy is refined by the original exact clipper.
+            result = new(0, 0, columns - 1, rows - 1);
+            screen = new(0, 0, width, height);
+            return true;
+        }
+        // With positive homogeneous weights a projective box reaches its extrema
+        // at a corner. Expand for float projection roundoff and the rim's DDA pixel.
+        float marginX = 2 + Math.Max(Math.Abs(left), Math.Abs(right)) * .00002f;
+        float marginY = 2 + Math.Max(Math.Abs(upper), Math.Abs(lower)) * .00002f;
+        left -= marginX; right += marginX; upper -= marginY; lower += marginY;
+        if (right < 0 || lower < 0 || left >= width || upper >= height) return false;
+        screen = new(Math.Max(0, left), Math.Max(0, upper), Math.Min(width, right), Math.Min(height, lower));
+        // Box corners have not been clipped and can exceed Int32 at a physical
+        // near plane. Clamp in floating point before converting to cell indices.
+        result = new((int)(Math.Clamp(left, 0, width - 1) / CellSize),
+            (int)(Math.Clamp(upper, 0, height - 1) / CellSize),
+            (int)(Math.Clamp(right, 0, width - 1) / CellSize),
+            (int)(Math.Clamp(lower, 0, height - 1) / CellSize));
         return true;
     }
 
@@ -339,7 +473,7 @@ internal sealed class GpuSceneDepth
         if (!triangle.Valid) return;
         int index = triangles.Count;
         triangles.Add(triangle);
-        Bin(index, triangle.Left, triangle.Top, triangle.Right, triangle.Bottom);
+        Bin(((ulong)preparingOrder << 32) | ((ulong)(uint)index << 1), triangle.Left, triangle.Top, triangle.Right, triangle.Bottom);
     }
 
     private void AddEdge(H a, H b, float far)
@@ -358,10 +492,10 @@ internal sealed class GpuSceneDepth
         var edge = new Edge(a, b, lo, hi, perspective);
         int index = edges.Count;
         edges.Add(edge);
-        Bin(~index, edge.Left, edge.Top, edge.Right + 1, edge.Bottom + 1);
+        Bin(((ulong)preparingOrder << 32) | ((ulong)(uint)index << 1) | 1, edge.Left, edge.Top, edge.Right + 1, edge.Bottom + 1);
     }
 
-    private void Bin(int primitive, float left, float top, float right, float bottom)
+    private void Bin(ulong primitive, float left, float top, float right, float bottom)
     {
         if (!float.IsFinite(left) || !float.IsFinite(top) || !float.IsFinite(right) || !float.IsFinite(bottom) ||
             right < 0 || bottom < 0 || left >= width || top >= height) return;
@@ -370,7 +504,11 @@ internal sealed class GpuSceneDepth
         int firstY = Math.Clamp((int)MathF.Floor(top / CellSize), 0, rows - 1);
         int lastY = Math.Clamp((int)MathF.Floor(bottom / CellSize), 0, rows - 1);
         for (int y = firstY; y <= lastY; y++)
-        for (int x = firstX; x <= lastX; x++) (cells[y * columns + x] ??= []).Add(primitive);
+        for (int x = firstX; x <= lastX; x++)
+        {
+            int cell = y * columns + x;
+            (cells[cell] ??= []).Add(primitive);
+        }
     }
 
     private void IncludeAltitude(float altitude)
@@ -381,15 +519,33 @@ internal sealed class GpuSceneDepth
 
     private readonly record struct PixelHit(float Depth, int TerrainTriangle, bool HasSurface, bool SurfaceIsTerrain);
 
+    private readonly record struct CellBounds(int Left, int Top, int Right, int Bottom)
+    {
+        internal bool Contains(int x, int y) => x >= Left && x <= Right && y >= Top && y <= Bottom;
+    }
+
+    private struct Group(int draw, int model, float foundation, float bottom, float top, SKRect screen, CellBounds cells)
+    {
+        internal readonly int Draw = draw, Model = model;
+        internal readonly float Foundation = foundation, Bottom = bottom, Top = top;
+        internal readonly CellBounds Cells = cells;
+        internal readonly SKRect Screen = screen;
+        internal int FirstTriangle = -1;
+    }
+
     private sealed class Storage
     {
-        internal readonly List<Triangle> Triangles = new(32768);
+        internal readonly List<Triangle> Triangles = new(1024);
         internal readonly List<Edge> Edges = [];
+        internal readonly List<Group> Groups = [];
+        internal readonly List<int> LargeProxies = [];
         internal readonly Dictionary<int, PixelHit> Samples = [];
-        internal List<int>?[] Cells = [];
+        internal List<ulong>?[] Cells = [];
+        internal List<int>?[] PendingCells = [];
+        internal bool[] PreparedCells = [];
+        internal byte[] CellQueries = [];
         // Indexed primitives retain value copies, so model scratch can span tiles and frames.
         internal Vertex[] ProjectedVertices = [];
-        internal bool[] VisibleModels = [];
     }
 
     private record struct Vertex(H Screen, float Height = 0, int ClipCode = -1)

@@ -19,7 +19,9 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly Dictionary<(Ink, int), SKShader> shaders = [];
     private readonly Dictionary<Ink, TerrainPattern> patterns = [];
     private readonly Dictionary<(Ink, float), SKPathEffect> dashes = [];
-    private readonly List<(Place Label, SKPoint Screen, float Distance)> candidates = [];
+    private readonly List<LabelCandidate> candidates = [];
+    private readonly record struct LabelCandidate(Place Label, SKPoint Screen, SKPoint Art,
+        float Distance, float Altitude, int Order);
     private readonly List<SKRect> occupied = [];
     private readonly HashSet<string> names = new(StringComparer.OrdinalIgnoreCase);
     private readonly BuildingRasterizer buildings = new();
@@ -216,7 +218,7 @@ public sealed partial class PixelMapRenderer : IDisposable
         {
             float meters = (float)(world / (MapCamera.EarthCircumference *
                 Math.Cos(Math.Clamp(camera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
-            buildings.Begin(w, h, (float)Math.Sin(camera.PitchRadians), meters, camera.Perspective);
+            buildings.Begin(w, h, (float)Math.Sin(camera.PitchRadians), meters, camera.Perspective, renderStyle);
             var pixels = new Span<uint>((void*)bitmap.GetPixels(), checked(w * h));
             if (camera.Perspective)
             {
@@ -492,39 +494,65 @@ public sealed partial class PixelMapRenderer : IDisposable
     private void DrawLabels(SKCanvas canvas, int w, int h, double zoom, int pixelSize, PixelPalette colors)
     {
         candidates.Clear(); names.Clear(); occupied.Clear();
+        var elevation = CurrentTerrain;
+        float meters = elevation is null ? 0 : (float)(terrainCamera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
+            Math.Cos(Math.Clamp(terrainCamera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
+        float lift = elevation is null ? 0 : Math.Max(4, .75f / meters);
         foreach (var (tile, transform, _) in visible)
         foreach (var label in tile.Labels)
         {
             if (label.Street && zoom < 15 || label.Priority > 9 && zoom < 9) continue;
             SKPoint screen;
-            if (CurrentTerrain is { } elevation)
+            float occlusionAltitude = 4;
+            if (elevation is not null)
             {
-                float meters = (float)(terrainCamera.WorldSize / pixelSize / (MapCamera.EarthCircumference *
-                    Math.Cos(Math.Clamp(terrainCamera.Latitude, -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180)));
                 float altitude = GroundAltitude(tile, label.Point, elevation, terrainCamera);
                 var point = transform.Vertex(label.Point.X, label.Point.Y, altitude * meters);
                 if (point.W < transform.Near || point.W > transform.Far) continue;
                 screen = point.Point;
-                if (buildings.CoversAt(screen.X, screen.Y, altitude + Math.Max(4, .75f / meters))) continue;
+                occlusionAltitude = altitude + lift;
             }
             else
             {
-                if (transform.Weight(label.Point.X, label.Point.Y) < transform.Near || transform.Weight(label.Point.X, label.Point.Y) > transform.Far) continue;
+                float weight = transform.Weight(label.Point.X, label.Point.Y);
+                if (weight < transform.Near || weight > transform.Far) continue;
                 screen = transform.At(label.Point.X, label.Point.Y);
-                if (label.Street && buildings.Covers(screen.X, screen.Y)) continue;
             }
+            var art = screen;
             screen.X *= pixelSize; screen.Y *= pixelSize;
             if (screen.X < 0 || screen.X >= w || screen.Y < 0 || screen.Y >= h) continue;
             float dx = screen.X - w * .5f, dy = screen.Y - h * .5f;
-            candidates.Add((label, screen, dx * dx + dy * dy));
+            candidates.Add(new(label, screen, art, dx * dx + dy * dy, occlusionAltitude, candidates.Count));
         }
-        candidates.Sort(static (a, b) =>
+        candidates.Sort(CompareLabels);
+        bool resolvedOcclusion = false;
+        for (int i = 1; i < candidates.Count; i++)
         {
-            int order = a.Label.Priority.CompareTo(b.Label.Priority);
-            return order == 0 ? a.Distance.CompareTo(b.Distance) : order;
-        });
-        foreach (var (label, screen, _) in candidates)
+            var previous = candidates[i - 1];
+            var current = candidates[i];
+            if (CompareLabels(previous, current) != 0 ||
+                previous.Label.Text == current.Label.Text && previous.Label.Street == current.Label.Street &&
+                previous.Screen == current.Screen) continue;
+            // List.Sort is unstable. Removing hidden candidates before its original
+            // sort can choose a different winner among distinct tied labels. Retain
+            // that behavior exactly for ambiguous ties; coincident duplicate glyphs
+            // have identical output regardless of which visible copy supplies them.
+            candidates.Sort(static (a, b) => a.Order.CompareTo(b.Order));
+            int retained = 0;
+            for (int j = 0; j < candidates.Count; j++)
+            {
+                var candidate = candidates[j];
+                if (!Covered(candidate)) candidates[retained++] = candidate;
+            }
+            candidates.RemoveRange(retained, candidates.Count - retained);
+            candidates.Sort(CompareLabels);
+            resolvedOcclusion = true;
+            break;
+        }
+        foreach (var candidate in candidates)
         {
+            var label = candidate.Label;
+            var screen = candidate.Screen;
             if (occupied.Count >= 90) break;
             if (names.Contains(label.Text)) continue;
             float size = label.Street ? 12f : 14f;
@@ -543,6 +571,9 @@ public sealed partial class PixelMapRenderer : IDisposable
             foreach (var prior in occupied)
                 if (bounds.IntersectsWith(prior)) { collision = true; break; }
             if (collision) continue;
+            // Most candidates cannot survive duplicate-name, clipping and collision
+            // checks. Defer their depth work so rejected labels never prepare geometry.
+            if (!resolvedOcclusion && Covered(candidate)) continue;
             names.Add(label.Text);
             occupied.Add(bounds);
             if (label.Glyphs is null)
@@ -557,6 +588,15 @@ public sealed partial class PixelMapRenderer : IDisposable
             paint.Style = SKPaintStyle.Fill; paint.Color = new(colors.Label);
             canvas.DrawText(glyphs, x, y, paint);
         }
+
+        bool Covered(in LabelCandidate candidate) => (elevation is not null || candidate.Label.Street) &&
+            buildings.CoversAt(candidate.Art.X, candidate.Art.Y, candidate.Altitude);
+    }
+
+    private static int CompareLabels(LabelCandidate a, LabelCandidate b)
+    {
+        int order = a.Label.Priority.CompareTo(b.Label.Priority);
+        return order == 0 ? a.Distance.CompareTo(b.Distance) : order;
     }
 
     private void ReleasePatterns()

@@ -14,6 +14,10 @@ internal sealed class TerrainSurface : IDisposable
     private const int Side = Segments + 1;
     private const int MaximumPatches = 64;
     private const int MaximumTextures = 96;
+    // The former cache retained up to 96 native bitmaps and 96 GPU texel arrays.
+    // GPU-only entries need just one copy, so bound retained bytes rather than
+    // evicting reusable artwork while half of that memory allowance is unused.
+    private const long MaximumTextureBytes = (long)MaximumTextures * TextureSize * TextureSize * sizeof(uint) * 2;
     private const int MaximumMeshes = 256;
     private readonly Dictionary<TileId, Texture> textures = [];
     private readonly Dictionary<TileId, Mesh> meshes = [];
@@ -45,13 +49,36 @@ internal sealed class TerrainSurface : IDisposable
     private bool heightLayoutChanged;
     internal long HeightRevision { get; private set; }
 
-    private sealed class Texture(SKBitmap bitmap, SKRect[] earthAreas) : IDisposable
+    private sealed class Texture(SKBitmap source, SKRect[] earthAreas) : IDisposable
     {
-        internal readonly SKBitmap Bitmap = bitmap;
+        private SKBitmap? bitmap = source;
+        private bool canRestoreBitmap;
+        internal SKBitmap Bitmap => bitmap ??= RestoreBitmap();
         internal readonly SKRect[] EarthAreas = earthAreas;
         internal GpuTerrainTexture? Gpu;
         internal long Frame;
-        public void Dispose() => Bitmap.Dispose();
+        internal long ResidentBytes => (bitmap is null ? 0 : (long)bitmap.RowBytes * bitmap.Height) +
+            (Gpu?.Texels.LongLength ?? 0) * sizeof(uint);
+
+        internal GpuTerrainTexture PrepareGpu()
+        {
+            Gpu ??= PrepareGpuTexture(this, out canRestoreBitmap);
+            // Frame snapshots retain the immutable GPU array. The CPU bitmap is a
+            // redundant copy whose opaque alpha can be reconstructed exactly.
+            if (canRestoreBitmap) { bitmap?.Dispose(); bitmap = null; }
+            return Gpu;
+        }
+
+        private unsafe SKBitmap RestoreBitmap()
+        {
+            var restored = new SKBitmap(TextureSize, TextureSize, SKColorType.Bgra8888, SKAlphaType.Opaque);
+            var target = new Span<uint>((void*)restored.GetPixels(), TextureSize * TextureSize);
+            var texels = Gpu!.Texels;
+            for (int i = 0; i < target.Length; i++) target[i] = texels[i] | 0xff000000;
+            return restored;
+        }
+
+        public void Dispose() { bitmap?.Dispose(); bitmap = null; }
     }
 
     private sealed class Mesh
@@ -230,11 +257,11 @@ internal sealed class TerrainSurface : IDisposable
             selection[i] = retained;
             if (!changed && !ReferenceEquals(previousGpuSelection[i], retained)) changed = true;
             var texture = GetTexture(patch.Id, bake);
-            draws[i] = new(retained, texture.Gpu ??= PrepareGpuTexture(texture), patch.Transform);
+            draws[i] = new(retained, texture.PrepareGpu(), patch.Transform);
         }
         if (changed) HeightRevision++;
         previousGpuSelection = selection;
-        TrimCaches();
+        TrimCaches(gpu: true);
         return draws;
     }
 
@@ -308,11 +335,16 @@ internal sealed class TerrainSurface : IDisposable
         return MathF.Floor(minimum / step) * step - step;
     }
 
-    private static unsafe GpuTerrainTexture PrepareGpuTexture(Texture source)
+    private static unsafe GpuTerrainTexture PrepareGpuTexture(Texture source, out bool opaque)
     {
         var pixels = new ReadOnlySpan<uint>((void*)source.Bitmap.GetPixels(), TextureSize * TextureSize);
         var texels = new uint[pixels.Length];
-        for (int i = 0; i < pixels.Length; i++) texels[i] = pixels[i] & 0xffffff;
+        opaque = true;
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            texels[i] = pixels[i] & 0xffffff;
+            opaque &= (pixels[i] & 0xff000000) == 0xff000000;
+        }
         foreach (var area in source.EarthAreas)
         {
             int left = Math.Clamp((int)MathF.Floor(area.Left - .5f), 0, TextureSize);
@@ -792,11 +824,19 @@ internal sealed class TerrainSurface : IDisposable
         return true;
     }
 
-    private void TrimCaches()
+    private void TrimCaches(bool gpu = false)
     {
-        if (textures.Count > MaximumTextures)
-            foreach (var entry in textures.OrderBy(entry => entry.Value.Frame).Take(textures.Count - MaximumTextures).ToArray())
-            { entry.Value.Dispose(); textures.Remove(entry.Key); }
+        long textureBytes = 0;
+        foreach (var texture in textures.Values) textureBytes += texture.ResidentBytes;
+        int textureLimit = gpu ? MaximumTextures * 2 : MaximumTextures;
+        if (textures.Count > textureLimit || textureBytes > MaximumTextureBytes)
+            foreach (var entry in textures.OrderBy(entry => entry.Value.Frame).ToArray())
+            {
+                if (textures.Count <= textureLimit && textureBytes <= MaximumTextureBytes) break;
+                textureBytes -= entry.Value.ResidentBytes;
+                entry.Value.Dispose();
+                textures.Remove(entry.Key);
+            }
         if (meshes.Count > MaximumMeshes)
             foreach (var entry in meshes.OrderBy(entry => entry.Value.Frame).Take(meshes.Count - MaximumMeshes).ToArray()) meshes.Remove(entry.Key);
         if (gpuMeshes.Count > MaximumMeshes)

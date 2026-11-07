@@ -2,6 +2,49 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--terrain-texture-cache", StringComparer.Ordinal))
+{
+    await TerrainTextureCacheChecks.RunAsync();
+    return;
+}
+
+if (args.Contains("--gpu-selection", StringComparer.Ordinal))
+{
+    GpuBuildingSelectionChecks.Run();
+    return;
+}
+
+if (args.Contains("--labels", StringComparer.Ordinal))
+{
+    LabelPreparationChecks.Run();
+    await LabelPreparationChecks.RunCityAsync();
+    return;
+}
+
+if (args.Contains("--depth-benchmark", StringComparer.Ordinal))
+{
+    await DepthPreparationBenchmark.RunAsync(args);
+    return;
+}
+
+if (args.Contains("--pixel-window-cost", StringComparer.Ordinal))
+{
+    PixelWindowChecks.RunCost(args);
+    return;
+}
+
+if (args.Contains("--pixel-windows", StringComparer.Ordinal))
+{
+    PixelWindowChecks.Run(args);
+    return;
+}
+
+if (args.Contains("--depth-index", StringComparer.Ordinal))
+{
+    GpuDepthIndexChecks.Run();
+    return;
+}
+
 if (args.Contains("--terrain-preparation", StringComparer.Ordinal))
 {
     TerrainMeshChecks.Run(args);
@@ -98,11 +141,16 @@ Assert(seamBitmap.GetPixel(158, 141) == shaded, "Buffered tile copies darkened a
 Console.WriteLine("Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order, picking and cross-tile shadow checks.");
 
 ImageryChecks.Run();
+LabelPreparationChecks.Run();
+await LabelPreparationChecks.RunCityAsync();
 NavigationChecks.Run();
 PerspectiveChecks.Run();
 TerrainCameraChecks.Run();
 TerrainRenderingChecks.Run();
 GpuDepthChecks.Run();
+await TerrainTextureCacheChecks.RunAsync();
+GpuBuildingSelectionChecks.Run();
+GpuDepthIndexChecks.Run();
 TerrainNavigationChecks.Run();
 RingFixtures.Run();
 RenderStyleChecks.Run();

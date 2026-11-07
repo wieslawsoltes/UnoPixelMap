@@ -360,7 +360,18 @@ internal sealed partial class BuildingRasterizer
             {
                 if (inv<inverseDepth[pos]) continue;
                 float z=zOver/inv; uint texel=color;
-                if (pixelsPerMeter*inv > .40f)
+                if (renderStyle == MapRenderStyle.Pixel)
+                {
+                    float along = uOver / inv;
+                    float column = uOver / (inv * bay), story = (z - foundation) / (pixelsPerMeter * floor);
+                    // U/W and Z/W are affine on the screen. The quotient derivative
+                    // measures one art pixel along both façade axes, including a
+                    // grazing wall whose bays are much narrower than its stories.
+                    float footprintX = (Math.Abs(uw.X - along * iw.X) + Math.Abs(uw.Y - along * iw.Y)) / (inv * bay);
+                    float footprintY = (Math.Abs(zw.X - z * iw.X) + Math.Abs(zw.Y - z * iw.Y)) / (inv * pixelsPerMeter * floor);
+                    texel = PixelWindowFilter.Sample(color, mat, seed, column, story, footprintX, footprintY, pixelsPerMeter * inv);
+                }
+                else if (pixelsPerMeter*inv > .40f)
                 {
                     float story=(z-foundation)/(pixelsPerMeter*floor), column=uOver/(inv*bay);
                     int level=(int)MathF.Floor(story), col=(int)MathF.Floor(column);

@@ -21,6 +21,8 @@ internal sealed class GpuBuildingSelection(byte[] models, uint[] indices, float[
         float ground = (float)camera.GroundAltitudeMeters;
         float exaggeration = terrain.Relief ? (float)terrain.HeightScale : 0;
         int indexCount = 0, edgeFloats = 0;
+        bool compare = previous is not null && previous.Models.Length == scratch.Length;
+        byte changed = compare ? (byte)0 : (byte)(Walls | Roof | Underside | Rim);
         for (int i = 0; i < mesh.Ranges.Length; i++)
         {
             var range = mesh.Ranges[i];
@@ -39,22 +41,30 @@ internal sealed class GpuBuildingSelection(byte[] models, uint[] indices, float[
                 if ((selected & Roof) != 0 && frustum.Intersects(model.Bounds, top, top)) selected |= Rim;
             }
             scratch[i] = selected;
+            if (compare) changed |= (byte)(selected ^ previous!.Models[i]);
             int capIndices = (range.IndexCount - range.WallIndexCount) / 2;
             if ((selected & Walls) != 0) indexCount += range.WallIndexCount;
             if ((selected & Roof) != 0) indexCount += capIndices;
             if ((selected & Underside) != 0) indexCount += capIndices;
             if ((selected & Rim) != 0) edgeFloats += range.EdgeCount * GpuBuildingMesh.EdgeStride;
         }
-        if (previous is not null && scratch.AsSpan().SequenceEqual(previous.Models)) return previous;
+        if (changed == 0) return previous!;
 
-        var indices = indexCount == mesh.Indices.Length ? mesh.Indices : new uint[indexCount];
-        var edges = edgeFloats == mesh.RoofEdges.Length ? mesh.RoofEdges : new float[edgeFloats];
+        // A roof can leave the viewport while its walls remain visible, and a tall
+        // wall can enter without changing any visible rims. Keep each unchanged
+        // immutable stream and its GL upload identity independently.
+        bool reuseIndices = (changed & (Walls | Roof | Underside)) == 0;
+        bool reuseEdges = (changed & Rim) == 0;
+        var indices = reuseIndices ? previous!.Indices : indexCount == mesh.Indices.Length ? mesh.Indices : new uint[indexCount];
+        var edges = reuseEdges ? previous!.RoofEdges : edgeFloats == mesh.RoofEdges.Length ? mesh.RoofEdges : new float[edgeFloats];
+        bool copyIndices = !reuseIndices && !ReferenceEquals(indices, mesh.Indices);
+        bool copyEdges = !reuseEdges && !ReferenceEquals(edges, mesh.RoofEdges);
         int indexOffset = 0, edgeOffset = 0;
         for (int i = 0; i < mesh.Ranges.Length; i++)
         {
             var range = mesh.Ranges[i];
             byte selected = scratch[i];
-            if (!ReferenceEquals(indices, mesh.Indices))
+            if (copyIndices)
             {
                 if ((selected & Walls) != 0)
                 {
@@ -76,7 +86,7 @@ internal sealed class GpuBuildingSelection(byte[] models, uint[] indices, float[
                     }
                 }
             }
-            if (!ReferenceEquals(edges, mesh.RoofEdges) && (selected & Rim) != 0)
+            if (copyEdges && (selected & Rim) != 0)
             {
                 int length = range.EdgeCount * GpuBuildingMesh.EdgeStride;
                 mesh.RoofEdges.AsSpan(range.FirstEdge * GpuBuildingMesh.EdgeStride, length).CopyTo(edges.AsSpan(edgeOffset));

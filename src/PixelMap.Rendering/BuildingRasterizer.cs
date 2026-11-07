@@ -6,32 +6,24 @@ namespace PixelMap.Rendering;
 internal sealed partial class BuildingRasterizer
 {
     // Apartment/office lights repeat in two-bay groups with a different phase per model.
-    private static readonly byte[] Rooms = CreateRooms();
-    private static byte[] CreateRooms()
-    {
-        var rooms = new byte[256];
-        var random = new Random(859);
-        for (int i = 0; i < rooms.Length; i += 2)
-        {
-            rooms[i] = (byte)random.Next(4);
-            rooms[i + 1] = random.Next(3) == 0 ? (byte)random.Next(4) : rooms[i];
-        }
-        return rooms;
-    }
+    private static readonly byte[] Rooms = PixelWindowFilter.Rooms;
 
     private float[] depth = [];
     private SKPoint[] vertices = [];
     private float[] intersections = [];
     private float[] ringMinimumY = [], ringMaximumY = [];
     private int width, height;
+    private MapRenderStyle renderStyle;
     private float vertical, pixelsPerMeter;
     private bool terrainDepth;
     private TerrainSurface? terrainSurface;
     private Func<float, float, float, bool>? gpuSceneQuery;
 
-    public void Begin(int w, int h, float sinPitch, float scale, bool perspective = false)
+    public void Begin(int w, int h, float sinPitch, float scale, bool perspective = false,
+        MapRenderStyle style = MapRenderStyle.Pixel)
     {
         width = w; height = h; vertical = sinPitch; pixelsPerMeter = scale;
+        renderStyle = style;
         terrainDepth = false;
         terrainSurface = null;
         gpuSceneQuery = null;
