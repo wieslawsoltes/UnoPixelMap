@@ -52,6 +52,7 @@ internal static class FreeCameraChecks
 
         TerrainDatum();
         FixedEyeInterpolation();
+        AimStablePoses();
         AimInsets();
         MercatorEdges();
         NearGeometry();
@@ -187,6 +188,79 @@ internal static class FreeCameraChecks
             450, 300, width, height, out unchanged) && unchanged == overhead,
             "An aim outside the physical far plane changed the camera");
         Console.WriteLine($"Passed {cases} fixed-eye inset aim cases, worst screen error {worst:F6}px.");
+    }
+
+    private static void AimStablePoses()
+    {
+        int cases = 0;
+        // North-up follow + pinch in Manhattan: the target already lies on the
+        // optical axis, but a Mercator round trip can leave a nonzero horizontal
+        // residue and make the analytic yaw solver choose a perpendicular heading.
+        for (int i = 0; i < 100; i++)
+        for (int j = 0; j < 100; j++)
+        {
+            double latitude = 40.7069 + i * .0000003, longitude = -74.0089 + j * .0000003;
+            const double ground = 43.7, focus = ground + .6;
+            var camera = MapCamera.FromEye(latitude, longitude, focus + 18 / Math.Sqrt(1.5),
+                0, 0, 1200, 684, groundAltitudeMeters: ground);
+            Stable(camera, latitude, longitude, focus, 600, 342, 1200, 684);
+        }
+
+        foreach (double latitude in new[] { -MapCamera.MaxLatitude, -70, -40.7069, 0, 40.7069, 70, MapCamera.MaxLatitude })
+        foreach (double longitude in new[] { -180d, -74.0089, 0, 179.999999, 540 })
+        foreach (double bearing in new[] { -179d, 0, 45, 90, 179 })
+        foreach (double ground in new[] { -300d, 1200 })
+        foreach (double clearance in new[] { 1.7, 1000 })
+        foreach (var viewport in new[] { (Width: 1200d, Height: 684d), (Width: 390d, Height: 844d), (Width: 1900d, Height: 420d) })
+        {
+            double focus = ground + .6;
+            var camera = MapCamera.FromEye(latitude, longitude, focus + clearance, bearing, 0,
+                1200, 684, groundAltitudeMeters: ground);
+            Stable(camera, latitude, longitude, focus, viewport.Width * .5, viewport.Height * .5,
+                viewport.Width, viewport.Height);
+        }
+
+        // The same no-op contract applies away from nadir, at inset screen
+        // positions and after re-encoding a physical eye for a different viewport.
+        foreach (double latitude in new[] { -70d, 0, 70 })
+        foreach (double bearing in new[] { -179d, 0, 87 })
+        foreach (double pitch in new[] { 0d, 55, 89.999, 90, 120, 179.5 })
+        foreach (var viewport in new[] { (Width: 900d, Height: 600d), (Width: 390d, Height: 844d) })
+        foreach (var inset in new[] { (X: .15, Y: .2), (X: .5, Y: .5), (X: .8, Y: .75) })
+        {
+            var camera = MapCamera.FromEye(latitude, 179.9999, 1234.5, bearing, pitch,
+                900, 600, groundAltitudeMeters: 1200);
+            double x = viewport.Width * inset.X, y = viewport.Height * inset.Y;
+            var target = AlongRay(camera.ForViewport(viewport.Width, viewport.Height),
+                viewport.Width, viewport.Height, x, y, 35);
+            Stable(camera, target.Latitude, target.Longitude, target.Altitude,
+                x, y, viewport.Width, viewport.Height);
+        }
+
+        var overhead = MapCamera.FromEye(40.7069, -74.0089, 100, 0, 0, 900, 600);
+        foreach (double distance in new[] { 0d, .04, -1, 7000 })
+        {
+            var target = Forward(overhead, 600, distance);
+            Assert(!overhead.TryAimAt(target.Latitude, target.Longitude, target.Altitude,
+                450, 300, 900, 600, out var unchanged) && unchanged == overhead,
+                $"An already centered target at clipped or unsupported distance {distance}m changed the camera");
+        }
+        Console.WriteLine($"Passed {cases} already-aligned aim poses with exact yaw/pitch preservation, repeated aims, resized viewports and clipped-target rejection.");
+
+        void Stable(MapCamera camera, double latitude, double longitude, double altitude,
+            double x, double y, double width, double height)
+        {
+            var expected = camera.ForViewport(width, height);
+            Assert(expected.TryProject(latitude, longitude, altitude, width, height, out var before) &&
+                Math.Abs(before.X - x) + Math.Abs(before.Y - y) < .0001,
+                "The orientation-preservation fixture did not start within the existing projection tolerance");
+            Assert(camera.TryAimAt(latitude, longitude, altitude, x, y, width, height, out var aimed) && aimed == expected,
+                $"An already-aligned aim changed the camera at ({latitude:R}, {longitude:R}), bearing {camera.Bearing:R}, pitch {camera.Pitch:R}, viewport {width}x{height}");
+            for (int repeat = 0; repeat < 3; repeat++)
+                Assert(aimed.TryAimAt(latitude, longitude, altitude, x, y, width, height, out aimed) && aimed == expected,
+                    "Repeated aiming accumulated orientation or physical-eye drift");
+            cases++;
+        }
     }
 
     private static (double Latitude, double Longitude, double Altitude) AlongRay(MapCamera camera,

@@ -112,15 +112,25 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
 
     /// <summary>Orient a free perspective eye so an absolute world position appears at
     /// the requested screen position, retaining the physical eye and lens. Returns false
-    /// when the target is clipped or the screen ray requires roll or an unsupported pitch.</summary>
+    /// when the target is clipped or the screen ray requires roll or an unsupported pitch.
+    /// Already aligned poses retain their orientation within 0.0001 screen pixels.</summary>
     public bool TryAimAt(double latitude, double longitude, double absoluteAltitudeMeters,
         double x, double y, double width, double height, out MapCamera aimed)
     {
+        const double tolerance = .0001;
         aimed = this;
         if (!IsFreeLook || !Perspective || !double.IsFinite(latitude) || !double.IsFinite(longitude) ||
             !double.IsFinite(absoluteAltitudeMeters) || !double.IsFinite(x) || !double.IsFinite(y) ||
             !double.IsFinite(width) || !double.IsFinite(height) || width <= 0 || height <= 0) return false;
         var next = ForViewport(width, height);
+        // At nadir, a target on the optical axis does not determine yaw. Tiny
+        // Mercator round-trip residues must not rotate an already valid pose.
+        if (next.TryProject(latitude, longitude, absoluteAltitudeMeters, width, height, out var current) &&
+            Math.Abs(current.X - x) + Math.Abs(current.Y - y) < tolerance)
+        {
+            aimed = next;
+            return true;
+        }
         var eye = next.GetEye(height);
         double east = WrapOffset((longitude - eye.Longitude) / 360) * WorldSize;
         double south = (MercatorY(latitude) - MercatorY(eye.Latitude)) * WorldSize;
@@ -156,7 +166,7 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
             next = (next with { Bearing = bestBearing, Pitch = bestPitch })
                 .WithEye(eye.Latitude, eye.Longitude, eye.AltitudeMeters, height);
             if (next.TryProject(latitude, longitude, absoluteAltitudeMeters, width, height, out var screen) &&
-                Math.Abs(screen.X - x) + Math.Abs(screen.Y - y) < .0001)
+                Math.Abs(screen.X - x) + Math.Abs(screen.Y - y) < tolerance)
             {
                 aimed = next;
                 return true;

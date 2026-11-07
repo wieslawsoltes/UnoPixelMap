@@ -2,6 +2,18 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--free-camera", StringComparer.Ordinal))
+{
+    FreeCameraChecks.Run();
+    return;
+}
+
+if (args.Contains("--pixel-footprint", StringComparer.Ordinal))
+{
+    PixelWindowFootprintChecks.Run();
+    return;
+}
+
 if (args.Contains("--terrain-texture-cache", StringComparer.Ordinal))
 {
     await TerrainTextureCacheChecks.RunAsync();
@@ -150,6 +162,7 @@ TerrainRenderingChecks.Run();
 GpuDepthChecks.Run();
 await TerrainTextureCacheChecks.RunAsync();
 GpuBuildingSelectionChecks.Run();
+PixelWindowFootprintChecks.Run();
 GpuDepthIndexChecks.Run();
 TerrainNavigationChecks.Run();
 RingFixtures.Run();

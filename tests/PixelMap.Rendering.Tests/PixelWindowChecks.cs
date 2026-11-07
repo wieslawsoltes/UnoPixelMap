@@ -63,6 +63,7 @@ internal static partial class PixelWindowChecks
 
     private static void CheckMath()
     {
+        PixelWindowColorChecks.Run();
         var random = new Random(32017);
         double worstCoverage = 0, worstLamp = 0;
         for (int i = 0; i < 4096; i++)

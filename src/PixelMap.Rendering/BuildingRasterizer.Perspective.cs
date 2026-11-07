@@ -346,6 +346,23 @@ internal sealed partial class BuildingRasterizer
         if (Occluded(screenBounds, Math.Max(ai, Math.Max(bi, ci)))) return;
         var iw=Plane(ai,bi,ci); var zw=Plane(a.Z*ai,b.Z*bi,c.Z*ci); var uw=Plane(a.U*ai,b.U*bi,c.U*ci);
         float floor=3.2f+(seed&3)*.22f, bay=3.2f+((seed>>2)&3)*.6f;
+        bool finiteAttributes = false;
+        bool filterWindows = renderStyle == MapRenderStyle.Pixel && !HasResolvedWindowFootprint(
+            p, ai, a.U * ai, a.Z * ai, iw, uw, zw, width, height, bay, (double)pixelsPerMeter * floor,
+            Math.Min(a.W, Math.Min(b.W, c.W)), perspectiveNear, out finiteAttributes);
+        var windowColors = filterWindows ? new PixelWindowFilter.Colors(color, mat) : default;
+        bool constantFootprint = filterWindows && finiteAttributes && iw.X == 0 && iw.Y == 0;
+        var footprint = default(PixelWindowFilter.SamplingFootprint);
+        if (constantFootprint)
+        {
+            // With finite attributes and constant reciprocal W, the quotient terms
+            // multiplied by d(1/W) are exactly zero. Retain the scalar denominator
+            // association while preparing the filter's LOD/blend only once.
+            float footprintX = (Math.Abs(uw.X) + Math.Abs(uw.Y)) / (ai * bay);
+            float footprintY = (Math.Abs(zw.X) + Math.Abs(zw.Y)) / (ai * pixelsPerMeter * floor);
+            constantFootprint = float.IsFinite(footprintX) && float.IsFinite(footprintY);
+            if (constantFootprint) footprint = new(footprintX, footprintY);
+        }
         int y0=FirstPixel(Math.Min(p.Y,Math.Min(q.Y,r.Y)),height);
         int y1=FirstPixel(Math.Max(p.Y,Math.Max(q.Y,r.Y)),height);
         for(int y=y0;y<y1;y++)
@@ -360,16 +377,21 @@ internal sealed partial class BuildingRasterizer
             {
                 if (inv<inverseDepth[pos]) continue;
                 float z=zOver/inv; uint texel=color;
-                if (renderStyle == MapRenderStyle.Pixel)
+                if (filterWindows)
                 {
-                    float along = uOver / inv;
                     float column = uOver / (inv * bay), story = (z - foundation) / (pixelsPerMeter * floor);
-                    // U/W and Z/W are affine on the screen. The quotient derivative
-                    // measures one art pixel along both façade axes, including a
-                    // grazing wall whose bays are much narrower than its stories.
-                    float footprintX = (Math.Abs(uw.X - along * iw.X) + Math.Abs(uw.Y - along * iw.Y)) / (inv * bay);
-                    float footprintY = (Math.Abs(zw.X - z * iw.X) + Math.Abs(zw.Y - z * iw.Y)) / (inv * pixelsPerMeter * floor);
-                    texel = PixelWindowFilter.Sample(color, mat, seed, column, story, footprintX, footprintY, pixelsPerMeter * inv);
+                    if (constantFootprint)
+                        texel = PixelWindowFilter.Sample(in windowColors, in footprint, seed, column, story, pixelsPerMeter * inv);
+                    else
+                    {
+                        float along = uOver / inv;
+                        // U/W and Z/W are affine on the screen. The quotient derivative
+                        // measures one art pixel along both façade axes, including a
+                        // grazing wall whose bays are much narrower than its stories.
+                        float footprintX = (Math.Abs(uw.X - along * iw.X) + Math.Abs(uw.Y - along * iw.Y)) / (inv * bay);
+                        float footprintY = (Math.Abs(zw.X - z * iw.X) + Math.Abs(zw.Y - z * iw.Y)) / (inv * pixelsPerMeter * floor);
+                        texel = PixelWindowFilter.Sample(in windowColors, seed, column, story, footprintX, footprintY, pixelsPerMeter * inv);
+                    }
                 }
                 else if (pixelsPerMeter*inv > .40f)
                 {
@@ -390,6 +412,81 @@ internal sealed partial class BuildingRasterizer
         InvalidateDepth(screenBounds);
         (float X,float Y) Plane(float v0,float v1,float v2) =>
             (((v1-v0)*dy2-(v2-v0)*dy1)/det,(dx1*(v2-v0)-dx2*(v1-v0))/det);
+    }
+
+    /// <summary>Prove that every possible scanline sample uses the original point
+    /// window lookup. The viewport rectangle contains the rasterized triangle; affine
+    /// extrema bound I, U/I and Z/I before the quotient derivatives are evaluated.
+    /// Ignoring cancellation makes this conservative for oblique and clipped walls.</summary>
+    internal static bool HasResolvedWindowFootprint(SKPoint origin, float inverse, float uOver, float zOver,
+        (float X, float Y) iw, (float X, float Y) uw, (float X, float Y) zw,
+        int viewportWidth, int viewportHeight, float bay, double storyHeight, float minimumWeight, float nearWeight) =>
+        HasResolvedWindowFootprint(origin, inverse, uOver, zOver, iw, uw, zw, viewportWidth, viewportHeight,
+            bay, storyHeight, minimumWeight, nearWeight, out _);
+
+    private static bool HasResolvedWindowFootprint(SKPoint origin, float inverse, float uOver, float zOver,
+        (float X, float Y) iw, (float X, float Y) uw, (float X, float Y) zw,
+        int viewportWidth, int viewportHeight, float bay, double storyHeight, float minimumWeight, float nearWeight,
+        out bool finiteAttributes)
+    {
+        finiteAttributes = false;
+        // Clipping at the physical near plane and exceptional numeric inputs keep
+        // the general per-pixel path. Pixel centers must also remain exact floats.
+        if (viewportWidth <= 0 || viewportHeight <= 0 || viewportHeight >= 1 << 23 ||
+            !float.IsFinite(origin.X) || !float.IsFinite(origin.Y) || !float.IsFinite(inverse) || inverse <= 0 ||
+            !float.IsFinite(uOver) || !float.IsFinite(zOver) ||
+            !float.IsFinite(iw.X) || !float.IsFinite(iw.Y) ||
+            !float.IsFinite(uw.X) || !float.IsFinite(uw.Y) ||
+            !float.IsFinite(zw.X) || !float.IsFinite(zw.Y) ||
+            !float.IsFinite(bay) || !double.IsFinite(storyHeight) || bay <= 0 || storyHeight <= 0 ||
+            !float.IsFinite(minimumWeight) || !float.IsFinite(nearWeight) || nearWeight < 0 ||
+            minimumWeight <= nearWeight * 1.001f) return false;
+
+        // Use a full float epsilon (twice unit roundoff). The gamma bound covers
+        // the initial plane evaluation and at most width rounded additions per row.
+        const double epsilon = 1.1920928955078125e-7;
+        double accumulated = (viewportWidth + 16d) * epsilon;
+        if (accumulated >= .01) return false;
+        double gamma = accumulated / (1 - accumulated);
+        double left = .5 - origin.X, right = viewportWidth - .5 - origin.X;
+        double top = .5 - origin.Y, bottom = viewportHeight - .5 - origin.Y;
+        var inverseRange = Range(inverse, iw);
+        var uRange = Range(uOver, uw);
+        var zRange = Range(zOver, zw);
+        double minimum = inverseRange.Low;
+        double maximum = inverseRange.High;
+        if (minimum <= 1e-20 || maximum >= float.MaxValue ||
+            Math.Max(Math.Abs(uRange.Low), Math.Abs(uRange.High)) >= float.MaxValue ||
+            Math.Max(Math.Abs(zRange.Low), Math.Abs(zRange.High)) >= float.MaxValue ||
+            minimum * bay <= 1e-30 || minimum * storyHeight <= 1e-30 ||
+            maximum * bay >= float.MaxValue || maximum * storyHeight >= float.MaxValue) return false;
+        double along = Math.Max(Math.Abs(uRange.Low), Math.Abs(uRange.High)) / minimum;
+        double altitude = Math.Max(Math.Abs(zRange.Low), Math.Abs(zRange.High)) / minimum;
+        if (along >= float.MaxValue / (1 + 16 * epsilon) || altitude >= float.MaxValue / (1 + 16 * epsilon)) return false;
+        finiteAttributes = true;
+        double inverseSlope = Math.Abs((double)iw.X) + Math.Abs((double)iw.Y);
+        // Bound |dU - (U/I)dI| / I and its vertical counterpart. The remaining
+        // margin covers division, products, sums, and the two story-scale products.
+        double rounding = 1 + 16 * epsilon;
+        double horizontal = (Math.Abs((double)uw.X) + Math.Abs((double)uw.Y) + along * inverseSlope + 1e-30) *
+            rounding / (minimum * bay);
+        double vertical = (Math.Abs((double)zw.X) + Math.Abs((double)zw.Y) + altitude * inverseSlope + 1e-30) *
+            rounding / (minimum * storyHeight);
+        return horizontal <= PixelWindowFilter.FilterStart && vertical <= PixelWindowFilter.FilterStart;
+
+        (double Low, double High) Range(float value, (float X, float Y) gradient)
+        {
+            double x0 = gradient.X * left, x1 = gradient.X * right;
+            double y0 = gradient.Y * top, y1 = gradient.Y * bottom;
+            double scale = Math.Abs((double)value) + Math.Max(Math.Abs(x0), Math.Abs(x1)) +
+                Math.Max(Math.Abs(y0), Math.Abs(y1)) + viewportWidth * Math.Abs((double)gradient.X);
+            // Cancellation in double must not hide overflowing float products or
+            // partial sums in the actual row initializer.
+            if (scale >= float.MaxValue / (1 + gamma)) return (double.NegativeInfinity, double.PositiveInfinity);
+            double error = gamma * scale + 1e-30;
+            return (value + Math.Min(x0, x1) + Math.Min(y0, y1) - error,
+                value + Math.Max(x0, x1) + Math.Max(y0, y1) + error);
+        }
     }
 
     private void PerspectiveEdge(Span<uint> pixels,H a,H b,float elevation,Material material)
