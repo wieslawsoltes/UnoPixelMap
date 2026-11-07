@@ -325,6 +325,8 @@ public sealed partial class JourneyPanel : UserControl
     private async void OnPlan(object sender, RoutedEventArgs e)
     {
         if (_planning is not null) return;
+        // TextChanged is deferred, so submit the current editor value directly.
+        _stops[_index].Query = Query.Text.Trim();
         for (int i = 0; i < _stops.Count; i++)
         {
             var draft = _stops[i];

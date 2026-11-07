@@ -101,7 +101,7 @@ async function see(page, pattern, timeout = 15000) {
     const end = Date.now() + timeout;
     do {
         const snapshot = await page.locator("body").ariaSnapshot();
-        if (pattern.test(snapshot)) return snapshot;
+        if (typeof pattern === "function" ? pattern(snapshot) : pattern.test(snapshot)) return snapshot;
         await page.waitForTimeout(180);
     } while (Date.now() < end);
     if (shots) await page.screenshot({path: path.join(shots, "journey-state-failure.png"), timeout: 10000}).catch(() => {});
@@ -395,8 +395,32 @@ async function planVia(browser) {
         await click(page, "Pick selected route stop on map");
         await see(page, /Tap the map to set via 1/i);
         await page.mouse.click(760, 390);
-        await see(page, /Set Via 1:/);
+        await see(page, snapshot => /Set Via 1: -?\d+\.\d+°, -?\d+\.\d+°/.test(snapshot) &&
+            !/Tap the map to set via 1/i.test(snapshot));
         await click(page, /^Set Destination:/);
+        await see(page, snapshot => /group "SET DESTINATION"/.test(snapshot) &&
+            /Search or pick destination on the map\./.test(snapshot));
+        // Record the public native edit at pointer-down without delaying the
+        // Calculate action after typing. This distinguishes a lost draft from
+        // a missed stop-selection or map-picking transition.
+        await page.evaluate(() => {
+            const records = window.pixelJourneyDraftInput = [];
+            document.addEventListener("pointerdown", event => {
+                if (records.length) return;
+                const button = document.querySelector('[aria-label="Calculate route"]');
+                if (!button) return;
+                const box = button.getBoundingClientRect();
+                if (event.clientX < box.left || event.clientX > box.right ||
+                    event.clientY < box.top || event.clientY > box.bottom) return;
+                const active = document.activeElement;
+                const input = document.querySelector('input[aria-label="Find a route stop"], textarea[aria-label="Find a route stop"]');
+                records.push({time: performance.now(), x: event.clientX, y: event.clientY,
+                    activeRole: active?.getAttribute("role"), activeLabel: active?.getAttribute("aria-label"),
+                    activeValue: active?.value ?? null, nativeInputValue: input?.value ?? null,
+                    stopLabels: [...document.querySelectorAll('[aria-label^="Set Start:"], [aria-label^="Set Via "], [aria-label^="Set Destination:"]')]
+                        .map(element => element.getAttribute("aria-label"))});
+            }, {capture: true});
+        });
         await routeQuery(page, "40.6895, -74.1745");
         // Calculating resolves the coordinate draft even before Enter or Find is pressed.
         await click(page, "Calculate route");
@@ -408,7 +432,15 @@ async function planVia(browser) {
         await click(page, "Fit route");
         await click(page, "Take manual control");
         await see(page, /Climb aircraft/);
-    } finally { await context.close(); }
+    } finally {
+        try {
+            if (shots) await writeFile(path.join(shots, "journey-plan-via-input.json"),
+                JSON.stringify(await page.evaluate(() => window.pixelJourneyDraftInput ?? []), null, 2));
+        } catch (error) {
+            console.warn("Could not save route-draft input evidence:", error.message);
+        }
+        await context.close();
+    }
 }
 
 async function phoneRide(browser) {
