@@ -1,17 +1,24 @@
-// Diagnostic only: run the unchanged 9171e95 AOT application with live providers.
+// Diagnostic only: run an independently verified AOT artifact with live or frozen provider data.
 // Observation hooks forward native calls unchanged and retain no Wasm heap buffers.
+// Opt in with PIXELMAP_REPLAY_MANIFEST (and optional PIXELMAP_REPLAY_MANIFEST_SHA256).
+// PIXELMAP_LIVE_REPEAT_CYCLES=1..3 repeats the same close/horizon range; defaults remain live/zero.
 const assert = require("node:assert/strict");
 const {createHash} = require("node:crypto");
 const {createWriteStream} = require("node:fs");
-const {mkdir, writeFile} = require("node:fs/promises");
-const {join, resolve} = require("node:path");
+const {mkdir, writeFile, readFile, stat, mkdtemp, rm} = require("node:fs/promises");
+const {join, resolve, dirname} = require("node:path");
+const {tmpdir} = require("node:os");
 const {performance} = require("node:perf_hooks");
 const base = new URL(process.argv[2] && process.argv[2] !== "--self-check"
     ? process.argv[2] : "http://127.0.0.1:8100/UnoPixelMap/");
 const output = resolve(process.env.PIXELMAP_LIVE_OUTPUT || process.argv[3] || "artifacts/live-memory");
 const fragment = "v4/40.7087/-74.0104/16.5/-15/55/Night/Map/Perspective/0/Relief/1.00";
-const source = "9171e95efab06db930a97dde212d754b8da48f60";
-const duration = Math.min(660, Math.max(60, Number(process.env.PIXELMAP_LIVE_SECONDS) || 540));
+const source = process.env.PIXELMAP_APPLICATION_SOURCE || "9171e95efab06db930a97dde212d754b8da48f60";
+assert.match(source, /^[a-f0-9]{40}$/, "Record the independently verified application commit");
+const duration = Math.min(540, Math.max(60, Number(process.env.PIXELMAP_LIVE_SECONDS) || 540));
+const replayPath = process.env.PIXELMAP_REPLAY_MANIFEST;
+const repeatCycles = Number(process.env.PIXELMAP_LIVE_REPEAT_CYCLES || 0);
+assert.ok(Number.isInteger(repeatCycles) && repeatCycles >= 0 && repeatCycles <= 3, "Repeat cycles must be an integer from 0 to 3");
 const corpusLimit = Math.min(512, Math.max(1, Number(process.env.PIXELMAP_CORPUS_MIB) || 256)) * 1048576;
 const responseLimit = 16 * 1048576;
 const started = performance.now();
@@ -65,6 +72,73 @@ function provider(url) {
     if (value.hostname === "tiles.maps.eox.at") return "imagery";
     if (value.hostname === "routing.openstreetmap.de") return "routing";
     return null;
+}
+
+async function loadReplay(path, maximumBytes, expectedHash) {
+    assert.ok((await stat(path)).size <= 8 * 1048576, "The replay manifest exceeds 8 MiB");
+    const encoded = await readFile(path), manifestHash = createHash("sha256").update(encoded).digest("hex");
+    if (expectedHash) assert.equal(manifestHash, expectedHash, "The pinned replay manifest SHA256 differs");
+    const manifest = JSON.parse(encoded);
+    assert.match(manifest.source, /^[a-f0-9]{40}$/, "The corpus must identify its captured application commit");
+    assert.equal(manifest.bodyFormat, "decoded HTTP response bytes");
+    assert.equal(manifest.corpusTruncated, false, "A truncated corpus cannot provide a strict replay");
+    assert.ok(Array.isArray(manifest.requests) && manifest.requests.length > 0 && manifest.requests.length <= 4096);
+    const byUrl = new Map(), files = new Map();
+    let bytes = 0;
+    for (const entry of manifest.requests) {
+        assert.ok(provider(entry.url) && entry.method === "GET" && entry.status === 200 && entry.capture === "saved",
+            "Replay requires complete successful provider GET responses");
+        assert.match(entry.sha256, /^[a-f0-9]{64}$/);
+        assert.equal(entry.body, `corpus/${entry.sha256}.bin`, "Replay bodies must use the captured hash-relative path");
+        assert.ok(Number.isInteger(entry.bodyBytes) && entry.bodyBytes >= 0 && entry.bodyBytes <= responseLimit);
+        let body = files.get(entry.sha256);
+        if (!body) {
+            const bodyPath = join(dirname(path), entry.body);
+            assert.equal((await stat(bodyPath)).size, entry.bodyBytes, "Captured body byte length differs");
+            bytes += entry.bodyBytes;
+            assert.ok(bytes <= maximumBytes, "The replay exceeds the corpus byte budget");
+            body = await readFile(bodyPath);
+            assert.equal(createHash("sha256").update(body).digest("hex"), entry.sha256, "Captured body SHA256 differs");
+            files.set(entry.sha256, body);
+        }
+        assert.equal(body.length, entry.bodyBytes);
+        let response = byUrl.get(entry.url);
+        if (response) assert.equal(response.sha256, entry.sha256, "Immediate replay requires one immutable body per URL");
+        else {
+            const headers = Object.fromEntries(Object.entries(entry.headers || {}).filter(([name]) =>
+                !["content-encoding", "content-length", "transfer-encoding"].includes(name.toLowerCase())));
+            response = {body, headers, sha256: entry.sha256, expectedRequests: 0, matchedRequests: 0};
+            byUrl.set(entry.url, response);
+        }
+        response.expectedRequests++;
+    }
+    assert.equal(bytes, manifest.storedBytes, "Manifest storedBytes differs from the verified unique bodies");
+    return {byUrl, captureOrder: manifest.requests.map(entry => entry.url), bytes, uniqueBodies: files.size,
+        captureSource: manifest.source, manifestPath: resolve(path), manifestSha256: manifestHash,
+        actualRequests: 0, extraRepetitions: 0, orderDifferences: 0, unknownRequests: []};
+}
+
+function selectReplay(replay, url, method) {
+    const expectedUrl = replay.captureOrder[replay.actualRequests++];
+    if (expectedUrl !== url) replay.orderDifferences++;
+    const response = replay.byUrl.get(url);
+    if (!response || method !== "GET") {
+        replay.unknownRequests.push({url, method});
+        throw new Error(`Provider request is outside the frozen replay: ${method} ${url}`);
+    }
+    const occurrence = ++response.matchedRequests, extra = occurrence > response.expectedRequests;
+    if (extra) replay.extraRepetitions++;
+    return {response, occurrence, extra, expectedUrl};
+}
+
+function replayReport(replay) {
+    if (!replay) return null;
+    const {captureSource, manifestPath, manifestSha256, bytes, uniqueBodies,
+        actualRequests, extraRepetitions, orderDifferences, unknownRequests} = replay;
+    return {mode: "immediate", captureSource, manifestPath, manifestSha256, bytes, uniqueBodies,
+        capturedRequests: replay.captureOrder.length, uniqueUrls: replay.byUrl.size,
+        actualRequests, extraRepetitions, orderDifferences, unknownRequests,
+        unrequestedUrls: [...replay.byUrl].filter(([, response]) => response.matchedRequests === 0).map(([url]) => url)};
 }
 
 function watchProviders(page) {
@@ -271,17 +345,22 @@ function publicState() {
 
 function buildReports(state) {
     const {source, fragment, elapsedMs, fatal, fatalKind, error, checkpoints, requests, responseOrder,
-        storedBytes, bodies, corpusLimit, corpusTruncated, eventCount, droppedEvents} = state;
-    const summary = {source, fragment, inputVariant: "native-synthesized-scroll", elapsedMs,
+        storedBytes, bodies, corpusLimit, corpusTruncated, eventCount, droppedEvents, replay,
+        repeatCycles = 0, providerMode = replay ? "frozen-corpus-immediate" : "live-providers"} = state;
+    const inputVariant = (providerMode === "frozen-corpus-immediate" ? "replay-immediate/" : "live-providers/") +
+        "native-synthesized-scroll" + (repeatCycles ? "/bounded-close-horizon-cycles" : "");
+    const summary = {source, fragment, inputVariant,
+        repeatCycles, providerMode, replay: replayReport(replay), elapsedMs,
         outcome: fatal ? fatalKind : error ? "diagnostic-step-failure" : "not-reproduced",
         error: error?.stack || null, fatal: fatal?.stack || null, checkpoints: checkpoints.length,
         requestCount: requests.length, responseCount: responseOrder, storedBytes, uniqueBodies: bodies.size,
         corpusLimit, corpusTruncated, eventCount, droppedEvents,
         limitations: ["Public DOM/request/API observations only; no decoded geometry, managed heap or retained-frame internals.",
             "Wasm byteLength is allocated linear memory, not live native/managed allocation or process RSS.",
-            "Body files are decoded HTTP bytes; response order/timing are preserved separately. Browser/provider state is live.",
+            providerMode === "frozen-corpus-immediate" ? "Frozen bodies are served immediately with service workers blocked and HTTP routing active; original network timing/cache behavior is not reproduced."
+                : "Body files are decoded HTTP bytes; response order/timing are preserved separately. Browser/provider state is live.",
             "No synthetic input fallback is silently substituted for the native gesture."]};
-    const manifest = {source, corpusLimit, storedBytes, corpusTruncated,
+    const manifest = {source, corpusLimit, storedBytes, corpusTruncated, replay: replayReport(replay),
         bodyFormat: "decoded HTTP response bytes", requests};
     return {summary, manifest};
 }
@@ -310,6 +389,43 @@ function checkReports() {
     assert.equal(failed.summary.error, error.stack);
 }
 
+async function checkReplay() {
+    const folder = await mkdtemp(join(tmpdir(), "pixelmap-replay-check-"));
+    try {
+        await mkdir(join(folder, "corpus"));
+        const body = Buffer.from("frozen provider body"), sha256 = createHash("sha256").update(body).digest("hex");
+        const entry = {id: 1, url: "https://tiles.openfreemap.org/test/14/4823/6160.pbf", method: "GET",
+            status: 200, capture: "saved", sha256, bodyBytes: body.length, body: `corpus/${sha256}.bin`,
+            headers: {"content-encoding": "gzip", "content-length": "99", "content-type": "application/x-protobuf"}};
+        const manifest = {source, bodyFormat: "decoded HTTP response bytes", corpusTruncated: false,
+            storedBytes: body.length, requests: [entry, {...entry, id: 2}, {...entry, id: 3, url: entry.url + "?second=1"}]};
+        const path = join(folder, "manifest.json");
+        await writeFile(path, JSON.stringify(manifest));
+        await writeFile(join(folder, entry.body), body);
+        const replay = await loadReplay(path, 1024);
+        assert.equal(replay.uniqueBodies, 1);
+        assert.equal(replay.byUrl.size, 2);
+        assert.deepEqual(replay.byUrl.get(entry.url).headers, {"content-type": "application/x-protobuf"});
+        assert.equal(selectReplay(replay, entry.url, "GET").extra, false);
+        assert.equal(selectReplay(replay, entry.url, "GET").extra, false);
+        assert.equal(selectReplay(replay, entry.url, "GET").extra, true);
+        assert.equal(replayReport(replay).orderDifferences, 1);
+        assert.equal(replayReport(replay).extraRepetitions, 1);
+        assert.deepEqual(replayReport(replay).unrequestedUrls, [entry.url + "?second=1"]);
+        selectReplay(replay, entry.url + "?second=1", "GET");
+        assert.deepEqual(replayReport(replay).unrequestedUrls, []);
+        assert.throws(() => selectReplay(replay, entry.url + "?unknown=1", "GET"), /outside the frozen replay/);
+        assert.throws(() => selectReplay(replay, entry.url, "POST"), /outside the frozen replay/);
+        assert.equal(replayReport(replay).unknownRequests.length, 2);
+        await assert.rejects(loadReplay(path, 1), /byte budget/);
+        await assert.rejects(loadReplay(path, 1024, "0".repeat(64)), /manifest SHA256/);
+        await writeFile(join(folder, entry.body), Buffer.alloc(body.length, 1));
+        await assert.rejects(loadReplay(path, 1024), /body SHA256/);
+        await writeFile(join(folder, entry.body), body.subarray(1));
+        await assert.rejects(loadReplay(path, 1024), /byte length/);
+    } finally { await rm(folder, {recursive: true, force: true}); }
+}
+
 async function run() {
     const {chromium} = require("playwright");
     const {action, choose, see, telemetry, waitForSettledFocus} = require("./explore.cjs");
@@ -318,10 +434,11 @@ async function run() {
     events = createWriteStream(join(output, "events.ndjson"));
     record("protocol", {source, fragment, input: "native CDP Input.synthesizeScrollGesture; no synthetic Pan fallback",
         viewport: {width: 1800, height: 924, deviceScaleFactor: 2}, durationSeconds: duration,
-        corpusLimit, responseLimit, bodyFormat: "decoded HTTP response bytes; remove content-encoding/content-length when replaying",
+        corpusLimit, responseLimit, repeatCycles, providerMode: replayPath ? "frozen-corpus-immediate" : "live-providers",
+        bodyFormat: "decoded HTTP response bytes; remove content-encoding/content-length when replaying",
         observation: "Weak Wasm-memory references, forwarded grow/resize calls, passive wheel listener, WebGL draw/viewport counters; no managed app-state access"});
     const deadline = setTimeout(() => fail(new Error("The bounded diagnostic deadline expired"), "deadline"), duration * 1000);
-    let browser, page, context, cdp, poller, polling = false, closing = false, error;
+    let browser, page, context, cdp, poller, replay, polling = false, closing = false, error;
     async function sample(name) {
         if (polling) return null;
         polling = true;
@@ -372,10 +489,35 @@ async function run() {
         await checkpoint(name, true, 45000);
     }
     try {
+        if (replayPath) {
+            replay = await step("verify-frozen-provider-corpus", () => loadReplay(replayPath, corpusLimit,
+                process.env.PIXELMAP_REPLAY_MANIFEST_SHA256));
+            record("replay-provenance", replayReport(replay));
+        }
         browser = await chromium.launch({executablePath: process.env.CHROMIUM_PATH || undefined,
             args: ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]});
         browser.on("disconnected", () => { if (!closing) fail(new Error("Chromium disconnected"), "browser-disconnected"); });
-        context = await browser.newContext({viewport: {width: 1800, height: 924}, deviceScaleFactor: 2});
+        context = await browser.newContext({viewport: {width: 1800, height: 924}, deviceScaleFactor: 2,
+            serviceWorkers: replay ? "block" : "allow"});
+        if (replay) await context.route(url => provider(url.href) !== null, async route => {
+            const request = route.request();
+            let selected;
+            try { selected = selectReplay(replay, request.url(), request.method()); }
+            catch (failure) {
+                record("replay-unknown-request", {url: request.url(), method: request.method()});
+                fail(failure, "replay-corpus-divergence");
+                await route.abort("blockedbyclient").catch(() => {});
+                return;
+            }
+            const {response, occurrence, extra, expectedUrl} = selected;
+            record("replay-request", {url: request.url(), sha256: response.sha256, occurrence,
+                extraRepetition: extra, capturedExpectedUrl: expectedUrl ?? null, sameCaptureOrder: expectedUrl === request.url()});
+            await route.fulfill({status: 200, headers: response.headers, body: response.body})
+                .catch(failure => {
+                    record("replay-delivery-error", {url: request.url(), error: String(failure), browserClosing: closing});
+                    if (!closing) fail(failure, "replay-delivery-failure");
+                });
+        });
         page = await context.newPage();
         page.setDefaultTimeout(25000);
         page.on("crash", () => fail(new Error("The renderer process crashed"), "page-crash"));
@@ -408,10 +550,11 @@ async function run() {
         const north = await checkpoint("02-north-up-live-ready");
         assert.deepEqual(north.geometry, {width: 1800, height: 924, dpr: 2, canvasWidth: 3600, canvasHeight: 1848});
         const physical = await step("read-live-ground", () => telemetry(page));
-        record("live-data-coverage", {physical, remoteVectors: requests.filter(r => r.kind === "vector" && r.status === 200).length,
-            remoteElevation: requests.filter(r => r.kind === "elevation" && r.status === 200).length});
+        record("provider-data-coverage", {physical, responseSource: replay ? "frozen-corpus" : "live-providers",
+            vectorResponses: requests.filter(r => r.kind === "vector" && r.status === 200).length,
+            elevationResponses: requests.filter(r => r.kind === "elevation" && r.status === 200).length});
         assert.ok(requests.some(r => r.kind === "vector" && r.status === 200) &&
-            requests.some(r => r.kind === "elevation" && r.status === 200), "The diagnostic must load real remote vectors and DEMs");
+            requests.some(r => r.kind === "elevation" && r.status === 200), "The diagnostic must load detailed provider vectors and DEMs");
         assert.ok(Math.abs(physical.altitude - 10.8) < 2, "Detailed Manhattan ground must replace the 44.2m world fallback");
         await nativeScroll(480, "03-native-close-orbit");
         // The live run paused while new data arrived. Reproduce that state boundary
@@ -473,10 +616,26 @@ async function run() {
         await step("horizon-resume-acknowledged", () => see(page, /Pause free roam/));
         await step("horizon-dwell", () => page.waitForTimeout(15000), 17000);
         await checkpoint("08-horizon-responsive");
+        for (let cycle = 1; cycle <= repeatCycles; cycle++) {
+            // Return to the captured close view, then the captured horizon view.
+            // Do not extend the native input range beyond the original sequence.
+            for (const y of [240, -240]) {
+                const name = `repeat-${cycle}-${y > 0 ? "close" : "horizon"}`;
+                await nativeScroll(y, name);
+                await step(name + "-pause", () => action(page, "Pause free roam"));
+                await step(name + "-pause-acknowledged", () => see(page, /Resume free roam/));
+                await ready(name + "-data-ready");
+                await checkpoint(name + "-paused-ready", false);
+                await step(name + "-resume", () => action(page, "Resume free roam"));
+                await step(name + "-resume-acknowledged", () => see(page, /Pause free roam/));
+                await checkpoint(name + "-resumed", false);
+            }
+        }
         await step("exit-free-roam", () => action(page, "Exit free roam"));
         await step("map-restored", () => page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true}).waitFor({state: "visible"}));
         await checkpoint("09-returned-to-map");
-        record("diagnostic-complete", {result: "No abort reproduced in this captured native-input/live-provider run"});
+        record("diagnostic-complete", {result: "No abort reproduced in this captured native-input run",
+            providerMode: replay ? "frozen-corpus-immediate" : "live-providers", repeatCycles});
     } catch (failure) {
         error = failure;
         record("diagnostic-failed", {error: failure.stack || String(failure)});
@@ -495,7 +654,9 @@ async function run() {
         closing = true;
         if (browser) await limit(browser.close(), 10000, "browser close", false).catch(failure => record("close-error", {error: String(failure)}));
         const {summary, manifest} = buildReports({source, fragment, elapsedMs: elapsed(), fatal, fatalKind, error,
-            checkpoints, requests, responseOrder, storedBytes, bodies, corpusLimit, corpusTruncated, eventCount, droppedEvents});
+            checkpoints, requests, responseOrder, storedBytes, bodies, corpusLimit, corpusTruncated,
+            eventCount, droppedEvents, replay, repeatCycles,
+            providerMode: replayPath ? "frozen-corpus-immediate" : "live-providers"});
         await writeFile(join(output, "summary.json"), JSON.stringify(summary, null, 2));
         await writeFile(join(output, "corpus-manifest.json"), JSON.stringify(manifest, null, 2));
         await new Promise(resolve => events.end(resolve));
@@ -503,10 +664,11 @@ async function run() {
     if (error || fatal) process.exitCode = 1;
 }
 
-module.exports = {buildReports, checkReports};
+module.exports = {buildReports, checkReports, loadReplay, selectReplay, replayReport, checkReplay};
 if (require.main === module) {
     if (process.argv.includes("--self-check")) {
         checkReports();
-        console.log("Diagnostic summary/manifest self-check passed with nonempty body Set, requests, truncation and failure records.");
+        checkReplay().then(() => console.log("Diagnostic report/replay self-checks passed: nonempty reports, exact bodies, hashes, limits, unknown URLs and repeated requests."))
+            .catch(error => { console.error(error); process.exitCode = 1; });
     } else run().catch(error => { console.error(error); process.exitCode = 1; });
 }

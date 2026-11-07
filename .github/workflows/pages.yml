@@ -1,4 +1,4 @@
-name: Pixel Atlas · frozen live-memory diagnostic
+name: Pixel Atlas · frozen corpus memory replay
 on:
   push:
     branches: [diagnostic/live-memory]
@@ -25,18 +25,22 @@ jobs:
     env:
       PIXELMAP_LIVE_SECONDS: '540'
       PIXELMAP_CORPUS_MIB: '256'
+      PIXELMAP_APPLICATION_SOURCE: '9171e95efab06db930a97dde212d754b8da48f60'
+      PIXELMAP_REPLAY_MANIFEST_SHA256: 'd66136be7fd4a19d85756ad4fce10521a1a67096053702dda2c3600bc1a7c606'
+      PIXELMAP_LIVE_REPEAT_CYCLES: '3'
     steps:
       - uses: actions/checkout@v4
       - name: Initialize diagnostic directories
         run: |
           printf 'PLAYWRIGHT_BROWSERS_PATH=%s/diagnostic-browsers\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
-          printf 'PIXELMAP_LIVE_OUTPUT=%s/live-memory\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'PIXELMAP_LIVE_OUTPUT=%s/corpus-memory\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'PIXELMAP_REPLAY_MANIFEST=%s/frozen-corpus/corpus-manifest.json\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: tests/browser/package-lock.json
-      - name: Verify the frozen source run and artifact identity
+      - name: Verify the frozen application and captured corpus identities
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -44,6 +48,8 @@ jobs:
           mkdir -p "$PIXELMAP_LIVE_OUTPUT"
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/42370846132" > "$PIXELMAP_LIVE_OUTPUT/source-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/13574430917" > "$PIXELMAP_LIVE_OUTPUT/source-artifact.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/42376068987" > "$PIXELMAP_LIVE_OUTPUT/capture-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/13575726810" > "$PIXELMAP_LIVE_OUTPUT/capture-artifact.json"
           python3 - <<'PY'
           import json, os
           from pathlib import Path
@@ -60,7 +66,20 @@ jobs:
           assert artifact['workflow_run']['id'] == run['id']
           assert artifact['workflow_run']['head_sha'] == source
           assert artifact['digest'] == digest and artifact['size_in_bytes'] == 88296669
-          print('Verified frozen 9171e95 source, successful run, exact artifact ID, size and ZIP digest metadata.')
+          assert source == os.environ['PIXELMAP_APPLICATION_SOURCE']
+          capture_run = json.loads((root / 'capture-run.json').read_text())
+          capture_artifact = json.loads((root / 'capture-artifact.json').read_text())
+          capture_source = '83980ac3b2da59970321bf183dfe8b48f876d9ec'
+          assert capture_run['id'] == 42376068987 and capture_run['head_sha'] == capture_source
+          assert capture_run['repository']['full_name'] == os.environ['GITHUB_REPOSITORY']
+          assert capture_run['repository']['id'] == 1443492055
+          assert capture_run['head_branch'] == 'diagnostic/live-memory' and capture_run['conclusion'] == 'success'
+          assert capture_artifact['id'] == 13575726810 and capture_artifact['name'] == 'atlas-live-memory-9171e95'
+          assert not capture_artifact['expired'] and capture_artifact['size_in_bytes'] == 17338602
+          assert capture_artifact['workflow_run']['id'] == capture_run['id']
+          assert capture_artifact['workflow_run']['head_sha'] == capture_source
+          assert capture_artifact['digest'] == 'sha256:017c91bd60ae21db6da9e9b1b96ce55ad0b00fa021b44b6788c9f937321f8581'
+          print('Verified frozen 9171e95 application and 83980ac capture runs, exact artifact IDs, sizes and ZIP digest metadata.')
           PY
       - uses: actions/download-artifact@v4
         with:
@@ -70,6 +89,14 @@ jobs:
           run-id: '42370846132'
           merge-multiple: true
           path: ${{ runner.temp }}/frozen-pages
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: '13575726810'
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: '42376068987'
+          merge-multiple: true
+          path: ${{ runner.temp }}/frozen-corpus
       - name: Verify exact artifact contents and AOT boot resources
         run: |
           set -euo pipefail
@@ -78,6 +105,16 @@ jobs:
           from pathlib import Path
           root = Path(os.environ['RUNNER_TEMP'])
           evidence = Path(os.environ['PIXELMAP_LIVE_OUTPUT'])
+          manifest_path = Path(os.environ['PIXELMAP_REPLAY_MANIFEST'])
+          manifest_bytes = manifest_path.read_bytes()
+          manifest_hash = hashlib.sha256(manifest_bytes).hexdigest()
+          assert manifest_hash == os.environ['PIXELMAP_REPLAY_MANIFEST_SHA256']
+          manifest = json.loads(manifest_bytes)
+          assert manifest['source'] == os.environ['PIXELMAP_APPLICATION_SOURCE']
+          assert manifest['bodyFormat'] == 'decoded HTTP response bytes' and manifest['corpusTruncated'] is False
+          assert len(manifest['requests']) == 170 and manifest['storedBytes'] == 19322575
+          assert len({entry['sha256'] for entry in manifest['requests']}) == 165
+          (evidence / 'replay-input-manifest.json').write_bytes(manifest_bytes)
           archive = root / 'frozen-pages/artifact.tar'
           tar_hash = hashlib.sha256(archive.read_bytes()).hexdigest()
           assert tar_hash == '6c5576660410404d31e9b7f96b0df47db633cc0bdd7c32f4c780269130ca9b09'
@@ -117,17 +154,26 @@ jobs:
               'artifact_tar_sha256': tar_hash, 'runtime_mode': mode.group(1), 'package': config_path.parent.name,
               'diagnostic_source': os.environ['GITHUB_SHA'], 'diagnostic_run': os.environ['GITHUB_RUN_ID'],
               'diagnostic_script_sha256': hashlib.sha256(Path('tests/browser/live-memory.cjs').read_bytes()).hexdigest(),
+              'corpus': {'capture_source': '83980ac3b2da59970321bf183dfe8b48f876d9ec',
+                  'capture_run': 42376068987, 'artifact_id': 13575726810,
+                  'artifact_zip_sha256': '017c91bd60ae21db6da9e9b1b96ce55ad0b00fa021b44b6788c9f937321f8581',
+                  'manifest_sha256': manifest_hash, 'captured_application_source': manifest['source'],
+                  'archive_verification': 'API ZIP digest checked; download-artifact retrieves/extracts ZIP; manifest SHA256 checked independently. The replay script validates every referenced body length and SHA256 before launching the browser.',
+                  'provider_mode': 'frozen-corpus-immediate', 'repeat_cycles': 3,
+                  'requests': 170, 'unique_bodies': 165, 'unique_body_bytes': 19322575},
               'resources': resources}
           (evidence / 'verified-provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
           print('Exact archived AOT bytes and all 72 boot resources verified. No application build occurs.')
           PY
       - name: Install the pinned browser
         run: |
+          set -euo pipefail
+          node tests/browser/live-memory.cjs --self-check | tee "$PIXELMAP_LIVE_OUTPUT/script-self-check.log"
           npm ci --prefix tests/browser
           (cd tests/browser && npx playwright install --with-deps chromium --only-shell)
           node --version > "$PIXELMAP_LIVE_OUTPUT/node-version.txt"
           (cd tests/browser && npx playwright --version) > "$PIXELMAP_LIVE_OUTPUT/playwright-version.txt"
-      - name: Reproduce live data and native input on the unchanged release
+      - name: Replay the exact captured corpus and three native input cycles
         timeout-minutes: 10
         run: |
           set -euo pipefail
@@ -139,8 +185,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-live-memory-9171e95
-          path: ${{ runner.temp }}/live-memory
+          name: atlas-corpus-memory-9171e95
+          path: ${{ runner.temp }}/corpus-memory
           if-no-files-found: warn
           retention-days: 7
           compression-level: 6
