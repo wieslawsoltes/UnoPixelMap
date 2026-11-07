@@ -47,6 +47,88 @@ internal static class PixelWindowFilter
         }
     }
 
+    /// <summary>A constant-footprint scanline also has constant story coverage,
+    /// point-window eligibility and mip-row coordinates. Prepare them once without
+    /// changing the per-column bilinear or color arithmetic.</summary>
+    internal readonly struct SamplingRow
+    {
+        internal readonly float CoverageY, SeedOffset;
+        internal readonly int PointOffset;
+        internal readonly bool PointWindow;
+        private readonly BilinearRow first, second;
+        private readonly float fraction;
+        private readonly bool interpolate;
+
+        internal SamplingRow(in SamplingFootprint footprint, uint seed, float story, float pixelScale)
+        {
+            CoverageY = 0;
+            SeedOffset = seed & 255;
+            PointOffset = 0;
+            PointWindow = false;
+            first = second = default;
+            fraction = 0;
+            interpolate = false;
+            if (footprint.Maximum <= FilterStart || footprint.Blend < 1)
+            {
+                if (!(pixelScale <= .4f))
+                {
+                    int row = (int)MathF.Floor(story);
+                    float v = story - row;
+                    PointWindow = v > StartY && v < EndY;
+                    PointOffset = unchecked((int)seed + row * Stories);
+                }
+            }
+            if (footprint.Maximum <= FilterStart) return;
+
+            CoverageY = Coverage(story, footprint.Y, StartY, EndY);
+            float y = Lookup(story, footprint.Y, StartY, EndY);
+            int firstLevel = (int)footprint.Lod, secondLevel = Math.Min(8, firstLevel + 1);
+            first = new(Levels[firstLevel], y);
+            interpolate = firstLevel != secondLevel && footprint.Lod != firstLevel;
+            fraction = footprint.Lod - firstLevel;
+            if (interpolate) second = new(Levels[secondLevel], y);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal float Lamp(float column)
+        {
+            float a = first.Sample(column);
+            return interpolate ? a + (second.Sample(column) - a) * fraction : a;
+        }
+    }
+
+    private readonly struct BilinearRow
+    {
+        private readonly byte[] pixels;
+        private readonly float scale, dy;
+        private readonly int mask, top, bottom;
+
+        internal BilinearRow(Level level, float story)
+        {
+            pixels = level.Pixels;
+            scale = level.Width / (float)Columns;
+            mask = level.Width - 1;
+            float y = story * (level.Height / (float)Stories) - .5f;
+            int iy = (int)MathF.Floor(y);
+            dy = y - iy;
+            top = ((iy & (level.Height - 1)) * level.Width) * 2 + 1;
+            bottom = (((iy + 1) & (level.Height - 1)) * level.Width) * 2 + 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal float Sample(float column)
+        {
+            float x = column * scale - .5f;
+            int ix = (int)MathF.Floor(x);
+            float dx = x - ix;
+            int left = (ix & mask) * 2, right = ((ix + 1) & mask) * 2;
+            float a = pixels[top + left], b = pixels[top + right];
+            float c = pixels[bottom + left], d = pixels[bottom + right];
+            float upper = a + (b - a) * dx, lower = c + (d - c) * dx;
+            return (upper + (lower - upper) * dy) / 255;
+        }
+    }
+
     private static byte[] CreateRooms()
     {
         var rooms = new byte[Columns];
@@ -118,6 +200,17 @@ internal static class PixelWindowFilter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static uint Sample(in Colors colors, in SamplingFootprint footprint, in SamplingRow row, float column)
+    {
+        if (footprint.Maximum <= FilterStart) return Point(colors, row, column);
+        float coverage = Coverage(column, footprint.X, StartX, EndX) * row.CoverageY;
+        if (coverage <= 0) return colors.Wall;
+        float lamps = row.Lamp(Lookup(column, footprint.X, StartX, EndX) + row.SeedOffset);
+        var point = footprint.Blend < 1 ? Expand(Point(colors, row, column)) : colors.Opaque;
+        return Blend(colors, point, lamps, coverage, footprint.Blend);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static uint Filtered(in Colors colors, uint seed, float column, float story,
         float footprintX, float footprintY, float pixelScale, float coverage, float lod, float blend)
     {
@@ -125,6 +218,12 @@ internal static class PixelWindowFilter
         float y = Lookup(story, footprintY, StartY, EndY);
         float lamps = Lamp(x, y, lod);
         var point = blend < 1 ? Expand(Point(colors, seed, column, story, pixelScale)) : colors.Opaque;
+        return Blend(colors, point, lamps, coverage, blend);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static uint Blend(in Colors colors, Vector4 point, float lamps, float coverage, float blend)
+    {
         // Keep the scalar operation order, including the identity blend at one.
         // SIMD combines the independent RGB channels without changing rounding.
         var filtered = colors.Opaque + (colors.Glazing + colors.LampDifference * lamps - colors.Opaque) * coverage;
@@ -153,6 +252,17 @@ internal static class PixelWindowFilter
         float u = column - x, v = story - y;
         return u > StartX && u < EndX && v > StartY && v < EndY
             ? Rooms[((int)seed + x + y * Stories) & 255] == 0 ? colors.Lamp : colors.Glass
+            : colors.Wall;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static uint Point(in Colors colors, in SamplingRow row, float column)
+    {
+        if (!row.PointWindow) return colors.Wall;
+        int x = (int)MathF.Floor(column);
+        float u = column - x;
+        return u > StartX && u < EndX
+            ? Rooms[unchecked(row.PointOffset + x) & 255] == 0 ? colors.Lamp : colors.Glass
             : colors.Wall;
     }
 

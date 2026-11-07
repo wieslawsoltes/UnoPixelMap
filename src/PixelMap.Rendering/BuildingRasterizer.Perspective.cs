@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using SkiaSharp;
 
 namespace PixelMap.Rendering;
@@ -373,6 +374,9 @@ internal sealed partial class BuildingRasterizer
             int x0=FirstPixel(min,width), x1=FirstPixel(max,width);
             float offX=x0+.5f-p.X, offY=row-p.Y;
             float inv=ai+iw.X*offX+iw.Y*offY, zOver=a.Z*ai+zw.X*offX+zw.Y*offY, uOver=a.U*ai+uw.X*offX+uw.Y*offY;
+            if (constantFootprint && zw.X == 0 && zOver != 0 && x0 < x1 &&
+                TryFilteredWindowRow(pixels, y * width + x0, x1 - x0, inv, zOver, uOver, uw.X,
+                    seed, foundation, floor, bay, in windowColors, in footprint)) continue;
             for(int x=x0,pos=y*width+x0;x<x1;x++,pos++,inv+=iw.X,zOver+=zw.X,uOver+=uw.X)
             {
                 if (inv<inverseDepth[pos]) continue;
@@ -412,6 +416,28 @@ internal sealed partial class BuildingRasterizer
         InvalidateDepth(screenBounds);
         (float X,float Y) Plane(float v0,float v1,float v2) =>
             (((v1-v0)*dy2-(v2-v0)*dy1)/det,(dx1*(v2-v0)-dx2*(v1-v0))/det);
+    }
+
+    // Keep the prepared filter's mip-row state and inlined pixel arithmetic out
+    // of WallTriangle's frame: resolved walls should not pay its register pressure.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private bool TryFilteredWindowRow(Span<uint> pixels, int start, int count,
+        float inv, float zOver, float uOver, float du, uint seed, float foundation, float floor, float bay,
+        in PixelWindowFilter.Colors colors, in PixelWindowFilter.SamplingFootprint footprint)
+    {
+        float z = zOver / inv, story = (z - foundation) / (pixelsPerMeter * floor);
+        if (!float.IsFinite(z) || !float.IsFinite(story)) return false;
+        // I and Z/I are identical across this row. Zero Z numerators stay on the
+        // general path: repeated += 0 can change the sign of a negative zero.
+        var sampling = new PixelWindowFilter.SamplingRow(footprint, seed, story, pixelsPerMeter * inv);
+        float columnScale = inv * bay;
+        for (int pos = start, end = start + count; pos < end; pos++, uOver += du)
+        {
+            if (inv < inverseDepth[pos]) continue;
+            uint texel = PixelWindowFilter.Sample(colors, footprint, sampling, uOver / columnScale);
+            inverseDepth[pos] = inv; depth[pos] = z; pixels[pos] = texel;
+        }
+        return true;
     }
 
     /// <summary>Prove that every possible scanline sample uses the original point
