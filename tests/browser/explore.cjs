@@ -384,10 +384,11 @@ async function highDensityCloseCamera(browser) {
     assert.ok(map?.width === 1800 && map.height > 700 && map.height < 924,
         "The dense scene occupies the large logical map viewport");
     const checkpoints = [];
-    async function checkpoint(name, active = true, input = null) {
+    async function checkpoint(name, active = true, input = null, cameraPicker = null) {
         const state = {name, input, camera: await readCamera(page),
             depthDraws: await page.evaluate(() => window.pixelExploreGpu.depthDraws),
             telemetry: active ? await telemetry(page) : null};
+        if (cameraPicker !== null) state.cameraPicker = cameraPicker;
         checkpoints.push(state);
         if (evidence) await writeFile(join(evidence, "high-dpi-close-camera.json"), JSON.stringify({
             fragment: closeCityView, geometry, mapBounds: map,
@@ -437,8 +438,23 @@ async function highDensityCloseCamera(browser) {
     assert.equal(close.camera.zoom, 24, "The regression reaches the extreme close camera");
     assert.equal(close.camera.bearing, -15, "Continuous look restores the walker's orbit bearing");
     await expandSettings(page);
-    assert.match(await page.getByRole("combobox", {name: "Free roam camera", exact: true}).ariaSnapshot(), /Orbit/,
-        "The continuous gesture actually changes NorthUp to Orbit");
+    const cameraChoice = page.getByRole("combobox", {name: "Free roam camera", exact: true});
+    await tap(page, cameraChoice);
+    await page.waitForFunction(() => document.querySelector('[role="combobox"][aria-label="Free roam camera"]')?.getAttribute("aria-expanded") === "true");
+    await page.waitForFunction(() => document.activeElement?.getAttribute("elementtype") === "ScrollContentPresenter");
+    const cameraOptions = page.getByRole("listbox", {name: "Free roam camera", exact: true});
+    // The closed ComboBox exposes its name only. Its virtual popup options
+    // expose aria-selected, so inspect them without issuing selection keys.
+    await cameraOptions.getByRole("option", {name: "Orbit", exact: true, selected: true}).waitFor({state: "attached"});
+    assert.equal(await cameraOptions.getByRole("option", {selected: true}).count(), 1,
+        "The continuous gesture selects Orbit as the sole camera rig");
+    const cameraPicker = await cameraOptions.ariaSnapshot();
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(() => document.querySelector('[role="combobox"][aria-label="Free roam camera"]')?.getAttribute("aria-expanded") === "false");
+    await cameraOptions.waitFor({state: "hidden"});
+    await waitForSettledFocus(page, cameraChoice);
+    await page.getByRole("button", {name: "Pause free roam", exact: true}).waitFor({state: "visible"});
+    await checkpoint("orbit-camera-selection", true, null, cameraPicker);
     await action(page, "Collapse game settings");
     await screen(page, "high-dpi-ground-clamped-orbit");
 
