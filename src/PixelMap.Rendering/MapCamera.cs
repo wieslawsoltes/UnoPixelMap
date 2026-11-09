@@ -96,6 +96,21 @@ public readonly partial record struct MapCamera(double Latitude, double Longitud
         return WithEye(eye.Latitude, eye.Longitude, eye.AltitudeMeters, height);
     }
 
+    /// <summary>Raise a perspective eye to an absolute altitude floor while preserving its
+    /// horizontal position, orientation and lens. Orthographic cameras are unchanged.</summary>
+    public MapCamera WithMinimumEyeAltitude(double minimumAltitudeMeters, double viewportHeight)
+    {
+        if (!double.IsFinite(minimumAltitudeMeters) || !double.IsFinite(viewportHeight) || viewportHeight <= 0)
+            throw new ArgumentOutOfRangeException(nameof(minimumAltitudeMeters), "The eye floor and viewport must be finite, with a positive height.");
+        if (!Perspective) return this;
+        var next = ForViewport(1, viewportHeight);
+        double altitude = next.GroundAltitudeMeters + next.TargetAltitudeMeters +
+            Focal(viewportHeight) * Math.Cos(next.PitchRadians) / next.PixelsPerMeter;
+        return altitude < minimumAltitudeMeters
+            ? next with { TargetAltitudeMeters = next.TargetAltitudeMeters + (minimumAltitudeMeters - altitude) }
+            : next;
+    }
+
     private MapCamera WithEye(double latitude, double longitude, double altitudeMeters, double height)
     {
         var (sin, cos) = Math.SinCos(Bearing * Math.PI / 180);

@@ -176,12 +176,14 @@ public sealed partial class PixelMapControl
             _ => 1.2
         };
         var eye = body;
-        double datum = _terrain is { Relief: true } ? _elevationSnapshot.SampleSurfaceMeters(body.Latitude, body.Longitude) : 0;
+        double datum;
         double altitude;
         double focusAltitude;
         if (firstPerson)
         {
-            altitude = RenderFreeRoamAltitude(body, Journey.AltitudeMeters, datum) + (Journey.IsFreeFlying ? 0 : eyeHeight);
+            double surface = _elevationSnapshot.SampleSurfaceMeters(body.Latitude, body.Longitude);
+            datum = _terrain is { Relief: true } ? surface : 0;
+            altitude = RenderFreeRoamAltitude(body, Journey.AltitudeMeters, datum, surface) + (Journey.IsFreeFlying ? 0 : eyeHeight);
             focusAltitude = altitude;
         }
         else
@@ -191,10 +193,13 @@ public sealed partial class PixelMapControl
             double radians = pitch * Math.PI / 180;
             double horizontal = _freeCameraDistance * Math.Sin(radians);
             eye = body.Move(heading + 180, horizontal);
-            datum = _terrain is { Relief: true } ? _elevationSnapshot.SampleSurfaceMeters(eye.Latitude, eye.Longitude) : 0;
-            focusAltitude = RenderFreeRoamAltitude(body, Journey.AltitudeMeters, datum) + eyeHeight * .5;
+            double surface = _terrain is { Relief: true }
+                ? _elevationSnapshot.SampleSurfaceMeters(eye.Latitude, eye.Longitude) : 0;
+            datum = surface;
+            focusAltitude = RenderFreeRoamAltitude(body, Journey.AltitudeMeters, datum,
+                _elevationSnapshot.SampleSurfaceMeters(body.Latitude, body.Longitude)) + eyeHeight * .5;
             altitude = focusAltitude + _freeCameraDistance * Math.Cos(radians);
-            double floor = RenderFreeRoamAltitude(eye, _elevationSnapshot.SampleSurfaceMeters(eye.Latitude, eye.Longitude), datum) + .35;
+            double floor = RenderFreeRoamAltitude(eye, surface, datum, surface) + .35;
             if (altitude < floor)
             {
                 altitude = floor;
@@ -219,15 +224,27 @@ public sealed partial class PixelMapControl
         {
             double elapsed = Math.Max(0, Stopwatch.GetElapsedTime(_cameraTimestamp, now).TotalSeconds);
             target = Camera.Interpolate(target, 1 - Math.Exp(-elapsed * 12));
+            // The spring follows a chord between safe poses. That chord can cross a
+            // ridge, and newly streamed terrain can also rise beneath the old eye.
+            // Apply the existing third-person floor at the actual smoothed eye.
+            // First-person and free flight retain their independent physical controls.
+            double floor = .35;
+            if (_terrain is { Relief: true })
+            {
+                var smoothedEye = target.GetEye(ActualHeight);
+                var eyePoint = new RoutePoint(smoothedEye.Latitude, smoothedEye.Longitude);
+                double surface = _elevationSnapshot.SampleSurfaceMeters(eyePoint.Latitude, eyePoint.Longitude);
+                floor += RenderFreeRoamAltitude(eyePoint, surface, surface, surface);
+            }
+            target = target.WithMinimumEyeAltitude(floor, ActualHeight);
         }
         _cameraTimestamp = now;
         _wasTracking = true;
         Camera = target;
     }
 
-    private double RenderFreeRoamAltitude(RoutePoint point, double physicalAltitude, double datum)
+    private double RenderFreeRoamAltitude(RoutePoint point, double physicalAltitude, double datum, double surface)
     {
-        double surface = _elevationSnapshot.SampleSurfaceMeters(point.Latitude, point.Longitude);
         if (_terrain is not { Relief: true } terrain) return physicalAltitude - surface;
         double meshHeight = TryGetRenderedTerrainElevation(point.Latitude, point.Longitude, out double sampled) ? sampled : surface;
         double scale = double.IsFinite(terrain.Exaggeration) ? Math.Clamp(terrain.Exaggeration, .25, 8) : 1;

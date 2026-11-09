@@ -52,6 +52,7 @@ internal static class FreeCameraChecks
 
         TerrainDatum();
         FixedEyeInterpolation();
+        TerrainSpringClearance();
         AimStablePoses();
         AimInsets();
         MercatorEdges();
@@ -147,6 +148,65 @@ internal static class FreeCameraChecks
             LongitudeError(direct.Bearing, partitioned.Bearing) < 1e-10 &&
             Math.Abs(direct.Pitch - partitioned.Pitch) < 1e-10,
             "Physical free-eye smoothing depends on how elapsed time is split into frames");
+    }
+
+    private static void TerrainSpringClearance()
+    {
+        const int size = 16, width = 900, height = 600;
+        const double clearance = .35;
+        var id = new TileId(14, 8192, 8192);
+        var samples = new float[size * size];
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++) samples[y * size + x] = x is >= 6 and <= 9 ? 180 : -40;
+        var elevation = new ElevationSnapshot([new ElevationTile(id, size, samples)]);
+        var terrain = new TerrainOptions(elevation, Exaggeration: 4);
+        var first = Point(.2);
+        var last = Point(.8);
+        int cases = 0;
+        foreach (double bearing in new[] { -179d, 0, 87, 179 })
+        foreach (double pitch in new[] { 0d, 55, 89.999, 90, 120, 179.5 })
+        {
+            var start = MapCamera.FromEye(first.Latitude, first.Longitude, -20, bearing, pitch,
+                width, height, groundAltitudeMeters: -40);
+            var destination = MapCamera.FromEye(last.Latitude, last.Longitude, -20, bearing + 20, pitch,
+                width, height, groundAltitudeMeters: -40);
+            Assert(start.GetEye(height).AltitudeMeters > elevation.SampleSurfaceMeters(first.Latitude, first.Longitude) + clearance &&
+                destination.GetEye(height).AltitudeMeters > elevation.SampleSurfaceMeters(last.Latitude, last.Longitude) + clearance,
+                "The chase-camera ridge regression did not start with two safe endpoints");
+            var smoothed = start.Interpolate(destination, .5);
+            var before = smoothed.GetEye(height);
+            double floor = elevation.SampleSurfaceMeters(before.Latitude, before.Longitude) + clearance;
+            Assert(before.AltitudeMeters < floor - 150,
+                "The chase spring fixture did not cross beneath the ridge between its safe poses");
+            var safe = smoothed.WithMinimumEyeAltitude(floor, height).OnTerrain(terrain, height);
+            var after = safe.GetEye(height);
+            Assert(Math.Abs(after.Latitude - before.Latitude) < 1e-10 &&
+                LongitudeError(after.Longitude, before.Longitude) < 1e-10 &&
+                Math.Abs(after.AltitudeMeters - floor) < 1e-8 &&
+                safe.Bearing == smoothed.Bearing && safe.Pitch == smoothed.Pitch &&
+                safe.Zoom == smoothed.Zoom && safe.ViewDistanceMeters == smoothed.ViewDistanceMeters,
+                "Terrain clearance moved the spring eye horizontally, changed its lens, or left it beneath the ridge");
+            Assert(smoothed.WithMinimumEyeAltitude(before.AltitudeMeters - 1, height) == smoothed,
+                "An already-safe camera changed when checking its altitude floor");
+            var resized = safe.WithMinimumEyeAltitude(floor + 10, 844);
+            var resizedEye = resized.GetEye(844);
+            Assert(resized.ViewportHeight == 844 &&
+                Math.Abs(resizedEye.Latitude - after.Latitude) < 1e-10 &&
+                LongitudeError(resizedEye.Longitude, after.Longitude) < 1e-10 &&
+                Math.Abs(resizedEye.AltitudeMeters - floor - 10) < 1e-8,
+                "An eye-floor correction after viewport resize moved the physical eye or retained the old lens height");
+            cases++;
+        }
+        var overhead = new MapCamera(0, 0, 16);
+        Assert(overhead.WithMinimumEyeAltitude(1000, height) == overhead,
+            "An orthographic map acquired a physical eye altitude");
+        Console.WriteLine($"Passed {cases} chase-spring ridge clearance cases with signed terrain, unchanged eye orientation and viewport resize.");
+
+        (double Latitude, double Longitude) Point(double x)
+        {
+            double worldX = (id.X + x) / (1 << id.Z), worldY = (id.Y + .5) / (1 << id.Z);
+            return (Math.Atan(Math.Sinh((1 - 2 * worldY) * Math.PI)) * 180 / Math.PI, worldX * 360 - 180);
+        }
     }
 
     private static void AimInsets()
