@@ -1,0 +1,3776 @@
+{
+  "Date": "2026-11-09",
+  "BaseCommit": "a4d80e0a4dfa84b7b420c04e3c03deef4f8b96bb",
+  "Method": {
+    "Order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "WarmupPasses": 9,
+    "MeasuredPassesPerProcess": 64,
+    "MeasuredSamples": 8448,
+    "ColdSamples": 132,
+    "Affinity": "CPU 8",
+    "Environment": {
+      "DOTNET_TieredCompilation": "0",
+      "DOTNET_PROCESSOR_COUNT": "2"
+    },
+    "Median": "Conventional median; average of the two middle values for even samples.",
+    "P95": "Nearest rank: sorted[ceil(0.95*N)-1].",
+    "Grouping": "Sum measured per-tile elapsed values within each pass before summarizing group distributions.",
+    "Scope": "EarthRaster.Get through one bound delegate, including JPEG/PNG decode, linear-light resampling, palette lookup, dithering and decoded-image cache insertion/replacement. Fixture construction, delegate creation, output hashing and result allocation are excluded. Fresh EarthRaster instance per pass; static palette LUT remains warm after nine untimed passes. Sample -9 is the first cold pass, reported separately and excluded from warm summaries. No rendering or GPU submission is measured.",
+    "Caveat": "Native CPU tile preprocessing, not browser/FPS or GPU timing. Timing samples include native decode and SKImage creation; managed allocation counters do not capture native allocations. Cold pass retains first-call JIT/static palette costs and has only two processes per variant."
+  },
+  "Runtime": ".NET 10.0.14",
+  "OS": "Debian GNU/Linux 13 (trixie)",
+  "Processors": 2,
+  "ProductionSourceDifferences": [
+    "src/PixelMap.Rendering/EarthRaster.cs"
+  ],
+  "EarthRasterSource": {
+    "Baseline": {
+      "Sha256": "80cb70f6d6ba04d1e3384f7535a3de9eda56f82512646e367ad5f3c5c9f5ff34",
+      "GitBlobSha1": "a38be53dbf9bf22dbe5481428b18030460c3a017"
+    },
+    "Candidate": {
+      "Sha256": "fd5635401b82bd6042a830f41e1afa532e37bdb811b6757dd55a06506115055e",
+      "GitBlobSha1": "765b7b4dac7b7d3f1e1ba8847db4fa086d9492a6"
+    }
+  },
+  "AssemblySha256": {
+    "Baseline": "b57d3b815c4172a3ee888ec9d8098b46ce312e898cdec6743e9ba8022fe6c5bc",
+    "Candidate": "c98d7c38f173ec0ece2ba26cb1f9f691da3bd56dbc4573a69d2de5e371a9d402",
+    "Harness": "d87e9dc2aa660f8c0ada4eae33b7c859e47a7dc0e676d87a6d304ae29d95d63b",
+    "Data": "7652489a32e882444e27453032a9b1574f1bc5b916ab409b615127e9cc30c3c4",
+    "Skia": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540"
+  },
+  "OnlyRuntimeFileDifference": "PixelMap.Rendering.dll",
+  "BaselineRuntimeFileSha256": {
+    "EarthCost.pdb": "623bae854711d9eec13bad26b20a2d3d7fd4ffce562f805dff67e6547209513e",
+    "EarthCost.dll": "d87e9dc2aa660f8c0ada4eae33b7c859e47a7dc0e676d87a6d304ae29d95d63b",
+    "EarthCost.runtimeconfig.json": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+    "EarthCost.deps.json": "53cac1a25b785420ad3c139201798059cb60cfcc39c6e802c9fcfc10b40ce006",
+    "EarthCost": "db4f69a1f2dddf2b5938260f7dd424a000bd5fc84031468bde5a086eedca027d",
+    "libSkiaSharp.so": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387",
+    "PixelMap.Routing.pdb": "55b12db22df012dfbbd3235e89e4a0ac1d8b4d777957b2edd59dc387f9fb5d21",
+    "PixelMap.Data.pdb": "47bc465bd46371e7ea9888a1f5fa71d25d7940ed804d1a04f01a27d9b8f64591",
+    "PixelMap.Rendering.pdb": "677a5d28693d3a9d640b122d77535a898ae4e9e41ae76c50879df8c16baddc4f",
+    "SkiaSharp.dll": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+    "Silk.NET.OpenGL.dll": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+    "Silk.NET.Core.dll": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+    "Silk.NET.Maths.dll": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+    "PixelMap.Routing.dll": "bf1ffa213c696abeaae03e592770cd10fa4c770bfe9856eaa0dfee904bf0af38",
+    "PixelMap.Rendering.dll": "b57d3b815c4172a3ee888ec9d8098b46ce312e898cdec6743e9ba8022fe6c5bc",
+    "PixelMap.Data.dll": "7652489a32e882444e27453032a9b1574f1bc5b916ab409b615127e9cc30c3c4",
+    "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+    "LibTessDotNet.dll": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921",
+    "LibTessDotNet.Double.dll": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+    "Microsoft.Extensions.DependencyModel.dll": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078"
+  },
+  "HarnessSourceSha256": {
+    "Program.cs": "e6ef0f38c37b9a2fdd542fc48a411c87a6fc608c5a83f32f1f2814f8edd42197",
+    "EarthCost.csproj": "e1e619bfac79a1b1a566e939a38c41258f24c7bd7f479a6da00e1be4090b5168"
+  },
+  "InputJpegSha256": {
+    "14-4824-6160.jpg": "44f2654e21f61afbb4614b1a5c1aa4d3434d67ccbb9be85a588c2bed4fcc02ab",
+    "14-4822-6161.jpg": "1331c8415120f94754e3caa1a6ec848b5bbcbae7d71dc6d0b3ccdcef6e05d913",
+    "14-4822-6159.jpg": "d9dde94d5b536278b0cd5abcf18ef01d5b087d4eba716053dc065c5f19109d44",
+    "0-0-0.jpg": "6c00984627301c566d8650b30c77cb875490595d9354f947313a4ec39b3fef0b",
+    "14-4823-6161.jpg": "2a38625796169a3c17df4e835bc6b44a168b19f515758a6aa4c7a95000dade3d",
+    "12-2171-1460.jpg": "f4af27bcebd239b5889ddc030642855960e6017a8c27cd95b89948bac0b81dca",
+    "12-2172-1460.jpg": "e679276f6394733890c1e2c797d981499ad1ca2d67a5d50049bfd8c707dea3e5",
+    "12-2171-1459.jpg": "d764e03b416007104fd009c8f3f698a7d707635ddffc6c8c5a32e1bf7415440f",
+    "14-4823-6159.jpg": "6cd9f10d7818d2e4a5985cf206ca3d1dab9d72a3c23f00782033f4b9f37ea2c7",
+    "12-2172-1459.jpg": "61195425b1647f43c8429c5044f05b6563c485db8401d4251f2c4f27c3d3b1f7",
+    "14-4823-6160.jpg": "1d4cbf01bae43c62041841c82a0ac09a7ee1be08f70461296f24f89eb9e08e02",
+    "12-2170-1459.jpg": "968ae5b535519eacc2341f798fc248debcd36d6401ecdf2e8fbca4cc945199d2",
+    "12-2170-1458.jpg": "fc342728097aa03e87b712e234a546a16fdbb9cf84237ff34be09aa36588db9d",
+    "14-4824-6161.jpg": "de9c54e4a48df690f850dde94ea011e25250d2000341507c357949f1feff2da2",
+    "12-2171-1458.jpg": "0c1349871807615f8271ae9c8b7f4c0d66d3ba7bf792630f00962fe0c64b40f7",
+    "12-2172-1458.jpg": "9c17a06e434c88df95dabe087abc30718ff7c0f4590eaf385e8138584d945de3",
+    "12-2170-1460.jpg": "91649cf25508576dad15ef8ff1dd50e07379870039500e907af5e97a4f6d3962",
+    "14-4822-6160.jpg": "95d92c1753cd576ec21e631cd0fd05e11f9140da7732817894aef9ffa0e9e48a",
+    "14-4824-6159.jpg": "ad86d93e38c1dd4eb9ef66c6c1fc2027268d25142282da73ed0b449c2990ed94"
+  },
+  "Controls": [
+    {
+      "Name": "0-0-0.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "07b7a223af276f53eaf317347cbc59c96fc5f6fea321a8e78ea69ecb6ea5e9ff"
+    },
+    {
+      "Name": "12-2170-1458.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "e28fa44434bad9bf461255fd2cd4a690cb6128d8b082b06e8d9fd69a6b8554f5"
+    },
+    {
+      "Name": "12-2170-1459.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "a3aa9bfb49a6ca51c171d6605d5d47c72dcd8ca5c0996eba94db1cd04cd73812"
+    },
+    {
+      "Name": "12-2170-1460.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "4b38b3665bb95261c16978296b0a399d064a0bc541be1d704bfa97c12553fe97"
+    },
+    {
+      "Name": "12-2171-1458.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "57dfc8f987cff406df8a52892ee500b9a2da9dd1fa8068f7f0aae005a90e3617"
+    },
+    {
+      "Name": "12-2171-1459.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "2a6b095d3aaf291914dcac8bde8aaa6199fe2cb3b69b63eb8d7105edec06e1d6"
+    },
+    {
+      "Name": "12-2171-1460.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "12d159f809b82e1f0d7e7ca413756cef072396d755c201a6a478c57671aedecd"
+    },
+    {
+      "Name": "12-2172-1458.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "2da2d882122d26cbc033b3bdef4f31be9c82fc6538002c97f4566afd5ded40a2"
+    },
+    {
+      "Name": "12-2172-1459.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "1f94df15122f63350edc41f60759fc9d610b9aa3b85160bd81bd3785503cae20"
+    },
+    {
+      "Name": "12-2172-1460.jpg",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "ef837fedf240f8fafdba1d1620d4586c99e40fb547a9258aa9bba34b4f9421c2"
+    },
+    {
+      "Name": "14-4822-6159.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "ca575452799fc4bbfe1a394d31e4cbe29cbc047fc8ee784e1287cb10ae2538af"
+    },
+    {
+      "Name": "14-4822-6160.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "cf3973569c6f3940e57bcdb750f7ca48c67defa8a03662c7c06cebb84073d6ee"
+    },
+    {
+      "Name": "14-4822-6161.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "92f63d247f6d8ab74c4afdc137158894477deb78a6e99c836b48ec67d715e209"
+    },
+    {
+      "Name": "14-4823-6159.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "3fc96a4f26ab5038b84ce11509d52d61790ca4735efc8766ee57e01c6997d7db"
+    },
+    {
+      "Name": "14-4823-6160.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "08e07bdde24512a048dff770ef0d4b7f3b5552fe03d01eb2fae25ef56f56ce6c"
+    },
+    {
+      "Name": "14-4823-6161.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "a64aab254faf0b6dca8676c1798a8ce1c6e0c6417fdd8c4ffe610320d6709914"
+    },
+    {
+      "Name": "14-4824-6159.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "f3193b8c60e5d9c40382d37718d802afa3969ec34cad70ab958fb9b84587347d"
+    },
+    {
+      "Name": "14-4824-6160.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "656b23c0cbccfee42808834f6fa80a1253b7fd1bab8d18dde2c18710f56f2c10"
+    },
+    {
+      "Name": "14-4824-6161.jpg",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "e3bda338dac04074f4aa2c9b974d8b63cc28190a06fc41d913610a500651a89e"
+    },
+    {
+      "Name": "smooth",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "9709b738e15479d6478986f8da6cd3d3523200ac41c9f08863fdd3d2ac8a693f"
+    },
+    {
+      "Name": "smooth-128",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "87a8feb6a14f53a4076ceba125429b9f3fe7670ff0fee0239f1a794ab56dfc23"
+    },
+    {
+      "Name": "checker",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "eab037c1f74d83697d7f6f1379ed8d0cdc15c55e87d922ac0aa10c8f09551184"
+    },
+    {
+      "Name": "checker-128",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "b4d8ab1ba7775a2a813c42e2b117b551a0edd8fd0340f251707325b62451fb2a"
+    },
+    {
+      "Name": "gradient",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "7aa3cc6a11003b516ea63dfd0234cfbe77a4c2ee82608340a7bacbed6efa6e35"
+    },
+    {
+      "Name": "gradient-128",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "1c9ad306857070ec4985069fcfdda4eb2a2e371e83b94071536d31fc04273a3d"
+    },
+    {
+      "Name": "noise",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "78616dde6618bd475618626b048edef65ff3d1a814d709c66c2724c982a4a08b"
+    },
+    {
+      "Name": "noise-128",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "70ddd0418c15beb100b8a93964021f10c3e82000bb5fccb5ac79f0727dee1d6e"
+    },
+    {
+      "Name": "irregular",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "b45c7ea6fee1c6e11d558fdc8dbaa8cb53257d9bf15c2aac2fcf5a983090998c"
+    },
+    {
+      "Name": "irregular-128",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "5aada52187139c1919a1be5d6332c762a3b695e8fb7beb1dd0deb0c39fa3e09d"
+    },
+    {
+      "Name": "tiny",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "1886e767055febb7a0d85ca63aed7e8a287a26a627d2e4a42df159c8699f9e63"
+    },
+    {
+      "Name": "tiny-128",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "f8363f132a20d1ce2d8ece301d2e2a0cb65405579cbf517348d78fb7494dbef7"
+    },
+    {
+      "Name": "big",
+      "Width": 256,
+      "Height": 256,
+      "Hash": "157dbbdc9d1b0a6ebfa6a11cfaf43803ce53e8726f2c3b105f97e540a2fabadf"
+    },
+    {
+      "Name": "big-128",
+      "Width": 128,
+      "Height": 128,
+      "Hash": "331e929a276c68453bb1a6fc7cc19889ca44cc558595a57a39188602f89df3ca"
+    }
+  ],
+  "AllFourProcessControlsEqual": true,
+  "Groups": [
+    {
+      "Name": "World",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.6676,
+        "P95Ms": 2.3637,
+        "MinMs": 1.5427,
+        "MaxMs": 3.7345
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.3472,
+        "P95Ms": 1.9448,
+        "MinMs": 1.2003,
+        "MaxMs": 2.3299
+      },
+      "MedianChangePercent": -19.213240585272253,
+      "P95ChangePercent": -17.722215171130006,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.7138499999999999,
+          "P95Ms": 2.3771,
+          "MinMs": 1.5508,
+          "MaxMs": 2.4144
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.313,
+          "P95Ms": 1.9054,
+          "MinMs": 1.2116,
+          "MaxMs": 1.9953
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.38895,
+          "P95Ms": 1.9495,
+          "MinMs": 1.2003,
+          "MaxMs": 2.3299
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6391499999999999,
+          "P95Ms": 2.3169,
+          "MinMs": 1.5427,
+          "MaxMs": 3.7345
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "704": 128
+        },
+        "candidate": {
+          "704": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 20.594,
+          "AllocatedBytes": 139264
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 21.8807,
+          "AllocatedBytes": 139264
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 24.2551,
+          "AllocatedBytes": 139264
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 23.3941,
+          "AllocatedBytes": 139264
+        }
+      ]
+    },
+    {
+      "Name": "Lake Garda (9 tiles)",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 14.92045,
+        "P95Ms": 20.659,
+        "MinMs": 13.8751,
+        "MaxMs": 21.078799999999998
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 11.8351,
+        "P95Ms": 16.6499,
+        "MinMs": 10.6006,
+        "MaxMs": 20.166
+      },
+      "MedianChangePercent": -20.678665857933243,
+      "P95ChangePercent": -19.40606999370734,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 14.948649999999997,
+          "P95Ms": 20.709999999999997,
+          "MinMs": 13.883700000000001,
+          "MaxMs": 21.078799999999998
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 11.559149999999999,
+          "P95Ms": 16.5549,
+          "MinMs": 10.683499999999999,
+          "MaxMs": 20.166
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 12.003249999999998,
+          "P95Ms": 16.6908,
+          "MinMs": 10.6006,
+          "MaxMs": 16.9985
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 14.88405,
+          "P95Ms": 20.3983,
+          "MinMs": 13.8751,
+          "MaxMs": 20.6798
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "5864": 128
+        },
+        "candidate": {
+          "5864": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 15.0598,
+          "AllocatedBytes": 5864
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 12.613499999999998,
+          "AllocatedBytes": 5864
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 16.4863,
+          "AllocatedBytes": 5864
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 17.1712,
+          "AllocatedBytes": 12056
+        }
+      ]
+    },
+    {
+      "Name": "Manhattan (9 tiles)",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 20.095600000000005,
+        "P95Ms": 28.523600000000005,
+        "MinMs": 18.914199999999997,
+        "MaxMs": 29.6334
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 17.5198,
+        "P95Ms": 24.7967,
+        "MinMs": 15.9088,
+        "MaxMs": 26.131600000000002
+      },
+      "MedianChangePercent": -12.817731244650588,
+      "P95ChangePercent": -13.066022521701337,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 20.0786,
+          "P95Ms": 28.631500000000003,
+          "MinMs": 18.914199999999997,
+          "MaxMs": 29.6334
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 17.30115,
+          "P95Ms": 24.115899999999996,
+          "MinMs": 15.9088,
+          "MaxMs": 24.8018
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 18.0912,
+          "P95Ms": 24.9131,
+          "MinMs": 15.9577,
+          "MaxMs": 26.131600000000002
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 20.09955,
+          "P95Ms": 26.3314,
+          "MinMs": 19.000700000000002,
+          "MaxMs": 28.1995
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "6280": 128
+        },
+        "candidate": {
+          "6280": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 19.632199999999997,
+          "AllocatedBytes": 6280
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 17.253400000000003,
+          "AllocatedBytes": 6280
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 20.876199999999997,
+          "AllocatedBytes": 6280
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 21.7708,
+          "AllocatedBytes": 6280
+        }
+      ]
+    },
+    {
+      "Name": "All bundled (19 tiles)",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 36.62905000000001,
+        "P95Ms": 51.4324,
+        "MinMs": 34.555,
+        "MaxMs": 52.5677
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 30.97435,
+        "P95Ms": 42.95439999999999,
+        "MinMs": 27.8561,
+        "MaxMs": 43.5125
+      },
+      "MedianChangePercent": -15.437746815710495,
+      "P95ChangePercent": -16.48377287468601,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 36.86635,
+          "P95Ms": 51.50070000000001,
+          "MinMs": 34.555,
+          "MaxMs": 52.5677
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 30.493249999999996,
+          "P95Ms": 41.315200000000004,
+          "MinMs": 28.0055,
+          "MaxMs": 43.1258
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 31.601550000000003,
+          "P95Ms": 43.2977,
+          "MinMs": 27.8561,
+          "MaxMs": 43.5125
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 36.565549999999995,
+          "P95Ms": 47.57339999999999,
+          "MinMs": 34.7453,
+          "MaxMs": 51.263200000000005
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "12848": 128
+        },
+        "candidate": {
+          "12848": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 55.285999999999994,
+          "AllocatedBytes": 151408
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 51.747600000000006,
+          "AllocatedBytes": 151408
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 61.61760000000001,
+          "AllocatedBytes": 151408
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 62.33610000000001,
+          "AllocatedBytes": 157600
+        }
+      ]
+    },
+    {
+      "Name": "Synthetic (14 textures)",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 27.795150000000003,
+        "P95Ms": 38.3065,
+        "MinMs": 26.037600000000005,
+        "MaxMs": 39.9349
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 23.794600000000003,
+        "P95Ms": 32.532000000000004,
+        "MinMs": 21.4539,
+        "MaxMs": 35.9035
+      },
+      "MedianChangePercent": -14.392978631164066,
+      "P95ChangePercent": -15.074465169096618,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 27.926849999999995,
+          "P95Ms": 38.7237,
+          "MinMs": 26.037600000000005,
+          "MaxMs": 39.9349
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 23.3605,
+          "P95Ms": 32.178700000000006,
+          "MinMs": 21.5092,
+          "MaxMs": 33.2983
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 24.69095,
+          "P95Ms": 32.7499,
+          "MinMs": 21.4539,
+          "MaxMs": 35.9035
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 27.68425,
+          "P95Ms": 37.2296,
+          "MinMs": 26.1718,
+          "MaxMs": 37.9694
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "7616": 128
+        },
+        "candidate": {
+          "7616": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 37.473099999999995,
+          "AllocatedBytes": 7616
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 34.43000000000001,
+          "AllocatedBytes": 7616
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 38.349700000000006,
+          "AllocatedBytes": 7616
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 45.9449,
+          "AllocatedBytes": 7616
+        }
+      ]
+    }
+  ],
+  "Fixtures": [
+    {
+      "Name": "0-0-0.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.6676,
+        "P95Ms": 2.3637,
+        "MinMs": 1.5427,
+        "MaxMs": 3.7345
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.3472,
+        "P95Ms": 1.9448,
+        "MinMs": 1.2003,
+        "MaxMs": 2.3299
+      },
+      "MedianChangePercent": -19.213240585272253,
+      "P95ChangePercent": -17.722215171130006,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.7138499999999999,
+          "P95Ms": 2.3771,
+          "MinMs": 1.5508,
+          "MaxMs": 2.4144
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.313,
+          "P95Ms": 1.9054,
+          "MinMs": 1.2116,
+          "MaxMs": 1.9953
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.38895,
+          "P95Ms": 1.9495,
+          "MinMs": 1.2003,
+          "MaxMs": 2.3299
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6391499999999999,
+          "P95Ms": 2.3169,
+          "MinMs": 1.5427,
+          "MaxMs": 3.7345
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "704": 128
+        },
+        "candidate": {
+          "704": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 20.594,
+          "AllocatedBytes": 139264
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 21.8807,
+          "AllocatedBytes": 139264
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 24.2551,
+          "AllocatedBytes": 139264
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 23.3941,
+          "AllocatedBytes": 139264
+        }
+      ]
+    },
+    {
+      "Name": "12-2170-1458.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.6389,
+        "P95Ms": 2.2744,
+        "MinMs": 1.5008,
+        "MaxMs": 2.3765
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.2706,
+        "P95Ms": 1.9037,
+        "MinMs": 1.1561,
+        "MaxMs": 5.0596
+      },
+      "MedianChangePercent": -22.4723900176948,
+      "P95ChangePercent": -16.298804080196973,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.70445,
+          "P95Ms": 2.2865,
+          "MinMs": 1.5008,
+          "MaxMs": 2.3765
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.23755,
+          "P95Ms": 1.8032,
+          "MinMs": 1.157,
+          "MaxMs": 5.0596
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.28965,
+          "P95Ms": 1.9037,
+          "MinMs": 1.1561,
+          "MaxMs": 2.3243
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6217000000000001,
+          "P95Ms": 2.2159,
+          "MinMs": 1.504,
+          "MaxMs": 2.2916
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.6756,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.6886,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.382,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.771,
+          "AllocatedBytes": 6736
+        }
+      ]
+    },
+    {
+      "Name": "12-2170-1459.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.61505,
+        "P95Ms": 2.3138,
+        "MinMs": 1.499,
+        "MaxMs": 3.5085
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.2158,
+        "P95Ms": 1.8294,
+        "MinMs": 1.1455,
+        "MaxMs": 1.9746
+      },
+      "MedianChangePercent": -24.720596885545344,
+      "P95ChangePercent": -20.935258017114712,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6268,
+          "P95Ms": 2.3353,
+          "MinMs": 1.5018,
+          "MaxMs": 2.6152
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2057,
+          "P95Ms": 1.8294,
+          "MinMs": 1.1491,
+          "MaxMs": 1.9746
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2319,
+          "P95Ms": 1.8158,
+          "MinMs": 1.1455,
+          "MaxMs": 1.8662
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6066500000000001,
+          "P95Ms": 2.2757,
+          "MinMs": 1.499,
+          "MaxMs": 3.5085
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.5542,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.3116,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.1875,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.5963,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "12-2170-1460.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.6048499999999999,
+        "P95Ms": 2.2578,
+        "MinMs": 1.4801,
+        "MaxMs": 2.9313
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.2489,
+        "P95Ms": 1.82,
+        "MinMs": 1.1245,
+        "MaxMs": 2.5216
+      },
+      "MedianChangePercent": -22.17964295728573,
+      "P95ChangePercent": -19.390557179555312,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.5613000000000001,
+          "P95Ms": 2.2746,
+          "MinMs": 1.4801,
+          "MaxMs": 2.9313
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.21945,
+          "P95Ms": 1.8575,
+          "MinMs": 1.1314,
+          "MaxMs": 2.5216
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.26425,
+          "P95Ms": 1.8036,
+          "MinMs": 1.1245,
+          "MaxMs": 1.8477
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6100500000000002,
+          "P95Ms": 2.2029,
+          "MinMs": 1.4813,
+          "MaxMs": 2.2815
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "848": 128
+        },
+        "candidate": {
+          "848": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.0876,
+          "AllocatedBytes": 848
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.9863,
+          "AllocatedBytes": 848
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 2.1133,
+          "AllocatedBytes": 848
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 3.5564,
+          "AllocatedBytes": 848
+        }
+      ]
+    },
+    {
+      "Name": "12-2171-1458.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.6572,
+        "P95Ms": 2.3558,
+        "MinMs": 1.5504,
+        "MaxMs": 2.568
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.3488,
+        "P95Ms": 1.9187,
+        "MinMs": 1.2189,
+        "MaxMs": 4.0934
+      },
+      "MedianChangePercent": -18.60970311368574,
+      "P95ChangePercent": -18.55420663893369,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6636000000000002,
+          "P95Ms": 2.3948,
+          "MinMs": 1.5504,
+          "MaxMs": 2.568
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.36405,
+          "P95Ms": 1.9187,
+          "MinMs": 1.2203,
+          "MaxMs": 4.0934
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.301,
+          "P95Ms": 1.9152,
+          "MinMs": 1.2189,
+          "MaxMs": 1.9767
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6532499999999999,
+          "P95Ms": 2.3278,
+          "MinMs": 1.5598,
+          "MaxMs": 2.3693
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.653,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.428,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.6208,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.8249,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "12-2171-1459.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.6144500000000002,
+        "P95Ms": 2.301,
+        "MinMs": 1.4981,
+        "MaxMs": 2.76
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.2614999999999998,
+        "P95Ms": 1.8683,
+        "MinMs": 1.144,
+        "MaxMs": 3.182
+      },
+      "MedianChangePercent": -21.861934404905714,
+      "P95ChangePercent": -18.804867448935248,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.5997,
+          "P95Ms": 2.3261,
+          "MinMs": 1.5027,
+          "MaxMs": 2.388
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2539500000000001,
+          "P95Ms": 1.7993,
+          "MinMs": 1.1603,
+          "MaxMs": 3.182
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2730000000000001,
+          "P95Ms": 1.8817,
+          "MinMs": 1.144,
+          "MaxMs": 2.1553
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6207500000000001,
+          "P95Ms": 2.2564,
+          "MinMs": 1.4981,
+          "MaxMs": 2.76
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.5208,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.1755,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.9396,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.5168,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "12-2171-1460.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.5653,
+        "P95Ms": 2.261,
+        "MinMs": 1.463,
+        "MaxMs": 2.505
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.23605,
+        "P95Ms": 1.8324,
+        "MinMs": 1.1103,
+        "MaxMs": 3.0163
+      },
+      "MedianChangePercent": -21.034306522711287,
+      "P95ChangePercent": -18.956214064573196,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.5746,
+          "P95Ms": 2.2668,
+          "MinMs": 1.4643,
+          "MaxMs": 2.4091
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.20755,
+          "P95Ms": 1.7916,
+          "MinMs": 1.1166,
+          "MaxMs": 3.0163
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2684000000000002,
+          "P95Ms": 1.84,
+          "MinMs": 1.1103,
+          "MaxMs": 2.484
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.5553,
+          "P95Ms": 2.2084,
+          "MinMs": 1.463,
+          "MaxMs": 2.505
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.4872,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.1611,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 2.4836,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.5658,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "12-2172-1458.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.6141999999999999,
+        "P95Ms": 2.3121,
+        "MinMs": 1.5193,
+        "MaxMs": 2.6329
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.28275,
+        "P95Ms": 1.9064,
+        "MinMs": 1.1649,
+        "MaxMs": 3.955
+      },
+      "MedianChangePercent": -20.53339115351257,
+      "P95ChangePercent": -17.54681890921672,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.61255,
+          "P95Ms": 2.3316,
+          "MinMs": 1.5243,
+          "MaxMs": 2.6329
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2812999999999999,
+          "P95Ms": 1.8453,
+          "MinMs": 1.1719,
+          "MaxMs": 3.955
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.3059500000000002,
+          "P95Ms": 1.9149,
+          "MinMs": 1.1649,
+          "MaxMs": 2.7568
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6141999999999999,
+          "P95Ms": 2.2704,
+          "MinMs": 1.5193,
+          "MaxMs": 2.3056
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "1208": 128
+        },
+        "candidate": {
+          "1208": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.6584,
+          "AllocatedBytes": 1208
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.2418,
+          "AllocatedBytes": 1208
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.1942,
+          "AllocatedBytes": 1208
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.8045,
+          "AllocatedBytes": 1208
+        }
+      ]
+    },
+    {
+      "Name": "12-2172-1459.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.65265,
+        "P95Ms": 2.3788,
+        "MinMs": 1.5471,
+        "MaxMs": 3.2762
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.3206,
+        "P95Ms": 1.9171,
+        "MinMs": 1.1925,
+        "MaxMs": 4.536
+      },
+      "MedianChangePercent": -20.091973497110704,
+      "P95ChangePercent": -19.408945686900957,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.66665,
+          "P95Ms": 2.5504,
+          "MinMs": 1.5572,
+          "MaxMs": 3.2762
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2861500000000001,
+          "P95Ms": 1.9247,
+          "MinMs": 1.1975,
+          "MaxMs": 4.536
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.3638,
+          "P95Ms": 1.8885,
+          "MinMs": 1.1925,
+          "MaxMs": 1.9293
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.63895,
+          "P95Ms": 2.324,
+          "MinMs": 1.5471,
+          "MaxMs": 2.4661
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.7272,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.2281,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 3.3237,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.7356,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "12-2172-1460.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.64425,
+        "P95Ms": 2.3617,
+        "MinMs": 1.54,
+        "MaxMs": 5.3935
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.30255,
+        "P95Ms": 1.9312,
+        "MinMs": 1.2039,
+        "MaxMs": 3.286
+      },
+      "MedianChangePercent": -20.781511327352888,
+      "P95ChangePercent": -18.228394800355673,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6921,
+          "P95Ms": 2.3852,
+          "MinMs": 1.54,
+          "MaxMs": 5.3935
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.30205,
+          "P95Ms": 1.8867,
+          "MinMs": 1.2054,
+          "MaxMs": 3.286
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.3101500000000001,
+          "P95Ms": 1.9544,
+          "MinMs": 1.2039,
+          "MaxMs": 2.6782
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.6301,
+          "P95Ms": 2.3293,
+          "MinMs": 1.5422,
+          "MaxMs": 2.3566
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.6958,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.3925,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.2416,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.7999,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4822-6159.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.32805,
+        "P95Ms": 3.3052,
+        "MinMs": 2.1505,
+        "MaxMs": 4.7624
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.9898500000000001,
+        "P95Ms": 2.8554,
+        "MinMs": 1.7957,
+        "MaxMs": 4.8419
+      },
+      "MedianChangePercent": -14.52717939906789,
+      "P95ChangePercent": -13.60885876800194,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.3498,
+          "P95Ms": 3.3443,
+          "MinMs": 2.1597,
+          "MaxMs": 4.7624
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.97705,
+          "P95Ms": 2.8337,
+          "MinMs": 1.7973,
+          "MaxMs": 4.8419
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.0147,
+          "P95Ms": 2.8554,
+          "MinMs": 1.7957,
+          "MaxMs": 3.1156
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.2931,
+          "P95Ms": 3.2653,
+          "MinMs": 2.1505,
+          "MaxMs": 3.3052
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.2341,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 2.0142,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 4.8365,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.6804,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4822-6160.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.1202,
+        "P95Ms": 3.0491,
+        "MinMs": 2.0005,
+        "MaxMs": 3.2457
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.8460999999999999,
+        "P95Ms": 2.6498,
+        "MinMs": 1.6556,
+        "MaxMs": 6.9035
+      },
+      "MedianChangePercent": -12.928025657956809,
+      "P95ChangePercent": -13.09566757403825,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.12385,
+          "P95Ms": 3.0974,
+          "MinMs": 2.0006,
+          "MaxMs": 3.2457
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.87255,
+          "P95Ms": 2.628,
+          "MinMs": 1.6664,
+          "MaxMs": 3.5212
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.8331,
+          "P95Ms": 2.6859,
+          "MinMs": 1.6556,
+          "MaxMs": 6.9035
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.1144499999999997,
+          "P95Ms": 2.8504,
+          "MinMs": 2.0005,
+          "MaxMs": 3.1053
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.1891,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.7227,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.9787,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.4971,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4822-6161.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.9731,
+        "P95Ms": 2.9251,
+        "MinMs": 1.8394,
+        "MaxMs": 3.1056
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.7068,
+        "P95Ms": 2.5168,
+        "MinMs": 1.533,
+        "MaxMs": 2.6989
+      },
+      "MedianChangePercent": -13.49652830571182,
+      "P95ChangePercent": -13.958497145396741,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.00575,
+          "P95Ms": 2.9551,
+          "MinMs": 1.8563,
+          "MaxMs": 3.1056
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.6731,
+          "P95Ms": 2.4921,
+          "MinMs": 1.533,
+          "MaxMs": 2.6989
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.76585,
+          "P95Ms": 2.5211,
+          "MinMs": 1.538,
+          "MaxMs": 2.6649
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.9384000000000001,
+          "P95Ms": 2.8935,
+          "MinMs": 1.8394,
+          "MaxMs": 3.0768
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.0351,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.8337,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.8542,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.008,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4823-6159.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.1797500000000003,
+        "P95Ms": 3.177,
+        "MinMs": 2.0383,
+        "MaxMs": 3.6564
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.87915,
+        "P95Ms": 2.7245,
+        "MinMs": 1.7109,
+        "MaxMs": 2.7877
+      },
+      "MedianChangePercent": -13.79057231333869,
+      "P95ChangePercent": -14.242996537614106,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.1873500000000003,
+          "P95Ms": 3.1864,
+          "MinMs": 2.0383,
+          "MaxMs": 3.6564
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.846,
+          "P95Ms": 2.6386,
+          "MinMs": 1.7152,
+          "MaxMs": 2.6867
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.9368,
+          "P95Ms": 2.741,
+          "MinMs": 1.7109,
+          "MaxMs": 2.7877
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.1696,
+          "P95Ms": 3.1291,
+          "MinMs": 2.0501,
+          "MaxMs": 3.1946
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.123,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.8923,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 2.0123,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.4747,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4823-6160.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.1833,
+        "P95Ms": 3.1502,
+        "MinMs": 2.0421,
+        "MaxMs": 3.2218
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.8919,
+        "P95Ms": 2.7131,
+        "MinMs": 1.7125,
+        "MaxMs": 5.2373
+      },
+      "MedianChangePercent": -13.346768652956541,
+      "P95ChangePercent": -13.875309504158473,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.2146,
+          "P95Ms": 3.1704,
+          "MinMs": 2.0421,
+          "MaxMs": 3.2218
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.85615,
+          "P95Ms": 2.6321,
+          "MinMs": 1.713,
+          "MaxMs": 2.7316
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.9428999999999998,
+          "P95Ms": 2.7437,
+          "MinMs": 1.7125,
+          "MaxMs": 5.2373
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.15415,
+          "P95Ms": 3.086,
+          "MinMs": 2.0505,
+          "MaxMs": 3.1639
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.1183,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.8933,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.8599,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.2411,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4823-6161.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.20525,
+        "P95Ms": 3.1934,
+        "MinMs": 2.0586,
+        "MaxMs": 3.3204
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.8696000000000002,
+        "P95Ms": 2.7325,
+        "MinMs": 1.6988,
+        "MaxMs": 6.1815
+      },
+      "MedianChangePercent": -15.220496542342133,
+      "P95ChangePercent": -14.432892841485568,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.2186500000000002,
+          "P95Ms": 3.2045,
+          "MinMs": 2.0586,
+          "MaxMs": 3.3204
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.8412,
+          "P95Ms": 2.6792,
+          "MinMs": 1.6988,
+          "MaxMs": 2.7839
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.90095,
+          "P95Ms": 2.7403,
+          "MinMs": 1.7088,
+          "MaxMs": 6.1815
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.17945,
+          "P95Ms": 2.9983,
+          "MinMs": 2.0634,
+          "MaxMs": 3.1864
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.1072,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.7622,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.8858,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.2911,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4824-6159.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.33795,
+        "P95Ms": 3.3702,
+        "MinMs": 2.2004,
+        "MaxMs": 8.8228
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 2.0149999999999997,
+        "P95Ms": 2.9328,
+        "MinMs": 1.8631,
+        "MaxMs": 3.3111
+      },
+      "MedianChangePercent": -13.813383519750232,
+      "P95ChangePercent": -12.978458251735814,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.3401,
+          "P95Ms": 3.4029,
+          "MinMs": 2.2004,
+          "MaxMs": 8.8228
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.00565,
+          "P95Ms": 2.9107,
+          "MinMs": 1.8651,
+          "MaxMs": 3.0199
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.0698499999999997,
+          "P95Ms": 2.9328,
+          "MinMs": 1.8631,
+          "MaxMs": 3.3111
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.3292,
+          "P95Ms": 3.2619,
+          "MinMs": 2.2064,
+          "MaxMs": 3.4166
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.2031,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.9342,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 2.3689,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.5425,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "14-4824-6160.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.2811500000000002,
+        "P95Ms": 3.2879,
+        "MinMs": 2.1452,
+        "MaxMs": 3.7033
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.9782000000000002,
+        "P95Ms": 2.8565,
+        "MinMs": 1.7888,
+        "MaxMs": 5.395
+      },
+      "MedianChangePercent": -13.28058216250575,
+      "P95ChangePercent": -13.120837008424836,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.2799,
+          "P95Ms": 3.3155,
+          "MinMs": 2.1452,
+          "MaxMs": 3.3677
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.90435,
+          "P95Ms": 2.841,
+          "MinMs": 1.7888,
+          "MaxMs": 3.9382
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.05755,
+          "P95Ms": 2.9173,
+          "MinMs": 1.8157,
+          "MaxMs": 5.395
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.2884,
+          "P95Ms": 3.2723,
+          "MinMs": 2.1544,
+          "MaxMs": 3.7033
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "1928": 128
+        },
+        "candidate": {
+          "1928": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.2787,
+          "AllocatedBytes": 1928
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.9758,
+          "AllocatedBytes": 1928
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 2.1127,
+          "AllocatedBytes": 1928
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.3623,
+          "AllocatedBytes": 1928
+        }
+      ]
+    },
+    {
+      "Name": "14-4824-6161.jpg",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.3222,
+        "P95Ms": 3.3303,
+        "MinMs": 2.1996,
+        "MaxMs": 3.7021
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 2.0387000000000004,
+        "P95Ms": 2.9625,
+        "MinMs": 1.8578,
+        "MaxMs": 4.9364
+      },
+      "MedianChangePercent": -12.208250796658326,
+      "P95ChangePercent": -11.044050085577872,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.3932,
+          "P95Ms": 3.3303,
+          "MinMs": 2.1996,
+          "MaxMs": 3.7021
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.99655,
+          "P95Ms": 2.9424,
+          "MinMs": 1.8578,
+          "MaxMs": 4.9364
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.08035,
+          "P95Ms": 2.9625,
+          "MinMs": 1.8823,
+          "MaxMs": 4.6932
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.3063000000000002,
+          "P95Ms": 3.3185,
+          "MinMs": 2.2033,
+          "MaxMs": 3.469
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.3436,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 2.225,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.9672,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.6736,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "smooth",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.5205,
+        "P95Ms": 2.2848,
+        "MinMs": 1.4172,
+        "MaxMs": 2.4228
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.2807499999999998,
+        "P95Ms": 1.8718,
+        "MinMs": 1.1504,
+        "MaxMs": 4.9381
+      },
+      "MedianChangePercent": -15.767839526471562,
+      "P95ChangePercent": -18.075980392156875,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.5430000000000001,
+          "P95Ms": 2.3142,
+          "MinMs": 1.4228,
+          "MaxMs": 2.4228
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.26905,
+          "P95Ms": 1.8308,
+          "MinMs": 1.1562,
+          "MaxMs": 1.9282
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.3083,
+          "P95Ms": 1.8918,
+          "MinMs": 1.1504,
+          "MaxMs": 4.9381
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.5082499999999999,
+          "P95Ms": 2.224,
+          "MinMs": 1.4172,
+          "MaxMs": 2.2848
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.4742,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.2066,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.1963,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.6759,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "smooth-128",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.0431,
+        "P95Ms": 1.5541,
+        "MinMs": 0.9791,
+        "MaxMs": 2.372
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 0.6614500000000001,
+        "P95Ms": 1.0699,
+        "MinMs": 0.6018,
+        "MaxMs": 2.1177
+      },
+      "MedianChangePercent": -36.588054836544906,
+      "P95ChangePercent": -31.156296248632643,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.06875,
+          "P95Ms": 1.562,
+          "MinMs": 0.9897,
+          "MaxMs": 2.372
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.6596,
+          "P95Ms": 1.0389,
+          "MinMs": 0.6028,
+          "MaxMs": 2.1177
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.6656500000000001,
+          "P95Ms": 1.0699,
+          "MinMs": 0.6018,
+          "MaxMs": 1.2364
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.0327,
+          "P95Ms": 1.4793,
+          "MinMs": 0.9791,
+          "MaxMs": 1.8134
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 0.9947,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 0.6927,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 0.7254,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.0913,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "checker",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.3458999999999999,
+        "P95Ms": 2.1241,
+        "MinMs": 1.2682,
+        "MaxMs": 3.0125
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.24325,
+        "P95Ms": 1.9405,
+        "MinMs": 1.1385,
+        "MaxMs": 2.6927
+      },
+      "MedianChangePercent": -7.6268667805929,
+      "P95ChangePercent": -8.643660844593004,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.3382,
+          "P95Ms": 2.1808,
+          "MinMs": 1.2682,
+          "MaxMs": 3.0125
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2136,
+          "P95Ms": 1.9241,
+          "MinMs": 1.1502,
+          "MaxMs": 2.6927
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.2859500000000001,
+          "P95Ms": 1.9484,
+          "MinMs": 1.1385,
+          "MaxMs": 1.9842
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.35195,
+          "P95Ms": 2.0878,
+          "MinMs": 1.2696,
+          "MaxMs": 2.1241
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.8887,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 2.8232,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 3.9796,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 3.0418,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "checker-128",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.0286499999999998,
+        "P95Ms": 1.46,
+        "MinMs": 0.9517,
+        "MaxMs": 1.5462
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 0.6770499999999999,
+        "P95Ms": 1.0728,
+        "MinMs": 0.5951,
+        "MaxMs": 1.5482
+      },
+      "MedianChangePercent": -34.180722305934964,
+      "P95ChangePercent": -26.520547945205475,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.0449,
+          "P95Ms": 1.4712,
+          "MinMs": 0.9517,
+          "MaxMs": 1.5462
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.6582,
+          "P95Ms": 1.0175,
+          "MinMs": 0.5951,
+          "MaxMs": 1.4446
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.7102999999999999,
+          "P95Ms": 1.1914,
+          "MinMs": 0.5953,
+          "MaxMs": 1.5482
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.01585,
+          "P95Ms": 1.392,
+          "MinMs": 0.9544,
+          "MaxMs": 1.4992
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 0.9713,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 0.7402,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 0.6409,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.0395,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "gradient",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.7548,
+        "P95Ms": 2.5726,
+        "MinMs": 1.647,
+        "MaxMs": 2.6876
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.45275,
+        "P95Ms": 2.1596,
+        "MinMs": 1.3363,
+        "MaxMs": 4.0793
+      },
+      "MedianChangePercent": -17.212787782083428,
+      "P95ChangePercent": -16.05379771437455,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.7936,
+          "P95Ms": 2.5767,
+          "MinMs": 1.6649,
+          "MaxMs": 2.6876
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.42755,
+          "P95Ms": 2.116,
+          "MinMs": 1.3363,
+          "MaxMs": 2.905
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.48015,
+          "P95Ms": 2.1629,
+          "MinMs": 1.3364,
+          "MaxMs": 4.0793
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.73685,
+          "P95Ms": 2.522,
+          "MinMs": 1.647,
+          "MaxMs": 2.5838
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.638,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 2.5295,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 2.4084,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.7467,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "gradient-128",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.3008,
+        "P95Ms": 1.8426,
+        "MinMs": 1.2206,
+        "MaxMs": 2.1338
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 0.9199999999999999,
+        "P95Ms": 1.3696,
+        "MinMs": 0.8428,
+        "MaxMs": 3.5083
+      },
+      "MedianChangePercent": -29.274292742927432,
+      "P95ChangePercent": -25.670248561814834,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.3342,
+          "P95Ms": 1.8426,
+          "MinMs": 1.2253,
+          "MaxMs": 1.8997
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.90505,
+          "P95Ms": 1.3275,
+          "MinMs": 0.8442,
+          "MaxMs": 1.7193
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.9725999999999999,
+          "P95Ms": 1.3744,
+          "MinMs": 0.8428,
+          "MaxMs": 3.5083
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.28715,
+          "P95Ms": 1.7891,
+          "MinMs": 1.2206,
+          "MaxMs": 2.1338
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.2281,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 0.9666,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 0.8888,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.497,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "noise",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.90355,
+        "P95Ms": 2.7582,
+        "MinMs": 1.7197,
+        "MaxMs": 2.8704
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.83745,
+        "P95Ms": 2.6039,
+        "MinMs": 1.5654,
+        "MaxMs": 3.617
+      },
+      "MedianChangePercent": -3.47245935226288,
+      "P95ChangePercent": -5.594228119788269,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.9144,
+          "P95Ms": 2.7893,
+          "MinMs": 1.7197,
+          "MaxMs": 2.8704
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.7877,
+          "P95Ms": 2.5888,
+          "MinMs": 1.5837,
+          "MaxMs": 3.617
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.84415,
+          "P95Ms": 2.6039,
+          "MinMs": 1.5654,
+          "MaxMs": 2.887
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.90125,
+          "P95Ms": 2.7368,
+          "MinMs": 1.7385,
+          "MaxMs": 2.8385
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 9.8413,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 10.2417,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 10.6563,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 14.2055,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "noise-128",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.1576,
+        "P95Ms": 1.7372,
+        "MinMs": 1.1139,
+        "MaxMs": 2.4619
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 0.861,
+        "P95Ms": 1.3092,
+        "MinMs": 0.7906,
+        "MaxMs": 1.3772
+      },
+      "MedianChangePercent": -25.621976503109877,
+      "P95ChangePercent": -24.63734745567581,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.1932,
+          "P95Ms": 1.7614,
+          "MinMs": 1.118,
+          "MaxMs": 1.8585
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.8647,
+          "P95Ms": 1.2796,
+          "MinMs": 0.7929,
+          "MaxMs": 1.3573
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.8590500000000001,
+          "P95Ms": 1.3229,
+          "MinMs": 0.7906,
+          "MaxMs": 1.3772
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.1482,
+          "P95Ms": 1.681,
+          "MinMs": 1.1139,
+          "MaxMs": 2.4619
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.342,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.0136,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.105,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.6957,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "irregular",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 3.05535,
+        "P95Ms": 4.1708,
+        "MinMs": 2.8835,
+        "MaxMs": 7.7467
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 2.8108,
+        "P95Ms": 3.7019,
+        "MinMs": 2.5176,
+        "MaxMs": 5.257
+      },
+      "MedianChangePercent": -8.00399299589245,
+      "P95ChangePercent": -11.242447492087837,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 3.1161,
+          "P95Ms": 4.2302,
+          "MinMs": 2.8835,
+          "MaxMs": 7.7467
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.7559,
+          "P95Ms": 3.6215,
+          "MinMs": 2.5409,
+          "MaxMs": 5.257
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.9464,
+          "P95Ms": 3.7352,
+          "MinMs": 2.5176,
+          "MaxMs": 4.4151
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 3.032,
+          "P95Ms": 4.0866,
+          "MinMs": 2.8965,
+          "MaxMs": 4.1287
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.9625,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 3.4475,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 3.5294,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 3.1733,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "irregular-128",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 1.4128,
+        "P95Ms": 1.9119,
+        "MinMs": 1.2812,
+        "MaxMs": 2.2651
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 1.31875,
+        "P95Ms": 1.852,
+        "MinMs": 1.2061,
+        "MaxMs": 2.6614
+      },
+      "MedianChangePercent": -6.656993204983008,
+      "P95ChangePercent": -3.133009048590396,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.4212500000000001,
+          "P95Ms": 1.9326,
+          "MinMs": 1.2855,
+          "MaxMs": 2.0927
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.28105,
+          "P95Ms": 1.852,
+          "MinMs": 1.2089,
+          "MaxMs": 2.5602
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 1.34875,
+          "P95Ms": 1.8229,
+          "MinMs": 1.2061,
+          "MaxMs": 2.6614
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 1.3984,
+          "P95Ms": 1.8723,
+          "MinMs": 1.2812,
+          "MaxMs": 2.2651
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 1.3016,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.2282,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 1.3149,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 1.3545,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "tiny",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 2.2573499999999997,
+        "P95Ms": 3.0786,
+        "MinMs": 2.1465,
+        "MaxMs": 3.2389
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 2.0490500000000003,
+        "P95Ms": 2.7981,
+        "MinMs": 1.8931,
+        "MaxMs": 5.4452
+      },
+      "MedianChangePercent": -9.227634172813238,
+      "P95ChangePercent": -9.111284350029237,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.3127,
+          "P95Ms": 3.0992,
+          "MinMs": 2.1465,
+          "MaxMs": 3.2389
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.0247,
+          "P95Ms": 2.7536,
+          "MinMs": 1.8931,
+          "MaxMs": 4.2151
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 2.10705,
+          "P95Ms": 2.7984,
+          "MinMs": 1.8938,
+          "MaxMs": 5.4452
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 2.23415,
+          "P95Ms": 3.0511,
+          "MinMs": 2.1531,
+          "MaxMs": 3.1707
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 2.1821,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 1.9124,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 2.0718,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 2.7984,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "tiny-128",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 0.5660499999999999,
+        "P95Ms": 0.8075,
+        "MinMs": 0.5362,
+        "MaxMs": 0.9028
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 0.5197,
+        "P95Ms": 0.7541,
+        "MinMs": 0.4764,
+        "MaxMs": 2.2286
+      },
+      "MedianChangePercent": -8.188322586343943,
+      "P95ChangePercent": -6.613003095975234,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 0.57355,
+          "P95Ms": 0.813,
+          "MinMs": 0.5369,
+          "MaxMs": 0.9028
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.511,
+          "P95Ms": 0.7075,
+          "MinMs": 0.4773,
+          "MaxMs": 0.7551
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 0.5531,
+          "P95Ms": 0.8228,
+          "MinMs": 0.4764,
+          "MaxMs": 2.2286
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 0.56225,
+          "P95Ms": 0.776,
+          "MinMs": 0.5362,
+          "MaxMs": 0.8351
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 0.5376,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 0.4887,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 0.4843,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 0.666,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "big",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 5.49845,
+        "P95Ms": 7.4742,
+        "MinMs": 5.0813,
+        "MaxMs": 8.7167
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 4.1046,
+        "P95Ms": 5.6147,
+        "MinMs": 3.6167,
+        "MaxMs": 7.5547
+      },
+      "MedianChangePercent": -25.349871327374085,
+      "P95ChangePercent": -24.87891680714993,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 5.49845,
+          "P95Ms": 7.5906,
+          "MinMs": 5.0813,
+          "MaxMs": 8.7167
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 4.00455,
+          "P95Ms": 5.5911,
+          "MinMs": 3.643,
+          "MaxMs": 6.6234
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 4.1746,
+          "P95Ms": 5.6147,
+          "MinMs": 3.6167,
+          "MaxMs": 7.5547
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 5.48355,
+          "P95Ms": 7.3136,
+          "MinMs": 5.0982,
+          "MaxMs": 7.6752
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 5.3083,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 3.6472,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 5.2803,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 6.6877,
+          "AllocatedBytes": 544
+        }
+      ]
+    },
+    {
+      "Name": "big-128",
+      "Baseline": {
+        "Count": 128,
+        "MedianMs": 3.63305,
+        "P95Ms": 4.9836,
+        "MinMs": 3.3741,
+        "MaxMs": 5.6958
+      },
+      "Candidate": {
+        "Count": 128,
+        "MedianMs": 3.6723,
+        "P95Ms": 4.9692,
+        "MinMs": 3.2961,
+        "MaxMs": 7.602
+      },
+      "MedianChangePercent": 1.0803594775739445,
+      "P95ChangePercent": -0.2889477486154646,
+      "Blocks": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 3.70815,
+          "P95Ms": 5.0303,
+          "MinMs": 3.3761,
+          "MaxMs": 5.6958
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 3.6253,
+          "P95Ms": 4.9722,
+          "MinMs": 3.2961,
+          "MaxMs": 7.602
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Count": 64,
+          "MedianMs": 3.7702999999999998,
+          "P95Ms": 4.9392,
+          "MinMs": 3.2986,
+          "MaxMs": 6.4561
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Count": 64,
+          "MedianMs": 3.52905,
+          "P95Ms": 4.8892,
+          "MinMs": 3.3741,
+          "MaxMs": 5.0227
+        }
+      ],
+      "AllocationHistograms": {
+        "baseline": {
+          "544": 128
+        },
+        "candidate": {
+          "544": 128
+        }
+      },
+      "ColdPasses": [
+        {
+          "Block": 0,
+          "Variant": "baseline",
+          "Milliseconds": 3.8027,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 1,
+          "Variant": "candidate",
+          "Milliseconds": 3.4919,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 2,
+          "Variant": "candidate",
+          "Milliseconds": 4.0683,
+          "AllocatedBytes": 544
+        },
+        {
+          "Block": 3,
+          "Variant": "baseline",
+          "Milliseconds": 4.2716,
+          "AllocatedBytes": 544
+        }
+      ]
+    }
+  ],
+  "Regressions": [
+    "big-128"
+  ],
+  "Correctness": {
+    "ArtAndNaturalTextures": 74,
+    "Pixels": 3989462,
+    "PaletteKeys": 32768,
+    "BayerClusters": 131072,
+    "OracleBaseCommit": "a4d80e0a4dfa84b7b420c04e3c03deef4f8b96bb",
+    "Tests": "EarthRasterChecks.Run, invoked by ImageryChecks.Run in the ordinary rendering suite.",
+    "SourceSha256": {
+      "tests/PixelMap.Rendering.Tests/EarthRasterChecks.cs": "f4823cd1ce5867c710d3d1aef164ceb9c218bef5fc2c4f0f3639f4f07f55b591",
+      "tests/PixelMap.Rendering.Tests/Reference/LegacyEarthRaster.cs": "b0b0998bcc1184c3129c1facd53f6efdae2285d0ff87806365b9241f18c45cab"
+    }
+  },
+  "CsvSha256": "e44bd713b991b12d6f88f36e2e0e59481946974cebb96f8d84d36727641b8fa7"
+}

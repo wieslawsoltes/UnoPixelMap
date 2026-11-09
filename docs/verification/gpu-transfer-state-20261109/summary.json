@@ -1,0 +1,32 @@
+{
+  "baseline_source": "a4d80e0a4dfa84b7b420c04e3c03deef4f8b96bb",
+  "baseline_renderer_sha256": "9f6691d0364e0b1726240c75362cb55beafd477027444449f01d3bea9e602ec6",
+  "candidate_renderer_sha256": "e676f92809d4b0a9f03bc6975c9e99cf565a7e8fff1867a93a5396f15b2e2400",
+  "candidate_source_files": {
+    "src/PixelMap.Rendering/GlMapRenderer.cs": "044385cd0edf27e798968b2bb96edaff9fb4bef6c6c6f04375295f568478e6e4",
+    "src/PixelMap.Rendering/EarthRaster.cs": "fd5635401b82bd6042a830f41e1afa532e37bdb811b6757dd55a06506115055e",
+    "src/PixelMap.Rendering/MapCamera.cs": "835caf479e21d6ae13e6a9543923467d2b4adb5bae7172164ef3e3400260e640",
+    "src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs": "cc1d35d70536dee08535bcfd57de55b7adc176f3fa3dbe91465d1f4d26d51b06",
+    "src/PixelMap.Controls/FreeRoamNavigation.cs": "2504101407d75a648a5fc4ec73c074e5c97909e5350325f99cfa6e72bb99ce12",
+    "tests/PixelMap.Rendering.Tests/GpuSubmissionChecks.cs": "daad83f52cae4605ea6da0aa263ed15810ecb7ed759088b9c67b902144b509d7",
+    "tests/browser/performance.cjs": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c"
+  },
+  "context": "EGL 1.5, OpenGL ES 3.2 Mesa 25.0.7-2+deb13u1, Mesa, llvmpipe (LLVM 19.1.7, 256 bits)",
+  "identical_complete_report": true,
+  "report_sha256": "bd4674613629c8530e52784f3cd1368d492f5ddcab16b83e70988448a115c58a",
+  "standard_scenarios": 48,
+  "standard_image_hashes": 192,
+  "navigation_configurations": 24,
+  "source_ordering_layers": 3,
+  "failures": [],
+  "state_regressions": [
+    "16 host-state draws: four styles, photograph/no photograph, full/art output",
+    "Eight exact retained images: poisoned unpack buffers/strides, pack row lengths, shifted viewport",
+    "Failed uniform upload restores host state and invalidates cached uniform values",
+    "Cached detached draws query no unpack fields and call no pixel-store setters",
+    "Cached adopted images query/restore only the two row lengths Skia resets",
+    "Immutable images retain their contents across later frames, viewport resize and renderer disposal",
+    "Deferred Skia picture replay and pending prior Skia draws preserve original texture contents"
+  ],
+  "scope": "Functional GL state and exact image comparison. No isolated wall-clock speedup is claimed. Desktop GL3.3 retains mutable allocation; native GLES3.2 is the executed graphics backend."
+}

@@ -2,6 +2,66 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
+## Camera clearance and exact Earth preprocessing · 9 November 2026
+
+Third-person follow now checks terrain clearance at the actual interpolated eye.
+Previously, both spring endpoints could be above the surface while their chord
+crossed below an intervening ridge. The final eye keeps the existing 35 cm floor,
+rendered-mesh elevation and vertical exaggeration, with unchanged horizontal
+position, orientation and lens. First-person and free-flight controls retain their
+existing behavior. Twenty-four regression poses start with safe endpoints and
+verify an unsafe midpoint before correction, including signed terrain and viewport
+changes. Reusing DEM samples reduces explicit surface queries in the follow method
+from two to one for relief first-person, five to three for smoothed relief chase,
+and three to one for flat chase. These counts exclude subsequent camera
+normalization and rendered-mesh queries.
+
+Earth image preprocessing specializes the common 256-to-128 reduction as an exact
+integer 2×2 sum in linear light. Smooth output clusters share palette unpacking and
+their four Bayer decisions. Irregular image dimensions retain the generic box
+integral; nearby detail, palette choices and world-aligned dither remain exact.
+The frozen-raster comparison covers 74 art/natural textures containing 3,989,462
+pixels and all 131,072 palette-key/even-phase clusters, including codec guards,
+replacement and cache reuse.
+
+| Native imagery batch | Previous median | New median | Change |
+| --- | ---: | ---: | ---: |
+| World overview | 1.6676 ms | 1.3472 ms | −19.21% |
+| Nine Garda tiles | 14.9205 ms | 11.8351 ms | −20.68% |
+| Nine Manhattan tiles | 20.0956 ms | 17.5198 ms | −12.82% |
+| All 19 bundled tiles | 36.6291 ms | 30.9744 ms | −15.44% |
+
+The isolated four-process ABBA run uses the same harness and dependencies, changing
+only the renderer assembly. It includes decode, resampling, palette lookup,
+dithering and cache insertion. The bundled-batch p95 changes from 51.4324 to
+42.9544 ms; measured managed allocation remains 12,848 bytes per batch. All 33
+benchmark control images match. One synthetic 512-to-128 generic-path median is
+1.08% slower, and the first cold call includes mixed JIT/static-initialization
+results. These are native preprocessing measurements, not frame-rate gains.
+[Raw measurements and provenance](verification/earth-raster-20261109.json) ·
+[Reproduction harness](verification/earth-raster-harness/README.md)
+
+Retained GLES/WebGL artwork images now allocate immutable RGBA storage without a
+pixel source. Cached detached frames avoid all seven unpack-state queries and
+their corresponding state changes. Cached images adopted by Skia preserve only
+the two row lengths that Skia resets; actual pixel uploads still capture and
+restore the complete unpack state. The desktop OpenGL 3.3 allocation path keeps
+its original API requirements. The host-state regression additionally covers
+nondefault pack row lengths, failed uploads, resize, retained textures and delayed
+Skia playback. All 192 standard GPU/CPU/artwork image hashes remain unchanged,
+alongside navigation, source-order and context-recreation checks.
+
+GPU building-cache pruning now runs when the source geometry generation changes.
+Camera-only frames avoid a copied key array and redundant scan. Replacement,
+33-tile eviction, style reset and held-frame replay are covered explicitly. An
+eight-frame control removes exactly 72 managed bytes per frame for six retained
+keys, with identical query and overlay fingerprints; no timing gain is claimed.
+[Allocation evidence](verification/gpu-building-cache-20261109/summary.json)
+
+The full native renderer suite passes. The browser pipeline compares the final
+source with the exact previous Pages artifact from run `42415166135`; its results
+are recorded separately when complete.
+
 ## Selective depth preparation and reusable pixel rows · 7 November 2026
 
 Source release [`53e9c68`](https://github.com/wieslawsoltes/UnoPixelMap/commit/53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b)
