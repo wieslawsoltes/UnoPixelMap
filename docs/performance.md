@@ -171,8 +171,33 @@ Context destruction/recreation and retained-frame replay also pass.
 Browser release validation and the paired benchmark use
 [run 42415166135](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42415166135),
 with the exact `c937ddd` Pages artifact pinned by baseline run `42377138938`.
-Browser measurements and live-camera acceptance are recorded when that run
-completes; the native measurements above do not substitute for them.
+The run completed successfully, including browser verification, deployment and
+the paired benchmark. The recovered evidence now retains all 30 original
+reports, package provenance, browser/runner identity and independently computed
+aggregates in [browser-rendering-53e9c68](verification/browser-rendering-53e9c68/summary.json).
+
+| Moving workload | Main-thread CPU occupancy, baseline → candidate | Relative change | Map submissions/s, baseline → candidate |
+| --- | ---: | ---: | ---: |
+| Walking, first person | 34.852% → 26.455% | −24.09% | 5.356 → 5.607 |
+| Walking, chase | 34.023% → 33.642% | −1.12% | 8.833 → 8.715 |
+| Driving, chase | 43.827% → 44.784% | +2.18% | 6.302 → 6.246 |
+| Driving, first person | 47.631% → 40.550% | −14.87% | 4.137 → 4.215 |
+| Free flight | 35.444% → 32.513% | −8.27% | 4.801 → 5.183 |
+
+Moving cases use two fresh processes per variant in ABBA order. Walking
+first-person rAF p95 changes from 33.35 to 16.80 ms; driving first-person changes
+from 66.65 to 49.95 ms. Chase throughput remains slightly lower, and the driving
+chase CPU result regresses. Stationary controls have one run per variant and
+remain available in the complete comparison; their small CPU occupancy is not
+a reliable basis for a general speedup claim. All 486 candidate map submissions
+use the compositor context, with zero readbacks and at most two images pending.
+
+These are Chromium/SwiftShader scheduling and submission measurements, not
+physical-GPU display rates. External providers are blocked, adaptive art
+resolution remains active, and the reports preserve pixel-size distributions
+and before/after vehicle positions. Native Safari/iOS and physical-GPU timing
+remain unmeasured. This evidence closes the previous release's pending benchmark
+record; it is separate from subsequent source changes.
 
 ## Previous release: moving-frame preparation and pixel-art filtering · c937ddd
 

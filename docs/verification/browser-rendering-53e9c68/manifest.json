@@ -1,0 +1,222 @@
+[
+  {
+    "path": "provenance.json",
+    "sha256": "cc1299b8c94ef84d31e249f36f4fcaf770f4645e99e67e0a0eb2b080cdf2e171",
+    "bytes": 41790
+  },
+  {
+    "path": "environment.json",
+    "sha256": "7dafbbea6abe28803a28a8c2bab58c0c1a1c09d964ad7259f5e861410cd02dce",
+    "bytes": 4195
+  },
+  {
+    "path": "baseline/car-moving-chase/repetition-1.json.gz",
+    "sha256": "43c55d42c2edca25bd678ec8ffe4f919fafe392cce17feb407b1f97bdf0ab0bc",
+    "bytes": 4982,
+    "decoded_sha256": "3f3af7f186ccc544f2335cc90de7c07abb516ee48dece4a4c35995a8fe11263b",
+    "decoded_bytes": 43790
+  },
+  {
+    "path": "baseline/car-moving-chase/repetition-2.json.gz",
+    "sha256": "5d51bfbdd946dd167ee6137c11c8f6ac0d63acb337adae7cd26bc768c326072d",
+    "bytes": 2923,
+    "decoded_sha256": "400143d622e24edccd41c26a4343a3aa8d1bc4de9962f648f995e49ac8ce208b",
+    "decoded_bytes": 10785
+  },
+  {
+    "path": "baseline/car-moving-firstperson/repetition-1.json.gz",
+    "sha256": "2d8ca1d6f0d03d67aeeb5818680bfd38e898a44c08874b092ea194edf29ceeca",
+    "bytes": 4888,
+    "decoded_sha256": "74fec06466760a61d6a3ddb276c3b6d113a9d84184180f82496751cda85a8ef0",
+    "decoded_bytes": 44128
+  },
+  {
+    "path": "baseline/car-moving-firstperson/repetition-2.json.gz",
+    "sha256": "43bcf6f1d298dc0dcc17130c26ed074d49ef0ba8e748360a9d0d1168dcbc9ef1",
+    "bytes": 2862,
+    "decoded_sha256": "ae2778ece75afb1bd4edd00687a0c7876732189463ecdd7782079e0066d44b56",
+    "decoded_bytes": 10065
+  },
+  {
+    "path": "baseline/car-stationary-chase/repetition-1.json.gz",
+    "sha256": "273485777244aba2d2319c3cc805faec9656da4964f4c9a4c42c64c175f8db5b",
+    "bytes": 2052,
+    "decoded_sha256": "34b1b6d385e6143e58e5b034dc6e0e98f1c24bab3a2f21e2a2c623a11bc0917f",
+    "decoded_bytes": 5227
+  },
+  {
+    "path": "baseline/freeflight-moving/repetition-1.json.gz",
+    "sha256": "9e073dda2f800bc0f25644afe810299e135715bf093c8cbe906952dd620e3be9",
+    "bytes": 4940,
+    "decoded_sha256": "6004b9e65a952597125d7a2d370941421dd7e9364aee5ca4bd88161a9175869d",
+    "decoded_bytes": 44223
+  },
+  {
+    "path": "baseline/freeflight-moving/repetition-2.json.gz",
+    "sha256": "270cf09075f4b2735f714fe216df0217cd7d7fb8e0d741f9ca7e2aa157d7bf6a",
+    "bytes": 2829,
+    "decoded_sha256": "088d401bd44c146644c404c4bb2f42a52e69febcba6f762105322e0a1b1ed41b",
+    "decoded_bytes": 9981
+  },
+  {
+    "path": "baseline/freeflight-stationary/repetition-1.json.gz",
+    "sha256": "eb27331a0a6ea1a12beafc298c73779a408ce2bcb47d4e44f4902f05cad7967b",
+    "bytes": 2040,
+    "decoded_sha256": "9bf020e97385b6728ca1be7fd4dccbb1bcccadb86dfa56dc49e55c8f02f9567f",
+    "decoded_bytes": 5177
+  },
+  {
+    "path": "baseline/map-idle-default/repetition-1.json.gz",
+    "sha256": "c66856bd8ab1b0c5119a6576650c391480944407d62e7bd1625ca39a2cba9b40",
+    "bytes": 1934,
+    "decoded_sha256": "87cc8ca79030d9048038cabf5fe91cc38476e658326dd207d155a8c00d2ab50a",
+    "decoded_bytes": 4752
+  },
+  {
+    "path": "baseline/map-idle-relief/repetition-1.json.gz",
+    "sha256": "a0f91730c51f7fbfc3edc02b706bdfe43d04bc6ff52c7acf89a19a6d0bd4629b",
+    "bytes": 2264,
+    "decoded_sha256": "0f58533c5aa9e7a62d6e4a2b24ea9aec01081a0b567a46fb2f22ebfe0bd9767d",
+    "decoded_bytes": 7042
+  },
+  {
+    "path": "baseline/walk-moving-chase/repetition-1.json.gz",
+    "sha256": "d04b6c6ee3bf6606d59a5b6a484782dcb2a2e2a950383acb952d7807d94c88ee",
+    "bytes": 4947,
+    "decoded_sha256": "f7915780b4fb9838937094ca26ad0a483b8a1ffe7ada29ed2432280c445771b2",
+    "decoded_bytes": 43072
+  },
+  {
+    "path": "baseline/walk-moving-chase/repetition-2.json.gz",
+    "sha256": "4e77895812fe5e442f7a0140ae482aea4697a4f50bc43ef909872b9edf7e070d",
+    "bytes": 2852,
+    "decoded_sha256": "2b708659164b986d25752270544da5cd69bfbe6c5fc17a68f9a49bb447d9d3d6",
+    "decoded_bytes": 10140
+  },
+  {
+    "path": "baseline/walk-moving-firstperson/repetition-1.json.gz",
+    "sha256": "38872795eead2556d6f699daab46b76ce0072c3260afd55e4b9025195f8e0039",
+    "bytes": 4846,
+    "decoded_sha256": "ea87c8513018e37da0f324a4a600750777923f63d65f2f0006c25df74116492b",
+    "decoded_bytes": 43150
+  },
+  {
+    "path": "baseline/walk-moving-firstperson/repetition-2.json.gz",
+    "sha256": "a813dfbbd25bc20dfac425c341c2d655671ce5a26d619492234a8b333f98ffd2",
+    "bytes": 2827,
+    "decoded_sha256": "b16eedb730d5e8a048e33636c31ea3b032f74e0111b6044645d0d519de5a7bea",
+    "decoded_bytes": 9956
+  },
+  {
+    "path": "baseline/walk-stationary-firstperson/repetition-1.json.gz",
+    "sha256": "f918c9c75d7967ccb62f8fe60bf84056dc3add525be4d64dfb48469a8b3fba1e",
+    "bytes": 4106,
+    "decoded_sha256": "5e71b982db628b47ae17a8a72bf5d2785296aac890a991391f4f7d1d83a01545",
+    "decoded_bytes": 37805
+  },
+  {
+    "path": "candidate/car-moving-chase/repetition-1.json.gz",
+    "sha256": "f8b4e7c65309b92d8b2ac5ba7f68a372925a823cc1a53e2bd232679e50b77a67",
+    "bytes": 5028,
+    "decoded_sha256": "39a47526448aa7cd09d4cc341f4d0c765e75a1e55eace532949c78014b017efa",
+    "decoded_bytes": 44449
+  },
+  {
+    "path": "candidate/car-moving-chase/repetition-2.json.gz",
+    "sha256": "2c40bd24b9065d52143ac48e71d4b5d48aed4a7a14db1ea287fe91fa9700d281",
+    "bytes": 2959,
+    "decoded_sha256": "a43e24caf2deb6ac467014820a9ca4ed01330e6620dd67c8115429b1f3de5391",
+    "decoded_bytes": 11096
+  },
+  {
+    "path": "candidate/car-moving-firstperson/repetition-1.json.gz",
+    "sha256": "c9f79ff085f962ae60d862971b668d69a789b816c4c09700e3c271dcf2d517d9",
+    "bytes": 4894,
+    "decoded_sha256": "63359dddb6f948692f61247e181e31d986d7b0c06756c1c2066c368a8ed3c30f",
+    "decoded_bytes": 44174
+  },
+  {
+    "path": "candidate/car-moving-firstperson/repetition-2.json.gz",
+    "sha256": "3474391cbe07e2d2271a707bdb19d19c19d80f9c286c82074366e66f21c66dec",
+    "bytes": 2908,
+    "decoded_sha256": "2f09126928a29ca1d9ef0089809b26ad0ae54eb75d5475caffe70358fb3f341c",
+    "decoded_bytes": 10156
+  },
+  {
+    "path": "candidate/car-stationary-chase/repetition-1.json.gz",
+    "sha256": "231095bbabad73ed6aa6c8ca2d6c16f3841c71de5589454a2b979181ffa60a19",
+    "bytes": 2064,
+    "decoded_sha256": "a023ca3433c27f3547bb00b9a34209e87a585fd58571ef0444f98dd0d17cec50",
+    "decoded_bytes": 5242
+  },
+  {
+    "path": "candidate/freeflight-moving/repetition-1.json.gz",
+    "sha256": "7fd41708389b73c4af46cc3d593235e33e50b396243087384f96c7e2de1e2813",
+    "bytes": 4888,
+    "decoded_sha256": "cc53d00b363e31b494240fc51c889187073193f55bd33674fe07dd2dd1923155",
+    "decoded_bytes": 43410
+  },
+  {
+    "path": "candidate/freeflight-moving/repetition-2.json.gz",
+    "sha256": "fdae0c3d87c3c2da65ce617bcaca45cd9ce7c3de8b98f22235c1da693e300309",
+    "bytes": 2866,
+    "decoded_sha256": "6fe73f300f271b659585371d25a10eebdea2b440e07c0d4e7a27d6d55ded26fd",
+    "decoded_bytes": 10513
+  },
+  {
+    "path": "candidate/freeflight-stationary/repetition-1.json.gz",
+    "sha256": "69a2a0b8ba5b12cfb33ce31c7567edbc4f4d0077284427c3997a20b63f3daf7b",
+    "bytes": 2055,
+    "decoded_sha256": "5dd750a1ebeef86b01ba6690251d9967270f2a83757216c05478654a8764a0c5",
+    "decoded_bytes": 5189
+  },
+  {
+    "path": "candidate/map-idle-default/repetition-1.json.gz",
+    "sha256": "e4eab6773c71474ed59f7b755e30137fd36936454ee61dd5821c8e63b9d6e87e",
+    "bytes": 1935,
+    "decoded_sha256": "f3d9a9114ab38d78caef0c36dbd2b9a897b30ce617999b29b691475d78ee17c5",
+    "decoded_bytes": 4752
+  },
+  {
+    "path": "candidate/map-idle-relief/repetition-1.json.gz",
+    "sha256": "1d17212527a8c7423c2f15848de1f9165dccefd0677eb611e11f77725520a836",
+    "bytes": 2186,
+    "decoded_sha256": "441e37664a34371e5b020305f1e4f4f46a6a81cbf7f4b05e3213c2498e5a9d88",
+    "decoded_bytes": 6301
+  },
+  {
+    "path": "candidate/walk-moving-chase/repetition-1.json.gz",
+    "sha256": "4854d1c873f46abfc4677845b4f825bca934a361cd77a18c88aafefbe8c72529",
+    "bytes": 4979,
+    "decoded_sha256": "49c6d3d2246891172a96a208371ab9a3d9794352a5ba1cd3093497c088fb4e78",
+    "decoded_bytes": 43170
+  },
+  {
+    "path": "candidate/walk-moving-chase/repetition-2.json.gz",
+    "sha256": "32d3703c2bbddc8dbe496cc73ce57a657a13ca86ecfbfe68e1dab78530f77e4b",
+    "bytes": 2896,
+    "decoded_sha256": "62dec0f47919b2779f2c4ff6360fab1387bfd837583cde85908b99c4123b75dd",
+    "decoded_bytes": 10295
+  },
+  {
+    "path": "candidate/walk-moving-firstperson/repetition-1.json.gz",
+    "sha256": "2beac3fe5479b504cb594c072e79a19f339d6c76c607ff05d9e92552c9aa929e",
+    "bytes": 4870,
+    "decoded_sha256": "80aa9170444854ccdd944697e67983ed5ccd73a5f7668bc32e3c6add91e937e2",
+    "decoded_bytes": 43281
+  },
+  {
+    "path": "candidate/walk-moving-firstperson/repetition-2.json.gz",
+    "sha256": "5d39f4645832f4fdf1431cc0bcf543a520a1a34c20b4268c736a79f1b013d3a7",
+    "bytes": 2818,
+    "decoded_sha256": "caa218011b3d51b28b6a4336d3d2888aa10cacd76f33de8741ea4d0fa67f5dfe",
+    "decoded_bytes": 9814
+  },
+  {
+    "path": "candidate/walk-stationary-firstperson/repetition-1.json.gz",
+    "sha256": "db7affb8d26a3a2c6d6f7daafa5e63581319d9e789c952ae63122fbda5cac94a",
+    "bytes": 4195,
+    "decoded_sha256": "d93e4a0978ac7252a1577c528113df4d79599bd93a2a8686059ba8ad17cbb16a",
+    "decoded_bytes": 38130
+  }
+]

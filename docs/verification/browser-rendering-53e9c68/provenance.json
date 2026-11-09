@@ -1,0 +1,1119 @@
+{
+  "baseline_selection": {
+    "source": "commit-marker",
+    "requested_run_id": 42377138938,
+    "workflow_input": null,
+    "commit_marker": "42377138938",
+    "resolved_run_id": 42377138938
+  },
+  "baseline": {
+    "run_id": 42377138938,
+    "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+    "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42377138938",
+    "artifact_id": 13576502635,
+    "artifact_digest": "sha256:ba0b8ae7a050c64bd7459ef6fa30e5db9c2901b102d843171d3b4bfd1e7c57cb",
+    "artifact_size_bytes": 88286013,
+    "runtime_mode": "InterpreterAndAOT",
+    "resources": [
+      {
+        "group": "jsModuleNative",
+        "name": "dotnet.native.55qcjjnjf2.js",
+        "sha256": "595e0a9c7fd699394ab24c87fc152cb482b59ea4a65ac1e17877d68a0e2f95fa"
+      },
+      {
+        "group": "jsModuleRuntime",
+        "name": "dotnet.runtime.5nc8i5dl74.js",
+        "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d"
+      },
+      {
+        "group": "wasmNative",
+        "name": "dotnet.native.3l7hksc7hn.wasm",
+        "sha256": "a7441c8610c1aa6c76fd92fb1b8ac5fc92889b37933f19d6d93b90bfcb4f1912"
+      },
+      {
+        "group": "icu",
+        "name": "icudt_CJK.tjcz0u77k5.dat",
+        "sha256": "4992ed42745cd09930a8769bd155153fb4f7b813d2798cf1cc39e9c4fa549c79"
+      },
+      {
+        "group": "icu",
+        "name": "icudt_EFIGS.tptq2av103.dat",
+        "sha256": "f1f22d7ad618f24434c30ea8c704cb893de85e50701caba66de3f6a51178c937"
+      },
+      {
+        "group": "icu",
+        "name": "icudt_no_CJK.lfu7j35m59.dat",
+        "sha256": "2fbb15ecd1183f7eff42bd853c278fa39709a918135d1c061eec05e50fb435fb"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "CommonServiceLocator.ukyzr3es9y.wasm",
+        "sha256": "329f6f7c3651c3118f398f95dbef3e7f491b1340359eb8a79faf0e9197fac208"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "HarfBuzzSharp.lwf1lgi861.wasm",
+        "sha256": "3b646f6e48032206a913f499fe461b98795c4b94cd75ad823731054b822fc731"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "LibTessDotNet.crzkfkf89i.wasm",
+        "sha256": "082149dde1c08d7c54870523d654106d328324a3dc6c639437511cb75edbe7f5"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Microsoft.Extensions.Logging.Abstractions.mpr032n10k.wasm",
+        "sha256": "b69874361df91da4f3a22acefdcd8f3730160dcb1859eaa440767dafcbf2ba4d"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Microsoft.Extensions.Logging.qmh9uu1lj0.wasm",
+        "sha256": "7ed83b989a8094f8fd109d2e280658a4bfe6db756b1d8c988c40fac1fbe81e92"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Microsoft.Extensions.Options.g14ttqkiwj.wasm",
+        "sha256": "b45eda73d20aca050e34ae2695375a3b5e114d6c280aa1cc872b911b9e401038"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.App.ed4aoode0k.wasm",
+        "sha256": "5e0387aadafe40999cd7ddcde8577789f971bf46d661f1d18393a0451f164423"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Audio.0pnxehjm71.wasm",
+        "sha256": "345806c445957bec1df074260b08cb588eba7e6fac06ffc06aefd43a4a5e98e4"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Controls.dznawm573g.wasm",
+        "sha256": "1720083369bbd1d2ff94d1e9719baaf65c32a8684e3521254f5f534dfb214654"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Data.gzfcn8ucti.wasm",
+        "sha256": "14ad105650baa16ae11da8de8721a216fcb3ac2e17cf570cfedb890897a18299"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Rendering.66degbrj6x.wasm",
+        "sha256": "d2399744c90513daa45207caccad29a4e281ca218c27f93747273acdd9e7a01b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Routing.wpummei6g9.wasm",
+        "sha256": "fc4c8e2ce0d9b911b42ed111383129f035acbbab8fb4f69ae9938c3b259675cd"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Simulation.jipcrwnhjn.wasm",
+        "sha256": "2b373da302044a2c023b50f3be2fc34792e0f78ab320b95cf262a00d168d7258"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Silk.NET.Core.irny1tzrsi.wasm",
+        "sha256": "ced1ea04885913057f48865cd0aa4b4041ba8eda9e75e310e31c5687060327d8"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Silk.NET.OpenGL.l769160cw3.wasm",
+        "sha256": "4fff987fde634d26c5b7b483401df2d05edf880d9a2526b9f7105cd3eeb06a81"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+        "sha256": "3330bc28a3f1c22072d7ca8ec3aca5e68a42f6774d9bd7bcd575c3b539bb67d2"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+        "sha256": "83a0935a743e40eb8ea87daded2abd8a765855a37b20e08eb399fd78928cd17c"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+        "sha256": "8bec56cec65707287a4d7a1473c9fa0a91b24b1f36ff4c1d85523c7efe97019f"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.6bzq5bigir.wasm",
+        "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.Concurrent.ajnvvkksra.wasm",
+        "sha256": "e617759820fe62f1694633f132ec7a59cd08255f0c912804e15b9e84cd110dd1"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.Immutable.rqpx5bg4jl.wasm",
+        "sha256": "6dcef119932aa14daf126b20b24b43518682c3329e1142dca954f132c7ee0317"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.NonGeneric.kkxpvokdtg.wasm",
+        "sha256": "34d56f8fdb74a452306948f7598cdc3ea745c0da6076ef1de306f4ec2dbce64e"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.Specialized.j3sjtyx29u.wasm",
+        "sha256": "0156b2f518bc6f339d8d55feb99a95c9156f7d7f1a81e8307fe6a8e645b547bf"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.vcygonji41.wasm",
+        "sha256": "116a113890f40036d6c8f2f1818cb8de215a4cde4cd2215737b4066e8e4938c3"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ComponentModel.g3pwvcjcrg.wasm",
+        "sha256": "f459ba180c859a26f524ba65827066a70b9affe548e5de42c0b89cb1db846b55"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ComponentModel.Primitives.t2v0oareoy.wasm",
+        "sha256": "554d3049cd02483d27d963b45681035a4244fdbf327fe910ce6fdaf8a7cf6221"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ComponentModel.TypeConverter.2acv8geycx.wasm",
+        "sha256": "eaf7747eeba897fb131bc4a00557425335dc53b711875ea1974094730b9106b6"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Console.8asle477ur.wasm",
+        "sha256": "7010e8671ead33807e1d63efc3af5a5b801fba280eb2cdde2d20143e050c36f3"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Drawing.Primitives.nn7jqfbl79.wasm",
+        "sha256": "7d6cfcf6af203d16c1e896264ae07395782c4a4e59d2bc6f01685efc70d5fddc"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Drawing.nxsyxvwmnf.wasm",
+        "sha256": "fbe3be42f3ae0a9641a516c2490147c20b2c0abd4bee59a015221bdadd1f4a47"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.IO.Compression.t357pfbby0.wasm",
+        "sha256": "672586bcafa825d9a73bfe5f750eb8750623ef7d1d6c5d54da7b57b4c0d5ab0d"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.IO.Pipelines.bs0ouzxqxi.wasm",
+        "sha256": "050ccde057a06086e4b69b83fd06bc8f47ebb633f577795564cbb38a17267338"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Linq.Expressions.7zweb26hu8.wasm",
+        "sha256": "8d8eabb9a9d4c623e818ee9067b0a5710b89c69e8d4d3102346b072ac30fd364"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Linq.q457punoy8.wasm",
+        "sha256": "ba76376857e644ce76008f0ff4d3c0d41d11685768a302a39175cf52c4fa44e1"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Memory.2acfgvgghp.wasm",
+        "sha256": "ead7a8eed580f4f1556448d0ddc7fbb2eb408d9e638d60ef7d6032e74e437b64"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Net.Http.5jkdru1ctm.wasm",
+        "sha256": "31ec0be616b394a143a1d6eefd88e7028ed0a82ff64c5a10d3ebfd908a81650a"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Net.Primitives.wr5ku4tjce.wasm",
+        "sha256": "3c58c1da45d55b0d08af9cdf8f1d298b3781e3108936c145c9e503095b33562b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ObjectModel.av0m9ib997.wasm",
+        "sha256": "e6cef0c31897e62d519f27229adc1484b32cd51faf8c4de76f4015742ce02afa"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Private.CoreLib.0jgd5hx6dl.wasm",
+        "sha256": "14d2d9952efa3823fe7d0ab39f2957dc012aad7031f7862e84cbdb030e73d78b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Private.Uri.nmnyz2eidv.wasm",
+        "sha256": "1f57dbf1a140f1b0759fb1a85e283143bfdec024197f4b7c7c5d7682557831f1"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Private.Xml.x61a4mvfse.wasm",
+        "sha256": "778f5be3f71adaf091aa2f4f95ceb178756fc6da1a6125211ca9a1c20ba6f9ab"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Runtime.InteropServices.JavaScript.wjudxd2z05.wasm",
+        "sha256": "142ff9a62a316de9ddaafcb43b80913dc7c7db0a7c96626a124db9ea9738116d"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Security.Cryptography.hjdh28m8dh.wasm",
+        "sha256": "cd2013526aad255162483e2f04b1e160480ed035d418e53b87f68e58436dbb22"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Text.Encodings.Web.409810hzt0.wasm",
+        "sha256": "6caf10192a477ab1a4e1a8b94038dc546eaf97137401a4b3a631aee5346c4019"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Text.Json.2m50hjpw08.wasm",
+        "sha256": "6a89fe893fbe127f14346f5bcd5f607dcf278bfc7a93a3e5a90029eda3f82060"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Text.RegularExpressions.77jjwmegg8.wasm",
+        "sha256": "0d00bd1d87b8e23de4d412a01fb634c520bb448806f506a45e8b48b339200084"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.a3z5tpzyvn.wasm",
+        "sha256": "1ace5b022a74634ed8eeb764e02627a73ac1786a6502e7450042d410b7c1cbcd"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.fmbs8vjlnx.wasm",
+        "sha256": "d77d0f49f7ed269f4695e96a90e32876d52951de359a3bc7f301f3c8aa2e96a3"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Core.Extensions.Logging.tx34v3idjk.wasm",
+        "sha256": "f1b778e5b3f876bc740760449dc7a53b77cfbb78a03c2859922ad3e84c87d0bc"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Core.Extensions.Logging.Singleton.goqx5ykemm.wasm",
+        "sha256": "b04d1b452c9b0b34d6a9da77aaf23928be2139c14f84a24f1f46127c824ea244"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Diagnostics.Eventing.bsz5ci2pgy.wasm",
+        "sha256": "9547bed7d3e2c2aede5c04e506eed66f7ab29316ebc5756e036cf5dc29e1eb75"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Foundation.Logging.renv1nr86x.wasm",
+        "sha256": "4395972a1ff8e3cd085138146236bd57f1ee922a33de379ffc8d00e3d5486288"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Foundation.Runtime.WebAssembly.km8s5j6taq.wasm",
+        "sha256": "ac0be8e2f502505553fece7d263bd26c6f309d6b2265edfbc17cdb22fc7d19eb"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Foundation.vlgc9ffcv7.wasm",
+        "sha256": "1314f7e0992b094d521fa4e3d05f65201e0f71bfc152a8800f9945ac41524527"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+        "sha256": "38e6dc99802d58d0c7896562d0728ca54ff882192c727e3d3ada7e6d00451079"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+        "sha256": "865d99094ccf1a2783b59bcc2b739cc354dee641e81c62047c213c425adfa51e"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+        "sha256": "48c9648a0591741d6c8ffa82fb762c9fc24ffbfa6eb79ea7cc5f26882843f583"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+        "sha256": "f7e11c9a2a010cf5e9d498b8b0e107d8b0d63a0c308770023ac20ab7f48dd01a"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Lottie.o8obruisre.wasm",
+        "sha256": "78a2dc965e0dbe0335dd2204795d840bb120f2ec295053ac07e15f8ab16a9ef5"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+        "sha256": "d765dd49065cffb92d2ab80c36362b98115aab26182cb8b84950180cb26ae385"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+        "sha256": "17f211fb69fe6084a3954bfeb458842f77b2a5b6fe11700f13cfeb2e71d1d79b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+        "sha256": "f90fbdc306d961a83af29cf06e2b6a15c4791ab21148b43e983df91161a97859"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.4m88unnvnt.wasm",
+        "sha256": "9ca7fa14fd307a2c5d4c70919fa54b156aa3e916ae48a81b5b658708454a6fab"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.WinUI.Graphics2DSK.kw64qixynf.wasm",
+        "sha256": "f46d25c54ab7cad77f89a51960ad506855d7e52b68dab1ab9004439f9d260784"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.WinUI.Graphics3DGL.f1ii2wdxps.wasm",
+        "sha256": "2d0238035a8d20d282870ae9d90afeb256ea8af9b4f116f1f5f0962ba3d52a38"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Xaml.ddg0hhofs5.wasm",
+        "sha256": "1fd8978cd634488fca207f13d6f64a7868ca4469968699f522a5d3bf7d725a01"
+      }
+    ],
+    "index_sha256": "69f7ba97caaa9d55b268b2d573b5355c337cf07a9673b1e79c8c15812a370d68",
+    "config_sha256": "46804107d55f79f7dad9bd2932d339b06161a876d9a4f503186b3348e7bfd15f",
+    "loader_sha256": "4f1a73ec0925cf906e9a1a2b09546b39cc2b59844257c2d46fb6632a7afe2685"
+  },
+  "candidate": {
+    "run_id": 42415166135,
+    "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+    "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42415166135",
+    "artifact_id": 13591044857,
+    "artifact_digest": "sha256:a6c8de14fea3fc245f46f4057833a0b072becd749278d3ec35b5f7c20aa64c09",
+    "artifact_size_bytes": 88403486,
+    "runtime_mode": "InterpreterAndAOT",
+    "resources": [
+      {
+        "group": "jsModuleNative",
+        "name": "dotnet.native.lsdbvplmxc.js",
+        "sha256": "6b927c67eb04ba4895854609d88eb32b60eb51320a7c7d7ecbfd149c4740c50d"
+      },
+      {
+        "group": "jsModuleRuntime",
+        "name": "dotnet.runtime.5nc8i5dl74.js",
+        "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d"
+      },
+      {
+        "group": "wasmNative",
+        "name": "dotnet.native.i91u2xqomj.wasm",
+        "sha256": "1a9808ff92ebaf23bbf86313b001e13ad2e26a2e26c77e49b7c26446bcc7e847"
+      },
+      {
+        "group": "icu",
+        "name": "icudt_CJK.tjcz0u77k5.dat",
+        "sha256": "4992ed42745cd09930a8769bd155153fb4f7b813d2798cf1cc39e9c4fa549c79"
+      },
+      {
+        "group": "icu",
+        "name": "icudt_EFIGS.tptq2av103.dat",
+        "sha256": "f1f22d7ad618f24434c30ea8c704cb893de85e50701caba66de3f6a51178c937"
+      },
+      {
+        "group": "icu",
+        "name": "icudt_no_CJK.lfu7j35m59.dat",
+        "sha256": "2fbb15ecd1183f7eff42bd853c278fa39709a918135d1c061eec05e50fb435fb"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "CommonServiceLocator.ukyzr3es9y.wasm",
+        "sha256": "329f6f7c3651c3118f398f95dbef3e7f491b1340359eb8a79faf0e9197fac208"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "HarfBuzzSharp.lwf1lgi861.wasm",
+        "sha256": "3b646f6e48032206a913f499fe461b98795c4b94cd75ad823731054b822fc731"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "LibTessDotNet.crzkfkf89i.wasm",
+        "sha256": "082149dde1c08d7c54870523d654106d328324a3dc6c639437511cb75edbe7f5"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Microsoft.Extensions.Logging.Abstractions.mpr032n10k.wasm",
+        "sha256": "b69874361df91da4f3a22acefdcd8f3730160dcb1859eaa440767dafcbf2ba4d"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Microsoft.Extensions.Logging.qmh9uu1lj0.wasm",
+        "sha256": "7ed83b989a8094f8fd109d2e280658a4bfe6db756b1d8c988c40fac1fbe81e92"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Microsoft.Extensions.Options.g14ttqkiwj.wasm",
+        "sha256": "b45eda73d20aca050e34ae2695375a3b5e114d6c280aa1cc872b911b9e401038"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.App.zxu9coxgvw.wasm",
+        "sha256": "19ffe1b192e4dd59b8a3d3d205abe57ae2c7bd84b300991190f63c6b4b0c40ad"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Audio.hz2i48rjf0.wasm",
+        "sha256": "630c1338f138d80ff510b321438d0ac96c1906fdd34ade0757d1dbf4d980566c"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Controls.mqbe19mu9d.wasm",
+        "sha256": "ee77c71dcf67fc072970fa4ad1f915cb94a8f300ecdccf3936f524aebfc419f3"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Data.oqykj4w235.wasm",
+        "sha256": "e0ef1537e05f219255d885b616253a532b95fab6b0b0fb3b0688d1ef25a1f242"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Rendering.3k8u0qqdrg.wasm",
+        "sha256": "2df1a9eead00e42f84a8aad8504cd0bd542fe1e230096bcc03d616a73a3a08b5"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Routing.h3ki2dz79j.wasm",
+        "sha256": "c3431d46880a82d0d2e0073386ee514c9b34adfbdd3ade154d9c86bd56b6939b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "PixelMap.Simulation.l0h4jm7jme.wasm",
+        "sha256": "256a7a41f099df9e5d910af362ad72d0fb332cb2bee57239700a47c8417e5d10"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Silk.NET.Core.irny1tzrsi.wasm",
+        "sha256": "ced1ea04885913057f48865cd0aa4b4041ba8eda9e75e310e31c5687060327d8"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Silk.NET.OpenGL.l769160cw3.wasm",
+        "sha256": "4fff987fde634d26c5b7b483401df2d05edf880d9a2526b9f7105cd3eeb06a81"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+        "sha256": "3330bc28a3f1c22072d7ca8ec3aca5e68a42f6774d9bd7bcd575c3b539bb67d2"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+        "sha256": "83a0935a743e40eb8ea87daded2abd8a765855a37b20e08eb399fd78928cd17c"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+        "sha256": "8bec56cec65707287a4d7a1473c9fa0a91b24b1f36ff4c1d85523c7efe97019f"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "SkiaSharp.6bzq5bigir.wasm",
+        "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.Concurrent.ajnvvkksra.wasm",
+        "sha256": "e617759820fe62f1694633f132ec7a59cd08255f0c912804e15b9e84cd110dd1"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.Immutable.rqpx5bg4jl.wasm",
+        "sha256": "6dcef119932aa14daf126b20b24b43518682c3329e1142dca954f132c7ee0317"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.NonGeneric.kkxpvokdtg.wasm",
+        "sha256": "34d56f8fdb74a452306948f7598cdc3ea745c0da6076ef1de306f4ec2dbce64e"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.Specialized.j3sjtyx29u.wasm",
+        "sha256": "0156b2f518bc6f339d8d55feb99a95c9156f7d7f1a81e8307fe6a8e645b547bf"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Collections.vcygonji41.wasm",
+        "sha256": "116a113890f40036d6c8f2f1818cb8de215a4cde4cd2215737b4066e8e4938c3"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ComponentModel.g3pwvcjcrg.wasm",
+        "sha256": "f459ba180c859a26f524ba65827066a70b9affe548e5de42c0b89cb1db846b55"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ComponentModel.Primitives.t2v0oareoy.wasm",
+        "sha256": "554d3049cd02483d27d963b45681035a4244fdbf327fe910ce6fdaf8a7cf6221"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ComponentModel.TypeConverter.2acv8geycx.wasm",
+        "sha256": "eaf7747eeba897fb131bc4a00557425335dc53b711875ea1974094730b9106b6"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Console.8asle477ur.wasm",
+        "sha256": "7010e8671ead33807e1d63efc3af5a5b801fba280eb2cdde2d20143e050c36f3"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Drawing.Primitives.nn7jqfbl79.wasm",
+        "sha256": "7d6cfcf6af203d16c1e896264ae07395782c4a4e59d2bc6f01685efc70d5fddc"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Drawing.nxsyxvwmnf.wasm",
+        "sha256": "fbe3be42f3ae0a9641a516c2490147c20b2c0abd4bee59a015221bdadd1f4a47"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.IO.Compression.t357pfbby0.wasm",
+        "sha256": "672586bcafa825d9a73bfe5f750eb8750623ef7d1d6c5d54da7b57b4c0d5ab0d"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.IO.Pipelines.bs0ouzxqxi.wasm",
+        "sha256": "050ccde057a06086e4b69b83fd06bc8f47ebb633f577795564cbb38a17267338"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Linq.Expressions.7zweb26hu8.wasm",
+        "sha256": "8d8eabb9a9d4c623e818ee9067b0a5710b89c69e8d4d3102346b072ac30fd364"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Linq.q457punoy8.wasm",
+        "sha256": "ba76376857e644ce76008f0ff4d3c0d41d11685768a302a39175cf52c4fa44e1"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Memory.2acfgvgghp.wasm",
+        "sha256": "ead7a8eed580f4f1556448d0ddc7fbb2eb408d9e638d60ef7d6032e74e437b64"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Net.Http.5jkdru1ctm.wasm",
+        "sha256": "31ec0be616b394a143a1d6eefd88e7028ed0a82ff64c5a10d3ebfd908a81650a"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Net.Primitives.wr5ku4tjce.wasm",
+        "sha256": "3c58c1da45d55b0d08af9cdf8f1d298b3781e3108936c145c9e503095b33562b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.ObjectModel.av0m9ib997.wasm",
+        "sha256": "e6cef0c31897e62d519f27229adc1484b32cd51faf8c4de76f4015742ce02afa"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Private.CoreLib.0jgd5hx6dl.wasm",
+        "sha256": "14d2d9952efa3823fe7d0ab39f2957dc012aad7031f7862e84cbdb030e73d78b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Private.Uri.nmnyz2eidv.wasm",
+        "sha256": "1f57dbf1a140f1b0759fb1a85e283143bfdec024197f4b7c7c5d7682557831f1"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Private.Xml.x61a4mvfse.wasm",
+        "sha256": "778f5be3f71adaf091aa2f4f95ceb178756fc6da1a6125211ca9a1c20ba6f9ab"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Runtime.InteropServices.JavaScript.wjudxd2z05.wasm",
+        "sha256": "142ff9a62a316de9ddaafcb43b80913dc7c7db0a7c96626a124db9ea9738116d"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Security.Cryptography.hjdh28m8dh.wasm",
+        "sha256": "cd2013526aad255162483e2f04b1e160480ed035d418e53b87f68e58436dbb22"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Text.Encodings.Web.409810hzt0.wasm",
+        "sha256": "6caf10192a477ab1a4e1a8b94038dc546eaf97137401a4b3a631aee5346c4019"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Text.Json.2m50hjpw08.wasm",
+        "sha256": "6a89fe893fbe127f14346f5bcd5f607dcf278bfc7a93a3e5a90029eda3f82060"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.Text.RegularExpressions.77jjwmegg8.wasm",
+        "sha256": "0d00bd1d87b8e23de4d412a01fb634c520bb448806f506a45e8b48b339200084"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "System.a3z5tpzyvn.wasm",
+        "sha256": "1ace5b022a74634ed8eeb764e02627a73ac1786a6502e7450042d410b7c1cbcd"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.fmbs8vjlnx.wasm",
+        "sha256": "d77d0f49f7ed269f4695e96a90e32876d52951de359a3bc7f301f3c8aa2e96a3"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Core.Extensions.Logging.tx34v3idjk.wasm",
+        "sha256": "f1b778e5b3f876bc740760449dc7a53b77cfbb78a03c2859922ad3e84c87d0bc"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Core.Extensions.Logging.Singleton.goqx5ykemm.wasm",
+        "sha256": "b04d1b452c9b0b34d6a9da77aaf23928be2139c14f84a24f1f46127c824ea244"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Diagnostics.Eventing.bsz5ci2pgy.wasm",
+        "sha256": "9547bed7d3e2c2aede5c04e506eed66f7ab29316ebc5756e036cf5dc29e1eb75"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Foundation.Logging.renv1nr86x.wasm",
+        "sha256": "4395972a1ff8e3cd085138146236bd57f1ee922a33de379ffc8d00e3d5486288"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Foundation.Runtime.WebAssembly.km8s5j6taq.wasm",
+        "sha256": "ac0be8e2f502505553fece7d263bd26c6f309d6b2265edfbc17cdb22fc7d19eb"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Foundation.vlgc9ffcv7.wasm",
+        "sha256": "1314f7e0992b094d521fa4e3d05f65201e0f71bfc152a8800f9945ac41524527"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+        "sha256": "38e6dc99802d58d0c7896562d0728ca54ff882192c727e3d3ada7e6d00451079"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+        "sha256": "865d99094ccf1a2783b59bcc2b739cc354dee641e81c62047c213c425adfa51e"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+        "sha256": "48c9648a0591741d6c8ffa82fb762c9fc24ffbfa6eb79ea7cc5f26882843f583"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+        "sha256": "f7e11c9a2a010cf5e9d498b8b0e107d8b0d63a0c308770023ac20ab7f48dd01a"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Lottie.o8obruisre.wasm",
+        "sha256": "78a2dc965e0dbe0335dd2204795d840bb120f2ec295053ac07e15f8ab16a9ef5"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+        "sha256": "d765dd49065cffb92d2ab80c36362b98115aab26182cb8b84950180cb26ae385"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+        "sha256": "17f211fb69fe6084a3954bfeb458842f77b2a5b6fe11700f13cfeb2e71d1d79b"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+        "sha256": "f90fbdc306d961a83af29cf06e2b6a15c4791ab21148b43e983df91161a97859"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.UI.4m88unnvnt.wasm",
+        "sha256": "9ca7fa14fd307a2c5d4c70919fa54b156aa3e916ae48a81b5b658708454a6fab"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.WinUI.Graphics2DSK.kw64qixynf.wasm",
+        "sha256": "f46d25c54ab7cad77f89a51960ad506855d7e52b68dab1ab9004439f9d260784"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.WinUI.Graphics3DGL.f1ii2wdxps.wasm",
+        "sha256": "2d0238035a8d20d282870ae9d90afeb256ea8af9b4f116f1f5f0962ba3d52a38"
+      },
+      {
+        "group": "coreAssembly",
+        "name": "Uno.Xaml.ddg0hhofs5.wasm",
+        "sha256": "1fd8978cd634488fca207f13d6f64a7868ca4469968699f522a5d3bf7d725a01"
+      }
+    ],
+    "index_sha256": "2bcdca7ea7a281247820442a0c4fc98dddf9dfc88ca5b40b44f6f05a2e8e0763",
+    "config_sha256": "402bfa22ffd34f64380d05e6ab0713ecf28b3e00027522aee832e0b43837ca64",
+    "loader_sha256": "fc5f3c19623ffb64f0c990413ef31a1304832c6c1c3fd33c9f1f378848e44fc8"
+  },
+  "execution": [
+    {
+      "order": 1,
+      "scenario": "map-idle-default",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/map-idle-default/repetition-1",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:28:30.031903+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:28:46.548391+00:00"
+    },
+    {
+      "order": 2,
+      "scenario": "map-idle-default",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/map-idle-default/repetition-1",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:28:46.549778+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:29:01.702302+00:00"
+    },
+    {
+      "order": 3,
+      "scenario": "map-idle-relief",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/map-idle-relief/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:29:01.703639+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:29:30.569110+00:00"
+    },
+    {
+      "order": 4,
+      "scenario": "map-idle-relief",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/map-idle-relief/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:29:30.570418+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:30:00.640456+00:00"
+    },
+    {
+      "order": 5,
+      "scenario": "walk-stationary-firstperson",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/walk-stationary-firstperson/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:30:00.642023+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:30:35.043924+00:00"
+    },
+    {
+      "order": 6,
+      "scenario": "walk-stationary-firstperson",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/walk-stationary-firstperson/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:30:35.045115+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:31:08.442873+00:00"
+    },
+    {
+      "order": 7,
+      "scenario": "walk-moving-firstperson",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/walk-moving-firstperson/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:31:08.444242+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:31:43.080772+00:00"
+    },
+    {
+      "order": 8,
+      "scenario": "walk-moving-firstperson",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/walk-moving-firstperson/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:31:43.082104+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:32:18.672841+00:00"
+    },
+    {
+      "order": 9,
+      "scenario": "walk-moving-firstperson",
+      "repetition": 2,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/walk-moving-firstperson/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:32:18.674010+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:32:44.582465+00:00"
+    },
+    {
+      "order": 10,
+      "scenario": "walk-moving-firstperson",
+      "repetition": 2,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/walk-moving-firstperson/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:32:44.583611+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:33:09.828929+00:00"
+    },
+    {
+      "order": 11,
+      "scenario": "walk-moving-chase",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/walk-moving-chase/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:33:09.830232+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:33:48.110350+00:00"
+    },
+    {
+      "order": 12,
+      "scenario": "walk-moving-chase",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/walk-moving-chase/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:33:48.111616+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:34:27.346459+00:00"
+    },
+    {
+      "order": 13,
+      "scenario": "walk-moving-chase",
+      "repetition": 2,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/walk-moving-chase/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:34:27.347733+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:34:56.366524+00:00"
+    },
+    {
+      "order": 14,
+      "scenario": "walk-moving-chase",
+      "repetition": 2,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/walk-moving-chase/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:34:56.367763+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:35:25.489171+00:00"
+    },
+    {
+      "order": 15,
+      "scenario": "car-stationary-chase",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/car-stationary-chase/repetition-1",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:35:25.490465+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:35:54.104078+00:00"
+    },
+    {
+      "order": 16,
+      "scenario": "car-stationary-chase",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/car-stationary-chase/repetition-1",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:35:54.105369+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:36:22.475250+00:00"
+    },
+    {
+      "order": 17,
+      "scenario": "car-moving-chase",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/car-moving-chase/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:36:22.476479+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:37:01.256568+00:00"
+    },
+    {
+      "order": 18,
+      "scenario": "car-moving-chase",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/car-moving-chase/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:37:01.258078+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:37:42.028662+00:00"
+    },
+    {
+      "order": 19,
+      "scenario": "car-moving-chase",
+      "repetition": 2,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/car-moving-chase/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:37:42.029870+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:38:12.545234+00:00"
+    },
+    {
+      "order": 20,
+      "scenario": "car-moving-chase",
+      "repetition": 2,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/car-moving-chase/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:38:12.546596+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:38:43.942865+00:00"
+    },
+    {
+      "order": 21,
+      "scenario": "car-moving-firstperson",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/car-moving-firstperson/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:38:43.944293+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:39:20.783307+00:00"
+    },
+    {
+      "order": 22,
+      "scenario": "car-moving-firstperson",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/car-moving-firstperson/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:39:20.784718+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:39:58.547641+00:00"
+    },
+    {
+      "order": 23,
+      "scenario": "car-moving-firstperson",
+      "repetition": 2,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/car-moving-firstperson/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:39:58.549131+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:40:25.907927+00:00"
+    },
+    {
+      "order": 24,
+      "scenario": "car-moving-firstperson",
+      "repetition": 2,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/car-moving-firstperson/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:40:25.909274+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:40:55.296816+00:00"
+    },
+    {
+      "order": 25,
+      "scenario": "freeflight-stationary",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/freeflight-stationary/repetition-1",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:40:55.298326+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:41:18.129526+00:00"
+    },
+    {
+      "order": 26,
+      "scenario": "freeflight-stationary",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/freeflight-stationary/repetition-1",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:41:18.131487+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:41:41.949050+00:00"
+    },
+    {
+      "order": 27,
+      "scenario": "freeflight-moving",
+      "repetition": 1,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/freeflight-moving/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:41:41.950392+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:42:16.247752+00:00"
+    },
+    {
+      "order": 28,
+      "scenario": "freeflight-moving",
+      "repetition": 1,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/freeflight-moving/repetition-1",
+      "cpu_profile_requested": true,
+      "started_utc": "2026-11-07T21:42:16.249296+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:42:51.111357+00:00"
+    },
+    {
+      "order": 29,
+      "scenario": "freeflight-moving",
+      "repetition": 2,
+      "variant": "candidate",
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "output": "candidate/freeflight-moving/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:42:51.112707+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:43:15.281321+00:00"
+    },
+    {
+      "order": 30,
+      "scenario": "freeflight-moving",
+      "repetition": 2,
+      "variant": "baseline",
+      "source_sha": "c937ddd192619f48c1a2ec682845b52bc1eebff8",
+      "output": "baseline/freeflight-moving/repetition-2",
+      "cpu_profile_requested": false,
+      "started_utc": "2026-11-07T21:43:15.282778+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-11-07T21:43:41.459683+00:00"
+    }
+  ]
+}
