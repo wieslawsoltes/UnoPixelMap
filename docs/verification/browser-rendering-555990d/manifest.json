@@ -1,0 +1,786 @@
+{
+  "workflow_run_id": 42696985047,
+  "baseline_source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+  "candidate_source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+  "inputs_verified_against_original_zip_members": 80,
+  "preserved_timed_reports": 30,
+  "preserved_raw_probes": 30,
+  "preserved_raw_cpu_profiles": 14,
+  "symbolicated_candidate_profiles": 7,
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "e1d2396c829c697cd510b787ed43a99549c9d678be2e2551fd07e49da2c28eac",
+      "bytes": 7734
+    },
+    {
+      "path": "analysis.json",
+      "sha256": "bf345f4d8b3d5ec54be12bd70ab83e02f34bffbeda4b351fc5abee0fa856de31",
+      "bytes": 144070
+    },
+    {
+      "path": "analyze.py",
+      "sha256": "4bb58fc8035a39ee31db88a4d4500f211f898163a1dc645e496b21b8f48876fd",
+      "bytes": 11998
+    },
+    {
+      "path": "baseline/car-moving-chase/repetition-1/car-moving-chase-raw.json.gz",
+      "sha256": "d5d8a22afeeb0b561d18aacb00470a15fc881785970d92cd486104aaafda3b74",
+      "bytes": 26132,
+      "decoded_sha256": "1227fe37bfd1fad583927b5e5ba5b1f77b53f4e711dfa8d09d2ff61f8755216f",
+      "decoded_bytes": 2688895,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-chase/repetition-1/car-moving-chase-raw.json"
+    },
+    {
+      "path": "baseline/car-moving-chase/repetition-1/car-moving-chase.cpuprofile.gz",
+      "sha256": "988c4b2dc56d8580f23ce1f903f8ed3d60d97c06cc00623917456333e79cf38c",
+      "bytes": 77796,
+      "decoded_sha256": "cbf96bcbe6530441998902ea76a15d7320f7e21bf717a2ff5010d3af20b809f5",
+      "decoded_bytes": 1142789,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-chase/repetition-1/car-moving-chase.cpuprofile"
+    },
+    {
+      "path": "baseline/car-moving-chase/repetition-1/report.json.gz",
+      "sha256": "c3f217b1bb87c39b5dceb26092de56987edc92773cdf669ebab97cea7bcb5725",
+      "bytes": 4977,
+      "decoded_sha256": "0222eda89959d746923494a0bbb7672784df8fb9458e9f185befcb2953d4870a",
+      "decoded_bytes": 43290,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-chase/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/car-moving-chase/repetition-2/car-moving-chase-raw.json.gz",
+      "sha256": "c71abd40cefb877e544651957161bbf643e9c4d8e7c19353054a9c24c43c6d1d",
+      "bytes": 26873,
+      "decoded_sha256": "6b1228f7b379f15c3499b43e230aa88eb43c1ea16b567bf4931f83b8366a41da",
+      "decoded_bytes": 2817678,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-chase/repetition-2/car-moving-chase-raw.json"
+    },
+    {
+      "path": "baseline/car-moving-chase/repetition-2/report.json.gz",
+      "sha256": "6fe8c29cd8362d1e4b725686b721067f685753bf994dee826974521247ecc934",
+      "bytes": 2904,
+      "decoded_sha256": "4278eee288da5ebb3b932ff14b7c38532bc77171896e29b6034bac88ef6c5a12",
+      "decoded_bytes": 10793,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-chase/repetition-2/report.json"
+    },
+    {
+      "path": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json.gz",
+      "sha256": "4d8a202afdfca5c7324e0e5edab25756a0b5769d7d0b23ee4c2c87cbd491d153",
+      "bytes": 12189,
+      "decoded_sha256": "7b2fa7d0d9740b2115df87b5bb253426c0bf7d70602faebf70cdccd139d268b0",
+      "decoded_bytes": 723380,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json"
+    },
+    {
+      "path": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile.gz",
+      "sha256": "f9ab09a0a9ce49e335c44ee22045ca34da0903470b1d602a28a546d480bb269c",
+      "bytes": 82127,
+      "decoded_sha256": "5f4488c37d7b5cbdafe97b59b7bd40772a9116f72a72ff129cb545a529e251f4",
+      "decoded_bytes": 1226229,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile"
+    },
+    {
+      "path": "baseline/car-moving-firstperson/repetition-1/report.json.gz",
+      "sha256": "48feb39c5d991d6854311f45f5567a7d0003bec8c619559e5a2568af7fa6bcae",
+      "bytes": 4916,
+      "decoded_sha256": "bfefe93c02e5d823c9d27f579598c239f6231961e2680d7c994e7e4763970435",
+      "decoded_bytes": 43955,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-firstperson/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json.gz",
+      "sha256": "659912bc8ca8710817eebc358b8d5f7149b5d2cd46ea074dd822df9fb718926c",
+      "bytes": 11839,
+      "decoded_sha256": "73da762883f86f225b39979fc123fc944a9bfba4b79e1785312e87e79cbc83c9",
+      "decoded_bytes": 710153,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json"
+    },
+    {
+      "path": "baseline/car-moving-firstperson/repetition-2/report.json.gz",
+      "sha256": "726e8e661c1ee390e766b20975495a658142f220688666ec57bfdf3f07eb82a1",
+      "bytes": 2881,
+      "decoded_sha256": "1a36725f546cabc226783a2b337d0ae4cc1209ad2c473a46e6e8079e7ea34a11",
+      "decoded_bytes": 10137,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-moving-firstperson/repetition-2/report.json"
+    },
+    {
+      "path": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-raw.json.gz",
+      "sha256": "fb8b1a309727795794848750ce4256253927ed33ddbe19e9e4467d9c5f955739",
+      "bytes": 2258,
+      "decoded_sha256": "ddf08f485991c73a5ddf8a06f952f4072615c5c4008dacd2bbf4b96d3a3d8726",
+      "decoded_bytes": 23729,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-raw.json"
+    },
+    {
+      "path": "baseline/car-stationary-chase/repetition-1/report.json.gz",
+      "sha256": "1ce8076cab2045a6bfaa79dbf172cb007b9b337d3e061ad8268590c77608f1c1",
+      "bytes": 2055,
+      "decoded_sha256": "e8d3ad8f87d20d57af023765df5aa50ec95511d78e57d67d1488152556dcffd8",
+      "decoded_bytes": 5227,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/car-stationary-chase/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/freeflight-moving/repetition-1/freeflight-moving-raw.json.gz",
+      "sha256": "0db86795b75887d79932666765cdcd9b0cd9beff88bde3f544adfc19a4375b9c",
+      "bytes": 14104,
+      "decoded_sha256": "0b40db595493eaa8d879aee43aed479d6a1ea4778168a457552622f8db5a9a1e",
+      "decoded_bytes": 897527,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/freeflight-moving/repetition-1/freeflight-moving-raw.json"
+    },
+    {
+      "path": "baseline/freeflight-moving/repetition-1/freeflight-moving.cpuprofile.gz",
+      "sha256": "a2b16767e4cbec284efaf5e5831d0aad47ca910dc162a2971d2c1b7fa56cd7a3",
+      "bytes": 92263,
+      "decoded_sha256": "75fcfde30ee09b28619dd72b3c683e618d954ecad9908341c0ed013eeab8e33c",
+      "decoded_bytes": 1430372,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/freeflight-moving/repetition-1/freeflight-moving.cpuprofile"
+    },
+    {
+      "path": "baseline/freeflight-moving/repetition-1/report.json.gz",
+      "sha256": "0cffbd9eea0ada1a99f9a2ea1a78eb23eb42b98e09b956bdc2b505b5d3f2eaf4",
+      "bytes": 5002,
+      "decoded_sha256": "ad92c80699c84ad09daa4d487d6a985e087b31d3cab891821b5f21e2f079520e",
+      "decoded_bytes": 44121,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/freeflight-moving/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/freeflight-moving/repetition-2/freeflight-moving-raw.json.gz",
+      "sha256": "3d6f84a05d07f91f9735df0fd88ae4c7cc01f8c2cc29bc2b608d82d9e97eab52",
+      "bytes": 13838,
+      "decoded_sha256": "05a18ec6cd8685752cf2313216248f7ecf6c27b4002b24f2ccd177f080414929",
+      "decoded_bytes": 895418,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/freeflight-moving/repetition-2/freeflight-moving-raw.json"
+    },
+    {
+      "path": "baseline/freeflight-moving/repetition-2/report.json.gz",
+      "sha256": "6fd5cb3a78fa187424bd79dff43f5ea8601c6034dd63b37e1d60e5b712823a8c",
+      "bytes": 2903,
+      "decoded_sha256": "212144560b018082e3a1052abb5725ffbb2510b90eb5b3430a13ffc099df3f11",
+      "decoded_bytes": 10728,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/freeflight-moving/repetition-2/report.json"
+    },
+    {
+      "path": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-raw.json.gz",
+      "sha256": "86fea9b3201d65d2c534a2e021db7645e5e50feb53a5361d9cc3db3deaabb4e9",
+      "bytes": 2264,
+      "decoded_sha256": "ae594665f14020a7b2f1dccabd082b00937bf098be88cb61b5bbd0aec04c9699",
+      "decoded_bytes": 23716,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-raw.json"
+    },
+    {
+      "path": "baseline/freeflight-stationary/repetition-1/report.json.gz",
+      "sha256": "04063406c0d6eddde6537c646812d05f5c8864fa162c9077f8ebcef3d1002ea8",
+      "bytes": 2039,
+      "decoded_sha256": "cb6f4a685f2325c2cf6cc61f1a5eb879e61e09accd238f93de92e383391d802d",
+      "decoded_bytes": 5198,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/freeflight-stationary/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/map-idle-default/repetition-1/map-idle-default-raw.json.gz",
+      "sha256": "ca47235dde4223f2dfa2a6a298008170ff492917906eab914703a3233410ab00",
+      "bytes": 2279,
+      "decoded_sha256": "fe69f057f741e142150c2f7f159a34405039404e30a980103b8295436f6d8a71",
+      "decoded_bytes": 23510,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/map-idle-default/repetition-1/map-idle-default-raw.json"
+    },
+    {
+      "path": "baseline/map-idle-default/repetition-1/report.json.gz",
+      "sha256": "b9f5fce79174ed99ac42010989f34a947d4a6b268590026f7f843b915701a307",
+      "bytes": 1936,
+      "decoded_sha256": "f6acbcca472a975666167bdfdfe7f1b6cf31868c76c764b27aec3f1364a952c0",
+      "decoded_bytes": 4752,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/map-idle-default/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/map-idle-relief/repetition-1/map-idle-relief-raw.json.gz",
+      "sha256": "33b146b08ea7b29daf40116cae657466a5e8a0c77b2d24cb46ff36a669ea46e1",
+      "bytes": 2253,
+      "decoded_sha256": "99772256ad30df28b25bc9cee60dca7629d97ec53e94b4015fb672ca01adca06",
+      "decoded_bytes": 23718,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/map-idle-relief/repetition-1/map-idle-relief-raw.json"
+    },
+    {
+      "path": "baseline/map-idle-relief/repetition-1/map-idle-relief.cpuprofile.gz",
+      "sha256": "5504fdacae1f05ef29f4bb5682fe2751a7d3d5d9383dfc63a0959d7b28de35e8",
+      "bytes": 5960,
+      "decoded_sha256": "2e2841a438c2035a67d8c0dae8d263d7db5f15b8a4e9cd8ba642def8fdc23791",
+      "decoded_bytes": 53116,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/map-idle-relief/repetition-1/map-idle-relief.cpuprofile"
+    },
+    {
+      "path": "baseline/map-idle-relief/repetition-1/report.json.gz",
+      "sha256": "caf5ed0cd07ba7e59cdb2ae940dbc9f626d277ddce84411a11edff6c73b0aa10",
+      "bytes": 2263,
+      "decoded_sha256": "5ef04035618b94ea2ed7aa0846615b1d92d29a4d4407a849a52801336139de1f",
+      "decoded_bytes": 7051,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/map-idle-relief/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/walk-moving-chase/repetition-1/report.json.gz",
+      "sha256": "758fad7b539ec06c623b5c23fdacedc3287e9a229bf00ac3bc3783f580a47436",
+      "bytes": 4945,
+      "decoded_sha256": "93881a18f5f7518b629d1c0ea6ebc00ba0de9aa14b9e42a71945b4f1683e1b97",
+      "decoded_bytes": 42820,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-chase/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-raw.json.gz",
+      "sha256": "cdecb636b02b6b9a70ffdc9ec24f9cd645ab333c863bc19dcdb2625fab29aa53",
+      "bytes": 26648,
+      "decoded_sha256": "71eda1f2d253b22de9915d2b43ad59fde0856984d6d695379d5d1669cb0cd7f0",
+      "decoded_bytes": 2885317,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-raw.json"
+    },
+    {
+      "path": "baseline/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile.gz",
+      "sha256": "2869decf38057a80591bc1f6d409d7bd75306682f1cca6782124ce7c261c6302",
+      "bytes": 67564,
+      "decoded_sha256": "165528cc4f286f2a7dfbb8c02c9b5ac5073be1553ec012ef425a2385c087572c",
+      "decoded_bytes": 976425,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile"
+    },
+    {
+      "path": "baseline/walk-moving-chase/repetition-2/report.json.gz",
+      "sha256": "747374f10e64f1e76b08779e25433c0de74c91a812606061105a4267a1df1eb3",
+      "bytes": 2854,
+      "decoded_sha256": "5c073527a5435f39e6dc5001a0a8ec2ece737b1a74e8f3f5be8820bc1a94f4d5",
+      "decoded_bytes": 9942,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-chase/repetition-2/report.json"
+    },
+    {
+      "path": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-raw.json.gz",
+      "sha256": "b66a9de81116b126884fba39940ad01847ed6f4167c9259214495d285b4bbb6b",
+      "bytes": 25769,
+      "decoded_sha256": "dca0ac0e2da2680122ba7a1985dbc58b93ea6c21b5b3c2c4510b6f75f78a8a5c",
+      "decoded_bytes": 2795208,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-raw.json"
+    },
+    {
+      "path": "baseline/walk-moving-firstperson/repetition-1/report.json.gz",
+      "sha256": "7dffe7e1eb4fb71a1b17dac78b1a96f074c820c641e794fb0c953c7fca7dc0c1",
+      "bytes": 4829,
+      "decoded_sha256": "785b38b81e1ad743ab0529842737bf8009d5f1dcba11a3ebbf699ea79f1786ac",
+      "decoded_bytes": 43150,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-firstperson/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json.gz",
+      "sha256": "c50abf50450b44a3d5270eafb515a4996c272d7c3bff0c492c38ab39c95f79d2",
+      "bytes": 10922,
+      "decoded_sha256": "aa6d21b5659fcd985a51e8d16850457eade943134e93a8d879ab7494b52b880b",
+      "decoded_bytes": 541326,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json"
+    },
+    {
+      "path": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile.gz",
+      "sha256": "4555a90f4c730c24ec69eee1387972c60e9baab854c1ba02b6a58631604684d8",
+      "bytes": 68164,
+      "decoded_sha256": "99b0993c7263257d5f826907e5d0ece5d11d42405ebcd8411767fa1df366a2c8",
+      "decoded_bytes": 989569,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile"
+    },
+    {
+      "path": "baseline/walk-moving-firstperson/repetition-2/report.json.gz",
+      "sha256": "da0fd854559f8b4f7bae52b13f48a287080e31f7d02803cc1cbb4fbbad5de0bf",
+      "bytes": 2846,
+      "decoded_sha256": "44d14e936c90ea7dbf806ef7c28dda2e47704fad1fefb3096e28eb9681906df6",
+      "decoded_bytes": 9969,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-firstperson/repetition-2/report.json"
+    },
+    {
+      "path": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json.gz",
+      "sha256": "07425009d46df1f9c0b334c473478e130c7fd88c4ba2e44bfb453570ad950676",
+      "bytes": 10857,
+      "decoded_sha256": "8528f2d779b19459469c749070b96c45eee2814ccbcd45130c858b41d5f80901",
+      "decoded_bytes": 533742,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json"
+    },
+    {
+      "path": "baseline/walk-stationary-firstperson/repetition-1/report.json.gz",
+      "sha256": "21168a8f2107fdf6e85b288d706d383f6880f09b0b2fe1109b4e837845fc567c",
+      "bytes": 4154,
+      "decoded_sha256": "f855eeafd1edabffb28dec46b24e304754157d2fd3fea29c6ccbaef5ca49c66f",
+      "decoded_bytes": 37561,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-stationary-firstperson/repetition-1/report.json"
+    },
+    {
+      "path": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json.gz",
+      "sha256": "7d59a2a2af2c05fc4a22bb5d2709b88ee94356adb5c18b8d74dc5defad3bc989",
+      "bytes": 2257,
+      "decoded_sha256": "0386ed8432dbf42c4d8d1b6555715423eba679ecffc997610058341f491b8526",
+      "decoded_bytes": 23685,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json"
+    },
+    {
+      "path": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile.gz",
+      "sha256": "a90cfed3e76277a31f735bf7f6e616a85630dc565264393dfe5454d0b639b958",
+      "bytes": 27543,
+      "decoded_sha256": "8284b6786ef801195bf54db026a1e47dc7540b62c37b2c697b6afb75c406833f",
+      "decoded_bytes": 440298,
+      "source_artifact_id": 13712241017,
+      "source_member": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile"
+    },
+    {
+      "path": "browser-checks.log",
+      "sha256": "26af3c3709b68e0e73931528cb2461064b39b24e2402292c652ff3556119558b",
+      "bytes": 3023
+    },
+    {
+      "path": "build-checks.log",
+      "sha256": "07968678fd56784543a7fd83bdc8ca27b12def6d006f3f093a8f1c97adb0d655",
+      "bytes": 9209
+    },
+    {
+      "path": "candidate/car-moving-chase/repetition-1/car-moving-chase-raw.json.gz",
+      "sha256": "590b9660a289f7df61848199886cfa79e29afa21bedc3d0bf25541a3cdccca6f",
+      "bytes": 26467,
+      "decoded_sha256": "0b0a5b3c45e5907c3be5ff24f3496589a53e81ce6be06dfba8f8b606aa45043c",
+      "decoded_bytes": 2751915,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-chase/repetition-1/car-moving-chase-raw.json"
+    },
+    {
+      "path": "candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile.gz",
+      "sha256": "bcb1ef35457bd68f47a7c751a31688aec963a17590fe28967338d0232a0c640c",
+      "bytes": 79155,
+      "decoded_sha256": "78c73b8570f703849bf42b0dea6af18b0408da5e492b910c91b1a973ff36fc23",
+      "decoded_bytes": 1199059,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile"
+    },
+    {
+      "path": "candidate/car-moving-chase/repetition-1/report.json.gz",
+      "sha256": "ae3046af4708724f4bca4a4506afa00878398d09761679dacb9866e4b2768456",
+      "bytes": 5004,
+      "decoded_sha256": "33e98ef143e80ed3eefafbe026b700875b38d4bc545f90b935571c0c0d000d53",
+      "decoded_bytes": 43981,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-chase/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/car-moving-chase/repetition-2/car-moving-chase-raw.json.gz",
+      "sha256": "b7f886d6262f4a0f2d887f1d89d5e9f2f486261e04bd1e8635fc92bb3d045653",
+      "bytes": 26353,
+      "decoded_sha256": "8a8f3c0edb5077b4dda8b7efa8af89955e2e3727969e514f821269dec2d4254c",
+      "decoded_bytes": 2734150,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-chase/repetition-2/car-moving-chase-raw.json"
+    },
+    {
+      "path": "candidate/car-moving-chase/repetition-2/report.json.gz",
+      "sha256": "c43c3c91b2709b4bf77b0ea2c071be83d50f492d8924f84936eab8eaa6b3c167",
+      "bytes": 2960,
+      "decoded_sha256": "131a3637b3b316c8b320fc6bbc7d426ba727309f0e7730ce2efe796740ef6897",
+      "decoded_bytes": 11078,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-chase/repetition-2/report.json"
+    },
+    {
+      "path": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json.gz",
+      "sha256": "efb7d97e7cffb5ec71a66a488716ee3ef65b91597140faea86fe3d5c2e71a690",
+      "bytes": 12009,
+      "decoded_sha256": "98bc7ea0826a5ee690aa9cd4cb5e72f5ccfa1bc2b8e722b8e8ccb573775ebec5",
+      "decoded_bytes": 729709,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json"
+    },
+    {
+      "path": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile.gz",
+      "sha256": "ce4ac8c1dd4bc7a944c0c9f9a8f052faf9cc17137c08ae2e0fa0d77d963aa0de",
+      "bytes": 82132,
+      "decoded_sha256": "9eb66a9a6f524aea8034890897f5bd11ea45e5acc5bad0fb98b091fe0c69c25d",
+      "decoded_bytes": 1239918,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile"
+    },
+    {
+      "path": "candidate/car-moving-firstperson/repetition-1/report.json.gz",
+      "sha256": "4945e1c0b712ddd902488d188127d453951bdf6583412fbd88b320ede8d1dc88",
+      "bytes": 4820,
+      "decoded_sha256": "dc8085a6c9a5917d2359ba11a2b5b13c221a63e2817f9f89daf56ea130a4e018",
+      "decoded_bytes": 43941,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-firstperson/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json.gz",
+      "sha256": "c11bb86152cfce83a1e6b0ac9def035ce5e7ad114de240f3f8a037d5a4308754",
+      "bytes": 12043,
+      "decoded_sha256": "1d65e7629fbe5413b1d8af6e2f1c8422f8c7818a42b742a6fd6bf24cf48db6ba",
+      "decoded_bytes": 729792,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json"
+    },
+    {
+      "path": "candidate/car-moving-firstperson/repetition-2/report.json.gz",
+      "sha256": "87e02cb001f7ea6ec23da1a65ed79a1d11764e2321b1d293e61fda32e8021255",
+      "bytes": 2891,
+      "decoded_sha256": "468cfd7c4fe10f19320708c1559392eb10085c06b5478f48187255192a5b37c4",
+      "decoded_bytes": 10170,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-moving-firstperson/repetition-2/report.json"
+    },
+    {
+      "path": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-raw.json.gz",
+      "sha256": "9f4073605ea69226731d3bf6f0937f36c88165ad9a1d8dfaaf22087121532eb8",
+      "bytes": 2266,
+      "decoded_sha256": "edd7d867cface4828340b2fad33eed71c6c3a64f79e33918ae4a200539f96c77",
+      "decoded_bytes": 23674,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-raw.json"
+    },
+    {
+      "path": "candidate/car-stationary-chase/repetition-1/report.json.gz",
+      "sha256": "050d89dbb739634d91b22cffacdf8a3a0c994e7169c45c6227696b228f02e46a",
+      "bytes": 2056,
+      "decoded_sha256": "9136c31a543ffb93b332f1c891bc7ea9bea582861380f30fe41cff17ed37822d",
+      "decoded_bytes": 5205,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/car-stationary-chase/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/freeflight-moving/repetition-1/freeflight-moving-raw.json.gz",
+      "sha256": "319385a0746c27b9f29f1fdf4b9b427c7fe0fd3690fc16e8e624013fd88c404d",
+      "bytes": 13912,
+      "decoded_sha256": "6817931353a0971b5a8ca1df23a0920d000317fe0ec569676176f662fea4e3b0",
+      "decoded_bytes": 877947,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/freeflight-moving/repetition-1/freeflight-moving-raw.json"
+    },
+    {
+      "path": "candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile.gz",
+      "sha256": "46ad7e099bf5c6317856bf96e4c193f9e1b8fc738f064abb60bb11f4f955265c",
+      "bytes": 83707,
+      "decoded_sha256": "354b52fd65cf2c0d12ab3f16448a52b15e5c5b9aa9950620fef3ec2f97fd5689",
+      "decoded_bytes": 1279328,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile"
+    },
+    {
+      "path": "candidate/freeflight-moving/repetition-1/report.json.gz",
+      "sha256": "2aab85413b9d03c367105c1a8b959b60e25400e8fb07790d4d6836d434d8c8f7",
+      "bytes": 4883,
+      "decoded_sha256": "60ebe095734cea6b1dc2c36f87b2becfc95c2859c93234ac6b42839b67a21053",
+      "decoded_bytes": 43479,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/freeflight-moving/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/freeflight-moving/repetition-2/freeflight-moving-raw.json.gz",
+      "sha256": "9c8ffcdbccd92588990b008473712772d8adf1af03e6e00b4c5717f18bfe2e49",
+      "bytes": 13903,
+      "decoded_sha256": "05c67a3bf8f137b61d8639e72197cbd4132e173f1b5d109c04ed0da5ac3d3e2b",
+      "decoded_bytes": 904968,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/freeflight-moving/repetition-2/freeflight-moving-raw.json"
+    },
+    {
+      "path": "candidate/freeflight-moving/repetition-2/report.json.gz",
+      "sha256": "c8960253321e710eda2dd62bcf9fe87afc14136d760b2df89df833181d2b60aa",
+      "bytes": 2882,
+      "decoded_sha256": "0aac87f02e38664b02c5f5c5fb90ee16047d283a87add4fe38bc38e1fb611dbe",
+      "decoded_bytes": 10465,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/freeflight-moving/repetition-2/report.json"
+    },
+    {
+      "path": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-raw.json.gz",
+      "sha256": "12efe47d8c683d0e8040fa7fbdd7f0b0ba743a218e41898aa199e6060077cdd9",
+      "bytes": 2269,
+      "decoded_sha256": "76ac94072602d59e6beb7ed6064007d14aa4f27e7073892a8562cb851ef93adf",
+      "decoded_bytes": 23689,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-raw.json"
+    },
+    {
+      "path": "candidate/freeflight-stationary/repetition-1/report.json.gz",
+      "sha256": "17f5a15f51416615e54d73072f08c62457ddb9f8f0bbf15b66e601292fa54728",
+      "bytes": 2041,
+      "decoded_sha256": "94d72596f5768bee75e82bda61951aaeb4ad9d6332c79ab25286e871e4f11199",
+      "decoded_bytes": 5176,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/freeflight-stationary/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/map-idle-default/repetition-1/map-idle-default-raw.json.gz",
+      "sha256": "a1fdf867e0de7fc044a55fbed0d0e26da1636fa0c38391c56efd434e56a45eb1",
+      "bytes": 2279,
+      "decoded_sha256": "6af4f4a5d87e45256b4fda49204277327760f182329942b4bccf144b89f95230",
+      "decoded_bytes": 23446,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/map-idle-default/repetition-1/map-idle-default-raw.json"
+    },
+    {
+      "path": "candidate/map-idle-default/repetition-1/report.json.gz",
+      "sha256": "5860194b3c6efe3b8b9a36f5121f6e13b994657bd37a86b82af2e395b1fb5814",
+      "bytes": 1944,
+      "decoded_sha256": "93d0127d4a800595328688f953315654694af78681dde837d9c316a83ab11f0c",
+      "decoded_bytes": 4764,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/map-idle-default/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/map-idle-relief/repetition-1/map-idle-relief-raw.json.gz",
+      "sha256": "6515f30a1538ffda52cb0243d1108bd7aa6e95c9ad1602f311866de84af43c65",
+      "bytes": 2248,
+      "decoded_sha256": "7df5c0694cf59e0c386bafb44d15682075aaaa9bddd32cbd8f0713c8d7eb2c38",
+      "decoded_bytes": 23680,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/map-idle-relief/repetition-1/map-idle-relief-raw.json"
+    },
+    {
+      "path": "candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile.gz",
+      "sha256": "4711cd97732e7ed0abd66e4cc4511a1aac78887deaf5b388285910ff278fc473",
+      "bytes": 6357,
+      "decoded_sha256": "f22dcc2323e9524ea63283d7be21b7e5629098e858474bd6d78e06e890e5abd1",
+      "decoded_bytes": 52636,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile"
+    },
+    {
+      "path": "candidate/map-idle-relief/repetition-1/report.json.gz",
+      "sha256": "6ced9cccd963616ee1bf17d4630df054ce59076e299ab92e1222d1af21a53f11",
+      "bytes": 2185,
+      "decoded_sha256": "09fb544fa74482022f55591034c44aeb753a1ce889b8b6e35050f57ea19fd258",
+      "decoded_bytes": 6299,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/map-idle-relief/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/walk-moving-chase/repetition-1/report.json.gz",
+      "sha256": "964db04ee5873dab12040926820313b51fe642da29651604dd17faa2cca7feb2",
+      "bytes": 4966,
+      "decoded_sha256": "18e9749e4afd43dae0385d9045057f723853a4826288f8754a9b06c8c345d125",
+      "decoded_bytes": 42921,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-chase/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-raw.json.gz",
+      "sha256": "bc85095fc1dbc63b317024373b1ea6d872ab350fec04a991b52d0831e873738e",
+      "bytes": 26284,
+      "decoded_sha256": "3d9a9321de4da4c8572c7277564e45175844d51fdef2dc52084f072f528018f1",
+      "decoded_bytes": 2813771,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-raw.json"
+    },
+    {
+      "path": "candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile.gz",
+      "sha256": "4d88fd3c19a41cc7843d91193af194bbf30ff127bb822ce79a671588c8d64cc1",
+      "bytes": 67068,
+      "decoded_sha256": "c1341c74bf89958df08be476789d7c56ed8d8c7652a05afb74a5fb4767aaea44",
+      "decoded_bytes": 971973,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile"
+    },
+    {
+      "path": "candidate/walk-moving-chase/repetition-2/report.json.gz",
+      "sha256": "1b2df07872920acb689641fbf9fc0b588b96454090440792a8fdeefc07df5622",
+      "bytes": 2842,
+      "decoded_sha256": "860eae48530f12fe4298f4869fcf80e919bfe76d3c2e2d0afab003758a83fb3f",
+      "decoded_bytes": 9949,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-chase/repetition-2/report.json"
+    },
+    {
+      "path": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-raw.json.gz",
+      "sha256": "31439c976a58afc03648c110388859c4b76213d88e6297b602997380d21dec5a",
+      "bytes": 25862,
+      "decoded_sha256": "38e046cc29643c99e1b02471c78d6faa2a8c5d07362d89c9e46101b129b6549e",
+      "decoded_bytes": 2794565,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-raw.json"
+    },
+    {
+      "path": "candidate/walk-moving-firstperson/repetition-1/report.json.gz",
+      "sha256": "34107ea62ec308163e4651c5fbe45bb70ff683b22ebc6ba4322b40d050aa955e",
+      "bytes": 4868,
+      "decoded_sha256": "cd1fa5d5432721bba3b22d35f972970aca9659427711e78ac9bfb3939058d9bf",
+      "decoded_bytes": 43631,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-firstperson/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json.gz",
+      "sha256": "c73c108d7d2be19c6bdab26099594cff18f5619ce24e71ac0b72e99cf08261d5",
+      "bytes": 11114,
+      "decoded_sha256": "79612f8098dac7abb4a0654dea3c7658573612ab29d63f3b58f93b33a4fb978b",
+      "decoded_bytes": 546944,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json"
+    },
+    {
+      "path": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile.gz",
+      "sha256": "aacd202d68209845ed96a76df91c0e86b851b911c9d9c92e179c87fd318f35f0",
+      "bytes": 56677,
+      "decoded_sha256": "9ed2df49ca65810960f13cb0212556b23dfb7b4b5d0d6ef35ddb51939ba89fdf",
+      "decoded_bytes": 785240,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile"
+    },
+    {
+      "path": "candidate/walk-moving-firstperson/repetition-2/report.json.gz",
+      "sha256": "7e2d58e6ffbb6036a7d762b9c1d0476c802f9bf1e16dcdf000fb8ceddd9a2325",
+      "bytes": 2827,
+      "decoded_sha256": "1b20374152ee887de8abfe85eed518751f8ea7cbd2373d2fd5249a2df5bce786",
+      "decoded_bytes": 9838,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-firstperson/repetition-2/report.json"
+    },
+    {
+      "path": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json.gz",
+      "sha256": "903ca34bcb6205cd5ef427008813a4095650e96858421198ecd2980e729893a7",
+      "bytes": 10796,
+      "decoded_sha256": "73842e99d18278b5257f2dcfda6718ed405b3d2e197c212df24a49c24cc60b7e",
+      "decoded_bytes": 529285,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json"
+    },
+    {
+      "path": "candidate/walk-stationary-firstperson/repetition-1/report.json.gz",
+      "sha256": "5040890c8f07690853b51c25a2ea6665c13ac5c7c7868fe12f2ed54c1244f487",
+      "bytes": 4239,
+      "decoded_sha256": "a1bc0be9bf344f86f580189e148a2e39d570608de9b835ec444d715d7449d784",
+      "decoded_bytes": 37959,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-stationary-firstperson/repetition-1/report.json"
+    },
+    {
+      "path": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json.gz",
+      "sha256": "289cfece9784d7225f772893c4d8643b4ac944bb112ef7f015bad6338c3b4083",
+      "bytes": 2255,
+      "decoded_sha256": "b02a2b004f67c68012fff23443bf462ce06edaef60ff490916fd585e5ee96e96",
+      "decoded_bytes": 23688,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json"
+    },
+    {
+      "path": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile.gz",
+      "sha256": "5f40f890b4f39ee7189823408090abf51ee3cd47b29ca8df832b736771ba9637",
+      "bytes": 31560,
+      "decoded_sha256": "8fe13da11973257a52d0bd88cae095524a110f77fac681b881ef6e659cca6e5f",
+      "decoded_bytes": 482151,
+      "source_artifact_id": 13712241017,
+      "source_member": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile"
+    },
+    {
+      "path": "candidate-profile-hotspots.json",
+      "sha256": "a452ee9a931bfd61d85f19c41060e6d57c1bc44d220bb31747af63af1e7cde08",
+      "bytes": 80170
+    },
+    {
+      "path": "candidate-profile-provenance.json",
+      "sha256": "3a0286ebb63e2a3064799ba2a43ae9cfed299314939d4848e152f7a57a3e8073",
+      "bytes": 20367
+    },
+    {
+      "path": "candidate-profile-validation.json",
+      "sha256": "12d7598e781e7e65af10c33facafb79e02825ca65a41ea88ebb24c698b397aec",
+      "bytes": 4699
+    },
+    {
+      "path": "candidate-profiles-symbolicated.zip",
+      "sha256": "59c32dd83897b173399451d1bc51cbc9396ecff694a248ba8b313bcaf8c6f4ec",
+      "bytes": 763293
+    },
+    {
+      "path": "environment.json",
+      "sha256": "81bbeb0467683c18ae15a1a13dc8741ebfbe0790b9ca62d1f4c98c8a84c03fb5",
+      "bytes": 4195,
+      "source_artifact_id": 13712241017,
+      "source_member": "environment.json"
+    },
+    {
+      "path": "high-dpi-close-camera.json.gz",
+      "sha256": "914113d07568953ac343e5cfb3cc8eab9c0580312a862678b86a485993de85a8",
+      "bytes": 962,
+      "decoded_sha256": "c1e32753fe58b6657093c989e91101df5eed1cf2a7ad4a2b9da10da00bdf2e66",
+      "decoded_bytes": 6316,
+      "source_artifact_id": 13710573869,
+      "source_member": "explore/high-dpi-close-camera.json"
+    },
+    {
+      "path": "live-earth.jpg",
+      "sha256": "b82fa84de897b4cdb512d57801e053e4250dadc58a2be9860ae957a19123a075",
+      "bytes": 331724
+    },
+    {
+      "path": "presentation-comparison.json",
+      "sha256": "9e12867d8aee13f1c0fc49c1a576d03dc1bef25498812c09eb00ae22904c2ef0",
+      "bytes": 934,
+      "source_artifact_id": 13710573869,
+      "source_member": "gpu-direct/comparison.json"
+    },
+    {
+      "path": "presentation-detached.json.gz",
+      "sha256": "6da819c407bc510cf1a1ae95e51604a918c84a90455c7d9b543255edb829bc95",
+      "bytes": 4100,
+      "decoded_sha256": "48de7fa4722cbd1ddbef7b724c2a86285f006a91d3597ec81ce2ba39a27bff80",
+      "decoded_bytes": 18034,
+      "source_artifact_id": 13710573869,
+      "source_member": "gpu-transfer/visual.json"
+    },
+    {
+      "path": "presentation-direct.json.gz",
+      "sha256": "6cb5dcf7895d42505d0fce0a33012cef5950ac8de80aca9fce3bc4d2f30b671c",
+      "bytes": 4048,
+      "decoded_sha256": "be36e28066725a0ef6a866ee99373ee471615267e863b7e35c0bd9ce14a38afd",
+      "decoded_bytes": 17340,
+      "source_artifact_id": 13710573869,
+      "source_member": "gpu-direct/visual.json"
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "45e1ca0e3df27f4bfe9dc67c85e8015e33234ce252f45186739cad3387981d3f",
+      "bytes": 41790,
+      "source_artifact_id": 13712241017,
+      "source_member": "provenance.json"
+    },
+    {
+      "path": "samples.csv",
+      "sha256": "711d806aaad389090b7f0a5bafdbbb3c38e6b5ecc251f0dbe12d4eae90019eca",
+      "bytes": 21226
+    },
+    {
+      "path": "validation.json",
+      "sha256": "563d64557f5e7492b39d83af35db0acb37bf29cdbfb8ab8cb508e13d4a523240",
+      "bytes": 3973
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "date": "2026-11-09",
-  "scope": "Allocation-only moving GPU-frame control. Four warmup frames and eight measured phases; no imagery, GL submission, browser presentation or free-roam simulation. No frame-time improvement claim.",
+  "scope": "Allocation-only moving GPU-frame control. Four warmup frames and eight measured phases; no imagery, GL submission, browser presentation or free-roam simulation. The independent depth-query pass is disabled, so its fingerprints are SHA256(empty); overlay fingerprints are nonempty and exact. No frame-time improvement claim.",
   "baseline_commit": "a4d80e0a4dfa84b7b420c04e3c03deef4f8b96bb",
   "candidate": {
     "base_commit": "a4d80e0a4dfa84b7b420c04e3c03deef4f8b96bb",
@@ -33,7 +33,8 @@
     "identical_harness_and_all_runtime_dependencies_except_renderer": true,
     "all_8_query_and_overlay_fingerprints_exact": true,
     "removed_managed_bytes_each_frame": 72,
-    "interpretation": "One six-reference key array removed per moving frame on this x64 runtime. Cache-generation checks still run after source replacement or eviction."
+    "interpretation": "One six-reference key array removed per moving frame on this x64 runtime. Cache-generation checks still run after source replacement or eviction.",
+    "independent_depth_queries_per_frame": 0
   },
   "samples": [
     {

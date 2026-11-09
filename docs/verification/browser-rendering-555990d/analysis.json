@@ -1,0 +1,4188 @@
+{
+  "provenance": {
+    "baseline_selection": {
+      "source": "commit-marker",
+      "requested_run_id": 42415166135,
+      "workflow_input": null,
+      "commit_marker": "42415166135",
+      "resolved_run_id": 42415166135
+    },
+    "baseline": {
+      "run_id": 42415166135,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42415166135",
+      "artifact_id": 13591044857,
+      "artifact_digest": "sha256:a6c8de14fea3fc245f46f4057833a0b072becd749278d3ec35b5f7c20aa64c09",
+      "artifact_size_bytes": 88403486,
+      "runtime_mode": "InterpreterAndAOT",
+      "resources": [
+        {
+          "group": "jsModuleNative",
+          "name": "dotnet.native.lsdbvplmxc.js",
+          "sha256": "6b927c67eb04ba4895854609d88eb32b60eb51320a7c7d7ecbfd149c4740c50d"
+        },
+        {
+          "group": "jsModuleRuntime",
+          "name": "dotnet.runtime.5nc8i5dl74.js",
+          "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d"
+        },
+        {
+          "group": "wasmNative",
+          "name": "dotnet.native.i91u2xqomj.wasm",
+          "sha256": "1a9808ff92ebaf23bbf86313b001e13ad2e26a2e26c77e49b7c26446bcc7e847"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_CJK.tjcz0u77k5.dat",
+          "sha256": "4992ed42745cd09930a8769bd155153fb4f7b813d2798cf1cc39e9c4fa549c79"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_EFIGS.tptq2av103.dat",
+          "sha256": "f1f22d7ad618f24434c30ea8c704cb893de85e50701caba66de3f6a51178c937"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_no_CJK.lfu7j35m59.dat",
+          "sha256": "2fbb15ecd1183f7eff42bd853c278fa39709a918135d1c061eec05e50fb435fb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "CommonServiceLocator.ukyzr3es9y.wasm",
+          "sha256": "329f6f7c3651c3118f398f95dbef3e7f491b1340359eb8a79faf0e9197fac208"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "HarfBuzzSharp.lwf1lgi861.wasm",
+          "sha256": "3b646f6e48032206a913f499fe461b98795c4b94cd75ad823731054b822fc731"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "LibTessDotNet.crzkfkf89i.wasm",
+          "sha256": "082149dde1c08d7c54870523d654106d328324a3dc6c639437511cb75edbe7f5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.Abstractions.mpr032n10k.wasm",
+          "sha256": "b69874361df91da4f3a22acefdcd8f3730160dcb1859eaa440767dafcbf2ba4d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.qmh9uu1lj0.wasm",
+          "sha256": "7ed83b989a8094f8fd109d2e280658a4bfe6db756b1d8c988c40fac1fbe81e92"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Options.g14ttqkiwj.wasm",
+          "sha256": "b45eda73d20aca050e34ae2695375a3b5e114d6c280aa1cc872b911b9e401038"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.App.zxu9coxgvw.wasm",
+          "sha256": "19ffe1b192e4dd59b8a3d3d205abe57ae2c7bd84b300991190f63c6b4b0c40ad"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Audio.hz2i48rjf0.wasm",
+          "sha256": "630c1338f138d80ff510b321438d0ac96c1906fdd34ade0757d1dbf4d980566c"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Controls.mqbe19mu9d.wasm",
+          "sha256": "ee77c71dcf67fc072970fa4ad1f915cb94a8f300ecdccf3936f524aebfc419f3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Data.oqykj4w235.wasm",
+          "sha256": "e0ef1537e05f219255d885b616253a532b95fab6b0b0fb3b0688d1ef25a1f242"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Rendering.3k8u0qqdrg.wasm",
+          "sha256": "2df1a9eead00e42f84a8aad8504cd0bd542fe1e230096bcc03d616a73a3a08b5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Routing.h3ki2dz79j.wasm",
+          "sha256": "c3431d46880a82d0d2e0073386ee514c9b34adfbdd3ade154d9c86bd56b6939b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Simulation.l0h4jm7jme.wasm",
+          "sha256": "256a7a41f099df9e5d910af362ad72d0fb332cb2bee57239700a47c8417e5d10"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.Core.irny1tzrsi.wasm",
+          "sha256": "ced1ea04885913057f48865cd0aa4b4041ba8eda9e75e310e31c5687060327d8"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.OpenGL.l769160cw3.wasm",
+          "sha256": "4fff987fde634d26c5b7b483401df2d05edf880d9a2526b9f7105cd3eeb06a81"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+          "sha256": "3330bc28a3f1c22072d7ca8ec3aca5e68a42f6774d9bd7bcd575c3b539bb67d2"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+          "sha256": "83a0935a743e40eb8ea87daded2abd8a765855a37b20e08eb399fd78928cd17c"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+          "sha256": "8bec56cec65707287a4d7a1473c9fa0a91b24b1f36ff4c1d85523c7efe97019f"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.6bzq5bigir.wasm",
+          "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Concurrent.ajnvvkksra.wasm",
+          "sha256": "e617759820fe62f1694633f132ec7a59cd08255f0c912804e15b9e84cd110dd1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Immutable.rqpx5bg4jl.wasm",
+          "sha256": "6dcef119932aa14daf126b20b24b43518682c3329e1142dca954f132c7ee0317"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.NonGeneric.kkxpvokdtg.wasm",
+          "sha256": "34d56f8fdb74a452306948f7598cdc3ea745c0da6076ef1de306f4ec2dbce64e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Specialized.j3sjtyx29u.wasm",
+          "sha256": "0156b2f518bc6f339d8d55feb99a95c9156f7d7f1a81e8307fe6a8e645b547bf"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.vcygonji41.wasm",
+          "sha256": "116a113890f40036d6c8f2f1818cb8de215a4cde4cd2215737b4066e8e4938c3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.g3pwvcjcrg.wasm",
+          "sha256": "f459ba180c859a26f524ba65827066a70b9affe548e5de42c0b89cb1db846b55"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.Primitives.t2v0oareoy.wasm",
+          "sha256": "554d3049cd02483d27d963b45681035a4244fdbf327fe910ce6fdaf8a7cf6221"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.TypeConverter.2acv8geycx.wasm",
+          "sha256": "eaf7747eeba897fb131bc4a00557425335dc53b711875ea1974094730b9106b6"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Console.8asle477ur.wasm",
+          "sha256": "7010e8671ead33807e1d63efc3af5a5b801fba280eb2cdde2d20143e050c36f3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.Primitives.nn7jqfbl79.wasm",
+          "sha256": "7d6cfcf6af203d16c1e896264ae07395782c4a4e59d2bc6f01685efc70d5fddc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.nxsyxvwmnf.wasm",
+          "sha256": "fbe3be42f3ae0a9641a516c2490147c20b2c0abd4bee59a015221bdadd1f4a47"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Compression.t357pfbby0.wasm",
+          "sha256": "672586bcafa825d9a73bfe5f750eb8750623ef7d1d6c5d54da7b57b4c0d5ab0d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Pipelines.bs0ouzxqxi.wasm",
+          "sha256": "050ccde057a06086e4b69b83fd06bc8f47ebb633f577795564cbb38a17267338"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.Expressions.7zweb26hu8.wasm",
+          "sha256": "8d8eabb9a9d4c623e818ee9067b0a5710b89c69e8d4d3102346b072ac30fd364"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.q457punoy8.wasm",
+          "sha256": "ba76376857e644ce76008f0ff4d3c0d41d11685768a302a39175cf52c4fa44e1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Memory.2acfgvgghp.wasm",
+          "sha256": "ead7a8eed580f4f1556448d0ddc7fbb2eb408d9e638d60ef7d6032e74e437b64"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Http.5jkdru1ctm.wasm",
+          "sha256": "31ec0be616b394a143a1d6eefd88e7028ed0a82ff64c5a10d3ebfd908a81650a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Primitives.wr5ku4tjce.wasm",
+          "sha256": "3c58c1da45d55b0d08af9cdf8f1d298b3781e3108936c145c9e503095b33562b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ObjectModel.av0m9ib997.wasm",
+          "sha256": "e6cef0c31897e62d519f27229adc1484b32cd51faf8c4de76f4015742ce02afa"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.CoreLib.0jgd5hx6dl.wasm",
+          "sha256": "14d2d9952efa3823fe7d0ab39f2957dc012aad7031f7862e84cbdb030e73d78b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Uri.nmnyz2eidv.wasm",
+          "sha256": "1f57dbf1a140f1b0759fb1a85e283143bfdec024197f4b7c7c5d7682557831f1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Xml.x61a4mvfse.wasm",
+          "sha256": "778f5be3f71adaf091aa2f4f95ceb178756fc6da1a6125211ca9a1c20ba6f9ab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Runtime.InteropServices.JavaScript.wjudxd2z05.wasm",
+          "sha256": "142ff9a62a316de9ddaafcb43b80913dc7c7db0a7c96626a124db9ea9738116d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Security.Cryptography.hjdh28m8dh.wasm",
+          "sha256": "cd2013526aad255162483e2f04b1e160480ed035d418e53b87f68e58436dbb22"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Encodings.Web.409810hzt0.wasm",
+          "sha256": "6caf10192a477ab1a4e1a8b94038dc546eaf97137401a4b3a631aee5346c4019"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Json.2m50hjpw08.wasm",
+          "sha256": "6a89fe893fbe127f14346f5bcd5f607dcf278bfc7a93a3e5a90029eda3f82060"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.RegularExpressions.77jjwmegg8.wasm",
+          "sha256": "0d00bd1d87b8e23de4d412a01fb634c520bb448806f506a45e8b48b339200084"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.a3z5tpzyvn.wasm",
+          "sha256": "1ace5b022a74634ed8eeb764e02627a73ac1786a6502e7450042d410b7c1cbcd"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.fmbs8vjlnx.wasm",
+          "sha256": "d77d0f49f7ed269f4695e96a90e32876d52951de359a3bc7f301f3c8aa2e96a3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.tx34v3idjk.wasm",
+          "sha256": "f1b778e5b3f876bc740760449dc7a53b77cfbb78a03c2859922ad3e84c87d0bc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.Singleton.goqx5ykemm.wasm",
+          "sha256": "b04d1b452c9b0b34d6a9da77aaf23928be2139c14f84a24f1f46127c824ea244"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Diagnostics.Eventing.bsz5ci2pgy.wasm",
+          "sha256": "9547bed7d3e2c2aede5c04e506eed66f7ab29316ebc5756e036cf5dc29e1eb75"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Logging.renv1nr86x.wasm",
+          "sha256": "4395972a1ff8e3cd085138146236bd57f1ee922a33de379ffc8d00e3d5486288"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Runtime.WebAssembly.km8s5j6taq.wasm",
+          "sha256": "ac0be8e2f502505553fece7d263bd26c6f309d6b2265edfbc17cdb22fc7d19eb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.vlgc9ffcv7.wasm",
+          "sha256": "1314f7e0992b094d521fa4e3d05f65201e0f71bfc152a8800f9945ac41524527"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+          "sha256": "38e6dc99802d58d0c7896562d0728ca54ff882192c727e3d3ada7e6d00451079"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+          "sha256": "865d99094ccf1a2783b59bcc2b739cc354dee641e81c62047c213c425adfa51e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+          "sha256": "48c9648a0591741d6c8ffa82fb762c9fc24ffbfa6eb79ea7cc5f26882843f583"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+          "sha256": "f7e11c9a2a010cf5e9d498b8b0e107d8b0d63a0c308770023ac20ab7f48dd01a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Lottie.o8obruisre.wasm",
+          "sha256": "78a2dc965e0dbe0335dd2204795d840bb120f2ec295053ac07e15f8ab16a9ef5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+          "sha256": "d765dd49065cffb92d2ab80c36362b98115aab26182cb8b84950180cb26ae385"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+          "sha256": "17f211fb69fe6084a3954bfeb458842f77b2a5b6fe11700f13cfeb2e71d1d79b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+          "sha256": "f90fbdc306d961a83af29cf06e2b6a15c4791ab21148b43e983df91161a97859"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.4m88unnvnt.wasm",
+          "sha256": "9ca7fa14fd307a2c5d4c70919fa54b156aa3e916ae48a81b5b658708454a6fab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics2DSK.kw64qixynf.wasm",
+          "sha256": "f46d25c54ab7cad77f89a51960ad506855d7e52b68dab1ab9004439f9d260784"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics3DGL.f1ii2wdxps.wasm",
+          "sha256": "2d0238035a8d20d282870ae9d90afeb256ea8af9b4f116f1f5f0962ba3d52a38"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Xaml.ddg0hhofs5.wasm",
+          "sha256": "1fd8978cd634488fca207f13d6f64a7868ca4469968699f522a5d3bf7d725a01"
+        }
+      ],
+      "index_sha256": "2bcdca7ea7a281247820442a0c4fc98dddf9dfc88ca5b40b44f6f05a2e8e0763",
+      "config_sha256": "402bfa22ffd34f64380d05e6ab0713ecf28b3e00027522aee832e0b43837ca64",
+      "loader_sha256": "fc5f3c19623ffb64f0c990413ef31a1304832c6c1c3fd33c9f1f378848e44fc8"
+    },
+    "candidate": {
+      "run_id": 42696985047,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047",
+      "artifact_id": 13710017486,
+      "artifact_digest": "sha256:04abb6b24c35df6d6e5f6b3bbb80e211f1fe48c2d6edc948ada4138ac3163b8e",
+      "artifact_size_bytes": 88403636,
+      "runtime_mode": "InterpreterAndAOT",
+      "resources": [
+        {
+          "group": "jsModuleNative",
+          "name": "dotnet.native.3c2qey70js.js",
+          "sha256": "ad6bd0b511e0f199c825887fc8ec17392d019e4281b8b072646815cba7c79b3a"
+        },
+        {
+          "group": "jsModuleRuntime",
+          "name": "dotnet.runtime.5nc8i5dl74.js",
+          "sha256": "ff774183db23d722c3de1d0f0cc1e73545d6b3fdb35b020c133a26d57cf7438d"
+        },
+        {
+          "group": "wasmNative",
+          "name": "dotnet.native.xb3rs50ucp.wasm",
+          "sha256": "9d99319804c946006f4efe983f00830d430bd841a2170a3a09d09dfb2d9c295f"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_CJK.tjcz0u77k5.dat",
+          "sha256": "4992ed42745cd09930a8769bd155153fb4f7b813d2798cf1cc39e9c4fa549c79"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_EFIGS.tptq2av103.dat",
+          "sha256": "f1f22d7ad618f24434c30ea8c704cb893de85e50701caba66de3f6a51178c937"
+        },
+        {
+          "group": "icu",
+          "name": "icudt_no_CJK.lfu7j35m59.dat",
+          "sha256": "2fbb15ecd1183f7eff42bd853c278fa39709a918135d1c061eec05e50fb435fb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "CommonServiceLocator.ukyzr3es9y.wasm",
+          "sha256": "329f6f7c3651c3118f398f95dbef3e7f491b1340359eb8a79faf0e9197fac208"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "HarfBuzzSharp.lwf1lgi861.wasm",
+          "sha256": "3b646f6e48032206a913f499fe461b98795c4b94cd75ad823731054b822fc731"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "LibTessDotNet.crzkfkf89i.wasm",
+          "sha256": "082149dde1c08d7c54870523d654106d328324a3dc6c639437511cb75edbe7f5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.Abstractions.mpr032n10k.wasm",
+          "sha256": "b69874361df91da4f3a22acefdcd8f3730160dcb1859eaa440767dafcbf2ba4d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Logging.qmh9uu1lj0.wasm",
+          "sha256": "7ed83b989a8094f8fd109d2e280658a4bfe6db756b1d8c988c40fac1fbe81e92"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Microsoft.Extensions.Options.g14ttqkiwj.wasm",
+          "sha256": "b45eda73d20aca050e34ae2695375a3b5e114d6c280aa1cc872b911b9e401038"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.App.oe8g6kf73h.wasm",
+          "sha256": "90d49685dd0aa9344c73433b70a243c1c55725b2332255cb379af5be6091a780"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Audio.gvu9ampze1.wasm",
+          "sha256": "8cb6ce88b293cf17780454cf2650cc40a8b3ec277f4a6a7aa11fec949bb52ade"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Controls.e7qyq5ph70.wasm",
+          "sha256": "d6e8b53bfcdf059081b213c2e2a99caee0b06aad4be5690a9aa75146d96ec219"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Data.yz33an6e8i.wasm",
+          "sha256": "02e346b4e7c65cdbc8cf4fd22139ab94533b3bde99b739f15109c6f186be2a36"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Rendering.je62wwtr8n.wasm",
+          "sha256": "ebbc33aa710dd2e6094af9fc5f5f2f1a2057cac552245c8bc443507e44ffe026"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Routing.ukh4g1ju47.wasm",
+          "sha256": "fe95e1100c43671b08ccc72e63d613c252d5d6acecdfcf41398a7ad5e08c95be"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "PixelMap.Simulation.gogxuc5tjb.wasm",
+          "sha256": "b0f0cf3644744e9022c615893a7b6badc2ef7adf5ddd809b62cf619682ff1872"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.Core.irny1tzrsi.wasm",
+          "sha256": "ced1ea04885913057f48865cd0aa4b4041ba8eda9e75e310e31c5687060327d8"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Silk.NET.OpenGL.jsy9hs5hk1.wasm",
+          "sha256": "6349daecc75993a9523e6c0b1f1cf0b4c4b480b6d843bfd12ce0cb89789d0e8b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+          "sha256": "3330bc28a3f1c22072d7ca8ec3aca5e68a42f6774d9bd7bcd575c3b539bb67d2"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+          "sha256": "83a0935a743e40eb8ea87daded2abd8a765855a37b20e08eb399fd78928cd17c"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+          "sha256": "8bec56cec65707287a4d7a1473c9fa0a91b24b1f36ff4c1d85523c7efe97019f"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "SkiaSharp.6bzq5bigir.wasm",
+          "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Concurrent.ajnvvkksra.wasm",
+          "sha256": "e617759820fe62f1694633f132ec7a59cd08255f0c912804e15b9e84cd110dd1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Immutable.rqpx5bg4jl.wasm",
+          "sha256": "6dcef119932aa14daf126b20b24b43518682c3329e1142dca954f132c7ee0317"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.NonGeneric.kkxpvokdtg.wasm",
+          "sha256": "34d56f8fdb74a452306948f7598cdc3ea745c0da6076ef1de306f4ec2dbce64e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.Specialized.j3sjtyx29u.wasm",
+          "sha256": "0156b2f518bc6f339d8d55feb99a95c9156f7d7f1a81e8307fe6a8e645b547bf"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Collections.vcygonji41.wasm",
+          "sha256": "116a113890f40036d6c8f2f1818cb8de215a4cde4cd2215737b4066e8e4938c3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.g3pwvcjcrg.wasm",
+          "sha256": "f459ba180c859a26f524ba65827066a70b9affe548e5de42c0b89cb1db846b55"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.Primitives.t2v0oareoy.wasm",
+          "sha256": "554d3049cd02483d27d963b45681035a4244fdbf327fe910ce6fdaf8a7cf6221"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ComponentModel.TypeConverter.2acv8geycx.wasm",
+          "sha256": "eaf7747eeba897fb131bc4a00557425335dc53b711875ea1974094730b9106b6"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Console.8asle477ur.wasm",
+          "sha256": "7010e8671ead33807e1d63efc3af5a5b801fba280eb2cdde2d20143e050c36f3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.Primitives.nn7jqfbl79.wasm",
+          "sha256": "7d6cfcf6af203d16c1e896264ae07395782c4a4e59d2bc6f01685efc70d5fddc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Drawing.nxsyxvwmnf.wasm",
+          "sha256": "fbe3be42f3ae0a9641a516c2490147c20b2c0abd4bee59a015221bdadd1f4a47"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Compression.t357pfbby0.wasm",
+          "sha256": "672586bcafa825d9a73bfe5f750eb8750623ef7d1d6c5d54da7b57b4c0d5ab0d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.IO.Pipelines.bs0ouzxqxi.wasm",
+          "sha256": "050ccde057a06086e4b69b83fd06bc8f47ebb633f577795564cbb38a17267338"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.Expressions.7zweb26hu8.wasm",
+          "sha256": "8d8eabb9a9d4c623e818ee9067b0a5710b89c69e8d4d3102346b072ac30fd364"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Linq.q457punoy8.wasm",
+          "sha256": "ba76376857e644ce76008f0ff4d3c0d41d11685768a302a39175cf52c4fa44e1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Memory.2acfgvgghp.wasm",
+          "sha256": "ead7a8eed580f4f1556448d0ddc7fbb2eb408d9e638d60ef7d6032e74e437b64"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Http.5jkdru1ctm.wasm",
+          "sha256": "31ec0be616b394a143a1d6eefd88e7028ed0a82ff64c5a10d3ebfd908a81650a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Net.Primitives.wr5ku4tjce.wasm",
+          "sha256": "3c58c1da45d55b0d08af9cdf8f1d298b3781e3108936c145c9e503095b33562b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.ObjectModel.av0m9ib997.wasm",
+          "sha256": "e6cef0c31897e62d519f27229adc1484b32cd51faf8c4de76f4015742ce02afa"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.CoreLib.0jgd5hx6dl.wasm",
+          "sha256": "14d2d9952efa3823fe7d0ab39f2957dc012aad7031f7862e84cbdb030e73d78b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Uri.nmnyz2eidv.wasm",
+          "sha256": "1f57dbf1a140f1b0759fb1a85e283143bfdec024197f4b7c7c5d7682557831f1"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Private.Xml.x61a4mvfse.wasm",
+          "sha256": "778f5be3f71adaf091aa2f4f95ceb178756fc6da1a6125211ca9a1c20ba6f9ab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Runtime.InteropServices.JavaScript.wjudxd2z05.wasm",
+          "sha256": "142ff9a62a316de9ddaafcb43b80913dc7c7db0a7c96626a124db9ea9738116d"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Security.Cryptography.hjdh28m8dh.wasm",
+          "sha256": "cd2013526aad255162483e2f04b1e160480ed035d418e53b87f68e58436dbb22"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Encodings.Web.409810hzt0.wasm",
+          "sha256": "6caf10192a477ab1a4e1a8b94038dc546eaf97137401a4b3a631aee5346c4019"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.Json.2m50hjpw08.wasm",
+          "sha256": "6a89fe893fbe127f14346f5bcd5f607dcf278bfc7a93a3e5a90029eda3f82060"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.Text.RegularExpressions.77jjwmegg8.wasm",
+          "sha256": "0d00bd1d87b8e23de4d412a01fb634c520bb448806f506a45e8b48b339200084"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "System.a3z5tpzyvn.wasm",
+          "sha256": "1ace5b022a74634ed8eeb764e02627a73ac1786a6502e7450042d410b7c1cbcd"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.fmbs8vjlnx.wasm",
+          "sha256": "d77d0f49f7ed269f4695e96a90e32876d52951de359a3bc7f301f3c8aa2e96a3"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.tx34v3idjk.wasm",
+          "sha256": "f1b778e5b3f876bc740760449dc7a53b77cfbb78a03c2859922ad3e84c87d0bc"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Core.Extensions.Logging.Singleton.goqx5ykemm.wasm",
+          "sha256": "b04d1b452c9b0b34d6a9da77aaf23928be2139c14f84a24f1f46127c824ea244"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Diagnostics.Eventing.bsz5ci2pgy.wasm",
+          "sha256": "9547bed7d3e2c2aede5c04e506eed66f7ab29316ebc5756e036cf5dc29e1eb75"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Logging.renv1nr86x.wasm",
+          "sha256": "4395972a1ff8e3cd085138146236bd57f1ee922a33de379ffc8d00e3d5486288"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.Runtime.WebAssembly.km8s5j6taq.wasm",
+          "sha256": "ac0be8e2f502505553fece7d263bd26c6f309d6b2265edfbc17cdb22fc7d19eb"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Foundation.vlgc9ffcv7.wasm",
+          "sha256": "1314f7e0992b094d521fa4e3d05f65201e0f71bfc152a8800f9945ac41524527"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+          "sha256": "38e6dc99802d58d0c7896562d0728ca54ff882192c727e3d3ada7e6d00451079"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+          "sha256": "865d99094ccf1a2783b59bcc2b739cc354dee641e81c62047c213c425adfa51e"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+          "sha256": "48c9648a0591741d6c8ffa82fb762c9fc24ffbfa6eb79ea7cc5f26882843f583"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+          "sha256": "f7e11c9a2a010cf5e9d498b8b0e107d8b0d63a0c308770023ac20ab7f48dd01a"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Lottie.o8obruisre.wasm",
+          "sha256": "78a2dc965e0dbe0335dd2204795d840bb120f2ec295053ac07e15f8ab16a9ef5"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+          "sha256": "d765dd49065cffb92d2ab80c36362b98115aab26182cb8b84950180cb26ae385"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+          "sha256": "17f211fb69fe6084a3954bfeb458842f77b2a5b6fe11700f13cfeb2e71d1d79b"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+          "sha256": "f90fbdc306d961a83af29cf06e2b6a15c4791ab21148b43e983df91161a97859"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.UI.4m88unnvnt.wasm",
+          "sha256": "9ca7fa14fd307a2c5d4c70919fa54b156aa3e916ae48a81b5b658708454a6fab"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics2DSK.kw64qixynf.wasm",
+          "sha256": "f46d25c54ab7cad77f89a51960ad506855d7e52b68dab1ab9004439f9d260784"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.WinUI.Graphics3DGL.f1ii2wdxps.wasm",
+          "sha256": "2d0238035a8d20d282870ae9d90afeb256ea8af9b4f116f1f5f0962ba3d52a38"
+        },
+        {
+          "group": "coreAssembly",
+          "name": "Uno.Xaml.ddg0hhofs5.wasm",
+          "sha256": "1fd8978cd634488fca207f13d6f64a7868ca4469968699f522a5d3bf7d725a01"
+        }
+      ],
+      "index_sha256": "7045470e41419e03e3b4934e6be331c2d7e45a01580d7014c2cd5eded8b1d9f1",
+      "config_sha256": "bcc32adf7e0a52ad788bbabfe9c5e2030cb57b800d8fc5f8b4b4c68b2ca4d6b6",
+      "loader_sha256": "6ec50b1d185c2d978e056d2cbe4b270783fd86622a5f0cb90e388b3db726593b"
+    },
+    "execution": [
+      {
+        "order": 1,
+        "scenario": "map-idle-default",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/map-idle-default/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:08:43.738643+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:09:00.056250+00:00"
+      },
+      {
+        "order": 2,
+        "scenario": "map-idle-default",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/map-idle-default/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:09:00.057065+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:09:14.862121+00:00"
+      },
+      {
+        "order": 3,
+        "scenario": "map-idle-relief",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/map-idle-relief/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:09:14.862877+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:09:44.201275+00:00"
+      },
+      {
+        "order": 4,
+        "scenario": "map-idle-relief",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/map-idle-relief/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:09:44.202029+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:10:14.688122+00:00"
+      },
+      {
+        "order": 5,
+        "scenario": "walk-stationary-firstperson",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/walk-stationary-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:10:14.689645+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:10:50.244225+00:00"
+      },
+      {
+        "order": 6,
+        "scenario": "walk-stationary-firstperson",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/walk-stationary-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:10:50.245022+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:11:25.165795+00:00"
+      },
+      {
+        "order": 7,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/walk-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:11:25.166674+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:11:59.182432+00:00"
+      },
+      {
+        "order": 8,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/walk-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:11:59.183226+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:12:33.291427+00:00"
+      },
+      {
+        "order": 9,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/walk-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:12:33.292124+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:12:57.831806+00:00"
+      },
+      {
+        "order": 10,
+        "scenario": "walk-moving-firstperson",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/walk-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:12:57.832481+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:13:24.299575+00:00"
+      },
+      {
+        "order": 11,
+        "scenario": "walk-moving-chase",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/walk-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:13:24.300421+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:14:01.659206+00:00"
+      },
+      {
+        "order": 12,
+        "scenario": "walk-moving-chase",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/walk-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:14:01.660011+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:14:39.044288+00:00"
+      },
+      {
+        "order": 13,
+        "scenario": "walk-moving-chase",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/walk-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:14:39.044971+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:15:08.005831+00:00"
+      },
+      {
+        "order": 14,
+        "scenario": "walk-moving-chase",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/walk-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:15:08.006601+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:15:36.622159+00:00"
+      },
+      {
+        "order": 15,
+        "scenario": "car-stationary-chase",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/car-stationary-chase/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:15:36.622910+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:16:03.452912+00:00"
+      },
+      {
+        "order": 16,
+        "scenario": "car-stationary-chase",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/car-stationary-chase/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:16:03.453642+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:16:31.722769+00:00"
+      },
+      {
+        "order": 17,
+        "scenario": "car-moving-chase",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/car-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:16:31.723520+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:17:10.670863+00:00"
+      },
+      {
+        "order": 18,
+        "scenario": "car-moving-chase",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/car-moving-chase/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:17:10.671663+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:17:50.102257+00:00"
+      },
+      {
+        "order": 19,
+        "scenario": "car-moving-chase",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/car-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:17:50.103028+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:18:20.058784+00:00"
+      },
+      {
+        "order": 20,
+        "scenario": "car-moving-chase",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/car-moving-chase/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:18:20.059470+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:18:49.538866+00:00"
+      },
+      {
+        "order": 21,
+        "scenario": "car-moving-firstperson",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/car-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:18:49.539674+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:19:27.570165+00:00"
+      },
+      {
+        "order": 22,
+        "scenario": "car-moving-firstperson",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/car-moving-firstperson/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:19:27.571014+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:20:05.397147+00:00"
+      },
+      {
+        "order": 23,
+        "scenario": "car-moving-firstperson",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/car-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:20:05.398045+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:20:32.897394+00:00"
+      },
+      {
+        "order": 24,
+        "scenario": "car-moving-firstperson",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/car-moving-firstperson/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:20:32.898177+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:21:01.893447+00:00"
+      },
+      {
+        "order": 25,
+        "scenario": "freeflight-stationary",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/freeflight-stationary/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:21:01.894354+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:21:27.506473+00:00"
+      },
+      {
+        "order": 26,
+        "scenario": "freeflight-stationary",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/freeflight-stationary/repetition-1",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:21:27.507411+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:21:51.996543+00:00"
+      },
+      {
+        "order": 27,
+        "scenario": "freeflight-moving",
+        "repetition": 1,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/freeflight-moving/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:21:51.997460+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:22:28.216509+00:00"
+      },
+      {
+        "order": 28,
+        "scenario": "freeflight-moving",
+        "repetition": 1,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/freeflight-moving/repetition-1",
+        "cpu_profile_requested": true,
+        "started_utc": "2026-11-09T21:22:28.217528+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:23:03.167654+00:00"
+      },
+      {
+        "order": 29,
+        "scenario": "freeflight-moving",
+        "repetition": 2,
+        "variant": "candidate",
+        "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "output": "candidate/freeflight-moving/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:23:03.168442+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:23:30.666009+00:00"
+      },
+      {
+        "order": 30,
+        "scenario": "freeflight-moving",
+        "repetition": 2,
+        "variant": "baseline",
+        "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+        "output": "baseline/freeflight-moving/repetition-2",
+        "cpu_profile_requested": false,
+        "started_utc": "2026-11-09T21:23:30.666943+00:00",
+        "exit_code": 0,
+        "completed_utc": "2026-11-09T21:23:56.314308+00:00"
+      }
+    ]
+  },
+  "environment": {
+    "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+    "cpu_affinity": "0,1,2",
+    "cpu_description": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           48 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 7763 64-Core Processor\nCPU family:                              25\nModel:                                   1\nThread(s) per core:                      2\nCore(s) per socket:                      2\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                4890.85\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl tsc_reliable nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves user_shstk clzero xsaveerptr rdpru arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload umip vaes vpclmulqdq rdpid fsrm\nVirtualization:                          AMD-V\nHypervisor vendor:                       Microsoft\nVirtualization type:                     full\nL1d cache:                               64 KiB (2 instances)\nL1i cache:                               64 KiB (2 instances)\nL2 cache:                                1 MiB (2 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Vulnerable: Safe RET, no microcode\nVulnerability Spec store bypass:         Vulnerable\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Vulnerable: No microcode\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+    "node": "v24.22.2",
+    "browser": "Google Chrome for Testing 156.0.8078.4",
+    "browser_sha256": "4fa61f0ba0b4f89b7bec242c32ca16d3bccf69dbfef0651924a9ba8fede5f9d6",
+    "extra_browser_args": [
+      "--in-process-gpu",
+      "--disable-gpu-watchdog",
+      "--renderer-process-limit=1"
+    ],
+    "protocol": "Each stationary scenario runs baseline then candidate. Moving scenarios run baseline/candidate then candidate/baseline (ABBA), in fresh browser processes on the same runner. CPU profiles are collected separately after timing, only in the first repetition.",
+    "play-performance.cjs_sha256": "fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44",
+    "performance.cjs_sha256": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c",
+    "explore.cjs_sha256": "83d83491198362e499b67a07d1ddcc5ed2f3daaf451dd9493017c48153bae49b"
+  },
+  "errors": [],
+  "records": [
+    {
+      "scenario": "map-idle-default",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 1,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/map-idle-default/repetition-1/report.json",
+      "report_sha256": "f6acbcca472a975666167bdfdfe7f1b6cf31868c76c764b27aec3f1364a952c0",
+      "raw_sha256": "fe69f057f741e142150c2f7f159a34405039404e30a980103b8295436f6d8a71",
+      "capture_ms": 8007.299999999988,
+      "metric_window_ms": 8032.182999999975,
+      "cpu_task_ms": 55.426,
+      "cpu_occupancy_percent": 0.6900490190524814,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 481,
+      "raf_per_second": 60.070185955315864,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": null,
+      "after_hud": null,
+      "distance_delta": null
+    },
+    {
+      "scenario": "map-idle-default",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 2,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/map-idle-default/repetition-1/report.json",
+      "report_sha256": "93d0127d4a800595328688f953315654694af78681dde837d9c316a83ab11f0c",
+      "raw_sha256": "6af4f4a5d87e45256b4fda49204277327760f182329942b4bccf144b89f95230",
+      "capture_ms": 8006.3000000000175,
+      "metric_window_ms": 8036.214999999998,
+      "cpu_task_ms": 62.41799999999999,
+      "cpu_occupancy_percent": 0.7767089357365378,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 480,
+      "raf_per_second": 59.95278718009554,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": null,
+      "after_hud": null,
+      "distance_delta": null
+    },
+    {
+      "scenario": "map-idle-relief",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 3,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/map-idle-relief/repetition-1/report.json",
+      "report_sha256": "5ef04035618b94ea2ed7aa0846615b1d92d29a4d4407a849a52801336139de1f",
+      "raw_sha256": "99772256ad30df28b25bc9cee60dca7629d97ec53e94b4015fb672ca01adca06",
+      "capture_ms": 8002.300000000047,
+      "metric_window_ms": 8020.322000000022,
+      "cpu_task_ms": 107.08,
+      "cpu_occupancy_percent": 1.335108490656606,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 481,
+      "raf_per_second": 60.1077190307783,
+      "raf_p95_ms": 16.700000000000728,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": null,
+      "after_hud": null,
+      "distance_delta": null
+    },
+    {
+      "scenario": "map-idle-relief",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 4,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/map-idle-relief/repetition-1/report.json",
+      "report_sha256": "09fb544fa74482022f55591034c44aeb753a1ce889b8b6e35050f57ea19fd258",
+      "raw_sha256": "7df5c0694cf59e0c386bafb44d15682075aaaa9bddd32cbd8f0713c8d7eb2c38",
+      "capture_ms": 8001.400000000023,
+      "metric_window_ms": 8017.361999999992,
+      "cpu_task_ms": 91.152,
+      "cpu_occupancy_percent": 1.1369325720854326,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 480,
+      "raf_per_second": 59.98950183717832,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": null,
+      "after_hud": null,
+      "distance_delta": null
+    },
+    {
+      "scenario": "walk-stationary-firstperson",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 5,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/walk-stationary-firstperson/repetition-1/report.json",
+      "report_sha256": "f855eeafd1edabffb28dec46b24e304754157d2fd3fea29c6ccbaef5ca49c66f",
+      "raw_sha256": "0386ed8432dbf42c4d8d1b6555715423eba679ecffc997610058341f491b8526",
+      "capture_ms": 8002.599999999977,
+      "metric_window_ms": 8029.831000000002,
+      "cpu_task_ms": 356.593,
+      "cpu_occupancy_percent": 4.44085311384511,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 480,
+      "raf_per_second": 59.980506335441156,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "distance_delta": 0
+    },
+    {
+      "scenario": "walk-stationary-firstperson",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 6,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/walk-stationary-firstperson/repetition-1/report.json",
+      "report_sha256": "a1bc0be9bf344f86f580189e148a2e39d570608de9b835ec444d715d7449d784",
+      "raw_sha256": "b02a2b004f67c68012fff23443bf462ce06edaef60ff490916fd585e5ee96e96",
+      "capture_ms": 8001.5,
+      "metric_window_ms": 8025.339000000031,
+      "cpu_task_ms": 387.11500000000007,
+      "cpu_occupancy_percent": 4.823659162559968,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 481,
+      "raf_per_second": 60.113728675873276,
+      "raf_p95_ms": 16.700000000000728,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "distance_delta": 0
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 7,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/walk-moving-firstperson/repetition-1/report.json",
+      "report_sha256": "785b38b81e1ad743ab0529842737bf8009d5f1dcba11a3ebbf699ea79f1786ac",
+      "raw_sha256": "aa6d21b5659fcd985a51e8d16850457eade943134e93a8d879ab7494b52b880b",
+      "capture_ms": 8002.299999999988,
+      "metric_window_ms": 8426.143000000025,
+      "cpu_task_ms": 2235.676,
+      "cpu_occupancy_percent": 26.532614032303904,
+      "map_submissions": 45,
+      "map_submissions_per_second": 5.6233832773077825,
+      "map_submit_median_ms": 180.20000000001164,
+      "map_submit_p95_ms": 250.40000000002328,
+      "signal_median_ms": 316.70000000001164,
+      "signal_p95_ms": 419.4000000000233,
+      "raf_count": 465,
+      "raf_per_second": 58.10829386551375,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 45,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 45
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 5,
+      "long_task_ms": 313,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70691,
+        "longitude": -74.00893,
+        "distance": 12
+      },
+      "distance_delta": 12
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 8,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/walk-moving-firstperson/repetition-1/report.json",
+      "report_sha256": "cd1fa5d5432721bba3b22d35f972970aca9659427711e78ac9bfb3939058d9bf",
+      "raw_sha256": "79612f8098dac7abb4a0654dea3c7658573612ab29d63f3b58f93b33a4fb978b",
+      "capture_ms": 8003.5,
+      "metric_window_ms": 8413.711999999976,
+      "cpu_task_ms": 2278.3,
+      "cpu_occupancy_percent": 27.078416755886188,
+      "map_submissions": 46,
+      "map_submissions_per_second": 5.747485475104642,
+      "map_submit_median_ms": 173.70000000001164,
+      "map_submit_p95_ms": 242.20000000001164,
+      "signal_median_ms": 310.5,
+      "signal_p95_ms": 367.4000000000233,
+      "raf_count": 470,
+      "raf_per_second": 58.7243081151996,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 46,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 46
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 5,
+      "long_task_ms": 321,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70691,
+        "longitude": -74.00893,
+        "distance": 12
+      },
+      "distance_delta": 12
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "variant": "candidate",
+      "repetition": 2,
+      "order": 9,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/walk-moving-firstperson/repetition-2/report.json",
+      "report_sha256": "1b20374152ee887de8abfe85eed518751f8ea7cbd2373d2fd5249a2df5bce786",
+      "raw_sha256": "73842e99d18278b5257f2dcfda6718ed405b3d2e197c212df24a49c24cc60b7e",
+      "capture_ms": 8005,
+      "metric_window_ms": 8406.67400000001,
+      "cpu_task_ms": 2228.91,
+      "cpu_occupancy_percent": 26.513577188790684,
+      "map_submissions": 44,
+      "map_submissions_per_second": 5.496564647095565,
+      "map_submit_median_ms": 180.70000000001164,
+      "map_submit_p95_ms": 247.89999999996508,
+      "signal_median_ms": 326.79999999998836,
+      "signal_p95_ms": 436.79999999998836,
+      "raf_count": 467,
+      "raf_per_second": 58.33853841349157,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 44,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 44
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 4,
+      "long_task_ms": 257,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70691,
+        "longitude": -74.00893,
+        "distance": 12
+      },
+      "distance_delta": 12
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "variant": "baseline",
+      "repetition": 2,
+      "order": 10,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/walk-moving-firstperson/repetition-2/report.json",
+      "report_sha256": "44d14e936c90ea7dbf806ef7c28dda2e47704fad1fefb3096e28eb9681906df6",
+      "raw_sha256": "8528f2d779b19459469c749070b96c45eee2814ccbcd45130c858b41d5f80901",
+      "capture_ms": 8002.200000000012,
+      "metric_window_ms": 8372.183000000006,
+      "cpu_task_ms": 2180.1020000000003,
+      "cpu_occupancy_percent": 26.039827366410872,
+      "map_submissions": 45,
+      "map_submissions_per_second": 5.623453550273666,
+      "map_submit_median_ms": 180.5,
+      "map_submit_p95_ms": 247.39999999996508,
+      "signal_median_ms": 322.20000000001164,
+      "signal_p95_ms": 405.5999999999767,
+      "raf_count": 465,
+      "raf_per_second": 58.10902001949455,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 45,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 45
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 5,
+      "long_task_ms": 304,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70691,
+        "longitude": -74.00893,
+        "distance": 12
+      },
+      "distance_delta": 12
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 11,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/walk-moving-chase/repetition-1/report.json",
+      "report_sha256": "93881a18f5f7518b629d1c0ea6ebc00ba0de9aa14b9e42a71945b4f1683e1b97",
+      "raw_sha256": "71eda1f2d253b22de9915d2b43ad59fde0856984d6d695379d5d1669cb0cd7f0",
+      "capture_ms": 8239.900000000023,
+      "metric_window_ms": 10052.038000000039,
+      "cpu_task_ms": 3146.08,
+      "cpu_occupancy_percent": 31.297931822382562,
+      "map_submissions": 76,
+      "map_submissions_per_second": 9.2234129054964,
+      "map_submit_median_ms": 98.5,
+      "map_submit_p95_ms": 187.89999999996508,
+      "signal_median_ms": 179.29999999998836,
+      "signal_p95_ms": 287.3999999999651,
+      "raf_count": 441,
+      "raf_per_second": 53.52006699110411,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 76,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 76
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 4,
+      "long_task_ms": 680,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70692,
+        "longitude": -74.00894,
+        "distance": 14
+      },
+      "distance_delta": 14
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 12,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/walk-moving-chase/repetition-1/report.json",
+      "report_sha256": "18e9749e4afd43dae0385d9045057f723853a4826288f8754a9b06c8c345d125",
+      "raw_sha256": "3d9a9321de4da4c8572c7277564e45175844d51fdef2dc52084f072f528018f1",
+      "capture_ms": 8364.900000000023,
+      "metric_window_ms": 9858.461999999918,
+      "cpu_task_ms": 3239.215,
+      "cpu_occupancy_percent": 32.85720429819608,
+      "map_submissions": 74,
+      "map_submissions_per_second": 8.846489497782375,
+      "map_submit_median_ms": 100.80000000004657,
+      "map_submit_p95_ms": 207.79999999993015,
+      "signal_median_ms": 187.59999999997672,
+      "signal_p95_ms": 275.5,
+      "raf_count": 446,
+      "raf_per_second": 53.31803129744513,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 74,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 74
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 4,
+      "long_task_ms": 689,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70692,
+        "longitude": -74.00894,
+        "distance": 14
+      },
+      "distance_delta": 14
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "variant": "candidate",
+      "repetition": 2,
+      "order": 13,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/walk-moving-chase/repetition-2/report.json",
+      "report_sha256": "860eae48530f12fe4298f4869fcf80e919bfe76d3c2e2d0afab003758a83fb3f",
+      "raw_sha256": "38e046cc29643c99e1b02471c78d6faa2a8c5d07362d89c9e46101b129b6549e",
+      "capture_ms": 8244.300000000047,
+      "metric_window_ms": 9669.281999999952,
+      "cpu_task_ms": 3175.2509999999997,
+      "cpu_occupancy_percent": 32.83853961442034,
+      "map_submissions": 74,
+      "map_submissions_per_second": 8.975898499569348,
+      "map_submit_median_ms": 100.19999999995343,
+      "map_submit_p95_ms": 195.69999999995343,
+      "signal_median_ms": 190.5,
+      "signal_p95_ms": 264,
+      "raf_count": 437,
+      "raf_per_second": 53.0063195177271,
+      "raf_p95_ms": 16.700000000000728,
+      "compositor_submissions": 74,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 74
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 4,
+      "long_task_ms": 712,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70692,
+        "longitude": -74.00894,
+        "distance": 13
+      },
+      "distance_delta": 13
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "variant": "baseline",
+      "repetition": 2,
+      "order": 14,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/walk-moving-chase/repetition-2/report.json",
+      "report_sha256": "5c073527a5435f39e6dc5001a0a8ec2ece737b1a74e8f3f5be8820bc1a94f4d5",
+      "raw_sha256": "dca0ac0e2da2680122ba7a1985dbc58b93ea6c21b5b3c2c4510b6f75f78a8a5c",
+      "capture_ms": 8049,
+      "metric_window_ms": 9469.015000000014,
+      "cpu_task_ms": 3117.2410000000004,
+      "cpu_occupancy_percent": 32.92043575810151,
+      "map_submissions": 74,
+      "map_submissions_per_second": 9.193688656976022,
+      "map_submit_median_ms": 101.30000000004657,
+      "map_submit_p95_ms": 189.29999999993015,
+      "signal_median_ms": 192.70000000006985,
+      "signal_p95_ms": 245.29999999993015,
+      "raf_count": 436,
+      "raf_per_second": 54.16821965461548,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 74,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 74
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 4,
+      "long_task_ms": 674,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.70692,
+        "longitude": -74.00894,
+        "distance": 13
+      },
+      "distance_delta": 13
+    },
+    {
+      "scenario": "car-stationary-chase",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 15,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/car-stationary-chase/repetition-1/report.json",
+      "report_sha256": "e8d3ad8f87d20d57af023765df5aa50ec95511d78e57d67d1488152556dcffd8",
+      "raw_sha256": "ddf08f485991c73a5ddf8a06f952f4072615c5c4008dacd2bbf4b96d3a3d8726",
+      "capture_ms": 8003.099999999977,
+      "metric_window_ms": 8017.850000000067,
+      "cpu_task_ms": 367.486,
+      "cpu_occupancy_percent": 4.583348403873818,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 481,
+      "raf_per_second": 60.10171058714766,
+      "raf_p95_ms": 16.700000000000728,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "distance_delta": 0
+    },
+    {
+      "scenario": "car-stationary-chase",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 16,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/car-stationary-chase/repetition-1/report.json",
+      "report_sha256": "9136c31a543ffb93b332f1c891bc7ea9bea582861380f30fe41cff17ed37822d",
+      "raw_sha256": "edd7d867cface4828340b2fad33eed71c6c3a64f79e33918ae4a200539f96c77",
+      "capture_ms": 8003,
+      "metric_window_ms": 8017.685000000029,
+      "cpu_task_ms": 322.541,
+      "cpu_occupancy_percent": 4.022869444234824,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 480,
+      "raf_per_second": 59.977508434337125,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "distance_delta": 0
+    },
+    {
+      "scenario": "car-moving-chase",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 17,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/car-moving-chase/repetition-1/report.json",
+      "report_sha256": "0222eda89959d746923494a0bbb7672784df8fb9458e9f185befcb2953d4870a",
+      "raw_sha256": "1227fe37bfd1fad583927b5e5ba5b1f77b53f4e711dfa8d09d2ff61f8755216f",
+      "capture_ms": 8002.899999999907,
+      "metric_window_ms": 9655.1300000001,
+      "cpu_task_ms": 4433.599999999999,
+      "cpu_occupancy_percent": 45.91963028980401,
+      "map_submissions": 48,
+      "map_submissions_per_second": 5.997825788151864,
+      "map_submit_median_ms": 140.79999999993015,
+      "map_submit_p95_ms": 371.60000000009313,
+      "signal_median_ms": 269.0999999999767,
+      "signal_p95_ms": 446.79999999993015,
+      "raf_count": 370,
+      "raf_per_second": 46.23324045033729,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 48,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 48
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 9,
+      "long_task_ms": 2077,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 117.3,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70782,
+        "longitude": -74.0104,
+        "distance": 172
+      },
+      "distance_delta": 172
+    },
+    {
+      "scenario": "car-moving-chase",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 18,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/car-moving-chase/repetition-1/report.json",
+      "report_sha256": "33e98ef143e80ed3eefafbe026b700875b38d4bc545f90b935571c0c0d000d53",
+      "raw_sha256": "0b0a5b3c45e5907c3be5ff24f3496589a53e81ce6be06dfba8f8b606aa45043c",
+      "capture_ms": 8008.300000000047,
+      "metric_window_ms": 9767.663000000084,
+      "cpu_task_ms": 4224.394,
+      "cpu_occupancy_percent": 43.24876892251467,
+      "map_submissions": 49,
+      "map_submissions_per_second": 6.118651898655109,
+      "map_submit_median_ms": 135.40000000002328,
+      "map_submit_p95_ms": 427.4000000000233,
+      "signal_median_ms": 262.0999999999767,
+      "signal_p95_ms": 456.9000000000233,
+      "raf_count": 368,
+      "raf_per_second": 45.95232446336899,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 49,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 49
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 1,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 9,
+      "long_task_ms": 2095,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 120.2,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70778,
+        "longitude": -74.01034,
+        "distance": 166
+      },
+      "distance_delta": 166
+    },
+    {
+      "scenario": "car-moving-chase",
+      "variant": "candidate",
+      "repetition": 2,
+      "order": 19,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/car-moving-chase/repetition-2/report.json",
+      "report_sha256": "131a3637b3b316c8b320fc6bbc7d426ba727309f0e7730ce2efe796740ef6897",
+      "raw_sha256": "8a8f3c0edb5077b4dda8b7efa8af89955e2e3727969e514f821269dec2d4254c",
+      "capture_ms": 8010.70000000007,
+      "metric_window_ms": 9684.339000000022,
+      "cpu_task_ms": 4225.576999999999,
+      "cpu_occupancy_percent": 43.63309669353778,
+      "map_submissions": 48,
+      "map_submissions_per_second": 5.991985719100651,
+      "map_submit_median_ms": 144.30000000004657,
+      "map_submit_p95_ms": 474,
+      "signal_median_ms": 268.79999999993015,
+      "signal_p95_ms": 480,
+      "raf_count": 374,
+      "raf_per_second": 46.687555394659235,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 48,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 48
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 9,
+      "long_task_ms": 2032,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 120,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70778,
+        "longitude": -74.01033,
+        "distance": 165
+      },
+      "distance_delta": 165
+    },
+    {
+      "scenario": "car-moving-chase",
+      "variant": "baseline",
+      "repetition": 2,
+      "order": 20,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/car-moving-chase/repetition-2/report.json",
+      "report_sha256": "4278eee288da5ebb3b932ff14b7c38532bc77171896e29b6034bac88ef6c5a12",
+      "raw_sha256": "6b1228f7b379f15c3499b43e230aa88eb43c1ea16b567bf4931f83b8366a41da",
+      "capture_ms": 8003.5,
+      "metric_window_ms": 9645.69599999993,
+      "cpu_task_ms": 4462.429,
+      "cpu_occupancy_percent": 46.26342153018333,
+      "map_submissions": 50,
+      "map_submissions_per_second": 6.2472668207659146,
+      "map_submit_median_ms": 128.29999999993015,
+      "map_submit_p95_ms": 438.9000000000233,
+      "signal_median_ms": 256.0999999999767,
+      "signal_p95_ms": 451.4000000000233,
+      "raf_count": 363,
+      "raf_per_second": 45.355157118760545,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 50,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 50
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 11,
+      "long_task_ms": 2236,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 119.7,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70777,
+        "longitude": -74.01032,
+        "distance": 163
+      },
+      "distance_delta": 163
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 21,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/car-moving-firstperson/repetition-1/report.json",
+      "report_sha256": "bfefe93c02e5d823c9d27f579598c239f6231961e2680d7c994e7e4763970435",
+      "raw_sha256": "7b2fa7d0d9740b2115df87b5bb253426c0bf7d70602faebf70cdccd139d268b0",
+      "capture_ms": 8049.20000000007,
+      "metric_window_ms": 8613.463000000025,
+      "cpu_task_ms": 3589.391,
+      "cpu_occupancy_percent": 41.67186879423513,
+      "map_submissions": 35,
+      "map_submissions_per_second": 4.3482582119961855,
+      "map_submit_median_ms": 231.59999999997672,
+      "map_submit_p95_ms": 384.4000000000233,
+      "signal_median_ms": 397.69999999995343,
+      "signal_p95_ms": 528.5,
+      "raf_count": 386,
+      "raf_per_second": 47.95507628087222,
+      "raf_p95_ms": 50,
+      "compositor_submissions": 35,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 35
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 25,
+      "long_task_ms": 2252,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 114.1,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70771,
+        "longitude": -74.01023,
+        "distance": 153
+      },
+      "distance_delta": 153
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 22,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/car-moving-firstperson/repetition-1/report.json",
+      "report_sha256": "dc8085a6c9a5917d2359ba11a2b5b13c221a63e2817f9f89daf56ea130a4e018",
+      "raw_sha256": "98bc7ea0826a5ee690aa9cd4cb5e72f5ccfa1bc2b8e722b8e8ccb573775ebec5",
+      "capture_ms": 8186.800000000047,
+      "metric_window_ms": 8826.432999999952,
+      "cpu_task_ms": 3693.101,
+      "cpu_occupancy_percent": 41.84137578566586,
+      "map_submissions": 32,
+      "map_submissions_per_second": 3.9087311281574997,
+      "map_submit_median_ms": 276.19999999995343,
+      "map_submit_p95_ms": 369.4000000000233,
+      "signal_median_ms": 453,
+      "signal_p95_ms": 533.5999999999767,
+      "raf_count": 384,
+      "raf_per_second": 46.904773537889994,
+      "raf_p95_ms": 50,
+      "compositor_submissions": 32,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 32
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 23,
+      "long_task_ms": 2368,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 114.7,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70781,
+        "longitude": -74.01038,
+        "distance": 170
+      },
+      "distance_delta": 170
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "variant": "candidate",
+      "repetition": 2,
+      "order": 23,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/car-moving-firstperson/repetition-2/report.json",
+      "report_sha256": "468cfd7c4fe10f19320708c1559392eb10085c06b5478f48187255192a5b37c4",
+      "raw_sha256": "1d65e7629fbe5413b1d8af6e2f1c8422f8c7818a42b742a6fd6bf24cf48db6ba",
+      "capture_ms": 8088.5,
+      "metric_window_ms": 8651.483000000098,
+      "cpu_task_ms": 3650.967,
+      "cpu_occupancy_percent": 42.20047591840565,
+      "map_submissions": 32,
+      "map_submissions_per_second": 3.956234159609322,
+      "map_submit_median_ms": 253.09999999997672,
+      "map_submit_p95_ms": 424.0999999999767,
+      "signal_median_ms": 436.20000000006985,
+      "signal_p95_ms": 639.5,
+      "raf_count": 382,
+      "raf_per_second": 47.22754528033628,
+      "raf_p95_ms": 50,
+      "compositor_submissions": 32,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 32
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 23,
+      "long_task_ms": 2247,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 115,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70774,
+        "longitude": -74.01027,
+        "distance": 158
+      },
+      "distance_delta": 158
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "variant": "baseline",
+      "repetition": 2,
+      "order": 24,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/car-moving-firstperson/repetition-2/report.json",
+      "report_sha256": "1a36725f546cabc226783a2b337d0ae4cc1209ad2c473a46e6e8079e7ea34a11",
+      "raw_sha256": "73da762883f86f225b39979fc123fc944a9bfba4b79e1785312e87e79cbc83c9",
+      "capture_ms": 8118.400000000023,
+      "metric_window_ms": 8558.297000000039,
+      "cpu_task_ms": 3806.079,
+      "cpu_occupancy_percent": 44.472387438762446,
+      "map_submissions": 33,
+      "map_submissions_per_second": 4.06484036263302,
+      "map_submit_median_ms": 249.09999999997672,
+      "map_submit_p95_ms": 435.0999999999767,
+      "signal_median_ms": 416.29999999993015,
+      "signal_p95_ms": 545,
+      "raf_count": 379,
+      "raf_per_second": 46.6840756799368,
+      "raf_p95_ms": 50,
+      "compositor_submissions": 33,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 33
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 24,
+      "long_task_ms": 2308,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00882,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 113.4,
+        "altitude": 44,
+        "clearance": 0,
+        "latitude": 40.70771,
+        "longitude": -74.01022,
+        "distance": 152
+      },
+      "distance_delta": 152
+    },
+    {
+      "scenario": "freeflight-stationary",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 25,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/freeflight-stationary/repetition-1/report.json",
+      "report_sha256": "cb6f4a685f2325c2cf6cc61f1a5eb879e61e09accd238f93de92e383391d802d",
+      "raw_sha256": "ae594665f14020a7b2f1dccabd082b00937bf098be88cb61b5bbd0aec04c9699",
+      "capture_ms": 8002.70000000007,
+      "metric_window_ms": 8019.696000000067,
+      "cpu_task_ms": 487.44300000000004,
+      "cpu_occupancy_percent": 6.078073283575786,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 481,
+      "raf_per_second": 60.10471465880213,
+      "raf_p95_ms": 16.700000000000728,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "distance_delta": 0
+    },
+    {
+      "scenario": "freeflight-stationary",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 26,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/freeflight-stationary/repetition-1/report.json",
+      "report_sha256": "94d72596f5768bee75e82bda61951aaeb4ad9d6332c79ab25286e871e4f11199",
+      "raw_sha256": "76ac94072602d59e6beb7ed6064007d14aa4f27e7073892a8562cb851ef93adf",
+      "capture_ms": 8003,
+      "metric_window_ms": 8017.316000000051,
+      "cpu_task_ms": 531.069,
+      "cpu_occupancy_percent": 6.624024798323985,
+      "map_submissions": 0,
+      "map_submissions_per_second": 0,
+      "map_submit_median_ms": null,
+      "map_submit_p95_ms": null,
+      "signal_median_ms": null,
+      "signal_p95_ms": null,
+      "raf_count": 481,
+      "raf_per_second": 60.10246157690866,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 0,
+      "detached_submissions": 0,
+      "pixel_sizes": {},
+      "direct_pending_start": 0,
+      "direct_pending_end": 0,
+      "direct_maximum_pending": 0,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 0,
+      "long_task_ms": 0,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "distance_delta": 0
+    },
+    {
+      "scenario": "freeflight-moving",
+      "variant": "baseline",
+      "repetition": 1,
+      "order": 27,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/freeflight-moving/repetition-1/report.json",
+      "report_sha256": "ad92c80699c84ad09daa4d487d6a985e087b31d3cab891821b5f21e2f079520e",
+      "raw_sha256": "0b40db595493eaa8d879aee43aed479d6a1ea4778168a457552622f8db5a9a1e",
+      "capture_ms": 8003.400000000023,
+      "metric_window_ms": 8754.955999999993,
+      "cpu_task_ms": 3120.9849999999997,
+      "cpu_occupancy_percent": 35.64820885450483,
+      "map_submissions": 41,
+      "map_submissions_per_second": 5.122822800309853,
+      "map_submit_median_ms": 175.20000000006985,
+      "map_submit_p95_ms": 346,
+      "signal_median_ms": 311.0999999999767,
+      "signal_p95_ms": 706.2999999999302,
+      "raf_count": 440,
+      "raf_per_second": 54.976634930154525,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 41,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 41
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 10,
+      "long_task_ms": 993,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 26.7,
+        "altitude": 0.2,
+        "clearance": 0.2,
+        "latitude": 40.69662,
+        "longitude": -74.03114,
+        "distance": 286
+      },
+      "distance_delta": 286
+    },
+    {
+      "scenario": "freeflight-moving",
+      "variant": "candidate",
+      "repetition": 1,
+      "order": 28,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/freeflight-moving/repetition-1/report.json",
+      "report_sha256": "60ebe095734cea6b1dc2c36f87b2becfc95c2859c93234ac6b42839b67a21053",
+      "raw_sha256": "6817931353a0971b5a8ca1df23a0920d000317fe0ec569676176f662fea4e3b0",
+      "capture_ms": 8005.5,
+      "metric_window_ms": 8841.769999999997,
+      "cpu_task_ms": 3189.992,
+      "cpu_occupancy_percent": 36.078658458657046,
+      "map_submissions": 39,
+      "map_submissions_per_second": 4.87165074011617,
+      "map_submit_median_ms": 202.30000000004657,
+      "map_submit_p95_ms": 371.0999999998603,
+      "signal_median_ms": 365.60000000009313,
+      "signal_p95_ms": 610.1000000000931,
+      "raf_count": 437,
+      "raf_per_second": 54.587471113609396,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 39,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 39
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 11,
+      "long_task_ms": 1077,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 103.1,
+        "altitude": 0.2,
+        "clearance": 0.2,
+        "latitude": 40.69665,
+        "longitude": -74.03118,
+        "distance": 291
+      },
+      "distance_delta": 291
+    },
+    {
+      "scenario": "freeflight-moving",
+      "variant": "candidate",
+      "repetition": 2,
+      "order": 29,
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "report": "candidate/freeflight-moving/repetition-2/report.json",
+      "report_sha256": "0aac87f02e38664b02c5f5c5fb90ee16047d283a87add4fe38bc38e1fb611dbe",
+      "raw_sha256": "05c67a3bf8f137b61d8639e72197cbd4132e173f1b5d109c04ed0da5ac3d3e2b",
+      "capture_ms": 8005.399999999907,
+      "metric_window_ms": 8766.180000000077,
+      "cpu_task_ms": 3099.59,
+      "cpu_occupancy_percent": 35.35850279140941,
+      "map_submissions": 37,
+      "map_submissions_per_second": 4.621880230844234,
+      "map_submit_median_ms": 173.0999999998603,
+      "map_submit_p95_ms": 403.39999999990687,
+      "signal_median_ms": 361.39999999990687,
+      "signal_p95_ms": 860.6999999999534,
+      "raf_count": 433,
+      "raf_per_second": 54.088490269069005,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 37,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 37
+      },
+      "direct_pending_start": 0,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 9,
+      "long_task_ms": 1041,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 119.8,
+        "altitude": 0.2,
+        "clearance": 0.2,
+        "latitude": 40.69662,
+        "longitude": -74.03114,
+        "distance": 286
+      },
+      "distance_delta": 286
+    },
+    {
+      "scenario": "freeflight-moving",
+      "variant": "baseline",
+      "repetition": 2,
+      "order": 30,
+      "source_sha": "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+      "report": "baseline/freeflight-moving/repetition-2/report.json",
+      "report_sha256": "212144560b018082e3a1052abb5725ffbb2510b90eb5b3430a13ffc099df3f11",
+      "raw_sha256": "05a18ec6cd8685752cf2313216248f7ecf6c27b4002b24f2ccd177f080414929",
+      "capture_ms": 8024.800000000047,
+      "metric_window_ms": 8856.794000000036,
+      "cpu_task_ms": 3102.52,
+      "cpu_occupancy_percent": 35.02983133625991,
+      "map_submissions": 37,
+      "map_submissions_per_second": 4.610706808892407,
+      "map_submit_median_ms": 210.19999999995343,
+      "map_submit_p95_ms": 428.89999999990687,
+      "signal_median_ms": 329.9000000001397,
+      "signal_p95_ms": 799.5,
+      "raf_count": 435,
+      "raf_per_second": 54.20695842887019,
+      "raf_p95_ms": 16.799999999999272,
+      "compositor_submissions": 37,
+      "detached_submissions": 0,
+      "pixel_sizes": {
+        "4": 37
+      },
+      "direct_pending_start": 1,
+      "direct_pending_end": 2,
+      "direct_maximum_pending": 2,
+      "direct_released_before_signal": 0,
+      "read_pixels_calls": 0,
+      "read_pixels_ms": 0,
+      "pixel_pack_submissions": 0,
+      "pixel_pack_maximum_pending": 0,
+      "pixel_pack_overwritten": 0,
+      "pixel_pack_abandoned": 0,
+      "pixel_pack_released_without_copy": 0,
+      "positive_timeout_polls": 0,
+      "pixel_pack_copies": 0,
+      "long_tasks": 9,
+      "long_task_ms": 982,
+      "before_hud": {
+        "speed": 0,
+        "altitude": 30,
+        "clearance": 30,
+        "latitude": 40.695,
+        "longitude": -74.0285,
+        "distance": 0
+      },
+      "after_hud": {
+        "speed": 56.6,
+        "altitude": 0.2,
+        "clearance": 0.2,
+        "latitude": 40.69665,
+        "longitude": -74.0312,
+        "distance": 292
+      },
+      "distance_delta": 292
+    }
+  ],
+  "scenarios": {
+    "map-idle-default": {
+      "baseline": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          55.426
+        ],
+        "cpu_task_mean_ms": 55.426,
+        "cpu_occupancy_percent": [
+          0.6900490190524814
+        ],
+        "weighted_cpu_occupancy_percent": 0.6900490190524814,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          60.070185955315864
+        ],
+        "weighted_raf_per_second": 60.07018595531586,
+        "raf_p95_ms": [
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 480,
+          "median_ms": 16.69999999999891,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 16.80000000000109,
+          "mean_ms": 16.666041666666665
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          null
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          62.41799999999999
+        ],
+        "cpu_task_mean_ms": 62.41799999999999,
+        "cpu_occupancy_percent": [
+          0.7767089357365378
+        ],
+        "weighted_cpu_occupancy_percent": 0.7767089357365378,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          59.95278718009554
+        ],
+        "weighted_raf_per_second": 59.95278718009554,
+        "raf_p95_ms": [
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 479,
+          "median_ms": 16.69999999999891,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 16.80000000000109,
+          "mean_ms": 16.665970772442588
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          null
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": 12.615018222494845,
+        "weighted_cpu_occupancy_percent_percent": 12.55851603166549,
+        "weighted_map_submissions_per_second_percent": null,
+        "weighted_raf_per_second_percent": -0.1954360109816311,
+        "occupancy_percentage_points": 0.08665991668405637,
+        "per_repeat_cpu_percent": [
+          12.615018222494845
+        ],
+        "per_repeat_submission_percent": [
+          null
+        ]
+      }
+    },
+    "map-idle-relief": {
+      "baseline": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          107.08
+        ],
+        "cpu_task_mean_ms": 107.08,
+        "cpu_occupancy_percent": [
+          1.335108490656606
+        ],
+        "weighted_cpu_occupancy_percent": 1.335108490656606,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          60.1077190307783
+        ],
+        "weighted_raf_per_second": 60.1077190307783,
+        "raf_p95_ms": [
+          16.700000000000728
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 480,
+          "median_ms": 16.69999999999891,
+          "p95_ms": 16.700000000000728,
+          "max_ms": 16.80000000000109,
+          "mean_ms": 16.666249999999998
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          null
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          91.152
+        ],
+        "cpu_task_mean_ms": 91.152,
+        "cpu_occupancy_percent": [
+          1.1369325720854326
+        ],
+        "weighted_cpu_occupancy_percent": 1.1369325720854326,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          59.98950183717832
+        ],
+        "weighted_raf_per_second": 59.989501837178324,
+        "raf_p95_ms": [
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 479,
+          "median_ms": 16.69999999999891,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 16.80000000000291,
+          "mean_ms": 16.665970772442584
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          null
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": -14.874859917818451,
+        "weighted_cpu_occupancy_percent_percent": -14.843431822810926,
+        "weighted_map_submissions_per_second_percent": null,
+        "weighted_raf_per_second_percent": -0.1966755609865034,
+        "occupancy_percentage_points": -0.19817591857117334,
+        "per_repeat_cpu_percent": [
+          -14.874859917818451
+        ],
+        "per_repeat_submission_percent": [
+          null
+        ]
+      }
+    },
+    "walk-stationary-firstperson": {
+      "baseline": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          356.593
+        ],
+        "cpu_task_mean_ms": 356.593,
+        "cpu_occupancy_percent": [
+          4.44085311384511
+        ],
+        "weighted_cpu_occupancy_percent": 4.44085311384511,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          59.980506335441156
+        ],
+        "weighted_raf_per_second": 59.980506335441156,
+        "raf_p95_ms": [
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 479,
+          "median_ms": 16.69999999999709,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 16.80000000000291,
+          "mean_ms": 16.66576200417536
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          0
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          387.11500000000007
+        ],
+        "cpu_task_mean_ms": 387.11500000000007,
+        "cpu_occupancy_percent": [
+          4.823659162559968
+        ],
+        "weighted_cpu_occupancy_percent": 4.823659162559968,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          60.113728675873276
+        ],
+        "weighted_raf_per_second": 60.113728675873276,
+        "raf_p95_ms": [
+          16.700000000000728
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 480,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.700000000000728,
+          "max_ms": 16.80000000000291,
+          "mean_ms": 16.666249999999998
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          0
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": 8.55933795671817,
+        "weighted_cpu_occupancy_percent_percent": 8.620101563850335,
+        "weighted_map_submissions_per_second_percent": null,
+        "weighted_raf_per_second_percent": 0.22210939615459058,
+        "occupancy_percentage_points": 0.38280604871485835,
+        "per_repeat_cpu_percent": [
+          8.55933795671817
+        ],
+        "per_repeat_submission_percent": [
+          null
+        ]
+      }
+    },
+    "walk-moving-firstperson": {
+      "baseline": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          2235.676,
+          2180.1020000000003
+        ],
+        "cpu_task_mean_ms": 2207.889,
+        "cpu_occupancy_percent": [
+          26.532614032303904,
+          26.039827366410872
+        ],
+        "weighted_cpu_occupancy_percent": 26.287012170141193,
+        "map_submissions_per_second": [
+          5.6233832773077825,
+          5.623453550273666
+        ],
+        "weighted_map_submissions_per_second": 5.6234184135711835,
+        "raf_per_second": [
+          58.10829386551375,
+          58.10902001949455
+        ],
+        "weighted_raf_per_second": 58.108656940235555,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          250.40000000002328,
+          247.39999999996508
+        ],
+        "signal_p95_ms": [
+          419.4000000000233,
+          405.5999999999767
+        ],
+        "pooled_raf_distribution": {
+          "samples": 928,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 83.30000000000109,
+          "mean_ms": 17.204741379310345
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 88,
+          "median_ms": 180.20000000001164,
+          "p95_ms": 250.40000000002328,
+          "max_ms": 330.1000000000349,
+          "mean_ms": 180.44204545454505
+        },
+        "pooled_signal_distribution": {
+          "samples": 86,
+          "median_ms": 317.3999999999651,
+          "p95_ms": 419.4000000000233,
+          "max_ms": 437.80000000004657,
+          "mean_ms": 318.0732558139534
+        },
+        "pixel_size_submission_counts": {
+          "4": 90
+        },
+        "distance_delta": [
+          12,
+          12
+        ],
+        "compositor_submissions": 90,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          2278.3,
+          2228.91
+        ],
+        "cpu_task_mean_ms": 2253.605,
+        "cpu_occupancy_percent": [
+          27.078416755886188,
+          26.513577188790684
+        ],
+        "weighted_cpu_occupancy_percent": 26.79611514266084,
+        "map_submissions_per_second": [
+          5.747485475104642,
+          5.496564647095565
+        ],
+        "weighted_map_submissions_per_second": 5.62201330543149,
+        "raf_per_second": [
+          58.7243081151996,
+          58.33853841349157
+        ],
+        "weighted_raf_per_second": 58.53140519099229,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          242.20000000001164,
+          247.89999999996508
+        ],
+        "signal_p95_ms": [
+          367.4000000000233,
+          436.79999999998836
+        ],
+        "pooled_raf_distribution": {
+          "samples": 935,
+          "median_ms": 16.69999999999891,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 66.69999999999891,
+          "mean_ms": 17.11158930481284
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 88,
+          "median_ms": 178.09999999997672,
+          "p95_ms": 247.70000000001164,
+          "max_ms": 333.5,
+          "mean_ms": 179.78636363636443
+        },
+        "pooled_signal_distribution": {
+          "samples": 86,
+          "median_ms": 311.5,
+          "p95_ms": 400.6000000000349,
+          "max_ms": 579.4000000000233,
+          "mean_ms": 317.443023255813
+        },
+        "pixel_size_submission_counts": {
+          "4": 90
+        },
+        "distance_delta": [
+          12,
+          12
+        ],
+        "compositor_submissions": 90,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": 2.0705751059043154,
+        "weighted_cpu_occupancy_percent_percent": 1.9367091597345176,
+        "weighted_map_submissions_per_second_percent": -0.024986725801923182,
+        "weighted_raf_per_second_percent": 0.7275133741114104,
+        "occupancy_percentage_points": 0.5091029725196492,
+        "per_repeat_cpu_percent": [
+          1.9065374410245584,
+          2.238794331641336
+        ],
+        "per_repeat_submission_percent": [
+          2.2068955942884605,
+          -2.2564230689151143
+        ]
+      }
+    },
+    "walk-moving-chase": {
+      "baseline": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          3146.08,
+          3117.2410000000004
+        ],
+        "cpu_task_mean_ms": 3131.6605,
+        "cpu_occupancy_percent": [
+          31.297931822382562,
+          32.92043575810151
+        ],
+        "weighted_cpu_occupancy_percent": 32.08495463846127,
+        "map_submissions_per_second": [
+          9.2234129054964,
+          9.193688656976022
+        ],
+        "weighted_map_submissions_per_second": 9.208724959942034,
+        "raf_per_second": [
+          53.52006699110411,
+          54.16821965461548
+        ],
+        "weighted_raf_per_second": 53.84034526579442,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          187.89999999996508,
+          189.29999999993015
+        ],
+        "signal_p95_ms": [
+          287.3999999999651,
+          245.29999999993015
+        ],
+        "pooled_raf_distribution": {
+          "samples": 875,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 283.2999999999993,
+          "mean_ms": 17.923051428571426
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 148,
+          "median_ms": 99.40000000002328,
+          "p95_ms": 187.89999999996508,
+          "max_ms": 467.0,
+          "mean_ms": 109.68310810810794
+        },
+        "pooled_signal_distribution": {
+          "samples": 146,
+          "median_ms": 181.89999999990687,
+          "p95_ms": 276.20000000001164,
+          "max_ms": 431,
+          "mean_ms": 185.22123287670826
+        },
+        "pixel_size_submission_counts": {
+          "4": 150
+        },
+        "distance_delta": [
+          14,
+          13
+        ],
+        "compositor_submissions": 150,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          3239.215,
+          3175.2509999999997
+        ],
+        "cpu_task_mean_ms": 3207.233,
+        "cpu_occupancy_percent": [
+          32.85720429819608,
+          32.83853961442034
+        ],
+        "weighted_cpu_occupancy_percent": 32.847962365750206,
+        "map_submissions_per_second": [
+          8.846489497782375,
+          8.975898499569348
+        ],
+        "weighted_map_submissions_per_second": 8.910724176962127,
+        "raf_per_second": [
+          53.31803129744513,
+          53.0063195177271
+        ],
+        "weighted_raf_per_second": 53.16330708282135,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.700000000000728
+        ],
+        "map_submit_p95_ms": [
+          207.79999999993015,
+          195.69999999995343
+        ],
+        "signal_p95_ms": [
+          275.5,
+          264
+        ],
+        "pooled_raf_distribution": {
+          "samples": 881,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 283.2999999999993,
+          "mean_ms": 17.990124858115777
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 146,
+          "median_ms": 100.80000000004657,
+          "p95_ms": 195.69999999995343,
+          "max_ms": 570.6999999999534,
+          "mean_ms": 113.08287671232861
+        },
+        "pooled_signal_distribution": {
+          "samples": 144,
+          "median_ms": 187.59999999997672,
+          "p95_ms": 265.69999999995343,
+          "max_ms": 452.5,
+          "mean_ms": 188.33680555555716
+        },
+        "pixel_size_submission_counts": {
+          "4": 148
+        },
+        "distance_delta": [
+          14,
+          13
+        ],
+        "compositor_submissions": 148,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": 2.4131766518113995,
+        "weighted_cpu_occupancy_percent_percent": 2.378085728612178,
+        "weighted_map_submissions_per_second_percent": -3.236069969254274,
+        "weighted_raf_per_second_percent": -1.2574922757844997,
+        "occupancy_percentage_points": 0.7630077272889366,
+        "per_repeat_cpu_percent": [
+          2.960350658597366,
+          1.8609404919285755
+        ],
+        "per_repeat_submission_percent": [
+          -4.08659366739842,
+          -2.368909428332855
+        ]
+      }
+    },
+    "car-stationary-chase": {
+      "baseline": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          367.486
+        ],
+        "cpu_task_mean_ms": 367.486,
+        "cpu_occupancy_percent": [
+          4.583348403873818
+        ],
+        "weighted_cpu_occupancy_percent": 4.583348403873818,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          60.10171058714766
+        ],
+        "weighted_raf_per_second": 60.10171058714765,
+        "raf_p95_ms": [
+          16.700000000000728
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 480,
+          "median_ms": 16.69999999999709,
+          "p95_ms": 16.700000000000728,
+          "max_ms": 16.80000000000291,
+          "mean_ms": 16.666249999999998
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          0
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          322.541
+        ],
+        "cpu_task_mean_ms": 322.541,
+        "cpu_occupancy_percent": [
+          4.022869444234824
+        ],
+        "weighted_cpu_occupancy_percent": 4.022869444234824,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          59.977508434337125
+        ],
+        "weighted_raf_per_second": 59.97750843433712,
+        "raf_p95_ms": [
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 479,
+          "median_ms": 16.69999999999709,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 16.80000000000291,
+          "mean_ms": 16.665970772442588
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          0
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": -12.230397892708833,
+        "weighted_cpu_occupancy_percent_percent": -12.228591637617614,
+        "weighted_map_submissions_per_second_percent": null,
+        "weighted_raf_per_second_percent": -0.20665327425322122,
+        "occupancy_percentage_points": -0.5604789596389939,
+        "per_repeat_cpu_percent": [
+          -12.230397892708833
+        ],
+        "per_repeat_submission_percent": [
+          null
+        ]
+      }
+    },
+    "car-moving-chase": {
+      "baseline": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          4433.599999999999,
+          4462.429
+        ],
+        "cpu_task_mean_ms": 4448.014499999999,
+        "cpu_occupancy_percent": [
+          45.91963028980401,
+          46.26342153018333
+        ],
+        "weighted_cpu_occupancy_percent": 46.09144188958537,
+        "map_submissions_per_second": [
+          5.997825788151864,
+          6.2472668207659146
+        ],
+        "weighted_map_submissions_per_second": 6.122550979608192,
+        "raf_per_second": [
+          46.23324045033729,
+          45.355157118760545
+        ],
+        "weighted_raf_per_second": 45.794182327069436,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          371.60000000009313,
+          438.9000000000233
+        ],
+        "signal_p95_ms": [
+          446.79999999993015,
+          451.4000000000233
+        ],
+        "pooled_raf_distribution": {
+          "samples": 731,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 550.0,
+          "mean_ms": 21.887004103967165
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 96,
+          "median_ms": 135.5,
+          "p95_ms": 438.9000000000233,
+          "max_ms": 700.2999999999302,
+          "mean_ms": 164.36249999999927
+        },
+        "pooled_signal_distribution": {
+          "samples": 94,
+          "median_ms": 262.9000000000233,
+          "p95_ms": 451.4000000000233,
+          "max_ms": 708.9000000000233,
+          "mean_ms": 268.8489361702095
+        },
+        "pixel_size_submission_counts": {
+          "4": 98
+        },
+        "distance_delta": [
+          172,
+          163
+        ],
+        "compositor_submissions": 98,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          4224.394,
+          4225.576999999999
+        ],
+        "cpu_task_mean_ms": 4224.9855,
+        "cpu_occupancy_percent": [
+          43.24876892251467,
+          43.63309669353778
+        ],
+        "weighted_cpu_occupancy_percent": 43.44010966069175,
+        "map_submissions_per_second": [
+          6.118651898655109,
+          5.991985719100651
+        ],
+        "weighted_map_submissions_per_second": 6.055309320182239,
+        "raf_per_second": [
+          45.95232446336899,
+          46.687555394659235
+        ],
+        "weighted_raf_per_second": 46.31999500593012,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          427.4000000000233,
+          474
+        ],
+        "signal_p95_ms": [
+          456.9000000000233,
+          480
+        ],
+        "pooled_raf_distribution": {
+          "samples": 740,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 500.0,
+          "mean_ms": 21.598243243243243
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 95,
+          "median_ms": 142.39999999990687,
+          "p95_ms": 458.0999999999767,
+          "max_ms": 558.7000000000698,
+          "mean_ms": 166.06210526315692
+        },
+        "pooled_signal_distribution": {
+          "samples": 94,
+          "median_ms": 263.5,
+          "p95_ms": 471.39999999990687,
+          "max_ms": 566.9000000000233,
+          "mean_ms": 271.12553191489536
+        },
+        "pixel_size_submission_counts": {
+          "4": 97
+        },
+        "distance_delta": [
+          166,
+          165
+        ],
+        "compositor_submissions": 97,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": -5.014124841544454,
+        "weighted_cpu_occupancy_percent_percent": -5.752330845376963,
+        "weighted_map_submissions_per_second_percent": -1.0982621402403803,
+        "weighted_raf_per_second_percent": 1.1482084669734771,
+        "occupancy_percentage_points": -2.651332228893615,
+        "per_repeat_cpu_percent": [
+          -4.718648502345701,
+          -5.307692290454391
+        ],
+        "per_repeat_submission_percent": [
+          2.014498499471684,
+          -4.086284594355883
+        ]
+      }
+    },
+    "car-moving-firstperson": {
+      "baseline": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          3589.391,
+          3806.079
+        ],
+        "cpu_task_mean_ms": 3697.735,
+        "cpu_occupancy_percent": [
+          41.67186879423513,
+          44.472387438762446
+        ],
+        "weighted_cpu_occupancy_percent": 43.06762964308826,
+        "map_submissions_per_second": [
+          4.3482582119961855,
+          4.06484036263302
+        ],
+        "weighted_map_submissions_per_second": 4.2059427496969,
+        "raf_per_second": [
+          47.95507628087222,
+          46.6840756799368
+        ],
+        "weighted_raf_per_second": 47.31685593409013,
+        "raf_p95_ms": [
+          50,
+          50
+        ],
+        "map_submit_p95_ms": [
+          384.4000000000233,
+          435.0999999999767
+        ],
+        "signal_p95_ms": [
+          528.5,
+          545
+        ],
+        "pooled_raf_distribution": {
+          "samples": 763,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 50.0,
+          "max_ms": 266.59999999999854,
+          "mean_ms": 20.510353866317168
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 66,
+          "median_ms": 237.10000000009313,
+          "p95_ms": 384.9000000000233,
+          "max_ms": 497.9000000000233,
+          "mean_ms": 243.55909090909125
+        },
+        "pooled_signal_distribution": {
+          "samples": 64,
+          "median_ms": 402.60000000009313,
+          "p95_ms": 539.1999999999534,
+          "max_ms": 599,
+          "mean_ms": 393.15312500000437
+        },
+        "pixel_size_submission_counts": {
+          "4": 68
+        },
+        "distance_delta": [
+          153,
+          152
+        ],
+        "compositor_submissions": 68,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          3693.101,
+          3650.967
+        ],
+        "cpu_task_mean_ms": 3672.034,
+        "cpu_occupancy_percent": [
+          41.84137578566586,
+          42.20047591840565
+        ],
+        "weighted_cpu_occupancy_percent": 42.019128596338255,
+        "map_submissions_per_second": [
+          3.9087311281574997,
+          3.956234159609322
+        ],
+        "weighted_map_submissions_per_second": 3.9323391888321453,
+        "raf_per_second": [
+          46.904773537889994,
+          47.22754528033628
+        ],
+        "weighted_raf_per_second": 47.06518466633474,
+        "raf_p95_ms": [
+          50,
+          50
+        ],
+        "map_submit_p95_ms": [
+          369.4000000000233,
+          424.0999999999767
+        ],
+        "signal_p95_ms": [
+          533.5999999999767,
+          639.5
+        ],
+        "pooled_raf_distribution": {
+          "samples": 764,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 50.0,
+          "max_ms": 250,
+          "mean_ms": 20.72342931937173
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 62,
+          "median_ms": 260.69999999995343,
+          "p95_ms": 369.4000000000233,
+          "max_ms": 443.20000000006985,
+          "mean_ms": 261.3499999999992
+        },
+        "pooled_signal_distribution": {
+          "samples": 60,
+          "median_ms": 448,
+          "p95_ms": 594.7999999999302,
+          "max_ms": 642,
+          "mean_ms": 427.79666666665776
+        },
+        "pixel_size_submission_counts": {
+          "4": 64
+        },
+        "distance_delta": [
+          170,
+          158
+        ],
+        "compositor_submissions": 64,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": -0.6950471031590966,
+        "weighted_cpu_occupancy_percent_percent": -2.4345455169907937,
+        "weighted_map_submissions_per_second_percent": -6.50516607446624,
+        "weighted_raf_per_second_percent": -0.5318850181126877,
+        "occupancy_percentage_points": -1.0485010467500047,
+        "per_repeat_cpu_percent": [
+          2.889348081610499,
+          -4.075375208974908
+        ],
+        "per_repeat_submission_percent": [
+          -10.108118294955371,
+          -2.6718442382654306
+        ]
+      }
+    },
+    "freeflight-stationary": {
+      "baseline": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          487.44300000000004
+        ],
+        "cpu_task_mean_ms": 487.44300000000004,
+        "cpu_occupancy_percent": [
+          6.078073283575786
+        ],
+        "weighted_cpu_occupancy_percent": 6.078073283575786,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          60.10471465880213
+        ],
+        "weighted_raf_per_second": 60.10471465880213,
+        "raf_p95_ms": [
+          16.700000000000728
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 480,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.700000000000728,
+          "max_ms": 16.80000000000291,
+          "mean_ms": 16.66604166666667
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          0
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 1,
+        "cpu_task_ms": [
+          531.069
+        ],
+        "cpu_task_mean_ms": 531.069,
+        "cpu_occupancy_percent": [
+          6.624024798323985
+        ],
+        "weighted_cpu_occupancy_percent": 6.624024798323985,
+        "map_submissions_per_second": [
+          0
+        ],
+        "weighted_map_submissions_per_second": 0.0,
+        "raf_per_second": [
+          60.10246157690866
+        ],
+        "weighted_raf_per_second": 60.10246157690866,
+        "raf_p95_ms": [
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          null
+        ],
+        "signal_p95_ms": [
+          null
+        ],
+        "pooled_raf_distribution": {
+          "samples": 480,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 16.80000000000291,
+          "mean_ms": 16.66604166666667
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 0
+        },
+        "pooled_signal_distribution": {
+          "samples": 0
+        },
+        "pixel_size_submission_counts": {},
+        "distance_delta": [
+          0
+        ],
+        "compositor_submissions": 0,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 0,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": 8.949969534899438,
+        "weighted_cpu_occupancy_percent_percent": 8.982312145256177,
+        "weighted_map_submissions_per_second_percent": null,
+        "weighted_raf_per_second_percent": -0.0037485942762760516,
+        "occupancy_percentage_points": 0.5459515147481993,
+        "per_repeat_cpu_percent": [
+          8.949969534899438
+        ],
+        "per_repeat_submission_percent": [
+          null
+        ]
+      }
+    },
+    "freeflight-moving": {
+      "baseline": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          3120.9849999999997,
+          3102.52
+        ],
+        "cpu_task_mean_ms": 3111.7524999999996,
+        "cpu_occupancy_percent": [
+          35.64820885450483,
+          35.02983133625991
+        ],
+        "weighted_cpu_occupancy_percent": 35.337232245517846,
+        "map_submissions_per_second": [
+          5.122822800309853,
+          4.610706808892407
+        ],
+        "weighted_map_submissions_per_second": 4.866422929586583,
+        "raf_per_second": [
+          54.976634930154525,
+          54.20695842887019
+        ],
+        "weighted_raf_per_second": 54.591282863952046,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          346,
+          428.89999999990687
+        ],
+        "signal_p95_ms": [
+          706.2999999999302,
+          799.5
+        ],
+        "pooled_raf_distribution": {
+          "samples": 873,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 183.40000000000146,
+          "mean_ms": 18.269761741122565
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 76,
+          "median_ms": 182.89999999990687,
+          "p95_ms": 404.0,
+          "max_ms": 525.3999999999069,
+          "mean_ms": 208.73684210526469
+        },
+        "pooled_signal_distribution": {
+          "samples": 75,
+          "median_ms": 325.0999999998603,
+          "p95_ms": 706.2999999999302,
+          "max_ms": 897.4000000001397,
+          "mean_ms": 371.6799999999922
+        },
+        "pixel_size_submission_counts": {
+          "4": 78
+        },
+        "distance_delta": [
+          286,
+          292
+        ],
+        "compositor_submissions": 78,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "candidate": {
+        "repeats": 2,
+        "cpu_task_ms": [
+          3189.992,
+          3099.59
+        ],
+        "cpu_task_mean_ms": 3144.791,
+        "cpu_occupancy_percent": [
+          36.078658458657046,
+          35.35850279140941
+        ],
+        "weighted_cpu_occupancy_percent": 35.720126420168015,
+        "map_submissions_per_second": [
+          4.87165074011617,
+          4.621880230844234
+        ],
+        "weighted_map_submissions_per_second": 4.746766265481669,
+        "raf_per_second": [
+          54.587471113609396,
+          54.088490269069005
+        ],
+        "weighted_raf_per_second": 54.337982249592784,
+        "raf_p95_ms": [
+          16.799999999999272,
+          16.799999999999272
+        ],
+        "map_submit_p95_ms": [
+          371.0999999998603,
+          403.39999999990687
+        ],
+        "signal_p95_ms": [
+          610.1000000000931,
+          860.6999999999534
+        ],
+        "pooled_raf_distribution": {
+          "samples": 868,
+          "median_ms": 16.700000000000728,
+          "p95_ms": 16.799999999999272,
+          "max_ms": 283.2000000000007,
+          "mean_ms": 18.41336405529954
+        },
+        "pooled_map_submission_distribution": {
+          "samples": 74,
+          "median_ms": 188.9000000001397,
+          "p95_ms": 371.0999999998603,
+          "max_ms": 791.0,
+          "mean_ms": 214.01351351351036
+        },
+        "pooled_signal_distribution": {
+          "samples": 72,
+          "median_ms": 363.39999999990687,
+          "p95_ms": 645.5,
+          "max_ms": 936.5999999998603,
+          "mean_ms": 385.1194444444393
+        },
+        "pixel_size_submission_counts": {
+          "4": 76
+        },
+        "distance_delta": [
+          291,
+          286
+        ],
+        "compositor_submissions": 76,
+        "read_pixels_calls": 0,
+        "max_direct_pending": 2,
+        "released_before_signal": 0
+      },
+      "changes": {
+        "cpu_task_mean_ms_percent": 1.0617328981016527,
+        "weighted_cpu_occupancy_percent_percent": 1.083543193167702,
+        "weighted_map_submissions_per_second_percent": -2.458821722572302,
+        "weighted_raf_per_second_percent": -0.46399461795121333,
+        "occupancy_percentage_points": 0.3828941746501684,
+        "per_repeat_cpu_percent": [
+          2.211064776024263,
+          -0.09443935897269773
+        ],
+        "per_repeat_submission_percent": [
+          -4.9030011379369025,
+          0.24233642291628943
+        ]
+      }
+    }
+  },
+  "scope": "Per-run paired comparison only. CPU occupancy uses the Performance metric interval; map submission rates use the capture interval. rAF is browser scheduling, map submissions are submitted images, and neither measures physical display presentation. These runs use SwiftShader. Moving trajectories can diverge, so retain HUD distances. Two repeats characterize observed spread; they do not establish statistical confidence."
+}

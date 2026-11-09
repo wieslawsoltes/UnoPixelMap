@@ -91,7 +91,7 @@ Ground vehicles and trains follow the sampled surface. Ocean surfaces use sea le
 
 The default GPU backend renders terrain and buildings with retained geometry, vertex and fragment shaders, and hardware depth testing. Sparse CPU visibility queries keep labels, routes, vehicles and feature inspection aligned with the selected mesh. The CPU renderer remains available through the same control. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
 
-Building meshes use lossless 32-byte vertices and exact output allocation. On the captured dense Manhattan corpus, this reduces constructor allocation by 53.6% and retained mesh/edge payload by 146.3 MB while preserving the original geometry and rendered pixels. The fixed-corpus AOT replay also lowers peak allocated Wasm memory by 161.56 MiB while completing all 27 camera/control checkpoints. [Mesh layout and memory evidence](docs/building-mesh-memory.md) · [Current measurements and limitations](docs/performance.md#current-paired-browser-measurements)
+Building meshes use lossless 32-byte vertices and exact output allocation. On the captured dense Manhattan corpus, this reduces constructor allocation by 53.6% and retained mesh/edge payload by 146.3 MB while preserving the original geometry and rendered pixels. The fixed-corpus AOT replay also lowers peak allocated Wasm memory by 161.56 MiB while completing all 27 camera/control checkpoints. [Mesh layout and memory evidence](docs/building-mesh-memory.md) · [Current measurements and limitations](docs/performance.md#current-release-browser-measurements)
 
 ## Reuse the control
 

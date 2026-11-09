@@ -36,8 +36,9 @@ only the renderer assembly. It includes decode, resampling, palette lookup,
 dithering and cache insertion. The bundled-batch p95 changes from 51.4324 to
 42.9544 ms; measured managed allocation remains 12,848 bytes per batch. All 33
 benchmark control images match. One synthetic 512-to-128 generic-path median is
-1.08% slower, and the first cold call includes mixed JIT/static-initialization
-results. These are native preprocessing measurements, not frame-rate gains.
+1.08% slower, and the first cold world-image call is slower in both candidate
+processes; cold calls include JIT/static initialization. These are native
+preprocessing measurements, not frame-rate gains.
 [Raw measurements and provenance](verification/earth-raster-20261109.json) ·
 [Reproduction harness](verification/earth-raster-harness/README.md)
 
@@ -55,12 +56,68 @@ GPU building-cache pruning now runs when the source geometry generation changes.
 Camera-only frames avoid a copied key array and redundant scan. Replacement,
 33-tile eviction, style reset and held-frame replay are covered explicitly. An
 eight-frame control removes exactly 72 managed bytes per frame for six retained
-keys, with identical query and overlay fingerprints; no timing gain is claimed.
+keys, with identical overlay fingerprints. This control issues no independent
+depth queries, and no timing gain is claimed.
 [Allocation evidence](verification/gpu-building-cache-20261109/summary.json)
 
-The full native renderer suite passes. The browser pipeline compares the final
-source with the exact previous Pages artifact from run `42415166135`; its results
-are recorded separately when complete.
+### Current release browser measurements
+
+Source release [`555990d`](https://github.com/wieslawsoltes/UnoPixelMap/commit/555990d0e086ffb9908d4d98ec30a73a245a6c6e)
+passed all four jobs in [run 42696985047](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047):
+native/build/package checks, browser validation, the paired benchmark and Pages
+deployment. The live site serves the same checked package. Browser validation
+includes CPU/GPU journeys and terrain, all five camera rigs, four styles, pointer
+lock, touch takeover and DPR2 close-camera recovery. All six compositor-versus-
+detached presentation cases have zero differing map pixels and exact canvas
+output, covering 1,782,000 compared map pixels.
+
+The workflow remeasures the exact `53e9c68` Pages artifact from run `42415166135`
+alongside `555990d`; it does not reuse timings from the earlier runner. Thirty
+fresh browser processes cover five stationary AB controls and five moving ABBA
+comparisons. Moving scenarios have two repetitions per variant, with an 8,000 ms
+requested timed window and a separate profile capture. Both variants use Chromium
+156.0.8078.4, SwiftShader, an AMD EPYC 7763 runner, affinity `0,1,2`, a 1200 × 780
+viewport and DPR 1. CPU occupancy is total task CPU time divided by the total
+`Performance.getMetrics` interval; submission rates use total submissions divided
+by the total captured interval. The metric interval includes probe-result transfer.
+
+| Moving workload | Main-thread CPU occupancy, baseline → candidate | Submitted map images/s, baseline → candidate | Submission-rate change |
+| --- | ---: | ---: | ---: |
+| Walking, first person | 26.29% → 26.80% | 5.623 → 5.622 | −0.025% |
+| Walking, chase | 32.08% → 32.85% | 9.209 → 8.911 | −3.24% |
+| Driving, chase | 46.09% → 43.44% | 6.123 → 6.055 | −1.10% |
+| Driving, first person | 43.07% → 42.02% | 4.206 → 3.932 | −6.51% |
+| Free flight | 35.34% → 35.72% | 4.866 → 4.747 | −2.46% |
+
+These measurements do **not** show a general play-mode throughput improvement.
+Driving chase reduces mean main-thread task CPU time from 4,448.01 to 4,224.99 ms
+(−5.01%), while its map submission rate is slightly lower. Walking chase has
+2.41% more task CPU work and a 3.24% lower submission rate; both repetitions have
+longer map-submission p95 intervals. First-person driving has a 6.51% lower submission
+rate, with both candidate repetitions below both baseline repetitions. Its
+pooled median submission interval rises from 237.1 to 260.7 ms, despite a lower
+submission p95. These regressions remain part of the release evidence.
+
+The first-person driving trajectories differ: baseline distances are 153/152 m,
+candidate distances 170/158 m. Walking-chase distances match at 14/13 m. These
+held-key workloads preserve the observed end-to-end differences but do not isolate
+one optimization's contribution. Two repetitions provide observed spread, not
+statistical confidence. The moving scenarios use the Map layer and therefore do
+not measure the separate Earth preprocessing gains above.
+
+All 475 candidate submissions use the compositor context at 300 × 166 art pixels
+(pixel size 4), matching the baseline's artwork resolution and pixel size. There are zero map
+readbacks, zero PBO copies, at most two outstanding direct frames and no premature
+frame releases. Stationary windows submit no map images. rAF p95 is about 16.8 ms
+for the other moving workloads and 50 ms for first-person driving in both variants;
+rAF counts browser scheduling, not map rendering or physical display FPS. These
+measurements use a software GPU and do not establish physical-GPU or Safari/iOS
+performance.
+
+[Complete browser evidence and reproduction](verification/browser-rendering-555990d/README.md) ·
+[Thirty original reports and raw probes](verification/browser-rendering-555990d/manifest.json) ·
+[Audited per-run values and pooled distributions](verification/browser-rendering-555990d/analysis.json) ·
+[Functional validation and live capture](verification/browser-rendering-555990d/validation.json)
 
 ## Selective depth preparation and reusable pixel rows · 7 November 2026
 

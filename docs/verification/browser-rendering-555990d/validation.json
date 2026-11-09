@@ -1,0 +1,104 @@
+{
+  "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+  "workflow_run_id": 42696985047,
+  "workflow_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047",
+  "workflow_conclusion": "success",
+  "jobs": [
+    {
+      "name": "browser",
+      "id": 129431349148,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047/job/129431349148",
+      "conclusion": "success",
+      "started_at": "2026-11-09T20:51:53Z",
+      "completed_at": "2026-11-09T21:05:19Z"
+    },
+    {
+      "name": "verify",
+      "id": 129438833575,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047/job/129438833575",
+      "conclusion": "success",
+      "started_at": "2026-11-09T21:05:23Z",
+      "completed_at": "2026-11-09T21:16:20Z"
+    },
+    {
+      "name": "play-benchmark",
+      "id": 129438834044,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047/job/129438834044",
+      "conclusion": "success",
+      "started_at": "2026-11-09T21:05:23Z",
+      "completed_at": "2026-11-09T21:23:59Z"
+    },
+    {
+      "name": "deploy",
+      "id": 129445047899,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047/job/129445047899",
+      "conclusion": "success",
+      "started_at": "2026-11-09T21:16:27Z",
+      "completed_at": "2026-11-09T21:16:38Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "atlas-play-performance",
+      "id": 13712241017,
+      "sha256": "25c211ddbadcdceea1f9be2bb6a11ce8a6db5ba789c11a730126a7ea13a85325",
+      "bytes": 6172596
+    },
+    {
+      "name": "atlas-browser-screens",
+      "id": 13710573869,
+      "sha256": "9ff0bacd6694612a3cd0fd0d057f1d20dc58b56eb1892938b223608c0f738042",
+      "bytes": 29275275
+    },
+    {
+      "name": "github-pages",
+      "id": 13710017486,
+      "sha256": "04abb6b24c35df6d6e5f6b3bbb80e211f1fe48c2d6edc948ada4138ac3163b8e",
+      "bytes": 88403636
+    }
+  ],
+  "native_and_packaging": {
+    "checks_excerpt": "build-checks.log",
+    "boot_resources": 72,
+    "compressed_representations": 250
+  },
+  "browser_validation": {
+    "checks_excerpt": "browser-checks.log",
+    "presentation_comparison": "presentation-comparison.json",
+    "comparison_cases": 6,
+    "total_compared_map_pixels": 1782000,
+    "different_map_pixels": 0,
+    "exact_canvas_in_every_case": true,
+    "close_camera_checkpoints": 9,
+    "close_camera_failures": 0,
+    "scope": "Chromium 156.0.8078.4 with SwiftShader; source package identified by its checked bootstrap and native WASM hashes. These functional checks are distinct from the timed play benchmark."
+  },
+  "live_site": {
+    "url": "https://wieslawsoltes.github.io/UnoPixelMap/",
+    "date_utc": "2026-11-09",
+    "observed_bootstrap_src": "./package_f94afc049db9913efe870a82a5ee049f4bcd7cfd07814383e5e445612de13355/uno-bootstrap.js",
+    "observations": [
+      "Dense Manhattan map renders with GPU active and Pixel rendering.",
+      "View menu shows GPU rendering and Pixel art rendering selected.",
+      "Switching the world layer from Map to Earth reaches Earth ready with GPU active.",
+      "The free-roam camera selector accepts Third person."
+    ],
+    "screenshot": "live-earth.jpg",
+    "screenshot_sha256": "b82fa84de897b4cdb512d57801e053e4250dadc58a2be9860ae957a19123a075",
+    "screenshot_pixels": [
+      1800,
+      869
+    ],
+    "scope": "Visual live-site smoke check, not a performance measurement or pixel oracle. Camera motion acceptance is provided by the native and CI browser suites."
+  },
+  "candidate_profiles": {
+    "archive": "candidate-profiles-symbolicated.zip",
+    "sha256": "59c32dd83897b173399451d1bc51cbc9396ecff694a248ba8b313bcaf8c6f4ec",
+    "profile_count": 7,
+    "renamed_active_profiles": 6,
+    "unchanged_idle_profiles": 1,
+    "integrity": "candidate-profile-validation.json",
+    "provenance": "candidate-profile-provenance.json",
+    "hotspots": "candidate-profile-hotspots.json"
+  }
+}

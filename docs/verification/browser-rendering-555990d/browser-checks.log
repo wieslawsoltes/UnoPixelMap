@@ -1,0 +1,27 @@
+2026-11-09T21:05:55.3592351Z Trusted browser input checks passed for wheel/pinch routing, pointer capture, key repeat and native editing.
+2026-11-09T21:06:16.2878833Z Browser checks passed: seeded geometry, Earth imagery in isometric and overhead views, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.
+2026-11-09T21:06:27.7406232Z Paused route follow, interrupted fit, exact pinch zoom, zero-delta Safari ownership and explicit twist passed.
+2026-11-09T21:06:32.7752799Z Verified browser audio { contexts: 1, resumes: 2, frequencyWrites: 30, endedSources: 2 }
+2026-11-09T21:06:36.2426706Z Passed journey scenario drive
+2026-11-09T21:07:02.0154808Z Passed journey scenario groundModes
+2026-11-09T21:07:24.3397632Z Passed journey scenario planVia
+2026-11-09T21:07:30.2552462Z Passed journey scenario phoneRide
+2026-11-09T21:07:47.8785310Z Browser checks passed: seeded geometry, Earth imagery in isometric and overhead views, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.
+2026-11-09T21:07:58.2988676Z Paused route follow, interrupted fit, exact pinch zoom, zero-delta Safari ownership and explicit twist passed.
+2026-11-09T21:08:03.1173832Z Verified browser audio { contexts: 1, resumes: 2, frequencyWrites: 30, endedSources: 2 }
+2026-11-09T21:08:08.1420034Z Passed journey scenario drive
+2026-11-09T21:08:31.0391518Z Passed journey scenario groundModes
+2026-11-09T21:08:51.3233978Z Passed journey scenario planVia
+2026-11-09T21:08:56.1623850Z Passed journey scenario phoneRide
+2026-11-09T21:11:54.2255681Z Terrain browser checks passed for real Garda relief, flat comparison, elevation, Map and Earth layers, 2D/3D, picking, orbit, drag, exaggeration, v4 sharing and phone controls.
+2026-11-09T21:13:04.0554168Z Terrain browser checks passed for real Garda relief, flat comparison, elevation, Map and Earth layers, 2D/3D, picking, orbit, drag, exaggeration, v4 sharing and phone controls.
+2026-11-09T21:13:51.0004392Z DPR2 dense-city NorthUp→ground-clamped Orbit, horizon changes and runtime recovery passed.
+2026-11-09T21:14:10.1231453Z All four rendering styles and CPU/GPU switching passed.
+2026-11-09T21:14:12.7566742Z Desktop trackpad and WebKit gesture routing passed.
+2026-11-09T21:14:25.2822116Z Walking, terrain contact and held-jump behavior passed.
+2026-11-09T21:14:47.2755062Z Paused style and relief changes retain the pose and settle GPU rendering.
+2026-11-09T21:14:47.2755524Z Native drag, browser Pointer Lock, relative look and pause passed.
+2026-11-09T21:15:00.6852082Z Car driving and all five camera rigs passed.
+2026-11-09T21:15:22.3646278Z Walking, driving, aircraft, free flight and camera controls passed.
+2026-11-09T21:15:58.2876064Z Held-touch flights, mixed trackpad takeover, camera reattachment and pinch cancellation passed.
+2026-11-09T21:16:14.3843636Z Exploration checks passed for GPU defaults, four styles, native gestures, free movement, physical cameras, terrain and mobile controls.

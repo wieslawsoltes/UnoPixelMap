@@ -99,7 +99,7 @@ The connected browser then loaded the package above at 1800 × 924 CSS pixels, D
 
 ![Ready Manhattan overview after the acknowledged live camera replay and exit](verification/live-c937ddd-manhattan-overview.jpg)
 
-The [frozen-corpus memory comparison](verification/corpus-memory-comparison-c937ddd.json) separately measures the original and compact artifacts against the same captured response bodies and three camera cycles. The [paired browser performance record](verification/browser-rendering-c937ddd-provenance.json) compares this exact candidate artifact with pinned baseline run `42300149918`; its mixed timing results are retained in [performance.md](performance.md#current-paired-browser-measurements).
+The [frozen-corpus memory comparison](verification/corpus-memory-comparison-c937ddd.json) separately measures the original and compact artifacts against the same captured response bodies and three camera cycles. The [paired browser performance record](verification/browser-rendering-c937ddd-provenance.json) compares this exact candidate artifact with pinned baseline run `42300149918`; its mixed timing results are retained in [performance.md](performance.md#paired-browser-measurements-for-c937ddd).
 
 ## Pinning performance baselines
 

@@ -1,0 +1,56 @@
+2026-11-09T20:52:14.8705429Z Tile viewport checks passed for mixed LOD, retained fallback, retries and cancellation.
+2026-11-09T20:52:27.9351969Z Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order, picking and cross-tile shadow checks.
+2026-11-09T20:52:29.7163304Z Passed 74 exact Earth textures (3,989,462 pixels), natural imagery, replacement/cache reuse, codec guards and 131,072 palette/Bayer clusters against the frozen raster.
+2026-11-09T20:52:30.1311273Z Passed Earth quadrants, pitch, wrap, missing tile, model composition, palette (69 inks on RGB fixture), seam phase and determinism.
+2026-11-09T20:52:30.7845513Z Passed 24 exact eager/deferred label images, 12 ambiguous-sort tie fallbacks; 12 crowded views reduced depth queries from 8004 to 324.
+2026-11-09T20:52:35.1369339Z Passed 16 real-city exact label images, including 16 with visible glyphs.
+2026-11-09T20:52:35.1944165Z Passed 24 chase-spring ridge clearance cases with signed terrain, unchanged eye orientation and viewport resize.
+2026-11-09T20:52:35.2445778Z Passed 12424 already-aligned aim poses with exact yaw/pitch preservation, repeated aims, resized viewports and clipped-target rejection.
+2026-11-09T20:52:35.2471500Z Passed 486 fixed-eye inset aim cases, worst screen error 0.000099px.
+2026-11-09T20:52:35.3588621Z Passed 84 free-camera poses, physical-eye interpolation, analytic inset aim, physical near/far clipping, terrain datum, close model picking, bounded horizon requests and v5 style/view links.
+2026-11-09T20:52:35.3589706Z Passed camera orbit, fit, short-arc flight, six vehicle symbols, pause/seek effects and route wrap checks.
+2026-11-09T20:52:35.4912523Z Passed true perspective frustum, ray inverse, anchors, target altitude, inset route fit, homogeneous raster registration, model depth, holes, picking and navigation alignment.
+2026-11-09T20:52:35.5036731Z Passed 432 steep-slope follow anchors with 0.0117px maximum projection error.
+2026-11-09T20:52:35.5932589Z Passed 54 elevated route fits with top, bottom and side UI insets.
+2026-11-09T20:52:35.6109918Z Passed full-vertex terrain fitting for dense routes with unevenly sampled mountain peaks.
+2026-11-09T20:52:35.6127379Z Passed terrain camera datum, height-field inverse, orbit/zoom/drag and flight-follow anchors, signed heights and v1–v4 view links.
+2026-11-09T20:52:35.6982999Z Passed 35,547 exact terrain height/lighting pairs across zoom 0–22, signed DEMs, void fallback, ocean masking, longitude wrap and polar borders.
+2026-11-09T20:52:36.4713976Z Passed 28 exact retained terrain layouts across motion, LOD, style, DEM, CPU/GPU handoffs, resizing and repeated worlds.
+2026-11-09T20:52:36.8146028Z Passed elevation relief, flat compatibility, height-field picking (0.0001px), 2D tint, signed datum, foundations, thin models, ridge occlusion, stale-view picking, wrapped LOD seams, Earth draping and cache invalidation. Warm terrain orbit 11.6 ms/frame at 640×420 / 2.
+2026-11-09T20:52:36.8196604Z Passed 128 exact GPU depth interpolation comparisons across projection, terrain, near-plane weights and winding.
+2026-11-09T20:52:36.8354823Z Passed 936 exact direct clipping-code comparisons across viewport and near/far boundaries.
+2026-11-09T20:52:38.2298874Z Passed 8,202 exact pressure queries: active exact/coarse budgets, source-order terrain ties, model rims, cached/held frames, pooled capacity reuse and adaptive large grids.
+2026-11-09T20:52:42.6885460Z Passed opaque/nonopaque terrain texture round trips, 48 MiB mixed-cache budget, CPU fallback, retained frames and source invalidation.
+2026-11-09T20:52:42.8507254Z Passed GPU building-cache motion, source replacement, 33-tile eviction, style reset and held-frame replay.
+2026-11-09T20:52:42.8508282Z Passed independent building face/rim reuse, changed-stream invalidation, retained contents and cold-selection equivalence from 1122 physical-camera poses.
+2026-11-09T20:52:43.7389596Z Passed 22 building mesh cases / 845,516 vertices: every old logical float bit, index, rim and range matches; real-tile constructor allocation 301,928,928 -> 143,559,168 bytes; vertex payload 39,973,344 -> 26,648,896 bytes; GPU leaves CPU edge tables lazy.
+2026-11-09T20:52:44.1554244Z Passed 405,674 float-accumulated samples in 291 resolved footprint bounds, 221 general-path cases, exceptional inputs and 32 exact nearby CPU images.
+2026-11-09T20:52:47.1599675Z Passed 6,612,305 exact sparse/eager depth queries across 55 frames: all styles, projection modes, near-plane crossings, raised/courtyard roofs, signed terrain, wrapped worlds, bounded overflow and retained A→B→A frames.
+2026-11-09T20:52:47.5716858Z Projected depth raster checks: 9,063,600 exact comparisons across 562 frames; 40 valid raster-empty triangles removed. Half-pixel/cell boundaries, winding, subpixel coverage, source-order ties and large-coordinate fallback agree with the frozen eager oracle.
+2026-11-09T20:52:48.0414952Z Passed 24 terrain navigation cases covering routes, six vehicle types, heading, paused/seeked effects, gates, LOD, palettes, exaggeration, flat tint and public mesh projection, plus 25 grazing-slope gates and building occlusion.
+2026-11-09T20:52:48.0660174Z Passed disconnected footprint and enclosing courtyard clipping checks.
+2026-11-09T20:52:49.2961807Z Passed 48 exact standalone idle/reuse/resume pixel and effects-state comparisons, pose guards and route/mode/reset transitions.
+2026-11-09T20:52:49.2962883Z Passed four render styles, bounded voxel/bevel topology, immutable frame switching, terrain height/picking, Pixel restoration and world-scale standalone vehicles.
+2026-11-09T20:52:49.4416607Z Passed 360 exact GPU fallback, toggle, cached-redraw and resize checks on CPU canvases.
+2026-11-09T20:52:53.7566539Z Passed 16 exact shared-GL-state draws, warm uniform/query reuse, float-bit preservation and failed-upload retry.
+2026-11-09T20:52:54.2060267Z Passed 8 exact same-context texture images, four styles, Earth blending, shared GL state, deferred picture replay, pending Skia drawing, resize and image lifetime checks.
+2026-11-09T20:52:55.3168157Z Passed 64 exact hardware-culling/fragment-discard comparisons: four styles, art scales, courtyard/disconnected/intersecting/raised/flat caps, orthographic and physical cameras above, below and inside buildings.
+2026-11-09T20:52:55.4724718Z Passed 65,536 exact scalar/SIMD/prepared-row window colors across palettes, signed room boundaries, filter transitions and mip levels.
+2026-11-09T20:52:55.5107385Z Passed 222,912 exact reused-row window samples across signed story/window boundaries and lamp repeats.
+2026-11-09T20:52:55.5211193Z Passed 4,096 signed window-footprint intersections (coverage 0.000058, lamps 0.000044), mip energy and 2,048 exact resolved samples.
+2026-11-09T20:52:56.8220842Z Passed resolved, distant and grazing Pixel façade fixtures, spatial-reference quality, retained lamp contribution and CPU/GPU footprint parity.
+2026-11-09T20:52:57.1467136Z Passed native GLES rendering, immutable redraw and upload reuse for all four render styles across Map, Earth and Elevation.
+2026-11-09T20:52:59.2932226Z Passed 108 exact physical-camera GLES visibility comparisons, depth queries, retained stream restoration and upload reuse across all styles and terrain layers.
+2026-11-09T20:53:00.0487916Z Passed 32 exact bounded GPU-cache frames across all styles, motion, physical-camera culling and held-frame replay; retained uploads and oversized-tile recovery also pass.
+2026-11-09T20:53:04.4177095Z Passed 408 native GPU/CPU mesh intersection checks and stale-camera rejection.
+2026-11-09T20:53:04.5158511Z Passed retained GPU frame mutation, reactivation, picking and cache identity checks.
+2026-11-09T20:53:04.5644556Z Passed stationary A/B/A route-cache invalidation with delayed building publication.
+2026-11-09T20:53:04.7508475Z Passed 2× destination framebuffer, nearest art pixels, physical-resolution text and independent read/draw target restoration.
+2026-11-09T20:53:16.3489820Z Passed six GPU ridge-occluded gate, route and vehicle overlays through full-resolution GL composition.
+2026-11-09T20:53:17.4712071Z Passed 48 native GLES terrain, model, tint, Earth, projection, style, resize and exact redraw checks. Reports /home/runner/work/_temp/gpu-terrain
+2026-11-09T20:53:17.5537771Z Passed complete EGL context destruction and recreation with identical terrain pixels.
+2026-11-09T20:53:24.8610340Z All routing checks passed.
+2026-11-09T20:53:29.5497325Z Audio checks passed for six instruments, activation, bounded cues, pause, visibility and disposal.
+2026-11-09T20:53:29.6067731Z Browser input checks passed for map-scoped pinch, two-axis trackpad motion, wheel units, Safari gestures, pointer capture/lock, UI pass-through and disposal.
+2026-11-09T21:05:06.9152706Z Package identity checks passed: deterministic, repeatable, incremental, runtime/adapters/assets, references, gzip/Brotli reuse, preflight failures and read-only retry.
+2026-11-09T21:05:10.8923108Z Published artifact: package_f94afc049db9913efe870a82a5ee049f4bcd7cfd07814383e5e445612de13355; 72 boot resources and 250 compressed representations verified; two passes preserve all artifact bytes.

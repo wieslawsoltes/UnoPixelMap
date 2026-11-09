@@ -1,0 +1,135 @@
+{
+  "status": "passed",
+  "archive_and_all_67_wasm_hashes_validated": true,
+  "assembly_count": 66,
+  "profiles": [
+    {
+      "scenario": "car-moving-chase",
+      "status": "validated",
+      "renamed_nodes": 1834,
+      "checks": [
+        "Raw profile hash matches summary.",
+        "Published native filename, function index, byte offset validated by existing symbolicator.",
+        "Only node functionName values changed; node IDs, edges, times, samples and deltas are identical.",
+        "Every changed name has a corresponding exact-package mapping.",
+        "Self sample weights sum to original total."
+      ]
+    },
+    {
+      "scenario": "car-moving-firstperson",
+      "status": "validated",
+      "renamed_nodes": 1962,
+      "checks": [
+        "Raw profile hash matches summary.",
+        "Published native filename, function index, byte offset validated by existing symbolicator.",
+        "Only node functionName values changed; node IDs, edges, times, samples and deltas are identical.",
+        "Every changed name has a corresponding exact-package mapping.",
+        "Self sample weights sum to original total."
+      ]
+    },
+    {
+      "scenario": "freeflight-moving",
+      "status": "validated",
+      "renamed_nodes": 1999,
+      "checks": [
+        "Raw profile hash matches summary.",
+        "Published native filename, function index, byte offset validated by existing symbolicator.",
+        "Only node functionName values changed; node IDs, edges, times, samples and deltas are identical.",
+        "Every changed name has a corresponding exact-package mapping.",
+        "Self sample weights sum to original total."
+      ]
+    },
+    {
+      "scenario": "walk-moving-chase",
+      "status": "validated",
+      "renamed_nodes": 1391,
+      "checks": [
+        "Raw profile hash matches summary.",
+        "Published native filename, function index, byte offset validated by existing symbolicator.",
+        "Only node functionName values changed; node IDs, edges, times, samples and deltas are identical.",
+        "Every changed name has a corresponding exact-package mapping.",
+        "Self sample weights sum to original total."
+      ]
+    },
+    {
+      "scenario": "walk-moving-firstperson",
+      "status": "validated",
+      "renamed_nodes": 1245,
+      "checks": [
+        "Raw profile hash matches summary.",
+        "Published native filename, function index, byte offset validated by existing symbolicator.",
+        "Only node functionName values changed; node IDs, edges, times, samples and deltas are identical.",
+        "Every changed name has a corresponding exact-package mapping.",
+        "Self sample weights sum to original total."
+      ]
+    },
+    {
+      "scenario": "walk-stationary-firstperson",
+      "status": "validated",
+      "renamed_nodes": 772,
+      "checks": [
+        "Raw profile hash matches summary.",
+        "Published native filename, function index, byte offset validated by existing symbolicator.",
+        "Only node functionName values changed; node IDs, edges, times, samples and deltas are identical.",
+        "Every changed name has a corresponding exact-package mapping.",
+        "Self sample weights sum to original total."
+      ]
+    },
+    {
+      "scenario": "map-idle-relief",
+      "status": "validated byte-for-byte unchanged",
+      "checks": [
+        "Contains only root, program and idle nodes; no native module occurs.",
+        "Copied file SHA-256 equals original profile SHA-256."
+      ]
+    }
+  ],
+  "independent_profile_integrity": {
+    "profiles": [
+      {
+        "scenario": "car-moving-chase",
+        "samples": 6180,
+        "sample_delta_us": 8235485,
+        "renamed_nodes": 1834
+      },
+      {
+        "scenario": "car-moving-firstperson",
+        "samples": 6175,
+        "sample_delta_us": 8164989,
+        "renamed_nodes": 1962
+      },
+      {
+        "scenario": "freeflight-moving",
+        "samples": 6009,
+        "sample_delta_us": 8159230,
+        "renamed_nodes": 1999
+      },
+      {
+        "scenario": "map-idle-relief",
+        "samples": 7457,
+        "sample_delta_us": 8154416,
+        "renamed_nodes": 0
+      },
+      {
+        "scenario": "walk-moving-chase",
+        "samples": 6134,
+        "sample_delta_us": 8192931,
+        "renamed_nodes": 1391
+      },
+      {
+        "scenario": "walk-moving-firstperson",
+        "samples": 6311,
+        "sample_delta_us": 8144424,
+        "renamed_nodes": 1245
+      },
+      {
+        "scenario": "walk-stationary-firstperson",
+        "samples": 7394,
+        "sample_delta_us": 8158210,
+        "renamed_nodes": 772
+      }
+    ],
+    "only_function_names_changed": true,
+    "samples": 45660
+  }
+}
