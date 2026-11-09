@@ -1,5 +1,9 @@
 using PixelMap.Data;
 using PixelMap.Rendering;
+using System.Collections;
+using System.Reflection;
+using System.Security.Cryptography;
+using SkiaSharp;
 
 /// <summary>Physical-camera transitions that change only one immutable model stream.</summary>
 internal static class GpuBuildingSelectionChecks
@@ -58,7 +62,74 @@ internal static class GpuBuildingSelectionChecks
         Check(mesh, rimOnly!.Value, reuseFaces: true, reuseRims: false, "rim-only change");
         Check(mesh, faceOnly!.Value, reuseFaces: false, reuseRims: true, "face-only change");
         Check(mesh, equalLength!.Value, reuseFaces: false, reuseRims: false, "equal-length content change");
+        SceneCacheLifetime();
         Console.WriteLine($"Passed independent building face/rim reuse, changed-stream invalidation, retained contents and cold-selection equivalence from {poses} physical-camera poses.");
+    }
+
+    private static void SceneCacheLifetime()
+    {
+        using var renderer = new PixelMapRenderer();
+        var source = CreateTile();
+        var camera = Camera(source.Id);
+        using var held = renderer.PrepareGpuFrame(Width, Height, camera, [source], pixelSize: Pixels);
+        Assert(held.Buildings.Length == 1, "The cache lifetime fixture did not create a building mesh.");
+        var mesh = held.Buildings[0].Mesh;
+        var cache = (IDictionary)typeof(PixelMapRenderer).GetField("gpuBuildings",
+            BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(renderer)!;
+        string fingerprint = Fingerprint(held);
+        for (int i = 1; i <= 8; i++)
+        {
+            using var moved = renderer.PrepareGpuFrame(Width, Height, camera with { Bearing = i * 5 }, [source], pixelSize: Pixels);
+            Assert(cache.Count == 1 && ReferenceEquals(moved.Buildings[0].Mesh, mesh),
+                "Camera motion replaced an unchanged tile's retained building mesh.");
+        }
+        var replacement = source with { Features = source.Features.Select(feature => feature with { Height = feature.Height + 20 }).ToArray() };
+        using (var changed = renderer.PrepareGpuFrame(Width, Height, camera, [replacement], pixelSize: Pixels))
+        {
+            Assert(cache.Count == 1 && !cache.Contains(mesh.Source) &&
+                !ReferenceEquals(changed.Buildings[0].Mesh, mesh),
+                "Replacing a source tile retained the old cache entry or reused stale geometry.");
+        }
+        // Populate the retained geometry limit, then cross it with one visible tile.
+        // The old entries must disappear in the same frame as geometry eviction.
+        for (int i = 1; i <= 32; i++)
+        {
+            var tile = source with { Id = Tile with { X = Tile.X + i } };
+            using var next = renderer.PrepareGpuFrame(Width, Height, Camera(tile.Id), [tile], pixelSize: Pixels);
+            Assert(cache.Count == (i < 32 ? i + 1 : 1),
+                "The GPU building cache did not follow geometry retention and eviction.");
+        }
+        renderer.ActivateGpuFrame(held);
+        Assert(Fingerprint(held) == fingerprint, "Cache pruning mutated a retained earlier frame's depth queries.");
+        using var bitmap = new SKBitmap(Width, Height);
+        using var canvas = new SKCanvas(bitmap);
+        renderer.DrawGpuOverlay(canvas, held);
+        using (var changedStyle = renderer.PrepareGpuFrame(Width, Height, camera, [replacement], PixelStyle.Day, Pixels,
+            null, null, MapRenderStyle.Minecraft))
+            Assert(cache.Count == 1 && !ReferenceEquals(changedStyle.Buildings[0].Mesh, mesh),
+                "Changing style retained a prior geometry cache generation.");
+        renderer.ActivateGpuFrame(held);
+        Assert(Fingerprint(held) == fingerprint, "A style change corrupted a held frame after cache pruning.");
+        Console.WriteLine("Passed GPU building-cache motion, source replacement, 33-tile eviction, style reset and held-frame replay.");
+
+        static MapCamera Camera(TileId tile) => new(
+            Math.Atan(Math.Sinh(Math.PI * (1 - 2 * (tile.Y + .5) / (1 << tile.Z)))) * 180 / Math.PI,
+            (tile.X + .5) / (1 << tile.Z) * 360 - 180, 14, 23, 55, true);
+
+        static string Fingerprint(GpuMapFrame frame)
+        {
+            var values = new int[64 * 4];
+            for (int i = 0; i < 64; i++)
+            {
+                int x = (i * 17 + 3) % frame.ArtWidth, y = (i * 23 + 5) % frame.ArtHeight;
+                bool hit = frame.Depth.TryTerrain(x, y, out float altitude, out float inverse, out _);
+                values[i * 4] = hit ? 1 : 0;
+                values[i * 4 + 1] = BitConverter.SingleToInt32Bits(altitude);
+                values[i * 4 + 2] = BitConverter.SingleToInt32Bits(inverse);
+                values[i * 4 + 3] = frame.Depth.CoversAt(x + .23f, y + .71f, 4) ? 1 : 0;
+            }
+            return Convert.ToHexString(SHA256.HashData(System.Runtime.InteropServices.MemoryMarshal.AsBytes(values.AsSpan())));
+        }
     }
 
     private static void Check(GpuBuildingMesh mesh, (View Before, View After) pair,

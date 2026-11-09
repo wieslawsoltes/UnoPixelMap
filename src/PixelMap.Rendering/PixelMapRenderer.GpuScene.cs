@@ -7,6 +7,7 @@ public sealed partial class PixelMapRenderer
 {
     private const long GeometryGpuGeneration = long.MinValue;
     private readonly Dictionary<TileGeometry, GpuBuildingCache> gpuBuildings = [];
+    private long gpuBuildingGeometryRevision = -1;
     private GpuMapFrame? lastGpuScene, activeGpuScene;
     private SKPicture? gpuLabelPicture;
     private GpuSceneDepth? activeGpuDepth;
@@ -123,8 +124,14 @@ public sealed partial class PixelMapRenderer
                     }
                     modelDraws.Add(new(mesh, transform, unitsToMeters, selection));
                 }
-            foreach (var tile in gpuBuildings.Keys.ToArray())
-                if (!geometry.TryGetValue(tile.Source.Id, out var retained) || !ReferenceEquals(tile, retained)) gpuBuildings.Remove(tile);
+            if (gpuBuildingGeometryRevision != geometryRevision)
+            {
+                // Creation, replacement and eviction advance the geometry revision.
+                // Camera-only frames cannot invalidate these retained tile identities.
+                foreach (var tile in gpuBuildings.Keys.ToArray())
+                    if (!geometry.TryGetValue(tile.Source.Id, out var retained) || !ReferenceEquals(tile, retained)) gpuBuildings.Remove(tile);
+                gpuBuildingGeometryRevision = geometryRevision;
+            }
 
             var result = new GpuMapFrame(width, height, pixelSize, camera, options, colors, meters, terrainDraws, modelDraws.ToArray())
             {
@@ -277,6 +284,7 @@ public sealed partial class PixelMapRenderer
         lastGpuScene = null;
         activeGpuScene = null;
         gpuBuildings.Clear();
+        gpuBuildingGeometryRevision = -1;
         activeGpuDepth?.Release();
         activeGpuDepth = null;
         gpuLabelPicture?.Dispose();

@@ -1,0 +1,342 @@
+{
+  "date": "2026-11-09",
+  "scope": "Allocation-only moving GPU-frame control. Four warmup frames and eight measured phases; no imagery, GL submission, browser presentation or free-roam simulation. No frame-time improvement claim.",
+  "baseline_commit": "a4d80e0a4dfa84b7b420c04e3c03deef4f8b96bb",
+  "candidate": {
+    "base_commit": "a4d80e0a4dfa84b7b420c04e3c03deef4f8b96bb",
+    "changed_source_files": [
+      "src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs"
+    ],
+    "baseline_source_sha256": "522f56bc2f33bf6b77b11e187f48f9afabacd87d45760882219b1b3b8a282003",
+    "candidate_source_sha256": "cc1d35d70536dee08535bcfd57de55b7adc176f3fa3dbe91465d1f4d26d51b06",
+    "source_patch_sha256": "613b59cc68a0d4b20ac9a7ae0b2bec0b6d384f5c61a887bd6041f0eb92130442",
+    "source_patch": "diff --git a/src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs b/src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs\nindex 04002bb..6f61628 100644\n--- a/src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs\n+++ b/src/PixelMap.Rendering/PixelMapRenderer.GpuScene.cs\n@@ -7,6 +7,7 @@ public sealed partial class PixelMapRenderer\n {\n     private const long GeometryGpuGeneration = long.MinValue;\n     private readonly Dictionary<TileGeometry, GpuBuildingCache> gpuBuildings = [];\n+    private long gpuBuildingGeometryRevision = -1;\n     private GpuMapFrame? lastGpuScene, activeGpuScene;\n     private SKPicture? gpuLabelPicture;\n     private GpuSceneDepth? activeGpuDepth;\n@@ -123,8 +124,14 @@ public sealed partial class PixelMapRenderer\n                     }\n                     modelDraws.Add(new(mesh, transform, unitsToMeters, selection));\n                 }\n-            foreach (var tile in gpuBuildings.Keys.ToArray())\n-                if (!geometry.TryGetValue(tile.Source.Id, out var retained) || !ReferenceEquals(tile, retained)) gpuBuildings.Remove(tile);\n+            if (gpuBuildingGeometryRevision != geometryRevision)\n+            {\n+                // Creation, replacement and eviction advance the geometry revision.\n+                // Camera-only frames cannot invalidate these retained tile identities.\n+                foreach (var tile in gpuBuildings.Keys.ToArray())\n+                    if (!geometry.TryGetValue(tile.Source.Id, out var retained) || !ReferenceEquals(tile, retained)) gpuBuildings.Remove(tile);\n+                gpuBuildingGeometryRevision = geometryRevision;\n+            }\n \n             var result = new GpuMapFrame(width, height, pixelSize, camera, options, colors, meters, terrainDraws, modelDraws.ToArray())\n             {\n@@ -277,6 +284,7 @@ public sealed partial class PixelMapRenderer\n         lastGpuScene = null;\n         activeGpuScene = null;\n         gpuBuildings.Clear();\n+        gpuBuildingGeometryRevision = -1;\n         activeGpuDepth?.Release();\n         activeGpuDepth = null;\n         gpuLabelPicture?.Dispose();\n"
+  },
+  "harness": {
+    "assembly_sha256": "49af4e71df50a6811b89bb854c2d019d3224184eb52338fbf9b9bfeef788e0ab",
+    "source": "tests/PixelMap.Rendering.Tests/DepthPreparationBenchmark.cs",
+    "source_sha256": "ffc0068e72cc368fe6dfaf3d0f456e8064f734796bc787f3f6e17b2eefb3b4bb",
+    "arguments": [
+      "--depth-benchmark",
+      "--depth-filter=zero-query",
+      "--depth-warmup=4",
+      "--depth-samples=8"
+    ],
+    "environment": {
+      "DOTNET_TieredCompilation": "0",
+      "DOTNET_PROCESSOR_COUNT": "2"
+    }
+  },
+  "runtime": ".NET 10.0.14",
+  "platform": "Debian GNU/Linux 13 (trixie)",
+  "verification": {
+    "identical_harness_and_all_runtime_dependencies_except_renderer": true,
+    "all_8_query_and_overlay_fingerprints_exact": true,
+    "removed_managed_bytes_each_frame": 72,
+    "interpretation": "One six-reference key array removed per moving frame on this x64 runtime. Cache-generation checks still run after source replacement or eviction."
+  },
+  "samples": [
+    {
+      "frame": 0,
+      "baseline_prepare_allocated_bytes": 1830656,
+      "candidate_prepare_allocated_bytes": 1830584,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "b0f86a620a28dbc19837514d7815000c5dfbfea889a19099758be27adb5d9686"
+    },
+    {
+      "frame": 1,
+      "baseline_prepare_allocated_bytes": 1775696,
+      "candidate_prepare_allocated_bytes": 1775624,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "54a80d657e279d130c38ccbb138b1c683bcd89d44deeb2ef468cb97a1a110c83"
+    },
+    {
+      "frame": 2,
+      "baseline_prepare_allocated_bytes": 1346472,
+      "candidate_prepare_allocated_bytes": 1346400,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "a812609da3d6f3c936db268d6ac684314391ffe17ba2945075bbfd9e38ecbe64"
+    },
+    {
+      "frame": 3,
+      "baseline_prepare_allocated_bytes": 1323560,
+      "candidate_prepare_allocated_bytes": 1323488,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "10c09df996519531f720c423e16fbce241d809c183385ffc76954c52849ad961"
+    },
+    {
+      "frame": 4,
+      "baseline_prepare_allocated_bytes": 1309664,
+      "candidate_prepare_allocated_bytes": 1309592,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "306581e76b0743861d59b1a898f32d60d3bfe8f8776ec4069f1558abe2068aeb"
+    },
+    {
+      "frame": 5,
+      "baseline_prepare_allocated_bytes": 1612600,
+      "candidate_prepare_allocated_bytes": 1612528,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "d06f22824c21b615637389bbff065720b97b53ee5636f54cfdcbf76ecd199d83"
+    },
+    {
+      "frame": 6,
+      "baseline_prepare_allocated_bytes": 3365808,
+      "candidate_prepare_allocated_bytes": 3365736,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "0600bb25eac5dd723323c9b54afa499ef6916b2b2f5d0e81e8886e983ecc4c5e"
+    },
+    {
+      "frame": 7,
+      "baseline_prepare_allocated_bytes": 3096696,
+      "candidate_prepare_allocated_bytes": 3096624,
+      "removed_bytes": 72,
+      "query_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "overlay_sha256": "176ac37df7fd714af920d06e3d55ac9caf52ab15d6cc60d4fcc028ce36c8fdbc"
+    }
+  ],
+  "reports": {
+    "baseline": {
+      "file": "baseline.json.gz",
+      "decoded_sha256": "6cbcbe2078b9ff45dde641e732e7acffeb1cb1e16a9406355acdeb34ef6a62a4",
+      "gzip_sha256": "9337481e1e3924509f2d449e64ab866326586a1896336cf719b280127f97dbb9",
+      "renderer_sha256": "6b9d3bf23f1c1d404e4e32b19cdd62338b0239ad0913f420428c2c297ef616ae"
+    },
+    "scene-cache": {
+      "file": "scene-cache.json.gz",
+      "decoded_sha256": "78e7f6da54f21b73757f514c9cb42072ba43c03d6ef38724fbc0c2251e3cea94",
+      "gzip_sha256": "c5db7291ca3e4472f4fb7b49998b1bc5ebd8520ebaae93d3de068db8954a1ee5",
+      "renderer_sha256": "1b265dd911923f506496a1c884ea043c022618a64d441402407245b56e8580da"
+    }
+  },
+  "runtime_manifest": {
+    "LibTessDotNet.Double.dll": {
+      "baseline_sha256": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "candidate_sha256": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+      "bytes": 36864,
+      "candidate_bytes": 36864
+    },
+    "LibTessDotNet.dll": {
+      "baseline_sha256": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921",
+      "candidate_sha256": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921",
+      "bytes": 35840,
+      "candidate_bytes": 35840
+    },
+    "Microsoft.DotNet.PlatformAbstractions.dll": {
+      "baseline_sha256": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "candidate_sha256": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+      "bytes": 23424,
+      "candidate_bytes": 23424
+    },
+    "Microsoft.Extensions.DependencyModel.dll": {
+      "baseline_sha256": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "candidate_sha256": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+      "bytes": 75888,
+      "candidate_bytes": 75888
+    },
+    "PixelMap.Data.dll": {
+      "baseline_sha256": "db3498db9204b664ca30127e45c6bef19c550e4f5bb9cbbfeb22c24e12503649",
+      "candidate_sha256": "db3498db9204b664ca30127e45c6bef19c550e4f5bb9cbbfeb22c24e12503649",
+      "bytes": 3159040,
+      "candidate_bytes": 3159040
+    },
+    "PixelMap.Data.pdb": {
+      "baseline_sha256": "cb2bd1128118538c7ed44ef22dc54d086665424fd8b08ca08cce6f53c1f7da99",
+      "candidate_sha256": "cb2bd1128118538c7ed44ef22dc54d086665424fd8b08ca08cce6f53c1f7da99",
+      "bytes": 29296,
+      "candidate_bytes": 29296
+    },
+    "PixelMap.Rendering.Tests": {
+      "baseline_sha256": "3d9c678caec05a5349970fd5d6152b849368adb1666fa0ec4daec9de5d607751",
+      "candidate_sha256": "3d9c678caec05a5349970fd5d6152b849368adb1666fa0ec4daec9de5d607751",
+      "bytes": 78192,
+      "candidate_bytes": 78192
+    },
+    "PixelMap.Rendering.Tests.deps.json": {
+      "baseline_sha256": "0edc31e57ad5b7a1db378b769291ca0163c34b1c1eadacbfbdd760c2ed21daa0",
+      "candidate_sha256": "0edc31e57ad5b7a1db378b769291ca0163c34b1c1eadacbfbdd760c2ed21daa0",
+      "bytes": 10690,
+      "candidate_bytes": 10690
+    },
+    "PixelMap.Rendering.Tests.dll": {
+      "baseline_sha256": "49af4e71df50a6811b89bb854c2d019d3224184eb52338fbf9b9bfeef788e0ab",
+      "candidate_sha256": "49af4e71df50a6811b89bb854c2d019d3224184eb52338fbf9b9bfeef788e0ab",
+      "bytes": 537600,
+      "candidate_bytes": 537600
+    },
+    "PixelMap.Rendering.Tests.pdb": {
+      "baseline_sha256": "2767634d32d23d71cf7b9a0933c8714f4fb6f284685348d5371986c0045f0c30",
+      "candidate_sha256": "2767634d32d23d71cf7b9a0933c8714f4fb6f284685348d5371986c0045f0c30",
+      "bytes": 122232,
+      "candidate_bytes": 122232
+    },
+    "PixelMap.Rendering.Tests.runtimeconfig.json": {
+      "baseline_sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "candidate_sha256": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+      "bytes": 330,
+      "candidate_bytes": 330
+    },
+    "PixelMap.Rendering.dll": {
+      "baseline_sha256": "6b9d3bf23f1c1d404e4e32b19cdd62338b0239ad0913f420428c2c297ef616ae",
+      "candidate_sha256": "1b265dd911923f506496a1c884ea043c022618a64d441402407245b56e8580da",
+      "bytes": 429056,
+      "candidate_bytes": 429056
+    },
+    "PixelMap.Rendering.pdb": {
+      "baseline_sha256": "88266af2d28c31aa815101103ee9395493af79492c53b47567978c8058738956",
+      "candidate_sha256": "88266af2d28c31aa815101103ee9395493af79492c53b47567978c8058738956",
+      "bytes": 109892,
+      "candidate_bytes": 109892
+    },
+    "PixelMap.Routing.dll": {
+      "baseline_sha256": "6b2a18798bdbf9f151c379fecb27b3288db54f8d505bf02289ff333f2ac5c0de",
+      "candidate_sha256": "6b2a18798bdbf9f151c379fecb27b3288db54f8d505bf02289ff333f2ac5c0de",
+      "bytes": 76288,
+      "candidate_bytes": 76288
+    },
+    "PixelMap.Routing.pdb": {
+      "baseline_sha256": "da74e9ef8200ab6d0dbc44ee696049a95633edfa513e5ba950dcaceb9b2f20ea",
+      "candidate_sha256": "da74e9ef8200ab6d0dbc44ee696049a95633edfa513e5ba950dcaceb9b2f20ea",
+      "bytes": 23736,
+      "candidate_bytes": 23736
+    },
+    "Silk.NET.Core.dll": {
+      "baseline_sha256": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "candidate_sha256": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+      "bytes": 134088,
+      "candidate_bytes": 134088
+    },
+    "Silk.NET.Maths.dll": {
+      "baseline_sha256": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "candidate_sha256": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+      "bytes": 341448,
+      "candidate_bytes": 341448
+    },
+    "Silk.NET.OpenGL.dll": {
+      "baseline_sha256": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "candidate_sha256": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+      "bytes": 2798536,
+      "candidate_bytes": 2798536
+    },
+    "SkiaSharp.dll": {
+      "baseline_sha256": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "candidate_sha256": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+      "bytes": 490016,
+      "candidate_bytes": 490016
+    },
+    "runtimes/linux-arm/native/libSkiaSharp.so": {
+      "baseline_sha256": "0a7a1e605f4e210068970f3bc91cbf780f87689ca36c50764d0ecb2c1854d398",
+      "candidate_sha256": "0a7a1e605f4e210068970f3bc91cbf780f87689ca36c50764d0ecb2c1854d398",
+      "bytes": 8321144,
+      "candidate_bytes": 8321144
+    },
+    "runtimes/linux-arm64/native/libSkiaSharp.so": {
+      "baseline_sha256": "8adc84fa17c497c2e59efcd60e04cc4840e75959669dabb52555d3730d0b140d",
+      "candidate_sha256": "8adc84fa17c497c2e59efcd60e04cc4840e75959669dabb52555d3730d0b140d",
+      "bytes": 11292808,
+      "candidate_bytes": 11292808
+    },
+    "runtimes/linux-loongarch64/native/libSkiaSharp.so": {
+      "baseline_sha256": "c64076022dee01a1089c5de7199dc9a2b0c42bf74816b238ace45486c7e9ad17",
+      "candidate_sha256": "c64076022dee01a1089c5de7199dc9a2b0c42bf74816b238ace45486c7e9ad17",
+      "bytes": 10987880,
+      "candidate_bytes": 10987880
+    },
+    "runtimes/linux-musl-arm/native/libSkiaSharp.so": {
+      "baseline_sha256": "d340a9b6d35c3d6ac44402441e23e3aa30cc1d1b4a3f7bf298aaffc9916f4632",
+      "candidate_sha256": "d340a9b6d35c3d6ac44402441e23e3aa30cc1d1b4a3f7bf298aaffc9916f4632",
+      "bytes": 14668640,
+      "candidate_bytes": 14668640
+    },
+    "runtimes/linux-musl-arm64/native/libSkiaSharp.so": {
+      "baseline_sha256": "40f4e889a2694397d289e93148c03f06bbde0e398458814068ed85ee287002fb",
+      "candidate_sha256": "40f4e889a2694397d289e93148c03f06bbde0e398458814068ed85ee287002fb",
+      "bytes": 18551912,
+      "candidate_bytes": 18551912
+    },
+    "runtimes/linux-musl-loongarch64/native/libSkiaSharp.so": {
+      "baseline_sha256": "b0edf27e6fd55a7ad38694896d891f96e9ef4538b38af48cd4fdc6020f25655c",
+      "candidate_sha256": "b0edf27e6fd55a7ad38694896d891f96e9ef4538b38af48cd4fdc6020f25655c",
+      "bytes": 11911400,
+      "candidate_bytes": 11911400
+    },
+    "runtimes/linux-musl-riscv64/native/libSkiaSharp.so": {
+      "baseline_sha256": "1874a97cd04ad501ded373f60b830e6ec2ef1b6d68e889f264e92961a7a412c8",
+      "candidate_sha256": "1874a97cd04ad501ded373f60b830e6ec2ef1b6d68e889f264e92961a7a412c8",
+      "bytes": 9978144,
+      "candidate_bytes": 9978144
+    },
+    "runtimes/linux-musl-x64/native/libSkiaSharp.so": {
+      "baseline_sha256": "b8e9c3cbd4073cc3fb176a56d293d37a990c21ce1987bf0be6c6f02868e51e9e",
+      "candidate_sha256": "b8e9c3cbd4073cc3fb176a56d293d37a990c21ce1987bf0be6c6f02868e51e9e",
+      "bytes": 18455312,
+      "candidate_bytes": 18455312
+    },
+    "runtimes/linux-riscv64/native/libSkiaSharp.so": {
+      "baseline_sha256": "28e4dbe2729dfbc0a26cf94de002fd8c856038d5131e27edde657d99649300b0",
+      "candidate_sha256": "28e4dbe2729dfbc0a26cf94de002fd8c856038d5131e27edde657d99649300b0",
+      "bytes": 9033440,
+      "candidate_bytes": 9033440
+    },
+    "runtimes/linux-x64/native/libSkiaSharp.so": {
+      "baseline_sha256": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387",
+      "candidate_sha256": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387",
+      "bytes": 11178144,
+      "candidate_bytes": 11178144
+    },
+    "runtimes/linux-x86/native/libSkiaSharp.so": {
+      "baseline_sha256": "75d904907f6ec5853daeffc5c542ba07e6425494f6aa8be8b32e4b2eafc134d0",
+      "candidate_sha256": "75d904907f6ec5853daeffc5c542ba07e6425494f6aa8be8b32e4b2eafc134d0",
+      "bytes": 10803432,
+      "candidate_bytes": 10803432
+    },
+    "runtimes/osx/native/libSkiaSharp.dylib": {
+      "baseline_sha256": "f0db1a978ba6568b6a99c79afacc74dfd988b81d3e06ae703832f3dd1eee5d0b",
+      "candidate_sha256": "f0db1a978ba6568b6a99c79afacc74dfd988b81d3e06ae703832f3dd1eee5d0b",
+      "bytes": 15383440,
+      "candidate_bytes": 15383440
+    },
+    "runtimes/win-arm64/native/libSkiaSharp.dll": {
+      "baseline_sha256": "a6a09d02db0fe21148369b8bf0a9b44aa165c7ec4ea97c2de8ac706ac113f389",
+      "candidate_sha256": "a6a09d02db0fe21148369b8bf0a9b44aa165c7ec4ea97c2de8ac706ac113f389",
+      "bytes": 10408992,
+      "candidate_bytes": 10408992
+    },
+    "runtimes/win-arm64/native/libSkiaSharp.pdb": {
+      "baseline_sha256": "a439e0afbcb08786b16fdf3c3049866191a705fb7d1d4b95cb01e7cccbc9e2d1",
+      "candidate_sha256": "a439e0afbcb08786b16fdf3c3049866191a705fb7d1d4b95cb01e7cccbc9e2d1",
+      "bytes": 84815872,
+      "candidate_bytes": 84815872
+    },
+    "runtimes/win-x64/native/libSkiaSharp.dll": {
+      "baseline_sha256": "8b097d433db94fe61aba85213184938fb36118afd542d33252dd83794fdd9afc",
+      "candidate_sha256": "8b097d433db94fe61aba85213184938fb36118afd542d33252dd83794fdd9afc",
+      "bytes": 11611680,
+      "candidate_bytes": 11611680
+    },
+    "runtimes/win-x64/native/libSkiaSharp.pdb": {
+      "baseline_sha256": "f1c1354dd1cccc001247d6fa5515600b09e4cb70ff6d01d60e593ee67f337b89",
+      "candidate_sha256": "f1c1354dd1cccc001247d6fa5515600b09e4cb70ff6d01d60e593ee67f337b89",
+      "bytes": 83832832,
+      "candidate_bytes": 83832832
+    },
+    "runtimes/win-x86/native/libSkiaSharp.dll": {
+      "baseline_sha256": "0a8a5ce7f24837d78b622b123eff0956bdd81437d7aa8554cb1282d4eae186b0",
+      "candidate_sha256": "0a8a5ce7f24837d78b622b123eff0956bdd81437d7aa8554cb1282d4eae186b0",
+      "bytes": 10101792,
+      "candidate_bytes": 10101792
+    },
+    "runtimes/win-x86/native/libSkiaSharp.pdb": {
+      "baseline_sha256": "950e882d4277de2cacae5a6ab6b185306290e4a1e16d276c108c71c8e1bba891",
+      "candidate_sha256": "950e882d4277de2cacae5a6ab6b185306290e4a1e16d276c108c71c8e1bba891",
+      "bytes": 86552576,
+      "candidate_bytes": 86552576
+    }
+  }
+}
