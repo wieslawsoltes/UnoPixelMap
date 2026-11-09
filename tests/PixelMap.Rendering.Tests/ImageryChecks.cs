@@ -7,6 +7,7 @@ internal static class ImageryChecks
     private const int Size = 512;
     internal static void Run()
     {
+        EarthRasterChecks.Run();
         using var renderer = new PixelMapRenderer();
         using var bitmap = new SKBitmap(Size, Size);
         using var canvas = new SKCanvas(bitmap);

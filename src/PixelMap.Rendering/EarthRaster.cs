@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using PixelMap.Data;
 using SkiaSharp;
 
@@ -47,6 +48,10 @@ internal sealed class EarthRaster : IDisposable
         }
         using var art = new SKBitmap(size, size, SKColorType.Bgra8888, SKAlphaType.Opaque);
         int width = decoded.Width, height = decoded.Height;
+        // Keep the common source grids explicit. Integer 2×2 sums are exactly the
+        // generic box integral, including its truncation after linear-light averaging.
+        bool direct = width == size && height == size;
+        bool half = width == size * 2 && height == size * 2;
         var src = new ReadOnlySpan<uint>((void*)decoded.GetPixels(), width * height);
         var dest = new Span<uint>((void*)art.GetPixels(), size * size);
         Span<LinearRgb> cluster = stackalloc LinearRgb[4];
@@ -58,8 +63,8 @@ internal sealed class EarthRaster : IDisposable
                 for (int i = 0; i < 4; i++)
                 {
                     int sx = x + (i & 1), sy = y + (i >> 1);
-                    cluster[i] = width == size && height == size
-                        ? LinearRgb.From(src[sy * width + sx]) : Box(src, width, height, sx, sy, size);
+                    cluster[i] = direct ? LinearRgb.From(src[sy * width + sx]) : half
+                        ? Box2x2(src, width, sx, sy) : Box(src, width, height, sx, sy, size);
                     r += cluster[i].R; g += cluster[i].G; b += cluster[i].B;
                 }
                 var mean = new LinearRgb((r + 2) / 4, (g + 2) / 4, (b + 2) / 4);
@@ -71,17 +76,22 @@ internal sealed class EarthRaster : IDisposable
                     if (Math.Abs(p.R - mean.R) > 22 + mean.R / 6 || Math.Abs(p.G - mean.G) > 22 + mean.G / 6 ||
                         Math.Abs(p.B - mean.B) > 22 + mean.B / 6) { smooth = false; break; }
                 }
-                int pair = smooth ? EarthInks.Resolve(mean.R, mean.G, mean.B) : 0;
-                for (int i = 0; i < 4; i++)
+                if (smooth)
                 {
-                    if (!smooth)
+                    EarthInks.WriteCluster(dest, y * size + x, size, x, y,
+                        EarthInks.Resolve(mean.R, mean.G, mean.B));
+                }
+                else
+                {
+                    for (int i = 0; i < 4; i++)
                     {
                         var sample = cluster[i];
-                        pair = EarthInks.Resolve(sample.R, sample.G, sample.B);
+                        int pair = EarthInks.Resolve(sample.R, sample.G, sample.B);
+                        int sx = x + (i & 1), sy = y + (i >> 1);
+                        // Both artwork sizes are multiples of the 4×4 Bayer period,
+                        // so a tile origin contributes zero to the dither phase.
+                        dest[sy * size + sx] = EarthInks.Sample(pair, sx, sy);
                     }
-                    int sx = x + (i & 1), sy = y + (i >> 1);
-                    dest[sy * size + sx] = EarthInks.Sample(pair,
-                        tile.Id.X * size + sx, tile.Id.Y * size + sy);
                 }
             }
         }
@@ -93,6 +103,18 @@ internal sealed class EarthRaster : IDisposable
     {
         internal static LinearRgb From(uint p) => new(EarthInks.Linear[(p >> 16) & 255],
             EarthInks.Linear[(p >> 8) & 255], EarthInks.Linear[p & 255]);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static LinearRgb Box2x2(ReadOnlySpan<uint> src, int width, int x, int y)
+    {
+        int offset = y * 2 * width + x * 2;
+        var a = LinearRgb.From(src[offset]);
+        var b = LinearRgb.From(src[offset + 1]);
+        var c = LinearRgb.From(src[offset + width]);
+        var d = LinearRgb.From(src[offset + width + 1]);
+        return new((a.R + b.R + c.R + d.R) / 4,
+            (a.G + b.G + c.G + d.G) / 4, (a.B + b.B + c.B + d.B) / 4);
     }
 
     private static LinearRgb Box(ReadOnlySpan<uint> src, int width, int height, int x, int y, int size)
@@ -189,6 +211,21 @@ internal static class EarthInks
     {
         int choice = Bayer[((y & 3) << 2) | (x & 3)] < ((pair >> 16) & 15) ? (pair >> 8) & 255 : pair & 255;
         return 0xff000000 | Colors[choice];
+    }
+
+    // The decoder advances by two pixels on both axes. For these even origins,
+    // all four Bayer positions stay within the same 4×4 period. A smooth region
+    // shares its two inks and mixture threshold without changing any pixel choice.
+    internal static void WriteCluster(Span<uint> pixels, int offset, int width, int x, int y, int pair)
+    {
+        uint first = 0xff000000 | Colors[pair & 255];
+        uint second = 0xff000000 | Colors[(pair >> 8) & 255];
+        int fraction = (pair >> 16) & 15;
+        int phase = ((y & 3) << 2) | (x & 3);
+        pixels[offset] = Bayer[phase] < fraction ? second : first;
+        pixels[offset + 1] = Bayer[phase + 1] < fraction ? second : first;
+        pixels[offset + width] = Bayer[phase + 4] < fraction ? second : first;
+        pixels[offset + width + 1] = Bayer[phase + 5] < fraction ? second : first;
     }
 
     private static Lab ToLab(int r, int g, int b)
