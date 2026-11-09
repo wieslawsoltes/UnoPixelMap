@@ -33,6 +33,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private uint framebuffer, artworkTexture, depthBuffer, photographTexture, overlayTexture, imageFramebuffer;
     private int artWidth, artHeight, overlayWidth, overlayHeight;
     private int terrainArtworkFilter;
+    private PixelTransferState transferState;
     private PixelPalette? uploadedPalette;
     private long generation;
     private bool disposed;
@@ -70,7 +71,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         var state = new GlState(gl, embedded);
         try
         {
-            ConfigureTransferState();
+            ConfigureSamplers();
             // Floating-point model and elevation textures require highp samplers too.
             // A highp arithmetic default alone still permits lowp texture lookups in GLSL ES.
             string header = embedded
@@ -105,6 +106,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         }
         finally
         {
+            transferState.Restore(gl);
             state.Restore(gl);
         }
     }
@@ -182,7 +184,10 @@ public sealed unsafe class GlMapRenderer : IDisposable
         {
             try
             {
-                ConfigureTransferState();
+                // Adopting the final image lets Skia normalize both pixel row
+                // lengths. Other unpack state is needed only for actual uploads.
+                if (imageContext is not null) transferState.CaptureSkiaRowLengths(gl);
+                ConfigureSamplers();
                 gl.Disable(EnableCap.Blend);
                 gl.Disable(EnableCap.CullFace);
                 gl.Disable(EnableCap.ScissorTest);
@@ -218,8 +223,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
                 if (imageContext is not null)
                 {
                     imageTexture = CreateTexture();
-                    gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)artWidth, (uint)artHeight,
-                        0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
+                    AllocateImageStorage(artWidth, artHeight);
                     if (imageFramebuffer == 0) imageFramebuffer = gl.GenFramebuffer();
                     gl.BindFramebuffer(FramebufferTarget.DrawFramebuffer, imageFramebuffer);
                     gl.FramebufferTexture2D(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.ColorAttachment0,
@@ -253,6 +257,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
                     gl.FramebufferTexture2D(FramebufferTarget.DrawFramebuffer, FramebufferAttachment.ColorAttachment0,
                         TextureTarget.Texture2D, 0, 0);
                 }
+                transferState.Restore(gl);
                 state.Restore(gl);
             }
             // Validate the complete transaction once, including host-state restoration.
@@ -494,6 +499,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
 
     private void CreateTerrainArrays()
     {
+        transferState.Configure(gl);
         terrainArtworkArray = CreateArrayTexture();
         gl.TexImage3D(TextureTarget.Texture2DArray, 0, InternalFormat.Rgba8,
             GpuTerrainTexture.Size, GpuTerrainTexture.Size, MaximumTerrainTextures, 0,
@@ -544,6 +550,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
         mesh.Frame = generation;
         if (mesh.Revision != source.Revision)
         {
+            transferState.Configure(gl);
             if (source.HeightLight is { } blocks) blocks.CopyTo(terrainHeightUpload, 0);
             else
                 for (int vertex = 0; vertex < GpuTerrainMesh.Side * GpuTerrainMesh.Side; vertex++)
@@ -565,6 +572,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     {
         if (!terrainTextures.TryGetValue(source, out var texture))
         {
+            transferState.Configure(gl);
             while (terrainTextureLayers.Count == 0)
                 if (!EvictOldest(2)) throw new NotSupportedException("The terrain artwork array has no available layer.");
             texture = new TextureResource { Layer = terrainTextureLayers.Pop() };
@@ -670,6 +678,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
 
     private void UploadModels(MeshResource mesh, float[] source)
     {
+        transferState.Configure(gl);
         int texels = Math.Max(2, (source.Length + 3) / 4);
         int width = Math.Min(maximumTextureSize, texels), height = (texels + width - 1) / width;
         if (height > maximumTextureSize) throw new NotSupportedException("The building model table exceeds the GPU texture limit.");
@@ -706,6 +715,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     private void UploadPalette(PixelPalette palette)
     {
         if (ReferenceEquals(uploadedPalette, palette)) return;
+        transferState.Configure(gl);
         Span<uint> colors = stackalloc uint[palette.Materials.Length * 7];
         int index = 0;
         foreach (var material in palette.Materials)
@@ -728,6 +738,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
 
     private void CreateRoomTexture()
     {
+        transferState.Configure(gl);
         roomTexture = CreateTexture();
         BindTexture(0, roomTexture);
         for (int index = 0; index < PixelWindowFilter.Levels.Length; index++)
@@ -747,6 +758,7 @@ public sealed unsafe class GlMapRenderer : IDisposable
     {
         if (overlay.Width > maximumTextureSize || overlay.Height > maximumTextureSize)
             throw new NotSupportedException("The logical map overlay exceeds the GPU texture limit.");
+        transferState.Configure(gl);
         if (overlayTexture == 0) overlayTexture = CreateTexture();
         BindTexture(0, overlayTexture);
         gl.PixelStore(PixelStoreParameter.UnpackRowLength, overlay.RowBytes / sizeof(uint));
@@ -775,12 +787,10 @@ public sealed unsafe class GlMapRenderer : IDisposable
         {
             nextArtwork = CreateTexture();
             BindTexture(0, nextArtwork);
-            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)width, (uint)height,
-                0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
+            AllocateImageStorage(width, height);
             nextPhotograph = CreateTexture();
             BindTexture(0, nextPhotograph);
-            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)width, (uint)height,
-                0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
+            AllocateImageStorage(width, height);
             nextDepth = gl.GenRenderbuffer();
             gl.BindRenderbuffer(RenderbufferTarget.Renderbuffer, nextDepth);
             gl.RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Depth24Stencil8, (uint)width, (uint)height);
@@ -846,15 +856,23 @@ public sealed unsafe class GlMapRenderer : IDisposable
         gl.BindTexture(TextureTarget.Texture2DArray, texture);
     }
 
-    private void ConfigureTransferState()
+    private void AllocateImageStorage(int width, int height)
     {
-        gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, 0);
-        gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
-        gl.PixelStore(PixelStoreParameter.UnpackRowLength, 0);
-        gl.PixelStore(PixelStoreParameter.UnpackSkipRows, 0);
-        gl.PixelStore(PixelStoreParameter.UnpackSkipPixels, 0);
-        gl.PixelStore(PixelStoreParameter.UnpackImageHeight, 0);
-        gl.PixelStore(PixelStoreParameter.UnpackSkipImages, 0);
+        // GLES 3/WebGL 2 guarantee immutable storage. It has no source pointer,
+        // so cached GPU frames need neither inspect nor change host unpack state.
+        // Desktop GL 3.3 remains supported without requiring ARB_texture_storage.
+        if (embedded)
+            gl.TexStorage2D(TextureTarget.Texture2D, 1, SizedInternalFormat.Rgba8, (uint)width, (uint)height);
+        else
+        {
+            transferState.Configure(gl);
+            gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba8, (uint)width, (uint)height,
+                0, PixelFormat.Rgba, PixelType.UnsignedByte, null);
+        }
+    }
+
+    private void ConfigureSamplers()
+    {
         for (uint unit = 0; unit < 3; unit++) gl.BindSampler(unit, 0);
     }
 
@@ -1112,13 +1130,76 @@ public sealed unsafe class GlMapRenderer : IDisposable
         }
     }
 
+    private struct PixelTransferState
+    {
+        private bool captured, rowLengthCaptured, packRowLengthCaptured;
+        private int buffer, alignment, rowLength, packRowLength, skipRows, skipPixels, imageHeight, skipImages;
+
+        private void CaptureRowLength(GL gl)
+        {
+            if (rowLengthCaptured) return;
+            rowLength = gl.GetInteger(GLEnum.UnpackRowLength);
+            rowLengthCaptured = true;
+        }
+
+        internal void CaptureSkiaRowLengths(GL gl)
+        {
+            CaptureRowLength(gl);
+            packRowLength = gl.GetInteger(GLEnum.PackRowLength);
+            packRowLengthCaptured = true;
+        }
+
+        internal void Configure(GL gl)
+        {
+            if (captured) return;
+            CaptureRowLength(gl);
+            buffer = gl.GetInteger(GLEnum.PixelUnpackBufferBinding);
+            alignment = gl.GetInteger(GLEnum.UnpackAlignment);
+            skipRows = gl.GetInteger(GLEnum.UnpackSkipRows);
+            skipPixels = gl.GetInteger(GLEnum.UnpackSkipPixels);
+            imageHeight = gl.GetInteger(GLEnum.UnpackImageHeight);
+            skipImages = gl.GetInteger(GLEnum.UnpackSkipImages);
+            captured = true;
+            gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, 0);
+            gl.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
+            gl.PixelStore(PixelStoreParameter.UnpackRowLength, 0);
+            gl.PixelStore(PixelStoreParameter.UnpackSkipRows, 0);
+            gl.PixelStore(PixelStoreParameter.UnpackSkipPixels, 0);
+            gl.PixelStore(PixelStoreParameter.UnpackImageHeight, 0);
+            gl.PixelStore(PixelStoreParameter.UnpackSkipImages, 0);
+        }
+
+        internal void Restore(GL gl)
+        {
+            if (captured)
+            {
+                captured = false;
+                gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, (uint)buffer);
+                gl.PixelStore(PixelStoreParameter.UnpackAlignment, alignment);
+                gl.PixelStore(PixelStoreParameter.UnpackSkipRows, skipRows);
+                gl.PixelStore(PixelStoreParameter.UnpackSkipPixels, skipPixels);
+                gl.PixelStore(PixelStoreParameter.UnpackImageHeight, imageHeight);
+                gl.PixelStore(PixelStoreParameter.UnpackSkipImages, skipImages);
+            }
+            if (rowLengthCaptured)
+            {
+                rowLengthCaptured = false;
+                gl.PixelStore(PixelStoreParameter.UnpackRowLength, rowLength);
+            }
+            if (packRowLengthCaptured)
+            {
+                packRowLengthCaptured = false;
+                gl.PixelStore(PixelStoreParameter.PackRowLength, packRowLength);
+            }
+        }
+    }
+
     private readonly struct GlState
     {
         internal readonly int DrawFramebuffer, ViewportX, ViewportY, ViewportWidth, ViewportHeight;
-        private readonly int program, array, vertexBuffer, unpackBuffer;
+        private readonly int program, array, vertexBuffer;
         private readonly int activeTexture, texture0, texture1, texture2, sampler0, sampler1, sampler2;
         private readonly int textureArray0, textureArray1;
-        private readonly int unpackAlignment, unpackRowLength, unpackSkipRows, unpackSkipPixels, unpackImageHeight, unpackSkipImages;
         private readonly int depthFunction, frontFace, cullFace;
         private readonly bool blend, cull, scissor, stencil, depth, dither, rasterizerDiscard, polygonOffset, alphaCoverage;
         private readonly bool depthMask, redMask, greenMask, blueMask, alphaMask, embedded, framebufferSrgb;
@@ -1134,7 +1215,6 @@ public sealed unsafe class GlMapRenderer : IDisposable
             program = gl.GetInteger(GLEnum.CurrentProgram);
             array = gl.GetInteger(GLEnum.VertexArrayBinding);
             vertexBuffer = gl.GetInteger(GLEnum.ArrayBufferBinding);
-            unpackBuffer = gl.GetInteger(GLEnum.PixelUnpackBufferBinding);
             activeTexture = gl.GetInteger(GLEnum.ActiveTexture);
             gl.ActiveTexture(TextureUnit.Texture0);
             texture0 = gl.GetInteger(GLEnum.TextureBinding2D); sampler0 = gl.GetInteger(GLEnum.SamplerBinding);
@@ -1145,12 +1225,6 @@ public sealed unsafe class GlMapRenderer : IDisposable
             gl.ActiveTexture(TextureUnit.Texture2);
             texture2 = gl.GetInteger(GLEnum.TextureBinding2D); sampler2 = gl.GetInteger(GLEnum.SamplerBinding);
             gl.ActiveTexture((TextureUnit)activeTexture);
-            unpackAlignment = gl.GetInteger(GLEnum.UnpackAlignment);
-            unpackRowLength = gl.GetInteger(GLEnum.UnpackRowLength);
-            unpackSkipRows = gl.GetInteger(GLEnum.UnpackSkipRows);
-            unpackSkipPixels = gl.GetInteger(GLEnum.UnpackSkipPixels);
-            unpackImageHeight = gl.GetInteger(GLEnum.UnpackImageHeight);
-            unpackSkipImages = gl.GetInteger(GLEnum.UnpackSkipImages);
             depthFunction = gl.GetInteger(GLEnum.DepthFunc);
             frontFace = gl.GetInteger(GLEnum.FrontFace);
             cullFace = gl.GetInteger(GLEnum.CullFaceMode);
@@ -1185,19 +1259,12 @@ public sealed unsafe class GlMapRenderer : IDisposable
             gl.UseProgram((uint)program);
             gl.BindVertexArray((uint)array);
             gl.BindBuffer(BufferTargetARB.ArrayBuffer, (uint)vertexBuffer);
-            gl.BindBuffer(BufferTargetARB.PixelUnpackBuffer, (uint)unpackBuffer);
             gl.ActiveTexture(TextureUnit.Texture0); gl.BindTexture(TextureTarget.Texture2D, (uint)texture0); gl.BindSampler(0, (uint)sampler0);
             gl.BindTexture(TextureTarget.Texture2DArray, (uint)textureArray0);
             gl.ActiveTexture(TextureUnit.Texture1); gl.BindTexture(TextureTarget.Texture2D, (uint)texture1); gl.BindSampler(1, (uint)sampler1);
             gl.BindTexture(TextureTarget.Texture2DArray, (uint)textureArray1);
             gl.ActiveTexture(TextureUnit.Texture2); gl.BindTexture(TextureTarget.Texture2D, (uint)texture2); gl.BindSampler(2, (uint)sampler2);
             gl.ActiveTexture((TextureUnit)activeTexture);
-            gl.PixelStore(PixelStoreParameter.UnpackAlignment, unpackAlignment);
-            gl.PixelStore(PixelStoreParameter.UnpackRowLength, unpackRowLength);
-            gl.PixelStore(PixelStoreParameter.UnpackSkipRows, unpackSkipRows);
-            gl.PixelStore(PixelStoreParameter.UnpackSkipPixels, unpackSkipPixels);
-            gl.PixelStore(PixelStoreParameter.UnpackImageHeight, unpackImageHeight);
-            gl.PixelStore(PixelStoreParameter.UnpackSkipImages, unpackSkipImages);
             gl.DepthFunc((DepthFunction)depthFunction);
             gl.FrontFace((FrontFaceDirection)frontFace);
             gl.CullFace((GLEnum)cullFace);

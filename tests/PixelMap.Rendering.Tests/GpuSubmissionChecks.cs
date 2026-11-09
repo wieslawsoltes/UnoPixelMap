@@ -15,6 +15,11 @@ internal static class GpuSubmissionChecks
         EnableCap.DepthTest, EnableCap.Dither, EnableCap.RasterizerDiscard,
         EnableCap.PolygonOffsetFill, EnableCap.SampleAlphaToCoverage
     ];
+    private static readonly GLEnum[] UnpackParameters =
+    [
+        GLEnum.PixelUnpackBufferBinding, GLEnum.UnpackAlignment, GLEnum.UnpackRowLength,
+        GLEnum.UnpackSkipRows, GLEnum.UnpackSkipPixels, GLEnum.UnpackImageHeight, GLEnum.UnpackSkipImages
+    ];
 
     internal static void Run()
     {
@@ -49,6 +54,8 @@ internal static class GpuSubmissionChecks
         Assert(calls.ErrorCalls == 1, "A warm frame did not use one complete draw/restoration error checkpoint.");
         Assert(!calls.Queries.Contains(GLEnum.ReadFramebufferBinding) && !calls.Queries.Contains(GLEnum.RenderbufferBinding) &&
             !calls.Queries.Contains(GLEnum.DepthClearValue), "A warm vector frame queried untouched GL state.");
+        Assert(!UnpackParameters.Any(calls.Queries.Contains) && calls.PixelStoreCalls == 0,
+            "A cached frame queried or changed pixel unpack state without uploading pixels.");
 
         using var resize = scene.PrepareGpuFrame(317, 211, camera.OnTerrain(terrain, 211), tiles,
             PixelStyle.Day, 3, null, terrain);
@@ -104,16 +111,16 @@ internal static class GpuSubmissionChecks
         Assert(calls.UniformCalls > 0, "A failed frame retained its unverified uniform cache.");
         Reset(gl);
         Console.WriteLine($"Passed {cases} exact shared-GL-state draws, warm uniform/query reuse, float-bit preservation and failed-upload retry.");
-        CheckTextureImages(gl, scene, host, camera, tiles, imagery, terrain);
+        CheckTextureImages(gl, calls, scene, host, camera, tiles, imagery, terrain);
     }
 
-    private static void CheckTextureImages(GL gl, PixelMapRenderer scene, HostResources host, MapCamera camera,
+    private static void CheckTextureImages(GL gl, CallProbe calls, PixelMapRenderer scene, HostResources host, MapCamera camera,
         MapTile[] tiles, ImageryTile[] imagery, TerrainOptions terrain)
     {
         using var glInterface = GRGlInterface.CreateGles(name => gl.Context.GetProcAddress(name));
         using var skia = GRContext.CreateGl(glInterface);
         Assert(skia is not null, "Skia could not create a context for same-context texture checks.");
-        using var renderer = new GlMapRenderer(gl);
+        using var renderer = new GlMapRenderer(calls.Gl);
         var retained = new List<(SKImage Image, byte[] Pixels)>();
         var nearest = new SKSamplingOptions(SKFilterMode.Nearest, SKMipmapMode.None);
         try
@@ -139,7 +146,14 @@ internal static class GpuSubmissionChecks
                 host.Poison();
                 gl.Viewport(7, 9, 713, 419);
                 var before = Snapshot(gl);
+                calls.Reset();
                 var image = renderer.DrawArtworkImage(frame, skia);
+                Assert(!UnpackParameters.Where(p => p != GLEnum.UnpackRowLength).Any(calls.Queries.Contains) &&
+                    calls.Queries.Contains(GLEnum.UnpackRowLength) && calls.Queries.Contains(GLEnum.PackRowLength) &&
+                    calls.PixelStoreCalls == 2,
+                    $"{style} photograph {photograph} did not limit transfer state to Skia's two row lengths.");
+                Assert(calls.TextureStorageCalls == 1,
+                    "A retained GPU image did not use one source-free immutable texture allocation.");
                 retained.Add((image, expected));
                 Assert(image.IsTextureBacked && image.Width == artWidth && image.Height == artHeight,
                     $"{style} photograph {photograph} did not retain an art-sized GPU texture.");
@@ -242,8 +256,10 @@ internal static class GpuSubmissionChecks
         var (width, height) = SetViewport(gl, frame, artwork, x, y);
         if (artwork) renderer.DrawArtwork(frame); else renderer.Draw(frame);
         uint previousRead = (uint)gl.GetInteger(GLEnum.ReadFramebufferBinding);
+        int packRowLength = gl.GetInteger(GLEnum.PackRowLength);
         try
         {
+            gl.PixelStore(PixelStoreParameter.PackRowLength, 0);
             gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0);
             byte[] pixels = new byte[width * height * 4];
             gl.ReadPixels<byte>(x, y, (uint)width, (uint)height, PixelFormat.Rgba, PixelType.UnsignedByte, pixels.AsSpan());
@@ -251,6 +267,7 @@ internal static class GpuSubmissionChecks
         }
         finally
         {
+            gl.PixelStore(PixelStoreParameter.PackRowLength, packRowLength);
             gl.BindFramebuffer(FramebufferTarget.ReadFramebuffer, previousRead);
         }
     }
@@ -271,7 +288,7 @@ internal static class GpuSubmissionChecks
             GLEnum.CurrentProgram, GLEnum.VertexArrayBinding, GLEnum.ArrayBufferBinding, GLEnum.ElementArrayBufferBinding,
             GLEnum.PixelUnpackBufferBinding, GLEnum.RenderbufferBinding, GLEnum.ActiveTexture, GLEnum.UnpackAlignment,
             GLEnum.UnpackRowLength, GLEnum.UnpackSkipRows, GLEnum.UnpackSkipPixels, GLEnum.UnpackImageHeight,
-            GLEnum.UnpackSkipImages, GLEnum.DepthFunc, GLEnum.FrontFace, GLEnum.CullFaceMode })
+            GLEnum.UnpackSkipImages, GLEnum.PackRowLength, GLEnum.DepthFunc, GLEnum.FrontFace, GLEnum.CullFaceMode })
             result[parameter.ToString()] = gl.GetInteger(parameter);
         foreach (var capability in Capabilities) result[capability.ToString()] = gl.IsEnabled(capability) ? 1 : 0;
         result["DepthMask"] = gl.GetBoolean(GLEnum.DepthWritemask) ? 1 : 0;
@@ -318,6 +335,7 @@ internal static class GpuSubmissionChecks
         gl.CullFace(GLEnum.Back);
         gl.DepthFunc(DepthFunction.Less);
         gl.PixelStore(PixelStoreParameter.UnpackAlignment, 4);
+        gl.PixelStore(PixelStoreParameter.PackRowLength, 0);
         foreach (var parameter in new[] { PixelStoreParameter.UnpackRowLength, PixelStoreParameter.UnpackSkipRows,
             PixelStoreParameter.UnpackSkipPixels, PixelStoreParameter.UnpackImageHeight, PixelStoreParameter.UnpackSkipImages })
             gl.PixelStore(parameter, 0);
@@ -379,6 +397,7 @@ internal static class GpuSubmissionChecks
             gl.PixelStore(PixelStoreParameter.UnpackSkipPixels, 3);
             gl.PixelStore(PixelStoreParameter.UnpackImageHeight, 17);
             gl.PixelStore(PixelStoreParameter.UnpackSkipImages, 1);
+            gl.PixelStore(PixelStoreParameter.PackRowLength, 13);
             for (uint unit = 0; unit < 3; unit++)
             {
                 gl.ActiveTexture(TextureUnit.Texture0 + (int)unit);
@@ -429,7 +448,7 @@ internal static class GpuSubmissionChecks
         private readonly GL native;
         private readonly Dictionary<string, Delegate> callbacks = [];
         internal GL Gl { get; }
-        internal int UniformCalls, ErrorCalls;
+        internal int UniformCalls, ErrorCalls, PixelStoreCalls, TextureStorageCalls;
         internal bool FailNextUniform4;
         internal HashSet<GLEnum> Queries { get; } = [];
 
@@ -448,6 +467,16 @@ internal static class GpuSubmissionChecks
                 native.Uniform4(location, x, y, z, w);
             });
             callbacks["glGetError"] = new Error(() => { ErrorCalls++; return (uint)native.GetError(); });
+            callbacks["glPixelStorei"] = new Store((parameter, value) =>
+            {
+                PixelStoreCalls++;
+                native.PixelStore((PixelStoreParameter)parameter, value);
+            });
+            callbacks["glTexStorage2D"] = new Storage((target, levels, format, width, height) =>
+            {
+                TextureStorageCalls++;
+                native.TexStorage2D((TextureTarget)target, levels, (SizedInternalFormat)format, width, height);
+            });
             foreach (string name in new[] { "glGetIntegerv", "glGetBooleanv", "glGetFloatv" })
             {
                 var original = Marshal.GetDelegateForFunctionPointer<Query>(native.Context.GetProcAddress(name));
@@ -465,7 +494,7 @@ internal static class GpuSubmissionChecks
 
         internal void Reset()
         {
-            UniformCalls = ErrorCalls = 0;
+            UniformCalls = ErrorCalls = PixelStoreCalls = TextureStorageCalls = 0;
             Queries.Clear();
         }
 
@@ -479,6 +508,8 @@ internal static class GpuSubmissionChecks
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] private delegate void Int2(int location, int x, int y);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] private delegate uint Error();
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] private delegate void Query(uint parameter, nint destination);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] private delegate void Store(uint parameter, int value);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)] private delegate void Storage(uint target, uint levels, uint format, uint width, uint height);
     }
 
     private static void Assert(bool condition, string message)

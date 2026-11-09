@@ -111,14 +111,17 @@ function installProbe({ observeDraws = false, requireDepthQuality = false, obser
     };
     for (const type of [globalThis.WebGLRenderingContext, globalThis.WebGL2RenderingContext]) {
         if (!type) continue;
-        for (const name of ["texImage2D", "texSubImage2D"]) {
+        for (const name of ["texImage2D", "texSubImage2D", "texStorage2D"]) {
             const original = type.prototype[name];
-            if (original.__pixelAtlasObserved) continue;
+            if (typeof original !== "function" || original.__pixelAtlasObserved) continue;
             const observed = function (...args) {
                 const started = observeTransfers && state.active ? performance.now() : null;
                 const result = Reflect.apply(original, this, args);
                 const duration = started === null ? null : performance.now() - started;
-                if (args.length >= 9) {
+                if (name === "texStorage2D") {
+                    record(args[3], args[4], true);
+                    transfer(name, duration, args[3], args[4], 1, null, true);
+                } else if (args.length >= 9) {
                     const index = name === "texImage2D" ? 3 : 4;
                     record(args[index], args[index + 1], observeDraws && args[8] === null);
                     transfer(name, duration, args[index], args[index + 1], 1,
