@@ -21,6 +21,7 @@ internal static class TerrainTextureCacheChecks
         RoundTrip(opaque: false);
         CheckBudget();
         await CheckMovingCacheAsync();
+        await TerrainTextureCopyChecks.RunAsync();
         Console.WriteLine("Passed opaque/nonopaque terrain texture round trips, 48 MiB mixed-cache budget, CPU fallback, retained frames and source invalidation.");
     }
 

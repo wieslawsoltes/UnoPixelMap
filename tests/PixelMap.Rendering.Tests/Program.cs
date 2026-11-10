@@ -38,6 +38,13 @@ if (args.Contains("--terrain-texture-cache", StringComparer.Ordinal))
     return;
 }
 
+if (args.Contains("--terrain-texture-copy", StringComparer.Ordinal) || args.Contains("--terrain-texture-copy-cost", StringComparer.Ordinal) ||
+    args.Contains("--terrain-frame-cost", StringComparer.Ordinal))
+{
+    await TerrainTextureCopyChecks.RunAsync(args);
+    return;
+}
+
 if (args.Contains("--gpu-selection", StringComparer.Ordinal))
 {
     GpuBuildingSelectionChecks.Run();

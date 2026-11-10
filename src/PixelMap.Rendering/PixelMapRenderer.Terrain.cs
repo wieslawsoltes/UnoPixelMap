@@ -227,6 +227,11 @@ public sealed partial class PixelMapRenderer
 
     private SKRect[] BakeTerrainTexture(TileId patch, SKBitmap texture, int pixelSize, PixelPalette colors, bool shadows)
     {
+        // An opaque patch covered by one vector source already exists in the block
+        // cache. Keep mixed source levels and all photographic/transparent overlays
+        // on the ordinary compositing path, whose ordering remains significant.
+        if (imageryOrder.Count == 0 && SingleTerrainSource(patch) is { } source &&
+            terrain.TryCopyTexture(texture, patch, source, pixelSize, shadows, colors, this)) return [];
         using var canvas = new SKCanvas(texture);
         canvas.Clear(new SKColor(colors.Ground));
         var textureBounds = new SKRect(0, 0, TerrainSurface.TextureSize, TerrainSurface.TextureSize);
@@ -279,6 +284,19 @@ public sealed partial class PixelMapRenderer
                 canvas.Restore();
             }
         }
+    }
+
+    private TileGeometry? SingleTerrainSource(TileId patch)
+    {
+        var bounds = new SKRect(0, 0, TerrainSurface.TextureSize, TerrainSurface.TextureSize);
+        TileGeometry? covering = null;
+        foreach (var tile in reliefTiles)
+            if (TextureArea(patch, tile.Source.Id).Contains(bounds)) covering = tile;
+        if (covering is null) return null;
+        foreach (var tile in reliefTiles)
+            if (!ReferenceEquals(tile, covering) && tile.Source.Id.Z >= covering.Source.Id.Z &&
+                TextureArea(patch, tile.Source.Id).IntersectsWith(bounds)) return null;
+        return covering;
     }
 
     private static SKRect TextureArea(TileId patch, TileId source)
