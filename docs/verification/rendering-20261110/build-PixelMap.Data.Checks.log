@@ -1,0 +1,11 @@
+  Determining projects to restore...
+  Restored /workspace/scratch/c64783d771e9/UnoPixelMap/tests/PixelMap.Data.Checks/PixelMap.Data.Checks.csproj (in 73 ms).
+  1 of 2 projects are up-to-date for restore.
+  PixelMap.Data -> /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Data/bin/Release/net10.0/PixelMap.Data.dll
+  PixelMap.Data.Checks -> /workspace/scratch/c64783d771e9/UnoPixelMap/tests/PixelMap.Data.Checks/bin/Release/net10.0/PixelMap.Data.Checks.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.97

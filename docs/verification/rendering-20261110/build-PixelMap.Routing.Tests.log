@@ -1,0 +1,12 @@
+  Determining projects to restore...
+  Restored /workspace/scratch/c64783d771e9/UnoPixelMap/tests/PixelMap.Routing.Tests/PixelMap.Routing.Tests.csproj (in 64 ms).
+  2 of 3 projects are up-to-date for restore.
+  PixelMap.Data -> /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Data/bin/Release/net10.0/PixelMap.Data.dll
+  PixelMap.Routing -> /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Routing/bin/Release/net10.0/PixelMap.Routing.dll
+  PixelMap.Routing.Tests -> /workspace/scratch/c64783d771e9/UnoPixelMap/tests/PixelMap.Routing.Tests/bin/Release/net10.0/PixelMap.Routing.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.08

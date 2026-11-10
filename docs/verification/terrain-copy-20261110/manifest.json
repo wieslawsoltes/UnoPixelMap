@@ -1,0 +1,154 @@
+{
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 10276,
+      "sha256": "b663022870b2df136de84c47427b90c11b93ee4cada256d4b6f7ad5d7c34ba52"
+    },
+    {
+      "path": "analysis.json",
+      "bytes": 27186,
+      "sha256": "2bcde829eb375bb488ee4ac32feffc1c9ce2ee03c9bc087e2dc366e951c544db"
+    },
+    {
+      "path": "analyze.py",
+      "bytes": 5347,
+      "sha256": "f8dc541e1229ff91c763c213cc5d9f5fd293ffd14972add07696d77778edcddf"
+    },
+    {
+      "path": "boundary-regression.patch.gz",
+      "bytes": 1579,
+      "sha256": "b2b3bed89b393758a9909576a72386e89fb87a2c58c6f8e050f5f539c8357891",
+      "decoded_bytes": 4506,
+      "decoded_sha256": "7f5f52c8d76722eea981f973762f9ac5ea1646cd184601494f74a080f480a2cd"
+    },
+    {
+      "path": "candidate.patch.gz",
+      "bytes": 8679,
+      "sha256": "df79c89a2a36f7189ba997dd60f8f5c2b2d4d904e03a1fbc331e37b15bb3c6ac",
+      "decoded_bytes": 32330,
+      "decoded_sha256": "6214ce14a92a64f0aacd7924b6787470af262a3f415add1061bbde3d6700c1d1"
+    },
+    {
+      "path": "frames-01-baseline/terrain-frame-cost.json.gz",
+      "bytes": 32805,
+      "sha256": "6695cb67d0b446eb49c52cbf9714c0b39100877c6d5a8a508e45f391e41dc192",
+      "decoded_bytes": 386960,
+      "decoded_sha256": "adc68e17e85dfb85fb93ce0747c01bb0e7e9ac9bfd4663ee3e22ede72d02beef"
+    },
+    {
+      "path": "frames-01-baseline.log",
+      "bytes": 513,
+      "sha256": "14b511c6892be208807c4d4a578b0cb6dcc1ea92c3acad6c81bd3290bcc6bcf5"
+    },
+    {
+      "path": "frames-02-candidate/terrain-frame-cost.json.gz",
+      "bytes": 32797,
+      "sha256": "4ddf8ec799f6653758b0c8eafe3d32ccc1698c01025c69628a66ea3254e64c80",
+      "decoded_bytes": 386950,
+      "decoded_sha256": "b1732a8c992e2a551c8e58c7069e524ae4d532cf5b8f45e0ffb013d918044c7f"
+    },
+    {
+      "path": "frames-02-candidate.log",
+      "bytes": 513,
+      "sha256": "c03c2b218ad479a799c1c6ae19369105587240e7b6569c788d27256904a55557"
+    },
+    {
+      "path": "frames-03-candidate/terrain-frame-cost.json.gz",
+      "bytes": 32714,
+      "sha256": "a3d7487587570966ed2a7c49090cc593c4758a7f7c7be1d43ae11a5f92be14e6",
+      "decoded_bytes": 386937,
+      "decoded_sha256": "e6314dcb6e5ab6b797263a48591e9aeb928395281795ec8d4cec32ab276d82b5"
+    },
+    {
+      "path": "frames-03-candidate.log",
+      "bytes": 513,
+      "sha256": "b79535d73d6b9f2c06c02ffcbf118300f2777248ff9bd8f992566d12a2a08269"
+    },
+    {
+      "path": "frames-04-baseline/terrain-frame-cost.json.gz",
+      "bytes": 32790,
+      "sha256": "51ec23e25b9b11883d9f87ef9b144ea0b7641c455ee566eb89d913b14f058bc0",
+      "decoded_bytes": 386953,
+      "decoded_sha256": "9013fc658b9197b3ed22ad696162332518fbadcda848cfd000131c0c6b1827da"
+    },
+    {
+      "path": "frames-04-baseline.log",
+      "bytes": 513,
+      "sha256": "3eded50e874fe22bfed457f14446260d9967fa36398e5e3c855351cbef83c990"
+    },
+    {
+      "path": "micro-01-baseline/terrain-copy.json.gz",
+      "bytes": 6209,
+      "sha256": "af3dc1e7426135cc13d0094146936f7bdd3f93c4f199f3aa17c763a0bcc32786",
+      "decoded_bytes": 339484,
+      "decoded_sha256": "4e98d89c1f1685e537d3ffc9f13896e83db953e0b371e3f32cab9ec824c5c65e"
+    },
+    {
+      "path": "micro-01-baseline.log",
+      "bytes": 294,
+      "sha256": "4558b3507873cf0d2a5f1a8d4c55d6f5fa163f6a838ba7f5ea42937c8149c3e0"
+    },
+    {
+      "path": "micro-02-candidate/terrain-copy.json.gz",
+      "bytes": 6105,
+      "sha256": "cdc9c7bb88e83df48adeaf26bc3c0d33f422538ca958aa6e3e16a81d643d4255",
+      "decoded_bytes": 339480,
+      "decoded_sha256": "226b5720e08eac73b9930ab3c5ae7353bfec91fb33002445d1f3e37022e972c2"
+    },
+    {
+      "path": "micro-02-candidate.log",
+      "bytes": 294,
+      "sha256": "9d14b95778506157917b1934b305024f43a951adb925c33b5c8b41cd6df7fed6"
+    },
+    {
+      "path": "micro-03-candidate/terrain-copy.json.gz",
+      "bytes": 6103,
+      "sha256": "5b537def100da955f521ecbbda18620efeb5b4c3c1d1ff98ee4402dfcf726f5c",
+      "decoded_bytes": 339481,
+      "decoded_sha256": "8825507d27e1b402b29a3c1871397bc1bd40d5c69c3bdfb625403fe17169c434"
+    },
+    {
+      "path": "micro-03-candidate.log",
+      "bytes": 294,
+      "sha256": "35fc25d4caec4e85cf02b1f6c01954cf653763c1676e193588ef2fac6a72bfe5"
+    },
+    {
+      "path": "micro-04-baseline/terrain-copy.json.gz",
+      "bytes": 6272,
+      "sha256": "cbcf46a196b0eac94cc761438f6d4d392a0c6e056eeb3783f81936a17f3413f4",
+      "decoded_bytes": 339471,
+      "decoded_sha256": "a1e5b89e2e7276e065bf52521ec603778566b4c797e92112991aca481f3868a5"
+    },
+    {
+      "path": "micro-04-baseline.log",
+      "bytes": 294,
+      "sha256": "74f40bd6b1477f9aa6040670e1d38a78aee619d9818888a001b890d35e68f75e"
+    },
+    {
+      "path": "provenance.json",
+      "bytes": 12720,
+      "sha256": "7f129352d61a8d4f3e824719752ab5c53ea31a87eb74fd21c03153a7d87ab8f8"
+    },
+    {
+      "path": "run_abba.py",
+      "bytes": 4266,
+      "sha256": "140cda05ee023971115c9e8ead4cd3260b86568c566d5cf24606cc94a8373556"
+    },
+    {
+      "path": "source-provenance.json",
+      "bytes": 2617,
+      "sha256": "d4db294b88218535f846a62b1020b477577ef4bc9d7c2684ac29b090efdbbb7d"
+    },
+    {
+      "path": "texture-boundary-checks.log",
+      "bytes": 439,
+      "sha256": "33e6d08923ed6aea8454a1d4756d158acec6c4a59ec0abad08f3594ab1bb612b"
+    },
+    {
+      "path": "texture-checks.log",
+      "bytes": 323,
+      "sha256": "c96dccf25aa6369ba776ec568dfa73197242a05fdc20ed0da58fe2fbc05de013"
+    }
+  ]
+}

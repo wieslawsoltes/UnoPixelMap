@@ -1,0 +1,41 @@
+{
+  "baseline_commit": "ce82b2c6fccee2d77a9e9489e1c6415e04412e8c",
+  "candidate_patch_sha256": "6214ce14a92a64f0aacd7924b6787470af262a3f415add1061bbde3d6700c1d1",
+  "renderer_changes": {
+    "src/PixelMap.Rendering/TerrainCache.cs": {
+      "baseline_sha256": "06de4d98b29b115fb377e77ced6806547b34445ce55b11bbcb9bdd86f1d35422",
+      "candidate_sha256": "af50534c6b003396a0d86a518519949e8bdf329749ab3496150e347ee63deaea"
+    },
+    "src/PixelMap.Rendering/PixelMapRenderer.Terrain.cs": {
+      "baseline_sha256": "2d5e2d5537a113173866d031c4b11b97cb5a447067f168fd68fc9f8a56636dce",
+      "candidate_sha256": "677186be3e8c4c520e65d1d0e323db58db07a5d50b9f53fd7092185e3834766c"
+    }
+  },
+  "harness_sources": {
+    "tests/PixelMap.Rendering.Tests/Program.cs": "de30acf5bbb07b45f0bd52c9c1b483fac8b4ff885ded9c9da9f55dc8eb777716",
+    "tests/PixelMap.Rendering.Tests/TerrainTextureCacheChecks.cs": "fae37096f0107f1e7038cf359b2208e2c3da910479bc1887cf983a8516d5297b",
+    "tests/PixelMap.Rendering.Tests/TerrainTextureCopyChecks.cs": "63a2d5d669c7febff8722e00c6985ba92a25ad4e3c847379fbaca5d45727e587"
+  },
+  "runtime_comparison": "Only PixelMap.Rendering.dll differs between staged baseline/candidate runtime directories; the full compiled harness and all other runtime dependencies are identical.",
+  "candidate_patch_file": "candidate.patch.gz",
+  "candidate_patch_stored_sha256": "df79c89a2a36f7189ba997dd60f8f5c2b2d4d904e03a1fbc331e37b15bb3c6ac",
+  "post_measurement_correctness": {
+    "production_source_changed": false,
+    "additional_asymmetric_boundary_cases": 42,
+    "original_texture_cases_rerun": 768,
+    "patch_file": "boundary-regression.patch.gz",
+    "patch_sha256": "7f5f52c8d76722eea981f973762f9ac5ea1646cd184601494f74a080f480a2cd",
+    "patch_stored_sha256": "b2b3bed89b393758a9909576a72386e89fb87a2c58c6f8e050f5f539c8357891",
+    "applies_after": "candidate.patch.gz",
+    "test_source_file": "tests/PixelMap.Rendering.Tests/TerrainTextureCopyChecks.cs",
+    "test_source_sha256": "e54f449a04ac8507fbca4af15e29ce778178259c492ff62c632da9ad9138bdaf",
+    "harness_assembly_sha256": "c123ae93fd92695b40a6814b747c1821d2335ee62751584130ff70a4fd5d2707",
+    "renderer_assembly_sha256": "017465b00dc2b89d81fabd6bf87cfca874261d188a0b931312cd03ac13a742fe",
+    "renderer_scope": "Integrated terrain-copy and early-occlusion changes; exact terrain production sources still match isolated measured candidate hashes.",
+    "arguments": [
+      "--terrain-texture-copy"
+    ],
+    "log_file": "texture-boundary-checks.log",
+    "log_sha256": "33e6d08923ed6aea8454a1d4756d158acec6c4a59ec0abad08f3594ab1bb612b"
+  }
+}

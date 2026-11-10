@@ -1,0 +1,285 @@
+{
+  "scope": "Diagnostic-only instrumentation of CoversBeforeComplete executions; no diagnostic timings are used. Entries count all label/navigation invocations reaching that traversal; cached samples and near-singular plane early rejections are excluded. All ordinary workloads cover16camera phases with zero warmup; short controls cover8initial phases.",
+  "workloads": [
+    {
+      "workload": "manhattan-walk",
+      "camera_frames": 16,
+      "traversals": 3387,
+      "early_returns": 2490,
+      "coarse_models": {
+        "median": 111,
+        "max": 221,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 3387
+      },
+      "point_models": {
+        "median": 91,
+        "max": 148,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 3387
+      },
+      "unprepared_point_models": {
+        "median": 16,
+        "max": 102,
+        "zero": 1081,
+        "one": 76,
+        "at_least_two": 2230
+      },
+      "new_prepared_triangles_in_traversals": 74953
+    },
+    {
+      "workload": "manhattan-chase",
+      "camera_frames": 16,
+      "traversals": 3815,
+      "early_returns": 2774,
+      "coarse_models": {
+        "median": 106,
+        "max": 219,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 3815
+      },
+      "point_models": {
+        "median": 85,
+        "max": 152,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 3815
+      },
+      "unprepared_point_models": {
+        "median": 7,
+        "max": 102,
+        "zero": 1564,
+        "one": 77,
+        "at_least_two": 2174
+      },
+      "new_prepared_triangles_in_traversals": 95334
+    },
+    {
+      "workload": "manhattan-freeflight",
+      "camera_frames": 16,
+      "traversals": 3649,
+      "early_returns": 3508,
+      "coarse_models": {
+        "median": 109,
+        "max": 196,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 3649
+      },
+      "point_models": {
+        "median": 64,
+        "max": 124,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 3649
+      },
+      "unprepared_point_models": {
+        "median": 7,
+        "max": 114,
+        "zero": 435,
+        "one": 325,
+        "at_least_two": 2889
+      },
+      "new_prepared_triangles_in_traversals": 376786
+    },
+    {
+      "workload": "manhattan-orbit",
+      "camera_frames": 16,
+      "traversals": 5169,
+      "early_returns": 5048,
+      "coarse_models": {
+        "median": 143,
+        "max": 262,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 5169
+      },
+      "point_models": {
+        "median": 93,
+        "max": 184,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 5169
+      },
+      "unprepared_point_models": {
+        "median": 9,
+        "max": 158,
+        "zero": 505,
+        "one": 523,
+        "at_least_two": 4141
+      },
+      "new_prepared_triangles_in_traversals": 381733
+    },
+    {
+      "workload": "manhattan-freeflight-normal",
+      "camera_frames": 16,
+      "traversals": 6381,
+      "early_returns": 6023,
+      "coarse_models": {
+        "median": 237,
+        "max": 276,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 6381
+      },
+      "point_models": {
+        "median": 61,
+        "max": 119,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 6381
+      },
+      "unprepared_point_models": {
+        "median": 3,
+        "max": 72,
+        "zero": 1008,
+        "one": 831,
+        "at_least_two": 4542
+      },
+      "new_prepared_triangles_in_traversals": 487664
+    },
+    {
+      "workload": "hills-pixel",
+      "camera_frames": 16,
+      "traversals": 0,
+      "early_returns": 0,
+      "coarse_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "point_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "unprepared_point_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "new_prepared_triangles_in_traversals": 0
+    },
+    {
+      "workload": "hills-minecraft",
+      "camera_frames": 16,
+      "traversals": 0,
+      "early_returns": 0,
+      "coarse_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "point_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "unprepared_point_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "new_prepared_triangles_in_traversals": 0
+    },
+    {
+      "workload": "hills-roblox",
+      "camera_frames": 16,
+      "traversals": 0,
+      "early_returns": 0,
+      "coarse_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "point_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "unprepared_point_models": {
+        "median": null,
+        "max": null,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 0
+      },
+      "new_prepared_triangles_in_traversals": 0
+    },
+    {
+      "workload": "manhattan-zero-query",
+      "camera_frames": 8,
+      "traversals": 1849,
+      "early_returns": 1792,
+      "coarse_models": {
+        "median": 109,
+        "max": 196,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 1849
+      },
+      "point_models": {
+        "median": 65,
+        "max": 124,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 1849
+      },
+      "unprepared_point_models": {
+        "median": 11,
+        "max": 114,
+        "zero": 246,
+        "one": 136,
+        "at_least_two": 1467
+      },
+      "new_prepared_triangles_in_traversals": 186795
+    },
+    {
+      "workload": "manhattan-full-query",
+      "camera_frames": 8,
+      "traversals": 1849,
+      "early_returns": 1792,
+      "coarse_models": {
+        "median": 109,
+        "max": 196,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 1849
+      },
+      "point_models": {
+        "median": 65,
+        "max": 124,
+        "zero": 0,
+        "one": 0,
+        "at_least_two": 1849
+      },
+      "unprepared_point_models": {
+        "median": 11,
+        "max": 114,
+        "zero": 246,
+        "one": 136,
+        "at_least_two": 1467
+      },
+      "new_prepared_triangles_in_traversals": 186795
+    }
+  ]
+}

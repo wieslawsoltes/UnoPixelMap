@@ -1,0 +1,1 @@
+Camera replay checks passed: native input contract, cached projection state, terrain-instance ranges, context isolation, fence identity and exact sequence comparison.

@@ -1,0 +1,3 @@
+Passed 42 asymmetric cached-BGRA interior-boundary comparisons at patch zooms 16–22, including zoom22/local131071.
+Terrain copy eligibility: 42/64 cold first-person patches have one complete source.
+Passed 768 exact terrain copies against Skia across patch zoom 0–22, all render styles, day/night, shadow and pixel-size changes, edge subpixels, BGRA channels and padded strides; mixed/partial/photographic coverage remains composited.

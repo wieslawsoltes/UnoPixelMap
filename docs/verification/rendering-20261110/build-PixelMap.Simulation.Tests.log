@@ -1,0 +1,16 @@
+  Determining projects to restore...
+  Restored /workspace/scratch/c64783d771e9/UnoPixelMap/tests/PixelMap.Simulation.Tests/PixelMap.Simulation.Tests.csproj (in 82 ms).
+  Restored /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Audio/PixelMap.Audio.csproj (in 50 ms).
+  Restored /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Simulation/PixelMap.Simulation.csproj (in 2 ms).
+  2 of 5 projects are up-to-date for restore.
+  PixelMap.Data -> /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Data/bin/Release/net10.0/PixelMap.Data.dll
+  PixelMap.Routing -> /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Routing/bin/Release/net10.0/PixelMap.Routing.dll
+  PixelMap.Simulation -> /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Simulation/bin/Release/net10.0/PixelMap.Simulation.dll
+  PixelMap.Audio -> /workspace/scratch/c64783d771e9/UnoPixelMap/src/PixelMap.Audio/bin/Release/net10.0/PixelMap.Audio.dll
+  PixelMap.Simulation.Tests -> /workspace/scratch/c64783d771e9/UnoPixelMap/tests/PixelMap.Simulation.Tests/bin/Release/net10.0/PixelMap.Simulation.Tests.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:04.56

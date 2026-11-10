@@ -1,0 +1,21 @@
+{
+  "baseline_commit": "ce82b2c6fccee2d77a9e9489e1c6415e04412e8c",
+  "patch_applies_to": "clean baseline; contains v2 optimization plus diagnostic-only instrumentation",
+  "source_patch_sha256": "27d3ad7c725eda917f389bedcc60fec4c8bad3c2eb47668fd672d4342175555e",
+  "renderer_sha256": "53c54608afdd68375d227fe9e2ee403aa992f57999c50e4ad116096e89467221",
+  "harness_sha256": "b36b04bb289a35ab593a24a25905a31e70c212bb1bd0c7c5b1b47fabbb1a8a2e",
+  "raw_report_sha256": "60bfbc3b31c1b1e1f87ca6f58ee225ee0b7ed80d4dcf1f697cfed6acfe8a06d3",
+  "cpu_affinity": [
+    6
+  ],
+  "arguments": [
+    "--depth-benchmark",
+    "--depth-warmup=0",
+    "--depth-samples=16"
+  ],
+  "timing_claims": false,
+  "source_files": {
+    "src/PixelMap.Rendering/GpuSceneDepth.cs": "6d6bac62b511570ebe3c1359bb0794052782b47c30e6c2935618079b8b241331",
+    "tests/PixelMap.Rendering.Tests/DepthPreparationBenchmark.cs": "0240d9392f769b588208dcbf1a80963ee45c4365ccd8903d5ab42955cb924eaf"
+  }
+}

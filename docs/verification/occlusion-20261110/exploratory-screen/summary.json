@@ -1,0 +1,69 @@
+{
+  "scope": "Initial single baseline/candidate screen:4warmup/8measured frames percase. Different test-assembly hashes because new correctness tests were compiled into the candidate; DepthPreparationBenchmark source was unchanged. Exploratory only, never pooled into the final comparison.",
+  "harness_sha256": [
+    "b66d1129338462074e6e12913b643768b10462bce4c9e852f5426b59cf16fb77",
+    "0a4a94b396218c9d5a04cb2c2c4f3155febe21004f65efc0a05535f5bce7bf23"
+  ],
+  "results": [
+    {
+      "name": "manhattan-walk",
+      "baseline_median_ms": 5.9085,
+      "candidate_median_ms": 5.680999999999999,
+      "change_percent": -3.8503850385038674
+    },
+    {
+      "name": "manhattan-chase",
+      "baseline_median_ms": 11.616050000000001,
+      "candidate_median_ms": 12.43095,
+      "change_percent": 7.015293494776609
+    },
+    {
+      "name": "manhattan-freeflight",
+      "baseline_median_ms": 6.7806,
+      "candidate_median_ms": 6.18775,
+      "change_percent": -8.743326549272922
+    },
+    {
+      "name": "manhattan-orbit",
+      "baseline_median_ms": 13.849499999999999,
+      "candidate_median_ms": 12.7793,
+      "change_percent": -7.72735477815083
+    },
+    {
+      "name": "manhattan-freeflight-normal",
+      "baseline_median_ms": 9.415500000000002,
+      "candidate_median_ms": 7.48235,
+      "change_percent": -20.531570283043934
+    },
+    {
+      "name": "hills-pixel",
+      "baseline_median_ms": 0.8575,
+      "candidate_median_ms": 0.8589,
+      "change_percent": 0.16326530612245094
+    },
+    {
+      "name": "hills-minecraft",
+      "baseline_median_ms": 0.9076500000000001,
+      "candidate_median_ms": 1.18855,
+      "change_percent": 30.948052663471582
+    },
+    {
+      "name": "hills-roblox",
+      "baseline_median_ms": 1.0772499999999998,
+      "candidate_median_ms": 1.63245,
+      "change_percent": 51.53864005569739
+    },
+    {
+      "name": "manhattan-zero-query",
+      "baseline_median_ms": 6.7232,
+      "candidate_median_ms": 6.97465,
+      "change_percent": 3.740034507377432
+    },
+    {
+      "name": "manhattan-full-query",
+      "baseline_median_ms": 8.205100000000002,
+      "candidate_median_ms": 8.09995,
+      "change_percent": -1.281520030225125
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "baseline_source": "ce82b2c6fccee2d77a9e9489e1c6415e04412e8c",
+  "candidate_scope": "Baseline plus TerrainCache.cs and PixelMapRenderer.Terrain.cs changes in candidate.patch",
+  "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "machine": "x86_64",
+  "cpu_affinity": [
+    8
+  ],
+  "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+  "managed_processors": 2,
+  "tiered_compilation": false,
+  "samples_per_process": 64,
+  "order_per_mode": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "baseline_files": {
+    "LibTessDotNet.Double.dll": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+    "LibTessDotNet.dll": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921",
+    "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+    "Microsoft.Extensions.DependencyModel.dll": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+    "PixelMap.Data.dll": "546fe9de52858fac1d923cdf646d838d1395463b40e5221130f66a5637345dc9",
+    "PixelMap.Rendering.Tests": "3d9c678caec05a5349970fd5d6152b849368adb1666fa0ec4daec9de5d607751",
+    "PixelMap.Rendering.Tests.deps.json": "0edc31e57ad5b7a1db378b769291ca0163c34b1c1eadacbfbdd760c2ed21daa0",
+    "PixelMap.Rendering.Tests.dll": "8d0b5b86015f21ee68cac6a0e24759419b12ed3df2a4860c3d73826cae9292f9",
+    "PixelMap.Rendering.Tests.runtimeconfig.json": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+    "PixelMap.Rendering.dll": "dd6b9649b8265dfe45ba140779184ff725880b9ed552845ac1a5680d14599c23",
+    "PixelMap.Routing.dll": "621822acf8dc6ce132f101830866e4f70720089a9d89154378ef85b89808de70",
+    "Silk.NET.Core.dll": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+    "Silk.NET.Maths.dll": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+    "Silk.NET.OpenGL.dll": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+    "SkiaSharp.dll": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+    "runtimes/linux-x64/native/libSkiaSharp.so": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387"
+  },
+  "candidate_files": {
+    "LibTessDotNet.Double.dll": "0835229f5bce0f90b6fd10dda3ab689ee7f865ca34c300b0906c2df1e3053d4a",
+    "LibTessDotNet.dll": "6f2a8b10515fe328e1c9a28b23660958d8a3eea0ca436042516ff5e0a2ec5921",
+    "Microsoft.DotNet.PlatformAbstractions.dll": "b1f4ad169fb192747f5d2d3111c01db4257e3ec1f7f18f301f7fc4be3b869ff3",
+    "Microsoft.Extensions.DependencyModel.dll": "b6406254657a68f84df707987a9319dafbd2e8681fd2e384f3c7ee5883510078",
+    "PixelMap.Data.dll": "546fe9de52858fac1d923cdf646d838d1395463b40e5221130f66a5637345dc9",
+    "PixelMap.Rendering.Tests": "3d9c678caec05a5349970fd5d6152b849368adb1666fa0ec4daec9de5d607751",
+    "PixelMap.Rendering.Tests.deps.json": "0edc31e57ad5b7a1db378b769291ca0163c34b1c1eadacbfbdd760c2ed21daa0",
+    "PixelMap.Rendering.Tests.dll": "8d0b5b86015f21ee68cac6a0e24759419b12ed3df2a4860c3d73826cae9292f9",
+    "PixelMap.Rendering.Tests.runtimeconfig.json": "9950d4583cfc9a106857c0d5b8a75b53e8774852b57b80bc3823a74d44a4d87f",
+    "PixelMap.Rendering.dll": "d71723b1eb6ad2eb53ce51e54d6526a45b7e75ed568e2cd21a66bdc5f01da7d7",
+    "PixelMap.Routing.dll": "621822acf8dc6ce132f101830866e4f70720089a9d89154378ef85b89808de70",
+    "Silk.NET.Core.dll": "8ef2293a1c8cfcfa7c591ae74d8685e6453be7a35dbb4d4916efce32ed770c73",
+    "Silk.NET.Maths.dll": "818c9baacf2023cd6e03da1fc24ee5be445c3bbfa96f8d28b399b497c6c81bc2",
+    "Silk.NET.OpenGL.dll": "5d0ea431b5cf1e5a18181d9f07631f97ced8254c964d7e2fdaf451bc7ebd1ded",
+    "SkiaSharp.dll": "b0f9102f6c51d6daa13e5b682c2c6f7223ff1490418bbd5202797976db18d540",
+    "runtimes/linux-x64/native/libSkiaSharp.so": "c6b2a3ff89db6b2b83780594322d650c1cad33fb43af01786e278e582375f387"
+  },
+  "dotnet_sha256": "634efbf2414144d140d6f59d167342c8b3b53b4c34346ed786dd0470ddc9a3cb",
+  "dotnet_info": ".NET SDK:\n Version:           10.0.403\n Commit:            5a2162bea6\n Workload version:  10.0.400-manifests.a00bebb6\n MSBuild version:   18.9.15+5a2162bea\n\nRuntime Environment:\n OS Name:     debian\n OS Version:  13\n OS Platform: Linux\n RID:         linux-x64\n Base Path:   /workspace/scratch/c64783d771e9/toolchain/dotnet/sdk/10.0.403/\n\n.NET workloads installed:\nThere are no installed workloads to display.\nConfigured to use workload sets when installing new manifests.\nNo workload sets are installed. Run \"dotnet workload restore\" to install a workload set.\n\nHost:\n  Version:      10.0.14\n  Architecture: x64\n  Commit:       0427b9abbe\n\n.NET SDKs installed:\n  10.0.403 [/workspace/scratch/c64783d771e9/toolchain/dotnet/sdk]\n\n.NET runtimes installed:\n  Microsoft.AspNetCore.App 10.0.14 [/workspace/scratch/c64783d771e9/toolchain/dotnet/shared/Microsoft.AspNetCore.App]\n  Microsoft.NETCore.App 10.0.14 [/workspace/scratch/c64783d771e9/toolchain/dotnet/shared/Microsoft.NETCore.App]\n\nOther architectures found:\n  None\n\nEnvironment variables:\n  DOTNET_PROCESSOR_COUNT                   [2]\n  DOTNET_ROOT                              [/workspace/scratch/c64783d771e9/toolchain/dotnet]\n  DOTNET_TieredCompilation                 [0]\n  Detected COMPlus_* environment variable(s). Consider transitioning to DOTNET_* equivalent.\n\nglobal.json file:\n  /workspace/scratch/c64783d771e9/UnoPixelMap/global.json\n\nLearn more:\n  https://aka.ms/dotnet/info\n\nDownload .NET:\n  https://aka.ms/dotnet/download\n",
+  "runs": [
+    {
+      "mode": "micro",
+      "number": 1,
+      "variant": "baseline",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/baseline/PixelMap.Rendering.Tests.dll",
+        "--terrain-texture-copy-cost",
+        "--terrain-copy-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/micro-01-baseline",
+        "--terrain-copy-samples=64"
+      ],
+      "started_unix_seconds": 1794345376.0674312,
+      "elapsed_process_seconds": 1.4749665260314941,
+      "report": "micro-01-baseline/terrain-copy.json",
+      "report_sha256": "4e98d89c1f1685e537d3ffc9f13896e83db953e0b371e3f32cab9ec824c5c65e",
+      "log": "micro-01-baseline.log",
+      "log_sha256": "4558b3507873cf0d2a5f1a8d4c55d6f5fa163f6a838ba7f5ea42937c8149c3e0"
+    },
+    {
+      "mode": "micro",
+      "number": 2,
+      "variant": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/candidate/PixelMap.Rendering.Tests.dll",
+        "--terrain-texture-copy-cost",
+        "--terrain-copy-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/micro-02-candidate",
+        "--terrain-copy-samples=64"
+      ],
+      "started_unix_seconds": 1794345377.5430803,
+      "elapsed_process_seconds": 1.013291835784912,
+      "report": "micro-02-candidate/terrain-copy.json",
+      "report_sha256": "226b5720e08eac73b9930ab3c5ae7353bfec91fb33002445d1f3e37022e972c2",
+      "log": "micro-02-candidate.log",
+      "log_sha256": "9d14b95778506157917b1934b305024f43a951adb925c33b5c8b41cd6df7fed6"
+    },
+    {
+      "mode": "micro",
+      "number": 3,
+      "variant": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/candidate/PixelMap.Rendering.Tests.dll",
+        "--terrain-texture-copy-cost",
+        "--terrain-copy-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/micro-03-candidate",
+        "--terrain-copy-samples=64"
+      ],
+      "started_unix_seconds": 1794345378.5570276,
+      "elapsed_process_seconds": 1.0250651836395264,
+      "report": "micro-03-candidate/terrain-copy.json",
+      "report_sha256": "8825507d27e1b402b29a3c1871397bc1bd40d5c69c3bdfb625403fe17169c434",
+      "log": "micro-03-candidate.log",
+      "log_sha256": "35fc25d4caec4e85cf02b1f6c01954cf653763c1676e193588ef2fac6a72bfe5"
+    },
+    {
+      "mode": "micro",
+      "number": 4,
+      "variant": "baseline",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/baseline/PixelMap.Rendering.Tests.dll",
+        "--terrain-texture-copy-cost",
+        "--terrain-copy-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/micro-04-baseline",
+        "--terrain-copy-samples=64"
+      ],
+      "started_unix_seconds": 1794345379.5827193,
+      "elapsed_process_seconds": 1.5119285583496094,
+      "report": "micro-04-baseline/terrain-copy.json",
+      "report_sha256": "a1e5b89e2e7276e065bf52521ec603778566b4c797e92112991aca481f3868a5",
+      "log": "micro-04-baseline.log",
+      "log_sha256": "74f40bd6b1477f9aa6040670e1d38a78aee619d9818888a001b890d35e68f75e"
+    },
+    {
+      "mode": "frames",
+      "number": 1,
+      "variant": "baseline",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/baseline/PixelMap.Rendering.Tests.dll",
+        "--terrain-frame-cost",
+        "--terrain-frame-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/frames-01-baseline",
+        "--terrain-frame-samples=64"
+      ],
+      "started_unix_seconds": 1794345381.0953214,
+      "elapsed_process_seconds": 9.000010251998901,
+      "report": "frames-01-baseline/terrain-frame-cost.json",
+      "report_sha256": "adc68e17e85dfb85fb93ce0747c01bb0e7e9ac9bfd4663ee3e22ede72d02beef",
+      "log": "frames-01-baseline.log",
+      "log_sha256": "14b511c6892be208807c4d4a578b0cb6dcc1ea92c3acad6c81bd3290bcc6bcf5"
+    },
+    {
+      "mode": "frames",
+      "number": 2,
+      "variant": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/candidate/PixelMap.Rendering.Tests.dll",
+        "--terrain-frame-cost",
+        "--terrain-frame-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/frames-02-candidate",
+        "--terrain-frame-samples=64"
+      ],
+      "started_unix_seconds": 1794345390.096269,
+      "elapsed_process_seconds": 7.753484487533569,
+      "report": "frames-02-candidate/terrain-frame-cost.json",
+      "report_sha256": "b1732a8c992e2a551c8e58c7069e524ae4d532cf5b8f45e0ffb013d918044c7f",
+      "log": "frames-02-candidate.log",
+      "log_sha256": "c03c2b218ad479a799c1c6ae19369105587240e7b6569c788d27256904a55557"
+    },
+    {
+      "mode": "frames",
+      "number": 3,
+      "variant": "candidate",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/candidate/PixelMap.Rendering.Tests.dll",
+        "--terrain-frame-cost",
+        "--terrain-frame-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/frames-03-candidate",
+        "--terrain-frame-samples=64"
+      ],
+      "started_unix_seconds": 1794345397.8504739,
+      "elapsed_process_seconds": 7.354820013046265,
+      "report": "frames-03-candidate/terrain-frame-cost.json",
+      "report_sha256": "e6314dcb6e5ab6b797263a48591e9aeb928395281795ec8d4cec32ab276d82b5",
+      "log": "frames-03-candidate.log",
+      "log_sha256": "b79535d73d6b9f2c06c02ffcbf118300f2777248ff9bd8f992566d12a2a08269"
+    },
+    {
+      "mode": "frames",
+      "number": 4,
+      "variant": "baseline",
+      "command": [
+        "taskset",
+        "-c",
+        "8",
+        "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+        "/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/baseline/PixelMap.Rendering.Tests.dll",
+        "--terrain-frame-cost",
+        "--terrain-frame-output=/workspace/scratch/c64783d771e9/terrain-benchmark-20261110/formal/frames-04-baseline",
+        "--terrain-frame-samples=64"
+      ],
+      "started_unix_seconds": 1794345405.20603,
+      "elapsed_process_seconds": 8.806135177612305,
+      "report": "frames-04-baseline/terrain-frame-cost.json",
+      "report_sha256": "9013fc658b9197b3ed22ad696162332518fbadcda848cfd000131c0c6b1827da",
+      "log": "frames-04-baseline.log",
+      "log_sha256": "3eded50e874fe22bfed457f14446260d9967fa36398e5e3c855351cbef83c990"
+    }
+  ]
+}

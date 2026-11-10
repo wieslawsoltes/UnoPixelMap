@@ -1,0 +1,12 @@
+Walk: 789 m, 3 game gates, 550 points
+Bike: 804 m, 3 game gates, 550 points
+Drive: 773 m, 3 game gates, 550 points
+Train: 1200 m, 4 game gates, 650 points
+Boat: 911 m, 3 game gates, 550 points
+Flight: 27121 m, 24 game gates, 2650 points
+Water, bridge, tunnel, raised-building, courtyard and tile-resolution checks passed.
+Collision broad phase: 69,552 frozen-reference sweeps agree, including wrapped tiles, mixed extents, holes, narrow walls, elevation, tunnels and streamed replacement.
+Seek, score, pause, invalid-input, transactional-load and audio-lifetime checks passed.
+Elevation grounding, streaming, aircraft clearance, water surfaces and 3D contact checks passed.
+Free-roam movement, reverse, jump, gravity, sliding, flight, water, streamed rail and lifecycle checks passed.
+Fixed-step, manual steering, obstacle, shoreline, recovery and audio checks passed.

@@ -1,0 +1,4 @@
+Terrain texture identity: 0.0766 ms per 16 patches, 1792 managed bytes.
+Terrain texture magnify-2: 0.4130 ms per 16 patches, 1792 managed bytes.
+Terrain texture magnify-16: 0.0662 ms per 16 patches, 1792 managed bytes.
+Terrain texture magnify-256: 0.0609 ms per 16 patches, 1792 managed bytes.

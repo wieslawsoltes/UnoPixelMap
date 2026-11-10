@@ -1,0 +1,13 @@
+{
+  "baseline": "ce82b2c6fccee2d77a9e9489e1c6415e04412e8c",
+  "runtime": ".NET 10.0.14",
+  "sdk": "10.0.403",
+  "source_files": {
+    "src/PixelMap.Rendering/GpuSceneDepth.cs": "e5ca142f26f920b787f54eca49ea28b5b45a227089d59e4016e6d07fa68405a2",
+    "src/PixelMap.Rendering/TerrainCache.cs": "af50534c6b003396a0d86a518519949e8bdf329749ab3496150e347ee63deaea",
+    "src/PixelMap.Rendering/PixelMapRenderer.Terrain.cs": "677186be3e8c4c520e65d1d0e323db58db07a5d50b9f53fd7092185e3834766c"
+  },
+  "gpu_report_sha256": "bd4674613629c8530e52784f3cd1368d492f5ddcab16b83e70988448a115c58a",
+  "gpu_report_identical_to_baseline": true,
+  "checks": "Full integrated native rendering, GLES, data, routing, simulation, audio, input and replay-unit suites passed. The subsequently added 42 interior texture-boundary checks also passed without production changes. Browser release validation is recorded separately."
+}

@@ -1,0 +1,89 @@
+{
+  "files": [
+    {
+      "path": "PixelMap.Data.Checks.log",
+      "bytes": 320,
+      "sha256": "feca3fd504fdd61550abb8ce7e948ef8ea7cc660fa48f839814fc424ade5e63d"
+    },
+    {
+      "path": "PixelMap.Routing.Tests.log",
+      "bytes": 110,
+      "sha256": "c0cee123e59eb268897a925756bbe24a761e8bbb5fee5e0f9b9cbdd95bc52739"
+    },
+    {
+      "path": "PixelMap.Simulation.Tests.log",
+      "bytes": 869,
+      "sha256": "d0b2aebc205470a5b89f91c30ee7cd795b96c5d5585f269f689879621e733c3a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1748,
+      "sha256": "690b4a0e65f28a3c4302b420dae9ffc993f637795cc31d5609744f8633f81f6b"
+    },
+    {
+      "path": "audio.log",
+      "bytes": 99,
+      "sha256": "2b591af0b6f555ddef743c6f6afd4baf38722c4b6c17b99192c6cc5badfc878e"
+    },
+    {
+      "path": "build-PixelMap.Data.Checks.log",
+      "bytes": 542,
+      "sha256": "ed85b5fb441625e48b6b55d6031cea5c00afffee959acd1ec0314a39c1d10dd8"
+    },
+    {
+      "path": "build-PixelMap.Routing.Tests.log",
+      "bytes": 680,
+      "sha256": "2d74d102e03410b6d3482385a52ba68307d1d81e64aacecb299487dba4ccffa8"
+    },
+    {
+      "path": "build-PixelMap.Simulation.Tests.log",
+      "bytes": 1179,
+      "sha256": "6d7a6e9aa99cead7c59ecb7cedb6fa94fee1a2275345697932e9586e54f243f0"
+    },
+    {
+      "path": "build-rendering.log",
+      "bytes": 1112,
+      "sha256": "c3b8a2eb2a60414aaac66403b60c72c91a7dbfc92063504bba29c41b0722b853"
+    },
+    {
+      "path": "camera-replay-checks.log",
+      "bytes": 167,
+      "sha256": "989cb437f3c7fc5cb7c8b362048ffb2f024889cb7d4ecdfff2a4cd29eed30b88"
+    },
+    {
+      "path": "final-texture-checks.log",
+      "bytes": 439,
+      "sha256": "33e6d08923ed6aea8454a1d4756d158acec6c4a59ec0abad08f3594ab1bb612b"
+    },
+    {
+      "path": "gpu-checks.json",
+      "bytes": 62627,
+      "sha256": "bd4674613629c8530e52784f3cd1368d492f5ddcab16b83e70988448a115c58a"
+    },
+    {
+      "path": "gpu.log",
+      "bytes": 11229,
+      "sha256": "7e00886702b1897e626387c8ba64f073521fcbc643f754bf8255f2b4758b381b"
+    },
+    {
+      "path": "input-adapter.log",
+      "bytes": 158,
+      "sha256": "11fa941b7e95de7ea55c93911d0b55e17fc8dc48c758a76bccb74a1d7a542fe6"
+    },
+    {
+      "path": "native-results.json",
+      "bytes": 3329,
+      "sha256": "e2883f12b9f63f12625abda3bd9c14f962451683b08a4f8c34d6f7708c970fdb"
+    },
+    {
+      "path": "rendering.log",
+      "bytes": 5861,
+      "sha256": "addf44682b1ffb5dedde44be79073b0926734a81cf01771e3fe5037e1ea1a10e"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 901,
+      "sha256": "5456cab59b956356cc3be6a04205f1fbb9e434a1c0a79e8bb147aad4d5a9b450"
+    }
+  ]
+}

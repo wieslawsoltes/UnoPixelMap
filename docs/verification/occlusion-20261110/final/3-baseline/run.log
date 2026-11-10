@@ -1,0 +1,10 @@
+Depth manhattan-walk: prepare 4.735 ms, navigation 1.030 ms, construction 0.151 ms, queries 3.101 ms; 10713 demand-prepared triangles.
+Depth manhattan-chase: prepare 8.865 ms, navigation 1.450 ms, construction 0.202 ms, queries 5.298 ms; 14951 demand-prepared triangles.
+Depth manhattan-freeflight: prepare 6.199 ms, navigation 0.762 ms, construction 0.147 ms, queries 4.568 ms; 26583 demand-prepared triangles.
+Depth manhattan-orbit: prepare 13.535 ms, navigation 1.429 ms, construction 0.557 ms, queries 11.344 ms; 30078 demand-prepared triangles.
+Depth manhattan-freeflight-normal: prepare 6.599 ms, navigation 1.107 ms, construction 0.170 ms, queries 5.497 ms; 32233 demand-prepared triangles.
+Depth hills-pixel: prepare 0.251 ms, navigation 0.468 ms, construction 0.020 ms, queries 1.115 ms; 15414 demand-prepared triangles.
+Depth hills-minecraft: prepare 0.375 ms, navigation 0.498 ms, construction 0.021 ms, queries 1.625 ms; 11706 demand-prepared triangles.
+Depth hills-roblox: prepare 0.593 ms, navigation 0.605 ms, construction 0.025 ms, queries 3.471 ms; 34314 demand-prepared triangles.
+Depth manhattan-zero-query: prepare 6.674 ms, navigation 0.768 ms, construction 0.153 ms, queries 0.000 ms; 0 demand-prepared triangles.
+Depth manhattan-full-query: prepare 7.148 ms, navigation 0.789 ms, construction 0.170 ms, queries 146.269 ms; 27872 demand-prepared triangles.

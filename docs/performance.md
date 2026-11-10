@@ -2,6 +2,89 @@
 
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
+## Early label occlusion and aligned terrain textures · 10 November 2026
+
+Sparse Boolean visibility now stops preparing model geometry once an opaque model
+or roof rim permanently proves occlusion. All contributing terrain is resolved
+first, preserving continuous subpixel terrain sampling and the original depth
+tolerances. An early result is never cached as a complete pixel sample; later
+picking and height queries still demand omitted geometry. Existing complete-cell
+and memory-pressure fallbacks remain active.
+
+The isolated four-process ABBA comparison changes only `GpuSceneDepth.cs` from
+`ce82b2c`. The same compiled harness and dependencies measure fixed camera poses,
+including label preparation and the navigation/overlay pass:
+
+| Native preparation + navigation | Baseline median | Candidate median | Change |
+| --- | ---: | ---: | ---: |
+| Manhattan walking | 5.9254 ms | 4.6848 ms | −20.94% |
+| Manhattan chase | 10.1424 ms | 7.5728 ms | −25.33% |
+| Manhattan free flight | 7.3768 ms | 6.4162 ms | −13.02% |
+| Manhattan orbit | 13.4515 ms | 11.4957 ms | −14.54% |
+| Manhattan Normal flight | 7.9400 ms | 7.0940 ms | −10.66% |
+
+The same final sequence records higher hill medians: +8.58% Pixel, +16.00%
+Minecraft and +13.71% Roblox. Process spread is substantial, including changed
+timings in unchanged constructor work. Separate instrumentation shows that these
+hill fixtures never enter the new Boolean traversal, but that does not rule out
+effects from ordinary sampling refactoring or JIT layout. All regressions,
+exploratory sequences and per-process values remain in the
+[complete visibility evidence](verification/occlusion-20261110/README.md).
+
+For the city views, total prepared triangles after labels/navigation decrease
+1.56–12.46% across the exact measured camera sequences. The final auditor verifies
+3,168 query/overlay hash comparisons and 7,920 frame/geometry/range comparisons.
+This is native CPU preparation evidence, excluding GL and browser presentation.
+
+### Exact terrain texture copying
+
+New opaque vector-terrain patches can copy or replicate pixels from the existing
+world-aligned block directly into their destination bitmap. Power-of-two grid
+alignment reduces nearest-neighbor sampling to integer shifts and span copies or
+fills. Partial coverage, distinct duplicate sources, photographs and transparent
+overlays retain ordered Skia compositing. There are no additional persistent
+buffers, and the existing block/surface cache budgets remain unchanged.
+
+An independent ABBA changes only the two terrain production files. Isolated
+16-texture bake batches improve 60.54% for identity copies, 17.30% for 2×
+magnification, 86.01% for 16×, and 87.17% for 256×. Warm source blocks and output
+bitmap allocation outside the timer define this narrow scope. Managed allocation
+decreases by 104 bytes per eligible texture.
+
+The public `PrepareGpuFrame` comparison uses fixed, advancing camera positions
+and records actual texture misses, rather than revisiting only a warm working set:
+
+| Native frame preparation | Baseline median | Candidate median | Change | Eligible misses / all misses per 64 frames |
+| --- | ---: | ---: | ---: | ---: |
+| Walking first person | 4.7428 ms | 4.4901 ms | −5.33% | 164 / 183 |
+| Driving first person | 9.7549 ms | 9.3808 ms | −3.83% | 587 / 615 |
+| Driving chase | 11.0367 ms | 11.0308 ms | −0.05% | 586 / 621 |
+| Fully retained control | 6.1395 ms | 6.1879 ms | +0.79% | 0 / 0 |
+
+Walking process medians overlap. Both first-person driving candidate process
+medians are below both baselines. Chase is effectively flat; the retained control
+is slightly slower and executes no texture-copy work. All 1,024 frame controls
+and 16,384 isolated texture controls match exactly. The
+[terrain evidence](verification/terrain-copy-20261110/README.md) retains raw
+samples, allocations, cache diagnostics, hashes and reproduction tools.
+Percentages from the two isolated optimizations cannot simply be added.
+
+### Verification and controlled browser comparison
+
+The integrated native suites pass 11,935,261 sparse/eager depth comparisons,
+9,063,600 projected-raster comparisons and 768 exact texture comparisons against
+Skia, plus 42 asymmetric interior-pixel boundary checks at extreme zooms. The
+complete GLES report is byte-identical to the baseline, including all
+192 standard image hashes. Held frames, source changes, picking and index-budget
+exhaustion remain covered. [Integrated native checks](verification/rendering-20261110/validation.json)
+
+The [camera replay](camera-replay.md) adds a controlled browser workload alongside
+the existing held-key play benchmark. It retains the ordered native inputs and
+every submitted projection value and frame sequence, including asynchronous
+tile refreshes. Cross-artifact timing comparisons require exact sequence identity.
+It measures controlled input/render latency; it does not replace simulation
+throughput measurements or establish physical display FPS.
+
 ## Camera clearance and exact Earth preprocessing · 9 November 2026
 
 Third-person follow now checks terrain clearance at the actual interpolated eye.

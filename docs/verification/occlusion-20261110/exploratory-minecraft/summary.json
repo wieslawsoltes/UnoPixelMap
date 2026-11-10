@@ -1,0 +1,1193 @@
+{
+  "scope": "CPU-only moving PrepareGpuFrame including labels, followed by DrawGpuOverlay/Drive route/vehicle/gate/picking for every camera: navigation overlay stress, not a free-roam simulation. Independent depth construction plus 144 sparse first/repeated query pairs, or zero/full-pixel stress. Query percentiles describe whole batches. GL/presentation excluded; hashes/delegate creation untimed. Thread CPU uses CLOCK_THREAD_CPUTIME_ID.",
+  "protocol": {
+    "Runtime": ".NET 10.0.14",
+    "Platform": "Debian GNU/Linux 13 (trixie)",
+    "Processors": 2,
+    "LabelFont": "DejaVu Sans; 6253 glyphs",
+    "Width": 1100,
+    "Height": 650,
+    "RequestedPixelSize": 3,
+    "Warmup": 32,
+    "Samples": 64,
+    "HarnessSha256": "b66d1129338462074e6e12913b643768b10462bce4c9e852f5426b59cf16fb77"
+  },
+  "renderers": {
+    "baseline": "dd6b9649b8265dfe45ba140779184ff725880b9ed552845ac1a5680d14599c23",
+    "candidate": "73fb13b08ec20c189f4803f69237ecc3121eaac8353ab04552665fd31c711fd0"
+  },
+  "order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "statistics": "Median averages the middle two samples; p95 is nearest rank. Matched samples pair equal frame/camera indices in adjacent AB and BA blocks. Camera-phase medians pool each phase across both corresponding variant processes. Timing samples are not excluded.",
+  "measured_frames": 256,
+  "exact_comparisons": 1344,
+  "workloads": [
+    {
+      "Name": "hills-minecraft",
+      "Features": 162,
+      "Style": 2,
+      "Probes": 144,
+      "CoarseCellSize": 16,
+      "QueryCells": 100,
+      "Warmup": 32,
+      "MeasuredSamples": 64,
+      "metrics": {
+        "prepare_navigation": {
+          "WallMs": {
+            "baseline": {
+              "median": 0.9714,
+              "p95": 1.4052,
+              "min": 0.7838,
+              "max": 1.6078999999999999,
+              "mean": 1.03031953125
+            },
+            "candidate": {
+              "median": 0.95665,
+              "p95": 1.4848,
+              "min": 0.7595,
+              "max": 2.3678,
+              "mean": 1.0215796875
+            },
+            "median_change_percent": -1.518427012559198,
+            "block_medians": [
+              1.1497000000000002,
+              0.9867,
+              0.91875,
+              0.9250499999999999
+            ],
+            "block_p95": [
+              1.4702,
+              1.3122,
+              1.6156000000000001,
+              1.0718
+            ],
+            "matched_sample_delta_median": -0.01974999999999999,
+            "matched_sample_percent_median": -2.232353104066082,
+            "camera_phase_change_percent_median": -1.783580822874109,
+            "camera_phase_change_percent_range": [
+              -8.536089920101109,
+              6.46260232877407
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              4,
+              5,
+              7,
+              8,
+              9,
+              11,
+              12,
+              13
+            ]
+          },
+          "ThreadCpuMs": {
+            "baseline": {
+              "median": 0.9727350000000001,
+              "p95": 1.4066770000000588,
+              "min": 0.7847510000000284,
+              "max": 1.6044600000000173,
+              "mean": 1.031462890625007
+            },
+            "candidate": {
+              "median": 0.9577625000000012,
+              "p95": 1.4860840000000053,
+              "min": 0.7603019999999105,
+              "max": 2.3727569999999787,
+              "mean": 1.0224277734374994
+            },
+            "median_change_percent": -1.539216744539773,
+            "block_medians": [
+              1.1511760000000208,
+              0.9879724999999553,
+              0.9194650000000024,
+              0.925869500000033
+            ],
+            "block_p95": [
+              1.4725050000000692,
+              1.3137780000000703,
+              1.617230999999947,
+              1.0731389999999692
+            ],
+            "matched_sample_delta_median": -0.020211000000074364,
+            "matched_sample_percent_median": -2.2226974947821,
+            "camera_phase_change_percent_median": -1.7532140080919856,
+            "camera_phase_change_percent_range": [
+              -8.85120950695547,
+              6.341523097266033
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              4,
+              5,
+              7,
+              8,
+              9,
+              11,
+              12,
+              13
+            ]
+          },
+          "Bytes": {
+            "baseline": {
+              "median": 67700.0,
+              "p95": 217552,
+              "min": 21272,
+              "max": 217552,
+              "mean": 78209.5
+            },
+            "candidate": {
+              "median": 67700.0,
+              "p95": 217552,
+              "min": 21272,
+              "max": 217552,
+              "mean": 78209.5
+            },
+            "median_change_percent": 0.0,
+            "block_medians": [
+              67700.0,
+              67700.0,
+              67700.0,
+              67700.0
+            ],
+            "block_p95": [
+              217552,
+              217552,
+              217552,
+              217552
+            ],
+            "matched_sample_delta_median": 0.0,
+            "matched_sample_percent_median": 0.0,
+            "camera_phase_change_percent_median": 0.0,
+            "camera_phase_change_percent_range": [
+              0.0,
+              0.0
+            ],
+            "improved_camera_phases": []
+          }
+        },
+        "prepare": {
+          "WallMs": {
+            "baseline": {
+              "median": 0.4253,
+              "p95": 0.6897,
+              "min": 0.2949,
+              "max": 0.7983,
+              "mean": 0.4473578125
+            },
+            "candidate": {
+              "median": 0.42679999999999996,
+              "p95": 0.7075,
+              "min": 0.29,
+              "max": 1.0846,
+              "mean": 0.45098671875
+            },
+            "median_change_percent": 0.35269221725839905,
+            "block_medians": [
+              0.4833,
+              0.4632,
+              0.41305000000000003,
+              0.37075
+            ],
+            "block_p95": [
+              0.7428,
+              0.6733,
+              0.7375,
+              0.5307
+            ],
+            "matched_sample_delta_median": -0.005599999999999994,
+            "matched_sample_percent_median": -1.6486570510706844,
+            "camera_phase_change_percent_median": -1.6275624851036063,
+            "camera_phase_change_percent_range": [
+              -14.684167350287126,
+              16.977557563392587
+            ],
+            "improved_camera_phases": [
+              0,
+              2,
+              3,
+              4,
+              5,
+              7,
+              8,
+              10,
+              11,
+              12,
+              13
+            ]
+          },
+          "ThreadCpuMs": {
+            "baseline": {
+              "median": 0.42311050000000705,
+              "p95": 0.6909899999999425,
+              "min": 0.2952699999999595,
+              "max": 0.7936819999999898,
+              "mean": 0.44791437500000164
+            },
+            "candidate": {
+              "median": 0.426179999999988,
+              "p95": 0.7083659999999554,
+              "min": 0.29032199999994646,
+              "max": 1.086909999999989,
+              "mean": 0.45126179687500034
+            },
+            "median_change_percent": 0.725460606621886,
+            "block_medians": [
+              0.48448200000001407,
+              0.4623635000000377,
+              0.40879900000004454,
+              0.3712279999999737
+            ],
+            "block_p95": [
+              0.7443090000000439,
+              0.6753759999999147,
+              0.738381000000004,
+              0.5315719999999828
+            ],
+            "matched_sample_delta_median": -0.005763999999999214,
+            "matched_sample_percent_median": -1.6945414023868122,
+            "camera_phase_change_percent_median": -1.5875680593875452,
+            "camera_phase_change_percent_range": [
+              -14.67778914179213,
+              15.587695066316032
+            ],
+            "improved_camera_phases": [
+              0,
+              2,
+              3,
+              4,
+              5,
+              7,
+              8,
+              10,
+              11,
+              12,
+              13,
+              15
+            ]
+          },
+          "Bytes": {
+            "baseline": {
+              "median": 67140.0,
+              "p95": 216992,
+              "min": 20712,
+              "max": 216992,
+              "mean": 77649.5
+            },
+            "candidate": {
+              "median": 67140.0,
+              "p95": 216992,
+              "min": 20712,
+              "max": 216992,
+              "mean": 77649.5
+            },
+            "median_change_percent": 0.0,
+            "block_medians": [
+              67140.0,
+              67140.0,
+              67140.0,
+              67140.0
+            ],
+            "block_p95": [
+              216992,
+              216992,
+              216992,
+              216992
+            ],
+            "matched_sample_delta_median": 0.0,
+            "matched_sample_percent_median": 0.0,
+            "camera_phase_change_percent_median": 0.0,
+            "camera_phase_change_percent_range": [
+              0.0,
+              0.0
+            ],
+            "improved_camera_phases": []
+          }
+        },
+        "navigation": {
+          "WallMs": {
+            "baseline": {
+              "median": 0.5444500000000001,
+              "p95": 0.7449,
+              "min": 0.4735,
+              "max": 0.8425,
+              "mean": 0.58296171875
+            },
+            "candidate": {
+              "median": 0.5253,
+              "p95": 0.8445,
+              "min": 0.4695,
+              "max": 1.2832,
+              "mean": 0.57059296875
+            },
+            "median_change_percent": -3.517311047846472,
+            "block_medians": [
+              0.64375,
+              0.56105,
+              0.5019,
+              0.5149
+            ],
+            "block_p95": [
+              0.7621,
+              0.7601,
+              0.8856,
+              0.6396
+            ],
+            "matched_sample_delta_median": -0.016000000000000014,
+            "matched_sample_percent_median": -2.776174085732003,
+            "camera_phase_change_percent_median": -4.067606128234874,
+            "camera_phase_change_percent_range": [
+              -9.768946395563782,
+              6.71454818774011
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              4,
+              5,
+              7,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14
+            ]
+          },
+          "ThreadCpuMs": {
+            "baseline": {
+              "median": 0.5451375000000098,
+              "p95": 0.745441000000028,
+              "min": 0.4738370000000032,
+              "max": 0.8437569999999823,
+              "mean": 0.5835485156250053
+            },
+            "candidate": {
+              "median": 0.525779,
+              "p95": 0.8451989999999796,
+              "min": 0.4699799999999641,
+              "max": 1.2858469999999897,
+              "mean": 0.571165976562499
+            },
+            "median_change_percent": -3.55112242324358,
+            "block_medians": [
+              0.6442950000000565,
+              0.5616620000000125,
+              0.5022940000000062,
+              0.5153329999999983
+            ],
+            "block_p95": [
+              0.7637080000000651,
+              0.7614250000000311,
+              0.8863209999999526,
+              0.6400039999999763
+            ],
+            "matched_sample_delta_median": -0.01610899999997173,
+            "matched_sample_percent_median": -2.7878934804587363,
+            "camera_phase_change_percent_median": -4.073056705027317,
+            "camera_phase_change_percent_range": [
+              -9.78196943048043,
+              6.70129965458619
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              4,
+              5,
+              7,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14
+            ]
+          },
+          "Bytes": {
+            "baseline": {
+              "median": 560.0,
+              "p95": 560,
+              "min": 560,
+              "max": 560,
+              "mean": 560
+            },
+            "candidate": {
+              "median": 560.0,
+              "p95": 560,
+              "min": 560,
+              "max": 560,
+              "mean": 560
+            },
+            "median_change_percent": 0.0,
+            "block_medians": [
+              560.0,
+              560.0,
+              560.0,
+              560.0
+            ],
+            "block_p95": [
+              560,
+              560,
+              560,
+              560
+            ],
+            "matched_sample_delta_median": 0.0,
+            "matched_sample_percent_median": 0.0,
+            "camera_phase_change_percent_median": 0.0,
+            "camera_phase_change_percent_range": [
+              0.0,
+              0.0
+            ],
+            "improved_camera_phases": []
+          }
+        },
+        "depth_construction": {
+          "WallMs": {
+            "baseline": {
+              "median": 0.0209,
+              "p95": 0.0304,
+              "min": 0.0198,
+              "max": 0.0867,
+              "mean": 0.023365625
+            },
+            "candidate": {
+              "median": 0.0206,
+              "p95": 0.0385,
+              "min": 0.0194,
+              "max": 0.1161,
+              "mean": 0.02375703125
+            },
+            "median_change_percent": -1.4354066985645897,
+            "block_medians": [
+              0.022850000000000002,
+              0.020749999999999998,
+              0.0204,
+              0.0206
+            ],
+            "block_p95": [
+              0.0304,
+              0.0316,
+              0.0422,
+              0.0245
+            ],
+            "matched_sample_delta_median": -0.00020000000000000226,
+            "matched_sample_percent_median": -0.9501241254795845,
+            "camera_phase_change_percent_median": -1.2037616465025713,
+            "camera_phase_change_percent_range": [
+              -8.29596412556054,
+              2.6128266033254244
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              8,
+              9,
+              10,
+              11,
+              13,
+              14,
+              15
+            ]
+          },
+          "ThreadCpuMs": {
+            "baseline": {
+              "median": 0.021131499999967218,
+              "p95": 0.030656000000021777,
+              "min": 0.019988999999895896,
+              "max": 0.08700999999996384,
+              "mean": 0.0235863828124927
+            },
+            "candidate": {
+              "median": 0.020771000000024742,
+              "p95": 0.03878799999995408,
+              "min": 0.019548999999983607,
+              "max": 0.11689400000000205,
+              "mean": 0.023889835937501935
+            },
+            "median_change_percent": -1.7059839573292712,
+            "block_medians": [
+              0.023083999999983007,
+              0.020926499999973203,
+              0.020616000000018175,
+              0.020790999999974247
+            ],
+            "block_p95": [
+              0.030656000000021777,
+              0.03187800000000607,
+              0.04131199999994806,
+              0.024686999999971704
+            ],
+            "matched_sample_delta_median": -0.00016550000003690002,
+            "matched_sample_percent_median": -0.8019307380627505,
+            "camera_phase_change_percent_median": -1.2039199994875127,
+            "camera_phase_change_percent_range": [
+              -8.358301706558835,
+              2.641056422594401
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              8,
+              9,
+              10,
+              11,
+              13,
+              14,
+              15
+            ]
+          },
+          "Bytes": {
+            "baseline": {
+              "median": 264.0,
+              "p95": 264,
+              "min": 264,
+              "max": 264,
+              "mean": 264
+            },
+            "candidate": {
+              "median": 264.0,
+              "p95": 264,
+              "min": 264,
+              "max": 264,
+              "mean": 264
+            },
+            "median_change_percent": 0.0,
+            "block_medians": [
+              264.0,
+              264.0,
+              264.0,
+              264.0
+            ],
+            "block_p95": [
+              264,
+              264,
+              264,
+              264
+            ],
+            "matched_sample_delta_median": 0.0,
+            "matched_sample_percent_median": 0.0,
+            "camera_phase_change_percent_median": 0.0,
+            "camera_phase_change_percent_range": [
+              0.0,
+              0.0
+            ],
+            "improved_camera_phases": []
+          }
+        },
+        "sparse_queries": {
+          "WallMs": {
+            "baseline": {
+              "median": 1.7158,
+              "p95": 2.4253,
+              "min": 1.4204,
+              "max": 3.9657,
+              "mean": 1.84146875
+            },
+            "candidate": {
+              "median": 1.6638,
+              "p95": 2.5649,
+              "min": 1.419,
+              "max": 3.1258,
+              "mean": 1.7929859375
+            },
+            "median_change_percent": -3.0306562536426163,
+            "block_medians": [
+              1.8766500000000002,
+              1.72515,
+              1.6383,
+              1.65405
+            ],
+            "block_p95": [
+              2.651,
+              2.4361,
+              2.5864,
+              1.9306
+            ],
+            "matched_sample_delta_median": -0.028900000000000037,
+            "matched_sample_percent_median": -1.8236679583014115,
+            "camera_phase_change_percent_median": -2.7071042882116645,
+            "camera_phase_change_percent_range": [
+              -11.833557046979859,
+              13.422168382798304
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              7,
+              8,
+              9,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "ThreadCpuMs": {
+            "baseline": {
+              "median": 1.7164275000000089,
+              "p95": 2.426306000000068,
+              "min": 1.4206980000000158,
+              "max": 3.9684530000000677,
+              "mean": 1.8419856718750038
+            },
+            "candidate": {
+              "median": 1.6642555000000243,
+              "p95": 2.5656739999999445,
+              "min": 1.4193959999998924,
+              "max": 3.116115000000036,
+              "mean": 1.791912734374998
+            },
+            "median_change_percent": -3.039569105015172,
+            "block_medians": [
+              1.8775834999999574,
+              1.725742500000024,
+              1.6387420000000361,
+              1.6544564999999807
+            ],
+            "block_p95": [
+              2.652512999999999,
+              2.4369219999999814,
+              2.5874670000000606,
+              1.931067999999982
+            ],
+            "matched_sample_delta_median": -0.029048499999930755,
+            "matched_sample_percent_median": -1.8244435090438216,
+            "camera_phase_change_percent_median": -2.704824806748285,
+            "camera_phase_change_percent_range": [
+              -11.83996968610469,
+              13.440099212702329
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              7,
+              8,
+              9,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "Bytes": {
+            "baseline": {
+              "median": 0.0,
+              "p95": 0,
+              "min": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "candidate": {
+              "median": 0.0,
+              "p95": 0,
+              "min": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "median_change_percent": null,
+            "block_medians": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "block_p95": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "matched_sample_delta_median": 0.0,
+            "matched_sample_percent_median": null,
+            "camera_phase_change_percent_median": null,
+            "camera_phase_change_percent_range": null,
+            "improved_camera_phases": []
+          }
+        },
+        "construction_queries": {
+          "WallMs": {
+            "baseline": {
+              "median": 1.7365,
+              "p95": 2.4533,
+              "min": 1.4402000000000001,
+              "max": 3.9885,
+              "mean": 1.864834375
+            },
+            "candidate": {
+              "median": 1.6847999999999999,
+              "p95": 2.6073000000000004,
+              "min": 1.4386,
+              "max": 3.2419,
+              "mean": 1.81674296875
+            },
+            "median_change_percent": -2.9772530953066534,
+            "block_medians": [
+              1.90425,
+              1.7454,
+              1.6585,
+              1.6755
+            ],
+            "block_p95": [
+              2.6799999999999997,
+              2.4677000000000002,
+              2.6233999999999997,
+              1.9516
+            ],
+            "matched_sample_delta_median": -0.03469999999999995,
+            "matched_sample_percent_median": -2.0966632569770107,
+            "camera_phase_change_percent_median": -2.687681401985137,
+            "camera_phase_change_percent_range": [
+              -11.722691306887578,
+              13.31359176836564
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              7,
+              8,
+              9,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "ThreadCpuMs": {
+            "baseline": {
+              "median": 1.737288499999977,
+              "p95": 2.4545480000000452,
+              "min": 1.4406869999999117,
+              "max": 3.9915470000000823,
+              "mean": 1.8655720546874965
+            },
+            "candidate": {
+              "median": 1.6853215000000432,
+              "p95": 2.608347999999978,
+              "min": 1.4392149999998765,
+              "max": 3.233009000000038,
+              "mean": 1.8158025703125
+            },
+            "median_change_percent": -2.9912705920711713,
+            "block_medians": [
+              1.905429999999967,
+              1.746187500000076,
+              1.659061999999949,
+              1.6763389999999845
+            ],
+            "block_p95": [
+              2.681867000000011,
+              2.4687999999999874,
+              2.619775000000004,
+              1.9522289999999884
+            ],
+            "matched_sample_delta_median": -0.034832000000051266,
+            "matched_sample_percent_median": -2.1041139013992574,
+            "camera_phase_change_percent_median": -2.6880408578491775,
+            "camera_phase_change_percent_range": [
+              -11.72795830993163,
+              13.327329439174518
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              7,
+              8,
+              9,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "Bytes": {
+            "baseline": {
+              "median": 264.0,
+              "p95": 264,
+              "min": 264,
+              "max": 264,
+              "mean": 264
+            },
+            "candidate": {
+              "median": 264.0,
+              "p95": 264,
+              "min": 264,
+              "max": 264,
+              "mean": 264
+            },
+            "median_change_percent": 0.0,
+            "block_medians": [
+              264.0,
+              264.0,
+              264.0,
+              264.0
+            ],
+            "block_p95": [
+              264,
+              264,
+              264,
+              264
+            ],
+            "matched_sample_delta_median": 0.0,
+            "matched_sample_percent_median": 0.0,
+            "camera_phase_change_percent_median": 0.0,
+            "camera_phase_change_percent_range": [
+              0.0,
+              0.0
+            ],
+            "improved_camera_phases": []
+          }
+        },
+        "repeated_queries": {
+          "WallMs": {
+            "baseline": {
+              "median": 0.0042,
+              "p95": 0.007,
+              "min": 0.004,
+              "max": 0.013,
+              "mean": 0.00482890625
+            },
+            "candidate": {
+              "median": 0.0039,
+              "p95": 0.0071,
+              "min": 0.0037,
+              "max": 0.0102,
+              "mean": 0.0044359375
+            },
+            "median_change_percent": -7.14285714285714,
+            "block_medians": [
+              0.0043,
+              0.004,
+              0.0039,
+              0.0041
+            ],
+            "block_p95": [
+              0.0072,
+              0.0064,
+              0.0093,
+              0.0047
+            ],
+            "matched_sample_delta_median": -0.00030000000000000035,
+            "matched_sample_percent_median": -7.317073170731714,
+            "camera_phase_change_percent_median": -7.14285714285714,
+            "camera_phase_change_percent_range": [
+              -10.465116279069765,
+              -3.6144578313253017
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "ThreadCpuMs": {
+            "baseline": {
+              "median": 0.0044060000000172295,
+              "p95": 0.007360999999946216,
+              "min": 0.0041669999999385254,
+              "max": 0.01361999999994623,
+              "mean": 0.005052937499999466
+            },
+            "candidate": {
+              "median": 0.0040859999999725005,
+              "p95": 0.007931999999982509,
+              "min": 0.0038459999999531647,
+              "max": 0.025738000000046668,
+              "mean": 0.0047946718749973805
+            },
+            "median_change_percent": -7.262823423592324,
+            "block_medians": [
+              0.004522000000065418,
+              0.004165999999997894,
+              0.0040459999999029606,
+              0.004346499999996922
+            ],
+            "block_p95": [
+              0.0074510000000600485,
+              0.006730000000061409,
+              0.009625000000028194,
+              0.004876999999964937
+            ],
+            "matched_sample_delta_median": -0.00031550000002766865,
+            "matched_sample_percent_median": -7.093533579692074,
+            "camera_phase_change_percent_median": -7.253082307132275,
+            "camera_phase_change_percent_range": [
+              -10.128831631323788,
+              -3.5804452606174264
+            ],
+            "improved_camera_phases": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "Bytes": {
+            "baseline": {
+              "median": 0.0,
+              "p95": 0,
+              "min": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "candidate": {
+              "median": 0.0,
+              "p95": 0,
+              "min": 0,
+              "max": 0,
+              "mean": 0
+            },
+            "median_change_percent": null,
+            "block_medians": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "block_p95": [
+              0,
+              0,
+              0,
+              0
+            ],
+            "matched_sample_delta_median": 0.0,
+            "matched_sample_percent_median": null,
+            "camera_phase_change_percent_median": null,
+            "camera_phase_change_percent_range": null,
+            "improved_camera_phases": []
+          }
+        }
+      },
+      "counters": {
+        "FramePreparedTriangles": {
+          "baseline": {
+            "median": 766.0,
+            "p95": 995,
+            "min": 719,
+            "max": 995,
+            "mean": 806.125
+          },
+          "candidate": {
+            "median": 766.0,
+            "p95": 995,
+            "min": 719,
+            "max": 995,
+            "mean": 806.125
+          },
+          "total_change_percent": 0.0,
+          "block_medians": [
+            766.0,
+            766.0,
+            766.0,
+            766.0
+          ]
+        },
+        "PreparedTriangles": {
+          "baseline": {
+            "median": 11718.0,
+            "p95": 12270,
+            "min": 10298,
+            "max": 12270,
+            "mean": 11508.625
+          },
+          "candidate": {
+            "median": 11718.0,
+            "p95": 12270,
+            "min": 10298,
+            "max": 12270,
+            "mean": 11508.625
+          },
+          "total_change_percent": 0.0,
+          "block_medians": [
+            11718.0,
+            11718.0,
+            11718.0,
+            11718.0
+          ]
+        },
+        "PreparedEdges": {
+          "baseline": {
+            "median": 41.0,
+            "p95": 59,
+            "min": 30,
+            "max": 59,
+            "mean": 42.25
+          },
+          "candidate": {
+            "median": 41.0,
+            "p95": 59,
+            "min": 30,
+            "max": 59,
+            "mean": 42.25
+          },
+          "total_change_percent": 0.0,
+          "block_medians": [
+            41.0,
+            41.0,
+            41.0,
+            41.0
+          ]
+        },
+        "PreparedGroups": {
+          "baseline": {
+            "median": 74.0,
+            "p95": 79,
+            "min": 67,
+            "max": 79,
+            "mean": 73.3125
+          },
+          "candidate": {
+            "median": 74.0,
+            "p95": 79,
+            "min": 67,
+            "max": 79,
+            "mean": 73.3125
+          },
+          "total_change_percent": 0.0,
+          "block_medians": [
+            74.0,
+            74.0,
+            74.0,
+            74.0
+          ]
+        },
+        "PreparedCells": {
+          "baseline": {
+            "median": 0.0,
+            "p95": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "candidate": {
+            "median": 0.0,
+            "p95": 0,
+            "min": 0,
+            "max": 0,
+            "mean": 0
+          },
+          "total_change_percent": null,
+          "block_medians": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "FrameIndexCapacityBytes": {
+          "baseline": {
+            "median": 187232.0,
+            "p95": 187680,
+            "min": 186784,
+            "max": 187680,
+            "mean": 187232
+          },
+          "candidate": {
+            "median": 187232.0,
+            "p95": 187680,
+            "min": 186784,
+            "max": 187680,
+            "mean": 187232
+          },
+          "total_change_percent": 0.0,
+          "block_medians": [
+            187232.0,
+            187232.0,
+            187232.0,
+            187232.0
+          ]
+        },
+        "IndependentIndexCapacityBytes": {
+          "baseline": {
+            "median": 187232.0,
+            "p95": 187680,
+            "min": 186784,
+            "max": 187680,
+            "mean": 187232
+          },
+          "candidate": {
+            "median": 187232.0,
+            "p95": 187680,
+            "min": 186784,
+            "max": 187680,
+            "mean": 187232
+          },
+          "total_change_percent": 0.0,
+          "block_medians": [
+            187232.0,
+            187232.0,
+            187232.0,
+            187232.0
+          ]
+        }
+      },
+      "FrameCoarseIndex": [
+        true
+      ],
+      "FrameExactIndex": [
+        true
+      ],
+      "IndependentCoarseIndex": [
+        true
+      ],
+      "IndependentExactIndex": [
+        true
+      ]
+    }
+  ]
+}

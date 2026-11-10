@@ -1,0 +1,991 @@
+{
+  "baseline_source": "ce82b2c6fccee2d77a9e9489e1c6415e04412e8c",
+  "harness_sha256": "8d0b5b86015f21ee68cac6a0e24759419b12ed3df2a4860c3d73826cae9292f9",
+  "quantiles": "Pooled median averages middle samples; p95 is nearest rank. Every raw sample retained.",
+  "modes": {
+    "micro": [
+      {
+        "name": "identity",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.1941,
+            "p95": 0.3086,
+            "mean": 0.22731796875,
+            "minimum": 0.1838,
+            "maximum": 2.2189
+          },
+          "bytes": {
+            "count": 128,
+            "median": 3456.0,
+            "p95": 3456,
+            "mean": 3456,
+            "minimum": 3456,
+            "maximum": 3456
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.0766,
+            "p95": 0.1246,
+            "mean": 0.0864375,
+            "minimum": 0.0731,
+            "maximum": 0.4754
+          },
+          "bytes": {
+            "count": 128,
+            "median": 1792.0,
+            "p95": 1792,
+            "mean": 1792,
+            "minimum": 1792,
+            "maximum": 1792
+          }
+        },
+        "median_change_percent": -60.53580628541988,
+        "mean_allocation_change_bytes": -1664,
+        "control_sha256": "bba3194561d26fe50b15c586eed4c0b6b0cc967758281d7365d552a10628000b",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.1886,
+              "p95": 0.2768,
+              "mean": 0.20345,
+              "minimum": 0.1847,
+              "maximum": 0.3314
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.07665,
+              "p95": 0.1184,
+              "mean": 0.089621875,
+              "minimum": 0.0731,
+              "maximum": 0.4754
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.0765,
+              "p95": 0.1246,
+              "mean": 0.083253125,
+              "minimum": 0.0734,
+              "maximum": 0.1537
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.2009,
+              "p95": 0.325,
+              "mean": 0.2511859375,
+              "minimum": 0.1838,
+              "maximum": 2.2189
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          }
+        ]
+      },
+      {
+        "name": "magnify-2",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.49685,
+            "p95": 0.6067,
+            "mean": 0.5146203125,
+            "minimum": 0.4635,
+            "maximum": 0.721
+          },
+          "bytes": {
+            "count": 128,
+            "median": 3456.0,
+            "p95": 3456,
+            "mean": 3456,
+            "minimum": 3456,
+            "maximum": 3456
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.41090000000000004,
+            "p95": 0.5404,
+            "mean": 0.44823125,
+            "minimum": 0.3935,
+            "maximum": 2.4245
+          },
+          "bytes": {
+            "count": 128,
+            "median": 1792.0,
+            "p95": 1792,
+            "mean": 1792,
+            "minimum": 1792,
+            "maximum": 1792
+          }
+        },
+        "median_change_percent": -17.298983596658946,
+        "mean_allocation_change_bytes": -1664,
+        "control_sha256": "2e1eac30cf3ac2e0f415b028d05b3d431c0118db12549e038ddda3cad9a51a44",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.5155000000000001,
+              "p95": 0.616,
+              "mean": 0.52393125,
+              "minimum": 0.4674,
+              "maximum": 0.721
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.41065,
+              "p95": 0.4636,
+              "mean": 0.419759375,
+              "minimum": 0.3935,
+              "maximum": 0.7161
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.4123,
+              "p95": 0.6505,
+              "mean": 0.476703125,
+              "minimum": 0.3936,
+              "maximum": 2.4245
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.4868,
+              "p95": 0.6028,
+              "mean": 0.505309375,
+              "minimum": 0.4635,
+              "maximum": 0.6907
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          }
+        ]
+      },
+      {
+        "name": "magnify-16",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.47185,
+            "p95": 0.6849,
+            "mean": 0.5500890625,
+            "minimum": 0.4461,
+            "maximum": 2.5405
+          },
+          "bytes": {
+            "count": 128,
+            "median": 3456.0,
+            "p95": 3456,
+            "mean": 3456,
+            "minimum": 3456,
+            "maximum": 3456
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.066,
+            "p95": 0.0808,
+            "mean": 0.06830625,
+            "minimum": 0.0648,
+            "maximum": 0.1027
+          },
+          "bytes": {
+            "count": 128,
+            "median": 1792.0,
+            "p95": 1792,
+            "mean": 1792,
+            "minimum": 1792,
+            "maximum": 1792
+          }
+        },
+        "median_change_percent": -86.01250397372047,
+        "mean_allocation_change_bytes": -1664,
+        "control_sha256": "d77b5261c8ad32007c050c8a85061d6b21cdc56285cc5ccf1a891a6507964670",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.46435,
+              "p95": 0.5509,
+              "mean": 0.477596875,
+              "minimum": 0.4461,
+              "maximum": 0.7024
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.0656,
+              "p95": 0.0808,
+              "mean": 0.0680234375,
+              "minimum": 0.0648,
+              "maximum": 0.1027
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.0662,
+              "p95": 0.0801,
+              "mean": 0.0685890625,
+              "minimum": 0.0657,
+              "maximum": 0.0949
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.47909999999999997,
+              "p95": 2.2387,
+              "mean": 0.62258125,
+              "minimum": 0.4487,
+              "maximum": 2.5405
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          }
+        ]
+      },
+      {
+        "name": "magnify-256",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.47215,
+            "p95": 0.5829,
+            "mean": 0.5370140625,
+            "minimum": 0.4509,
+            "maximum": 3.6367
+          },
+          "bytes": {
+            "count": 128,
+            "median": 3456.0,
+            "p95": 3456,
+            "mean": 3456,
+            "minimum": 3456,
+            "maximum": 3456
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 0.0606,
+            "p95": 0.0789,
+            "mean": 0.06429921875,
+            "minimum": 0.0598,
+            "maximum": 0.1294
+          },
+          "bytes": {
+            "count": 128,
+            "median": 1792.0,
+            "p95": 1792,
+            "mean": 1792,
+            "minimum": 1792,
+            "maximum": 1792
+          }
+        },
+        "median_change_percent": -87.16509583818701,
+        "mean_allocation_change_bytes": -1664,
+        "control_sha256": "c847f3ada74f4d05b79032deb063e89e01407c616d1865d5fa873d2aa67714e0",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.46615,
+              "p95": 0.5075,
+              "mean": 0.469440625,
+              "minimum": 0.4509,
+              "maximum": 0.5414
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.06035,
+              "p95": 0.0789,
+              "mean": 0.0647390625,
+              "minimum": 0.0598,
+              "maximum": 0.1294
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.06085,
+              "p95": 0.0782,
+              "mean": 0.063859375,
+              "minimum": 0.06,
+              "maximum": 0.0866
+            },
+            "bytes": {
+              "count": 64,
+              "median": 1792.0,
+              "p95": 1792,
+              "mean": 1792,
+              "minimum": 1792,
+              "maximum": 1792
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 0.48095,
+              "p95": 0.9232,
+              "mean": 0.6045874999999999,
+              "minimum": 0.4564,
+              "maximum": 3.6367
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3456.0,
+              "p95": 3456,
+              "mean": 3456,
+              "minimum": 3456,
+              "maximum": 3456
+            }
+          }
+        ]
+      }
+    ],
+    "frames": [
+      {
+        "name": "walk-first-person",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 4.74285,
+            "p95": 25.52,
+            "mean": 7.277471875,
+            "minimum": 3.3641,
+            "maximum": 44.4157
+          },
+          "bytes": {
+            "count": 128,
+            "median": 938712.0,
+            "p95": 2600816,
+            "mean": 1037678.75,
+            "minimum": 18512,
+            "maximum": 6098672
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 4.4901,
+            "p95": 16.3928,
+            "mean": 6.50359453125,
+            "minimum": 3.5207,
+            "maximum": 36.7309
+          },
+          "bytes": {
+            "count": 128,
+            "median": 938440.0,
+            "p95": 2600608,
+            "mean": 1037067.75,
+            "minimum": 18512,
+            "maximum": 6095640
+          }
+        },
+        "median_change_percent": -5.3290742907745265,
+        "mean_allocation_change_bytes": -611.0,
+        "control_sha256": "1b50633efdeb228e53f85cdbe20d608a381dc671d704b253d64cee3d3f084b81",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 4.5567,
+              "p95": 23.4757,
+              "mean": 7.269346875,
+              "minimum": 3.7144,
+              "maximum": 44.4157
+            },
+            "bytes": {
+              "count": 64,
+              "median": 938712.0,
+              "p95": 2600816,
+              "mean": 1037717.75,
+              "minimum": 18512,
+              "maximum": 6098672
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 4.59465,
+              "p95": 16.3928,
+              "mean": 6.70761875,
+              "minimum": 3.5207,
+              "maximum": 36.3812
+            },
+            "bytes": {
+              "count": 64,
+              "median": 938440.0,
+              "p95": 2600608,
+              "mean": 1037065.5,
+              "minimum": 18512,
+              "maximum": 6095640
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 4.380599999999999,
+              "p95": 14.8606,
+              "mean": 6.2995703125,
+              "minimum": 3.7113,
+              "maximum": 36.7309
+            },
+            "bytes": {
+              "count": 64,
+              "median": 938440.0,
+              "p95": 2600608,
+              "mean": 1037070,
+              "minimum": 18512,
+              "maximum": 6095640
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 5.0258,
+              "p95": 25.52,
+              "mean": 7.285596875,
+              "minimum": 3.3641,
+              "maximum": 39.0479
+            },
+            "bytes": {
+              "count": 64,
+              "median": 938712.0,
+              "p95": 2600816,
+              "mean": 1037639.75,
+              "minimum": 18512,
+              "maximum": 6098672
+            }
+          }
+        ],
+        "per_process_texture_misses": 183,
+        "per_process_eligible_misses": 164,
+        "eligible_miss_percent": 89.61748633879782
+      },
+      {
+        "name": "drive-first-person",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 9.7549,
+            "p95": 38.3814,
+            "mean": 18.40949765625,
+            "minimum": 3.9459,
+            "maximum": 349.2848
+          },
+          "bytes": {
+            "count": 128,
+            "median": 2864456.0,
+            "p95": 4797312,
+            "mean": 4238440.8125,
+            "minimum": 958168,
+            "maximum": 76192232
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 9.3808,
+            "p95": 34.591,
+            "mean": 14.44121953125,
+            "minimum": 3.7737,
+            "maximum": 201.5804
+          },
+          "bytes": {
+            "count": 128,
+            "median": 2863416.0,
+            "p95": 4795752,
+            "mean": 4237300.5625,
+            "minimum": 957856,
+            "maximum": 76180336
+          }
+        },
+        "median_change_percent": -3.834995745727776,
+        "mean_allocation_change_bytes": -1140.25,
+        "control_sha256": "a7a34dfe383538029870419ea9f4109214e4eaf59594d44a10551ced96c0b6e5",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 9.93365,
+              "p95": 38.3814,
+              "mean": 19.4696078125,
+              "minimum": 4.0659,
+              "maximum": 349.2848
+            },
+            "bytes": {
+              "count": 64,
+              "median": 2864456.0,
+              "p95": 4797312,
+              "mean": 4238391.5,
+              "minimum": 958168,
+              "maximum": 76192232
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 9.4778,
+              "p95": 43.8679,
+              "mean": 15.1595890625,
+              "minimum": 4.1,
+              "maximum": 201.5804
+            },
+            "bytes": {
+              "count": 64,
+              "median": 2863416.0,
+              "p95": 4795752,
+              "mean": 4237302.5,
+              "minimum": 957856,
+              "maximum": 76180336
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 9.35155,
+              "p95": 34.5084,
+              "mean": 13.72285,
+              "minimum": 3.7737,
+              "maximum": 183.3982
+            },
+            "bytes": {
+              "count": 64,
+              "median": 2863416.0,
+              "p95": 4795752,
+              "mean": 4237298.625,
+              "minimum": 957856,
+              "maximum": 76180336
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 9.652000000000001,
+              "p95": 34.7299,
+              "mean": 17.3493875,
+              "minimum": 3.9459,
+              "maximum": 291.8911
+            },
+            "bytes": {
+              "count": 64,
+              "median": 2864456.0,
+              "p95": 4797312,
+              "mean": 4238490.125,
+              "minimum": 958168,
+              "maximum": 76192232
+            }
+          }
+        ],
+        "per_process_texture_misses": 615,
+        "per_process_eligible_misses": 587,
+        "eligible_miss_percent": 95.44715447154472
+      },
+      {
+        "name": "drive-chase",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 11.0367,
+            "p95": 39.6463,
+            "mean": 17.3645171875,
+            "minimum": 6.3711,
+            "maximum": 226.7078
+          },
+          "bytes": {
+            "count": 128,
+            "median": 3193456.0,
+            "p95": 4886032,
+            "mean": 3304650.75,
+            "minimum": 859256,
+            "maximum": 14552600
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 11.0308,
+            "p95": 38.3221,
+            "mean": 14.510128125,
+            "minimum": 6.2386,
+            "maximum": 93.8708
+          },
+          "bytes": {
+            "count": 128,
+            "median": 3192416.0,
+            "p95": 4883680,
+            "mean": 3303665.8125,
+            "minimum": 858944,
+            "maximum": 14540704
+          }
+        },
+        "median_change_percent": -0.053458008281470626,
+        "mean_allocation_change_bytes": -984.9375,
+        "control_sha256": "ba668888fc2c24eabf1e1ded5ff028ffcd947a6714b71b1dbb2bbf0836793571",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 11.2056,
+              "p95": 39.6463,
+              "mean": 17.7237875,
+              "minimum": 6.5415,
+              "maximum": 226.7078
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3193456.0,
+              "p95": 4886032,
+              "mean": 3304650.75,
+              "minimum": 859256,
+              "maximum": 14552600
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 10.6691,
+              "p95": 44.44,
+              "mean": 14.8507203125,
+              "minimum": 6.2386,
+              "maximum": 93.8708
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3192416.0,
+              "p95": 4883680,
+              "mean": 3303711.75,
+              "minimum": 858944,
+              "maximum": 14540704
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 11.2299,
+              "p95": 36.8101,
+              "mean": 14.1695359375,
+              "minimum": 6.4105,
+              "maximum": 85.2373
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3192416.0,
+              "p95": 4883680,
+              "mean": 3303619.875,
+              "minimum": 858944,
+              "maximum": 14540704
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 10.76885,
+              "p95": 37.6813,
+              "mean": 17.005246875,
+              "minimum": 6.3711,
+              "maximum": 216.6702
+            },
+            "bytes": {
+              "count": 64,
+              "median": 3193456.0,
+              "p95": 4886032,
+              "mean": 3304650.75,
+              "minimum": 859256,
+              "maximum": 14552600
+            }
+          }
+        ],
+        "per_process_texture_misses": 621,
+        "per_process_eligible_misses": 586,
+        "eligible_miss_percent": 94.36392914653784
+      },
+      {
+        "name": "retained-control",
+        "baseline": {
+          "milliseconds": {
+            "count": 128,
+            "median": 6.1395,
+            "p95": 7.8935,
+            "mean": 6.4269789062500005,
+            "minimum": 5.7429,
+            "maximum": 10.1812
+          },
+          "bytes": {
+            "count": 128,
+            "median": 19416.0,
+            "p95": 19416,
+            "mean": 19417.9375,
+            "minimum": 19416,
+            "maximum": 19664
+          }
+        },
+        "candidate": {
+          "milliseconds": {
+            "count": 128,
+            "median": 6.1879,
+            "p95": 7.9369,
+            "mean": 6.367715625,
+            "minimum": 5.576,
+            "maximum": 8.1276
+          },
+          "bytes": {
+            "count": 128,
+            "median": 19416.0,
+            "p95": 19416,
+            "mean": 19417.9375,
+            "minimum": 19416,
+            "maximum": 19664
+          }
+        },
+        "median_change_percent": 0.7883378125254525,
+        "mean_allocation_change_bytes": 0.0,
+        "control_sha256": "50403178b61f4313b45b6a61bc463d286b2329340d916dceaaf4b68f6d269587",
+        "exact_controls": true,
+        "processes": [
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 6.1665,
+              "p95": 7.8935,
+              "mean": 6.4886265625,
+              "minimum": 5.7429,
+              "maximum": 8.0174
+            },
+            "bytes": {
+              "count": 64,
+              "median": 19416.0,
+              "p95": 19416,
+              "mean": 19416,
+              "minimum": 19416,
+              "maximum": 19416
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 6.229699999999999,
+              "p95": 8.0094,
+              "mean": 6.573709375,
+              "minimum": 5.576,
+              "maximum": 8.1276
+            },
+            "bytes": {
+              "count": 64,
+              "median": 19416.0,
+              "p95": 19416,
+              "mean": 19419.875,
+              "minimum": 19416,
+              "maximum": 19664
+            }
+          },
+          {
+            "variant": "candidate",
+            "milliseconds": {
+              "count": 64,
+              "median": 6.1414,
+              "p95": 6.6666,
+              "mean": 6.161721875,
+              "minimum": 5.61,
+              "maximum": 7.7938
+            },
+            "bytes": {
+              "count": 64,
+              "median": 19416.0,
+              "p95": 19416,
+              "mean": 19416,
+              "minimum": 19416,
+              "maximum": 19416
+            }
+          },
+          {
+            "variant": "baseline",
+            "milliseconds": {
+              "count": 64,
+              "median": 6.12665,
+              "p95": 7.3262,
+              "mean": 6.36533125,
+              "minimum": 5.8102,
+              "maximum": 10.1812
+            },
+            "bytes": {
+              "count": 64,
+              "median": 19416.0,
+              "p95": 19416,
+              "mean": 19419.875,
+              "minimum": 19416,
+              "maximum": 19664
+            }
+          }
+        ],
+        "per_process_texture_misses": 0,
+        "per_process_eligible_misses": 0,
+        "eligible_miss_percent": 0
+      }
+    ]
+  }
+}

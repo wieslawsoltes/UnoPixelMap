@@ -1,0 +1,4 @@
+Terrain frames walk-first-person: 4.5734 ms prepare, 1037718 managed bytes, 183/4096 texture misses, 164 eligible for opaque copy.
+Terrain frames drive-first-person: 9.9754 ms prepare, 4238392 managed bytes, 615/4095 texture misses, 587 eligible for opaque copy.
+Terrain frames drive-chase: 11.2063 ms prepare, 3304651 managed bytes, 621/4096 texture misses, 586 eligible for opaque copy.
+Terrain frames retained-control: 6.1773 ms prepare, 19416 managed bytes, 0/4096 texture misses, 0 eligible for opaque copy.

@@ -1,0 +1,1 @@
+Projected depth raster checks: 9,063,600 exact comparisons across 562 frames; 40 valid raster-empty triangles removed. Half-pixel/cell boundaries, winding, subpixel coverage, source-order ties and large-coordinate fallback agree with the frozen eager oracle.

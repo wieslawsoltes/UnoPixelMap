@@ -1,0 +1,4 @@
+Offline DEM range -7527 to 5657 m, Riva anchor 61.0 m.
+Elevation decoding, seamless sampling, water surfaces and request lifetime checks passed.
+Tile viewport checks passed for mixed LOD, retained fallback, retries and cancellation.
+Tile geometry and request lifetime checks passed (1421 anchor-tile building features).

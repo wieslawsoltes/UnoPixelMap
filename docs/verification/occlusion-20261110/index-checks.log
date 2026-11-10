@@ -1,0 +1,1 @@
+Passed 11,935,261 exact sparse/eager depth queries across 56 frames: all styles, projection modes, near-plane crossings, raised/courtyard roofs, signed terrain, wrapped worlds, bounded overflow and retained A→B→A frames.

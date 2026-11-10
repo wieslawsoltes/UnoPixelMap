@@ -1,0 +1,136 @@
+[
+  {
+    "name": "build-rendering",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "build",
+      "tests/PixelMap.Rendering.Tests",
+      "-c",
+      "Release",
+      "-m:1",
+      "--disable-build-servers",
+      "--nologo"
+    ],
+    "exit_code": 0,
+    "seconds": 8.460762739181519
+  },
+  {
+    "name": "rendering",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "tests/PixelMap.Rendering.Tests/bin/Release/net10.0/PixelMap.Rendering.Tests.dll"
+    ],
+    "exit_code": 0,
+    "seconds": 18.422855615615845
+  },
+  {
+    "name": "gpu",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "tests/PixelMap.Rendering.Tests/bin/Release/net10.0/PixelMap.Rendering.Tests.dll",
+      "--gpu-terrain",
+      "--gpu-output=/workspace/scratch/c64783d771e9/validation-20261110/integrated/gpu"
+    ],
+    "exit_code": 0,
+    "seconds": 17.20469617843628
+  },
+  {
+    "name": "build-PixelMap.Data.Checks",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "build",
+      "tests/PixelMap.Data.Checks",
+      "-c",
+      "Release",
+      "-m:1",
+      "--disable-build-servers",
+      "--nologo"
+    ],
+    "exit_code": 0,
+    "seconds": 2.1317198276519775
+  },
+  {
+    "name": "PixelMap.Data.Checks",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "tests/PixelMap.Data.Checks/bin/Release/net10.0/PixelMap.Data.Checks.dll"
+    ],
+    "exit_code": 0,
+    "seconds": 4.455413579940796
+  },
+  {
+    "name": "build-PixelMap.Routing.Tests",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "build",
+      "tests/PixelMap.Routing.Tests",
+      "-c",
+      "Release",
+      "-m:1",
+      "--disable-build-servers",
+      "--nologo"
+    ],
+    "exit_code": 0,
+    "seconds": 2.2169241905212402
+  },
+  {
+    "name": "PixelMap.Routing.Tests",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "tests/PixelMap.Routing.Tests/bin/Release/net10.0/PixelMap.Routing.Tests.dll"
+    ],
+    "exit_code": 0,
+    "seconds": 5.169850826263428
+  },
+  {
+    "name": "build-PixelMap.Simulation.Tests",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "build",
+      "tests/PixelMap.Simulation.Tests",
+      "-c",
+      "Release",
+      "-m:1",
+      "--disable-build-servers",
+      "--nologo"
+    ],
+    "exit_code": 0,
+    "seconds": 4.702052593231201
+  },
+  {
+    "name": "PixelMap.Simulation.Tests",
+    "command": [
+      "/workspace/scratch/c64783d771e9/toolchain/dotnet/dotnet",
+      "tests/PixelMap.Simulation.Tests/bin/Release/net10.0/PixelMap.Simulation.Tests.dll"
+    ],
+    "exit_code": 0,
+    "seconds": 0.6170814037322998
+  },
+  {
+    "name": "audio",
+    "command": [
+      "node",
+      "tests/browser/audio.cjs"
+    ],
+    "exit_code": 0,
+    "seconds": 0.07279229164123535
+  },
+  {
+    "name": "input-adapter",
+    "command": [
+      "node",
+      "tests/browser/input-adapter.cjs"
+    ],
+    "exit_code": 0,
+    "seconds": 0.05641674995422363
+  },
+  {
+    "name": "camera-replay-checks",
+    "command": [
+      "node",
+      "tests/browser/camera-replay-checks.cjs"
+    ],
+    "exit_code": 0,
+    "seconds": 0.11723995208740234
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "checks": [
+    "final/summary.json",
+    "final/phase-pairs.csv.gz",
+    "exploratory-32/summary.json",
+    "exploratory-32/phase-pairs.csv.gz",
+    "exploratory-minecraft/summary.json",
+    "exploratory-minecraft/phase-pairs.csv.gz",
+    "query-counts/summary.json",
+    "query-counts/queries.csv.gz",
+    "candidate-source.patch reconstructs measured and integrated source exactly",
+    "all runtime files except renderer DLL/PDB are identical",
+    "both frozen runtime trees still match recorded identities",
+    "all12 ABBA reports preserve original decoded bytes",
+    "all independent prepared-geometry/cell/group counters match framebyframe across each ABBA",
+    "both exploratory-screen reports preserve original decoded bytes"
+  ],
+  "unchanged_runtime_files": 35,
+  "source_sha256": "e5ca142f26f920b787f54eca49ea28b5b45a227089d59e4016e6d07fa68405a2"
+}
