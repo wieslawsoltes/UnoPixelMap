@@ -23,11 +23,15 @@ function makeTrace(scenario, map) {
     // pixels even when CDP receives a fractional point (odd map dimensions).
     // Choose an integral point up front so the declared trace equals the input.
     const center = {x: Math.floor(map.x + map.width * .5), y: Math.floor(map.y + map.height * .5)};
+    // A barrier-paced CDP vertical wheel can expose a legacy 120-unit detent.
+    // Keep a horizontal component in each event so the production adapter
+    // unambiguously selects its immediate two-axis trackpad path, even after a
+    // slow GPU fence. Alt/Shift still select tilt/orbit through the public route.
     const segments = scenario.motion === "pan"
-        ? [[12, 0, 0], [0, 12, 0], [-12, 0, 0], [0, -12, 0]]
+        ? [[12, 1, 0], [1, 12, 0], [-12, -1, 0], [-1, -12, 0]]
         : scenario.motion === "orbit"
-            ? [[-10, 0, 8], [0, -5, 1], [10, 0, 8], [0, 5, 1]]
-            : [[-10, 0, 0], [0, -5, 0], [10, 0, 0], [0, 5, 0]];
+            ? [[-10, 0, 8], [1, -5, 1], [10, 0, 8], [-1, 5, 1]]
+            : [[-10, 0, 0], [1, -5, 0], [10, 0, 0], [-1, 5, 0]];
     return segments.flatMap(([deltaX, deltaY, modifiers]) => Array.from({length: 8}, () =>
         ({...center, deltaX, deltaY, modifiers})));
 }

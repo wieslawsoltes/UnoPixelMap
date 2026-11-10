@@ -1,4 +1,6 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const vm = require("node:vm");
 const {installCameraReplayProbe} = require("./camera-replay-probe.cjs");
 const {sha256, checkStep, compareReplays} = require("./camera-replay-contract.cjs");
@@ -177,5 +179,39 @@ for (const scenario of scenarios) {
     const fractional = makeTrace(scenario, {x: .25, y: 59, width: 1200, height: 665});
     assert.ok(fractional.every(event => event.x === 600 && event.y === 391),
         "Odd or fractional map geometry still declares the integral native wheel coordinates");
+}
+
+// Execute the actual production adapter. Native CDP input can carry a legacy
+// detent even for tiny pixel deltas; the fence barrier also makes each burst
+// fresh. A diagonal trace must still take the immediate pan/look route.
+{
+    const listeners = new Map();
+    class Element { closest() { return null; } }
+    const canvas = new Element();
+    const document = {addEventListener: (name, callback) => listeners.set(name, callback),
+        documentElement: {clientWidth: 1200, clientHeight: 780}};
+    const adapterContext = {document, window: {addEventListener() {}}, Element, AbortController,
+        WheelEvent: {DOM_DELTA_PIXEL: 0, DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2}};
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../../src/PixelMap.Controls/Browser/map-input.js"), "utf8"), adapterContext);
+    const adapter = adapterContext.PixelAtlasInput;
+    adapter.attach(1, () => {}, () => {});
+    let timestamp = 0;
+    const classify = input => {
+        const event = {target: canvas, eventPhase: 1, deltaMode: 0, deltaX: input.deltaX, deltaY: input.deltaY,
+            clientX: input.x, clientY: input.y, timeStamp: timestamp += 1000, wheelDeltaY: 120,
+            altKey: Boolean(input.modifiers & 1), ctrlKey: Boolean(input.modifiers & 2),
+            metaKey: Boolean(input.modifiers & 4), shiftKey: Boolean(input.modifiers & 8), preventDefault() {}};
+        listeners.get("wheel")(event);
+        const sample = [...adapter.takeWheel(1)];
+        event.eventPhase = 0;
+        return sample;
+    };
+    assert.equal(classify({x: 600, y: 391, deltaX: 0, deltaY: 12, modifiers: 0})[0], 1,
+        "The fixture reproduces the observed CDP pure-vertical detent");
+    for (const scenario of scenarios)
+        for (const input of makeTrace(scenario, {x: 0, y: 60, width: 1200, height: 663}))
+            assert.deepEqual(classify(input), [0, input.deltaX, input.deltaY,
+                input.modifiers & 8 ? 1 : 0, input.modifiers & 1 ? 1 : 0],
+                "Every barrier-paced replay event reaches the immediate trackpad route");
 }
 console.log("Camera replay checks passed: native input contract, cached projection state, terrain-instance ranges, context isolation, fence identity and exact sequence comparison.");
