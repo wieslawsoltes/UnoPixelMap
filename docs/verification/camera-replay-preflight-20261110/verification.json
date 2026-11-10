@@ -1,0 +1,246 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "application": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+  "preflightRunId": 42906521344,
+  "exactProjectionSequence": true,
+  "totalInputs": 192,
+  "totalSubmissions": 204,
+  "minimumQuietMs": 284.4000000000233,
+  "repetitions": [
+    {
+      "repetition": 1,
+      "cases": [
+        {
+          "name": "map-pan-relief",
+          "inputs": 32,
+          "submissions": 34,
+          "submissionsPerInput": {
+            "1": 30,
+            "2": 2
+          },
+          "multiSubmissionSteps": [
+            8,
+            30
+          ],
+          "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+          "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c",
+          "taskCpuMs": 2319.401,
+          "taskCpuPerStepMs": 72.48128125,
+          "inputToFirstSubmission": {
+            "samples": 32,
+            "medianMs": 28.60000000000582,
+            "p95Ms": 175,
+            "maxMs": 241.20000000001164,
+            "meanMs": 47.44687500000282
+          },
+          "inputToFirstFenceSignal": {
+            "samples": 32,
+            "medianMs": 1035.5,
+            "p95Ms": 1125.8999999999942,
+            "maxMs": 1264.7000000000116,
+            "meanMs": 1029.9593749999972
+          },
+          "inputToSettledFenceSignal": {
+            "samples": 32,
+            "medianMs": 1038.2999999999884,
+            "p95Ms": 1972.8999999999942,
+            "maxMs": 2131.5,
+            "meanMs": 1095.0781249999968
+          }
+        },
+        {
+          "name": "map-orbit-relief",
+          "inputs": 32,
+          "submissions": 32,
+          "submissionsPerInput": {
+            "1": 32
+          },
+          "multiSubmissionSteps": [],
+          "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+          "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba",
+          "taskCpuMs": 3455.504,
+          "taskCpuPerStepMs": 107.9845,
+          "inputToFirstSubmission": {
+            "samples": 32,
+            "medianMs": 36.70000000001164,
+            "p95Ms": 292.5999999999767,
+            "maxMs": 339.30000000001746,
+            "meanMs": 84.50312499999927
+          },
+          "inputToFirstFenceSignal": {
+            "samples": 32,
+            "medianMs": 1036.8999999999942,
+            "p95Ms": 1268.4000000000233,
+            "maxMs": 1313.8999999999942,
+            "meanMs": 1060.7218749999984
+          },
+          "inputToSettledFenceSignal": {
+            "samples": 32,
+            "medianMs": 1036.8999999999942,
+            "p95Ms": 1268.4000000000233,
+            "maxMs": 1313.8999999999942,
+            "meanMs": 1060.7218749999984
+          }
+        },
+        {
+          "name": "walk-look-firstperson",
+          "inputs": 32,
+          "submissions": 36,
+          "submissionsPerInput": {
+            "1": 28,
+            "2": 4
+          },
+          "multiSubmissionSteps": [
+            9,
+            15,
+            24,
+            30
+          ],
+          "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+          "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4",
+          "taskCpuMs": 4204.905999999999,
+          "taskCpuPerStepMs": 131.40331249999997,
+          "inputToFirstSubmission": {
+            "samples": 32,
+            "medianMs": 85.60000000000582,
+            "p95Ms": 358,
+            "maxMs": 447.69999999998254,
+            "meanMs": 110.79062499999782
+          },
+          "inputToFirstFenceSignal": {
+            "samples": 32,
+            "medianMs": 227.89999999999418,
+            "p95Ms": 488.5,
+            "maxMs": 610.7999999999884,
+            "meanMs": 254.8593749999991
+          },
+          "inputToSettledFenceSignal": {
+            "samples": 32,
+            "medianMs": 229.60000000000582,
+            "p95Ms": 527.5999999999767,
+            "maxMs": 610.7999999999884,
+            "meanMs": 276.69374999999854
+          }
+        }
+      ]
+    },
+    {
+      "repetition": 2,
+      "cases": [
+        {
+          "name": "map-pan-relief",
+          "inputs": 32,
+          "submissions": 34,
+          "submissionsPerInput": {
+            "1": 30,
+            "2": 2
+          },
+          "multiSubmissionSteps": [
+            8,
+            30
+          ],
+          "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+          "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c",
+          "taskCpuMs": 2317.899,
+          "taskCpuPerStepMs": 72.43434375,
+          "inputToFirstSubmission": {
+            "samples": 32,
+            "medianMs": 27.70000000001164,
+            "p95Ms": 170.89999999999418,
+            "maxMs": 239.60000000000582,
+            "meanMs": 45.537500000000364
+          },
+          "inputToFirstFenceSignal": {
+            "samples": 32,
+            "medianMs": 1019.1000000000349,
+            "p95Ms": 1143,
+            "maxMs": 1265.2999999999884,
+            "meanMs": 1017.9375000000009
+          },
+          "inputToSettledFenceSignal": {
+            "samples": 32,
+            "medianMs": 1027.7000000000116,
+            "p95Ms": 1946.7000000000116,
+            "maxMs": 1980.6000000000058,
+            "meanMs": 1078.0218750000004
+          }
+        },
+        {
+          "name": "map-orbit-relief",
+          "inputs": 32,
+          "submissions": 32,
+          "submissionsPerInput": {
+            "1": 32
+          },
+          "multiSubmissionSteps": [],
+          "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+          "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba",
+          "taskCpuMs": 3534.9120000000003,
+          "taskCpuPerStepMs": 110.46600000000001,
+          "inputToFirstSubmission": {
+            "samples": 32,
+            "medianMs": 36.29999999998836,
+            "p95Ms": 292.9000000000233,
+            "maxMs": 337.70000000001164,
+            "meanMs": 83.19062500000473
+          },
+          "inputToFirstFenceSignal": {
+            "samples": 32,
+            "medianMs": 1064.2999999999884,
+            "p95Ms": 1197.9000000000233,
+            "maxMs": 1234.5,
+            "meanMs": 1067.293749999997
+          },
+          "inputToSettledFenceSignal": {
+            "samples": 32,
+            "medianMs": 1064.2999999999884,
+            "p95Ms": 1197.9000000000233,
+            "maxMs": 1234.5,
+            "meanMs": 1067.293749999997
+          }
+        },
+        {
+          "name": "walk-look-firstperson",
+          "inputs": 32,
+          "submissions": 36,
+          "submissionsPerInput": {
+            "1": 28,
+            "2": 4
+          },
+          "multiSubmissionSteps": [
+            9,
+            15,
+            24,
+            30
+          ],
+          "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+          "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4",
+          "taskCpuMs": 4230.404,
+          "taskCpuPerStepMs": 132.200125,
+          "inputToFirstSubmission": {
+            "samples": 32,
+            "medianMs": 85.5,
+            "p95Ms": 353.70000000001164,
+            "maxMs": 442.70000000001164,
+            "meanMs": 109.31562499999745
+          },
+          "inputToFirstFenceSignal": {
+            "samples": 32,
+            "medianMs": 236,
+            "p95Ms": 484.29999999998836,
+            "maxMs": 606.4000000000233,
+            "meanMs": 253.99375000000146
+          },
+          "inputToSettledFenceSignal": {
+            "samples": 32,
+            "medianMs": 239.59999999997672,
+            "p95Ms": 504.5,
+            "maxMs": 606.4000000000233,
+            "meanMs": 273.9656249999989
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -85,6 +85,11 @@ tile refreshes. Cross-artifact timing comparisons require exact sequence identit
 It measures controlled input/render latency; it does not replace simulation
 throughput measurements or establish physical display FPS.
 
+The [same-artifact preflight](verification/camera-replay-preflight-20261110/README.md)
+reproduces all 96 trusted inputs and 102 ordered, individually fenced submissions
+in each of two independent captures. Its complete raw records and offline verifier
+establish repeatability of the observer before the cross-artifact comparison.
+
 ## Camera clearance and exact Earth preprocessing · 9 November 2026
 
 Third-person follow now checks terrain clearance at the actual interpolated eye.

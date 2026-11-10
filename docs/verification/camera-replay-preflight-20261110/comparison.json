@@ -1,0 +1,1790 @@
+{
+  "schema": 2,
+  "baseline": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+  "candidate": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+  "notes": "Exact ordered native inputs and every submitted projection float match. These are controlled camera/render workloads with a fence barrier between inputs, not free-roam simulation or physical display FPS.",
+  "comparisons": [
+    {
+      "name": "map-pan-relief",
+      "exactProjectionSequence": true,
+      "steps": 32,
+      "submissions": 34,
+      "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+      "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c",
+      "baseline": {
+        "steps": 32,
+        "submissions": 34,
+        "taskCpuMs": 2319.401,
+        "taskCpuPerStepMs": 72.48128125,
+        "inputToFirstSubmission": {
+          "samples": 32,
+          "medianMs": 28.60000000000582,
+          "p95Ms": 175,
+          "maxMs": 241.20000000001164,
+          "meanMs": 47.44687500000282
+        },
+        "inputToFirstFenceSignal": {
+          "samples": 32,
+          "medianMs": 1035.5,
+          "p95Ms": 1125.8999999999942,
+          "maxMs": 1264.7000000000116,
+          "meanMs": 1029.9593749999972
+        },
+        "inputToSettledFenceSignal": {
+          "samples": 32,
+          "medianMs": 1038.2999999999884,
+          "p95Ms": 1972.8999999999942,
+          "maxMs": 2131.5,
+          "meanMs": 1095.0781249999968
+        },
+        "capture": {
+          "durationMs": 37638.90000000001,
+          "raf": {
+            "samples": 2224,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.700000000004366,
+            "maxMs": 216.70000000000073,
+            "meanMs": 16.913264388489203
+          },
+          "metricWindowMs": 37978.75900000001,
+          "mapResolves": {
+            "submissions": 34,
+            "submissionsPerSecond": 0.903320766547375,
+            "compositorSubmissions": 34,
+            "detachedSubmissions": 0,
+            "intervals": {
+              "samples": 33,
+              "medianMs": 1111.6000000000058,
+              "p95Ms": 2010.7000000000116,
+              "maxMs": 2122.5,
+              "meanMs": 1106.2363636363636
+            },
+            "signaledCompletions": 34,
+            "submitToSignal": {
+              "samples": 34,
+              "medianMs": 1004.3999999999942,
+              "p95Ms": 1888.5,
+              "maxMs": 2009.8999999999942,
+              "meanMs": 1039.3794117647014
+            },
+            "byPixelSize": {
+              "2": 34
+            }
+          },
+          "directGpuFrames": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 2,
+            "releasedBeforeSignal": 0
+          },
+          "rafByObservedPixelSize": {
+            "2": {
+              "samples": 2224,
+              "medianMs": 16.69999999999709,
+              "p95Ms": 16.700000000004366,
+              "maxMs": 216.70000000000073,
+              "meanMs": 16.913264388489203
+            }
+          },
+          "mapTextureUploadsByPixelSize": {},
+          "allTextureUploadDimensions": {},
+          "artSizedOffscreenDrawsByPixelSize": {
+            "2": 714
+          },
+          "artSizedDepthTestedDrawsByPixelSize": {
+            "2": 646
+          },
+          "readPixels": {
+            "samples": 0,
+            "totalPixels": 0,
+            "totalMs": 0,
+            "dimensions": {},
+            "byDestination": {},
+            "byPixelSize": {}
+          },
+          "transfersByMethod": {
+            "bufferSubData": {
+              "samples": 254,
+              "medianMs": 0,
+              "p95Ms": 0.10000000000582077,
+              "maxMs": 0.10000000000582077,
+              "meanMs": 0.007874015748031496,
+              "totalCallMs": 2,
+              "uploadedBytes": 1940484,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {}
+            },
+            "texStorage2D": {
+              "samples": 35,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0,
+              "meanMs": 0,
+              "totalCallMs": 0,
+              "uploadedBytes": 0,
+              "allocationCalls": 35,
+              "unknownByteCounts": 35,
+              "dimensions": {
+                "600x332x1": {
+                  "calls": 34,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 34,
+                  "totalCallMs": 0
+                },
+                "128x16x1": {
+                  "calls": 1,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 1,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texSubImage2D": {
+              "samples": 45,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0.10000000000582077,
+              "meanMs": 0.0022222222223515727,
+              "totalCallMs": 0.10000000000582077,
+              "uploadedBytes": 530476,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "64x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 512,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "12x8x1": {
+                  "calls": 3,
+                  "uploadedBytes": 288,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "44x9x1": {
+                  "calls": 1,
+                  "uploadedBytes": 396,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "448x14x1": {
+                  "calls": 1,
+                  "uploadedBytes": 6272,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "618x1x1": {
+                  "calls": 13,
+                  "uploadedBytes": 128544,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.10000000000582077
+                },
+                "1126x1x1": {
+                  "calls": 10,
+                  "uploadedBytes": 180160,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "4x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 32,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "2790x1x1": {
+                  "calls": 4,
+                  "uploadedBytes": 178560,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "984x1x1": {
+                  "calls": 2,
+                  "uploadedBytes": 31488,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "118x1x1": {
+                  "calls": 2,
+                  "uploadedBytes": 3776,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "8x8x1": {
+                  "calls": 7,
+                  "uploadedBytes": 448,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texSubImage3D": {
+              "samples": 61,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 0.10000000000582077,
+              "meanMs": 0.006557377049084905,
+              "totalCallMs": 0.39999999999417923,
+              "uploadedBytes": 6636832,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "17x17x1": {
+                  "calls": 36,
+                  "uploadedBytes": 83232,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.09999999997671694
+                },
+                "256x256x1": {
+                  "calls": 25,
+                  "uploadedBytes": 6553600,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.3000000000174623
+                }
+              }
+            }
+          },
+          "pixelPackReadback": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 0,
+            "overwritten": 0,
+            "abandoned": 0,
+            "releasedWithoutCopy": 0,
+            "submissions": 0,
+            "syncByMethod": {
+              "fenceSync": {
+                "samples": 34,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.011764705882181743,
+                "totalCallMs": 0.39999999999417923
+              },
+              "flush": {
+                "samples": 34,
+                "medianMs": 0,
+                "p95Ms": 0.20000000001164153,
+                "maxMs": 0.20000000001164153,
+                "meanMs": 0.026470588235122917,
+                "totalCallMs": 0.8999999999941792
+              },
+              "clientWaitSync": {
+                "samples": 2064,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 2.1000000000058208,
+                "meanMs": 0.008284883720855498,
+                "totalCallMs": 17.09999999984575
+              },
+              "deleteSync": {
+                "samples": 34,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.008823529412278304,
+                "totalCallMs": 0.3000000000174623
+              }
+            },
+            "pollStatuses": {
+              "timeoutExpired": 2030,
+              "conditionSatisfied": 34
+            },
+            "positiveTimeoutPolls": 0,
+            "submitToSignal": {
+              "samples": 0
+            },
+            "getBufferSubData": {
+              "samples": 0,
+              "totalCallMs": 0,
+              "copiedBytes": 0,
+              "correlatedCopies": 0,
+              "submitToCopy": {
+                "samples": 0
+              }
+            }
+          },
+          "finalObservedPixelSize": 2,
+          "longTasks": 8,
+          "longTaskDurationMs": 869,
+          "cpu": {
+            "TaskDurationMs": 2319.401,
+            "ScriptDurationMs": 1872.9640000000002,
+            "LayoutDurationMs": 0.118,
+            "RecalcStyleDurationMs": 0.05699999999999999
+          }
+        }
+      },
+      "candidate": {
+        "steps": 32,
+        "submissions": 34,
+        "taskCpuMs": 2317.899,
+        "taskCpuPerStepMs": 72.43434375,
+        "inputToFirstSubmission": {
+          "samples": 32,
+          "medianMs": 27.70000000001164,
+          "p95Ms": 170.89999999999418,
+          "maxMs": 239.60000000000582,
+          "meanMs": 45.537500000000364
+        },
+        "inputToFirstFenceSignal": {
+          "samples": 32,
+          "medianMs": 1019.1000000000349,
+          "p95Ms": 1143,
+          "maxMs": 1265.2999999999884,
+          "meanMs": 1017.9375000000009
+        },
+        "inputToSettledFenceSignal": {
+          "samples": 32,
+          "medianMs": 1027.7000000000116,
+          "p95Ms": 1946.7000000000116,
+          "maxMs": 1980.6000000000058,
+          "meanMs": 1078.0218750000004
+        },
+        "capture": {
+          "durationMs": 36952.100000000006,
+          "raf": {
+            "samples": 2183,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.700000000004366,
+            "maxMs": 216.70000000000073,
+            "meanMs": 16.91795693999083
+          },
+          "metricWindowMs": 37288.44500000002,
+          "mapResolves": {
+            "submissions": 34,
+            "submissionsPerSecond": 0.9201100884658786,
+            "compositorSubmissions": 34,
+            "detachedSubmissions": 0,
+            "intervals": {
+              "samples": 33,
+              "medianMs": 1096.2999999999884,
+              "p95Ms": 1945.2999999999884,
+              "maxMs": 1969.1000000000058,
+              "meanMs": 1086.169696969697
+            },
+            "signaledCompletions": 34,
+            "submitToSignal": {
+              "samples": 34,
+              "medianMs": 990.2000000000116,
+              "p95Ms": 1849.899999999965,
+              "maxMs": 1863.8000000000175,
+              "meanMs": 1024.417647058823
+            },
+            "byPixelSize": {
+              "2": 34
+            }
+          },
+          "directGpuFrames": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 2,
+            "releasedBeforeSignal": 0
+          },
+          "rafByObservedPixelSize": {
+            "2": {
+              "samples": 2183,
+              "medianMs": 16.69999999999709,
+              "p95Ms": 16.700000000004366,
+              "maxMs": 216.70000000000073,
+              "meanMs": 16.91795693999083
+            }
+          },
+          "mapTextureUploadsByPixelSize": {},
+          "allTextureUploadDimensions": {},
+          "artSizedOffscreenDrawsByPixelSize": {
+            "2": 714
+          },
+          "artSizedDepthTestedDrawsByPixelSize": {
+            "2": 646
+          },
+          "readPixels": {
+            "samples": 0,
+            "totalPixels": 0,
+            "totalMs": 0,
+            "dimensions": {},
+            "byDestination": {},
+            "byPixelSize": {}
+          },
+          "transfersByMethod": {
+            "bufferSubData": {
+              "samples": 256,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 1.1000000000058208,
+              "meanMs": 0.009765624999886313,
+              "totalCallMs": 2.499999999970896,
+              "uploadedBytes": 1949060,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {}
+            },
+            "texStorage2D": {
+              "samples": 35,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0,
+              "meanMs": 0,
+              "totalCallMs": 0,
+              "uploadedBytes": 0,
+              "allocationCalls": 35,
+              "unknownByteCounts": 35,
+              "dimensions": {
+                "600x332x1": {
+                  "calls": 34,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 34,
+                  "totalCallMs": 0
+                },
+                "128x16x1": {
+                  "calls": 1,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 1,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texSubImage2D": {
+              "samples": 45,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0,
+              "meanMs": 0,
+              "totalCallMs": 0,
+              "uploadedBytes": 530476,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "64x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 512,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "12x8x1": {
+                  "calls": 3,
+                  "uploadedBytes": 288,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "44x9x1": {
+                  "calls": 1,
+                  "uploadedBytes": 396,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "448x14x1": {
+                  "calls": 1,
+                  "uploadedBytes": 6272,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "618x1x1": {
+                  "calls": 13,
+                  "uploadedBytes": 128544,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "1126x1x1": {
+                  "calls": 10,
+                  "uploadedBytes": 180160,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "4x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 32,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "2790x1x1": {
+                  "calls": 4,
+                  "uploadedBytes": 178560,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "984x1x1": {
+                  "calls": 2,
+                  "uploadedBytes": 31488,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "118x1x1": {
+                  "calls": 2,
+                  "uploadedBytes": 3776,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "8x8x1": {
+                  "calls": 7,
+                  "uploadedBytes": 448,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texSubImage3D": {
+              "samples": 61,
+              "medianMs": 0,
+              "p95Ms": 0.10000000000582077,
+              "maxMs": 0.1000000000349246,
+              "meanMs": 0.01147540983673353,
+              "totalCallMs": 0.7000000000407454,
+              "uploadedBytes": 6636832,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "17x17x1": {
+                  "calls": 36,
+                  "uploadedBytes": 83232,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.29999999998835847
+                },
+                "256x256x1": {
+                  "calls": 25,
+                  "uploadedBytes": 6553600,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.4000000000523869
+                }
+              }
+            }
+          },
+          "pixelPackReadback": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 0,
+            "overwritten": 0,
+            "abandoned": 0,
+            "releasedWithoutCopy": 0,
+            "submissions": 0,
+            "syncByMethod": {
+              "fenceSync": {
+                "samples": 34,
+                "medianMs": 0,
+                "p95Ms": 0.09999999997671694,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.011764705880469753,
+                "totalCallMs": 0.3999999999359716
+              },
+              "flush": {
+                "samples": 34,
+                "medianMs": 0,
+                "p95Ms": 0.1000000000349246,
+                "maxMs": 0.20000000001164153,
+                "meanMs": 0.026470588235122917,
+                "totalCallMs": 0.8999999999941792
+              },
+              "clientWaitSync": {
+                "samples": 2033,
+                "medianMs": 0,
+                "p95Ms": 0.09999999997671694,
+                "maxMs": 1.099999999976717,
+                "meanMs": 0.007525823905294879,
+                "totalCallMs": 15.29999999946449
+              },
+              "deleteSync": {
+                "samples": 34,
+                "medianMs": 0,
+                "p95Ms": 0,
+                "maxMs": 0.09999999997671694,
+                "meanMs": 0.0029411764699034393,
+                "totalCallMs": 0.09999999997671694
+              }
+            },
+            "pollStatuses": {
+              "timeoutExpired": 1999,
+              "conditionSatisfied": 34
+            },
+            "positiveTimeoutPolls": 0,
+            "submitToSignal": {
+              "samples": 0
+            },
+            "getBufferSubData": {
+              "samples": 0,
+              "totalCallMs": 0,
+              "copiedBytes": 0,
+              "correlatedCopies": 0,
+              "submitToCopy": {
+                "samples": 0
+              }
+            }
+          },
+          "finalObservedPixelSize": 2,
+          "longTasks": 7,
+          "longTaskDurationMs": 793,
+          "cpu": {
+            "TaskDurationMs": 2317.899,
+            "ScriptDurationMs": 1873.731,
+            "LayoutDurationMs": 0.15,
+            "RecalcStyleDurationMs": 0.19
+          }
+        }
+      }
+    },
+    {
+      "name": "map-orbit-relief",
+      "exactProjectionSequence": true,
+      "steps": 32,
+      "submissions": 32,
+      "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+      "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba",
+      "baseline": {
+        "steps": 32,
+        "submissions": 32,
+        "taskCpuMs": 3455.504,
+        "taskCpuPerStepMs": 107.9845,
+        "inputToFirstSubmission": {
+          "samples": 32,
+          "medianMs": 36.70000000001164,
+          "p95Ms": 292.5999999999767,
+          "maxMs": 339.30000000001746,
+          "meanMs": 84.50312499999927
+        },
+        "inputToFirstFenceSignal": {
+          "samples": 32,
+          "medianMs": 1036.8999999999942,
+          "p95Ms": 1268.4000000000233,
+          "maxMs": 1313.8999999999942,
+          "meanMs": 1060.7218749999984
+        },
+        "inputToSettledFenceSignal": {
+          "samples": 32,
+          "medianMs": 1036.8999999999942,
+          "p95Ms": 1268.4000000000233,
+          "maxMs": 1313.8999999999942,
+          "meanMs": 1060.7218749999984
+        },
+        "capture": {
+          "durationMs": 36506.29999999999,
+          "raf": {
+            "samples": 2089,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.799999999995634,
+            "maxMs": 316.7000000000007,
+            "meanMs": 17.47180469123985
+          },
+          "metricWindowMs": 36821.686,
+          "mapResolves": {
+            "submissions": 32,
+            "submissionsPerSecond": 0.8765610319314752,
+            "compositorSubmissions": 32,
+            "detachedSubmissions": 0,
+            "intervals": {
+              "samples": 31,
+              "medianMs": 1127.3999999999942,
+              "p95Ms": 1292.0999999999767,
+              "maxMs": 1405.5,
+              "meanMs": 1136.1612903225807
+            },
+            "signaledCompletions": 32,
+            "submitToSignal": {
+              "samples": 32,
+              "medianMs": 1000.7000000000116,
+              "p95Ms": 1039.8999999999942,
+              "maxMs": 1048.7000000000116,
+              "meanMs": 976.2156249999989
+            },
+            "byPixelSize": {
+              "2": 32
+            }
+          },
+          "directGpuFrames": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 1,
+            "releasedBeforeSignal": 0
+          },
+          "rafByObservedPixelSize": {
+            "2": {
+              "samples": 2089,
+              "medianMs": 16.69999999999709,
+              "p95Ms": 16.799999999995634,
+              "maxMs": 316.7000000000007,
+              "meanMs": 17.47180469123985
+            }
+          },
+          "mapTextureUploadsByPixelSize": {},
+          "allTextureUploadDimensions": {},
+          "artSizedOffscreenDrawsByPixelSize": {
+            "2": 672
+          },
+          "artSizedDepthTestedDrawsByPixelSize": {
+            "2": 608
+          },
+          "readPixels": {
+            "samples": 0,
+            "totalPixels": 0,
+            "totalMs": 0,
+            "dimensions": {},
+            "byDestination": {},
+            "byPixelSize": {}
+          },
+          "transfersByMethod": {
+            "bufferSubData": {
+              "samples": 250,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 0.29999999998835847,
+              "meanMs": 0.007199999999953434,
+              "totalCallMs": 1.7999999999883585,
+              "uploadedBytes": 1876372,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {}
+            },
+            "texSubImage3D": {
+              "samples": 197,
+              "medianMs": 0,
+              "p95Ms": 0.10000000000582077,
+              "maxMs": 0.10000000000582077,
+              "meanMs": 0.010659898477186907,
+              "totalCallMs": 2.1000000000058208,
+              "uploadedBytes": 29036984,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "17x17x1": {
+                  "calls": 87,
+                  "uploadedBytes": 201144,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.20000000001164153
+                },
+                "256x256x1": {
+                  "calls": 110,
+                  "uploadedBytes": 28835840,
+                  "allocationCalls": 0,
+                  "totalCallMs": 1.8999999999941792
+                }
+              }
+            },
+            "texSubImage2D": {
+              "samples": 73,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0.10000000000582077,
+              "meanMs": 0.004109589040537735,
+              "totalCallMs": 0.29999999995925464,
+              "uploadedBytes": 1187836,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "2790x1x1": {
+                  "calls": 12,
+                  "uploadedBytes": 535680,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.09999999997671694
+                },
+                "618x1x1": {
+                  "calls": 21,
+                  "uploadedBytes": 207648,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "984x1x1": {
+                  "calls": 7,
+                  "uploadedBytes": 110208,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.09999999997671694
+                },
+                "1126x1x1": {
+                  "calls": 17,
+                  "uploadedBytes": 306272,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.10000000000582077
+                },
+                "118x1x1": {
+                  "calls": 6,
+                  "uploadedBytes": 11328,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "472x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 3776,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "64x1x1": {
+                  "calls": 2,
+                  "uploadedBytes": 2048,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "8x8x1": {
+                  "calls": 5,
+                  "uploadedBytes": 320,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "412x13x1": {
+                  "calls": 1,
+                  "uploadedBytes": 5356,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "400x13x1": {
+                  "calls": 1,
+                  "uploadedBytes": 5200,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texStorage2D": {
+              "samples": 33,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0,
+              "meanMs": 0,
+              "totalCallMs": 0,
+              "uploadedBytes": 0,
+              "allocationCalls": 33,
+              "unknownByteCounts": 33,
+              "dimensions": {
+                "600x332x1": {
+                  "calls": 32,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 32,
+                  "totalCallMs": 0
+                },
+                "128x16x1": {
+                  "calls": 1,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 1,
+                  "totalCallMs": 0
+                }
+              }
+            }
+          },
+          "pixelPackReadback": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 0,
+            "overwritten": 0,
+            "abandoned": 0,
+            "releasedWithoutCopy": 0,
+            "submissions": 0,
+            "syncByMethod": {
+              "fenceSync": {
+                "samples": 32,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.009374999999636202,
+                "totalCallMs": 0.29999999998835847
+              },
+              "flush": {
+                "samples": 32,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.018749999999272404,
+                "totalCallMs": 0.5999999999767169
+              },
+              "clientWaitSync": {
+                "samples": 1918,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.29999999998835847,
+                "meanMs": 0.006830031282573888,
+                "totalCallMs": 13.099999999976717
+              },
+              "deleteSync": {
+                "samples": 32,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.009374999999636202,
+                "totalCallMs": 0.29999999998835847
+              }
+            },
+            "pollStatuses": {
+              "timeoutExpired": 1886,
+              "conditionSatisfied": 32
+            },
+            "positiveTimeoutPolls": 0,
+            "submitToSignal": {
+              "samples": 0
+            },
+            "getBufferSubData": {
+              "samples": 0,
+              "totalCallMs": 0,
+              "copiedBytes": 0,
+              "correlatedCopies": 0,
+              "submitToCopy": {
+                "samples": 0
+              }
+            }
+          },
+          "finalObservedPixelSize": 2,
+          "longTasks": 13,
+          "longTaskDurationMs": 2164,
+          "cpu": {
+            "TaskDurationMs": 3455.504,
+            "ScriptDurationMs": 3040.832,
+            "LayoutDurationMs": 0.985,
+            "RecalcStyleDurationMs": 0.716
+          }
+        }
+      },
+      "candidate": {
+        "steps": 32,
+        "submissions": 32,
+        "taskCpuMs": 3534.9120000000003,
+        "taskCpuPerStepMs": 110.46600000000001,
+        "inputToFirstSubmission": {
+          "samples": 32,
+          "medianMs": 36.29999999998836,
+          "p95Ms": 292.9000000000233,
+          "maxMs": 337.70000000001164,
+          "meanMs": 83.19062500000473
+        },
+        "inputToFirstFenceSignal": {
+          "samples": 32,
+          "medianMs": 1064.2999999999884,
+          "p95Ms": 1197.9000000000233,
+          "maxMs": 1234.5,
+          "meanMs": 1067.293749999997
+        },
+        "inputToSettledFenceSignal": {
+          "samples": 32,
+          "medianMs": 1064.2999999999884,
+          "p95Ms": 1197.9000000000233,
+          "maxMs": 1234.5,
+          "meanMs": 1067.293749999997
+        },
+        "capture": {
+          "durationMs": 36585.79999999999,
+          "raf": {
+            "samples": 2092,
+            "medianMs": 16.69999999999709,
+            "p95Ms": 16.799999999999272,
+            "maxMs": 316.60000000000036,
+            "meanMs": 17.478585086042088
+          },
+          "metricWindowMs": 36901.603000000025,
+          "mapResolves": {
+            "submissions": 32,
+            "submissionsPerSecond": 0.8746562874120564,
+            "compositorSubmissions": 32,
+            "detachedSubmissions": 0,
+            "intervals": {
+              "samples": 31,
+              "medianMs": 1126.0999999999767,
+              "p95Ms": 1385.2000000000116,
+              "maxMs": 1421.7000000000116,
+              "meanMs": 1138.7354838709673
+            },
+            "signaledCompletions": 32,
+            "submitToSignal": {
+              "samples": 32,
+              "medianMs": 1006.1999999999534,
+              "p95Ms": 1052.2999999999884,
+              "maxMs": 1058.399999999965,
+              "meanMs": 984.1093749999927
+            },
+            "byPixelSize": {
+              "2": 32
+            }
+          },
+          "directGpuFrames": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 1,
+            "releasedBeforeSignal": 0
+          },
+          "rafByObservedPixelSize": {
+            "2": {
+              "samples": 2092,
+              "medianMs": 16.69999999999709,
+              "p95Ms": 16.799999999999272,
+              "maxMs": 316.60000000000036,
+              "meanMs": 17.478585086042088
+            }
+          },
+          "mapTextureUploadsByPixelSize": {},
+          "allTextureUploadDimensions": {},
+          "artSizedOffscreenDrawsByPixelSize": {
+            "2": 672
+          },
+          "artSizedDepthTestedDrawsByPixelSize": {
+            "2": 608
+          },
+          "readPixels": {
+            "samples": 0,
+            "totalPixels": 0,
+            "totalMs": 0,
+            "dimensions": {},
+            "byDestination": {},
+            "byPixelSize": {}
+          },
+          "transfersByMethod": {
+            "bufferSubData": {
+              "samples": 249,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 0.1000000000349246,
+              "meanMs": 0.006024096385308403,
+              "totalCallMs": 1.4999999999417923,
+              "uploadedBytes": 1876308,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {}
+            },
+            "texSubImage3D": {
+              "samples": 197,
+              "medianMs": 0,
+              "p95Ms": 0.1000000000349246,
+              "maxMs": 0.1000000000349246,
+              "meanMs": 0.014720812182859306,
+              "totalCallMs": 2.900000000023283,
+              "uploadedBytes": 29036984,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "17x17x1": {
+                  "calls": 87,
+                  "uploadedBytes": 201144,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.19999999995343387
+                },
+                "256x256x1": {
+                  "calls": 110,
+                  "uploadedBytes": 28835840,
+                  "allocationCalls": 0,
+                  "totalCallMs": 2.700000000069849
+                }
+              }
+            },
+            "texSubImage2D": {
+              "samples": 73,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0.1000000000349246,
+              "meanMs": 0.0041095890417337825,
+              "totalCallMs": 0.30000000004656613,
+              "uploadedBytes": 1187012,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "2790x1x1": {
+                  "calls": 12,
+                  "uploadedBytes": 535680,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.1000000000349246
+                },
+                "618x1x1": {
+                  "calls": 21,
+                  "uploadedBytes": 207648,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "984x1x1": {
+                  "calls": 7,
+                  "uploadedBytes": 110208,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "1126x1x1": {
+                  "calls": 17,
+                  "uploadedBytes": 306272,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "118x1x1": {
+                  "calls": 6,
+                  "uploadedBytes": 11328,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "256x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 2048,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.09999999997671694
+                },
+                "64x1x1": {
+                  "calls": 2,
+                  "uploadedBytes": 2048,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.1000000000349246
+                },
+                "12x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 96,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "8x8x1": {
+                  "calls": 4,
+                  "uploadedBytes": 256,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "388x13x1": {
+                  "calls": 1,
+                  "uploadedBytes": 5044,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "456x14x1": {
+                  "calls": 1,
+                  "uploadedBytes": 6384,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texStorage2D": {
+              "samples": 33,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0.09999999997671694,
+              "meanMs": 0.0030303030295974827,
+              "totalCallMs": 0.09999999997671694,
+              "uploadedBytes": 0,
+              "allocationCalls": 33,
+              "unknownByteCounts": 33,
+              "dimensions": {
+                "600x332x1": {
+                  "calls": 32,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 32,
+                  "totalCallMs": 0
+                },
+                "128x16x1": {
+                  "calls": 1,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 1,
+                  "totalCallMs": 0.09999999997671694
+                }
+              }
+            }
+          },
+          "pixelPackReadback": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 0,
+            "overwritten": 0,
+            "abandoned": 0,
+            "releasedWithoutCopy": 0,
+            "submissions": 0,
+            "syncByMethod": {
+              "fenceSync": {
+                "samples": 32,
+                "medianMs": 0,
+                "p95Ms": 0.1000000000349246,
+                "maxMs": 0.1000000000349246,
+                "meanMs": 0.015625,
+                "totalCallMs": 0.5
+              },
+              "flush": {
+                "samples": 32,
+                "medianMs": 0,
+                "p95Ms": 0.1000000000349246,
+                "maxMs": 0.20000000001164153,
+                "meanMs": 0.018750000002910383,
+                "totalCallMs": 0.6000000000931323
+              },
+              "clientWaitSync": {
+                "samples": 1936,
+                "medianMs": 0,
+                "p95Ms": 0.09999999997671694,
+                "maxMs": 1.2000000000116415,
+                "meanMs": 0.007592975206797979,
+                "totalCallMs": 14.700000000360887
+              },
+              "deleteSync": {
+                "samples": 32,
+                "medianMs": 0,
+                "p95Ms": 0.09999999997671694,
+                "maxMs": 0.1000000000349246,
+                "meanMs": 0.006250000000363798,
+                "totalCallMs": 0.20000000001164153
+              }
+            },
+            "pollStatuses": {
+              "timeoutExpired": 1904,
+              "conditionSatisfied": 32
+            },
+            "positiveTimeoutPolls": 0,
+            "submitToSignal": {
+              "samples": 0
+            },
+            "getBufferSubData": {
+              "samples": 0,
+              "totalCallMs": 0,
+              "copiedBytes": 0,
+              "correlatedCopies": 0,
+              "submitToCopy": {
+                "samples": 0
+              }
+            }
+          },
+          "finalObservedPixelSize": 2,
+          "longTasks": 13,
+          "longTaskDurationMs": 2157,
+          "cpu": {
+            "TaskDurationMs": 3534.9120000000003,
+            "ScriptDurationMs": 3091.35,
+            "LayoutDurationMs": 1.0330000000000001,
+            "RecalcStyleDurationMs": 0.5820000000000001
+          }
+        }
+      }
+    },
+    {
+      "name": "walk-look-firstperson",
+      "exactProjectionSequence": true,
+      "steps": 32,
+      "submissions": 36,
+      "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+      "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4",
+      "baseline": {
+        "steps": 32,
+        "submissions": 36,
+        "taskCpuMs": 4204.905999999999,
+        "taskCpuPerStepMs": 131.40331249999997,
+        "inputToFirstSubmission": {
+          "samples": 32,
+          "medianMs": 85.60000000000582,
+          "p95Ms": 358,
+          "maxMs": 447.69999999998254,
+          "meanMs": 110.79062499999782
+        },
+        "inputToFirstFenceSignal": {
+          "samples": 32,
+          "medianMs": 227.89999999999418,
+          "p95Ms": 488.5,
+          "maxMs": 610.7999999999884,
+          "meanMs": 254.8593749999991
+        },
+        "inputToSettledFenceSignal": {
+          "samples": 32,
+          "medianMs": 229.60000000000582,
+          "p95Ms": 527.5999999999767,
+          "maxMs": 610.7999999999884,
+          "meanMs": 276.69374999999854
+        },
+        "capture": {
+          "durationMs": 14277.200000000012,
+          "raf": {
+            "samples": 714,
+            "medianMs": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "maxMs": 416.59999999999854,
+            "meanMs": 19.98039215686274
+          },
+          "metricWindowMs": 14482.983999999988,
+          "mapResolves": {
+            "submissions": 36,
+            "submissionsPerSecond": 2.5215028156781423,
+            "compositorSubmissions": 36,
+            "detachedSubmissions": 0,
+            "intervals": {
+              "samples": 35,
+              "medianMs": 401.3999999999942,
+              "p95Ms": 683.1000000000058,
+              "maxMs": 836.1999999999825,
+              "meanMs": 397.3971428571427
+            },
+            "signaledCompletions": 36,
+            "submitToSignal": {
+              "samples": 36,
+              "medianMs": 146,
+              "p95Ms": 287.19999999998254,
+              "maxMs": 315.69999999998254,
+              "meanMs": 159.7944444444446
+            },
+            "byPixelSize": {
+              "2": 36
+            }
+          },
+          "directGpuFrames": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 2,
+            "releasedBeforeSignal": 0
+          },
+          "rafByObservedPixelSize": {
+            "2": {
+              "samples": 714,
+              "medianMs": 16.69999999999891,
+              "p95Ms": 16.799999999999272,
+              "maxMs": 416.59999999999854,
+              "meanMs": 19.98039215686274
+            }
+          },
+          "mapTextureUploadsByPixelSize": {},
+          "allTextureUploadDimensions": {},
+          "artSizedOffscreenDrawsByPixelSize": {
+            "2": 288
+          },
+          "artSizedDepthTestedDrawsByPixelSize": {
+            "2": 216
+          },
+          "readPixels": {
+            "samples": 0,
+            "totalPixels": 0,
+            "totalMs": 0,
+            "dimensions": {},
+            "byDestination": {},
+            "byPixelSize": {}
+          },
+          "transfersByMethod": {
+            "bufferSubData": {
+              "samples": 345,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 1.900000000023283,
+              "meanMs": 0.011304347826070085,
+              "totalCallMs": 3.8999999999941792,
+              "uploadedBytes": 14124532,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {}
+            },
+            "texSubImage3D": {
+              "samples": 1017,
+              "medianMs": 0,
+              "p95Ms": 0.10000000000582077,
+              "maxMs": 0.5,
+              "meanMs": 0.00963618485729788,
+              "totalCallMs": 9.799999999871943,
+              "uploadedBytes": 124212512,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "17x17x1": {
+                  "calls": 548,
+                  "uploadedBytes": 1266976,
+                  "allocationCalls": 0,
+                  "totalCallMs": 1.9999999999708962
+                },
+                "256x256x1": {
+                  "calls": 469,
+                  "uploadedBytes": 122945536,
+                  "allocationCalls": 0,
+                  "totalCallMs": 7.799999999901047
+                }
+              }
+            },
+            "texSubImage2D": {
+              "samples": 52,
+              "medianMs": 0,
+              "p95Ms": 0.10000000000582077,
+              "maxMs": 0.10000000000582077,
+              "meanMs": 0.0057692307695665825,
+              "totalCallMs": 0.3000000000174623,
+              "uploadedBytes": 1578368,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "2790x1x1": {
+                  "calls": 32,
+                  "uploadedBytes": 1428480,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.10000000000582077
+                },
+                "984x1x1": {
+                  "calls": 9,
+                  "uploadedBytes": 141696,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.20000000001164153
+                },
+                "8x8x1": {
+                  "calls": 5,
+                  "uploadedBytes": 320,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "46x1x1": {
+                  "calls": 3,
+                  "uploadedBytes": 2208,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "118x1x1": {
+                  "calls": 3,
+                  "uploadedBytes": 5664,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texStorage2D": {
+              "samples": 37,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0,
+              "meanMs": 0,
+              "totalCallMs": 0,
+              "uploadedBytes": 0,
+              "allocationCalls": 37,
+              "unknownByteCounts": 37,
+              "dimensions": {
+                "600x332x1": {
+                  "calls": 36,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 36,
+                  "totalCallMs": 0
+                },
+                "64x16x1": {
+                  "calls": 1,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 1,
+                  "totalCallMs": 0
+                }
+              }
+            }
+          },
+          "pixelPackReadback": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 0,
+            "overwritten": 0,
+            "abandoned": 0,
+            "releasedWithoutCopy": 0,
+            "submissions": 0,
+            "syncByMethod": {
+              "fenceSync": {
+                "samples": 36,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.016666666666019916,
+                "totalCallMs": 0.5999999999767169
+              },
+              "flush": {
+                "samples": 36,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.011111111110949423,
+                "totalCallMs": 0.39999999999417923
+              },
+              "clientWaitSync": {
+                "samples": 319,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.00877742946732185,
+                "totalCallMs": 2.80000000007567
+              },
+              "deleteSync": {
+                "samples": 36,
+                "medianMs": 0,
+                "p95Ms": 0.10000000000582077,
+                "maxMs": 0.10000000000582077,
+                "meanMs": 0.005555555555878932,
+                "totalCallMs": 0.20000000001164153
+              }
+            },
+            "pollStatuses": {
+              "timeoutExpired": 283,
+              "conditionSatisfied": 36
+            },
+            "positiveTimeoutPolls": 0,
+            "submitToSignal": {
+              "samples": 0
+            },
+            "getBufferSubData": {
+              "samples": 0,
+              "totalCallMs": 0,
+              "copiedBytes": 0,
+              "correlatedCopies": 0,
+              "submitToCopy": {
+                "samples": 0
+              }
+            }
+          },
+          "finalObservedPixelSize": 2,
+          "longTasks": 24,
+          "longTaskDurationMs": 3298,
+          "cpu": {
+            "TaskDurationMs": 4204.905999999999,
+            "ScriptDurationMs": 3939.512,
+            "LayoutDurationMs": 1.377,
+            "RecalcStyleDurationMs": 0.9169999999999999
+          }
+        }
+      },
+      "candidate": {
+        "steps": 32,
+        "submissions": 36,
+        "taskCpuMs": 4230.404,
+        "taskCpuPerStepMs": 132.200125,
+        "inputToFirstSubmission": {
+          "samples": 32,
+          "medianMs": 85.5,
+          "p95Ms": 353.70000000001164,
+          "maxMs": 442.70000000001164,
+          "meanMs": 109.31562499999745
+        },
+        "inputToFirstFenceSignal": {
+          "samples": 32,
+          "medianMs": 236,
+          "p95Ms": 484.29999999998836,
+          "maxMs": 606.4000000000233,
+          "meanMs": 253.99375000000146
+        },
+        "inputToSettledFenceSignal": {
+          "samples": 32,
+          "medianMs": 239.59999999997672,
+          "p95Ms": 504.5,
+          "maxMs": 606.4000000000233,
+          "meanMs": 273.9656249999989
+        },
+        "capture": {
+          "durationMs": 14205.900000000023,
+          "raf": {
+            "samples": 713,
+            "medianMs": 16.700000000000728,
+            "p95Ms": 16.799999999999272,
+            "maxMs": 416.7000000000007,
+            "meanMs": 19.915147265077138
+          },
+          "metricWindowMs": 14368.468000000008,
+          "mapResolves": {
+            "submissions": 36,
+            "submissionsPerSecond": 2.5341583426604397,
+            "compositorSubmissions": 36,
+            "detachedSubmissions": 0,
+            "intervals": {
+              "samples": 35,
+              "medianMs": 404.5,
+              "p95Ms": 678.2999999999884,
+              "maxMs": 836.7999999999884,
+              "meanMs": 394.91714285714386
+            },
+            "signaledCompletions": 36,
+            "submitToSignal": {
+              "samples": 36,
+              "medianMs": 146.5,
+              "p95Ms": 271.5,
+              "maxMs": 298.69999999995343,
+              "meanMs": 158.47777777778134
+            },
+            "byPixelSize": {
+              "2": 36
+            }
+          },
+          "directGpuFrames": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 2,
+            "releasedBeforeSignal": 0
+          },
+          "rafByObservedPixelSize": {
+            "2": {
+              "samples": 713,
+              "medianMs": 16.700000000000728,
+              "p95Ms": 16.799999999999272,
+              "maxMs": 416.7000000000007,
+              "meanMs": 19.915147265077138
+            }
+          },
+          "mapTextureUploadsByPixelSize": {},
+          "allTextureUploadDimensions": {},
+          "artSizedOffscreenDrawsByPixelSize": {
+            "2": 288
+          },
+          "artSizedDepthTestedDrawsByPixelSize": {
+            "2": 216
+          },
+          "readPixels": {
+            "samples": 0,
+            "totalPixels": 0,
+            "totalMs": 0,
+            "dimensions": {},
+            "byDestination": {},
+            "byPixelSize": {}
+          },
+          "transfersByMethod": {
+            "bufferSubData": {
+              "samples": 342,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 0.1000000000349246,
+              "meanMs": 0.00789473684077772,
+              "totalCallMs": 2.6999999995459802,
+              "uploadedBytes": 14100756,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {}
+            },
+            "texSubImage3D": {
+              "samples": 1017,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 0.5,
+              "meanMs": 0.010914454277034304,
+              "totalCallMs": 11.099999999743886,
+              "uploadedBytes": 124212512,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "17x17x1": {
+                  "calls": 548,
+                  "uploadedBytes": 1266976,
+                  "allocationCalls": 0,
+                  "totalCallMs": 1.8999999999650754
+                },
+                "256x256x1": {
+                  "calls": 469,
+                  "uploadedBytes": 122945536,
+                  "allocationCalls": 0,
+                  "totalCallMs": 9.199999999778811
+                }
+              }
+            },
+            "texSubImage2D": {
+              "samples": 52,
+              "medianMs": 0,
+              "p95Ms": 0.09999999997671694,
+              "maxMs": 0.1000000000349246,
+              "meanMs": 0.005769230769006894,
+              "totalCallMs": 0.29999999998835847,
+              "uploadedBytes": 1578400,
+              "allocationCalls": 0,
+              "unknownByteCounts": 0,
+              "dimensions": {
+                "2790x1x1": {
+                  "calls": 32,
+                  "uploadedBytes": 1428480,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0.29999999998835847
+                },
+                "984x1x1": {
+                  "calls": 9,
+                  "uploadedBytes": 141696,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "12x8x1": {
+                  "calls": 1,
+                  "uploadedBytes": 96,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "8x8x1": {
+                  "calls": 4,
+                  "uploadedBytes": 256,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "46x1x1": {
+                  "calls": 3,
+                  "uploadedBytes": 2208,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                },
+                "118x1x1": {
+                  "calls": 3,
+                  "uploadedBytes": 5664,
+                  "allocationCalls": 0,
+                  "totalCallMs": 0
+                }
+              }
+            },
+            "texStorage2D": {
+              "samples": 37,
+              "medianMs": 0,
+              "p95Ms": 0,
+              "maxMs": 0.09999999997671694,
+              "meanMs": 0.0027027027020734306,
+              "totalCallMs": 0.09999999997671694,
+              "uploadedBytes": 0,
+              "allocationCalls": 37,
+              "unknownByteCounts": 37,
+              "dimensions": {
+                "600x332x1": {
+                  "calls": 36,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 36,
+                  "totalCallMs": 0.09999999997671694
+                },
+                "64x16x1": {
+                  "calls": 1,
+                  "uploadedBytes": 0,
+                  "allocationCalls": 1,
+                  "totalCallMs": 0
+                }
+              }
+            }
+          },
+          "pixelPackReadback": {
+            "atStart": 0,
+            "atEnd": 0,
+            "maximumPending": 0,
+            "overwritten": 0,
+            "abandoned": 0,
+            "releasedWithoutCopy": 0,
+            "submissions": 0,
+            "syncByMethod": {
+              "fenceSync": {
+                "samples": 36,
+                "medianMs": 0,
+                "p95Ms": 0.09999999997671694,
+                "maxMs": 0.1000000000349246,
+                "meanMs": 0.005555555555878932,
+                "totalCallMs": 0.20000000001164153
+              },
+              "flush": {
+                "samples": 36,
+                "medianMs": 0,
+                "p95Ms": 0.1000000000349246,
+                "maxMs": 0.1000000000349246,
+                "meanMs": 0.0194444444463847,
+                "totalCallMs": 0.7000000000698492
+              },
+              "clientWaitSync": {
+                "samples": 316,
+                "medianMs": 0,
+                "p95Ms": 0.09999999997671694,
+                "maxMs": 0.5,
+                "meanMs": 0.009177215189578695,
+                "totalCallMs": 2.8999999999068677
+              },
+              "deleteSync": {
+                "samples": 36,
+                "medianMs": 0,
+                "p95Ms": 0,
+                "maxMs": 0.09999999997671694,
+                "meanMs": 0.002777777777131026,
+                "totalCallMs": 0.09999999997671694
+              }
+            },
+            "pollStatuses": {
+              "timeoutExpired": 280,
+              "conditionSatisfied": 36
+            },
+            "positiveTimeoutPolls": 0,
+            "submitToSignal": {
+              "samples": 0
+            },
+            "getBufferSubData": {
+              "samples": 0,
+              "totalCallMs": 0,
+              "copiedBytes": 0,
+              "correlatedCopies": 0,
+              "submitToCopy": {
+                "samples": 0
+              }
+            }
+          },
+          "finalObservedPixelSize": 2,
+          "longTasks": 21,
+          "longTaskDurationMs": 3099,
+          "cpu": {
+            "TaskDurationMs": 4230.404,
+            "ScriptDurationMs": 3966.582,
+            "LayoutDurationMs": 1.2260000000000002,
+            "RecalcStyleDurationMs": 0.855
+          }
+        }
+      }
+    }
+  ]
+}

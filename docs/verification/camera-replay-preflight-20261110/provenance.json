@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "purpose": "Same-artifact repeatability of the complete ordered submitted-camera replay; not a baseline/candidate performance comparison.",
+  "repository": "https://github.com/wieslawsoltes/UnoPixelMap",
+  "preflight": {
+    "id": 42906521344,
+    "head_sha": "2d1c43ad4355f6a7843083fe69086c35fe24d41c",
+    "head_branch": "perf/camera-replay-validation-20261110",
+    "event": "push",
+    "run_number": 5,
+    "run_attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42906521344",
+    "workflow_id": 413824751,
+    "path": ".github/workflows/camera-replay-preflight.yml",
+    "created_at": "2026-11-10T21:35:26Z",
+    "updated_at": "2026-11-10T21:40:20Z"
+  },
+  "job": {
+    "id": 130145802312,
+    "name": "replay",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42906521344/job/130145802312",
+    "started_at": "2026-11-10T21:35:29Z",
+    "completed_at": "2026-11-10T21:40:19Z",
+    "runner_name": "GitHub Actions 1000348240",
+    "labels": [
+      "ubuntu-latest"
+    ]
+  },
+  "artifact": {
+    "id": 13805432585,
+    "name": "camera-replay-validation",
+    "size_in_bytes": 3688328,
+    "digest": "sha256:18bb83f62b664fad5dabd8eb9160881e4459ce2b1598f9d5f44d848591352a9f",
+    "created_at": "2026-11-10T21:40:18Z",
+    "expires_at": "2026-11-24T21:40:17Z",
+    "workflow_run": {
+      "id": 42906521344,
+      "repository_id": 1443492055,
+      "head_repository_id": 1443492055,
+      "head_branch": "perf/camera-replay-validation-20261110",
+      "head_sha": "2d1c43ad4355f6a7843083fe69086c35fe24d41c"
+    }
+  },
+  "application": {
+    "head_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+    "source_run_id": 42696985047,
+    "source_run_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047",
+    "artifact_id": 13710017486,
+    "artifact_sha256": "04abb6b24c35df6d6e5f6b3bbb80e211f1fe48c2d6edc948ada4138ac3163b8e",
+    "artifact_bytes": 88403636,
+    "package_identity_check": "passed in the preflight workflow"
+  },
+  "published_harness_commit": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "report_schema": 2,
+  "protocol": "native-wheel-resolve-fence-v2",
+  "environment": {
+    "browser": "156.0.8078.4",
+    "browserArgs": [
+      "--disable-dev-shm-usage",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader",
+      "--in-process-gpu",
+      "--disable-gpu-watchdog",
+      "--renderer-process-limit=1"
+    ],
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "availableParallelism": 3,
+    "viewport": {
+      "width": 1200,
+      "height": 780
+    },
+    "deviceScaleFactor": 1
+  },
+  "harness_sha256": {
+    "camera-replay.cjs": "9e3d2987136fc38d10680f8b5654050fad23006bc5c453efcd84f44bb8c4e833",
+    "camera-replay-probe.cjs": "7894b2fd47410abfcd5c83fc7464a45f4a09d8f05bfb368c7037d7cdd268b4bd",
+    "camera-replay-contract.cjs": "69430f8b256d1e088adcb8174c18a2540f7d452eba964c02e49644e7647a3a48",
+    "performance.cjs": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c",
+    "explore.cjs": "7b40495c5abcee619491520fee7637764242ba1c39e1a33b2bdcbff54d0a503b"
+  },
+  "cases": [
+    {
+      "name": "map-pan-relief",
+      "exactProjectionSequence": true,
+      "steps": 32,
+      "submissions": 34,
+      "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+      "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c"
+    },
+    {
+      "name": "map-orbit-relief",
+      "exactProjectionSequence": true,
+      "steps": 32,
+      "submissions": 32,
+      "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+      "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba"
+    },
+    {
+      "name": "walk-look-firstperson",
+      "exactProjectionSequence": true,
+      "steps": 32,
+      "submissions": 36,
+      "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+      "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4"
+    }
+  ],
+  "retention": {
+    "raw_files": "Both full reports and every per-case raw probe are retained byte-for-byte after gzip decompression.",
+    "job_log": "The complete job log is retained with lossless gzip compression.",
+    "screenshots": "Before/after PNGs remain in the original Actions artifact and are omitted from this data archive.",
+    "failed_preflights": "Earlier harness-debug runs are not included; this archive contains only the passing protocol and its two complete captures.",
+    "reference_contract": "An unchanged copy of the validated contract is retained so offline verification does not depend on future harness changes."
+  }
+}
