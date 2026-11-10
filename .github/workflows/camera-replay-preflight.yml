@@ -1,0 +1,83 @@
+name: Validate deterministic camera replay
+on:
+  push:
+    branches: [perf/camera-replay-validation-20261110]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PIXELMAP_REVISION: 555990d0e086ffb9908d4d98ec30a73a245a6c6e
+      PIXELMAP_BROWSER_ARGS: '["--in-process-gpu","--disable-gpu-watchdog","--renderer-process-limit=1"]'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record the exact baseline artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/replay-evidence"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/42696985047" > "$RUNNER_TEMP/replay-evidence/source-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/13710017486" > "$RUNNER_TEMP/replay-evidence/source-artifact.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'replay-evidence'
+          run = json.loads((root / 'source-run.json').read_text())
+          artifact = json.loads((root / 'source-artifact.json').read_text())
+          assert run['conclusion'] == 'success' and run['head_sha'] == os.environ['PIXELMAP_REVISION']
+          assert artifact['workflow_run']['id'] == run['id'] and not artifact['expired']
+          assert artifact['digest'] == 'sha256:04abb6b24c35df6d6e5f6b3bbb80e211f1fe48c2d6edc948ada4138ac3163b8e'
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: 13710017486
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 42696985047
+          merge-multiple: true
+          path: ${{ runner.temp }}/baseline-artifact
+      - name: Unpack and verify the application
+        run: |
+          mkdir -p "$RUNNER_TEMP/preview/UnoPixelMap"
+          tar -xf "$RUNNER_TEMP/baseline-artifact/artifact.tar" -C "$RUNNER_TEMP/preview/UnoPixelMap"
+          node tests/packaging/package-identity.cjs "$RUNNER_TEMP/preview/UnoPixelMap"
+      - name: Install the pinned browser and check the observer
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/replay-browsers
+        run: |
+          npm ci --prefix tests/browser
+          (cd tests/browser && npx playwright install --with-deps chromium --only-shell)
+          node tests/browser/camera-replay-checks.cjs
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          browsers = list(Path(os.environ['PLAYWRIGHT_BROWSERS_PATH']).rglob('chrome-headless-shell'))
+          assert len(browsers) == 1
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write('CHROMIUM_PATH=' + str(browsers[0]) + '\n')
+              output.write('REPLAY_AFFINITY=' + ','.join(map(str, sorted(os.sched_getaffinity(0))[:3])) + '\n')
+          PY
+      - name: Compare two independent replays of the same artifact
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8100 --bind 127.0.0.1 --directory "$RUNNER_TEMP/preview" > "$RUNNER_TEMP/replay-evidence/server.log" 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          for repetition in 1 2; do
+            taskset -c "$REPLAY_AFFINITY" node tests/browser/camera-replay.cjs \
+              http://127.0.0.1:8100/UnoPixelMap/ "$RUNNER_TEMP/replay-evidence/repetition-$repetition" \
+              > "$RUNNER_TEMP/replay-evidence/repetition-$repetition.log" 2>&1
+          done
+          node tests/browser/camera-replay.cjs --compare \
+            "$RUNNER_TEMP/replay-evidence/repetition-1/report.json" \
+            "$RUNNER_TEMP/replay-evidence/repetition-2/report.json" \
+            "$RUNNER_TEMP/replay-evidence/comparison.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: camera-replay-validation
+          path: ${{ runner.temp }}/replay-evidence
+          retention-days: 14

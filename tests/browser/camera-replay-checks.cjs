@@ -1,0 +1,167 @@
+const assert = require("node:assert/strict");
+const vm = require("node:vm");
+const {installCameraReplayProbe} = require("./camera-replay-probe.cjs");
+const {sha256, checkStep, compareReplays} = require("./camera-replay-contract.cjs");
+const {makeTrace, scenarios} = require("./camera-replay.cjs");
+
+function observerFixture() {
+    let time = 0;
+    const listeners = {}, calls = [];
+    class WebGLRenderingContext {
+        constructor(id) {
+            this.canvas = {id}; this.ARRAY_BUFFER = 34962;
+            this.ALREADY_SIGNALED = 37146; this.CONDITION_SATISFIED = 37148;
+        }
+    }
+    for (const name of ["shaderSource", "attachShader", "getUniformLocation", "useProgram", "viewport",
+        "uniform1f", "uniform1i", "uniform2f", "uniform2i", "uniform3f", "uniform4f", "bufferSubData",
+        "drawArrays", "drawElements", "drawArraysInstanced", "drawElementsInstanced", "fenceSync",
+        "clientWaitSync", "deleteSync"])
+        WebGLRenderingContext.prototype[name] = function (...args) {
+            calls.push({gl: this, name, args});
+            if (name === "getUniformLocation") return args[1] === "missing" ? null : {owner: args[0], name: args[1]};
+            if (name === "fenceSync") return {};
+            if (name === "clientWaitSync") return args[1];
+        };
+    class WebGL2RenderingContext extends WebGLRenderingContext {}
+    const sandbox = {WeakMap, Set, Map, Array, Object, ArrayBuffer, DataView, Error,
+        performance: {now: () => ++time}, WebGLRenderingContext, WebGL2RenderingContext,
+        addEventListener: (name, callback) => { listeners[name] = callback; }};
+    vm.runInNewContext("(" + installCameraReplayProbe.toString() + ")()", sandbox);
+    const gl = new WebGL2RenderingContext("uno-canvas");
+    const state = sandbox.__pixelAtlasCameraReplay;
+    const program = (kind, owner = gl) => {
+        const shader = {}, result = {};
+        owner.shaderSource(shader, kind === "resolve" ? "uniform bool uArtworkOnly; uniform float uPhotoOpacity;"
+            : "uniform vec4 uScreenX; uniform vec3 uGround;" + (kind === "terrain" ? " in vec4 aScreenX;" : ""));
+        owner.attachShader(result, shader);
+        owner.useProgram(result);
+        return result;
+    };
+    const uniform = (program, name, data, owner = gl) =>
+        owner["uniform" + data.length + "f"](owner.getUniformLocation(program, name), ...data);
+    const wheel = input => listeners.wheel({isTrusted: true, deltaMode: 0, clientX: input.x, clientY: input.y,
+        deltaX: input.deltaX, deltaY: input.deltaY, altKey: Boolean(input.modifiers & 1),
+        ctrlKey: Boolean(input.modifiers & 2), metaKey: Boolean(input.modifiers & 4), shiftKey: Boolean(input.modifiers & 8)});
+    return {gl, state, program, uniform, wheel, calls, WebGL2RenderingContext};
+}
+
+const fixture = observerFixture();
+const {gl, state, program, uniform, wheel, calls} = fixture;
+const terrain = program("terrain");
+const geometry = program("geometry");
+const resolve = program("resolve");
+const ignored = {};
+for (const object of [terrain, geometry]) {
+    uniform(object, "uArtSize", [600, 332]);
+    uniform(object, "uGround", [15.25, 1, 100]);
+    uniform(object, "uDepth", [1, -.16]);
+    uniform(object, "uPerspective", [1]);
+}
+for (const name of ["uScreenX", "uScreenY", "uScreenW"]) uniform(geometry, name, [1, 2, 3, 4]);
+uniform(resolve, "uArtSize", [600, 332]);
+uniform(resolve, "uPixelSize", [2]);
+uniform(resolve, "uLogicalSize", [1200, 664]);
+
+// An unrelated context uses exactly the same uniform names with different data.
+// Its state must not contaminate the map context, even when programs are cached.
+const other = new fixture.WebGL2RenderingContext("other-canvas");
+const otherProgram = program("geometry", other);
+uniform(otherProgram, "uGround", [99, 88, 77], other);
+gl.useProgram(ignored);
+gl.uniform1f(null, 42);
+const input = {x: 600, y: 400, deltaX: -10, deltaY: 0, modifiers: 8};
+state.begin();
+assert.throws(() => state.begin(), /already active/);
+wheel(input);
+gl.viewport(0, 0, 600, 332);
+gl.useProgram(terrain);
+const values = Float32Array.from({length: 35}, (_, index) => index + .25);
+const sourceCopy = values.slice();
+gl.bufferSubData(gl.ARRAY_BUFFER, 0, values, 3, 28);
+const priorDrawCalls = calls.filter(call => call.name === "drawElementsInstanced").length;
+gl.drawElementsInstanced(4, 1536, 5123, 0, 2);
+assert.equal(calls.filter(call => call.name === "drawElementsInstanced").length - priorDrawCalls, 1,
+    "Inherited WebGL2 entry points forward each draw exactly once");
+values.fill(999);
+gl.useProgram(geometry);
+gl.drawElements(4, 120, 5125, 0);
+gl.useProgram(resolve);
+gl.drawArrays(4, 0, 3);
+const fence = gl.fenceSync(37143, 0);
+assert.equal(state.ready(), false, "A submission alone is not a completion");
+gl.clientWaitSync({}, gl.ALREADY_SIGNALED, 0);
+assert.equal(state.ready(), false, "An unrelated fence cannot complete this map frame");
+gl.clientWaitSync(fence, 37147, 0);
+assert.equal(state.ready(), false, "A timed-out fence cannot complete this map frame");
+gl.clientWaitSync(fence, gl.CONDITION_SATISFIED, 0);
+assert.equal(state.ready(), true);
+const first = JSON.parse(JSON.stringify(state.finish()));
+assert.throws(() => state.finish(), /No camera replay/);
+assert.deepEqual(first.resolves[0].draws[0].tileProjections,
+    [Array.from(sourceCopy.slice(3, 15)), Array.from(sourceCopy.slice(17, 29))],
+    "Terrain transforms honor source offsets, copy only the submitted range and omit cache slots");
+assert.deepEqual(first.resolves[0].draws[1].uniforms.uGround, [15.25, 1, 100],
+    "Uniform values persist across inactive frames without leaking between contexts");
+const step = checkStep(JSON.parse(JSON.stringify(first)), input, 0);
+assert.ok(step.inputToSubmissionMs > 0 && step.inputToFenceSignalMs > step.inputToSubmissionMs);
+
+// Uniform caches may omit every setter on the next frame. The observer must
+// retain those values, but must never retain previous-frame draws or fences.
+state.begin();
+wheel(input);
+gl.useProgram(geometry);
+gl.drawElements(4, 120, 5125, 0);
+gl.useProgram(resolve);
+gl.drawArrays(4, 0, 3);
+assert.equal(state.ready(), false);
+gl.clientWaitSync(fence, gl.ALREADY_SIGNALED, 0);
+assert.equal(state.ready(), false, "An earlier frame's fence cannot satisfy the next step");
+const secondFence = gl.fenceSync(37143, 0);
+gl.clientWaitSync(secondFence, gl.ALREADY_SIGNALED, 0);
+const second = JSON.parse(JSON.stringify(state.finish()));
+assert.equal(second.resolves[0].draws.length, 1, "Draws cannot leak between frames");
+assert.deepEqual(second.resolves[0].draws[0].uniforms, step.projection.draws[1].uniforms);
+
+const clone = value => JSON.parse(JSON.stringify(value));
+for (const mutate of [
+    raw => { raw.inputs = []; }, raw => { raw.inputs.push(clone(raw.inputs[0])); },
+    raw => { raw.inputs[0].trusted = false; }, raw => { raw.inputs[0].deltaX++; },
+    raw => { raw.resolves = []; }, raw => { raw.resolves.push(clone(raw.resolves[0])); },
+    raw => { raw.resolves[0].signaledAt = null; }, raw => { raw.resolves[0].compositorContext = false; },
+    raw => { raw.resolves[0].draws[0].tileProjections.pop(); },
+    raw => { raw.resolves[0].draws[1].uniforms.uScreenX = [1, 2]; }
+]) {
+    const changed = clone(first);
+    mutate(changed);
+    assert.throws(() => checkStep(changed, input, 0), "Incomplete or mismatched render steps fail closed");
+}
+
+const report = {schema: 1, protocol: "native-wheel-resolve-fence-v1", viewport: {width: 1200, height: 780},
+    deviceScaleFactor: 1, browser: "test-browser", browserArgs: [], cpu: "Fixture CPU", availableParallelism: 3,
+    harness: {observer: "same"}, revision: "baseline",
+    cases: [{name: "map", scenario: {}, map: {width: 1200, height: 664}, trace: [input], traceSha256: sha256([input]),
+        steps: [step], summary: {steps: 1}}]};
+const candidate = clone(report);
+candidate.revision = "candidate";
+assert.equal(compareReplays(report, candidate).comparisons[0].exactProjectionSequence, true);
+for (const mutate of [
+    value => { value.cases[0].steps = []; }, value => { value.cases[0].steps.push(clone(step)); },
+    value => { value.harness.observer = "different"; }, value => { value.deviceScaleFactor = 2; },
+    value => { value.cpu = "Different CPU"; }, value => { value.availableParallelism = 2; },
+    value => { value.cases[0].steps[0].projection.draws[0].tileProjections[0][0] += 1e-8;
+        value.cases[0].steps[0].projectionSha256 = sha256(value.cases[0].steps[0].projection); },
+    value => { value.cases[0].steps[0].projectionSha256 = "forged"; },
+    value => { value.cases[0].trace[0].deltaX++; }
+]) {
+    const changed = clone(candidate);
+    mutate(changed);
+    assert.throws(() => compareReplays(report, changed), "Comparison rejects missing/extra frames, any pose drift and protocol differences");
+}
+for (const scenario of scenarios) {
+    const trace = makeTrace(scenario, {x: 0, y: 80, width: 1200, height: 664});
+    assert.equal(trace.length, 32);
+    assert.equal(sha256(trace), sha256(makeTrace(scenario, {x: 0, y: 80, width: 1200, height: 664})));
+    assert.ok(trace.every(event => event.x === 600 && event.y === 412 && (event.deltaX !== 0 || event.deltaY !== 0)));
+}
+console.log("Camera replay checks passed: native input contract, cached projection state, terrain-instance ranges, context isolation, fence identity and exact sequence comparison.");
