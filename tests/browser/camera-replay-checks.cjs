@@ -146,6 +146,17 @@ const candidate = clone(report);
 candidate.revision = "candidate";
 assert.equal(compareReplays(report, candidate).comparisons[0].exactProjectionSequence, true);
 for (const mutate of [
+    value => { value.cases = []; },
+    value => { value.cases[0].trace = []; value.cases[0].steps = []; },
+    value => { value.cases[0].trace = Array(4097).fill(input); value.cases[0].steps = Array(4097).fill(step); },
+    value => { delete value.cpu; }, value => { value.availableParallelism = 0; }
+]) {
+    const invalid = clone(report);
+    mutate(invalid);
+    assert.throws(() => compareReplays(invalid, clone(invalid)),
+        "Two identically incomplete or unbounded reports cannot pass comparison");
+}
+for (const mutate of [
     value => { value.cases[0].steps = []; }, value => { value.cases[0].steps.push(clone(step)); },
     value => { value.harness.observer = "different"; }, value => { value.deviceScaleFactor = 2; },
     value => { value.cpu = "Different CPU"; }, value => { value.availableParallelism = 2; },
@@ -163,5 +174,8 @@ for (const scenario of scenarios) {
     assert.equal(trace.length, 32);
     assert.equal(sha256(trace), sha256(makeTrace(scenario, {x: 0, y: 80, width: 1200, height: 664})));
     assert.ok(trace.every(event => event.x === 600 && event.y === 412 && (event.deltaX !== 0 || event.deltaY !== 0)));
+    const fractional = makeTrace(scenario, {x: .25, y: 59, width: 1200, height: 665});
+    assert.ok(fractional.every(event => event.x === 600 && event.y === 391),
+        "Odd or fractional map geometry still declares the integral native wheel coordinates");
 }
 console.log("Camera replay checks passed: native input contract, cached projection state, terrain-instance ranges, context isolation, fence identity and exact sequence comparison.");

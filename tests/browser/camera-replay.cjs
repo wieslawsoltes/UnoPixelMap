@@ -19,7 +19,10 @@ const scenarios = [
 const digest = file => createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 
 function makeTrace(scenario, map) {
-    const center = {x: map.x + map.width * .5, y: map.y + map.height * .5};
+    // Chromium exposes native WheelEvent client coordinates as integral CSS
+    // pixels even when CDP receives a fractional point (odd map dimensions).
+    // Choose an integral point up front so the declared trace equals the input.
+    const center = {x: Math.floor(map.x + map.width * .5), y: Math.floor(map.y + map.height * .5)};
     const segments = scenario.motion === "pan"
         ? [[12, 0, 0], [0, 12, 0], [-12, 0, 0], [0, -12, 0]]
         : scenario.motion === "orbit"

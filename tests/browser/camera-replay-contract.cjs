@@ -41,6 +41,19 @@ function checkStep(raw, expected, index) {
 }
 
 function compareReplays(baseline, candidate) {
+    for (const report of [baseline, candidate]) {
+        assert.equal(report.schema, 1, "Replay report schema is supported");
+        assert.equal(report.protocol, "native-wheel-resolve-fence-v1", "Replay protocol is supported");
+        assert.ok(typeof report.cpu === "string" && report.cpu.length > 0 &&
+            Number.isInteger(report.availableParallelism) && report.availableParallelism > 0,
+            "Replay runner identity is recorded");
+        assert.ok(Array.isArray(report.cases) && report.cases.length > 0 && report.cases.length <= 16,
+            "Replay contains a bounded nonempty scenario set");
+        for (const item of report.cases)
+            assert.ok(Array.isArray(item.trace) && item.trace.length > 0 && item.trace.length <= 4096 &&
+                Array.isArray(item.steps) && item.steps.length === item.trace.length,
+                "Replay contains a bounded nonempty input sequence and all results");
+    }
     for (const field of ["schema", "protocol", "viewport", "deviceScaleFactor", "browser", "browserArgs",
         "cpu", "availableParallelism", "harness"])
         assert.deepEqual(candidate[field], baseline[field], `Replay ${field} is identical`);
