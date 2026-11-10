@@ -38,6 +38,8 @@ internal static class GpuDepthMemoryChecks
             frame.Depth.TryTerrain(1900, 500, out float beforeZ, out float beforeW, out float beforePhysical);
             Assert(DepthPreparationBenchmark.IndexCapacityBytes(frame.Depth) < IndexBudget,
                 "The pressure fixture did not begin on the indexed path.");
+            Assert(frame.Depth.CoversAt(288.23f, 288.71f, -5),
+                "The visibility-first pressure fixture did not cover the below-ground probe.");
             frame.Depth.TryTerrain(288, 288, out _, out _, out float physical);
             CheckCapacity(frame.Depth);
             Assert(!Flag(frame.Depth, "hasExactIndex"), "The exact-membership fixture did not exhaust its active budget.");
@@ -237,6 +239,9 @@ internal static class GpuDepthMemoryChecks
         {
             foreach (var (x, y) in queries)
             {
+                foreach (float altitude in new[] { -5f, 0, 10, 35, 80 })
+                    Assert(frame.Depth.CoversAt(x + .99f, y + .01f, altitude) == reference.CoversAt(x + .99f, y + .01f, altitude),
+                        $"Pressure visibility-first query differs from eager at {x},{y}, altitude {altitude}.");
                 bool actual = frame.Depth.TryTerrain(x, y, out float z, out float w, out float physical);
                 bool expected = reference.TryTerrain(x, y, out float ez, out float ew, out float ep);
                 Assert(actual == expected && Exact(z, ez) && Exact(w, ew) && Exact(physical, ep),
@@ -244,7 +249,7 @@ internal static class GpuDepthMemoryChecks
                 foreach (float altitude in new[] { -5f, 0, 10, 35, 80 })
                     Assert(frame.Depth.CoversAt(x + .23f, y + .71f, altitude) == reference.CoversAt(x + .23f, y + .71f, altitude),
                         $"Pressure occlusion query differs from eager at {x},{y}, altitude {altitude}.");
-                comparisons += 6;
+                comparisons += 11;
             }
         }
         finally { reference.Release(); }

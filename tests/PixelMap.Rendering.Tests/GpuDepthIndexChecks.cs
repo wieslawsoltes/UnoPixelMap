@@ -70,7 +70,43 @@ internal static class GpuDepthIndexChecks
             queries += Compare(first, frames++);
         }
         TerrainOrderAndNonfinite(ref frames, ref queries);
+        OcclusionBeforePicking(ref frames, ref queries);
         Console.WriteLine($"Passed {queries:N0} exact sparse/eager depth queries across {frames} frames: all styles, projection modes, near-plane crossings, raised/courtyard roofs, signed terrain, wrapped worlds, bounded overflow and retained A→B→A frames.");
+    }
+
+    private static void OcclusionBeforePicking(ref int frames, ref int queries)
+    {
+        var center = Geo(.5, .5);
+        var camera = new MapCamera(center.Latitude, center.Longitude, 16, 0, 0);
+        MapTile[] tiles = [new(Tile, Enumerable.Range(0, 48).Select(index =>
+            Building((ulong)(index + 1), 12 + index * 3, 0, Box(800, 800, 3300, 3300))).ToArray())];
+        using var renderer = new PixelMapRenderer();
+        using var frame = renderer.PrepareGpuFrame(Width, Height, camera, tiles, PixelStyle.Day, Pixels);
+        var reference = new EagerGpuSceneDepth(frame);
+        reference.Retain();
+        try
+        {
+            int x = frame.ArtWidth / 2, y = frame.ArtHeight / 2;
+            Assert(frame.Depth.CoversAt(x + .23f, y + .71f, 4) && reference.CoversAt(x + .23f, y + .71f, 4),
+                "The layered-building fixture failed to cover its first label.");
+            var groups = ((IEnumerable)Field(frame.Depth, "groups")).Cast<object>().ToArray();
+            int models = groups.Count(group => (int)Field(group, "Model") >= 0);
+            int prepared = groups.Count(group => (int)Field(group, "Model") >= 0 && (int)Field(group, "FirstTriangle") >= 0);
+            Assert(models >= 40 && prepared > 0 && prepared < models,
+                "An already-covered label still prepared every overlapping building.");
+            // The first successful Boolean query leaves higher layers unprepared.
+            // A different altitude and a subsequent terrain pick must still see
+            // those omitted layers; neither a partial hit nor a complete-cell flag
+            // may escape the early-return path.
+            foreach (float altitude in new[] { 4f, 65f, 170f })
+            {
+                Assert(frame.Depth.CoversAt(x + .99f, y + .01f, altitude) == reference.CoversAt(x + .99f, y + .01f, altitude),
+                    "An early occlusion result hid an unprepared higher layer.");
+                queries++;
+            }
+            queries += Compare(frame, frames++);
+        }
+        finally { reference.Release(); }
     }
 
     private static void TerrainOrderAndNonfinite(ref int frames, ref int queries)
@@ -149,6 +185,18 @@ internal static class GpuDepthIndexChecks
             foreach (int pixel in pixels)
             {
                 int x = pixel % width, y = pixel / width;
+                // Boolean visibility is normally queried by labels before picking.
+                // Exercise that order at distinct subpixel positions and heights,
+                // then demand the complete terrain result from the same pixel.
+                ReadOnlySpan<float> firstLevels = [-50f, 4f, 35f, 160f];
+                foreach (float firstLevel in firstLevels)
+                {
+                    float firstX = x + (firstLevel == 4 ? .99f : .01f);
+                    float firstY = y + (firstLevel == 4 ? .01f : .99f);
+                    if (frame.Depth.CoversAt(firstX, firstY, firstLevel) != reference.CoversAt(firstX, firstY, firstLevel))
+                        throw new InvalidOperationException($"First occlusion differs at frame {sequence}, pixel {x},{y}, altitude {firstLevel}.");
+                    queries++;
+                }
                 bool a = frame.Depth.TryTerrain(x, y, out float altitude, out float inverse, out float physical);
                 bool b = reference.TryTerrain(x, y, out float otherAltitude, out float otherInverse, out float otherPhysical);
                 if (a != b || !Exact(altitude, otherAltitude) || !Exact(inverse, otherInverse) || !Exact(physical, otherPhysical))

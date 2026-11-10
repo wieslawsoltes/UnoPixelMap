@@ -126,7 +126,25 @@ internal sealed class GpuSceneDepth
     {
         int x = (int)MathF.Floor(sx), y = (int)MathF.Floor(sy);
         if ((uint)x >= (uint)width || (uint)y >= (uint)height) return false;
-        var sample = Sample(x, y);
+        int offset = y * width + x;
+        if (!samples.TryGetValue(offset, out var sample))
+        {
+            int cell = (y >> cellShift) * columns + (x >> cellShift);
+            if (hasCoarseIndex && !preparedCells[cell] && cellQueries[cell] + 1 < CompleteCellAfterQueries)
+            {
+                cellQueries[cell]++;
+                float threshold = pixelsPerMeter * altitudeMeters;
+                if (perspective)
+                {
+                    float samplePlane = lens.CosPitch - (altitudeMeters * pixelsPerMeter - lens.TargetZ) * lens.InverseFocal;
+                    if (Math.Abs(samplePlane) < 1e-7f) return false;
+                    threshold = (lens.CosPitch + (y + .5f - lens.CY) * lens.SinPitch * lens.InverseFocal) / samplePlane + 1e-5f;
+                }
+                if (CoversBeforeComplete(cell, x, y, threshold, out sample)) return true;
+                CacheSample(offset, sample);
+            }
+            else sample = SampleUncached(x, y, cell);
+        }
         if (!sample.HasSurface) return false;
         float nearest = sample.Depth;
         float sampleY = y + .5f;
@@ -158,10 +176,29 @@ internal sealed class GpuSceneDepth
     {
         int offset = y * width + x;
         if (samples.TryGetValue(offset, out var cached)) return cached;
-        float sx = x + .5f, sy = y + .5f;
         int cell = (y >> cellShift) * columns + (x >> cellShift);
+        return SampleUncached(x, y, cell);
+    }
+
+    private PixelHit SampleUncached(int x, int y, int cell)
+    {
+        float sx = x + .5f, sy = y + .5f;
         if (!preparedCells[cell]) PrepareCell(cell, sx, sy, ++cellQueries[cell] >= CompleteCellAfterQueries);
         var hit = new HitAccumulator();
+        SamplePreparedCell(cell, x, y, sx, sy, ref hit);
+        // Every terrain primitive precedes every model primitive in the eager pass.
+        // Once a model covers terrain, no later primitive can restore terrain status.
+        // Thus only these maxima matter; cell entries need no ordering or sorting.
+        // Rims retain the original small inverse-depth tolerance, without changing
+        // the stored maximum. Equal-depth terrain picks still use source order.
+        var result = hit.Result(perspective);
+        CacheSample(y * width + x, result);
+        return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SamplePreparedCell(int cell, int x, int y, float sx, float sy, ref HitAccumulator hit)
+    {
         if (hasExactIndex)
         {
             var preparedTriangles = CollectionsMarshal.AsSpan(triangles);
@@ -174,15 +211,72 @@ internal sealed class GpuSceneDepth
                 }
         }
         else SampleGroups(cell, x, y, sx, sy, ref hit);
-        // Every terrain primitive precedes every model primitive in the eager pass.
-        // Once a model covers terrain, no later primitive can restore terrain status.
-        // Thus only these maxima matter; cell entries need no ordering or sorting.
-        // Rims retain the original small inverse-depth tolerance, without changing
-        // the stored maximum. Equal-depth terrain picks still use source order.
-        var result = hit.Result(perspective);
+    }
+
+    private void CacheSample(int offset, PixelHit result)
+    {
         if (samples.Count >= MaximumCachedPixels) samples.Clear();
         samples.Add(offset, result);
-        return result;
+    }
+
+    private bool CoversBeforeComplete(int cell, int x, int y, float threshold, out PixelHit sample)
+    {
+        float sx = x + .5f, sy = y + .5f;
+        var hit = new HitAccumulator();
+        var local = pendingCells[cell] is { } list ? CollectionsMarshal.AsSpan(list) : [];
+        var large = CollectionsMarshal.AsSpan(largeProxies);
+        // Terrain can replace pixel-center depth with its continuous plane at the
+        // caller's subpixel position. Resolve every contributing terrain group
+        // before an opaque model is allowed to prove a permanent occlusion.
+        foreach (int index in local)
+        {
+            if (groups[index].Model >= 0) break;
+            if (groups[index].Contains(sx, sy)) PrepareGroup(index);
+        }
+        foreach (int index in large)
+        {
+            if (groups[index].Model >= 0) break;
+            if (groups[index].Contains(sx, sy)) PrepareGroup(index);
+        }
+        // Reuse exact cell memberships for terrain and previously demanded models.
+        // Scanning a terrain group's complete mesh here would erase the index's
+        // sparse-query benefit. A previously prepared model can also finish this
+        // query without projecting any additional geometry.
+        SamplePreparedCell(cell, x, y, sx, sy, ref hit);
+        if (hit.HasPermanentModelCover(threshold, perspective))
+        {
+            sample = default;
+            return true;
+        }
+        foreach (int index in local)
+        {
+            if (groups[index].Model < 0 || groups[index].FirstTriangle >= 0) continue;
+            PrepareAndSampleGroup(index, x, y, sx, sy, ref hit);
+            if (hit.HasPermanentModelCover(threshold, perspective))
+            {
+                sample = default;
+                return true;
+            }
+        }
+        foreach (int index in large)
+        {
+            if (groups[index].Model < 0 || groups[index].FirstTriangle >= 0) continue;
+            PrepareAndSampleGroup(index, x, y, sx, sy, ref hit);
+            if (hit.HasPermanentModelCover(threshold, perspective))
+            {
+                sample = default;
+                return true;
+            }
+        }
+        sample = hit.Result(perspective);
+        return false;
+    }
+
+    private void PrepareAndSampleGroup(int index, int x, int y, float sx, float sy, ref HitAccumulator hit)
+    {
+        if (!groups[index].Contains(sx, sy)) return;
+        PrepareGroup(index);
+        SampleGroup(index, x, y, sx, sy, ref hit);
     }
 
     private void SampleGroups(int cell, int x, int y, float sx, float sy, ref HitAccumulator hit)
@@ -652,6 +746,13 @@ internal sealed class GpuSceneDepth
             nearest = Math.Max(nearest, depth);
             hasSurface = true;
         }
+
+        // All terrain is already known. Once a model/rim disables the terrain's
+        // subpixel-depth substitution, later models can only raise the maximum.
+        // Do not cache this partial hit: picking must still demand omitted groups.
+        internal readonly bool HasPermanentModelCover(float threshold, bool perspective) =>
+            nearest > threshold && (terrainIndex < 0 || modelDepth >= terrainDepth ||
+                edgeDepth >= terrainDepth - (perspective ? 1e-6f : 0));
 
         internal readonly PixelHit Result(bool perspective) => new(nearest, terrainIndex, hasSurface,
             terrainIndex >= 0 && modelDepth < terrainDepth && edgeDepth < terrainDepth - (perspective ? 1e-6f : 0));
