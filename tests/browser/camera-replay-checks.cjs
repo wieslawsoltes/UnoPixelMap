@@ -45,7 +45,8 @@ function observerFixture() {
     const wheel = input => listeners.wheel({isTrusted: true, deltaMode: 0, clientX: input.x, clientY: input.y,
         deltaX: input.deltaX, deltaY: input.deltaY, altKey: Boolean(input.modifiers & 1),
         ctrlKey: Boolean(input.modifiers & 2), metaKey: Boolean(input.modifiers & 4), shiftKey: Boolean(input.modifiers & 8)});
-    return {gl, state, program, uniform, wheel, calls, WebGL2RenderingContext};
+    return {gl, state, program, uniform, wheel, calls, WebGL2RenderingContext,
+        advance: milliseconds => { time += milliseconds; }};
 }
 
 const fixture = observerFixture();
@@ -97,6 +98,8 @@ assert.equal(state.ready(), false, "An unrelated fence cannot complete this map 
 gl.clientWaitSync(fence, 37147, 0);
 assert.equal(state.ready(), false, "A timed-out fence cannot complete this map frame");
 gl.clientWaitSync(fence, gl.CONDITION_SATISFIED, 0);
+assert.equal(state.ready(), false, "The tile-refresh quiet barrier follows a fast fence");
+fixture.advance(300);
 assert.equal(state.ready(), true);
 const first = JSON.parse(JSON.stringify(state.finish()));
 assert.throws(() => state.finish(), /No camera replay/);
@@ -106,7 +109,7 @@ assert.deepEqual(first.resolves[0].draws[0].tileProjections,
 assert.deepEqual(first.resolves[0].draws[1].uniforms.uGround, [15.25, 1, 100],
     "Uniform values persist across inactive frames without leaking between contexts");
 const step = checkStep(JSON.parse(JSON.stringify(first)), input, 0);
-assert.ok(step.inputToSubmissionMs > 0 && step.inputToFenceSignalMs > step.inputToSubmissionMs);
+assert.ok(step.inputToFirstSubmissionMs > 0 && step.inputToSettledFenceSignalMs > step.inputToFirstSubmissionMs);
 
 // Uniform caches may omit every setter on the next frame. The observer must
 // retain those values, but must never retain previous-frame draws or fences.
@@ -121,16 +124,45 @@ gl.clientWaitSync(fence, gl.ALREADY_SIGNALED, 0);
 assert.equal(state.ready(), false, "An earlier frame's fence cannot satisfy the next step");
 const secondFence = gl.fenceSync(37143, 0);
 gl.clientWaitSync(secondFence, gl.ALREADY_SIGNALED, 0);
+fixture.advance(300);
 const second = JSON.parse(JSON.stringify(state.finish()));
 assert.equal(second.resolves[0].draws.length, 1, "Draws cannot leak between frames");
-assert.deepEqual(second.resolves[0].draws[0].uniforms, step.projection.draws[1].uniforms);
+assert.deepEqual(second.resolves[0].draws[0].uniforms, step.projection[0].draws[1].uniforms);
+
+// A timer may reorder resident tiles after the first camera frame. Both map
+// submissions are retained, and the first (or an unrelated) signaled fence
+// cannot satisfy the second frame. No sorting or frame deduplication is allowed.
+state.begin();
+wheel(input);
+const submit = count => {
+    gl.useProgram(geometry);
+    gl.drawElements(4, count, 5125, 0);
+    gl.useProgram(resolve);
+    gl.drawArrays(4, 0, 3);
+    return gl.fenceSync(37143, 0);
+};
+const firstOfPair = submit(120);
+const secondOfPair = submit(240);
+gl.clientWaitSync(firstOfPair, gl.ALREADY_SIGNALED, 0);
+fixture.advance(300);
+assert.equal(state.ready(), false, "Every submitted frame needs its own signal");
+gl.clientWaitSync(secondFence, gl.ALREADY_SIGNALED, 0);
+assert.equal(state.ready(), false, "An earlier step's fence cannot finish an interleaved sequence");
+gl.clientWaitSync(secondOfPair, gl.ALREADY_SIGNALED, 0);
+assert.equal(state.ready(), true);
+const pair = JSON.parse(JSON.stringify(state.finish()));
+const pairStep = checkStep(pair, input, 0);
+assert.deepEqual(pairStep.projection.map(frame => frame.draws[0].count), [120, 240]);
+assert.ok(pairStep.inputToSettledFenceSignalMs > pairStep.inputToFirstFenceSignalMs,
+    "First-frame and settled-last-fence latency remain distinct");
 
 const clone = value => JSON.parse(JSON.stringify(value));
 for (const mutate of [
     raw => { raw.inputs = []; }, raw => { raw.inputs.push(clone(raw.inputs[0])); },
     raw => { raw.inputs[0].trusted = false; }, raw => { raw.inputs[0].deltaX++; },
-    raw => { raw.resolves = []; }, raw => { raw.resolves.push(clone(raw.resolves[0])); },
+    raw => { raw.resolves = []; }, raw => { raw.resolves = Array(33).fill(clone(raw.resolves[0])); },
     raw => { raw.resolves[0].signaledAt = null; }, raw => { raw.resolves[0].compositorContext = false; },
+    raw => { raw.quietForMs = 249; }, raw => { raw.lastResolveAt++; },
     raw => { raw.resolves[0].draws[0].tileProjections.pop(); },
     raw => { raw.resolves[0].draws[1].uniforms.uScreenX = [1, 2]; }
 ]) {
@@ -139,7 +171,7 @@ for (const mutate of [
     assert.throws(() => checkStep(changed, input, 0), "Incomplete or mismatched render steps fail closed");
 }
 
-const report = {schema: 1, protocol: "native-wheel-resolve-fence-v1", viewport: {width: 1200, height: 780},
+const report = {schema: 2, protocol: "native-wheel-resolve-fence-v2", viewport: {width: 1200, height: 780},
     deviceScaleFactor: 1, browser: "test-browser", browserArgs: [], cpu: "Fixture CPU", availableParallelism: 3,
     harness: {observer: "same"}, revision: "baseline",
     cases: [{name: "map", scenario: {}, map: {width: 1200, height: 664}, trace: [input], traceSha256: sha256([input]),
@@ -147,10 +179,25 @@ const report = {schema: 1, protocol: "native-wheel-resolve-fence-v1", viewport: 
 const candidate = clone(report);
 candidate.revision = "candidate";
 assert.equal(compareReplays(report, candidate).comparisons[0].exactProjectionSequence, true);
+const pairReport = clone(report);
+pairReport.cases[0].steps = [pairStep];
+assert.equal(compareReplays(pairReport, clone(pairReport)).comparisons[0].submissions, 2);
+for (const mutate of [
+    frames => frames.pop(), frames => frames.push(clone(frames[0])), frames => frames.reverse()
+]) {
+    const changed = clone(pairReport);
+    const changedStep = changed.cases[0].steps[0];
+    mutate(changedStep.projection);
+    changedStep.projectionSha256 = sha256(changedStep.projection);
+    assert.throws(() => compareReplays(pairReport, changed),
+        "Missing, extra or reordered frames within an input fail exact comparison");
+}
 for (const mutate of [
     value => { value.cases = []; },
     value => { value.cases[0].trace = []; value.cases[0].steps = []; },
     value => { value.cases[0].trace = Array(4097).fill(input); value.cases[0].steps = Array(4097).fill(step); },
+    value => { value.cases[0].steps[0].projection = []; },
+    value => { value.cases[0].steps[0].projection = Array(33).fill(step.projection[0]); },
     value => { delete value.cpu; }, value => { value.availableParallelism = 0; }
 ]) {
     const invalid = clone(report);
@@ -162,7 +209,7 @@ for (const mutate of [
     value => { value.cases[0].steps = []; }, value => { value.cases[0].steps.push(clone(step)); },
     value => { value.harness.observer = "different"; }, value => { value.deviceScaleFactor = 2; },
     value => { value.cpu = "Different CPU"; }, value => { value.availableParallelism = 2; },
-    value => { value.cases[0].steps[0].projection.draws[0].tileProjections[0][0] += 1e-8;
+    value => { value.cases[0].steps[0].projection[0].draws[0].tileProjections[0][0] += 1e-8;
         value.cases[0].steps[0].projectionSha256 = sha256(value.cases[0].steps[0].projection); },
     value => { value.cases[0].steps[0].projectionSha256 = "forged"; },
     value => { value.cases[0].trace[0].deltaX++; }

@@ -110,12 +110,20 @@ function installCameraReplayProbe() {
     }, {capture: true, passive: true});
     state.begin = () => {
         if (state.step) throw new Error("A camera replay step is already active");
-        state.step = {inputs: [], resolves: []};
+        state.step = {beganAt: performance.now(), inputs: [], resolves: []};
     };
-    state.ready = () => state.step?.resolves.some(resolve => resolve.signaledAt !== null) === true;
+    // The public tile refresh timer may submit a second frame after changing
+    // resident-tile order. Retain it and await its own fence as well; completing
+    // on the first signal would leak later map work into the next input.
+    state.ready = () => state.step?.resolves.length > 0 &&
+        state.step.resolves.every(resolve => resolve.signaledAt !== null) &&
+        performance.now() - state.lastResolveAt >= 250;
     state.finish = () => {
         const step = state.step;
         if (!step) throw new Error("No camera replay step is active");
+        step.finishedAt = performance.now();
+        step.lastResolveAt = state.lastResolveAt;
+        step.quietForMs = step.finishedAt - state.lastResolveAt;
         state.step = null;
         return step;
     };

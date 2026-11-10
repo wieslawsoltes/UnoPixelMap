@@ -69,10 +69,13 @@ async function measure(browser, scenario, ui, output, report, performanceProbe, 
         for (let index = 0; index < trace.length; index++) {
             await page.evaluate(() => __pixelAtlasCameraReplay.begin());
             await cdp.send("Input.dispatchMouseEvent", {type: "mouseWheel", ...trace[index]});
-            await page.waitForFunction(() => __pixelAtlasCameraReplay.ready(), undefined, {timeout: 20000});
-            // Let the signaled image enter the compositor before the next pose.
-            // The barrier is deliberately excluded from input-to-submit latency.
-            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            await page.waitForFunction(async () => {
+                if (!__pixelAtlasCameraReplay.ready()) return false;
+                // Let the signaled image enter the compositor before the next
+                // pose. A newly submitted frame must pass the full barrier too.
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                return __pixelAtlasCameraReplay.ready();
+            }, undefined, {timeout: 20000});
             const raw = await page.evaluate(() => __pixelAtlasCameraReplay.finish());
             rawSteps.push(raw);
             steps.push(checkStep(raw, trace[index], index));
@@ -80,15 +83,17 @@ async function measure(browser, scenario, ui, output, report, performanceProbe, 
         const raw = await page.evaluate(() => __pixelAtlasPerf.finish());
         const after = performanceProbe.metrics(await cdp.send("Performance.getMetrics"));
         const captured = performanceProbe.summarizeProbe(raw, before, after);
-        assert.equal(captured.mapResolves.submissions, trace.length,
-            "The full capture contains exactly one map submission for every input");
+        const submissions = steps.reduce((total, step) => total + step.projection.length, 0);
+        assert.equal(captured.mapResolves.submissions, submissions,
+            "Every map submission in the full capture belongs to an input step");
         const afterHud = scenario.vehicle === undefined ? null : await ui.telemetry(page);
         if (beforeHud) assert.deepEqual(afterHud, beforeHud, "A paused look replay retains the exact public physical telemetry");
         const result = {name: scenario.name, scenario, map, trace, traceSha256: sha256(trace), beforeHud, afterHud, steps,
-            summary: {steps: steps.length, taskCpuMs: captured.cpu.TaskDurationMs,
+            summary: {steps: steps.length, submissions, taskCpuMs: captured.cpu.TaskDurationMs,
                 taskCpuPerStepMs: captured.cpu.TaskDurationMs / steps.length,
-                inputToSubmission: performanceProbe.distribution(steps.map(step => step.inputToSubmissionMs)),
-                inputToFenceSignal: performanceProbe.distribution(steps.map(step => step.inputToFenceSignalMs)),
+                inputToFirstSubmission: performanceProbe.distribution(steps.map(step => step.inputToFirstSubmissionMs)),
+                inputToFirstFenceSignal: performanceProbe.distribution(steps.map(step => step.inputToFirstFenceSignalMs)),
+                inputToSettledFenceSignal: performanceProbe.distribution(steps.map(step => step.inputToSettledFenceSignalMs)),
                 capture: captured}};
         fs.writeFileSync(path.join(output, scenario.name + "-raw.json"), JSON.stringify({rawSteps, raw, before, after}, null, 2));
         await page.screenshot({path: path.join(output, scenario.name + "-after.png")});
@@ -98,6 +103,7 @@ async function measure(browser, scenario, ui, output, report, performanceProbe, 
             projectionSequenceSha256: sha256(steps.map(step => step.projection)), ...result.summary}));
     } catch (error) {
         diagnostics.pending = await page.evaluate(() => __pixelAtlasCameraReplay.step).catch(() => null);
+        diagnostics.lastResolveAt = await page.evaluate(() => __pixelAtlasCameraReplay.lastResolveAt).catch(() => null);
         fs.writeFileSync(path.join(output, scenario.name + "-failure-probe.json"), JSON.stringify(diagnostics, null, 2));
         await page.screenshot({path: path.join(output, scenario.name + "-failure.png")}).catch(() => {});
         fs.writeFileSync(path.join(output, scenario.name + "-failure.txt"),
@@ -129,13 +135,13 @@ async function main() {
     const browserArgs = ["--disable-dev-shm-usage", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
         ...JSON.parse(process.env.PIXELMAP_BROWSER_ARGS || "[]")];
     const browser = await chromium.launch({executablePath: process.env.CHROMIUM_PATH || undefined, args: browserArgs});
-    const report = {schema: 1, protocol: "native-wheel-resolve-fence-v1", revision: process.env.PIXELMAP_REVISION || null,
+    const report = {schema: 2, protocol: "native-wheel-resolve-fence-v2", revision: process.env.PIXELMAP_REVISION || null,
         base, capturedAtUtc: new Date().toISOString(), viewport: {width: 1200, height: 780}, deviceScaleFactor: 1,
         browser: browser.version(), browserArgs, cpu: os.cpus()[0]?.model, availableParallelism: os.availableParallelism(),
         harness: Object.fromEntries(["camera-replay.cjs", "camera-replay-probe.cjs", "camera-replay-contract.cjs",
             "performance.cjs", "explore.cjs"].map(name => [name, digest(path.join(__dirname, name))])),
         notes: "Native wheel inputs traverse the public input adapter and immediate camera update path. " +
-            "Each input waits for exactly one map resolve and that resolve's signaled GPU fence. " +
+            "Each input retains every map resolve in order and waits for all corresponding signaled GPU fences plus a quiet barrier. " +
             "All map projection uniforms and terrain instance transform floats are retained for exact cross-artifact comparison. " +
             "Cache-layer indices are excluded from pose identity. External providers are blocked; bundled tiles supply the scene. " +
             "The walking case is paused: it measures look/render work, not simulation. " +
