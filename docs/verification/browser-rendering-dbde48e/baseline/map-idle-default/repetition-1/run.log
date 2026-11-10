@@ -1,0 +1,1 @@
+PLAY {"name":"map-idle-default","wallMs":8006.200000000012,"cpuMs":66.83500000000001,"cpuPercent":0.8326579835686009,"raf":60.07843920961246,"rafMedian":16.69999999999891,"rafP95":16.799999999999272,"rafMax":16.80000000000109,"artCopiesPerSecond":0,"mapResolvesPerSecond":0,"compositorResolves":0,"artPixelSizes":{},"maximumPending":0,"copyMs":0,"beforeHud":null,"afterHud":null}

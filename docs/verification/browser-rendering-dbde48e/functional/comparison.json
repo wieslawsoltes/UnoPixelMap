@@ -1,0 +1,44 @@
+[
+  {
+    "name": "presentation-pixel",
+    "differentMapPixels": 0,
+    "totalMapPixels": 297000,
+    "maxChannelDelta": 0,
+    "exactCanvas": true
+  },
+  {
+    "name": "presentation-normal",
+    "differentMapPixels": 0,
+    "totalMapPixels": 297000,
+    "maxChannelDelta": 0,
+    "exactCanvas": true
+  },
+  {
+    "name": "presentation-minecraft",
+    "differentMapPixels": 0,
+    "totalMapPixels": 297000,
+    "maxChannelDelta": 0,
+    "exactCanvas": true
+  },
+  {
+    "name": "presentation-roblox",
+    "differentMapPixels": 0,
+    "totalMapPixels": 297000,
+    "maxChannelDelta": 0,
+    "exactCanvas": true
+  },
+  {
+    "name": "presentation-earth-overhead",
+    "differentMapPixels": 0,
+    "totalMapPixels": 297000,
+    "maxChannelDelta": 0,
+    "exactCanvas": true
+  },
+  {
+    "name": "presentation-elevation",
+    "differentMapPixels": 0,
+    "totalMapPixels": 297000,
+    "maxChannelDelta": 0,
+    "exactCanvas": true
+  }
+]

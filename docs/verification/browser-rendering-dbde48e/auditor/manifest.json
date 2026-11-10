@@ -1,0 +1,61 @@
+{
+  "candidate_source": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "files": {
+    "README.md": {
+      "bytes": 12496,
+      "sha256": "eaa93cf7d8afaef8a73ca7ec93de0308c39450dd83b0b41099aa86f4ee3aec02"
+    },
+    "analyze.py": {
+      "bytes": 40136,
+      "sha256": "b9726da37c044f6961b09a4deac47a41ec5dd110263efd05b98ad9485b480205"
+    },
+    "extract-artifact.py": {
+      "bytes": 4716,
+      "sha256": "e59e1f555cdfc955942f590b9d066e7808e5388626c7c69ff4073641ab1d3c7f"
+    },
+    "frozen-harness/camera-replay-contract.cjs": {
+      "bytes": 7706,
+      "sha256": "69430f8b256d1e088adcb8174c18a2540f7d452eba964c02e49644e7647a3a48"
+    },
+    "frozen-harness/camera-replay-probe.cjs": {
+      "bytes": 9517,
+      "sha256": "7894b2fd47410abfcd5c83fc7464a45f4a09d8f05bfb368c7037d7cdd268b4bd"
+    },
+    "frozen-harness/camera-replay.cjs": {
+      "bytes": 11236,
+      "sha256": "9e3d2987136fc38d10680f8b5654050fad23006bc5c453efcd84f44bb8c4e833"
+    },
+    "frozen-harness/explore.cjs": {
+      "bytes": 61999,
+      "sha256": "7b40495c5abcee619491520fee7637764242ba1c39e1a33b2bdcbff54d0a503b"
+    },
+    "frozen-harness/performance.cjs": {
+      "bytes": 52215,
+      "sha256": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c"
+    },
+    "frozen-harness/play-performance.cjs": {
+      "bytes": 12973,
+      "sha256": "fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44"
+    },
+    "known-baseline-artifact.json": {
+      "bytes": 13636,
+      "sha256": "d49e47ce3292e82a5e3dcc3276c303e693a6a62f4323961f42b9bbd8af15f290"
+    },
+    "selfcheck.py": {
+      "bytes": 9688,
+      "sha256": "0b4977193cd95b4c703514c67f42f98effceba7929ada590593be832795f97de"
+    },
+    "source-provenance.json": {
+      "bytes": 1793,
+      "sha256": "9d8eed0f0c0f6c6ffaa711ce495198dbccfc087d9ea5a27cef663e1f72381320"
+    },
+    "validation/selfcheck.json": {
+      "bytes": 7395,
+      "sha256": "cf9c8741db1d6baf5d6fa13a26b9d50bae0ad764897132928b80f78be9f90de0"
+    },
+    "verify-raw.cjs": {
+      "bytes": 9933,
+      "sha256": "79f49fc995ae1aa1c944ef54fa7c686772b6e60d16db073371b9f4a56770e048"
+    }
+  }
+}

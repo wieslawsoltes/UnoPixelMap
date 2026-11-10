@@ -1,0 +1,3048 @@
+{
+  "schema": 1,
+  "artifact_id": 13808810774,
+  "artifact_sha256": "b0feae7904d7c8350f7445424dce6fb9313d65fd52b9c238bc914e2a14efa5de",
+  "artifact_bytes": 13798778,
+  "compression": {
+    "format": "gzip",
+    "level": 9,
+    "mtime": 0,
+    "filename": ""
+  },
+  "scope": "Every non-screenshot ZIP member is preserved exactly after decompression. All 84 omitted PNGs are successful before/after benchmark captures; their original byte hashes remain recorded.",
+  "members": [
+    {
+      "original": "baseline/car-moving-chase/repetition-1/car-moving-chase-after.png",
+      "original_bytes": 63437,
+      "original_sha256": "7a0438e00335462e04a0b8a1b8f9a604c95a0b1db302ce1258a0028ddfa7220e",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-1/car-moving-chase-before.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-1/car-moving-chase-raw.json",
+      "original_bytes": 4209919,
+      "original_sha256": "70f089b5e1bab5f449a2170b0812885cfa21c7ada92ffef9e9d01b503db35745",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-1/car-moving-chase-raw.json.gz",
+      "stored_bytes": 37839,
+      "stored_sha256": "b5ffa56552d285022b36e25f18e77b9bec459d886361e66e92929d0ad877eba6",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-1/car-moving-chase-stacks.json",
+      "original_bytes": 26749,
+      "original_sha256": "7c058e9c1588816cabcc9869058d4080d543e8043ebfd2ba8d39d57dd0083afb",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-1/car-moving-chase-stacks.json.gz",
+      "stored_bytes": 2005,
+      "stored_sha256": "0dc12e1802a48b778222a9da5912b3e2beb0361921f31ecb3caea1863cd0c48c",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-1/car-moving-chase.cpuprofile",
+      "original_bytes": 1290591,
+      "original_sha256": "d619a0623477dc1e4af6a9394743e8855c26497d185a9371fc9738583e0134c3",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-1/car-moving-chase.cpuprofile.gz",
+      "stored_bytes": 86140,
+      "stored_sha256": "5c22d71ccc516b4b33b2e57a49315b39ac8ac5b536e5957620287eb35bc1b589",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-1/report.json",
+      "original_bytes": 43364,
+      "original_sha256": "87bbbfab61015c2d1137c8ed3c19b6cea42a1702e750d7ee3e9b1705e2b90303",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-1/report.json.gz",
+      "stored_bytes": 4961,
+      "stored_sha256": "49e6066fc837a1ae15e77b45157de3e0c26c85d44443dad50c7a3494a1e69f37",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-1/run.log",
+      "original_bytes": 2874,
+      "original_sha256": "bda264011be5b005c0d8a7fe8fa97f02fd3f6de0354e1bfe00fda3fd03863329",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-1/run.log",
+      "stored_bytes": 2874,
+      "stored_sha256": "bda264011be5b005c0d8a7fe8fa97f02fd3f6de0354e1bfe00fda3fd03863329",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-2/car-moving-chase-after.png",
+      "original_bytes": 62565,
+      "original_sha256": "a786dfaf9ef0393b612e85a92e44ab18fb79c80febd8d2814c166d56db8853b1",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-2/car-moving-chase-before.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-2/car-moving-chase-raw.json",
+      "original_bytes": 4214498,
+      "original_sha256": "709c7a88fe534068f95562bd027bb4aeb694e2a381b182db5426ca723b93bb74",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-2/car-moving-chase-raw.json.gz",
+      "stored_bytes": 37886,
+      "stored_sha256": "d715a96afc4660e691524fbc6a17b1825e97e83cdae7b0c0787f5516bde9fa08",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-2/report.json",
+      "original_bytes": 11018,
+      "original_sha256": "f694f310e57c2dc1ab39457e4e867b36ca5619297b6ff41db907fa4f7ea9eebd",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-2/report.json.gz",
+      "stored_bytes": 2962,
+      "stored_sha256": "45bb516209efb78e1062b3819e612a9400364e91db607a53776370ea5c0b1f12",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-chase/repetition-2/run.log",
+      "original_bytes": 646,
+      "original_sha256": "502fd8d8a21bef02eb438cc14f939a3eb23e7ff390fd960e8a854d23df946079",
+      "retained": true,
+      "stored": "baseline/car-moving-chase/repetition-2/run.log",
+      "stored_bytes": 646,
+      "stored_sha256": "502fd8d8a21bef02eb438cc14f939a3eb23e7ff390fd960e8a854d23df946079",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-after.png",
+      "original_bytes": 67491,
+      "original_sha256": "12eefb8e441e296b37591f08b06746ec4c04b9e63a51263834404a28262d1110",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-before.png",
+      "original_bytes": 64661,
+      "original_sha256": "7740b2bc828d9a85163eff6d15b409bdcab8a76fc6d0757cd582909c6565e2ec",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json",
+      "original_bytes": 983010,
+      "original_sha256": "7322464c3827880f2759416fd37420f7bd3f6381f9c9af932a20d691a1283b16",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json.gz",
+      "stored_bytes": 15632,
+      "stored_sha256": "8d308ddf0694eee2593a15a8ff8b5afc1042c4f87e6a9eab8db8c54c47e8cefe",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-stacks.json",
+      "original_bytes": 27932,
+      "original_sha256": "81e0dcdbd0b4a1474bf08ac4b20c18cd54cd28651f26c46347f73d46b34db9f7",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-stacks.json.gz",
+      "stored_bytes": 2015,
+      "stored_sha256": "3cbb4581936ba596848416d5f376ea9dbe3a8bcd6c41e4152a72fbe9578d1e10",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile",
+      "original_bytes": 1406099,
+      "original_sha256": "63d3bbc47216088db0a1a3a2dd32a8f3bff356dc3b899ebcfa04ef79d4cfd401",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile.gz",
+      "stored_bytes": 92852,
+      "stored_sha256": "4be2a3c641ab429ad3cef8ae7635eefafdd656a93777e17ccdc60ede74b3fb78",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-1/report.json",
+      "original_bytes": 43911,
+      "original_sha256": "5958bd41c6f710f154293d518027ada6d00df8291dccb85d434135549cacdb49",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 4945,
+      "stored_sha256": "dd2858e08029370dab5a208733bbcfc9c602a7d28d63f76667808e13b4709e6b",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-1/run.log",
+      "original_bytes": 3307,
+      "original_sha256": "e47f209eb0c759dc4e7e7bbcc372bef32f278e2567edc0191bc91fbe700a2100",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-1/run.log",
+      "stored_bytes": 3307,
+      "stored_sha256": "e47f209eb0c759dc4e7e7bbcc372bef32f278e2567edc0191bc91fbe700a2100",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-after.png",
+      "original_bytes": 68221,
+      "original_sha256": "f0289a2bdb7615cffe3eeb751f63616d464254baf9e6a2a710343507fc537128",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-before.png",
+      "original_bytes": 64661,
+      "original_sha256": "7740b2bc828d9a85163eff6d15b409bdcab8a76fc6d0757cd582909c6565e2ec",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json",
+      "original_bytes": 964475,
+      "original_sha256": "4a1d4220126fcf079440032ed0b83a10cdb2d74de49822cd298042ed35be5839",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json.gz",
+      "stored_bytes": 15531,
+      "stored_sha256": "d11cc341ad67f610345e290f088299c65dcb09cdccdcd01699a6e1b90615c7b5",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-2/report.json",
+      "original_bytes": 10350,
+      "original_sha256": "dd6fe9158f9e89b4755351da9a0732b6a7e9ae9f43f73b66c5c468f190cfe4f0",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-2/report.json.gz",
+      "stored_bytes": 2903,
+      "stored_sha256": "ed57c94a6f971a68ead6005258d052d683f174b3c5e2e4c1300a2a53c2656c4d",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-moving-firstperson/repetition-2/run.log",
+      "original_bytes": 663,
+      "original_sha256": "fc1fe909ea96a681589a865ce96a1be4686bd35a304f4e023753dda1676f2a89",
+      "retained": true,
+      "stored": "baseline/car-moving-firstperson/repetition-2/run.log",
+      "stored_bytes": 663,
+      "stored_sha256": "fc1fe909ea96a681589a865ce96a1be4686bd35a304f4e023753dda1676f2a89",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-after.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-before.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-raw.json",
+      "original_bytes": 23707,
+      "original_sha256": "40688ae12db79c434e57cba3852f4f26722a46e4e7c0138000f72f631332face",
+      "retained": true,
+      "stored": "baseline/car-stationary-chase/repetition-1/car-stationary-chase-raw.json.gz",
+      "stored_bytes": 2253,
+      "stored_sha256": "93b6e437b5d982840173bb6b766952ec369dd5882acea2306d139f95e703a9af",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-stationary-chase/repetition-1/report.json",
+      "original_bytes": 5201,
+      "original_sha256": "53682fa84d4fe98dd305504e8adb258dfda4d6d3a21a7c25fb0ed8a0e0c0e7a1",
+      "retained": true,
+      "stored": "baseline/car-stationary-chase/repetition-1/report.json.gz",
+      "stored_bytes": 2049,
+      "stored_sha256": "8d0ebfe86516d8f70c50ef7d409d60be5baee49a0dec2d472d2a0edd89d74809",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/car-stationary-chase/repetition-1/run.log",
+      "original_bytes": 623,
+      "original_sha256": "c4157cf4d0d1cbfc11c026b7ec772c4c3d2a58c17e90f44d3f9c56be66a0f1f1",
+      "retained": true,
+      "stored": "baseline/car-stationary-chase/repetition-1/run.log",
+      "stored_bytes": 623,
+      "stored_sha256": "c4157cf4d0d1cbfc11c026b7ec772c4c3d2a58c17e90f44d3f9c56be66a0f1f1",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-1/freeflight-moving-after.png",
+      "original_bytes": 55671,
+      "original_sha256": "ef5fa51cea39ee674578b4fa65ccd5d5a76857bb0110ecfaea7bc4ba6252d887",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-1/freeflight-moving-before.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-1/freeflight-moving-raw.json",
+      "original_bytes": 1242007,
+      "original_sha256": "c12d7325333567790d43188a9e30fd13949bf231cbbb49e567c6b2050b26e998",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-1/freeflight-moving-raw.json.gz",
+      "stored_bytes": 18900,
+      "stored_sha256": "64a081caf4211edfa792a85d874185ca14ae9dc4c599f88a0e9a7901d9a073bd",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-1/freeflight-moving-stacks.json",
+      "original_bytes": 26982,
+      "original_sha256": "76453ff818316d68d7b3e7b8c14cdf8903cb1f2acb63e5c835602ddf433e2254",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-1/freeflight-moving-stacks.json.gz",
+      "stored_bytes": 1969,
+      "stored_sha256": "21cb69e6d81271a3c4dfe9d70eb27f7deaa7bb8d0b61dcb9e4f7966437d4d043",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-1/freeflight-moving.cpuprofile",
+      "original_bytes": 1322174,
+      "original_sha256": "a25bdc609884c21fd2de58864c8436901880819bda1154f4d448d6e0fdd6e506",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-1/freeflight-moving.cpuprofile.gz",
+      "stored_bytes": 86932,
+      "stored_sha256": "64e66d3c7c7b796c8082bf26c94bba643442823cce04d53f962c8d21cffce003",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-1/report.json",
+      "original_bytes": 43130,
+      "original_sha256": "d8347a3f2304fbcc3814029253d9f46b77bb35444d4e6c32b5a8bbe9872b04cc",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-1/report.json.gz",
+      "stored_bytes": 4888,
+      "stored_sha256": "9824d9e37d921f1273ca8f5091e2411d1dbe739cbea69e18b8532699a227f6a5",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-1/run.log",
+      "original_bytes": 2939,
+      "original_sha256": "fe27ce6a7e6c9d104c10a7f90f10f2b7cc8b7aaf6e2b8eb96a00c76df0c95001",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-1/run.log",
+      "stored_bytes": 2939,
+      "stored_sha256": "fe27ce6a7e6c9d104c10a7f90f10f2b7cc8b7aaf6e2b8eb96a00c76df0c95001",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-2/freeflight-moving-after.png",
+      "original_bytes": 55823,
+      "original_sha256": "0546956d8bd6c59e57d374853182f29d6ae6861544b5dee68066437c049e46dd",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-2/freeflight-moving-before.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-2/freeflight-moving-raw.json",
+      "original_bytes": 1159916,
+      "original_sha256": "1625f3ce18741cdcf5f96f7a864807d7933b75fff8a6937eaad731804fe43c4a",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-2/freeflight-moving-raw.json.gz",
+      "stored_bytes": 18147,
+      "stored_sha256": "5d93ed23913b08de264c630c321369bef3ad63afe15f5c91e0375a486d7fd8c4",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-2/report.json",
+      "original_bytes": 10868,
+      "original_sha256": "7498a3a4aae06297bd20c9a507bb70c8cc68ca4548bc3fcc8d62e373fca6a483",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-2/report.json.gz",
+      "stored_bytes": 2919,
+      "stored_sha256": "3546719396cf98cf7447486e429402d5fff1c22f6037b5dcf57728e8bf732a5a",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-moving/repetition-2/run.log",
+      "original_bytes": 659,
+      "original_sha256": "2621822b40beb05114c3e3f3a0712cca8d002518ca3bd18ddc7c78fb10d9bbce",
+      "retained": true,
+      "stored": "baseline/freeflight-moving/repetition-2/run.log",
+      "stored_bytes": 659,
+      "stored_sha256": "2621822b40beb05114c3e3f3a0712cca8d002518ca3bd18ddc7c78fb10d9bbce",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-after.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-before.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-raw.json",
+      "original_bytes": 23687,
+      "original_sha256": "d0c465e0e89a7dcd5a21a2373a8b390214000f93bf846b2707afdd4757e6520d",
+      "retained": true,
+      "stored": "baseline/freeflight-stationary/repetition-1/freeflight-stationary-raw.json.gz",
+      "stored_bytes": 2263,
+      "stored_sha256": "3f970ca166a57b82f33fcb5ccf7b99c41fabbfe911089348bd3f68139b01c313",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-stationary/repetition-1/report.json",
+      "original_bytes": 5200,
+      "original_sha256": "e322ef6950b53f8bf6796b33fcc12bdbe061f4e52b321a4c2c49d10133332033",
+      "retained": true,
+      "stored": "baseline/freeflight-stationary/repetition-1/report.json.gz",
+      "stored_bytes": 2054,
+      "stored_sha256": "c97d520180d558f3f20d1ccb03cce33f4208b4a9a66f1a1d83b9409cab3d81b3",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/freeflight-stationary/repetition-1/run.log",
+      "original_bytes": 629,
+      "original_sha256": "81115688fdc4aaea26650453154c6400eac18ab992620f37e99f2b69aae7ef97",
+      "retained": true,
+      "stored": "baseline/freeflight-stationary/repetition-1/run.log",
+      "stored_bytes": 629,
+      "stored_sha256": "81115688fdc4aaea26650453154c6400eac18ab992620f37e99f2b69aae7ef97",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/map-idle-default/repetition-1/map-idle-default-after.png",
+      "original_bytes": 212501,
+      "original_sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/map-idle-default/repetition-1/map-idle-default-before.png",
+      "original_bytes": 212501,
+      "original_sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/map-idle-default/repetition-1/map-idle-default-raw.json",
+      "original_bytes": 23413,
+      "original_sha256": "3530327c06e6b9193c7bb54194a9caa6fd32a0f90f81cfaed444a7d2691c2297",
+      "retained": true,
+      "stored": "baseline/map-idle-default/repetition-1/map-idle-default-raw.json.gz",
+      "stored_bytes": 2263,
+      "stored_sha256": "2319e90f53bdbbb8d13d69bdff734f0c06ccb33c2d59ee5a8b11e9588851389a",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/map-idle-default/repetition-1/report.json",
+      "original_bytes": 4760,
+      "original_sha256": "a3b1857f645b4d8cc42aa5d7aeea19b760d01bef7b2772f9630aaf785f086105",
+      "retained": true,
+      "stored": "baseline/map-idle-default/repetition-1/report.json.gz",
+      "stored_bytes": 1933,
+      "stored_sha256": "3c125b31d687d101b3ba4b3bacd93b4fd0ed2f8fcad39400a7ffd5af9bce840f",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/map-idle-default/repetition-1/run.log",
+      "original_bytes": 380,
+      "original_sha256": "81a775ffc99e3ec9f26183fc8b9017a8d018674d1d407ca9d1d1b7d854b1014f",
+      "retained": true,
+      "stored": "baseline/map-idle-default/repetition-1/run.log",
+      "stored_bytes": 380,
+      "stored_sha256": "81a775ffc99e3ec9f26183fc8b9017a8d018674d1d407ca9d1d1b7d854b1014f",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/map-idle-relief/repetition-1/map-idle-relief-after.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/map-idle-relief/repetition-1/map-idle-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/map-idle-relief/repetition-1/map-idle-relief-raw.json",
+      "original_bytes": 23530,
+      "original_sha256": "674a659f01b065be58b4b74e817f1e5f5dffe4e66b794845326618bbc5e65bee",
+      "retained": true,
+      "stored": "baseline/map-idle-relief/repetition-1/map-idle-relief-raw.json.gz",
+      "stored_bytes": 2265,
+      "stored_sha256": "3bf5ccc5a4a78c72c3c19be0f2a2da8665c5004685ff165b55c329557a9a66a5",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/map-idle-relief/repetition-1/map-idle-relief-stacks.json",
+      "original_bytes": 24301,
+      "original_sha256": "6c9ca810662b3941382163651fedbbc09dc95386df6647de27973ba51478bdf0",
+      "retained": true,
+      "stored": "baseline/map-idle-relief/repetition-1/map-idle-relief-stacks.json.gz",
+      "stored_bytes": 1911,
+      "stored_sha256": "9cc4cf1a4700127f28c901af7afd4919cb91bc078681b1e250f1ed375437ac13",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/map-idle-relief/repetition-1/map-idle-relief.cpuprofile",
+      "original_bytes": 184520,
+      "original_sha256": "a0f5f0a519ad19d1fd270b0effc202d78adf572eb46575aff14505253d84568e",
+      "retained": true,
+      "stored": "baseline/map-idle-relief/repetition-1/map-idle-relief.cpuprofile.gz",
+      "stored_bytes": 12242,
+      "stored_sha256": "b440af831519b39faeef63a6214ac5d583e106002977c94b02c966535bd78f9e",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/map-idle-relief/repetition-1/report.json",
+      "original_bytes": 33980,
+      "original_sha256": "3db15df14027b1fefae7b58ae2e159bd8299070e53c394eb758ca88d0746a558",
+      "retained": true,
+      "stored": "baseline/map-idle-relief/repetition-1/report.json.gz",
+      "stored_bytes": 3930,
+      "stored_sha256": "199c89ce0c8c8c820d8b765d852400600524e9b0f7b6bdb3cbba4abbe9c7a662",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/map-idle-relief/repetition-1/run.log",
+      "original_bytes": 2809,
+      "original_sha256": "886cbda6df9a42b61da71cc71e5c7a05fc288506370f3a5075a475d1ab736c6b",
+      "retained": true,
+      "stored": "baseline/map-idle-relief/repetition-1/run.log",
+      "stored_bytes": 2809,
+      "stored_sha256": "886cbda6df9a42b61da71cc71e5c7a05fc288506370f3a5075a475d1ab736c6b",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-1/report.json",
+      "original_bytes": 42457,
+      "original_sha256": "911e0a8faff7fe0fec794affc6efc487dfc2741cbf3ba49022ec1bd6fef1be60",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-1/report.json.gz",
+      "stored_bytes": 4970,
+      "stored_sha256": "4a2443bcb0b99866a09b2d331f382b8b50980e6ce30e1ea999cd2cec837b6792",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-1/run.log",
+      "original_bytes": 2870,
+      "original_sha256": "c5a8e6b73b6cfdb8eef035398939aa4a9fa61cd5c84dc712d97b5ae42f4cb0a4",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-1/run.log",
+      "stored_bytes": 2870,
+      "stored_sha256": "c5a8e6b73b6cfdb8eef035398939aa4a9fa61cd5c84dc712d97b5ae42f4cb0a4",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-after.png",
+      "original_bytes": 57312,
+      "original_sha256": "5ad6156a45d88a4789209d5b9dae8557ed18042434b23efb791ea7b27e803ac9",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-before.png",
+      "original_bytes": 56086,
+      "original_sha256": "912ffff725e8a1b796335d71e1a15a041981d7e677a3e7f9613d3447fca066ff",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-raw.json",
+      "original_bytes": 3942110,
+      "original_sha256": "720056366481b8295097f1ae75dc825badcb9865b842543a92e34e516c860d75",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-raw.json.gz",
+      "stored_bytes": 33752,
+      "stored_sha256": "47a8412beffb01de0ad89f28486560a22f62f1f586941091e01aea4ebb817ca6",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-stacks.json",
+      "original_bytes": 26798,
+      "original_sha256": "66e446c88a2554425284e06e46de9c7e26cdcb9ab54bc43070f7cbb233d5241e",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-1/walk-moving-chase-stacks.json.gz",
+      "stored_bytes": 2064,
+      "stored_sha256": "6c3fb87ad4ff06822c605723336130a794c0d0a3050bb55d7f7a4edd4a2f32ae",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile",
+      "original_bytes": 1206989,
+      "original_sha256": "5a47072085cca55445bdd2467f73ee71ceff0b298cb762c279836dea259441dd",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile.gz",
+      "stored_bytes": 82047,
+      "stored_sha256": "8bb3a165d04f63c956c466044abbbca48584eaf87d2f0bbbe57711d2d497b426",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-2/report.json",
+      "original_bytes": 10048,
+      "original_sha256": "42ef3c1a0a966d4ea51ca8991b47492a39b204e9846baf6f9f45485844521264",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-2/report.json.gz",
+      "stored_bytes": 2853,
+      "stored_sha256": "8c553fd319daa099f148412a8c9dbd9f9a718a6b5eeded139a7a5888e4e3ee1a",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-2/run.log",
+      "original_bytes": 664,
+      "original_sha256": "e0d79151d899c187cc0c31cabe4f7a9d71e76f5344c7bb8325afa5a31a8bb5a2",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-2/run.log",
+      "stored_bytes": 664,
+      "stored_sha256": "e0d79151d899c187cc0c31cabe4f7a9d71e76f5344c7bb8325afa5a31a8bb5a2",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-after.png",
+      "original_bytes": 57226,
+      "original_sha256": "ae18964c7f3e271415647c0e5ae684539900b934418d45a51675f1e4efc60314",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-before.png",
+      "original_bytes": 56086,
+      "original_sha256": "912ffff725e8a1b796335d71e1a15a041981d7e677a3e7f9613d3447fca066ff",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-raw.json",
+      "original_bytes": 4057504,
+      "original_sha256": "d828eb50de2a77201421c181976e51ba71e2d2819cee98b6b5dd851322fe782b",
+      "retained": true,
+      "stored": "baseline/walk-moving-chase/repetition-2/walk-moving-chase-raw.json.gz",
+      "stored_bytes": 34612,
+      "stored_sha256": "4267f52d5b1b6146ad9dcef309e4a258e2c4e9147d0531f2d28e40c61d0fd0f6",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-1/report.json",
+      "original_bytes": 42621,
+      "original_sha256": "ec831ea3914617dc7947c11260061dd2e0895fd762269eb7a96d85e3346410ee",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 4819,
+      "stored_sha256": "2cde4f9fbd483db8a3434f181decf2fe3913d00b1b63b0554694d2069b239f05",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-1/run.log",
+      "original_bytes": 3182,
+      "original_sha256": "85f213f61d8393b8372e0ee5f0d18099d12521c2e75765eeea83066537edfa11",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-1/run.log",
+      "stored_bytes": 3182,
+      "stored_sha256": "85f213f61d8393b8372e0ee5f0d18099d12521c2e75765eeea83066537edfa11",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-after.png",
+      "original_bytes": 68738,
+      "original_sha256": "0a17fcde1eb9c917e7d313e6c843d7bc53be38b6d98b23e92d7b9cbaf4e55bf1",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-before.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json",
+      "original_bytes": 738752,
+      "original_sha256": "ea708166b2c10d410c8ea857f7c7eeacdedb4aa7f10e0b8caa79f4043c4e1740",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json.gz",
+      "stored_bytes": 13826,
+      "stored_sha256": "d7d8e94e7eed6ec5d19f13db691cadb176e85c831f3a54cd7fdc540a17ff3bb0",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-stacks.json",
+      "original_bytes": 27496,
+      "original_sha256": "e492d87df3a96cff3b3bcf91e96a45806a1620e47ce9dcbc040cc68180100495",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-stacks.json.gz",
+      "stored_bytes": 2012,
+      "stored_sha256": "4abfff2f5878a71e1d76ac8ee54a93ac428b300f60915add1edb218d46350e71",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile",
+      "original_bytes": 1072234,
+      "original_sha256": "563781dbc498383220d67d349a3062fb6b84b103a1c3aa9ecdd6646d24836ccc",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile.gz",
+      "stored_bytes": 74123,
+      "stored_sha256": "60b3de16a7c447ec2667a36ff4ae790938944f799d160d6923a26271d4755bf0",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-2/report.json",
+      "original_bytes": 9782,
+      "original_sha256": "cf507bf3714595545e5266ffa18a563a2ddac898523d2da00a42747cfdff4d6b",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-2/report.json.gz",
+      "stored_bytes": 2891,
+      "stored_sha256": "05d1fa20e877a981b7eb048f3737b248fe73bdfbf238d07c26efe7465fc015b0",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-2/run.log",
+      "original_bytes": 640,
+      "original_sha256": "02216afd9991504bfd67217809022aaed16d5a52b0da49f4456d5976c1e15300",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-2/run.log",
+      "stored_bytes": 640,
+      "stored_sha256": "02216afd9991504bfd67217809022aaed16d5a52b0da49f4456d5976c1e15300",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-after.png",
+      "original_bytes": 68377,
+      "original_sha256": "a93888b9f23cdde4dfca66b84688f1e22d4c3d4c1757ebe822e1b6b761827f97",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-before.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json",
+      "original_bytes": 724780,
+      "original_sha256": "2319181ca968b2d47f792f2b44dc439429b4a4764ae8496825d3199a0367e31c",
+      "retained": true,
+      "stored": "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json.gz",
+      "stored_bytes": 13646,
+      "stored_sha256": "341f2707ceecfa8587de9e86177b8ad251db793df8b8a90611828800f62c73f5",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-stationary-firstperson/repetition-1/report.json",
+      "original_bytes": 37992,
+      "original_sha256": "5603a1f3539c44fe8e20ffd39723ad5234e1549ac388bac19d3c0a23d1670f9a",
+      "retained": true,
+      "stored": "baseline/walk-stationary-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 4179,
+      "stored_sha256": "8f324e4ef2023d372a581f8bfaadf8274151d11add45c33033e82a551d05cb45",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-stationary-firstperson/repetition-1/run.log",
+      "original_bytes": 2792,
+      "original_sha256": "4ca97b326ab8e4a8cd5d115da1eab192cda8acbe15ff510a346acce2809d080e",
+      "retained": true,
+      "stored": "baseline/walk-stationary-firstperson/repetition-1/run.log",
+      "stored_bytes": 2792,
+      "stored_sha256": "4ca97b326ab8e4a8cd5d115da1eab192cda8acbe15ff510a346acce2809d080e",
+      "encoding": "identity"
+    },
+    {
+      "original": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-after.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-before.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json",
+      "original_bytes": 23718,
+      "original_sha256": "1ec85a37bd3d2f616d77060e38a5e5ecca7d3cb661566cde172d7068d2bd93e7",
+      "retained": true,
+      "stored": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json.gz",
+      "stored_bytes": 2261,
+      "stored_sha256": "7729cfdb1a468590c3fbb8f4366bc27242a52ad0164872d766921236dcc5c0ef",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-stacks.json",
+      "original_bytes": 27303,
+      "original_sha256": "b4052a7561a0c2614c5cd7cce9b76d54e603faca39617b2d046caa6c78886c13",
+      "retained": true,
+      "stored": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-stacks.json.gz",
+      "stored_bytes": 2077,
+      "stored_sha256": "d82147fc891748592a01e291b0e2744e046d2932c6e337a773333a426a624f30",
+      "encoding": "gzip"
+    },
+    {
+      "original": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile",
+      "original_bytes": 323611,
+      "original_sha256": "da8fe37243f3d756d108fd4a214ae0931e3bde0445f2cd2ef30495e68d08df86",
+      "retained": true,
+      "stored": "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile.gz",
+      "stored_bytes": 20629,
+      "stored_sha256": "430cadc0643a322328343f5dee0a712a4082a0456ae717c30da7a75d7fbe461f",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-1/map-orbit-relief-after.png",
+      "original_bytes": 204273,
+      "original_sha256": "0762a07806150a0f64e8c2ec8e6d7b1e0a2f0ed7f22d5c18d21da5ecaedc4b20",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-1/map-orbit-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-1/map-orbit-relief-raw.json",
+      "original_bytes": 3135448,
+      "original_sha256": "551b2b9e7a06ecb7bfb7b34ed2ee2fb06c97d9a63a1ee163d44d5e481cabbbcc",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-orbit-relief/repetition-1/map-orbit-relief-raw.json.gz",
+      "stored_bytes": 153088,
+      "stored_sha256": "9bca132136dce0a23bcc60bc77605c0d6acf96cef6ebaf64097401529c577029",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-1/report.json",
+      "original_bytes": 2262595,
+      "original_sha256": "7ddcbe889251e2637b540fe464a80ef255ccb974f1b04b58eadd6daa0988bebe",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-orbit-relief/repetition-1/report.json.gz",
+      "stored_bytes": 134828,
+      "stored_sha256": "10978295a4bc464c0877960ac58b3c344f2dead4e64c5328ce11593c30f766b2",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-1/run.log",
+      "original_bytes": 5298,
+      "original_sha256": "60a2609fe77eddc6d47c3b39c2f2ad88b02a1951ae4d6720626750cbf8a5e24e",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-orbit-relief/repetition-1/run.log",
+      "stored_bytes": 5298,
+      "stored_sha256": "60a2609fe77eddc6d47c3b39c2f2ad88b02a1951ae4d6720626750cbf8a5e24e",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-2/comparison-with-baseline-first.json",
+      "original_bytes": 20443,
+      "original_sha256": "cef8af7fa6ecfbc8f1c749d8699065ccb688173a641634a56ab6791843f64c8d",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-orbit-relief/repetition-2/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2653,
+      "stored_sha256": "10a6150dc2883310e28b3a7031157823edf92d54efa9af48a7fa59c8b57b8865",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-2/map-orbit-relief-after.png",
+      "original_bytes": 204273,
+      "original_sha256": "0762a07806150a0f64e8c2ec8e6d7b1e0a2f0ed7f22d5c18d21da5ecaedc4b20",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-2/map-orbit-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-2/map-orbit-relief-raw.json",
+      "original_bytes": 3120906,
+      "original_sha256": "59181baa0d90c21375064f94a62e4b345ad5a8483909dd53c4f2873e6b842071",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-orbit-relief/repetition-2/map-orbit-relief-raw.json.gz",
+      "stored_bytes": 152597,
+      "stored_sha256": "1f9bf6a465c95eb28536dac7dc6bc16282a42653a9336b360b8dfe7f3dd674ab",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-2/report.json",
+      "original_bytes": 2262999,
+      "original_sha256": "25b931b4a8badbb9e5a4876da1bf92022d64563456278159809b59cf0a7c557c",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-orbit-relief/repetition-2/report.json.gz",
+      "stored_bytes": 134897,
+      "stored_sha256": "91c1f91396be8649d3ac59a40f11bba5a3cac4b4b78c68a33b3e88a5110baef2",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-orbit-relief/repetition-2/run.log",
+      "original_bytes": 5513,
+      "original_sha256": "f55708b92f2d52db78034216169b5ac68217789914e1ad405c5a30ee2033f9f6",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-orbit-relief/repetition-2/run.log",
+      "stored_bytes": 5513,
+      "stored_sha256": "f55708b92f2d52db78034216169b5ac68217789914e1ad405c5a30ee2033f9f6",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-1/map-pan-relief-after.png",
+      "original_bytes": 201617,
+      "original_sha256": "304c0bd120fff71a7afcac4345eff9f1d7e4dd18bd267feb1afc5a76091beb29",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-1/map-pan-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-1/map-pan-relief-raw.json",
+      "original_bytes": 3254112,
+      "original_sha256": "468036a476cc5db532280f8d2e211c6d8ef376b5409a71a1943f9628729698ef",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-pan-relief/repetition-1/map-pan-relief-raw.json.gz",
+      "stored_bytes": 160465,
+      "stored_sha256": "b3b43b9d26a51752edc1c8bb65eaa02bce9c774e973f02ed5d7959d9c6a3742c",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-1/report.json",
+      "original_bytes": 2401364,
+      "original_sha256": "61ce8206d6f303d6b12a556fd405fa770934e86c48346a45e4f925c190bcbae7",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-pan-relief/repetition-1/report.json.gz",
+      "stored_bytes": 143348,
+      "stored_sha256": "11ccfa403e5fb43f78d80125361070293e7ce2e7d3bd5b4faff9ee7450dc72d6",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-1/run.log",
+      "original_bytes": 5405,
+      "original_sha256": "ad35a29e6a94a4aaeb8acd51b87d08f848f3a6cd4a358a123db192c9e6ef1b88",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-pan-relief/repetition-1/run.log",
+      "stored_bytes": 5405,
+      "stored_sha256": "ad35a29e6a94a4aaeb8acd51b87d08f848f3a6cd4a358a123db192c9e6ef1b88",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-2/comparison-with-baseline-first.json",
+      "original_bytes": 20497,
+      "original_sha256": "cfa2d8ac2aa4483db5f43734e82b68596b0f712e0acfe95639e8706d0c94f93a",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-pan-relief/repetition-2/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2649,
+      "stored_sha256": "3f23becdc6f0f711c9e460561370db000d98cf39f930e87dcf2491d7c7186eab",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-2/map-pan-relief-after.png",
+      "original_bytes": 201617,
+      "original_sha256": "304c0bd120fff71a7afcac4345eff9f1d7e4dd18bd267feb1afc5a76091beb29",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-2/map-pan-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-2/map-pan-relief-raw.json",
+      "original_bytes": 3249295,
+      "original_sha256": "c117815b69cd0ec8c57af7ea7fa3d33afd4df1606455668c4c4e5bb398351438",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-pan-relief/repetition-2/map-pan-relief-raw.json.gz",
+      "stored_bytes": 160423,
+      "stored_sha256": "427ceaa89c1ce6b6dedf13d3e8d1251fa4b4913c30f9f9003d72e328f60af366",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-2/report.json",
+      "original_bytes": 2401342,
+      "original_sha256": "bdad4b2944e7356a0e96e303b787168b875d3df75fb61223a544f9da071eba28",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-pan-relief/repetition-2/report.json.gz",
+      "stored_bytes": 143353,
+      "stored_sha256": "67ec3cc6acdaff58f41ebe9222e6b8d2cb30b3cce8c18ef035c95de70d82deff",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/map-pan-relief/repetition-2/run.log",
+      "original_bytes": 5343,
+      "original_sha256": "e229b2a2bf0b3f6859da5595141491398b161cc0ca927b25930c1a3faf192666",
+      "retained": true,
+      "stored": "camera-replay/baseline/map-pan-relief/repetition-2/run.log",
+      "stored_bytes": 5343,
+      "stored_sha256": "e229b2a2bf0b3f6859da5595141491398b161cc0ca927b25930c1a3faf192666",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-1/report.json",
+      "original_bytes": 1680002,
+      "original_sha256": "fb29e21d4c062e0db5d49bb890bbb9166bd86438c4b6b249266f58ddf9243ecd",
+      "retained": true,
+      "stored": "camera-replay/baseline/walk-look-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 132176,
+      "stored_sha256": "e22827c42f12bf384e3a5b374099b54fd04291385b3f706f047734ca6eef31ed",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-1/run.log",
+      "original_bytes": 4917,
+      "original_sha256": "d271970295724aaac84d103c1f42ec9abcc1ad2fba1f14a989f9f1ef557e75ee",
+      "retained": true,
+      "stored": "camera-replay/baseline/walk-look-firstperson/repetition-1/run.log",
+      "stored_bytes": 4917,
+      "stored_sha256": "d271970295724aaac84d103c1f42ec9abcc1ad2fba1f14a989f9f1ef557e75ee",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-1/walk-look-firstperson-after.png",
+      "original_bytes": 82573,
+      "original_sha256": "5a69bffc3a92f6ad4318f03178fd540a005192a02e564e7ab771311ced2375b7",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-1/walk-look-firstperson-before.png",
+      "original_bytes": 82573,
+      "original_sha256": "dfa733286f3eab6c244059bf94abc1b6fcb5ee2fd19379f8a2ce16232f2e5297",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json",
+      "original_bytes": 2111554,
+      "original_sha256": "85f002756f9d2610fbb2c5da4331b3b5cff6b493aa560b17811aae7ea23249f3",
+      "retained": true,
+      "stored": "camera-replay/baseline/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json.gz",
+      "stored_bytes": 135746,
+      "stored_sha256": "a9a70671bbf8112d79140cf6fe8aee51f1657cc35f9381d772bf62fa5210ae83",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json",
+      "original_bytes": 18210,
+      "original_sha256": "a5966c3558f1a6a4311069b2b8026a552db41571856eb5638ee445cef18696aa",
+      "retained": true,
+      "stored": "camera-replay/baseline/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2541,
+      "stored_sha256": "10641cdc9da5fe94e27f0620ae30992e0d801623c315a7b91fd5aeb7525bce6e",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-2/report.json",
+      "original_bytes": 1679852,
+      "original_sha256": "e8c91b9fd3dfc37fc64701deaea65c49e3cf01730866af8c6a39d426f6721b7f",
+      "retained": true,
+      "stored": "camera-replay/baseline/walk-look-firstperson/repetition-2/report.json.gz",
+      "stored_bytes": 132114,
+      "stored_sha256": "5a67679fc1ed0351313423122c75fcc1a163c6df48b666faabeb6b1c0336c7c5",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-2/run.log",
+      "original_bytes": 4931,
+      "original_sha256": "2fb149336936ea769c0c5dd1b52fcdb2302d928410006569d0e5b40e5ef1b634",
+      "retained": true,
+      "stored": "camera-replay/baseline/walk-look-firstperson/repetition-2/run.log",
+      "stored_bytes": 4931,
+      "stored_sha256": "2fb149336936ea769c0c5dd1b52fcdb2302d928410006569d0e5b40e5ef1b634",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-2/walk-look-firstperson-after.png",
+      "original_bytes": 82573,
+      "original_sha256": "5a69bffc3a92f6ad4318f03178fd540a005192a02e564e7ab771311ced2375b7",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-2/walk-look-firstperson-before.png",
+      "original_bytes": 82573,
+      "original_sha256": "dfa733286f3eab6c244059bf94abc1b6fcb5ee2fd19379f8a2ce16232f2e5297",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/baseline/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json",
+      "original_bytes": 2102746,
+      "original_sha256": "ccfcc26105e213b714f4c8f7d5fab67f0623ca921bda2b1d2d71fb336219e7ba",
+      "retained": true,
+      "stored": "camera-replay/baseline/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json.gz",
+      "stored_bytes": 135400,
+      "stored_sha256": "c35cdada24339e28b48f8663a0eca3bc07e6afc3fa49e8a5990f38ac54ef418d",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-1/comparison-with-baseline-first.json",
+      "original_bytes": 20228,
+      "original_sha256": "574d6df05d1eb1241d014af054c03d71bdb1d37f577ee9a5fca47710553f2219",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-1/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2656,
+      "stored_sha256": "15545b529294fcfb3780bd07beab1c5b4b1315c7dbb300b782a973c8c86a711a",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-1/map-orbit-relief-after.png",
+      "original_bytes": 204273,
+      "original_sha256": "0762a07806150a0f64e8c2ec8e6d7b1e0a2f0ed7f22d5c18d21da5ecaedc4b20",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-1/map-orbit-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-1/map-orbit-relief-raw.json",
+      "original_bytes": 3117604,
+      "original_sha256": "63eecdfb283159b0e0f00cb949dd3fc53e49cd012ca7bd098c49b348e23504f1",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-1/map-orbit-relief-raw.json.gz",
+      "stored_bytes": 152456,
+      "stored_sha256": "ecc84cbc4026875ffd1fcfa608b9258b446ef2e124c0ec4b78d74d7b172add97",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-1/report.json",
+      "original_bytes": 2262756,
+      "original_sha256": "872224ad5de0dbaf09e5e5cccb40a2cb08877b89759d5124a0b5b8e362675741",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-1/report.json.gz",
+      "stored_bytes": 134852,
+      "stored_sha256": "e66b7292ef791c186d9b41d8f9f6a8c5e14e004cd4787aedc0d52b1bce5dab6c",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-1/run.log",
+      "original_bytes": 5298,
+      "original_sha256": "4c0ab8ff0d90889820a86914abde80ec04a50a39481dacea60e0a90d139cb716",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-1/run.log",
+      "stored_bytes": 5298,
+      "stored_sha256": "4c0ab8ff0d90889820a86914abde80ec04a50a39481dacea60e0a90d139cb716",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-2/comparison-with-baseline-first.json",
+      "original_bytes": 19873,
+      "original_sha256": "6c9643b55e99b1c57355e8272546f96e9651a118b5b677cc3fcf999f53521d33",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-2/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2624,
+      "stored_sha256": "c3fb477d9556c41cfad1333c3159c36b5d3326535f7d9eec01e1b3c56781883e",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-2/map-orbit-relief-after.png",
+      "original_bytes": 204273,
+      "original_sha256": "0762a07806150a0f64e8c2ec8e6d7b1e0a2f0ed7f22d5c18d21da5ecaedc4b20",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-2/map-orbit-relief-before.png",
+      "original_bytes": 204546,
+      "original_sha256": "5cf47d9c3deecb3f8e8aa16973947353af2867004abf80439eddbbcddac5e3d6",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-2/map-orbit-relief-raw.json",
+      "original_bytes": 3123905,
+      "original_sha256": "ab287029edc437a35e1daf6e8fc5045ac69abe5ff02f3c789aa64129a63834db",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-2/map-orbit-relief-raw.json.gz",
+      "stored_bytes": 152519,
+      "stored_sha256": "ad5dbaf4ea15829ba21a3186f526e0be903bf3c654db9183ab390b411809f940",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-2/report.json",
+      "original_bytes": 2262448,
+      "original_sha256": "110d072b40f9df45fc12c7c9c4bab9289d95ac7b6f5945993a548ce0a34717bf",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-2/report.json.gz",
+      "stored_bytes": 134821,
+      "stored_sha256": "5aa141a89ef35ffcc0e4114f5f76fa15b2a5c8142f006a178722581e6009ae66",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-orbit-relief/repetition-2/run.log",
+      "original_bytes": 5173,
+      "original_sha256": "0270ef3490bab90bed13b91d10d4e5612aff785eb632b865e1b7b43791dfe3a9",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-orbit-relief/repetition-2/run.log",
+      "stored_bytes": 5173,
+      "stored_sha256": "0270ef3490bab90bed13b91d10d4e5612aff785eb632b865e1b7b43791dfe3a9",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-1/comparison-with-baseline-first.json",
+      "original_bytes": 20282,
+      "original_sha256": "142ceb5dbb90ec1380e87b0dcd2a4ffae8ffbac590f9ceec2dcd71a90532f8f6",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-1/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2690,
+      "stored_sha256": "4a7d4e0bade8c5f8287165f17b88baa65f668c7812478ce88421b1a5b6437ff1",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-1/map-pan-relief-after.png",
+      "original_bytes": 201617,
+      "original_sha256": "304c0bd120fff71a7afcac4345eff9f1d7e4dd18bd267feb1afc5a76091beb29",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-1/map-pan-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-1/map-pan-relief-raw.json",
+      "original_bytes": 3244524,
+      "original_sha256": "7d0edc0b8c57795616ce7e1ac17a83cd7d83a8882ee299a10226a1bcfbce803f",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-1/map-pan-relief-raw.json.gz",
+      "stored_bytes": 160200,
+      "stored_sha256": "ed78f969b1ed9aae902f7c6187b30b41d5cda6268f7461ebf5c5453d79256144",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-1/report.json",
+      "original_bytes": 2401147,
+      "original_sha256": "a4ae90fa224fd064075841f19ac529fe6b1e80b96ab78d7f2caf20b1c9345769",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-1/report.json.gz",
+      "stored_bytes": 143385,
+      "stored_sha256": "ecef4aecb9b8277133984e8648f2e53b4a78b7476ac062d19d103ac18fcfbccc",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-1/run.log",
+      "original_bytes": 5243,
+      "original_sha256": "55179db2ee7c2d1fbc59c82b717ae484767bb125f3db9cc90d66f99311d5ec15",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-1/run.log",
+      "stored_bytes": 5243,
+      "stored_sha256": "55179db2ee7c2d1fbc59c82b717ae484767bb125f3db9cc90d66f99311d5ec15",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-2/comparison-with-baseline-first.json",
+      "original_bytes": 20153,
+      "original_sha256": "7ba87b35e17eeb260b8655c3652478a86bc55ab126263dd57a0728c116d82fb7",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-2/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2659,
+      "stored_sha256": "bf5318efef933c6db0b60089231a74c492ff355f2ddeecd093b1f7b56c7053e7",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-2/map-pan-relief-after.png",
+      "original_bytes": 201617,
+      "original_sha256": "304c0bd120fff71a7afcac4345eff9f1d7e4dd18bd267feb1afc5a76091beb29",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-2/map-pan-relief-before.png",
+      "original_bytes": 204546,
+      "original_sha256": "5cf47d9c3deecb3f8e8aa16973947353af2867004abf80439eddbbcddac5e3d6",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-2/map-pan-relief-raw.json",
+      "original_bytes": 3239978,
+      "original_sha256": "f13a8da1aca1bcae276f96bb19fbc3df5c38717724d677dcd7830b52deee531c",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-2/map-pan-relief-raw.json.gz",
+      "stored_bytes": 160134,
+      "stored_sha256": "66392696d6cd4fff4c04273ebcbd84cf5712978c9a0b67c7a00ad4de03435414",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-2/report.json",
+      "original_bytes": 2401014,
+      "original_sha256": "b5d54fea1aedcc3e359fcbeb2b2f053721353afd5f74377b87ead6a4f9f70447",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-2/report.json.gz",
+      "stored_bytes": 143346,
+      "stored_sha256": "f5a23648fabb44912c3d62692f61806c85df9c44b1a4ccbec070c08e965798bd",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/map-pan-relief/repetition-2/run.log",
+      "original_bytes": 5229,
+      "original_sha256": "26ed01af490694dd664753ce635920b722eec2aeca707b81fed134ae0795a691",
+      "retained": true,
+      "stored": "camera-replay/candidate/map-pan-relief/repetition-2/run.log",
+      "stored_bytes": 5229,
+      "stored_sha256": "26ed01af490694dd664753ce635920b722eec2aeca707b81fed134ae0795a691",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-1/comparison-with-baseline-first.json",
+      "original_bytes": 18162,
+      "original_sha256": "d353e4f4bcd24559d0a7e464685d4808aa11a7b9cfe1b4846165e74dcedecdfc",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-1/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2576,
+      "stored_sha256": "aacdd20c62b115723d4faef8ec2a37567939cbb55f892558d50ddd4552f8263d",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-1/report.json",
+      "original_bytes": 1679851,
+      "original_sha256": "15d4c4df8a964f9ad9dd5d9e0d6f4635afb2e4463ef4439f851450e003d828f1",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 132161,
+      "stored_sha256": "576fff64ce41435c057a5bacbc32b04d0c100e90fc8de547020dbec48bfccf3a",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-1/run.log",
+      "original_bytes": 4883,
+      "original_sha256": "3281066df07a240d5150acc5e861c91c36a5be3a6390cf226eb553774a752f17",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-1/run.log",
+      "stored_bytes": 4883,
+      "stored_sha256": "3281066df07a240d5150acc5e861c91c36a5be3a6390cf226eb553774a752f17",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-1/walk-look-firstperson-after.png",
+      "original_bytes": 82573,
+      "original_sha256": "5a69bffc3a92f6ad4318f03178fd540a005192a02e564e7ab771311ced2375b7",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-1/walk-look-firstperson-before.png",
+      "original_bytes": 82573,
+      "original_sha256": "dfa733286f3eab6c244059bf94abc1b6fcb5ee2fd19379f8a2ce16232f2e5297",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json",
+      "original_bytes": 2103276,
+      "original_sha256": "d62ad26aeab01d5e47eae7ed9fa4e55b75526976a847a1c433d3f536c3d4dddb",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json.gz",
+      "stored_bytes": 135372,
+      "stored_sha256": "2fa9255f36555c678c5a6e273f0fc353ddd770999534bc220aa966534fb0594a",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json",
+      "original_bytes": 18139,
+      "original_sha256": "203bbc50aea43f26b2269ab6da14ba91a5a039201a15fd7888669798e8677197",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json.gz",
+      "stored_bytes": 2555,
+      "stored_sha256": "b4678455d8d700f47fea11537ae0f9a5b3cbd1d1ecb2e41a07517ced11563ff4",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-2/report.json",
+      "original_bytes": 1679811,
+      "original_sha256": "7a424f40f0aa88b7a9c2d2abe017b7aff9ca11ab09a8cdb693aa76c5e10040ac",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-2/report.json.gz",
+      "stored_bytes": 132154,
+      "stored_sha256": "ff20cf1c069e579e3dd84076656afc58919a120c306d7b2b91d8cbcc73afb9bd",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-2/run.log",
+      "original_bytes": 4860,
+      "original_sha256": "c1b96fabb85a6492a2c539c968677ef5fac0328b8142a7ee36a8d288b01771e0",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-2/run.log",
+      "stored_bytes": 4860,
+      "stored_sha256": "c1b96fabb85a6492a2c539c968677ef5fac0328b8142a7ee36a8d288b01771e0",
+      "encoding": "identity"
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-2/walk-look-firstperson-after.png",
+      "original_bytes": 82573,
+      "original_sha256": "5a69bffc3a92f6ad4318f03178fd540a005192a02e564e7ab771311ced2375b7",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-2/walk-look-firstperson-before.png",
+      "original_bytes": 82573,
+      "original_sha256": "dfa733286f3eab6c244059bf94abc1b6fcb5ee2fd19379f8a2ce16232f2e5297",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "camera-replay/candidate/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json",
+      "original_bytes": 2102460,
+      "original_sha256": "e715017bae7b3193525ec93d1e8a001b9b17c2145cefb51c8336a9a44e0e32b2",
+      "retained": true,
+      "stored": "camera-replay/candidate/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json.gz",
+      "stored_bytes": 135330,
+      "stored_sha256": "da2824f4d5a1d519ffca385055378e8b7b0e5bb12fa590ca0d9e29f8805fb637",
+      "encoding": "gzip"
+    },
+    {
+      "original": "camera-replay-server.log",
+      "original_bytes": 234108,
+      "original_sha256": "040a3a2e68bae87b9abeac1862f9e8852b5d7bbe223f6bf8fb4a237665c18c06",
+      "retained": true,
+      "stored": "camera-replay-server.log",
+      "stored_bytes": 234108,
+      "stored_sha256": "040a3a2e68bae87b9abeac1862f9e8852b5d7bbe223f6bf8fb4a237665c18c06",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-1/car-moving-chase-after.png",
+      "original_bytes": 62868,
+      "original_sha256": "878c4b3ab5b9d17b2b83faf1eb89edf646aed7b96bd0fa5914e56c09147eba34",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-1/car-moving-chase-before.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-1/car-moving-chase-raw.json",
+      "original_bytes": 4230377,
+      "original_sha256": "1063a1f07b93fe7413b19d84e509cde12e73de4bdc484c2c9f28b0cad5b899ea",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-1/car-moving-chase-raw.json.gz",
+      "stored_bytes": 37938,
+      "stored_sha256": "22e3510a178a82d7cf710716455a02210aeeaa1586cf12db7ef42fc45f9892e9",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-1/car-moving-chase-stacks.json",
+      "original_bytes": 26563,
+      "original_sha256": "e20f264d59fcac41aec01d40c8865dfa73fac82af33fb5e46b80027b64cfd7de",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-1/car-moving-chase-stacks.json.gz",
+      "stored_bytes": 2054,
+      "stored_sha256": "22ff75e6ccfdd350fb12e9fce7be31ab3ea3d3e76477e5cf0dd6a8062f0da522",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile",
+      "original_bytes": 1268445,
+      "original_sha256": "d4b1331f7732a5dad1212874314475888982ce664d13e8c4eb42eae85bdcd117",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile.gz",
+      "stored_bytes": 84171,
+      "stored_sha256": "cdde784638bfbf4f0f2652403bb9ebe4210ef1c2aeff19795bb4dc64a9d0f4ea",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-1/report.json",
+      "original_bytes": 43074,
+      "original_sha256": "3ef68ae933d4dd89150f74dbe1595875489be350e11385bd26d3954f6c4c4abe",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-1/report.json.gz",
+      "stored_bytes": 4991,
+      "stored_sha256": "fb680065347f686b852736e3a5c37de0459056abcc29d75dffdc38dada29f5d4",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-1/run.log",
+      "original_bytes": 2745,
+      "original_sha256": "ac17519deb86df3a36efa68e0bca42fbfb69c0144270730904d36873b1ae4834",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-1/run.log",
+      "stored_bytes": 2745,
+      "stored_sha256": "ac17519deb86df3a36efa68e0bca42fbfb69c0144270730904d36873b1ae4834",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-2/car-moving-chase-after.png",
+      "original_bytes": 62822,
+      "original_sha256": "d3d1ccc6197d955f453a7fb8199c0dede5dece124b7dcc4a94ee0cd930eada24",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-2/car-moving-chase-before.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-2/car-moving-chase-raw.json",
+      "original_bytes": 4167308,
+      "original_sha256": "f16942cc297348abbac7ce75a506566c6f5d927651ad6a888c925fd6ae15bac9",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-2/car-moving-chase-raw.json.gz",
+      "stored_bytes": 37995,
+      "stored_sha256": "3166ba5ad40ce4e8335c7580abc26cd832fda8b3f60b2119f0083885ee3d3c24",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-2/report.json",
+      "original_bytes": 11005,
+      "original_sha256": "dd51d23bb20f1ae8653345430ecbe0ec4e534d7c7cc3fb2bc29b32a28091d1ad",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-2/report.json.gz",
+      "stored_bytes": 2961,
+      "stored_sha256": "127087cb56c0cbe5e64fcd9777ffdb93e9ee93a2ccf83b6b12e29a20b9fe86ce",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-chase/repetition-2/run.log",
+      "original_bytes": 668,
+      "original_sha256": "923e6bedd9b645c39d4c344bc9c656e50713339a6e89a1b638fe040333b07d3f",
+      "retained": true,
+      "stored": "candidate/car-moving-chase/repetition-2/run.log",
+      "stored_bytes": 668,
+      "stored_sha256": "923e6bedd9b645c39d4c344bc9c656e50713339a6e89a1b638fe040333b07d3f",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-after.png",
+      "original_bytes": 68294,
+      "original_sha256": "382478e0f713313faa3a71413706d6eafe5b618d5e1cd74084d40a6f7b08f3dd",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-before.png",
+      "original_bytes": 64661,
+      "original_sha256": "7740b2bc828d9a85163eff6d15b409bdcab8a76fc6d0757cd582909c6565e2ec",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json",
+      "original_bytes": 947130,
+      "original_sha256": "5686078fd202227a03d5ab274525de22b09909bacc9738ccda3cdc27e2113a30",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json.gz",
+      "stored_bytes": 15584,
+      "stored_sha256": "088800d8c4419ec2a4c0a519900a3a3f17acfa7d2ddeecec673d51264e02fd2b",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-stacks.json",
+      "original_bytes": 28013,
+      "original_sha256": "c6f4e6b549efeb725bd5e6dacbd7f2aac71f4f6df673f1111597a897ae38edb6",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-stacks.json.gz",
+      "stored_bytes": 1988,
+      "stored_sha256": "a893464984123d4f2913dbc60580a91f48b8ba03ad1096aa1e412a004a3fc559",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile",
+      "original_bytes": 1363964,
+      "original_sha256": "1db6993b33c792d450c9c1e3dc55297f63d273333b10508fbdcedecaee5a1b48",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile.gz",
+      "stored_bytes": 88883,
+      "stored_sha256": "54171cb643f13e250f7bd8c272ff538b9ea72e9785c7ab6f6036ae685194d3be",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-1/report.json",
+      "original_bytes": 43712,
+      "original_sha256": "b6467705d4100d618e93033d99b6db8311ffa0197bc8fb3ab94707dfd77a0fa4",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 4902,
+      "stored_sha256": "4b5fbbd6466dc0ee777d3568259b4b5e5348accb13710d693038b32c37cb49b8",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-1/run.log",
+      "original_bytes": 3316,
+      "original_sha256": "af121718b8afb0f2619882f7c595c952344d51a2156555e78d288dd190ed21e2",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-1/run.log",
+      "stored_bytes": 3316,
+      "stored_sha256": "af121718b8afb0f2619882f7c595c952344d51a2156555e78d288dd190ed21e2",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-after.png",
+      "original_bytes": 68135,
+      "original_sha256": "56042bb045c6414ad75f9761925aa9e9ff2b8571a6b9d8c45fe1f8fcf7604801",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-before.png",
+      "original_bytes": 64661,
+      "original_sha256": "7740b2bc828d9a85163eff6d15b409bdcab8a76fc6d0757cd582909c6565e2ec",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json",
+      "original_bytes": 943852,
+      "original_sha256": "9fce57bc53b1bc8b395ab59c83217813d8355764f27f32b77da3c23827491163",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json.gz",
+      "stored_bytes": 15774,
+      "stored_sha256": "57d474c4c2fc92d0360e2bbbbb032f743a9e19f89522783b6e54df1cd5b38943",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-2/report.json",
+      "original_bytes": 10358,
+      "original_sha256": "d6e9485c9d0b6e1d0b4c318b9524b651c1597a465d5e626a9e01ef6a53124aa1",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-2/report.json.gz",
+      "stored_bytes": 2932,
+      "stored_sha256": "0ce0730f437ee7c83b3d5f9b64d06f5256722b913d0a1e4c254982bc56c15a4c",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-moving-firstperson/repetition-2/run.log",
+      "original_bytes": 665,
+      "original_sha256": "5d46483fa553b50cfbcb02a6058f4d3989ef68c68799164a87883d1331193f00",
+      "retained": true,
+      "stored": "candidate/car-moving-firstperson/repetition-2/run.log",
+      "stored_bytes": 665,
+      "stored_sha256": "5d46483fa553b50cfbcb02a6058f4d3989ef68c68799164a87883d1331193f00",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-after.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-before.png",
+      "original_bytes": 60894,
+      "original_sha256": "a337923b63da916dc393272300772664a4e274781de6558033aaf3dd92d4dbf2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-raw.json",
+      "original_bytes": 23720,
+      "original_sha256": "53b15263db8967d16aa8defcc0d58d41608d95789235357e78be826f70f6b5f8",
+      "retained": true,
+      "stored": "candidate/car-stationary-chase/repetition-1/car-stationary-chase-raw.json.gz",
+      "stored_bytes": 2232,
+      "stored_sha256": "13eaaebfd0275213a648a8498d5d1251f50a0a74c949708aa93864a160acf1ec",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-stationary-chase/repetition-1/report.json",
+      "original_bytes": 5228,
+      "original_sha256": "aec144ac1c91769f0be9b7f59907c53a294097ba1b8cb5079379dc8a788200d8",
+      "retained": true,
+      "stored": "candidate/car-stationary-chase/repetition-1/report.json.gz",
+      "stored_bytes": 2066,
+      "stored_sha256": "89a92bf9541e213351ad433faba250de64b2b0eeb274f09800e62f237d4c2477",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/car-stationary-chase/repetition-1/run.log",
+      "original_bytes": 636,
+      "original_sha256": "be8b94e4122bbff2ca4cc6abfc25eeb2b5bff1891c4ffb45081bc9d5e3a6ecbe",
+      "retained": true,
+      "stored": "candidate/car-stationary-chase/repetition-1/run.log",
+      "stored_bytes": 636,
+      "stored_sha256": "be8b94e4122bbff2ca4cc6abfc25eeb2b5bff1891c4ffb45081bc9d5e3a6ecbe",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-1/freeflight-moving-after.png",
+      "original_bytes": 55732,
+      "original_sha256": "808a330af510f19881906aeb57608659deb86905c1719eb6925a0798f7d5ab35",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-1/freeflight-moving-before.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-1/freeflight-moving-raw.json",
+      "original_bytes": 1085514,
+      "original_sha256": "e74ac124db89e8fc58665407966e7fb22ac2873bf156c8584c770b7d95eb665f",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-1/freeflight-moving-raw.json.gz",
+      "stored_bytes": 17764,
+      "stored_sha256": "519febc3e6501279624aff512e9f48c058a01f029a2e5136219b62841104c6b8",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-1/freeflight-moving-stacks.json",
+      "original_bytes": 27397,
+      "original_sha256": "5320287a1fe3821dbbe7519c75d72162b5d186498d1b85e65c5129371fc4434b",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-1/freeflight-moving-stacks.json.gz",
+      "stored_bytes": 2020,
+      "stored_sha256": "7fec26b9824f2b9b887394d38dc507fc82d3734d3df51ca309cc3f4e53c6a1f2",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile",
+      "original_bytes": 1319411,
+      "original_sha256": "58d98231690d74d9f268322e9b310092e7322b17ba191afa7c700cdfbe614377",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile.gz",
+      "stored_bytes": 86087,
+      "stored_sha256": "f7b1abc768d0fefa20b0fc026cb6a2c2e4029058f382eb267b0c8243eaaeb568",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-1/report.json",
+      "original_bytes": 43448,
+      "original_sha256": "92462eb0e7c78c18deb107abe723c5a6cb31c568d86fd4681e571435d1c78147",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-1/report.json.gz",
+      "stored_bytes": 4893,
+      "stored_sha256": "b2efa8324940c92a4577127942a72b96cd3098cf6de9b25ddf7f8ef39e29cee0",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-1/run.log",
+      "original_bytes": 2945,
+      "original_sha256": "f8e0306e98a4b555994bf3412733bc87d0266b796a72416637e5ad1ccef05017",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-1/run.log",
+      "stored_bytes": 2945,
+      "stored_sha256": "f8e0306e98a4b555994bf3412733bc87d0266b796a72416637e5ad1ccef05017",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-2/freeflight-moving-after.png",
+      "original_bytes": 55788,
+      "original_sha256": "a6b608ee803c9a222cfb10fd6e46b4238bb52d1e05d5c3356b478cf7b764c703",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-2/freeflight-moving-before.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-2/freeflight-moving-raw.json",
+      "original_bytes": 1277799,
+      "original_sha256": "efb8fd4229f884f3e64fe0908da7e8ba841de1d48ed0a337279de0128fcd7bcd",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-2/freeflight-moving-raw.json.gz",
+      "stored_bytes": 19178,
+      "stored_sha256": "d7008ca6024b10ffda18c916f3637ff4c43589569ebe58328471992e4d3cbc12",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-2/report.json",
+      "original_bytes": 10931,
+      "original_sha256": "984e39e40611244ffd61a98f370ad3ffc25a6240577bc3346555534b0933adb2",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-2/report.json.gz",
+      "stored_bytes": 2908,
+      "stored_sha256": "f8f485982ace1ff9933d24b3a9916de76c1ca8df9efd4fade0d53f0917b72f3c",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-moving/repetition-2/run.log",
+      "original_bytes": 662,
+      "original_sha256": "28b1dc843e00451c04904162fb7c7f5652666a98a9f54e1b4105466cb6e37ea7",
+      "retained": true,
+      "stored": "candidate/freeflight-moving/repetition-2/run.log",
+      "stored_bytes": 662,
+      "stored_sha256": "28b1dc843e00451c04904162fb7c7f5652666a98a9f54e1b4105466cb6e37ea7",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-after.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-before.png",
+      "original_bytes": 56739,
+      "original_sha256": "bb2a31c18c43bf636da4638b8274ddf2c69f73ba58fc7bf0284448832830402a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-raw.json",
+      "original_bytes": 23718,
+      "original_sha256": "76e25e4fa25545a14a94da5ff82ecd74c9da9595b4661090764aa03af47c844a",
+      "retained": true,
+      "stored": "candidate/freeflight-stationary/repetition-1/freeflight-stationary-raw.json.gz",
+      "stored_bytes": 2269,
+      "stored_sha256": "c2e1129bdf4d8dbf54be168215c8cc8e2960a5dafa6d4417a80712387c8a3833",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-stationary/repetition-1/report.json",
+      "original_bytes": 5199,
+      "original_sha256": "7bfc8f08f0633731fc03f821e11a960e3fad135aa8937bce421852fe4da5d531",
+      "retained": true,
+      "stored": "candidate/freeflight-stationary/repetition-1/report.json.gz",
+      "stored_bytes": 2054,
+      "stored_sha256": "78edc04fff9bb2ca23a64c77065ac763081b903cc2064f8bd3e413d441e50473",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/freeflight-stationary/repetition-1/run.log",
+      "original_bytes": 639,
+      "original_sha256": "2077073933c7dbb37031fddde7d9967e5d169d4732438b5c18ef4d65961d9bed",
+      "retained": true,
+      "stored": "candidate/freeflight-stationary/repetition-1/run.log",
+      "stored_bytes": 639,
+      "stored_sha256": "2077073933c7dbb37031fddde7d9967e5d169d4732438b5c18ef4d65961d9bed",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/map-idle-default/repetition-1/map-idle-default-after.png",
+      "original_bytes": 212501,
+      "original_sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/map-idle-default/repetition-1/map-idle-default-before.png",
+      "original_bytes": 212501,
+      "original_sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/map-idle-default/repetition-1/map-idle-default-raw.json",
+      "original_bytes": 23393,
+      "original_sha256": "51cdb96e338a07cda7510548afd428be3e931ae2a1ce39ec071692e9164bff60",
+      "retained": true,
+      "stored": "candidate/map-idle-default/repetition-1/map-idle-default-raw.json.gz",
+      "stored_bytes": 2251,
+      "stored_sha256": "b779432f1414c042634d0d3bafa1f2cd03fe6a74771326c78f36029fa150bdbb",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/map-idle-default/repetition-1/report.json",
+      "original_bytes": 4762,
+      "original_sha256": "728e380babe76758ca381e2d1d5066f1910128658a34c5c9d4365561855b9c3b",
+      "retained": true,
+      "stored": "candidate/map-idle-default/repetition-1/report.json.gz",
+      "stored_bytes": 1937,
+      "stored_sha256": "a9319c488eb8079aaed85c302eb042ea3c2b6437bf80321843c188be10f9260c",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/map-idle-default/repetition-1/run.log",
+      "original_bytes": 367,
+      "original_sha256": "f05e3948ebec049c6ee74f33d5603f434168663f36b929991004c752f2d24c41",
+      "retained": true,
+      "stored": "candidate/map-idle-default/repetition-1/run.log",
+      "stored_bytes": 367,
+      "stored_sha256": "f05e3948ebec049c6ee74f33d5603f434168663f36b929991004c752f2d24c41",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/map-idle-relief/repetition-1/map-idle-relief-after.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/map-idle-relief/repetition-1/map-idle-relief-before.png",
+      "original_bytes": 204551,
+      "original_sha256": "cc3110f4e7cf366fc765d0c8d09dbcb8933e5880b28d698d1a2600b10b6b9bc3",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/map-idle-relief/repetition-1/map-idle-relief-raw.json",
+      "original_bytes": 23528,
+      "original_sha256": "8d919d325c846061f1f4b58e3c41d5f24bc0a0ecb9fe2ea184c97a59a7ec7441",
+      "retained": true,
+      "stored": "candidate/map-idle-relief/repetition-1/map-idle-relief-raw.json.gz",
+      "stored_bytes": 2258,
+      "stored_sha256": "4435363b7de5f95e6c434e8c9123dae0624228da553898e138f01b30fcfff243",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/map-idle-relief/repetition-1/map-idle-relief-stacks.json",
+      "original_bytes": 1123,
+      "original_sha256": "29bcfd8ef8ba3cc97c3d74fbaf95145655f711aa5fd2bf9d8f2cbd20bff62665",
+      "retained": true,
+      "stored": "candidate/map-idle-relief/repetition-1/map-idle-relief-stacks.json.gz",
+      "stored_bytes": 252,
+      "stored_sha256": "39b8cb599e6c1046d467a0791ee9f50b185bc61b1e6c77758706bc8a6ec221e1",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile",
+      "original_bytes": 53135,
+      "original_sha256": "c217943e7552407bb1bd5c3831c457578093a4b629e9b9d405830c046abefd24",
+      "retained": true,
+      "stored": "candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile.gz",
+      "stored_bytes": 4471,
+      "stored_sha256": "713e220e5fba1b5047a329358d848ced4a52772d33238125c01263314123077e",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/map-idle-relief/repetition-1/report.json",
+      "original_bytes": 6300,
+      "original_sha256": "eddc2199801eb9cc0ab10238e17cdae62f4483469bd53d7334c3cffc13d15598",
+      "retained": true,
+      "stored": "candidate/map-idle-relief/repetition-1/report.json.gz",
+      "stored_bytes": 2183,
+      "stored_sha256": "17ed4516b9b94324233c21ee23c2081f2978da5e30399481c658ea65ef132ce0",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/map-idle-relief/repetition-1/run.log",
+      "original_bytes": 740,
+      "original_sha256": "57a391e15694d1821aab679ffed0e5684465d0fe157729998372ee0a9206de8c",
+      "retained": true,
+      "stored": "candidate/map-idle-relief/repetition-1/run.log",
+      "stored_bytes": 740,
+      "stored_sha256": "57a391e15694d1821aab679ffed0e5684465d0fe157729998372ee0a9206de8c",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-1/report.json",
+      "original_bytes": 42780,
+      "original_sha256": "7b05ea36bf2560eff99a91a3d5fd0a892ad70539947cb230332807a71b3a878f",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-1/report.json.gz",
+      "stored_bytes": 4934,
+      "stored_sha256": "afac239f5f5cca18804b7ba0b05bc45c85dfa5c5d53d88b9b1e655904d8196ec",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-1/run.log",
+      "original_bytes": 2966,
+      "original_sha256": "8d3481b0cf00604a38ab415c59dbff5e3b9438ea085e635a84d8a4a26721d4d6",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-1/run.log",
+      "stored_bytes": 2966,
+      "stored_sha256": "8d3481b0cf00604a38ab415c59dbff5e3b9438ea085e635a84d8a4a26721d4d6",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-after.png",
+      "original_bytes": 57279,
+      "original_sha256": "25a80c15ca8879e3760ef937e3c81cb4a142de2455ce19e963618b0d9c9371a2",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-before.png",
+      "original_bytes": 56086,
+      "original_sha256": "912ffff725e8a1b796335d71e1a15a041981d7e677a3e7f9613d3447fca066ff",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-raw.json",
+      "original_bytes": 4143359,
+      "original_sha256": "0ade1bde1bc5ca654a0fa4e08a2673e1421b7b94a6c4118814e5d8027db8a88a",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-raw.json.gz",
+      "stored_bytes": 35269,
+      "stored_sha256": "ca37d56500e69f10fb3acadb8586e48a129f604feed652d03320891bc3fb61e1",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-stacks.json",
+      "original_bytes": 27074,
+      "original_sha256": "2f59db39e0d0ccf7742d7334d04b5e2c288fd790afdb43026df86e0f19a19c15",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-1/walk-moving-chase-stacks.json.gz",
+      "stored_bytes": 2055,
+      "stored_sha256": "da685881b0fd8594842270c4c2c59df8a32567a00f334fd7207fd981c09f1f17",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile",
+      "original_bytes": 1031046,
+      "original_sha256": "86acd93429f6a92955c865bbc78c63e325ca7530ebe3c578812b54f699eb0f85",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile.gz",
+      "stored_bytes": 72838,
+      "stored_sha256": "8650689903c09eff23bac2b906e93f2d53f5437cfab94bf5bd0a1d2c2051bbd8",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-2/report.json",
+      "original_bytes": 10151,
+      "original_sha256": "4e46200ead33178d13116bde333f7c58286c6b1f21f87f7cfc72cf95ee9bd07b",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-2/report.json.gz",
+      "stored_bytes": 2905,
+      "stored_sha256": "55075738d0fc4871f04d807ae25e9cbdba69b0feed93b50707c03f41fe55c15c",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-2/run.log",
+      "original_bytes": 663,
+      "original_sha256": "24cb2d7dd3e4974a262176f10194264c22860b3b64ff472698dae5d981fd12eb",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-2/run.log",
+      "stored_bytes": 663,
+      "stored_sha256": "24cb2d7dd3e4974a262176f10194264c22860b3b64ff472698dae5d981fd12eb",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-after.png",
+      "original_bytes": 56740,
+      "original_sha256": "f07b7b4520cefefb529686be18ffbc28b11a81304ad90f9bb9880cc74afbe72e",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-before.png",
+      "original_bytes": 56086,
+      "original_sha256": "912ffff725e8a1b796335d71e1a15a041981d7e677a3e7f9613d3447fca066ff",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-raw.json",
+      "original_bytes": 4128124,
+      "original_sha256": "ccb211b344681cbcd1acb12717670758e160842133bae00c406dc54288d736ca",
+      "retained": true,
+      "stored": "candidate/walk-moving-chase/repetition-2/walk-moving-chase-raw.json.gz",
+      "stored_bytes": 35296,
+      "stored_sha256": "8cd442ff9ebf77ce534ae06ce4d6069141df06a1c64069cd281162e7ea4d6902",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-1/report.json",
+      "original_bytes": 43225,
+      "original_sha256": "2c98ab34ae6ca795e6485b04c217f5716f9b95a1cbff77b78afb64f4d49df08c",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 4811,
+      "stored_sha256": "9b8f0121addc3879a3a539212c33673709d2ab2b92806ec84c39483a7789e1f4",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-1/run.log",
+      "original_bytes": 3195,
+      "original_sha256": "58ec864fc3cf3f6d5636aa3b3ce944fbe5b16df21cc4165ddac937519de3b14f",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-1/run.log",
+      "stored_bytes": 3195,
+      "stored_sha256": "58ec864fc3cf3f6d5636aa3b3ce944fbe5b16df21cc4165ddac937519de3b14f",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-after.png",
+      "original_bytes": 67917,
+      "original_sha256": "6a6456c7dd9c7057a01e53653021d18e66b354cd091c83e895349f050377efc6",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-before.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json",
+      "original_bytes": 715619,
+      "original_sha256": "569880585d6e219eee6bd0e8925a0f88ffbbd4ce92f7ab2880c7c72f3474c315",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json.gz",
+      "stored_bytes": 13603,
+      "stored_sha256": "1f0a8c9dd981f0c9a5ddb2cc0a3d4ba0873308582bb4d0cd95f4f002825668a6",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-stacks.json",
+      "original_bytes": 27631,
+      "original_sha256": "fd0707badb060ddda1db7d55fbbea6fb81e6cbef2041e04601627edf6333d57e",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-stacks.json.gz",
+      "stored_bytes": 1922,
+      "stored_sha256": "020cc8b2ab2795269c39d5908a2a60629e0cca0d6c49c32f2367e71559dd24c8",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile",
+      "original_bytes": 1135082,
+      "original_sha256": "be4568d62b930e7d2a00c7f3ee875e2163d1ce6a6549938af5e28ce410c22788",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile.gz",
+      "stored_bytes": 78480,
+      "stored_sha256": "00a72a9c67bee4fd77672d2a6ec335d5161e49b40b652e17a7056e415135e785",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-2/report.json",
+      "original_bytes": 9903,
+      "original_sha256": "63043eb12483dd88ae9e5f6922aa220bb8219b8a2f4b1cda3cdb219330a54952",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-2/report.json.gz",
+      "stored_bytes": 2844,
+      "stored_sha256": "cb87f2af636e89c744791e8b2aac5b9554329d30f8de4014093aadfb7b745554",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-2/run.log",
+      "original_bytes": 667,
+      "original_sha256": "51714239f25fa6e6e6c4055be894e4a7055068662e3c2c20f1b4ae949c65b9f3",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-2/run.log",
+      "stored_bytes": 667,
+      "stored_sha256": "51714239f25fa6e6e6c4055be894e4a7055068662e3c2c20f1b4ae949c65b9f3",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-after.png",
+      "original_bytes": 68378,
+      "original_sha256": "de71f97f889d74aeb0df76c30c0f7cd8f7d4d2e55309cd447eb9344d4146593a",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-before.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json",
+      "original_bytes": 723350,
+      "original_sha256": "9d37151c88f1619ffa9c9b4b9327f76ee2871a0bbad808aa3b6a7f8551a0d7ae",
+      "retained": true,
+      "stored": "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json.gz",
+      "stored_bytes": 13680,
+      "stored_sha256": "6bfe4b20ae91be1951caf87c4ffff03007a9d3de89d7441a7159ec274b2e56c1",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-stationary-firstperson/repetition-1/report.json",
+      "original_bytes": 37713,
+      "original_sha256": "0b9f699d34a45d37f2d1f7bb85bec63c2f0d7749e9b63ac21578d27a7f249ff3",
+      "retained": true,
+      "stored": "candidate/walk-stationary-firstperson/repetition-1/report.json.gz",
+      "stored_bytes": 4191,
+      "stored_sha256": "2bef13948b6a9a29af9fbb3bdf7b8dacb714fe24ec55f4e31b70d55eef9a3168",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-stationary-firstperson/repetition-1/run.log",
+      "original_bytes": 2803,
+      "original_sha256": "1e698d5ff23eaffa3f78623c9ea16381482452ad3fc17c9a80d62f09371ea00e",
+      "retained": true,
+      "stored": "candidate/walk-stationary-firstperson/repetition-1/run.log",
+      "stored_bytes": 2803,
+      "stored_sha256": "1e698d5ff23eaffa3f78623c9ea16381482452ad3fc17c9a80d62f09371ea00e",
+      "encoding": "identity"
+    },
+    {
+      "original": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-after.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-before.png",
+      "original_bytes": 64700,
+      "original_sha256": "52b95a478a96a6715f54b746e9ca538235825727bbe01dd8faf69b601dc6a797",
+      "retained": false,
+      "reason": "Successful before/after benchmark screenshot omitted; raw measurements, process logs and workload identity retained."
+    },
+    {
+      "original": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json",
+      "original_bytes": 23650,
+      "original_sha256": "f79d70e694b2defd1fb036ba212c5d610dc9877ef3e12a395adc78623b8ae080",
+      "retained": true,
+      "stored": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json.gz",
+      "stored_bytes": 2260,
+      "stored_sha256": "1922a7be3a4d7a251688556ec99299b95af3d72b4dd7972a0a674e498df73fb8",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-stacks.json",
+      "original_bytes": 27024,
+      "original_sha256": "00e6baac9e2abc71fbc3ef98152f137fe9eb8b420e289814564c50f846b75173",
+      "retained": true,
+      "stored": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-stacks.json.gz",
+      "stored_bytes": 2091,
+      "stored_sha256": "2e2e0f6af8ae96d7796c1d24ff565e670de73a6b0cfcae9bdf02c3ad604de0f0",
+      "encoding": "gzip"
+    },
+    {
+      "original": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile",
+      "original_bytes": 317224,
+      "original_sha256": "1f69da98b7eec98fac98fe6be3fd61ad91aa5ae62fda564308933cd42d343781",
+      "retained": true,
+      "stored": "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile.gz",
+      "stored_bytes": 20130,
+      "stored_sha256": "248750745abcc3a7e4b44b1090953425c4c48fab665968fa51303a87e2c3f500",
+      "encoding": "gzip"
+    },
+    {
+      "original": "environment.json",
+      "original_bytes": 4677,
+      "original_sha256": "1e1bd1af4fa227d1a2cf228c9eb0e3a00c4aea907309aeef8e5e0106cf411376",
+      "retained": true,
+      "stored": "environment.json",
+      "stored_bytes": 4677,
+      "stored_sha256": "1e1bd1af4fa227d1a2cf228c9eb0e3a00c4aea907309aeef8e5e0106cf411376",
+      "encoding": "identity"
+    },
+    {
+      "original": "provenance.json",
+      "original_bytes": 46889,
+      "original_sha256": "51672f8f5b797454c1ac3762a50bfe6b7b6a9bc6308db3820e8a692af93b574c",
+      "retained": true,
+      "stored": "provenance.json",
+      "stored_bytes": 46889,
+      "stored_sha256": "51672f8f5b797454c1ac3762a50bfe6b7b6a9bc6308db3820e8a692af93b574c",
+      "encoding": "identity"
+    },
+    {
+      "original": "server.log",
+      "original_bytes": 585270,
+      "original_sha256": "4b00889aa2663c490da6b0bd658a5a4618227809b928b40a537e738a4173e625",
+      "retained": true,
+      "stored": "server.log",
+      "stored_bytes": 585270,
+      "stored_sha256": "4b00889aa2663c490da6b0bd658a5a4618227809b928b40a537e738a4173e625",
+      "encoding": "identity"
+    }
+  ],
+  "job_log": {
+    "job_id": 130158519966,
+    "source": "GitHub fetch_workflow_job_logs decoded UTF-8 text",
+    "stored": "play-job.log.gz",
+    "decoded_bytes": 513123,
+    "decoded_sha256": "e532773035945dec473ad66e0befd35347e807e4993588f2350b6f5c872d79a9",
+    "bytes": 77551,
+    "sha256": "03cf8835593cabf0f77f33e5aa650c89e2e06248f806f23e8a46bc3646cf2198"
+  },
+  "files_owned_by_play_preservation": {
+    "baseline/car-moving-chase/repetition-1/car-moving-chase-raw.json.gz": {
+      "bytes": 37839,
+      "sha256": "b5ffa56552d285022b36e25f18e77b9bec459d886361e66e92929d0ad877eba6"
+    },
+    "baseline/car-moving-chase/repetition-1/car-moving-chase-stacks.json.gz": {
+      "bytes": 2005,
+      "sha256": "0dc12e1802a48b778222a9da5912b3e2beb0361921f31ecb3caea1863cd0c48c"
+    },
+    "baseline/car-moving-chase/repetition-1/car-moving-chase.cpuprofile.gz": {
+      "bytes": 86140,
+      "sha256": "5c22d71ccc516b4b33b2e57a49315b39ac8ac5b536e5957620287eb35bc1b589"
+    },
+    "baseline/car-moving-chase/repetition-1/report.json.gz": {
+      "bytes": 4961,
+      "sha256": "49e6066fc837a1ae15e77b45157de3e0c26c85d44443dad50c7a3494a1e69f37"
+    },
+    "baseline/car-moving-chase/repetition-1/run.log": {
+      "bytes": 2874,
+      "sha256": "bda264011be5b005c0d8a7fe8fa97f02fd3f6de0354e1bfe00fda3fd03863329"
+    },
+    "baseline/car-moving-chase/repetition-2/car-moving-chase-raw.json.gz": {
+      "bytes": 37886,
+      "sha256": "d715a96afc4660e691524fbc6a17b1825e97e83cdae7b0c0787f5516bde9fa08"
+    },
+    "baseline/car-moving-chase/repetition-2/report.json.gz": {
+      "bytes": 2962,
+      "sha256": "45bb516209efb78e1062b3819e612a9400364e91db607a53776370ea5c0b1f12"
+    },
+    "baseline/car-moving-chase/repetition-2/run.log": {
+      "bytes": 646,
+      "sha256": "502fd8d8a21bef02eb438cc14f939a3eb23e7ff390fd960e8a854d23df946079"
+    },
+    "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json.gz": {
+      "bytes": 15632,
+      "sha256": "8d308ddf0694eee2593a15a8ff8b5afc1042c4f87e6a9eab8db8c54c47e8cefe"
+    },
+    "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson-stacks.json.gz": {
+      "bytes": 2015,
+      "sha256": "3cbb4581936ba596848416d5f376ea9dbe3a8bcd6c41e4152a72fbe9578d1e10"
+    },
+    "baseline/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile.gz": {
+      "bytes": 92852,
+      "sha256": "4be2a3c641ab429ad3cef8ae7635eefafdd656a93777e17ccdc60ede74b3fb78"
+    },
+    "baseline/car-moving-firstperson/repetition-1/report.json.gz": {
+      "bytes": 4945,
+      "sha256": "dd2858e08029370dab5a208733bbcfc9c602a7d28d63f76667808e13b4709e6b"
+    },
+    "baseline/car-moving-firstperson/repetition-1/run.log": {
+      "bytes": 3307,
+      "sha256": "e47f209eb0c759dc4e7e7bbcc372bef32f278e2567edc0191bc91fbe700a2100"
+    },
+    "baseline/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json.gz": {
+      "bytes": 15531,
+      "sha256": "d11cc341ad67f610345e290f088299c65dcb09cdccdcd01699a6e1b90615c7b5"
+    },
+    "baseline/car-moving-firstperson/repetition-2/report.json.gz": {
+      "bytes": 2903,
+      "sha256": "ed57c94a6f971a68ead6005258d052d683f174b3c5e2e4c1300a2a53c2656c4d"
+    },
+    "baseline/car-moving-firstperson/repetition-2/run.log": {
+      "bytes": 663,
+      "sha256": "fc1fe909ea96a681589a865ce96a1be4686bd35a304f4e023753dda1676f2a89"
+    },
+    "baseline/car-stationary-chase/repetition-1/car-stationary-chase-raw.json.gz": {
+      "bytes": 2253,
+      "sha256": "93b6e437b5d982840173bb6b766952ec369dd5882acea2306d139f95e703a9af"
+    },
+    "baseline/car-stationary-chase/repetition-1/report.json.gz": {
+      "bytes": 2049,
+      "sha256": "8d0ebfe86516d8f70c50ef7d409d60be5baee49a0dec2d472d2a0edd89d74809"
+    },
+    "baseline/car-stationary-chase/repetition-1/run.log": {
+      "bytes": 623,
+      "sha256": "c4157cf4d0d1cbfc11c026b7ec772c4c3d2a58c17e90f44d3f9c56be66a0f1f1"
+    },
+    "baseline/freeflight-moving/repetition-1/freeflight-moving-raw.json.gz": {
+      "bytes": 18900,
+      "sha256": "64a081caf4211edfa792a85d874185ca14ae9dc4c599f88a0e9a7901d9a073bd"
+    },
+    "baseline/freeflight-moving/repetition-1/freeflight-moving-stacks.json.gz": {
+      "bytes": 1969,
+      "sha256": "21cb69e6d81271a3c4dfe9d70eb27f7deaa7bb8d0b61dcb9e4f7966437d4d043"
+    },
+    "baseline/freeflight-moving/repetition-1/freeflight-moving.cpuprofile.gz": {
+      "bytes": 86932,
+      "sha256": "64e66d3c7c7b796c8082bf26c94bba643442823cce04d53f962c8d21cffce003"
+    },
+    "baseline/freeflight-moving/repetition-1/report.json.gz": {
+      "bytes": 4888,
+      "sha256": "9824d9e37d921f1273ca8f5091e2411d1dbe739cbea69e18b8532699a227f6a5"
+    },
+    "baseline/freeflight-moving/repetition-1/run.log": {
+      "bytes": 2939,
+      "sha256": "fe27ce6a7e6c9d104c10a7f90f10f2b7cc8b7aaf6e2b8eb96a00c76df0c95001"
+    },
+    "baseline/freeflight-moving/repetition-2/freeflight-moving-raw.json.gz": {
+      "bytes": 18147,
+      "sha256": "5d93ed23913b08de264c630c321369bef3ad63afe15f5c91e0375a486d7fd8c4"
+    },
+    "baseline/freeflight-moving/repetition-2/report.json.gz": {
+      "bytes": 2919,
+      "sha256": "3546719396cf98cf7447486e429402d5fff1c22f6037b5dcf57728e8bf732a5a"
+    },
+    "baseline/freeflight-moving/repetition-2/run.log": {
+      "bytes": 659,
+      "sha256": "2621822b40beb05114c3e3f3a0712cca8d002518ca3bd18ddc7c78fb10d9bbce"
+    },
+    "baseline/freeflight-stationary/repetition-1/freeflight-stationary-raw.json.gz": {
+      "bytes": 2263,
+      "sha256": "3f970ca166a57b82f33fcb5ccf7b99c41fabbfe911089348bd3f68139b01c313"
+    },
+    "baseline/freeflight-stationary/repetition-1/report.json.gz": {
+      "bytes": 2054,
+      "sha256": "c97d520180d558f3f20d1ccb03cce33f4208b4a9a66f1a1d83b9409cab3d81b3"
+    },
+    "baseline/freeflight-stationary/repetition-1/run.log": {
+      "bytes": 629,
+      "sha256": "81115688fdc4aaea26650453154c6400eac18ab992620f37e99f2b69aae7ef97"
+    },
+    "baseline/map-idle-default/repetition-1/map-idle-default-raw.json.gz": {
+      "bytes": 2263,
+      "sha256": "2319e90f53bdbbb8d13d69bdff734f0c06ccb33c2d59ee5a8b11e9588851389a"
+    },
+    "baseline/map-idle-default/repetition-1/report.json.gz": {
+      "bytes": 1933,
+      "sha256": "3c125b31d687d101b3ba4b3bacd93b4fd0ed2f8fcad39400a7ffd5af9bce840f"
+    },
+    "baseline/map-idle-default/repetition-1/run.log": {
+      "bytes": 380,
+      "sha256": "81a775ffc99e3ec9f26183fc8b9017a8d018674d1d407ca9d1d1b7d854b1014f"
+    },
+    "baseline/map-idle-relief/repetition-1/map-idle-relief-raw.json.gz": {
+      "bytes": 2265,
+      "sha256": "3bf5ccc5a4a78c72c3c19be0f2a2da8665c5004685ff165b55c329557a9a66a5"
+    },
+    "baseline/map-idle-relief/repetition-1/map-idle-relief-stacks.json.gz": {
+      "bytes": 1911,
+      "sha256": "9cc4cf1a4700127f28c901af7afd4919cb91bc078681b1e250f1ed375437ac13"
+    },
+    "baseline/map-idle-relief/repetition-1/map-idle-relief.cpuprofile.gz": {
+      "bytes": 12242,
+      "sha256": "b440af831519b39faeef63a6214ac5d583e106002977c94b02c966535bd78f9e"
+    },
+    "baseline/map-idle-relief/repetition-1/report.json.gz": {
+      "bytes": 3930,
+      "sha256": "199c89ce0c8c8c820d8b765d852400600524e9b0f7b6bdb3cbba4abbe9c7a662"
+    },
+    "baseline/map-idle-relief/repetition-1/run.log": {
+      "bytes": 2809,
+      "sha256": "886cbda6df9a42b61da71cc71e5c7a05fc288506370f3a5075a475d1ab736c6b"
+    },
+    "baseline/walk-moving-chase/repetition-1/report.json.gz": {
+      "bytes": 4970,
+      "sha256": "4a2443bcb0b99866a09b2d331f382b8b50980e6ce30e1ea999cd2cec837b6792"
+    },
+    "baseline/walk-moving-chase/repetition-1/run.log": {
+      "bytes": 2870,
+      "sha256": "c5a8e6b73b6cfdb8eef035398939aa4a9fa61cd5c84dc712d97b5ae42f4cb0a4"
+    },
+    "baseline/walk-moving-chase/repetition-1/walk-moving-chase-raw.json.gz": {
+      "bytes": 33752,
+      "sha256": "47a8412beffb01de0ad89f28486560a22f62f1f586941091e01aea4ebb817ca6"
+    },
+    "baseline/walk-moving-chase/repetition-1/walk-moving-chase-stacks.json.gz": {
+      "bytes": 2064,
+      "sha256": "6c3fb87ad4ff06822c605723336130a794c0d0a3050bb55d7f7a4edd4a2f32ae"
+    },
+    "baseline/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile.gz": {
+      "bytes": 82047,
+      "sha256": "8bb3a165d04f63c956c466044abbbca48584eaf87d2f0bbbe57711d2d497b426"
+    },
+    "baseline/walk-moving-chase/repetition-2/report.json.gz": {
+      "bytes": 2853,
+      "sha256": "8c553fd319daa099f148412a8c9dbd9f9a718a6b5eeded139a7a5888e4e3ee1a"
+    },
+    "baseline/walk-moving-chase/repetition-2/run.log": {
+      "bytes": 664,
+      "sha256": "e0d79151d899c187cc0c31cabe4f7a9d71e76f5344c7bb8325afa5a31a8bb5a2"
+    },
+    "baseline/walk-moving-chase/repetition-2/walk-moving-chase-raw.json.gz": {
+      "bytes": 34612,
+      "sha256": "4267f52d5b1b6146ad9dcef309e4a258e2c4e9147d0531f2d28e40c61d0fd0f6"
+    },
+    "baseline/walk-moving-firstperson/repetition-1/report.json.gz": {
+      "bytes": 4819,
+      "sha256": "2cde4f9fbd483db8a3434f181decf2fe3913d00b1b63b0554694d2069b239f05"
+    },
+    "baseline/walk-moving-firstperson/repetition-1/run.log": {
+      "bytes": 3182,
+      "sha256": "85f213f61d8393b8372e0ee5f0d18099d12521c2e75765eeea83066537edfa11"
+    },
+    "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json.gz": {
+      "bytes": 13826,
+      "sha256": "d7d8e94e7eed6ec5d19f13db691cadb176e85c831f3a54cd7fdc540a17ff3bb0"
+    },
+    "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson-stacks.json.gz": {
+      "bytes": 2012,
+      "sha256": "4abfff2f5878a71e1d76ac8ee54a93ac428b300f60915add1edb218d46350e71"
+    },
+    "baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile.gz": {
+      "bytes": 74123,
+      "sha256": "60b3de16a7c447ec2667a36ff4ae790938944f799d160d6923a26271d4755bf0"
+    },
+    "baseline/walk-moving-firstperson/repetition-2/report.json.gz": {
+      "bytes": 2891,
+      "sha256": "05d1fa20e877a981b7eb048f3737b248fe73bdfbf238d07c26efe7465fc015b0"
+    },
+    "baseline/walk-moving-firstperson/repetition-2/run.log": {
+      "bytes": 640,
+      "sha256": "02216afd9991504bfd67217809022aaed16d5a52b0da49f4456d5976c1e15300"
+    },
+    "baseline/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json.gz": {
+      "bytes": 13646,
+      "sha256": "341f2707ceecfa8587de9e86177b8ad251db793df8b8a90611828800f62c73f5"
+    },
+    "baseline/walk-stationary-firstperson/repetition-1/report.json.gz": {
+      "bytes": 4179,
+      "sha256": "8f324e4ef2023d372a581f8bfaadf8274151d11add45c33033e82a551d05cb45"
+    },
+    "baseline/walk-stationary-firstperson/repetition-1/run.log": {
+      "bytes": 2792,
+      "sha256": "4ca97b326ab8e4a8cd5d115da1eab192cda8acbe15ff510a346acce2809d080e"
+    },
+    "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json.gz": {
+      "bytes": 2261,
+      "sha256": "7729cfdb1a468590c3fbb8f4366bc27242a52ad0164872d766921236dcc5c0ef"
+    },
+    "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-stacks.json.gz": {
+      "bytes": 2077,
+      "sha256": "d82147fc891748592a01e291b0e2744e046d2932c6e337a773333a426a624f30"
+    },
+    "baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile.gz": {
+      "bytes": 20629,
+      "sha256": "430cadc0643a322328343f5dee0a712a4082a0456ae717c30da7a75d7fbe461f"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-1/map-orbit-relief-raw.json.gz": {
+      "bytes": 153088,
+      "sha256": "9bca132136dce0a23bcc60bc77605c0d6acf96cef6ebaf64097401529c577029"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-1/report.json.gz": {
+      "bytes": 134828,
+      "sha256": "10978295a4bc464c0877960ac58b3c344f2dead4e64c5328ce11593c30f766b2"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-1/run.log": {
+      "bytes": 5298,
+      "sha256": "60a2609fe77eddc6d47c3b39c2f2ad88b02a1951ae4d6720626750cbf8a5e24e"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-2/comparison-with-baseline-first.json.gz": {
+      "bytes": 2653,
+      "sha256": "10a6150dc2883310e28b3a7031157823edf92d54efa9af48a7fa59c8b57b8865"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-2/map-orbit-relief-raw.json.gz": {
+      "bytes": 152597,
+      "sha256": "1f9bf6a465c95eb28536dac7dc6bc16282a42653a9336b360b8dfe7f3dd674ab"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-2/report.json.gz": {
+      "bytes": 134897,
+      "sha256": "91c1f91396be8649d3ac59a40f11bba5a3cac4b4b78c68a33b3e88a5110baef2"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-2/run.log": {
+      "bytes": 5513,
+      "sha256": "f55708b92f2d52db78034216169b5ac68217789914e1ad405c5a30ee2033f9f6"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-1/map-pan-relief-raw.json.gz": {
+      "bytes": 160465,
+      "sha256": "b3b43b9d26a51752edc1c8bb65eaa02bce9c774e973f02ed5d7959d9c6a3742c"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-1/report.json.gz": {
+      "bytes": 143348,
+      "sha256": "11ccfa403e5fb43f78d80125361070293e7ce2e7d3bd5b4faff9ee7450dc72d6"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-1/run.log": {
+      "bytes": 5405,
+      "sha256": "ad35a29e6a94a4aaeb8acd51b87d08f848f3a6cd4a358a123db192c9e6ef1b88"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-2/comparison-with-baseline-first.json.gz": {
+      "bytes": 2649,
+      "sha256": "3f23becdc6f0f711c9e460561370db000d98cf39f930e87dcf2491d7c7186eab"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-2/map-pan-relief-raw.json.gz": {
+      "bytes": 160423,
+      "sha256": "427ceaa89c1ce6b6dedf13d3e8d1251fa4b4913c30f9f9003d72e328f60af366"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-2/report.json.gz": {
+      "bytes": 143353,
+      "sha256": "67ec3cc6acdaff58f41ebe9222e6b8d2cb30b3cce8c18ef035c95de70d82deff"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-2/run.log": {
+      "bytes": 5343,
+      "sha256": "e229b2a2bf0b3f6859da5595141491398b161cc0ca927b25930c1a3faf192666"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-1/report.json.gz": {
+      "bytes": 132176,
+      "sha256": "e22827c42f12bf384e3a5b374099b54fd04291385b3f706f047734ca6eef31ed"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-1/run.log": {
+      "bytes": 4917,
+      "sha256": "d271970295724aaac84d103c1f42ec9abcc1ad2fba1f14a989f9f1ef557e75ee"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json.gz": {
+      "bytes": 135746,
+      "sha256": "a9a70671bbf8112d79140cf6fe8aee51f1657cc35f9381d772bf62fa5210ae83"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json.gz": {
+      "bytes": 2541,
+      "sha256": "10641cdc9da5fe94e27f0620ae30992e0d801623c315a7b91fd5aeb7525bce6e"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-2/report.json.gz": {
+      "bytes": 132114,
+      "sha256": "5a67679fc1ed0351313423122c75fcc1a163c6df48b666faabeb6b1c0336c7c5"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-2/run.log": {
+      "bytes": 4931,
+      "sha256": "2fb149336936ea769c0c5dd1b52fcdb2302d928410006569d0e5b40e5ef1b634"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json.gz": {
+      "bytes": 135400,
+      "sha256": "c35cdada24339e28b48f8663a0eca3bc07e6afc3fa49e8a5990f38ac54ef418d"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-1/comparison-with-baseline-first.json.gz": {
+      "bytes": 2656,
+      "sha256": "15545b529294fcfb3780bd07beab1c5b4b1315c7dbb300b782a973c8c86a711a"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-1/map-orbit-relief-raw.json.gz": {
+      "bytes": 152456,
+      "sha256": "ecc84cbc4026875ffd1fcfa608b9258b446ef2e124c0ec4b78d74d7b172add97"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-1/report.json.gz": {
+      "bytes": 134852,
+      "sha256": "e66b7292ef791c186d9b41d8f9f6a8c5e14e004cd4787aedc0d52b1bce5dab6c"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-1/run.log": {
+      "bytes": 5298,
+      "sha256": "4c0ab8ff0d90889820a86914abde80ec04a50a39481dacea60e0a90d139cb716"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-2/comparison-with-baseline-first.json.gz": {
+      "bytes": 2624,
+      "sha256": "c3fb477d9556c41cfad1333c3159c36b5d3326535f7d9eec01e1b3c56781883e"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-2/map-orbit-relief-raw.json.gz": {
+      "bytes": 152519,
+      "sha256": "ad5dbaf4ea15829ba21a3186f526e0be903bf3c654db9183ab390b411809f940"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-2/report.json.gz": {
+      "bytes": 134821,
+      "sha256": "5aa141a89ef35ffcc0e4114f5f76fa15b2a5c8142f006a178722581e6009ae66"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-2/run.log": {
+      "bytes": 5173,
+      "sha256": "0270ef3490bab90bed13b91d10d4e5612aff785eb632b865e1b7b43791dfe3a9"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-1/comparison-with-baseline-first.json.gz": {
+      "bytes": 2690,
+      "sha256": "4a7d4e0bade8c5f8287165f17b88baa65f668c7812478ce88421b1a5b6437ff1"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-1/map-pan-relief-raw.json.gz": {
+      "bytes": 160200,
+      "sha256": "ed78f969b1ed9aae902f7c6187b30b41d5cda6268f7461ebf5c5453d79256144"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-1/report.json.gz": {
+      "bytes": 143385,
+      "sha256": "ecef4aecb9b8277133984e8648f2e53b4a78b7476ac062d19d103ac18fcfbccc"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-1/run.log": {
+      "bytes": 5243,
+      "sha256": "55179db2ee7c2d1fbc59c82b717ae484767bb125f3db9cc90d66f99311d5ec15"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-2/comparison-with-baseline-first.json.gz": {
+      "bytes": 2659,
+      "sha256": "bf5318efef933c6db0b60089231a74c492ff355f2ddeecd093b1f7b56c7053e7"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-2/map-pan-relief-raw.json.gz": {
+      "bytes": 160134,
+      "sha256": "66392696d6cd4fff4c04273ebcbd84cf5712978c9a0b67c7a00ad4de03435414"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-2/report.json.gz": {
+      "bytes": 143346,
+      "sha256": "f5a23648fabb44912c3d62692f61806c85df9c44b1a4ccbec070c08e965798bd"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-2/run.log": {
+      "bytes": 5229,
+      "sha256": "26ed01af490694dd664753ce635920b722eec2aeca707b81fed134ae0795a691"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-1/comparison-with-baseline-first.json.gz": {
+      "bytes": 2576,
+      "sha256": "aacdd20c62b115723d4faef8ec2a37567939cbb55f892558d50ddd4552f8263d"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-1/report.json.gz": {
+      "bytes": 132161,
+      "sha256": "576fff64ce41435c057a5bacbc32b04d0c100e90fc8de547020dbec48bfccf3a"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-1/run.log": {
+      "bytes": 4883,
+      "sha256": "3281066df07a240d5150acc5e861c91c36a5be3a6390cf226eb553774a752f17"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json.gz": {
+      "bytes": 135372,
+      "sha256": "2fa9255f36555c678c5a6e273f0fc353ddd770999534bc220aa966534fb0594a"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json.gz": {
+      "bytes": 2555,
+      "sha256": "b4678455d8d700f47fea11537ae0f9a5b3cbd1d1ecb2e41a07517ced11563ff4"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-2/report.json.gz": {
+      "bytes": 132154,
+      "sha256": "ff20cf1c069e579e3dd84076656afc58919a120c306d7b2b91d8cbcc73afb9bd"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-2/run.log": {
+      "bytes": 4860,
+      "sha256": "c1b96fabb85a6492a2c539c968677ef5fac0328b8142a7ee36a8d288b01771e0"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json.gz": {
+      "bytes": 135330,
+      "sha256": "da2824f4d5a1d519ffca385055378e8b7b0e5bb12fa590ca0d9e29f8805fb637"
+    },
+    "camera-replay-server.log": {
+      "bytes": 234108,
+      "sha256": "040a3a2e68bae87b9abeac1862f9e8852b5d7bbe223f6bf8fb4a237665c18c06"
+    },
+    "candidate/car-moving-chase/repetition-1/car-moving-chase-raw.json.gz": {
+      "bytes": 37938,
+      "sha256": "22e3510a178a82d7cf710716455a02210aeeaa1586cf12db7ef42fc45f9892e9"
+    },
+    "candidate/car-moving-chase/repetition-1/car-moving-chase-stacks.json.gz": {
+      "bytes": 2054,
+      "sha256": "22ff75e6ccfdd350fb12e9fce7be31ab3ea3d3e76477e5cf0dd6a8062f0da522"
+    },
+    "candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile.gz": {
+      "bytes": 84171,
+      "sha256": "cdde784638bfbf4f0f2652403bb9ebe4210ef1c2aeff19795bb4dc64a9d0f4ea"
+    },
+    "candidate/car-moving-chase/repetition-1/report.json.gz": {
+      "bytes": 4991,
+      "sha256": "fb680065347f686b852736e3a5c37de0459056abcc29d75dffdc38dada29f5d4"
+    },
+    "candidate/car-moving-chase/repetition-1/run.log": {
+      "bytes": 2745,
+      "sha256": "ac17519deb86df3a36efa68e0bca42fbfb69c0144270730904d36873b1ae4834"
+    },
+    "candidate/car-moving-chase/repetition-2/car-moving-chase-raw.json.gz": {
+      "bytes": 37995,
+      "sha256": "3166ba5ad40ce4e8335c7580abc26cd832fda8b3f60b2119f0083885ee3d3c24"
+    },
+    "candidate/car-moving-chase/repetition-2/report.json.gz": {
+      "bytes": 2961,
+      "sha256": "127087cb56c0cbe5e64fcd9777ffdb93e9ee93a2ccf83b6b12e29a20b9fe86ce"
+    },
+    "candidate/car-moving-chase/repetition-2/run.log": {
+      "bytes": 668,
+      "sha256": "923e6bedd9b645c39d4c344bc9c656e50713339a6e89a1b638fe040333b07d3f"
+    },
+    "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-raw.json.gz": {
+      "bytes": 15584,
+      "sha256": "088800d8c4419ec2a4c0a519900a3a3f17acfa7d2ddeecec673d51264e02fd2b"
+    },
+    "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson-stacks.json.gz": {
+      "bytes": 1988,
+      "sha256": "a893464984123d4f2913dbc60580a91f48b8ba03ad1096aa1e412a004a3fc559"
+    },
+    "candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile.gz": {
+      "bytes": 88883,
+      "sha256": "54171cb643f13e250f7bd8c272ff538b9ea72e9785c7ab6f6036ae685194d3be"
+    },
+    "candidate/car-moving-firstperson/repetition-1/report.json.gz": {
+      "bytes": 4902,
+      "sha256": "4b5fbbd6466dc0ee777d3568259b4b5e5348accb13710d693038b32c37cb49b8"
+    },
+    "candidate/car-moving-firstperson/repetition-1/run.log": {
+      "bytes": 3316,
+      "sha256": "af121718b8afb0f2619882f7c595c952344d51a2156555e78d288dd190ed21e2"
+    },
+    "candidate/car-moving-firstperson/repetition-2/car-moving-firstperson-raw.json.gz": {
+      "bytes": 15774,
+      "sha256": "57d474c4c2fc92d0360e2bbbbb032f743a9e19f89522783b6e54df1cd5b38943"
+    },
+    "candidate/car-moving-firstperson/repetition-2/report.json.gz": {
+      "bytes": 2932,
+      "sha256": "0ce0730f437ee7c83b3d5f9b64d06f5256722b913d0a1e4c254982bc56c15a4c"
+    },
+    "candidate/car-moving-firstperson/repetition-2/run.log": {
+      "bytes": 665,
+      "sha256": "5d46483fa553b50cfbcb02a6058f4d3989ef68c68799164a87883d1331193f00"
+    },
+    "candidate/car-stationary-chase/repetition-1/car-stationary-chase-raw.json.gz": {
+      "bytes": 2232,
+      "sha256": "13eaaebfd0275213a648a8498d5d1251f50a0a74c949708aa93864a160acf1ec"
+    },
+    "candidate/car-stationary-chase/repetition-1/report.json.gz": {
+      "bytes": 2066,
+      "sha256": "89a92bf9541e213351ad433faba250de64b2b0eeb274f09800e62f237d4c2477"
+    },
+    "candidate/car-stationary-chase/repetition-1/run.log": {
+      "bytes": 636,
+      "sha256": "be8b94e4122bbff2ca4cc6abfc25eeb2b5bff1891c4ffb45081bc9d5e3a6ecbe"
+    },
+    "candidate/freeflight-moving/repetition-1/freeflight-moving-raw.json.gz": {
+      "bytes": 17764,
+      "sha256": "519febc3e6501279624aff512e9f48c058a01f029a2e5136219b62841104c6b8"
+    },
+    "candidate/freeflight-moving/repetition-1/freeflight-moving-stacks.json.gz": {
+      "bytes": 2020,
+      "sha256": "7fec26b9824f2b9b887394d38dc507fc82d3734d3df51ca309cc3f4e53c6a1f2"
+    },
+    "candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile.gz": {
+      "bytes": 86087,
+      "sha256": "f7b1abc768d0fefa20b0fc026cb6a2c2e4029058f382eb267b0c8243eaaeb568"
+    },
+    "candidate/freeflight-moving/repetition-1/report.json.gz": {
+      "bytes": 4893,
+      "sha256": "b2efa8324940c92a4577127942a72b96cd3098cf6de9b25ddf7f8ef39e29cee0"
+    },
+    "candidate/freeflight-moving/repetition-1/run.log": {
+      "bytes": 2945,
+      "sha256": "f8e0306e98a4b555994bf3412733bc87d0266b796a72416637e5ad1ccef05017"
+    },
+    "candidate/freeflight-moving/repetition-2/freeflight-moving-raw.json.gz": {
+      "bytes": 19178,
+      "sha256": "d7008ca6024b10ffda18c916f3637ff4c43589569ebe58328471992e4d3cbc12"
+    },
+    "candidate/freeflight-moving/repetition-2/report.json.gz": {
+      "bytes": 2908,
+      "sha256": "f8f485982ace1ff9933d24b3a9916de76c1ca8df9efd4fade0d53f0917b72f3c"
+    },
+    "candidate/freeflight-moving/repetition-2/run.log": {
+      "bytes": 662,
+      "sha256": "28b1dc843e00451c04904162fb7c7f5652666a98a9f54e1b4105466cb6e37ea7"
+    },
+    "candidate/freeflight-stationary/repetition-1/freeflight-stationary-raw.json.gz": {
+      "bytes": 2269,
+      "sha256": "c2e1129bdf4d8dbf54be168215c8cc8e2960a5dafa6d4417a80712387c8a3833"
+    },
+    "candidate/freeflight-stationary/repetition-1/report.json.gz": {
+      "bytes": 2054,
+      "sha256": "78edc04fff9bb2ca23a64c77065ac763081b903cc2064f8bd3e413d441e50473"
+    },
+    "candidate/freeflight-stationary/repetition-1/run.log": {
+      "bytes": 639,
+      "sha256": "2077073933c7dbb37031fddde7d9967e5d169d4732438b5c18ef4d65961d9bed"
+    },
+    "candidate/map-idle-default/repetition-1/map-idle-default-raw.json.gz": {
+      "bytes": 2251,
+      "sha256": "b779432f1414c042634d0d3bafa1f2cd03fe6a74771326c78f36029fa150bdbb"
+    },
+    "candidate/map-idle-default/repetition-1/report.json.gz": {
+      "bytes": 1937,
+      "sha256": "a9319c488eb8079aaed85c302eb042ea3c2b6437bf80321843c188be10f9260c"
+    },
+    "candidate/map-idle-default/repetition-1/run.log": {
+      "bytes": 367,
+      "sha256": "f05e3948ebec049c6ee74f33d5603f434168663f36b929991004c752f2d24c41"
+    },
+    "candidate/map-idle-relief/repetition-1/map-idle-relief-raw.json.gz": {
+      "bytes": 2258,
+      "sha256": "4435363b7de5f95e6c434e8c9123dae0624228da553898e138f01b30fcfff243"
+    },
+    "candidate/map-idle-relief/repetition-1/map-idle-relief-stacks.json.gz": {
+      "bytes": 252,
+      "sha256": "39b8cb599e6c1046d467a0791ee9f50b185bc61b1e6c77758706bc8a6ec221e1"
+    },
+    "candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile.gz": {
+      "bytes": 4471,
+      "sha256": "713e220e5fba1b5047a329358d848ced4a52772d33238125c01263314123077e"
+    },
+    "candidate/map-idle-relief/repetition-1/report.json.gz": {
+      "bytes": 2183,
+      "sha256": "17ed4516b9b94324233c21ee23c2081f2978da5e30399481c658ea65ef132ce0"
+    },
+    "candidate/map-idle-relief/repetition-1/run.log": {
+      "bytes": 740,
+      "sha256": "57a391e15694d1821aab679ffed0e5684465d0fe157729998372ee0a9206de8c"
+    },
+    "candidate/walk-moving-chase/repetition-1/report.json.gz": {
+      "bytes": 4934,
+      "sha256": "afac239f5f5cca18804b7ba0b05bc45c85dfa5c5d53d88b9b1e655904d8196ec"
+    },
+    "candidate/walk-moving-chase/repetition-1/run.log": {
+      "bytes": 2966,
+      "sha256": "8d3481b0cf00604a38ab415c59dbff5e3b9438ea085e635a84d8a4a26721d4d6"
+    },
+    "candidate/walk-moving-chase/repetition-1/walk-moving-chase-raw.json.gz": {
+      "bytes": 35269,
+      "sha256": "ca37d56500e69f10fb3acadb8586e48a129f604feed652d03320891bc3fb61e1"
+    },
+    "candidate/walk-moving-chase/repetition-1/walk-moving-chase-stacks.json.gz": {
+      "bytes": 2055,
+      "sha256": "da685881b0fd8594842270c4c2c59df8a32567a00f334fd7207fd981c09f1f17"
+    },
+    "candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile.gz": {
+      "bytes": 72838,
+      "sha256": "8650689903c09eff23bac2b906e93f2d53f5437cfab94bf5bd0a1d2c2051bbd8"
+    },
+    "candidate/walk-moving-chase/repetition-2/report.json.gz": {
+      "bytes": 2905,
+      "sha256": "55075738d0fc4871f04d807ae25e9cbdba69b0feed93b50707c03f41fe55c15c"
+    },
+    "candidate/walk-moving-chase/repetition-2/run.log": {
+      "bytes": 663,
+      "sha256": "24cb2d7dd3e4974a262176f10194264c22860b3b64ff472698dae5d981fd12eb"
+    },
+    "candidate/walk-moving-chase/repetition-2/walk-moving-chase-raw.json.gz": {
+      "bytes": 35296,
+      "sha256": "8cd442ff9ebf77ce534ae06ce4d6069141df06a1c64069cd281162e7ea4d6902"
+    },
+    "candidate/walk-moving-firstperson/repetition-1/report.json.gz": {
+      "bytes": 4811,
+      "sha256": "9b8f0121addc3879a3a539212c33673709d2ab2b92806ec84c39483a7789e1f4"
+    },
+    "candidate/walk-moving-firstperson/repetition-1/run.log": {
+      "bytes": 3195,
+      "sha256": "58ec864fc3cf3f6d5636aa3b3ce944fbe5b16df21cc4165ddac937519de3b14f"
+    },
+    "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-raw.json.gz": {
+      "bytes": 13603,
+      "sha256": "1f0a8c9dd981f0c9a5ddb2cc0a3d4ba0873308582bb4d0cd95f4f002825668a6"
+    },
+    "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson-stacks.json.gz": {
+      "bytes": 1922,
+      "sha256": "020cc8b2ab2795269c39d5908a2a60629e0cca0d6c49c32f2367e71559dd24c8"
+    },
+    "candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile.gz": {
+      "bytes": 78480,
+      "sha256": "00a72a9c67bee4fd77672d2a6ec335d5161e49b40b652e17a7056e415135e785"
+    },
+    "candidate/walk-moving-firstperson/repetition-2/report.json.gz": {
+      "bytes": 2844,
+      "sha256": "cb87f2af636e89c744791e8b2aac5b9554329d30f8de4014093aadfb7b745554"
+    },
+    "candidate/walk-moving-firstperson/repetition-2/run.log": {
+      "bytes": 667,
+      "sha256": "51714239f25fa6e6e6c4055be894e4a7055068662e3c2c20f1b4ae949c65b9f3"
+    },
+    "candidate/walk-moving-firstperson/repetition-2/walk-moving-firstperson-raw.json.gz": {
+      "bytes": 13680,
+      "sha256": "6bfe4b20ae91be1951caf87c4ffff03007a9d3de89d7441a7159ec274b2e56c1"
+    },
+    "candidate/walk-stationary-firstperson/repetition-1/report.json.gz": {
+      "bytes": 4191,
+      "sha256": "2bef13948b6a9a29af9fbb3bdf7b8dacb714fe24ec55f4e31b70d55eef9a3168"
+    },
+    "candidate/walk-stationary-firstperson/repetition-1/run.log": {
+      "bytes": 2803,
+      "sha256": "1e698d5ff23eaffa3f78623c9ea16381482452ad3fc17c9a80d62f09371ea00e"
+    },
+    "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-raw.json.gz": {
+      "bytes": 2260,
+      "sha256": "1922a7be3a4d7a251688556ec99299b95af3d72b4dd7972a0a674e498df73fb8"
+    },
+    "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson-stacks.json.gz": {
+      "bytes": 2091,
+      "sha256": "2e2e0f6af8ae96d7796c1d24ff565e670de73a6b0cfcae9bdf02c3ad604de0f0"
+    },
+    "candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile.gz": {
+      "bytes": 20130,
+      "sha256": "248750745abcc3a7e4b44b1090953425c4c48fab665968fa51303a87e2c3f500"
+    },
+    "environment.json": {
+      "bytes": 4677,
+      "sha256": "1e1bd1af4fa227d1a2cf228c9eb0e3a00c4aea907309aeef8e5e0106cf411376"
+    },
+    "provenance.json": {
+      "bytes": 46889,
+      "sha256": "51672f8f5b797454c1ac3762a50bfe6b7b6a9bc6308db3820e8a692af93b574c"
+    },
+    "server.log": {
+      "bytes": 585270,
+      "sha256": "4b00889aa2663c490da6b0bd658a5a4618227809b928b40a537e738a4173e625"
+    },
+    "analysis.json": {
+      "bytes": 939423,
+      "sha256": "51f3b2ebefd5dc645ba5bb7ba82a7e9b4b273dea6f986ab285c155d250d81782"
+    },
+    "samples.csv": {
+      "bytes": 87769,
+      "sha256": "d40206056d7ec85f71c9bd1e4a68ae71df04b2c57cbec79165bf80ccd17908f0"
+    },
+    "replay-samples.csv": {
+      "bytes": 40795,
+      "sha256": "a5271178e9260651ea3ad1d9645d612d35746723ab7035a3a1320ecc1aca0f14"
+    },
+    "profiles.csv": {
+      "bytes": 2980,
+      "sha256": "f2c4a20b4d6f60be4c39028e3ad9fb9e73e85e295bbda00866dc6391d5d9be61"
+    },
+    "measurements.md": {
+      "bytes": 5248,
+      "sha256": "ba3247c25cf093ab4075c917b48f69f0885badf62b9c4154bf9a0d6cefc42df1"
+    },
+    "auditor/README.md": {
+      "bytes": 12496,
+      "sha256": "eaa93cf7d8afaef8a73ca7ec93de0308c39450dd83b0b41099aa86f4ee3aec02"
+    },
+    "auditor/analyze.py": {
+      "bytes": 40136,
+      "sha256": "b9726da37c044f6961b09a4deac47a41ec5dd110263efd05b98ad9485b480205"
+    },
+    "auditor/extract-artifact.py": {
+      "bytes": 4716,
+      "sha256": "e59e1f555cdfc955942f590b9d066e7808e5388626c7c69ff4073641ab1d3c7f"
+    },
+    "auditor/frozen-harness/camera-replay-contract.cjs": {
+      "bytes": 7706,
+      "sha256": "69430f8b256d1e088adcb8174c18a2540f7d452eba964c02e49644e7647a3a48"
+    },
+    "auditor/frozen-harness/camera-replay-probe.cjs": {
+      "bytes": 9517,
+      "sha256": "7894b2fd47410abfcd5c83fc7464a45f4a09d8f05bfb368c7037d7cdd268b4bd"
+    },
+    "auditor/frozen-harness/camera-replay.cjs": {
+      "bytes": 11236,
+      "sha256": "9e3d2987136fc38d10680f8b5654050fad23006bc5c453efcd84f44bb8c4e833"
+    },
+    "auditor/frozen-harness/explore.cjs": {
+      "bytes": 61999,
+      "sha256": "7b40495c5abcee619491520fee7637764242ba1c39e1a33b2bdcbff54d0a503b"
+    },
+    "auditor/frozen-harness/performance.cjs": {
+      "bytes": 52215,
+      "sha256": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c"
+    },
+    "auditor/frozen-harness/play-performance.cjs": {
+      "bytes": 12973,
+      "sha256": "fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44"
+    },
+    "auditor/known-baseline-artifact.json": {
+      "bytes": 13636,
+      "sha256": "d49e47ce3292e82a5e3dcc3276c303e693a6a62f4323961f42b9bbd8af15f290"
+    },
+    "auditor/selfcheck.py": {
+      "bytes": 9688,
+      "sha256": "0b4977193cd95b4c703514c67f42f98effceba7929ada590593be832795f97de"
+    },
+    "auditor/source-provenance.json": {
+      "bytes": 1793,
+      "sha256": "9d8eed0f0c0f6c6ffaa711ce495198dbccfc087d9ea5a27cef663e1f72381320"
+    },
+    "auditor/validation/selfcheck.json": {
+      "bytes": 7395,
+      "sha256": "cf9c8741db1d6baf5d6fa13a26b9d50bae0ad764897132928b80f78be9f90de0"
+    },
+    "auditor/verify-raw.cjs": {
+      "bytes": 9933,
+      "sha256": "79f49fc995ae1aa1c944ef54fa7c686772b6e60d16db073371b9f4a56770e048"
+    },
+    "auditor/manifest.json": {
+      "bytes": 2128,
+      "sha256": "d2277d94fee172809e13916c0ce18033d2c48149e2b4a1076b9eaf5e15c2815a"
+    },
+    "play-artifact.json": {
+      "bytes": 736,
+      "sha256": "92b5362543284ff67180a9a5181baf6a01fc46401a5902aa9b40e91cb1737763"
+    },
+    "play-evidence-acquisition.json": {
+      "bytes": 49725,
+      "sha256": "8722d1ecc00169cd034a8bca525ee8fabe788d08868178a0616f611003090d66"
+    },
+    "play-job.log.gz": {
+      "bytes": 77551,
+      "sha256": "03cf8835593cabf0f77f33e5aa650c89e2e06248f806f23e8a46bc3646cf2198"
+    },
+    "play-retention-audit.json": {
+      "bytes": 1537,
+      "sha256": "560df0c57f4e3f8d375c9ea114ee84633500d578390a638b73cb4274a854b802"
+    }
+  }
+}

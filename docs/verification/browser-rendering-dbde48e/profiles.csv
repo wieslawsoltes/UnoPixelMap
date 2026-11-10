@@ -1,0 +1,15 @@
+scenario,variant,repetition,path,sample_count,nodes,duration_ms,recorded_sample_weight_ms,duration_minus_sample_weights_ms,zero_delta_samples,idle_self_ms,program_self_ms,garbage_collector_self_ms,recorded_nonidle_weight_ms,summary_top_node_limit
+map-idle-relief,baseline,1,baseline/map-idle-relief/repetition-1/map-idle-relief.cpuprofile,7521,555,8103.02,8102.461,0.5590000000001965,0,7949.147,104.259,0.0,153.3140000000003,45
+map-idle-relief,candidate,1,candidate/map-idle-relief/repetition-1/map-idle-relief.cpuprofile,7527,3,8101.861,8101.153,0.7079999999996289,0,7999.086,102.067,0.0,102.06700000000001,45
+walk-stationary-firstperson,baseline,1,baseline/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile,7516,1129,8119.146,8111.538,7.608000000000175,0,7793.436,128.23,0.0,318.10199999999986,45
+walk-stationary-firstperson,candidate,1,candidate/walk-stationary-firstperson/repetition-1/walk-stationary-firstperson.cpuprofile,7503,1099,8119.923,8118.866,1.056999999999789,0,7771.114,149.173,2.146,347.7520000000004,45
+walk-moving-firstperson,baseline,1,baseline/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile,6348,4229,8139.822,8138.175,1.6469999999999345,0,5097.66,418.856,0.0,3040.5150000000003,45
+walk-moving-firstperson,candidate,1,candidate/walk-moving-firstperson/repetition-1/walk-moving-firstperson.cpuprofile,6450,4439,8119.851,8119.354,0.4969999999993888,0,5054.82,402.325,2.141,3064.5340000000006,45
+walk-moving-chase,baseline,1,baseline/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile,6027,4778,8174.022,8169.242,4.779999999999745,0,4987.707,627.445,63.072,3181.535,45
+walk-moving-chase,candidate,1,candidate/walk-moving-chase/repetition-1/walk-moving-chase.cpuprofile,6138,4027,8168.279,8167.937,0.342000000000553,0,5240.915,605.164,45.928,2927.022,45
+car-moving-chase,baseline,1,baseline/car-moving-chase/repetition-1/car-moving-chase.cpuprofile,6233,5112,8160.0,8158.818,1.181999999999789,0,5172.131,553.607,39.06,2986.687,45
+car-moving-chase,candidate,1,candidate/car-moving-chase/repetition-1/car-moving-chase.cpuprofile,6154,5052,8173.077,8172.74,0.33700000000044383,0,5219.058,594.447,32.9,2953.682,45
+car-moving-firstperson,baseline,1,baseline/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile,6356,5560,8144.007,8143.404,0.602999999999156,0,3966.159,527.758,40.847,4177.245000000001,45
+car-moving-firstperson,candidate,1,candidate/car-moving-firstperson/repetition-1/car-moving-firstperson.cpuprofile,6327,5376,8121.493,8121.209,0.28400000000056025,0,4481.232,517.091,19.087,3639.977,45
+freeflight-moving,baseline,1,baseline/freeflight-moving/repetition-1/freeflight-moving.cpuprofile,6210,5232,8108.807,8108.02,0.7869999999993524,0,5114.928,511.086,0.0,2993.0920000000006,45
+freeflight-moving,candidate,1,candidate/freeflight-moving/repetition-1/freeflight-moving.cpuprofile,6106,5200,8110.564,8110.302,0.26200000000062573,0,4996.991,540.152,0.0,3113.3109999999997,45

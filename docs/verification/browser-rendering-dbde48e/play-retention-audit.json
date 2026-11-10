@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "all_passed": true,
+  "retained_original_members": 167,
+  "deterministic_gzip_original_members": 121,
+  "omitted_success_screenshots": 84,
+  "complete_decoded_job_log_bytes": 513123,
+  "retained_reanalysis": {
+    "valid": true,
+    "timed_processes": 30,
+    "profiles": 14,
+    "replay_processes": 12,
+    "all_fields_except_storage_inventory_equal": true,
+    "differing_field": "audited_input_files",
+    "reason": "Original ZIP members are now stored as deterministic gzip. Original and stored byte mappings are preserved in play-members.json.",
+    "byte_identical_outputs": [
+      {
+        "file": "samples.csv",
+        "bytes": 87769,
+        "sha256": "d40206056d7ec85f71c9bd1e4a68ae71df04b2c57cbec79165bf80ccd17908f0"
+      },
+      {
+        "file": "replay-samples.csv",
+        "bytes": 40795,
+        "sha256": "a5271178e9260651ea3ad1d9645d612d35746723ab7035a3a1320ecc1aca0f14"
+      },
+      {
+        "file": "profiles.csv",
+        "bytes": 2980,
+        "sha256": "f2c4a20b4d6f60be4c39028e3ad9fb9e73e85e295bbda00866dc6391d5d9be61"
+      },
+      {
+        "file": "measurements.md",
+        "bytes": 5248,
+        "sha256": "ba3247c25cf093ab4075c917b48f69f0885badf62b9c4154bf9a0d6cefc42df1"
+      }
+    ]
+  },
+  "portable_auditor_manifest_verified_files": 14,
+  "scope": "Original member bytes verified after decompression; every quantitative/source/identity analysis field rederives unchanged. Successful before/after screenshots are deliberately omitted, with their original hashes retained."
+}

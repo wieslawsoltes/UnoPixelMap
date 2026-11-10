@@ -1,0 +1,21 @@
+{
+  "url": "https://wieslawsoltes.github.io/UnoPixelMap/",
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "observed_utc": "2026-11-10T22:20:01.837650+00:00",
+  "observed_bootstrap_src": "./package_801cbc2830341569438a9ce8c44febc16626f1501278ed456482a888efe98347/uno-bootstrap.js",
+  "observations": [
+    "The live document references the exact checked package bootstrap and matching versioned input/audio adapters.",
+    "The dense Manhattan map renders with GPU rendering and Pixel art rendering selected.",
+    "Terrain relief was enabled and reached Terrain ready.",
+    "Start walking here entered first-person free roam with physical telemetry.",
+    "Closing free roam restored the overview map; the final frame shows Map ready, Terrain ready, GPU active and Pixel rendering."
+  ],
+  "screenshot": "live-map.png",
+  "screenshot_sha256": "9a96c5243cb041061f87e82d4cd5f61ab34df76f50cd2661c7aca674ee6ea879",
+  "screenshot_bytes": 347215,
+  "screenshot_pixels": [
+    1800,
+    925
+  ],
+  "scope": "Manual visual live-site smoke check using public live providers; not a performance measurement or deterministic cross-release image oracle."
+}

@@ -1,0 +1,11 @@
+{
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "files": {
+    "tests/browser/input-adapter-browser.cjs": "d2baef73b1d9a3851eab53e9fd6c58bf3074c602c7318b40605c93284aae55ed",
+    "tests/browser/smoke.cjs": "943053ab52148ab1d0f9e18017d53cb9a1dc3748105747a31f02e82757d8b4e4",
+    "tests/browser/journeys.cjs": "a3e36b7daa7a40cf66f5824073a524c6cf8496b949ad57c56b15b90c2c7d9d1e",
+    "tests/browser/performance.cjs": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c",
+    "tests/browser/terrain.cjs": "4bf220f6dae23e63cbedd07abb931a24ac44e25264e94d40e7fb882709da4d66",
+    "tests/browser/explore.cjs": "7b40495c5abcee619491520fee7637764242ba1c39e1a33b2bdcbff54d0a503b"
+  }
+}

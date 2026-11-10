@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "workflow_run_id": 42907891884,
+  "verify_job_id": 130158519794,
+  "full_download_artifact_file_count": 154,
+  "retained_artifact_image_members": 24,
+  "retained_artifact_report_members": 4,
+  "omitted_artifact_members": 126,
+  "original_audit_scope": "audit.json records the completed audit of the entire digest-verified 154-file browser artifact. That artifact ZIP is not committed.",
+  "retained_audit_scope": "The portable auditor checks these selected original reports, the 24 explicitly mapped PNG members, full job logs, DPR2 checkpoints and recorded metadata. It cannot inspect omitted UI captures without the original artifact ZIP.",
+  "images": {
+    "mapping_file": "oracle-images.json",
+    "archive": "presentation-oracles.zip",
+    "stored_bytes": 3850160,
+    "stored_sha256": "d666e70fda0a243c03f90a8ac71fb0f74c0d742903fa8de1dd30e2e63b68823d",
+    "original_image_member_bytes": 7936746,
+    "unique_original_png_bytes": 3968373
+  },
+  "files": {
+    "comparison.json": {
+      "origin": "atlas-browser-screens.zip!gpu-direct/comparison.json",
+      "encoding": "original bytes",
+      "original_bytes": 934,
+      "original_sha256": "9e12867d8aee13f1c0fc49c1a576d03dc1bef25498812c09eb00ae22904c2ef0",
+      "stored_bytes": 934,
+      "stored_sha256": "9e12867d8aee13f1c0fc49c1a576d03dc1bef25498812c09eb00ae22904c2ef0",
+      "original_member": "gpu-direct/comparison.json"
+    },
+    "gpu-direct-visual.json.gz": {
+      "origin": "atlas-browser-screens.zip!gpu-direct/visual.json",
+      "encoding": "gzip",
+      "original_bytes": 17332,
+      "original_sha256": "03142125cec693d18d458e6b9b6fb674eb4806c78e69f37c241eec00ac37bd9b",
+      "stored_bytes": 4050,
+      "stored_sha256": "bf7180f32a9fb6976dc59b91fd353128fefdcda1691f982d68807324406e3b0c",
+      "original_member": "gpu-direct/visual.json"
+    },
+    "gpu-transfer-visual.json.gz": {
+      "origin": "atlas-browser-screens.zip!gpu-transfer/visual.json",
+      "encoding": "gzip",
+      "original_bytes": 18029,
+      "original_sha256": "188a7e9dde9663326c83b572585e90d4e642af396fed0d1f545b91d327b1de4c",
+      "stored_bytes": 4061,
+      "stored_sha256": "7eed359f0c9d9e63dceb2d431d15b6bce65d6097a48f8087015745515a1d42a3",
+      "original_member": "gpu-transfer/visual.json"
+    },
+    "high-dpi-close-camera.json.gz": {
+      "origin": "atlas-browser-screens.zip!explore/high-dpi-close-camera.json",
+      "encoding": "gzip",
+      "original_bytes": 6316,
+      "original_sha256": "f9d5a2f955a4a9c2c3d4bca00676d01029e35c022e7730b5f01832fccc6651b3",
+      "stored_bytes": 959,
+      "stored_sha256": "6d4b4661dc492279f3ed2290ead627ba88749b89f3ddfcdebe8b6326bd95ad62",
+      "original_member": "explore/high-dpi-close-camera.json"
+    },
+    "verify-job.log.gz": {
+      "origin": "download/capture/verify-job.log",
+      "encoding": "gzip",
+      "original_bytes": 75456,
+      "original_sha256": "f5ab0ed9896e4b35047e96854b342bbacafddf503a183d006f2d891c3237ad51",
+      "stored_bytes": 15080,
+      "stored_sha256": "5919147b878a362a18e72f10155f05637941ab7143741ca16e3b237b4063352a"
+    },
+    "browser-build.log.gz": {
+      "origin": "download/capture/browser-build.log",
+      "encoding": "gzip",
+      "original_bytes": 227606,
+      "original_sha256": "df85feedb1365954ea078c1fe9d78fe1a1dad9f5630ece68284ffdc3cc1190c4",
+      "stored_bytes": 30507,
+      "stored_sha256": "2d3931358514f05001d0ba53302dcb4b59651e50caa4fa13b796df3e97a40d41"
+    },
+    "capture-auditors/audit-run.log.gz": {
+      "origin": "download/capture/audit-run.log",
+      "encoding": "gzip",
+      "original_bytes": 2231,
+      "original_sha256": "982c167d8aac295b135cf6a466b4b264239497b4f89de3a4a62e245b61a4abc0",
+      "stored_bytes": 699,
+      "stored_sha256": "e0af3d87c1b2d4876b0cd27d336b84ea53b1b2357f5d52800582d74f65f98ec9"
+    },
+    "capture-auditors/full-download-audit.py.gz": {
+      "origin": "download/capture/audit.py",
+      "encoding": "gzip",
+      "original_bytes": 8845,
+      "original_sha256": "af9018f8d09ea2fac3b4f902905feda93a2d022e56f08b6397aee57e903af7ce",
+      "stored_bytes": 3238,
+      "stored_sha256": "c8fabfd1bcb936d5abee71628b1493ca3b8df10a927ab75123775279c2ad1135"
+    },
+    "capture-auditors/package-linkage-audit.py.gz": {
+      "origin": "download/capture/verify_package_linkage.py",
+      "encoding": "gzip",
+      "original_bytes": 2232,
+      "original_sha256": "288f47769873a6c97370fbebac1a2a134366a57d81c79b067e9690095458ce33",
+      "stored_bytes": 1033,
+      "stored_sha256": "53b68b6cb8019bdb3119cc32bfb8c5546685bfa07faddccd948aa7bd6197fa62"
+    },
+    "source-run.initial.json.gz": {
+      "origin": "download/capture/source-run.initial.json",
+      "encoding": "gzip",
+      "original_bytes": 14228,
+      "original_sha256": "5d66748b3ea5c097ae1e06fbe428c696df79f3373ae4393af2aceb99082bf353",
+      "stored_bytes": 1688,
+      "stored_sha256": "7a617553e06a4f55fa14933f13029ba58777020fdbe5439134666da18fb92abd"
+    },
+    "screens-artifact.json": {
+      "origin": "download/capture/screens-artifact.json",
+      "encoding": "original bytes",
+      "original_bytes": 735,
+      "original_sha256": "21eabd4ea5167f74d7e5d2bc72139e1d7b259db464884c3a39f5bbb088e039ad",
+      "stored_bytes": 735,
+      "stored_sha256": "21eabd4ea5167f74d7e5d2bc72139e1d7b259db464884c3a39f5bbb088e039ad"
+    },
+    "pages-artifact.json": {
+      "origin": "download/capture/pages-artifact.json",
+      "encoding": "original bytes",
+      "original_bytes": 775,
+      "original_sha256": "e605996d28c961a92957133b8dadf956433eade015fd956661d8bcd365c61505",
+      "stored_bytes": 775,
+      "stored_sha256": "e605996d28c961a92957133b8dadf956433eade015fd956661d8bcd365c61505"
+    },
+    "verify-job.json": {
+      "origin": "download/capture/verify-job.json",
+      "encoding": "original bytes",
+      "original_bytes": 1239,
+      "original_sha256": "3eaabd047119da33534e9c010bb71e2d1870a19126325ad76b4061e9e7c2b2e5",
+      "stored_bytes": 1239,
+      "stored_sha256": "3eaabd047119da33534e9c010bb71e2d1870a19126325ad76b4061e9e7c2b2e5"
+    },
+    "source-tests.json": {
+      "origin": "download/capture/source-tests.json",
+      "encoding": "original bytes",
+      "original_bytes": 703,
+      "original_sha256": "ccdbaa4e044ebc3ba585f23f5a7dcbb62ec9e25ee3599536d64b56bf47f3864e",
+      "stored_bytes": 703,
+      "stored_sha256": "ccdbaa4e044ebc3ba585f23f5a7dcbb62ec9e25ee3599536d64b56bf47f3864e"
+    },
+    "audit.json": {
+      "origin": "download/capture/audit.json",
+      "encoding": "original bytes",
+      "original_bytes": 35265,
+      "original_sha256": "014d5a38285a31e2a7d2c608fb736e160d83e783668bf830a483093eefa2f18c",
+      "stored_bytes": 35265,
+      "stored_sha256": "014d5a38285a31e2a7d2c608fb736e160d83e783668bf830a483093eefa2f18c"
+    },
+    "package-linkage.json": {
+      "origin": "download/capture/package-linkage.json",
+      "encoding": "original bytes",
+      "original_bytes": 3482,
+      "original_sha256": "2da5583cda8acb6f8b92922aa76137a46c6873a3b899a7610c044d1194bcdf0f",
+      "stored_bytes": 3482,
+      "stored_sha256": "2da5583cda8acb6f8b92922aa76137a46c6873a3b899a7610c044d1194bcdf0f"
+    }
+  }
+}

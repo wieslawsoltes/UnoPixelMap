@@ -1,0 +1,4815 @@
+{
+  "schema": 1,
+  "run_id": 42907891884,
+  "source_provenance_sha256": "51672f8f5b797454c1ac3762a50bfe6b7b6a9bc6308db3820e8a692af93b574c",
+  "symbolicator_sha256": "6d0484c69760af3ee80cfb1c650b5bfbde5b8184ec7371f3fe3589f2fd3506d5",
+  "category_patterns": {
+    "depth_visibility": [
+      "PixelMap.Rendering.GpuSceneDepth."
+    ],
+    "label_drawing": [
+      "PixelMap.Rendering.PixelMapRenderer.DrawLabels",
+      "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>"
+    ],
+    "terrain_texture_baking": [
+      "PixelMap.Rendering.PixelMapRenderer.BakeTerrainTexture"
+    ],
+    "terrain_integer_copy": [
+      "PixelMap.Rendering.TerrainCache.TryCopyTexture"
+    ],
+    "gl_state_capture": [
+      "PixelMap.Rendering.GlMapRenderer+GlState..ctor"
+    ]
+  },
+  "limits": [
+    "Every profile is a separately captured first-repetition post-timing window.",
+    "Sample weights are not invocation counts, GPU times, or the timed-window CPU metric.",
+    "Moving simulation trajectories can differ between variants; these profiles do not isolate a patch.",
+    "Only ordinary MethodDef AOT slots are named; runtime/native/generic extras remain anonymous.",
+    "Folded aliases are retained. A category matches if any preserved alias matches its pattern.",
+    "Each category counts each sampled stack once; categories overlap and must not be added."
+  ],
+  "variants": {
+    "baseline": {
+      "source_sha": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+      "run_id": 42696985047,
+      "artifact_id": 13710017486,
+      "artifact_digest": "sha256:04abb6b24c35df6d6e5f6b3bbb80e211f1fe48c2d6edc948ada4138ac3163b8e",
+      "native": {
+        "group": "wasmNative",
+        "name": "dotnet.native.xb3rs50ucp.wasm",
+        "sha256": "9d99319804c946006f4efe983f00830d430bd841a2170a3a09d09dfb2d9c295f"
+      },
+      "verified_boot_resources": 72,
+      "symbolicated_profiles": 7,
+      "unchanged_profiles": 0,
+      "profiles": [
+        {
+          "scenario": "car-moving-chase",
+          "input_sha256": "d619a0623477dc1e4af6a9394743e8855c26497d185a9371fc9738583e0134c3",
+          "output_sha256": "c3cedc8a90c496312465ff01792dd3001991b1151a64eb6c6e35417544e8ccae",
+          "renamed_nodes": 1948,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6233,
+          "sample_weight_ms": 8158.818,
+          "profile_duration_ms": 8160.0,
+          "median_sample_delta_ms": 1.066,
+          "max_sample_delta_ms": 155.328,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 199.447,
+              "inclusive_sample_count": 134,
+              "share_of_complete_profile_percent": 2.444557532721039
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 282.472,
+              "inclusive_sample_count": 188,
+              "share_of_complete_profile_percent": 3.4621681719092154
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 75.806,
+              "inclusive_sample_count": 62,
+              "share_of_complete_profile_percent": 0.9291296852068522
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 189.174,
+              "inclusive_sample_count": 120,
+              "share_of_complete_profile_percent": 2.318644686031727
+            }
+          },
+          "referenced_wasm_functions": 1866,
+          "mapped_wasm_functions": 750,
+          "mapped_wasm_self_ms": 812.314,
+          "unmapped_wasm_self_ms": 850.144,
+          "foreign_wasm_self_ms": 5.71,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 38.191,
+              "inclusive_ms": 90.712,
+              "self_samples": 24,
+              "inclusive_samples": 61
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 28.802,
+              "inclusive_ms": 73.257,
+              "self_samples": 21,
+              "inclusive_samples": 47
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91614]]",
+              "self_ms": 27.978,
+              "inclusive_ms": 58.743,
+              "self_samples": 16,
+              "inclusive_samples": 41
+            },
+            {
+              "key": "wasm:90591",
+              "name": "PixelMap.Data.ElevationSurfaceIndex+EdgeNode.Crossings [wasm-function[90591]]",
+              "self_ms": 24.685,
+              "inclusive_ms": 24.685,
+              "self_samples": 11,
+              "inclusive_samples": 11
+            },
+            {
+              "key": "wasm:91539",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91539]]",
+              "self_ms": 23.145,
+              "inclusive_ms": 47.417,
+              "self_samples": 15,
+              "inclusive_samples": 36
+            },
+            {
+              "key": "wasm:94001",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Obstructs [wasm-function[94001]]",
+              "self_ms": 20.883,
+              "inclusive_ms": 38.907,
+              "self_samples": 17,
+              "inclusive_samples": 33
+            },
+            {
+              "key": "wasm:91618",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91618]]",
+              "self_ms": 18.175,
+              "inclusive_ms": 18.175,
+              "self_samples": 12,
+              "inclusive_samples": 12
+            },
+            {
+              "key": "wasm:94066",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Contains [wasm-function[94066]]",
+              "self_ms": 16.362,
+              "inclusive_ms": 16.362,
+              "self_samples": 14,
+              "inclusive_samples": 14
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 15.123,
+              "inclusive_ms": 282.472,
+              "self_samples": 9,
+              "inclusive_samples": 188
+            },
+            {
+              "key": "wasm:91591",
+              "name": "PixelMap.Rendering.GpuSceneDepth.IndexBuildings [wasm-function[91591]]",
+              "self_ms": 15.055,
+              "inclusive_ms": 16.492,
+              "self_samples": 8,
+              "inclusive_samples": 9
+            },
+            {
+              "key": "wasm:91132",
+              "name": "PixelMap.Rendering.TileTransform.Vertex [wasm-function[91132]]",
+              "self_ms": 14.58,
+              "inclusive_ms": 14.58,
+              "self_samples": 10,
+              "inclusive_samples": 10
+            },
+            {
+              "key": "wasm:92358",
+              "name": "PixelMap.Rendering.TerrainSurface.AddPatch [wasm-function[92358]]",
+              "self_ms": 14.182,
+              "inclusive_ms": 21.043,
+              "self_samples": 4,
+              "inclusive_samples": 9
+            },
+            {
+              "key": "wasm:91814",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91814]]",
+              "self_ms": 13.755,
+              "inclusive_ms": 64.07,
+              "self_samples": 11,
+              "inclusive_samples": 51
+            },
+            {
+              "key": "wasm:23126",
+              "name": "Microsoft.UI.Xaml.Documents.UnicodeText..ctor [wasm-function[23126]]",
+              "self_ms": 13.21,
+              "inclusive_ms": 117.704,
+              "self_samples": 12,
+              "inclusive_samples": 82
+            },
+            {
+              "key": "wasm:91467",
+              "name": "PixelMap.Rendering.GpuBuildingSelection.Prepare [wasm-function[91467]]",
+              "self_ms": 12.944,
+              "inclusive_ms": 26.754,
+              "self_samples": 9,
+              "inclusive_samples": 16
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90157",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90157]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 990.145,
+              "self_samples": 0,
+              "inclusive_samples": 693
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 990.145,
+              "self_samples": 0,
+              "inclusive_samples": 693
+            },
+            {
+              "key": "wasm:90146",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90146]]",
+              "self_ms": 1.141,
+              "inclusive_ms": 951.451,
+              "self_samples": 1,
+              "inclusive_samples": 657
+            },
+            {
+              "key": "wasm:91797",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91797]]",
+              "self_ms": 1.906,
+              "inclusive_ms": 533.462,
+              "self_samples": 1,
+              "inclusive_samples": 357
+            },
+            {
+              "key": "wasm:89914",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89914]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 407.926,
+              "self_samples": 0,
+              "inclusive_samples": 293
+            },
+            {
+              "key": "wasm:91283",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91283]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 397.854,
+              "self_samples": 0,
+              "inclusive_samples": 286
+            },
+            {
+              "key": "wasm:91282",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91282]]",
+              "self_ms": 5.259,
+              "inclusive_ms": 396.783,
+              "self_samples": 5,
+              "inclusive_samples": 285
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 15.123,
+              "inclusive_ms": 282.472,
+              "self_samples": 9,
+              "inclusive_samples": 188
+            },
+            {
+              "key": "wasm:91272",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91272]]",
+              "self_ms": 2.112,
+              "inclusive_ms": 189.174,
+              "self_samples": 2,
+              "inclusive_samples": 120
+            },
+            {
+              "key": "wasm:91093",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91093]]",
+              "self_ms": 1.067,
+              "inclusive_ms": 178.088,
+              "self_samples": 1,
+              "inclusive_samples": 123
+            },
+            {
+              "key": "wasm:91594",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91594]]",
+              "self_ms": 1.721,
+              "inclusive_ms": 177.021,
+              "self_samples": 2,
+              "inclusive_samples": 122
+            },
+            {
+              "key": "wasm:91595",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Sample [wasm-function[91595]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 175.3,
+              "self_samples": 0,
+              "inclusive_samples": 120
+            },
+            {
+              "key": "wasm:91599",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91599]]",
+              "self_ms": 5.584,
+              "inclusive_ms": 173.026,
+              "self_samples": 6,
+              "inclusive_samples": 118
+            },
+            {
+              "key": "wasm:91789",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91789]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 169.782,
+              "self_samples": 0,
+              "inclusive_samples": 114
+            },
+            {
+              "key": "wasm:90121",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90121]]",
+              "self_ms": 1.358,
+              "inclusive_ms": 168.327,
+              "self_samples": 1,
+              "inclusive_samples": 136
+            },
+            {
+              "key": "wasm:91609",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAt [wasm-function[91609]]",
+              "self_ms": 1.055,
+              "inclusive_ms": 167.442,
+              "self_samples": 1,
+              "inclusive_samples": 112
+            },
+            {
+              "key": "wasm:93937",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93937]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 166.969,
+              "self_samples": 0,
+              "inclusive_samples": 135
+            },
+            {
+              "key": "wasm:91610",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91610]]",
+              "self_ms": 1.114,
+              "inclusive_ms": 166.387,
+              "self_samples": 1,
+              "inclusive_samples": 111
+            },
+            {
+              "key": "wasm:91805",
+              "name": "PixelMap.Rendering.TerrainSurface.PrepareGpu [wasm-function[91805]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 134.512,
+              "self_samples": 0,
+              "inclusive_samples": 96
+            },
+            {
+              "key": "wasm:91782",
+              "name": "PixelMap.Rendering.PixelMapRenderer.GroundAltitude [wasm-function[91782]]",
+              "self_ms": 8.363,
+              "inclusive_ms": 96.462,
+              "self_samples": 4,
+              "inclusive_samples": 64
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 38.191,
+              "inclusive_ms": 90.712,
+              "self_samples": 24,
+              "inclusive_samples": 61
+            },
+            {
+              "key": "wasm:92344",
+              "name": "PixelMap.Rendering.TerrainSurface.GetTexture [wasm-function[92344]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 77.96,
+              "self_samples": 0,
+              "inclusive_samples": 64
+            },
+            {
+              "key": "wasm:91842",
+              "name": "PixelMap.Rendering.PixelMapRenderer.BakeTerrainTexture [wasm-function[91842]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 75.806,
+              "self_samples": 0,
+              "inclusive_samples": 62
+            },
+            {
+              "key": "wasm:91898",
+              "name": "PixelMap.Rendering.PixelMapRenderer+<>c__DisplayClass72_0.<PrepareGpuFrame>b__4 [wasm-function[91898]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 75.806,
+              "self_samples": 0,
+              "inclusive_samples": 62
+            },
+            {
+              "key": "wasm:91761",
+              "name": "PixelMap.Rendering.TerrainCache.Draw [wasm-function[91761]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 75.328,
+              "self_samples": 0,
+              "inclusive_samples": 61
+            }
+          ]
+        },
+        {
+          "scenario": "car-moving-firstperson",
+          "input_sha256": "63d3bbc47216088db0a1a3a2dd32a8f3bff356dc3b899ebcfa04ef79d4cfd401",
+          "output_sha256": "bd5f4bd853ddace81447f460c1d7fadbe36b389287021b44f4871e1fc93e99f6",
+          "renamed_nodes": 2146,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6356,
+          "sample_weight_ms": 8143.404,
+          "profile_duration_ms": 8144.007,
+          "median_sample_delta_ms": 1.066,
+          "max_sample_delta_ms": 132.347,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 716.63,
+              "inclusive_sample_count": 559,
+              "share_of_complete_profile_percent": 8.800128300155562
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 814.408,
+              "inclusive_sample_count": 624,
+              "share_of_complete_profile_percent": 10.000830119689507
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 831.1,
+              "inclusive_sample_count": 631,
+              "share_of_complete_profile_percent": 10.205805827636699
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 149.922,
+              "inclusive_sample_count": 107,
+              "share_of_complete_profile_percent": 1.841023729143243
+            }
+          },
+          "referenced_wasm_functions": 1876,
+          "mapped_wasm_functions": 750,
+          "mapped_wasm_self_ms": 1285.275,
+          "unmapped_wasm_self_ms": 1697.577,
+          "foreign_wasm_self_ms": 17.052,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 155.313,
+              "inclusive_ms": 371.322,
+              "self_samples": 123,
+              "inclusive_samples": 288
+            },
+            {
+              "key": "wasm:91621",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91621]]",
+              "self_ms": 84.421,
+              "inclusive_ms": 84.421,
+              "self_samples": 62,
+              "inclusive_samples": 62
+            },
+            {
+              "key": "wasm:91602",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle.Contains [wasm-function[91602]]",
+              "self_ms": 51.625,
+              "inclusive_ms": 51.625,
+              "self_samples": 43,
+              "inclusive_samples": 43
+            },
+            {
+              "key": "wasm:91618",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91618]]",
+              "self_ms": 48.876,
+              "inclusive_ms": 48.876,
+              "self_samples": 36,
+              "inclusive_samples": 36
+            },
+            {
+              "key": "wasm:91619",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91619]]",
+              "self_ms": 48.148,
+              "inclusive_ms": 185.586,
+              "self_samples": 39,
+              "inclusive_samples": 143
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 44.961,
+              "inclusive_ms": 188.799,
+              "self_samples": 34,
+              "inclusive_samples": 140
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91614]]",
+              "self_ms": 44.04,
+              "inclusive_ms": 277.459,
+              "self_samples": 32,
+              "inclusive_samples": 210
+            },
+            {
+              "key": "wasm:91615",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Orientation [wasm-function[91615]]",
+              "self_ms": 41.422,
+              "inclusive_ms": 41.422,
+              "self_samples": 27,
+              "inclusive_samples": 27
+            },
+            {
+              "key": "wasm:91814",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91814]]",
+              "self_ms": 37.689,
+              "inclusive_ms": 135.389,
+              "self_samples": 26,
+              "inclusive_samples": 98
+            },
+            {
+              "key": "wasm:91622",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddSubpixelTriangle [wasm-function[91622]]",
+              "self_ms": 34.232,
+              "inclusive_ms": 38.156,
+              "self_samples": 26,
+              "inclusive_samples": 30
+            },
+            {
+              "key": "wasm:91539",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91539]]",
+              "self_ms": 31.967,
+              "inclusive_ms": 55.415,
+              "self_samples": 20,
+              "inclusive_samples": 40
+            },
+            {
+              "key": "wasm:92357",
+              "name": "PixelMap.Rendering.TerrainSurface.PrepareGpuTexture [wasm-function[92357]]",
+              "self_ms": 29.173,
+              "inclusive_ms": 93.831,
+              "self_samples": 22,
+              "inclusive_samples": 72
+            },
+            {
+              "key": "wasm:90492",
+              "name": "PixelMap.Data.TileId.GetHashCode [wasm-function[90492]]",
+              "self_ms": 24.827,
+              "inclusive_ms": 24.827,
+              "self_samples": 18,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 21.722,
+              "inclusive_ms": 814.408,
+              "self_samples": 11,
+              "inclusive_samples": 624
+            },
+            {
+              "key": "wasm:91595",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Sample [wasm-function[91595]]",
+              "self_ms": 19.117,
+              "inclusive_ms": 694.062,
+              "self_samples": 18,
+              "inclusive_samples": 539
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90157",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90157]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 2437.698,
+              "self_samples": 0,
+              "inclusive_samples": 1841
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 2437.698,
+              "self_samples": 0,
+              "inclusive_samples": 1841
+            },
+            {
+              "key": "wasm:90146",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90146]]",
+              "self_ms": 1.073,
+              "inclusive_ms": 2429.436,
+              "self_samples": 1,
+              "inclusive_samples": 1833
+            },
+            {
+              "key": "wasm:91797",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91797]]",
+              "self_ms": 0.184,
+              "inclusive_ms": 2062.395,
+              "self_samples": 1,
+              "inclusive_samples": 1558
+            },
+            {
+              "key": "wasm:91805",
+              "name": "PixelMap.Rendering.TerrainSurface.PrepareGpu [wasm-function[91805]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1079.216,
+              "self_samples": 0,
+              "inclusive_samples": 809
+            },
+            {
+              "key": "wasm:92344",
+              "name": "PixelMap.Rendering.TerrainSurface.GetTexture [wasm-function[92344]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 836.453,
+              "self_samples": 0,
+              "inclusive_samples": 636
+            },
+            {
+              "key": "wasm:91842",
+              "name": "PixelMap.Rendering.PixelMapRenderer.BakeTerrainTexture [wasm-function[91842]]",
+              "self_ms": 4.756,
+              "inclusive_ms": 831.1,
+              "self_samples": 1,
+              "inclusive_samples": 631
+            },
+            {
+              "key": "wasm:91898",
+              "name": "PixelMap.Rendering.PixelMapRenderer+<>c__DisplayClass72_0.<PrepareGpuFrame>b__4 [wasm-function[91898]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 831.1,
+              "self_samples": 0,
+              "inclusive_samples": 631
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 21.722,
+              "inclusive_ms": 814.408,
+              "self_samples": 11,
+              "inclusive_samples": 624
+            },
+            {
+              "key": "wasm:91844",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<BakeTerrainTexture>g__DrawVectorArtwork|107_0 [wasm-function[91844]]",
+              "self_ms": 2.709,
+              "inclusive_ms": 799.692,
+              "self_samples": 3,
+              "inclusive_samples": 616
+            },
+            {
+              "key": "wasm:91761",
+              "name": "PixelMap.Rendering.TerrainCache.Draw [wasm-function[91761]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 793.463,
+              "self_samples": 0,
+              "inclusive_samples": 610
+            },
+            {
+              "key": "wasm:92258",
+              "name": "PixelMap.Rendering.TerrainCache.DrawBlock [wasm-function[92258]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 792.382,
+              "self_samples": 0,
+              "inclusive_samples": 609
+            },
+            {
+              "key": "wasm:91595",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Sample [wasm-function[91595]]",
+              "self_ms": 19.117,
+              "inclusive_ms": 694.062,
+              "self_samples": 18,
+              "inclusive_samples": 539
+            },
+            {
+              "key": "wasm:91093",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91093]]",
+              "self_ms": 1.066,
+              "inclusive_ms": 688.9,
+              "self_samples": 1,
+              "inclusive_samples": 537
+            },
+            {
+              "key": "wasm:91789",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91789]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 688.9,
+              "self_samples": 0,
+              "inclusive_samples": 537
+            },
+            {
+              "key": "wasm:91594",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91594]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 687.834,
+              "self_samples": 0,
+              "inclusive_samples": 536
+            },
+            {
+              "key": "wasm:91599",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91599]]",
+              "self_ms": 5.395,
+              "inclusive_ms": 610.867,
+              "self_samples": 5,
+              "inclusive_samples": 467
+            },
+            {
+              "key": "wasm:91609",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAt [wasm-function[91609]]",
+              "self_ms": 17.757,
+              "inclusive_ms": 588.691,
+              "self_samples": 16,
+              "inclusive_samples": 451
+            },
+            {
+              "key": "wasm:91610",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91610]]",
+              "self_ms": 8.68,
+              "inclusive_ms": 570.932,
+              "self_samples": 6,
+              "inclusive_samples": 435
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 155.313,
+              "inclusive_ms": 371.322,
+              "self_samples": 123,
+              "inclusive_samples": 288
+            },
+            {
+              "key": "wasm:89914",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89914]]",
+              "self_ms": 0.976,
+              "inclusive_ms": 359.693,
+              "self_samples": 1,
+              "inclusive_samples": 268
+            },
+            {
+              "key": "wasm:91283",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91283]]",
+              "self_ms": 1.069,
+              "inclusive_ms": 353.082,
+              "self_samples": 1,
+              "inclusive_samples": 260
+            },
+            {
+              "key": "wasm:91282",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91282]]",
+              "self_ms": 2.422,
+              "inclusive_ms": 349.505,
+              "self_samples": 2,
+              "inclusive_samples": 257
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91614]]",
+              "self_ms": 44.04,
+              "inclusive_ms": 277.459,
+              "self_samples": 32,
+              "inclusive_samples": 210
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 44.961,
+              "inclusive_ms": 188.799,
+              "self_samples": 34,
+              "inclusive_samples": 140
+            }
+          ]
+        },
+        {
+          "scenario": "freeflight-moving",
+          "input_sha256": "a25bdc609884c21fd2de58864c8436901880819bda1154f4d448d6e0fdd6e506",
+          "output_sha256": "b47656bc77b4ff423f32e9dc46d5b802fb217c08e8b1f1946c567116bd8401f4",
+          "renamed_nodes": 2064,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6210,
+          "sample_weight_ms": 8108.02,
+          "profile_duration_ms": 8108.807,
+          "median_sample_delta_ms": 1.066,
+          "max_sample_delta_ms": 104.589,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 514.608,
+              "inclusive_sample_count": 348,
+              "share_of_complete_profile_percent": 6.346900969657204
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 574.746,
+              "inclusive_sample_count": 382,
+              "share_of_complete_profile_percent": 7.088611029573189
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 201.297,
+              "inclusive_sample_count": 138,
+              "share_of_complete_profile_percent": 2.4826899785644336
+            }
+          },
+          "referenced_wasm_functions": 1814,
+          "mapped_wasm_functions": 746,
+          "mapped_wasm_self_ms": 957.331,
+          "unmapped_wasm_self_ms": 801.359,
+          "foreign_wasm_self_ms": 3.854,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 123.019,
+              "inclusive_ms": 311.123,
+              "self_samples": 85,
+              "inclusive_samples": 210
+            },
+            {
+              "key": "wasm:91621",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91621]]",
+              "self_ms": 66.0,
+              "inclusive_ms": 66.0,
+              "self_samples": 41,
+              "inclusive_samples": 41
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 65.324,
+              "inclusive_ms": 149.994,
+              "self_samples": 44,
+              "inclusive_samples": 96
+            },
+            {
+              "key": "wasm:91618",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91618]]",
+              "self_ms": 42.474,
+              "inclusive_ms": 42.474,
+              "self_samples": 26,
+              "inclusive_samples": 26
+            },
+            {
+              "key": "wasm:91619",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91619]]",
+              "self_ms": 41.928,
+              "inclusive_ms": 162.881,
+              "self_samples": 32,
+              "inclusive_samples": 109
+            },
+            {
+              "key": "wasm:23126",
+              "name": "Microsoft.UI.Xaml.Documents.UnicodeText..ctor [wasm-function[23126]]",
+              "self_ms": 30.026,
+              "inclusive_ms": 142.527,
+              "self_samples": 23,
+              "inclusive_samples": 100
+            },
+            {
+              "key": "wasm:91622",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddSubpixelTriangle [wasm-function[91622]]",
+              "self_ms": 26.588,
+              "inclusive_ms": 44.169,
+              "self_samples": 23,
+              "inclusive_samples": 33
+            },
+            {
+              "key": "wasm:91602",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle.Contains [wasm-function[91602]]",
+              "self_ms": 25.71,
+              "inclusive_ms": 25.71,
+              "self_samples": 18,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91614]]",
+              "self_ms": 20.929,
+              "inclusive_ms": 224.129,
+              "self_samples": 13,
+              "inclusive_samples": 146
+            },
+            {
+              "key": "wasm:91615",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Orientation [wasm-function[91615]]",
+              "self_ms": 19.387,
+              "inclusive_ms": 19.387,
+              "self_samples": 13,
+              "inclusive_samples": 13
+            },
+            {
+              "key": "wasm:91624",
+              "name": "PixelMap.Rendering.GpuSceneDepth.BinCells [wasm-function[91624]]",
+              "self_ms": 19.272,
+              "inclusive_ms": 19.272,
+              "self_samples": 6,
+              "inclusive_samples": 6
+            },
+            {
+              "key": "wasm:15201",
+              "name": "Microsoft.UI.Composition.Visual.Render [wasm-function[15201]]",
+              "self_ms": 13.534,
+              "inclusive_ms": 1376.823,
+              "self_samples": 12,
+              "inclusive_samples": 963
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 13.464,
+              "inclusive_ms": 574.746,
+              "self_samples": 8,
+              "inclusive_samples": 382
+            },
+            {
+              "key": "wasm:90591",
+              "name": "PixelMap.Data.ElevationSurfaceIndex+EdgeNode.Crossings [wasm-function[90591]]",
+              "self_ms": 11.153,
+              "inclusive_ms": 11.153,
+              "self_samples": 8,
+              "inclusive_samples": 8
+            },
+            {
+              "key": "wasm:91814",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91814]]",
+              "self_ms": 9.932,
+              "inclusive_ms": 37.057,
+              "self_samples": 4,
+              "inclusive_samples": 21
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90157",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90157]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1119.034,
+              "self_samples": 0,
+              "inclusive_samples": 767
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1119.034,
+              "self_samples": 0,
+              "inclusive_samples": 767
+            },
+            {
+              "key": "wasm:90146",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90146]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1113.722,
+              "self_samples": 0,
+              "inclusive_samples": 761
+            },
+            {
+              "key": "wasm:91797",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91797]]",
+              "self_ms": 5.802,
+              "inclusive_ms": 700.357,
+              "self_samples": 6,
+              "inclusive_samples": 458
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 13.464,
+              "inclusive_ms": 574.746,
+              "self_samples": 8,
+              "inclusive_samples": 382
+            },
+            {
+              "key": "wasm:91789",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91789]]",
+              "self_ms": 1.033,
+              "inclusive_ms": 501.597,
+              "self_samples": 1,
+              "inclusive_samples": 337
+            },
+            {
+              "key": "wasm:91093",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91093]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 500.564,
+              "self_samples": 0,
+              "inclusive_samples": 336
+            },
+            {
+              "key": "wasm:91594",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91594]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 500.564,
+              "self_samples": 0,
+              "inclusive_samples": 336
+            },
+            {
+              "key": "wasm:91595",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Sample [wasm-function[91595]]",
+              "self_ms": 6.621,
+              "inclusive_ms": 499.504,
+              "self_samples": 6,
+              "inclusive_samples": 335
+            },
+            {
+              "key": "wasm:91599",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91599]]",
+              "self_ms": 4.986,
+              "inclusive_ms": 471.398,
+              "self_samples": 4,
+              "inclusive_samples": 315
+            },
+            {
+              "key": "wasm:91609",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAt [wasm-function[91609]]",
+              "self_ms": 1.056,
+              "inclusive_ms": 464.297,
+              "self_samples": 1,
+              "inclusive_samples": 309
+            },
+            {
+              "key": "wasm:91610",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91610]]",
+              "self_ms": 2.124,
+              "inclusive_ms": 463.241,
+              "self_samples": 2,
+              "inclusive_samples": 308
+            },
+            {
+              "key": "wasm:89914",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89914]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 408.856,
+              "self_samples": 0,
+              "inclusive_samples": 299
+            },
+            {
+              "key": "wasm:91283",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91283]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 398.816,
+              "self_samples": 0,
+              "inclusive_samples": 290
+            },
+            {
+              "key": "wasm:91282",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91282]]",
+              "self_ms": 2.505,
+              "inclusive_ms": 395.546,
+              "self_samples": 2,
+              "inclusive_samples": 287
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 123.019,
+              "inclusive_ms": 311.123,
+              "self_samples": 85,
+              "inclusive_samples": 210
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91614]]",
+              "self_ms": 20.929,
+              "inclusive_ms": 224.129,
+              "self_samples": 13,
+              "inclusive_samples": 146
+            },
+            {
+              "key": "wasm:91272",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91272]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 201.297,
+              "self_samples": 0,
+              "inclusive_samples": 138
+            },
+            {
+              "key": "wasm:91619",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91619]]",
+              "self_ms": 41.928,
+              "inclusive_ms": 162.881,
+              "self_samples": 32,
+              "inclusive_samples": 109
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 65.324,
+              "inclusive_ms": 149.994,
+              "self_samples": 44,
+              "inclusive_samples": 96
+            },
+            {
+              "key": "wasm:90121",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90121]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 110.927,
+              "self_samples": 0,
+              "inclusive_samples": 104
+            },
+            {
+              "key": "wasm:93937",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93937]]",
+              "self_ms": 0.251,
+              "inclusive_ms": 110.927,
+              "self_samples": 1,
+              "inclusive_samples": 104
+            },
+            {
+              "key": "wasm:90023",
+              "name": "PixelMap.Controls.PixelMapControl.OnJourneyChanged [wasm-function[90023]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 71.029,
+              "self_samples": 0,
+              "inclusive_samples": 68
+            },
+            {
+              "key": "wasm:90120",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_1 [wasm-function[90120]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 71.029,
+              "self_samples": 0,
+              "inclusive_samples": 68
+            },
+            {
+              "key": "wasm:90805",
+              "name": "PixelMap.Data.VectorTileSource+<GetTemplateAsync>d__13.MoveNext [wasm-function[90805]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 69.561,
+              "self_samples": 0,
+              "inclusive_samples": 52
+            }
+          ]
+        },
+        {
+          "scenario": "map-idle-relief",
+          "input_sha256": "a0f5f0a519ad19d1fd270b0effc202d78adf572eb46575aff14505253d84568e",
+          "output_sha256": "8554a4a6625d77999b052d5dd5ac1e78e5eab4c0d82327b12354f31de51df493",
+          "renamed_nodes": 247,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 7521,
+          "sample_weight_ms": 8102.461,
+          "profile_duration_ms": 8103.02,
+          "median_sample_delta_ms": 1.063,
+          "max_sample_delta_ms": 99.916,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            }
+          },
+          "referenced_wasm_functions": 176,
+          "mapped_wasm_functions": 95,
+          "mapped_wasm_self_ms": 3.168,
+          "unmapped_wasm_self_ms": 12.788,
+          "foreign_wasm_self_ms": 0.0,
+          "top_mapped_self": [
+            {
+              "key": "wasm:106154",
+              "name": "System.Net.Http.BrowserHttpInterop+<CancellationHelper>d__24.MoveNext [wasm-function[106154]]",
+              "self_ms": 1.091,
+              "inclusive_ms": 11.684,
+              "self_samples": 1,
+              "inclusive_samples": 11
+            },
+            {
+              "key": "wasm:106071",
+              "name": "System.Net.Http.BrowserHttpInterop.Fetch [wasm-function[106071]]",
+              "self_ms": 1.069,
+              "inclusive_ms": 23.472,
+              "self_samples": 1,
+              "inclusive_samples": 14
+            },
+            {
+              "key": "wasm:90641",
+              "name": "PixelMap.Data.ElevationTileSource+<ReadAsync>d__11.MoveNext [wasm-function[90641]]",
+              "self_ms": 1.008,
+              "inclusive_ms": 25.531,
+              "self_samples": 1,
+              "inclusive_samples": 16
+            },
+            {
+              "key": "wasm:10241",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.Enqueue [wasm-function[10241]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1.048,
+              "self_samples": 0,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:10270",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.DispatchItems [wasm-function[10270]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 17.071,
+              "self_samples": 0,
+              "inclusive_samples": 12
+            },
+            {
+              "key": "wasm:10273",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.EnqueueNative [wasm-function[10273]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 3.171,
+              "self_samples": 0,
+              "inclusive_samples": 3
+            },
+            {
+              "key": "wasm:10274",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.RunAction [wasm-function[10274]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 14.948,
+              "self_samples": 0,
+              "inclusive_samples": 10
+            },
+            {
+              "key": "wasm:10279",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.EnqueueCore [wasm-function[10279]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1.048,
+              "self_samples": 0,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:10285",
+              "name": "Uno.UI.Dispatching.NativeDispatcher+NativeMethods.WakeUp [wasm-function[10285]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 3.171,
+              "self_samples": 0,
+              "inclusive_samples": 3
+            },
+            {
+              "key": "wasm:10291",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.DispatcherCallback [wasm-function[10291]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 17.071,
+              "self_samples": 0,
+              "inclusive_samples": 12
+            },
+            {
+              "key": "wasm:10293",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.__Wrapper_DispatcherCallback_19325221 [wasm-function[10293]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 17.071,
+              "self_samples": 0,
+              "inclusive_samples": 12
+            },
+            {
+              "key": "wasm:10294",
+              "name": "Uno.UI.Dispatching.NativeDispatcher.<__Wrapper_DispatcherCallback_19325221>g____Stub|45_0 [wasm-function[10294]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 17.071,
+              "self_samples": 0,
+              "inclusive_samples": 12
+            },
+            {
+              "key": "wasm:10297",
+              "name": "Uno.UI.Dispatching.NativeDispatcher+NativeMethods.<WakeUp>g____InvokeJSFunction|0_0 [wasm-function[10297]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 3.171,
+              "self_samples": 0,
+              "inclusive_samples": 3
+            },
+            {
+              "key": "wasm:10325",
+              "name": "Uno.UI.Dispatching.NativeDispatcherSynchronizationContext.Post [wasm-function[10325]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1.048,
+              "self_samples": 0,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:10331",
+              "name": "Uno.UI.Dispatching.NativeDispatcherSynchronizationContext+<>c__DisplayClass3_0.<Post>b__0 [wasm-function[10331]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 14.948,
+              "self_samples": 0,
+              "inclusive_samples": 10
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90788",
+              "name": "PixelMap.Data.TileRequestCache`1+<ProduceAsync>d__14.MoveNext [wasm-function[90788]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 26.659,
+              "self_samples": 0,
+              "inclusive_samples": 17
+            },
+            {
+              "key": "wasm:90641",
+              "name": "PixelMap.Data.ElevationTileSource+<ReadAsync>d__11.MoveNext [wasm-function[90641]]",
+              "self_ms": 1.008,
+              "inclusive_ms": 25.531,
+              "self_samples": 1,
+              "inclusive_samples": 16
+            },
+            {
+              "key": "wasm:90637",
+              "name": "PixelMap.Data.ElevationTileSource.ReadAsync [wasm-function[90637]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 24.523,
+              "self_samples": 0,
+              "inclusive_samples": 15
+            },
+            {
+              "key": "wasm:90786",
+              "name": "PixelMap.Data.TileRequestCache`1+<GetTileAsync>d__13.MoveNext [wasm-function[90786]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 23.47,
+              "self_samples": 0,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:90278",
+              "name": "PixelMap.Controls.TileViewport`1+<Fetch>d__20.MoveNext [wasm-function[90278]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 20.257,
+              "self_samples": 0,
+              "inclusive_samples": 15
+            },
+            {
+              "key": "wasm:90499",
+              "name": "PixelMap.Data.TileRequestCache`1.GetTileAsync [wasm-function[90499]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 20.257,
+              "self_samples": 0,
+              "inclusive_samples": 15
+            },
+            {
+              "key": "wasm:90769",
+              "name": "PixelMap.Data.TileRequestCache`1.ProduceAsync [wasm-function[90769]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 20.257,
+              "self_samples": 0,
+              "inclusive_samples": 15
+            },
+            {
+              "key": "wasm:90636",
+              "name": "PixelMap.Data.ElevationTileSource.GetTileAsync [wasm-function[90636]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 18.121,
+              "self_samples": 0,
+              "inclusive_samples": 13
+            },
+            {
+              "key": "wasm:90801",
+              "name": "PixelMap.Data.VectorTileSource.GetTileAsync [wasm-function[90801]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 2.136,
+              "self_samples": 0,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:90803",
+              "name": "PixelMap.Data.VectorTileSource.ReadAsync [wasm-function[90803]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 2.136,
+              "self_samples": 0,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:90804",
+              "name": "PixelMap.Data.VectorTileSource.GetTemplateAsync [wasm-function[90804]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 2.136,
+              "self_samples": 0,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:90805",
+              "name": "PixelMap.Data.VectorTileSource+<GetTemplateAsync>d__13.MoveNext [wasm-function[90805]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 2.136,
+              "self_samples": 0,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:90807",
+              "name": "PixelMap.Data.VectorTileSource+<ReadAsync>d__12.MoveNext [wasm-function[90807]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 2.136,
+              "self_samples": 0,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:90505",
+              "name": "PixelMap.Data.TilePayload.OpenSeed [wasm-function[90505]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1.038,
+              "self_samples": 0,
+              "inclusive_samples": 1
+            }
+          ]
+        },
+        {
+          "scenario": "walk-moving-chase",
+          "input_sha256": "5a47072085cca55445bdd2467f73ee71ceff0b298cb762c279836dea259441dd",
+          "output_sha256": "ec75949f9c8747233f6a4c4553c94f1073f280962c4a90fe2f07cc90da589c77",
+          "renamed_nodes": 1827,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6027,
+          "sample_weight_ms": 8169.242,
+          "profile_duration_ms": 8174.022,
+          "median_sample_delta_ms": 1.068,
+          "max_sample_delta_ms": 163.041,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 234.199,
+              "inclusive_sample_count": 163,
+              "share_of_complete_profile_percent": 2.8668388083006966
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 332.172,
+              "inclusive_sample_count": 207,
+              "share_of_complete_profile_percent": 4.066130003248771
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 236.37,
+              "inclusive_sample_count": 184,
+              "share_of_complete_profile_percent": 2.89341410133278
+            }
+          },
+          "referenced_wasm_functions": 1736,
+          "mapped_wasm_functions": 708,
+          "mapped_wasm_self_ms": 767.56,
+          "unmapped_wasm_self_ms": 869.713,
+          "foreign_wasm_self_ms": 1.437,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 46.521,
+              "inclusive_ms": 116.762,
+              "self_samples": 34,
+              "inclusive_samples": 77
+            },
+            {
+              "key": "wasm:91539",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91539]]",
+              "self_ms": 36.458,
+              "inclusive_ms": 95.348,
+              "self_samples": 24,
+              "inclusive_samples": 56
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 27.82,
+              "inclusive_ms": 332.172,
+              "self_samples": 16,
+              "inclusive_samples": 207
+            },
+            {
+              "key": "wasm:91132",
+              "name": "PixelMap.Rendering.TileTransform.Vertex [wasm-function[91132]]",
+              "self_ms": 26.128,
+              "inclusive_ms": 26.128,
+              "self_samples": 8,
+              "inclusive_samples": 8
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 26.1,
+              "inclusive_ms": 37.679,
+              "self_samples": 19,
+              "inclusive_samples": 30
+            },
+            {
+              "key": "wasm:90591",
+              "name": "PixelMap.Data.ElevationSurfaceIndex+EdgeNode.Crossings [wasm-function[90591]]",
+              "self_ms": 22.043,
+              "inclusive_ms": 22.043,
+              "self_samples": 9,
+              "inclusive_samples": 9
+            },
+            {
+              "key": "wasm:15201",
+              "name": "Microsoft.UI.Composition.Visual.Render [wasm-function[15201]]",
+              "self_ms": 19.116,
+              "inclusive_ms": 1352.248,
+              "self_samples": 11,
+              "inclusive_samples": 961
+            },
+            {
+              "key": "wasm:91599",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91599]]",
+              "self_ms": 17.586,
+              "inclusive_ms": 187.486,
+              "self_samples": 13,
+              "inclusive_samples": 134
+            },
+            {
+              "key": "wasm:91618",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91618]]",
+              "self_ms": 14.417,
+              "inclusive_ms": 14.417,
+              "self_samples": 13,
+              "inclusive_samples": 13
+            },
+            {
+              "key": "wasm:91326",
+              "name": "PixelMap.Rendering.TerrainOptions.get_HeightScale [wasm-function[91326]]",
+              "self_ms": 10.821,
+              "inclusive_ms": 10.821,
+              "self_samples": 5,
+              "inclusive_samples": 5
+            },
+            {
+              "key": "wasm:91814",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91814]]",
+              "self_ms": 10.46,
+              "inclusive_ms": 107.265,
+              "self_samples": 5,
+              "inclusive_samples": 62
+            },
+            {
+              "key": "wasm:91469",
+              "name": "PixelMap.Rendering.GpuBuildingSelection+Frustum.Intersects [wasm-function[91469]]",
+              "self_ms": 10.433,
+              "inclusive_ms": 10.433,
+              "self_samples": 5,
+              "inclusive_samples": 5
+            },
+            {
+              "key": "wasm:94066",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Contains [wasm-function[94066]]",
+              "self_ms": 10.433,
+              "inclusive_ms": 10.433,
+              "self_samples": 8,
+              "inclusive_samples": 8
+            },
+            {
+              "key": "wasm:90492",
+              "name": "PixelMap.Data.TileId.GetHashCode [wasm-function[90492]]",
+              "self_ms": 10.334,
+              "inclusive_ms": 10.334,
+              "self_samples": 6,
+              "inclusive_samples": 6
+            },
+            {
+              "key": "wasm:91591",
+              "name": "PixelMap.Rendering.GpuSceneDepth.IndexBuildings [wasm-function[91591]]",
+              "self_ms": 9.159,
+              "inclusive_ms": 18.578,
+              "self_samples": 7,
+              "inclusive_samples": 12
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1134.804,
+              "self_samples": 0,
+              "inclusive_samples": 799
+            },
+            {
+              "key": "wasm:90157",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90157]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1133.811,
+              "self_samples": 0,
+              "inclusive_samples": 798
+            },
+            {
+              "key": "wasm:90146",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90146]]",
+              "self_ms": 0.799,
+              "inclusive_ms": 1038.552,
+              "self_samples": 1,
+              "inclusive_samples": 721
+            },
+            {
+              "key": "wasm:89914",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89914]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 518.489,
+              "self_samples": 0,
+              "inclusive_samples": 402
+            },
+            {
+              "key": "wasm:91797",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91797]]",
+              "self_ms": 1.561,
+              "inclusive_ms": 506.22,
+              "self_samples": 2,
+              "inclusive_samples": 310
+            },
+            {
+              "key": "wasm:91283",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91283]]",
+              "self_ms": 1.929,
+              "inclusive_ms": 503.154,
+              "self_samples": 1,
+              "inclusive_samples": 387
+            },
+            {
+              "key": "wasm:91282",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91282]]",
+              "self_ms": 2.1,
+              "inclusive_ms": 496.403,
+              "self_samples": 2,
+              "inclusive_samples": 384
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 27.82,
+              "inclusive_ms": 332.172,
+              "self_samples": 16,
+              "inclusive_samples": 207
+            },
+            {
+              "key": "wasm:91272",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91272]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 236.37,
+              "self_samples": 0,
+              "inclusive_samples": 184
+            },
+            {
+              "key": "wasm:91093",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91093]]",
+              "self_ms": 0.887,
+              "inclusive_ms": 195.836,
+              "self_samples": 1,
+              "inclusive_samples": 141
+            },
+            {
+              "key": "wasm:91594",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91594]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 194.949,
+              "self_samples": 0,
+              "inclusive_samples": 140
+            },
+            {
+              "key": "wasm:91595",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Sample [wasm-function[91595]]",
+              "self_ms": 2.121,
+              "inclusive_ms": 193.894,
+              "self_samples": 2,
+              "inclusive_samples": 139
+            },
+            {
+              "key": "wasm:91599",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91599]]",
+              "self_ms": 17.586,
+              "inclusive_ms": 187.486,
+              "self_samples": 13,
+              "inclusive_samples": 134
+            },
+            {
+              "key": "wasm:91609",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAt [wasm-function[91609]]",
+              "self_ms": 2.917,
+              "inclusive_ms": 163.387,
+              "self_samples": 2,
+              "inclusive_samples": 115
+            },
+            {
+              "key": "wasm:91610",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91610]]",
+              "self_ms": 4.232,
+              "inclusive_ms": 160.47,
+              "self_samples": 4,
+              "inclusive_samples": 113
+            },
+            {
+              "key": "wasm:91782",
+              "name": "PixelMap.Rendering.PixelMapRenderer.GroundAltitude [wasm-function[91782]]",
+              "self_ms": 4.508,
+              "inclusive_ms": 155.726,
+              "self_samples": 5,
+              "inclusive_samples": 85
+            },
+            {
+              "key": "wasm:91789",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91789]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 141.824,
+              "self_samples": 0,
+              "inclusive_samples": 100
+            },
+            {
+              "key": "wasm:90121",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90121]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 140.657,
+              "self_samples": 0,
+              "inclusive_samples": 124
+            },
+            {
+              "key": "wasm:93937",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93937]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 140.657,
+              "self_samples": 0,
+              "inclusive_samples": 124
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 46.521,
+              "inclusive_ms": 116.762,
+              "self_samples": 34,
+              "inclusive_samples": 77
+            },
+            {
+              "key": "wasm:91814",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91814]]",
+              "self_ms": 10.46,
+              "inclusive_ms": 107.265,
+              "self_samples": 5,
+              "inclusive_samples": 62
+            },
+            {
+              "key": "wasm:91539",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91539]]",
+              "self_ms": 36.458,
+              "inclusive_ms": 95.348,
+              "self_samples": 24,
+              "inclusive_samples": 56
+            },
+            {
+              "key": "wasm:91848",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawVehicle [wasm-function[91848]]",
+              "self_ms": 0.993,
+              "inclusive_ms": 82.03,
+              "self_samples": 1,
+              "inclusive_samples": 64
+            },
+            {
+              "key": "wasm:91849",
+              "name": "PixelMap.Rendering.RouteOverlay.DrawVehicle [wasm-function[91849]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 81.037,
+              "self_samples": 0,
+              "inclusive_samples": 63
+            },
+            {
+              "key": "wasm:92145",
+              "name": "PixelMap.Rendering.RouteOverlay.DrawVehicleCore [wasm-function[92145]]",
+              "self_ms": 1.06,
+              "inclusive_ms": 81.037,
+              "self_samples": 1,
+              "inclusive_samples": 63
+            }
+          ]
+        },
+        {
+          "scenario": "walk-moving-firstperson",
+          "input_sha256": "563781dbc498383220d67d349a3062fb6b84b103a1c3aa9ecdd6646d24836ccc",
+          "output_sha256": "d2e68f8e75d5d9d75ceb11c786becd69f77ead291345ee0ec8a116d751625e74",
+          "renamed_nodes": 1656,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6348,
+          "sample_weight_ms": 8138.175,
+          "profile_duration_ms": 8139.822,
+          "median_sample_delta_ms": 1.066,
+          "max_sample_delta_ms": 134.013,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 898.108,
+              "inclusive_sample_count": 592,
+              "share_of_complete_profile_percent": 11.03574204290274
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 1010.636,
+              "inclusive_sample_count": 655,
+              "share_of_complete_profile_percent": 12.418459912695413
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 170.597,
+              "inclusive_sample_count": 108,
+              "share_of_complete_profile_percent": 2.0962562245220826
+            }
+          },
+          "referenced_wasm_functions": 1516,
+          "mapped_wasm_functions": 665,
+          "mapped_wasm_self_ms": 1305.966,
+          "unmapped_wasm_self_ms": 645.629,
+          "foreign_wasm_self_ms": 11.006,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 203.34,
+              "inclusive_ms": 469.481,
+              "self_samples": 128,
+              "inclusive_samples": 301
+            },
+            {
+              "key": "wasm:91621",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91621]]",
+              "self_ms": 104.486,
+              "inclusive_ms": 104.486,
+              "self_samples": 72,
+              "inclusive_samples": 72
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 73.667,
+              "inclusive_ms": 217.188,
+              "self_samples": 42,
+              "inclusive_samples": 141
+            },
+            {
+              "key": "wasm:91619",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91619]]",
+              "self_ms": 66.879,
+              "inclusive_ms": 238.506,
+              "self_samples": 46,
+              "inclusive_samples": 166
+            },
+            {
+              "key": "wasm:91602",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle.Contains [wasm-function[91602]]",
+              "self_ms": 61.416,
+              "inclusive_ms": 61.416,
+              "self_samples": 47,
+              "inclusive_samples": 47
+            },
+            {
+              "key": "wasm:91618",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91618]]",
+              "self_ms": 55.594,
+              "inclusive_ms": 55.594,
+              "self_samples": 37,
+              "inclusive_samples": 37
+            },
+            {
+              "key": "wasm:91595",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Sample [wasm-function[91595]]",
+              "self_ms": 44.354,
+              "inclusive_ms": 868.354,
+              "self_samples": 26,
+              "inclusive_samples": 573
+            },
+            {
+              "key": "wasm:91622",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddSubpixelTriangle [wasm-function[91622]]",
+              "self_ms": 39.888,
+              "inclusive_ms": 56.356,
+              "self_samples": 33,
+              "inclusive_samples": 39
+            },
+            {
+              "key": "wasm:91615",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Orientation [wasm-function[91615]]",
+              "self_ms": 35.68,
+              "inclusive_ms": 35.68,
+              "self_samples": 18,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91614]]",
+              "self_ms": 34.449,
+              "inclusive_ms": 336.526,
+              "self_samples": 22,
+              "inclusive_samples": 229
+            },
+            {
+              "key": "wasm:91624",
+              "name": "PixelMap.Rendering.GpuSceneDepth.BinCells [wasm-function[91624]]",
+              "self_ms": 29.193,
+              "inclusive_ms": 29.193,
+              "self_samples": 16,
+              "inclusive_samples": 16
+            },
+            {
+              "key": "wasm:91814",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91814]]",
+              "self_ms": 25.225,
+              "inclusive_ms": 152.637,
+              "self_samples": 17,
+              "inclusive_samples": 93
+            },
+            {
+              "key": "wasm:91539",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91539]]",
+              "self_ms": 23.28,
+              "inclusive_ms": 83.401,
+              "self_samples": 16,
+              "inclusive_samples": 48
+            },
+            {
+              "key": "wasm:91599",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91599]]",
+              "self_ms": 21.534,
+              "inclusive_ms": 744.852,
+              "self_samples": 16,
+              "inclusive_samples": 487
+            },
+            {
+              "key": "wasm:91601",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Edge.TrySample [wasm-function[91601]]",
+              "self_ms": 17.297,
+              "inclusive_ms": 17.297,
+              "self_samples": 13,
+              "inclusive_samples": 13
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1627.598,
+              "self_samples": 0,
+              "inclusive_samples": 1073
+            },
+            {
+              "key": "wasm:90157",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90157]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1626.664,
+              "self_samples": 0,
+              "inclusive_samples": 1072
+            },
+            {
+              "key": "wasm:90146",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90146]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1620.77,
+              "self_samples": 0,
+              "inclusive_samples": 1066
+            },
+            {
+              "key": "wasm:91797",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91797]]",
+              "self_ms": 1.064,
+              "inclusive_ms": 1223.813,
+              "self_samples": 1,
+              "inclusive_samples": 791
+            },
+            {
+              "key": "wasm:91755",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91755]]",
+              "self_ms": 11.351,
+              "inclusive_ms": 1010.636,
+              "self_samples": 7,
+              "inclusive_samples": 655
+            },
+            {
+              "key": "wasm:91595",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Sample [wasm-function[91595]]",
+              "self_ms": 44.354,
+              "inclusive_ms": 868.354,
+              "self_samples": 26,
+              "inclusive_samples": 573
+            },
+            {
+              "key": "wasm:91093",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91093]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 861.519,
+              "self_samples": 0,
+              "inclusive_samples": 565
+            },
+            {
+              "key": "wasm:91594",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91594]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 861.519,
+              "self_samples": 0,
+              "inclusive_samples": 565
+            },
+            {
+              "key": "wasm:91789",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91789]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 861.519,
+              "self_samples": 0,
+              "inclusive_samples": 565
+            },
+            {
+              "key": "wasm:91599",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91599]]",
+              "self_ms": 21.534,
+              "inclusive_ms": 744.852,
+              "self_samples": 16,
+              "inclusive_samples": 487
+            },
+            {
+              "key": "wasm:91609",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAt [wasm-function[91609]]",
+              "self_ms": 13.81,
+              "inclusive_ms": 706.781,
+              "self_samples": 12,
+              "inclusive_samples": 461
+            },
+            {
+              "key": "wasm:91610",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91610]]",
+              "self_ms": 2.134,
+              "inclusive_ms": 692.971,
+              "self_samples": 2,
+              "inclusive_samples": 449
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91611]]",
+              "self_ms": 203.34,
+              "inclusive_ms": 469.481,
+              "self_samples": 128,
+              "inclusive_samples": 301
+            },
+            {
+              "key": "wasm:89914",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89914]]",
+              "self_ms": 1.061,
+              "inclusive_ms": 383.092,
+              "self_samples": 1,
+              "inclusive_samples": 267
+            },
+            {
+              "key": "wasm:91283",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91283]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 375.877,
+              "self_samples": 0,
+              "inclusive_samples": 260
+            },
+            {
+              "key": "wasm:91282",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91282]]",
+              "self_ms": 2.582,
+              "inclusive_ms": 373.725,
+              "self_samples": 2,
+              "inclusive_samples": 258
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91614]]",
+              "self_ms": 34.449,
+              "inclusive_ms": 336.526,
+              "self_samples": 22,
+              "inclusive_samples": 229
+            },
+            {
+              "key": "wasm:91619",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91619]]",
+              "self_ms": 66.879,
+              "inclusive_ms": 238.506,
+              "self_samples": 46,
+              "inclusive_samples": 166
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91612]]",
+              "self_ms": 73.667,
+              "inclusive_ms": 217.188,
+              "self_samples": 42,
+              "inclusive_samples": 141
+            },
+            {
+              "key": "wasm:91272",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91272]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 170.597,
+              "self_samples": 0,
+              "inclusive_samples": 108
+            },
+            {
+              "key": "wasm:91814",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91814]]",
+              "self_ms": 25.225,
+              "inclusive_ms": 152.637,
+              "self_samples": 17,
+              "inclusive_samples": 93
+            },
+            {
+              "key": "wasm:90121",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90121]]",
+              "self_ms": 0.882,
+              "inclusive_ms": 136.121,
+              "self_samples": 1,
+              "inclusive_samples": 123
+            },
+            {
+              "key": "wasm:93937",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93937]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 135.239,
+              "self_samples": 0,
+              "inclusive_samples": 122
+            },
+            {
+              "key": "wasm:91782",
+              "name": "PixelMap.Rendering.PixelMapRenderer.GroundAltitude [wasm-function[91782]]",
+              "self_ms": 0.82,
+              "inclusive_ms": 114.178,
+              "self_samples": 1,
+              "inclusive_samples": 67
+            },
+            {
+              "key": "wasm:91621",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91621]]",
+              "self_ms": 104.486,
+              "inclusive_ms": 104.486,
+              "self_samples": 72,
+              "inclusive_samples": 72
+            }
+          ]
+        },
+        {
+          "scenario": "walk-stationary-firstperson",
+          "input_sha256": "da8fe37243f3d756d108fd4a214ae0931e3bde0445f2cd2ef30495e68d08df86",
+          "output_sha256": "a392d5c83a30e4f208a6486be00b91e7837fcd5499e15f4cdce358063809e099",
+          "renamed_nodes": 530,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 7516,
+          "sample_weight_ms": 8111.538,
+          "profile_duration_ms": 8119.146,
+          "median_sample_delta_ms": 1.062,
+          "max_sample_delta_ms": 107.874,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            }
+          },
+          "referenced_wasm_functions": 340,
+          "mapped_wasm_functions": 213,
+          "mapped_wasm_self_ms": 57.461,
+          "unmapped_wasm_self_ms": 61.085,
+          "foreign_wasm_self_ms": 0.0,
+          "top_mapped_self": [
+            {
+              "key": "wasm:94001",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Obstructs [wasm-function[94001]]",
+              "self_ms": 5.31,
+              "inclusive_ms": 11.675,
+              "self_samples": 5,
+              "inclusive_samples": 11
+            },
+            {
+              "key": "wasm:94066",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Contains [wasm-function[94066]]",
+              "self_ms": 4.246,
+              "inclusive_ms": 4.246,
+              "self_samples": 4,
+              "inclusive_samples": 4
+            },
+            {
+              "key": "wasm:90278",
+              "name": "PixelMap.Controls.TileViewport`1+<Fetch>d__20.MoveNext [wasm-function[90278]]",
+              "self_ms": 2.146,
+              "inclusive_ms": 37.97,
+              "self_samples": 2,
+              "inclusive_samples": 29
+            },
+            {
+              "key": "wasm:10259",
+              "name": "Microsoft.UI.Dispatching.DispatcherQueueTimer.RaiseTick [wasm-function[10259]]",
+              "self_ms": 2.134,
+              "inclusive_ms": 46.801,
+              "self_samples": 2,
+              "inclusive_samples": 44
+            },
+            {
+              "key": "wasm:125511",
+              "name": "System.Runtime.CompilerServices.ConditionalWeakTable`2.TryGetValue [wasm-function[125511]]",
+              "self_ms": 2.128,
+              "inclusive_ms": 2.128,
+              "self_samples": 2,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:90000",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateFreeRoamCamera [wasm-function[90000]]",
+              "self_ms": 2.125,
+              "inclusive_ms": 10.644,
+              "self_samples": 2,
+              "inclusive_samples": 10
+            },
+            {
+              "key": "wasm:105941",
+              "name": "System.Net.Http.HttpRequestMessage.get_Content [wasm-function[105941]]",
+              "self_ms": 1.08,
+              "inclusive_ms": 1.08,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:90495",
+              "name": "PixelMap.Data.TileId.Equals [wasm-function[90495]]",
+              "self_ms": 1.077,
+              "inclusive_ms": 1.077,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:115367",
+              "name": "System.RuntimeType.GetEnumUnderlyingType [wasm-function[115367]]",
+              "self_ms": 1.074,
+              "inclusive_ms": 1.074,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:124453",
+              "name": "System.Threading.Tasks.Task.AddException [wasm-function[124453]]",
+              "self_ms": 1.072,
+              "inclusive_ms": 4.266,
+              "self_samples": 1,
+              "inclusive_samples": 4
+            },
+            {
+              "key": "wasm:124169",
+              "name": "System.Threading.ThreadPoolWorkQueue.DispatchWorkItem [wasm-function[124169]]",
+              "self_ms": 1.07,
+              "inclusive_ms": 89.415,
+              "self_samples": 1,
+              "inclusive_samples": 78
+            },
+            {
+              "key": "wasm:114993",
+              "name": "System.Math.Max [wasm-function[114993]]",
+              "self_ms": 1.069,
+              "inclusive_ms": 1.069,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:124237",
+              "name": "System.Threading.TimerQueueTimer.GetMilliseconds [wasm-function[124237]]",
+              "self_ms": 1.068,
+              "inclusive_ms": 1.068,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:90106",
+              "name": "PixelMap.Controls.PixelMapControl.DisplayTiles [wasm-function[90106]]",
+              "self_ms": 1.068,
+              "inclusive_ms": 1.068,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:90788",
+              "name": "PixelMap.Data.TileRequestCache`1+<ProduceAsync>d__14.MoveNext [wasm-function[90788]]",
+              "self_ms": 1.068,
+              "inclusive_ms": 56.438,
+              "self_samples": 1,
+              "inclusive_samples": 46
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90788",
+              "name": "PixelMap.Data.TileRequestCache`1+<ProduceAsync>d__14.MoveNext [wasm-function[90788]]",
+              "self_ms": 1.068,
+              "inclusive_ms": 56.438,
+              "self_samples": 1,
+              "inclusive_samples": 46
+            },
+            {
+              "key": "wasm:90641",
+              "name": "PixelMap.Data.ElevationTileSource+<ReadAsync>d__11.MoveNext [wasm-function[90641]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 47.217,
+              "self_samples": 0,
+              "inclusive_samples": 37
+            },
+            {
+              "key": "wasm:90121",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90121]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 39.337,
+              "self_samples": 0,
+              "inclusive_samples": 37
+            },
+            {
+              "key": "wasm:93937",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93937]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 39.337,
+              "self_samples": 0,
+              "inclusive_samples": 37
+            },
+            {
+              "key": "wasm:90278",
+              "name": "PixelMap.Controls.TileViewport`1+<Fetch>d__20.MoveNext [wasm-function[90278]]",
+              "self_ms": 2.146,
+              "inclusive_ms": 37.97,
+              "self_samples": 2,
+              "inclusive_samples": 29
+            },
+            {
+              "key": "wasm:90786",
+              "name": "PixelMap.Data.TileRequestCache`1+<GetTileAsync>d__13.MoveNext [wasm-function[90786]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 37.916,
+              "self_samples": 0,
+              "inclusive_samples": 29
+            },
+            {
+              "key": "wasm:90637",
+              "name": "PixelMap.Data.ElevationTileSource.ReadAsync [wasm-function[90637]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 35.218,
+              "self_samples": 0,
+              "inclusive_samples": 26
+            },
+            {
+              "key": "wasm:90805",
+              "name": "PixelMap.Data.VectorTileSource+<GetTemplateAsync>d__13.MoveNext [wasm-function[90805]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 30.871,
+              "self_samples": 0,
+              "inclusive_samples": 29
+            },
+            {
+              "key": "wasm:90499",
+              "name": "PixelMap.Data.TileRequestCache`1.GetTileAsync [wasm-function[90499]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 29.311,
+              "self_samples": 0,
+              "inclusive_samples": 21
+            },
+            {
+              "key": "wasm:90769",
+              "name": "PixelMap.Data.TileRequestCache`1.ProduceAsync [wasm-function[90769]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 29.311,
+              "self_samples": 0,
+              "inclusive_samples": 21
+            },
+            {
+              "key": "wasm:93939",
+              "name": "PixelMap.Simulation.JourneySession.FreeRoamStep [wasm-function[93939]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 22.311,
+              "self_samples": 0,
+              "inclusive_samples": 21
+            },
+            {
+              "key": "wasm:93969",
+              "name": "PixelMap.Simulation.JourneySession.WalkFree [wasm-function[93969]]",
+              "self_ms": 1.062,
+              "inclusive_ms": 22.311,
+              "self_samples": 1,
+              "inclusive_samples": 21
+            },
+            {
+              "key": "wasm:90636",
+              "name": "PixelMap.Data.ElevationTileSource.GetTileAsync [wasm-function[90636]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 20.832,
+              "self_samples": 0,
+              "inclusive_samples": 13
+            },
+            {
+              "key": "wasm:93973",
+              "name": "PixelMap.Simulation.JourneySession.TryWalkMove [wasm-function[93973]]",
+              "self_ms": 1.063,
+              "inclusive_ms": 20.188,
+              "self_samples": 1,
+              "inclusive_samples": 19
+            },
+            {
+              "key": "wasm:93974",
+              "name": "PixelMap.Simulation.JourneySession.Blocked [wasm-function[93974]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 16.998,
+              "self_samples": 0,
+              "inclusive_samples": 16
+            },
+            {
+              "key": "wasm:94003",
+              "name": "PixelMap.Simulation.VectorCollisionWorld.Blocks [wasm-function[94003]]",
+              "self_ms": 1.059,
+              "inclusive_ms": 16.998,
+              "self_samples": 1,
+              "inclusive_samples": 16
+            },
+            {
+              "key": "wasm:90807",
+              "name": "PixelMap.Data.VectorTileSource+<ReadAsync>d__12.MoveNext [wasm-function[90807]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 14.868,
+              "self_samples": 0,
+              "inclusive_samples": 14
+            },
+            {
+              "key": "wasm:90023",
+              "name": "PixelMap.Controls.PixelMapControl.OnJourneyChanged [wasm-function[90023]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 13.838,
+              "self_samples": 0,
+              "inclusive_samples": 13
+            },
+            {
+              "key": "wasm:90120",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_1 [wasm-function[90120]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 13.838,
+              "self_samples": 0,
+              "inclusive_samples": 13
+            },
+            {
+              "key": "wasm:94005",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+ContactSweep.Obstructed [wasm-function[94005]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 12.742,
+              "self_samples": 0,
+              "inclusive_samples": 12
+            },
+            {
+              "key": "wasm:94001",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Obstructs [wasm-function[94001]]",
+              "self_ms": 5.31,
+              "inclusive_ms": 11.675,
+              "self_samples": 5,
+              "inclusive_samples": 11
+            },
+            {
+              "key": "wasm:89986",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateRideCamera [wasm-function[89986]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 10.644,
+              "self_samples": 0,
+              "inclusive_samples": 10
+            },
+            {
+              "key": "wasm:90000",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateFreeRoamCamera [wasm-function[90000]]",
+              "self_ms": 2.125,
+              "inclusive_ms": 10.644,
+              "self_samples": 2,
+              "inclusive_samples": 10
+            },
+            {
+              "key": "wasm:90801",
+              "name": "PixelMap.Data.VectorTileSource.GetTileAsync [wasm-function[90801]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 8.479,
+              "self_samples": 0,
+              "inclusive_samples": 8
+            },
+            {
+              "key": "wasm:90803",
+              "name": "PixelMap.Data.VectorTileSource.ReadAsync [wasm-function[90803]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 8.479,
+              "self_samples": 0,
+              "inclusive_samples": 8
+            }
+          ]
+        }
+      ]
+    },
+    "candidate": {
+      "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+      "run_id": 42907891884,
+      "artifact_id": 13807570605,
+      "artifact_digest": "sha256:d1439991dabcd2e9cdd266accc57c723cc79b630080d61afdb1fecbe49d22f3d",
+      "native": {
+        "group": "wasmNative",
+        "name": "dotnet.native.h9l0fiui0y.wasm",
+        "sha256": "5b3d43dd28d2e03eeb31703ed03bedda44cf9fae46e41609b143e90654f2d6f4"
+      },
+      "verified_boot_resources": 72,
+      "symbolicated_profiles": 6,
+      "unchanged_profiles": 1,
+      "profiles": [
+        {
+          "scenario": "car-moving-chase",
+          "input_sha256": "d4b1331f7732a5dad1212874314475888982ce664d13e8c4eb42eae85bdcd117",
+          "output_sha256": "1ede02a1313ae95deff313eba1138c0d71076967b05e5edd7511ba8645dac7db",
+          "renamed_nodes": 1933,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6154,
+          "sample_weight_ms": 8172.74,
+          "profile_duration_ms": 8173.077,
+          "median_sample_delta_ms": 1.068,
+          "max_sample_delta_ms": 168.22,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 168.81,
+              "inclusive_sample_count": 122,
+              "share_of_complete_profile_percent": 2.065525148236699
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 260.975,
+              "inclusive_sample_count": 170,
+              "share_of_complete_profile_percent": 3.193237518873719
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 160.436,
+              "inclusive_sample_count": 117,
+              "share_of_complete_profile_percent": 1.963062571426474
+            }
+          },
+          "referenced_wasm_functions": 1769,
+          "mapped_wasm_functions": 724,
+          "mapped_wasm_self_ms": 725.366,
+          "unmapped_wasm_self_ms": 845.582,
+          "foreign_wasm_self_ms": 4.124,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91556",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91556]]",
+              "self_ms": 39.343,
+              "inclusive_ms": 63.502,
+              "self_samples": 21,
+              "inclusive_samples": 38
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 32.291,
+              "inclusive_ms": 91.135,
+              "self_samples": 26,
+              "inclusive_samples": 59
+            },
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 28.23,
+              "inclusive_ms": 42.776,
+              "self_samples": 22,
+              "inclusive_samples": 35
+            },
+            {
+              "key": "wasm:91640",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91640]]",
+              "self_ms": 20.6,
+              "inclusive_ms": 20.6,
+              "self_samples": 8,
+              "inclusive_samples": 8
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 19.661,
+              "inclusive_ms": 260.975,
+              "self_samples": 13,
+              "inclusive_samples": 170
+            },
+            {
+              "key": "wasm:94093",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Contains [wasm-function[94093]]",
+              "self_ms": 18.199,
+              "inclusive_ms": 18.199,
+              "self_samples": 16,
+              "inclusive_samples": 16
+            },
+            {
+              "key": "wasm:90608",
+              "name": "PixelMap.Data.ElevationSurfaceIndex+EdgeNode.Crossings [wasm-function[90608]]",
+              "self_ms": 16.201,
+              "inclusive_ms": 16.201,
+              "self_samples": 9,
+              "inclusive_samples": 9
+            },
+            {
+              "key": "wasm:91636",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91636]]",
+              "self_ms": 13.245,
+              "inclusive_ms": 47.992,
+              "self_samples": 9,
+              "inclusive_samples": 29
+            },
+            {
+              "key": "wasm:92389",
+              "name": "PixelMap.Rendering.TerrainSurface.SampleMesh [wasm-function[92389]]",
+              "self_ms": 11.999,
+              "inclusive_ms": 11.999,
+              "self_samples": 4,
+              "inclusive_samples": 4
+            },
+            {
+              "key": "wasm:90509",
+              "name": "PixelMap.Data.TileId.GetHashCode [wasm-function[90509]]",
+              "self_ms": 11.949,
+              "inclusive_ms": 11.949,
+              "self_samples": 6,
+              "inclusive_samples": 6
+            },
+            {
+              "key": "wasm:91149",
+              "name": "PixelMap.Rendering.TileTransform.Vertex [wasm-function[91149]]",
+              "self_ms": 11.542,
+              "inclusive_ms": 11.542,
+              "self_samples": 6,
+              "inclusive_samples": 6
+            },
+            {
+              "key": "wasm:91486",
+              "name": "PixelMap.Rendering.GpuBuildingSelection+Frustum.Intersects [wasm-function[91486]]",
+              "self_ms": 11.271,
+              "inclusive_ms": 11.271,
+              "self_samples": 6,
+              "inclusive_samples": 6
+            },
+            {
+              "key": "wasm:15218",
+              "name": "Microsoft.UI.Composition.Visual.Render [wasm-function[15218]]",
+              "self_ms": 10.913,
+              "inclusive_ms": 1126.082,
+              "self_samples": 9,
+              "inclusive_samples": 777
+            },
+            {
+              "key": "wasm:23143",
+              "name": "Microsoft.UI.Xaml.Documents.UnicodeText..ctor [wasm-function[23143]]",
+              "self_ms": 10.599,
+              "inclusive_ms": 104.539,
+              "self_samples": 9,
+              "inclusive_samples": 77
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 10.105,
+              "inclusive_ms": 103.585,
+              "self_samples": 4,
+              "inclusive_samples": 54
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90180",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90180]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 874.278,
+              "self_samples": 0,
+              "inclusive_samples": 608
+            },
+            {
+              "key": "wasm:90174",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90174]]",
+              "self_ms": 1.05,
+              "inclusive_ms": 874.197,
+              "self_samples": 1,
+              "inclusive_samples": 608
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 826.25,
+              "self_samples": 0,
+              "inclusive_samples": 568
+            },
+            {
+              "key": "wasm:91821",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91821]]",
+              "self_ms": 2.737,
+              "inclusive_ms": 445.92,
+              "self_samples": 3,
+              "inclusive_samples": 282
+            },
+            {
+              "key": "wasm:89931",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89931]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 372.485,
+              "self_samples": 0,
+              "inclusive_samples": 278
+            },
+            {
+              "key": "wasm:91300",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91300]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 362.714,
+              "self_samples": 0,
+              "inclusive_samples": 271
+            },
+            {
+              "key": "wasm:91299",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91299]]",
+              "self_ms": 4.504,
+              "inclusive_ms": 360.591,
+              "self_samples": 3,
+              "inclusive_samples": 269
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 19.661,
+              "inclusive_ms": 260.975,
+              "self_samples": 13,
+              "inclusive_samples": 170
+            },
+            {
+              "key": "wasm:90138",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90138]]",
+              "self_ms": 3.21,
+              "inclusive_ms": 170.607,
+              "self_samples": 3,
+              "inclusive_samples": 131
+            },
+            {
+              "key": "wasm:93964",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93964]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 167.397,
+              "self_samples": 0,
+              "inclusive_samples": 128
+            },
+            {
+              "key": "wasm:91289",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91289]]",
+              "self_ms": 1.066,
+              "inclusive_ms": 160.436,
+              "self_samples": 1,
+              "inclusive_samples": 117
+            },
+            {
+              "key": "wasm:91110",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91110]]",
+              "self_ms": 0.886,
+              "inclusive_ms": 146.024,
+              "self_samples": 1,
+              "inclusive_samples": 106
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91611]]",
+              "self_ms": 3.09,
+              "inclusive_ms": 143.528,
+              "self_samples": 3,
+              "inclusive_samples": 104
+            },
+            {
+              "key": "wasm:91813",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91813]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 136.386,
+              "self_samples": 0,
+              "inclusive_samples": 97
+            },
+            {
+              "key": "wasm:91625",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91625]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 134.729,
+              "self_samples": 0,
+              "inclusive_samples": 95
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete [wasm-function[91612]]",
+              "self_ms": 1.653,
+              "inclusive_ms": 125.917,
+              "self_samples": 2,
+              "inclusive_samples": 92
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 10.105,
+              "inclusive_ms": 103.585,
+              "self_samples": 4,
+              "inclusive_samples": 54
+            },
+            {
+              "key": "wasm:91806",
+              "name": "PixelMap.Rendering.PixelMapRenderer.GroundAltitude [wasm-function[91806]]",
+              "self_ms": 3.612,
+              "inclusive_ms": 102.954,
+              "self_samples": 1,
+              "inclusive_samples": 58
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 32.291,
+              "inclusive_ms": 91.135,
+              "self_samples": 26,
+              "inclusive_samples": 59
+            },
+            {
+              "key": "wasm:90137",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_1 [wasm-function[90137]]",
+              "self_ms": 1.071,
+              "inclusive_ms": 79.341,
+              "self_samples": 1,
+              "inclusive_samples": 53
+            },
+            {
+              "key": "wasm:90040",
+              "name": "PixelMap.Controls.PixelMapControl.OnJourneyChanged [wasm-function[90040]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 78.27,
+              "self_samples": 0,
+              "inclusive_samples": 52
+            },
+            {
+              "key": "wasm:90003",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateRideCamera [wasm-function[90003]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 77.205,
+              "self_samples": 0,
+              "inclusive_samples": 51
+            },
+            {
+              "key": "wasm:90017",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateFreeRoamCamera [wasm-function[90017]]",
+              "self_ms": 0.333,
+              "inclusive_ms": 77.205,
+              "self_samples": 1,
+              "inclusive_samples": 51
+            },
+            {
+              "key": "wasm:90061",
+              "name": "PixelMap.Controls.PixelMapControl.RefreshTiles [wasm-function[90061]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 70.481,
+              "self_samples": 0,
+              "inclusive_samples": 55
+            },
+            {
+              "key": "wasm:90142",
+              "name": "PixelMap.Controls.PixelMapControl.<.ctor>b__152_2 [wasm-function[90142]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 70.481,
+              "self_samples": 0,
+              "inclusive_samples": 55
+            }
+          ]
+        },
+        {
+          "scenario": "car-moving-firstperson",
+          "input_sha256": "1db6993b33c792d450c9c1e3dc55297f63d273333b10508fbdcedecaee5a1b48",
+          "output_sha256": "c36e0374551f6525d12f587b606bbb5000ac57b1905052d97a0ebda4cf1674de",
+          "renamed_nodes": 2034,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6327,
+          "sample_weight_ms": 8121.209,
+          "profile_duration_ms": 8121.493,
+          "median_sample_delta_ms": 1.066,
+          "max_sample_delta_ms": 117.681,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 787.843,
+              "inclusive_sample_count": 579,
+              "share_of_complete_profile_percent": 9.70105559406241
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 903.28,
+              "inclusive_sample_count": 654,
+              "share_of_complete_profile_percent": 11.1224818866255
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 34.818,
+              "inclusive_sample_count": 17,
+              "share_of_complete_profile_percent": 0.4287292692504281
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 24.08,
+              "inclusive_sample_count": 14,
+              "share_of_complete_profile_percent": 0.2965075766428373
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 158.396,
+              "inclusive_sample_count": 105,
+              "share_of_complete_profile_percent": 1.9503992570564308
+            }
+          },
+          "referenced_wasm_functions": 1800,
+          "mapped_wasm_functions": 754,
+          "mapped_wasm_self_ms": 1469.921,
+          "unmapped_wasm_self_ms": 963.008,
+          "foreign_wasm_self_ms": 16.867,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 175.507,
+              "inclusive_ms": 448.729,
+              "self_samples": 135,
+              "inclusive_samples": 318
+            },
+            {
+              "key": "wasm:91643",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91643]]",
+              "self_ms": 110.909,
+              "inclusive_ms": 110.909,
+              "self_samples": 82,
+              "inclusive_samples": 82
+            },
+            {
+              "key": "wasm:91622",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle.Contains [wasm-function[91622]]",
+              "self_ms": 62.147,
+              "inclusive_ms": 62.147,
+              "self_samples": 46,
+              "inclusive_samples": 46
+            },
+            {
+              "key": "wasm:91640",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91640]]",
+              "self_ms": 55.347,
+              "inclusive_ms": 55.347,
+              "self_samples": 34,
+              "inclusive_samples": 34
+            },
+            {
+              "key": "wasm:91644",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddSubpixelTriangle [wasm-function[91644]]",
+              "self_ms": 52.206,
+              "inclusive_ms": 67.448,
+              "self_samples": 35,
+              "inclusive_samples": 44
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 51.062,
+              "inclusive_ms": 202.444,
+              "self_samples": 39,
+              "inclusive_samples": 148
+            },
+            {
+              "key": "wasm:92384",
+              "name": "PixelMap.Rendering.TerrainSurface.PrepareGpuTexture [wasm-function[92384]]",
+              "self_ms": 49.921,
+              "inclusive_ms": 106.606,
+              "self_samples": 35,
+              "inclusive_samples": 78
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 46.229,
+              "inclusive_ms": 177.462,
+              "self_samples": 35,
+              "inclusive_samples": 115
+            },
+            {
+              "key": "wasm:91641",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91641]]",
+              "self_ms": 43.733,
+              "inclusive_ms": 253.501,
+              "self_samples": 34,
+              "inclusive_samples": 175
+            },
+            {
+              "key": "wasm:90509",
+              "name": "PixelMap.Data.TileId.GetHashCode [wasm-function[90509]]",
+              "self_ms": 34.514,
+              "inclusive_ms": 34.514,
+              "self_samples": 14,
+              "inclusive_samples": 14
+            },
+            {
+              "key": "wasm:91646",
+              "name": "PixelMap.Rendering.GpuSceneDepth.BinCells [wasm-function[91646]]",
+              "self_ms": 31.658,
+              "inclusive_ms": 31.658,
+              "self_samples": 18,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:23143",
+              "name": "Microsoft.UI.Xaml.Documents.UnicodeText..ctor [wasm-function[23143]]",
+              "self_ms": 29.278,
+              "inclusive_ms": 140.036,
+              "self_samples": 20,
+              "inclusive_samples": 95
+            },
+            {
+              "key": "wasm:91637",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Orientation [wasm-function[91637]]",
+              "self_ms": 28.776,
+              "inclusive_ms": 28.776,
+              "self_samples": 19,
+              "inclusive_samples": 19
+            },
+            {
+              "key": "wasm:91636",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91636]]",
+              "self_ms": 25.931,
+              "inclusive_ms": 328.828,
+              "self_samples": 20,
+              "inclusive_samples": 225
+            },
+            {
+              "key": "wasm:91556",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91556]]",
+              "self_ms": 24.85,
+              "inclusive_ms": 64.675,
+              "self_samples": 19,
+              "inclusive_samples": 42
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90174",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90174]]",
+              "self_ms": 0.928,
+              "inclusive_ms": 1768.823,
+              "self_samples": 1,
+              "inclusive_samples": 1253
+            },
+            {
+              "key": "wasm:90180",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90180]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1768.823,
+              "self_samples": 0,
+              "inclusive_samples": 1253
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1760.384,
+              "self_samples": 0,
+              "inclusive_samples": 1246
+            },
+            {
+              "key": "wasm:91821",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91821]]",
+              "self_ms": 3.421,
+              "inclusive_ms": 1390.982,
+              "self_samples": 2,
+              "inclusive_samples": 981
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 10.6,
+              "inclusive_ms": 903.28,
+              "self_samples": 8,
+              "inclusive_samples": 654
+            },
+            {
+              "key": "wasm:91813",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91813]]",
+              "self_ms": 1.061,
+              "inclusive_ms": 766.976,
+              "self_samples": 1,
+              "inclusive_samples": 563
+            },
+            {
+              "key": "wasm:91110",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91110]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 765.915,
+              "self_samples": 0,
+              "inclusive_samples": 562
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91611]]",
+              "self_ms": 3.398,
+              "inclusive_ms": 764.853,
+              "self_samples": 3,
+              "inclusive_samples": 561
+            },
+            {
+              "key": "wasm:91625",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91625]]",
+              "self_ms": 2.151,
+              "inclusive_ms": 656.559,
+              "self_samples": 2,
+              "inclusive_samples": 471
+            },
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 175.507,
+              "inclusive_ms": 448.729,
+              "self_samples": 135,
+              "inclusive_samples": 318
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete [wasm-function[91612]]",
+              "self_ms": 8.138,
+              "inclusive_ms": 399.441,
+              "self_samples": 8,
+              "inclusive_samples": 283
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.SampleUncached [wasm-function[91614]]",
+              "self_ms": 17.652,
+              "inclusive_ms": 363.279,
+              "self_samples": 16,
+              "inclusive_samples": 275
+            },
+            {
+              "key": "wasm:89931",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89931]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 359.385,
+              "self_samples": 0,
+              "inclusive_samples": 256
+            },
+            {
+              "key": "wasm:91300",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91300]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 356.404,
+              "self_samples": 0,
+              "inclusive_samples": 253
+            },
+            {
+              "key": "wasm:91299",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91299]]",
+              "self_ms": 9.739,
+              "inclusive_ms": 355.332,
+              "self_samples": 4,
+              "inclusive_samples": 252
+            },
+            {
+              "key": "wasm:91636",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91636]]",
+              "self_ms": 25.931,
+              "inclusive_ms": 328.828,
+              "self_samples": 20,
+              "inclusive_samples": 225
+            },
+            {
+              "key": "wasm:91829",
+              "name": "PixelMap.Rendering.TerrainSurface.PrepareGpu [wasm-function[91829]]",
+              "self_ms": 2.119,
+              "inclusive_ms": 291.687,
+              "self_samples": 2,
+              "inclusive_samples": 189
+            },
+            {
+              "key": "wasm:91619",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91619]]",
+              "self_ms": 1.782,
+              "inclusive_ms": 289.605,
+              "self_samples": 1,
+              "inclusive_samples": 216
+            },
+            {
+              "key": "wasm:91632",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAt [wasm-function[91632]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 283.556,
+              "self_samples": 0,
+              "inclusive_samples": 211
+            },
+            {
+              "key": "wasm:91641",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91641]]",
+              "self_ms": 43.733,
+              "inclusive_ms": 253.501,
+              "self_samples": 34,
+              "inclusive_samples": 175
+            },
+            {
+              "key": "wasm:91626",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAndSampleGroup [wasm-function[91626]]",
+              "self_ms": 1.066,
+              "inclusive_ms": 206.248,
+              "self_samples": 1,
+              "inclusive_samples": 142
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 51.062,
+              "inclusive_ms": 202.444,
+              "self_samples": 39,
+              "inclusive_samples": 148
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 46.229,
+              "inclusive_ms": 177.462,
+              "self_samples": 35,
+              "inclusive_samples": 115
+            },
+            {
+              "key": "wasm:91289",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91289]]",
+              "self_ms": 1.06,
+              "inclusive_ms": 158.396,
+              "self_samples": 1,
+              "inclusive_samples": 105
+            },
+            {
+              "key": "wasm:90138",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90138]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 142.048,
+              "self_samples": 0,
+              "inclusive_samples": 132
+            }
+          ]
+        },
+        {
+          "scenario": "freeflight-moving",
+          "input_sha256": "58d98231690d74d9f268322e9b310092e7322b17ba191afa7c700cdfbe614377",
+          "output_sha256": "65d5b92f88abf0846ce5f21dc10aec8e0d56553fd0e5ae90b94f112dc754b4c8",
+          "renamed_nodes": 2118,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6106,
+          "sample_weight_ms": 8110.302,
+          "profile_duration_ms": 8110.564,
+          "median_sample_delta_ms": 1.065,
+          "max_sample_delta_ms": 108.446,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 530.106,
+              "inclusive_sample_count": 361,
+              "share_of_complete_profile_percent": 6.5362054335337945
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 618.615,
+              "inclusive_sample_count": 404,
+              "share_of_complete_profile_percent": 7.6275211453284975
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 1.619,
+              "inclusive_sample_count": 1,
+              "share_of_complete_profile_percent": 0.019962265276928036
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 183.198,
+              "inclusive_sample_count": 117,
+              "share_of_complete_profile_percent": 2.258830805560631
+            }
+          },
+          "referenced_wasm_functions": 1771,
+          "mapped_wasm_functions": 760,
+          "mapped_wasm_self_ms": 1006.895,
+          "unmapped_wasm_self_ms": 796.64,
+          "foreign_wasm_self_ms": 5.971,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 96.522,
+              "inclusive_ms": 315.794,
+              "self_samples": 74,
+              "inclusive_samples": 217
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 65.611,
+              "inclusive_ms": 158.81,
+              "self_samples": 37,
+              "inclusive_samples": 101
+            },
+            {
+              "key": "wasm:91643",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91643]]",
+              "self_ms": 63.809,
+              "inclusive_ms": 63.809,
+              "self_samples": 47,
+              "inclusive_samples": 47
+            },
+            {
+              "key": "wasm:91644",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddSubpixelTriangle [wasm-function[91644]]",
+              "self_ms": 58.161,
+              "inclusive_ms": 60.311,
+              "self_samples": 33,
+              "inclusive_samples": 35
+            },
+            {
+              "key": "wasm:91641",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91641]]",
+              "self_ms": 54.589,
+              "inclusive_ms": 183.903,
+              "self_samples": 29,
+              "inclusive_samples": 116
+            },
+            {
+              "key": "wasm:91636",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91636]]",
+              "self_ms": 42.707,
+              "inclusive_ms": 265.787,
+              "self_samples": 24,
+              "inclusive_samples": 167
+            },
+            {
+              "key": "wasm:91640",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91640]]",
+              "self_ms": 37.01,
+              "inclusive_ms": 37.01,
+              "self_samples": 26,
+              "inclusive_samples": 26
+            },
+            {
+              "key": "wasm:23143",
+              "name": "Microsoft.UI.Xaml.Documents.UnicodeText..ctor [wasm-function[23143]]",
+              "self_ms": 33.491,
+              "inclusive_ms": 129.431,
+              "self_samples": 23,
+              "inclusive_samples": 97
+            },
+            {
+              "key": "wasm:91637",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Orientation [wasm-function[91637]]",
+              "self_ms": 21.92,
+              "inclusive_ms": 21.92,
+              "self_samples": 22,
+              "inclusive_samples": 22
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 20.726,
+              "inclusive_ms": 618.615,
+              "self_samples": 12,
+              "inclusive_samples": 404
+            },
+            {
+              "key": "wasm:91622",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle.Contains [wasm-function[91622]]",
+              "self_ms": 18.818,
+              "inclusive_ms": 18.818,
+              "self_samples": 17,
+              "inclusive_samples": 17
+            },
+            {
+              "key": "wasm:91149",
+              "name": "PixelMap.Rendering.TileTransform.Vertex [wasm-function[91149]]",
+              "self_ms": 14.47,
+              "inclusive_ms": 14.47,
+              "self_samples": 8,
+              "inclusive_samples": 8
+            },
+            {
+              "key": "wasm:90608",
+              "name": "PixelMap.Data.ElevationSurfaceIndex+EdgeNode.Crossings [wasm-function[90608]]",
+              "self_ms": 13.064,
+              "inclusive_ms": 13.064,
+              "self_samples": 9,
+              "inclusive_samples": 9
+            },
+            {
+              "key": "wasm:91556",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91556]]",
+              "self_ms": 12.892,
+              "inclusive_ms": 34.223,
+              "self_samples": 8,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete [wasm-function[91612]]",
+              "self_ms": 12.602,
+              "inclusive_ms": 479.643,
+              "self_samples": 7,
+              "inclusive_samples": 321
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90180",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90180]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1118.12,
+              "self_samples": 0,
+              "inclusive_samples": 759
+            },
+            {
+              "key": "wasm:90174",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90174]]",
+              "self_ms": 2.101,
+              "inclusive_ms": 1117.059,
+              "self_samples": 2,
+              "inclusive_samples": 758
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1107.513,
+              "self_samples": 0,
+              "inclusive_samples": 749
+            },
+            {
+              "key": "wasm:91821",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91821]]",
+              "self_ms": 1.061,
+              "inclusive_ms": 728.869,
+              "self_samples": 1,
+              "inclusive_samples": 483
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 20.726,
+              "inclusive_ms": 618.615,
+              "self_samples": 12,
+              "inclusive_samples": 404
+            },
+            {
+              "key": "wasm:91110",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91110]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 515.082,
+              "self_samples": 0,
+              "inclusive_samples": 350
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91611]]",
+              "self_ms": 3.815,
+              "inclusive_ms": 515.082,
+              "self_samples": 1,
+              "inclusive_samples": 350
+            },
+            {
+              "key": "wasm:91813",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91813]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 515.082,
+              "self_samples": 0,
+              "inclusive_samples": 350
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete [wasm-function[91612]]",
+              "self_ms": 12.602,
+              "inclusive_ms": 479.643,
+              "self_samples": 7,
+              "inclusive_samples": 321
+            },
+            {
+              "key": "wasm:91625",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91625]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 476.743,
+              "self_samples": 0,
+              "inclusive_samples": 320
+            },
+            {
+              "key": "wasm:89931",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89931]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 367.455,
+              "self_samples": 0,
+              "inclusive_samples": 259
+            },
+            {
+              "key": "wasm:91300",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91300]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 362.079,
+              "self_samples": 0,
+              "inclusive_samples": 254
+            },
+            {
+              "key": "wasm:91299",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91299]]",
+              "self_ms": 3.306,
+              "inclusive_ms": 355.874,
+              "self_samples": 3,
+              "inclusive_samples": 249
+            },
+            {
+              "key": "wasm:91626",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAndSampleGroup [wasm-function[91626]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 317.931,
+              "self_samples": 0,
+              "inclusive_samples": 219
+            },
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 96.522,
+              "inclusive_ms": 315.794,
+              "self_samples": 74,
+              "inclusive_samples": 217
+            },
+            {
+              "key": "wasm:91636",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91636]]",
+              "self_ms": 42.707,
+              "inclusive_ms": 265.787,
+              "self_samples": 24,
+              "inclusive_samples": 167
+            },
+            {
+              "key": "wasm:91641",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91641]]",
+              "self_ms": 54.589,
+              "inclusive_ms": 183.903,
+              "self_samples": 29,
+              "inclusive_samples": 116
+            },
+            {
+              "key": "wasm:91289",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91289]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 183.198,
+              "self_samples": 0,
+              "inclusive_samples": 117
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 65.611,
+              "inclusive_ms": 158.81,
+              "self_samples": 37,
+              "inclusive_samples": 101
+            },
+            {
+              "key": "wasm:90138",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90138]]",
+              "self_ms": 1.178,
+              "inclusive_ms": 115.939,
+              "self_samples": 1,
+              "inclusive_samples": 109
+            },
+            {
+              "key": "wasm:93964",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93964]]",
+              "self_ms": 1.931,
+              "inclusive_ms": 114.761,
+              "self_samples": 1,
+              "inclusive_samples": 108
+            },
+            {
+              "key": "wasm:90805",
+              "name": "PixelMap.Data.TileRequestCache`1+<ProduceAsync>d__14.MoveNext [wasm-function[90805]]",
+              "self_ms": 1.712,
+              "inclusive_ms": 75.408,
+              "self_samples": 2,
+              "inclusive_samples": 50
+            },
+            {
+              "key": "wasm:91806",
+              "name": "PixelMap.Rendering.PixelMapRenderer.GroundAltitude [wasm-function[91806]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 72.172,
+              "self_samples": 0,
+              "inclusive_samples": 36
+            },
+            {
+              "key": "wasm:90658",
+              "name": "PixelMap.Data.ElevationTileSource+<ReadAsync>d__11.MoveNext [wasm-function[90658]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 68.629,
+              "self_samples": 0,
+              "inclusive_samples": 43
+            },
+            {
+              "key": "wasm:91643",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91643]]",
+              "self_ms": 63.809,
+              "inclusive_ms": 63.809,
+              "self_samples": 47,
+              "inclusive_samples": 47
+            }
+          ]
+        },
+        {
+          "scenario": "map-idle-relief",
+          "input_sha256": "c217943e7552407bb1bd5c3831c457578093a4b629e9b9d405830c046abefd24",
+          "output_sha256": "c217943e7552407bb1bd5c3831c457578093a4b629e9b9d405830c046abefd24",
+          "renamed_nodes": 0,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": true,
+          "sample_count": 7527,
+          "sample_weight_ms": 8101.153,
+          "profile_duration_ms": 8101.861,
+          "median_sample_delta_ms": 1.062,
+          "max_sample_delta_ms": 99.903,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            }
+          }
+        },
+        {
+          "scenario": "walk-moving-chase",
+          "input_sha256": "86acd93429f6a92955c865bbc78c63e325ca7530ebe3c578812b54f699eb0f85",
+          "output_sha256": "4ade8f4d4d30e3290e89998abe2c72ffa5964e69248db3bfc48b6f17bdb4579f",
+          "renamed_nodes": 1446,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6138,
+          "sample_weight_ms": 8167.937,
+          "profile_duration_ms": 8168.279,
+          "median_sample_delta_ms": 1.068,
+          "max_sample_delta_ms": 158.458,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 210.392,
+              "inclusive_sample_count": 142,
+              "share_of_complete_profile_percent": 2.575827898770522
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 350.29,
+              "inclusive_sample_count": 198,
+              "share_of_complete_profile_percent": 4.288598210294717
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 204.336,
+              "inclusive_sample_count": 157,
+              "share_of_complete_profile_percent": 2.5016843298375098
+            }
+          },
+          "referenced_wasm_functions": 1597,
+          "mapped_wasm_functions": 636,
+          "mapped_wasm_self_ms": 751.916,
+          "unmapped_wasm_self_ms": 783.88,
+          "foreign_wasm_self_ms": 8.833,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 68.092,
+              "inclusive_ms": 113.638,
+              "self_samples": 33,
+              "inclusive_samples": 70
+            },
+            {
+              "key": "wasm:91556",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91556]]",
+              "self_ms": 44.152,
+              "inclusive_ms": 84.662,
+              "self_samples": 20,
+              "inclusive_samples": 46
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 33.48,
+              "inclusive_ms": 350.29,
+              "self_samples": 16,
+              "inclusive_samples": 198
+            },
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 30.18,
+              "inclusive_ms": 36.731,
+              "self_samples": 26,
+              "inclusive_samples": 33
+            },
+            {
+              "key": "wasm:90608",
+              "name": "PixelMap.Data.ElevationSurfaceIndex+EdgeNode.Crossings [wasm-function[90608]]",
+              "self_ms": 25.361,
+              "inclusive_ms": 25.361,
+              "self_samples": 12,
+              "inclusive_samples": 12
+            },
+            {
+              "key": "wasm:90509",
+              "name": "PixelMap.Data.TileId.GetHashCode [wasm-function[90509]]",
+              "self_ms": 19.204,
+              "inclusive_ms": 19.204,
+              "self_samples": 10,
+              "inclusive_samples": 10
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete [wasm-function[91612]]",
+              "self_ms": 13.689,
+              "inclusive_ms": 167.421,
+              "self_samples": 7,
+              "inclusive_samples": 114
+            },
+            {
+              "key": "wasm:91484",
+              "name": "PixelMap.Rendering.GpuBuildingSelection.Prepare [wasm-function[91484]]",
+              "self_ms": 13.194,
+              "inclusive_ms": 20.429,
+              "self_samples": 9,
+              "inclusive_samples": 15
+            },
+            {
+              "key": "wasm:92377",
+              "name": "PixelMap.Rendering.TerrainSurface.SelectPatches [wasm-function[92377]]",
+              "self_ms": 11.523,
+              "inclusive_ms": 22.113,
+              "self_samples": 4,
+              "inclusive_samples": 13
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 11.129,
+              "inclusive_ms": 111.799,
+              "self_samples": 5,
+              "inclusive_samples": 57
+            },
+            {
+              "key": "wasm:91640",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91640]]",
+              "self_ms": 9.793,
+              "inclusive_ms": 9.793,
+              "self_samples": 9,
+              "inclusive_samples": 9
+            },
+            {
+              "key": "wasm:15224",
+              "name": "Microsoft.UI.Composition.Visual.<Render>g__RenderChildrenStep|171_4 [wasm-function[15224]]",
+              "self_ms": 9.737,
+              "inclusive_ms": 1251.803,
+              "self_samples": 3,
+              "inclusive_samples": 884
+            },
+            {
+              "key": "wasm:94028",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Obstructs [wasm-function[94028]]",
+              "self_ms": 8.859,
+              "inclusive_ms": 20.144,
+              "self_samples": 11,
+              "inclusive_samples": 23
+            },
+            {
+              "key": "wasm:25081",
+              "name": "Microsoft.UI.Xaml.Media.CompositionTarget.EnqueueRenderCallback [wasm-function[25081]]",
+              "self_ms": 8.346,
+              "inclusive_ms": 1202.112,
+              "self_samples": 1,
+              "inclusive_samples": 849
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91611]]",
+              "self_ms": 7.478,
+              "inclusive_ms": 186.686,
+              "self_samples": 2,
+              "inclusive_samples": 125
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90180",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90180]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1059.24,
+              "self_samples": 0,
+              "inclusive_samples": 738
+            },
+            {
+              "key": "wasm:90174",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90174]]",
+              "self_ms": 0.656,
+              "inclusive_ms": 1058.349,
+              "self_samples": 1,
+              "inclusive_samples": 737
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90163]]",
+              "self_ms": 4.349,
+              "inclusive_ms": 970.776,
+              "self_samples": 1,
+              "inclusive_samples": 669
+            },
+            {
+              "key": "wasm:91821",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91821]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 491.377,
+              "self_samples": 0,
+              "inclusive_samples": 297
+            },
+            {
+              "key": "wasm:89931",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89931]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 464.557,
+              "self_samples": 0,
+              "inclusive_samples": 363
+            },
+            {
+              "key": "wasm:91300",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91300]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 452.677,
+              "self_samples": 0,
+              "inclusive_samples": 352
+            },
+            {
+              "key": "wasm:91299",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91299]]",
+              "self_ms": 1.062,
+              "inclusive_ms": 450.556,
+              "self_samples": 1,
+              "inclusive_samples": 350
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 33.48,
+              "inclusive_ms": 350.29,
+              "self_samples": 16,
+              "inclusive_samples": 198
+            },
+            {
+              "key": "wasm:91289",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91289]]",
+              "self_ms": 3.127,
+              "inclusive_ms": 204.336,
+              "self_samples": 2,
+              "inclusive_samples": 157
+            },
+            {
+              "key": "wasm:91110",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91110]]",
+              "self_ms": 5.967,
+              "inclusive_ms": 192.653,
+              "self_samples": 1,
+              "inclusive_samples": 126
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91611]]",
+              "self_ms": 7.478,
+              "inclusive_ms": 186.686,
+              "self_samples": 2,
+              "inclusive_samples": 125
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete [wasm-function[91612]]",
+              "self_ms": 13.689,
+              "inclusive_ms": 167.421,
+              "self_samples": 7,
+              "inclusive_samples": 114
+            },
+            {
+              "key": "wasm:91806",
+              "name": "PixelMap.Rendering.PixelMapRenderer.GroundAltitude [wasm-function[91806]]",
+              "self_ms": 1.247,
+              "inclusive_ms": 155.738,
+              "self_samples": 1,
+              "inclusive_samples": 81
+            },
+            {
+              "key": "wasm:91625",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91625]]",
+              "self_ms": 2.115,
+              "inclusive_ms": 154.462,
+              "self_samples": 2,
+              "inclusive_samples": 107
+            },
+            {
+              "key": "wasm:91813",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91813]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 153.856,
+              "self_samples": 0,
+              "inclusive_samples": 97
+            },
+            {
+              "key": "wasm:90138",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90138]]",
+              "self_ms": 1.715,
+              "inclusive_ms": 139.989,
+              "self_samples": 2,
+              "inclusive_samples": 121
+            },
+            {
+              "key": "wasm:93964",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93964]]",
+              "self_ms": 2.76,
+              "inclusive_ms": 138.274,
+              "self_samples": 2,
+              "inclusive_samples": 119
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 68.092,
+              "inclusive_ms": 113.638,
+              "self_samples": 33,
+              "inclusive_samples": 70
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 11.129,
+              "inclusive_ms": 111.799,
+              "self_samples": 5,
+              "inclusive_samples": 57
+            },
+            {
+              "key": "wasm:91556",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91556]]",
+              "self_ms": 44.152,
+              "inclusive_ms": 84.662,
+              "self_samples": 20,
+              "inclusive_samples": 46
+            },
+            {
+              "key": "wasm:91874",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawVehicle [wasm-function[91874]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 72.629,
+              "self_samples": 0,
+              "inclusive_samples": 57
+            },
+            {
+              "key": "wasm:91875",
+              "name": "PixelMap.Rendering.RouteOverlay.DrawVehicle [wasm-function[91875]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 72.629,
+              "self_samples": 0,
+              "inclusive_samples": 57
+            },
+            {
+              "key": "wasm:92171",
+              "name": "PixelMap.Rendering.RouteOverlay.DrawVehicleCore [wasm-function[92171]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 71.704,
+              "self_samples": 0,
+              "inclusive_samples": 56
+            },
+            {
+              "key": "wasm:90040",
+              "name": "PixelMap.Controls.PixelMapControl.OnJourneyChanged [wasm-function[90040]]",
+              "self_ms": 1.065,
+              "inclusive_ms": 71.352,
+              "self_samples": 1,
+              "inclusive_samples": 54
+            },
+            {
+              "key": "wasm:90137",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_1 [wasm-function[90137]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 71.352,
+              "self_samples": 0,
+              "inclusive_samples": 54
+            }
+          ]
+        },
+        {
+          "scenario": "walk-moving-firstperson",
+          "input_sha256": "be4568d62b930e7d2a00c7f3ee875e2163d1ce6a6549938af5e28ce410c22788",
+          "output_sha256": "87829ea0fbd7a2eebc8670d8a49573fe86ce78068d78406190fde092541acb76",
+          "renamed_nodes": 1815,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 6450,
+          "sample_weight_ms": 8119.354,
+          "profile_duration_ms": 8119.851,
+          "median_sample_delta_ms": 1.066,
+          "max_sample_delta_ms": 110.564,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 864.081,
+              "inclusive_sample_count": 629,
+              "share_of_complete_profile_percent": 10.642238286444956
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 989.905,
+              "inclusive_sample_count": 720,
+              "share_of_complete_profile_percent": 12.19191822403605
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 128.308,
+              "inclusive_sample_count": 96,
+              "share_of_complete_profile_percent": 1.5802735045177239
+            }
+          },
+          "referenced_wasm_functions": 1584,
+          "mapped_wasm_functions": 712,
+          "mapped_wasm_self_ms": 1362.809,
+          "unmapped_wasm_self_ms": 647.709,
+          "foreign_wasm_self_ms": 6.37,
+          "top_mapped_self": [
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 163.058,
+              "inclusive_ms": 442.85,
+              "self_samples": 127,
+              "inclusive_samples": 320
+            },
+            {
+              "key": "wasm:91643",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle..ctor [wasm-function[91643]]",
+              "self_ms": 115.264,
+              "inclusive_ms": 115.264,
+              "self_samples": 76,
+              "inclusive_samples": 76
+            },
+            {
+              "key": "wasm:91622",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Triangle.Contains [wasm-function[91622]]",
+              "self_ms": 101.799,
+              "inclusive_ms": 101.799,
+              "self_samples": 72,
+              "inclusive_samples": 72
+            },
+            {
+              "key": "wasm:91641",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91641]]",
+              "self_ms": 76.673,
+              "inclusive_ms": 278.179,
+              "self_samples": 54,
+              "inclusive_samples": 192
+            },
+            {
+              "key": "wasm:91644",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddSubpixelTriangle [wasm-function[91644]]",
+              "self_ms": 61.477,
+              "inclusive_ms": 67.171,
+              "self_samples": 43,
+              "inclusive_samples": 48
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 52.039,
+              "inclusive_ms": 213.346,
+              "self_samples": 40,
+              "inclusive_samples": 156
+            },
+            {
+              "key": "wasm:91636",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91636]]",
+              "self_ms": 49.722,
+              "inclusive_ms": 376.115,
+              "self_samples": 32,
+              "inclusive_samples": 259
+            },
+            {
+              "key": "wasm:91640",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CachedOutCode [wasm-function[91640]]",
+              "self_ms": 45.008,
+              "inclusive_ms": 45.008,
+              "self_samples": 35,
+              "inclusive_samples": 35
+            },
+            {
+              "key": "wasm:91556",
+              "name": "PixelMap.Rendering.GpuMapFrame.TryHeight [wasm-function[91556]]",
+              "self_ms": 44.354,
+              "inclusive_ms": 63.665,
+              "self_samples": 34,
+              "inclusive_samples": 51
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 40.2,
+              "inclusive_ms": 169.479,
+              "self_samples": 23,
+              "inclusive_samples": 118
+            },
+            {
+              "key": "wasm:91637",
+              "name": "PixelMap.Rendering.GpuSceneDepth.Orientation [wasm-function[91637]]",
+              "self_ms": 28.584,
+              "inclusive_ms": 28.584,
+              "self_samples": 21,
+              "inclusive_samples": 21
+            },
+            {
+              "key": "wasm:91646",
+              "name": "PixelMap.Rendering.GpuSceneDepth.BinCells [wasm-function[91646]]",
+              "self_ms": 24.191,
+              "inclusive_ms": 24.191,
+              "self_samples": 17,
+              "inclusive_samples": 17
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 23.964,
+              "inclusive_ms": 989.905,
+              "self_samples": 13,
+              "inclusive_samples": 720
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.SampleUncached [wasm-function[91614]]",
+              "self_ms": 23.726,
+              "inclusive_ms": 298.828,
+              "self_samples": 16,
+              "inclusive_samples": 228
+            },
+            {
+              "key": "wasm:91621",
+              "name": "PixelMap.Rendering.GpuSceneDepth+Edge.TrySample [wasm-function[91621]]",
+              "self_ms": 21.37,
+              "inclusive_ms": 21.37,
+              "self_samples": 18,
+              "inclusive_samples": 18
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90174",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.DrawGpuPresentation [wasm-function[90174]]",
+              "self_ms": 1.071,
+              "inclusive_ms": 1560.301,
+              "self_samples": 1,
+              "inclusive_samples": 1143
+            },
+            {
+              "key": "wasm:90180",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.RenderOverride [wasm-function[90180]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1560.301,
+              "self_samples": 0,
+              "inclusive_samples": 1143
+            },
+            {
+              "key": "wasm:90163",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PrepareGpuTexture [wasm-function[90163]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 1549.16,
+              "self_samples": 0,
+              "inclusive_samples": 1133
+            },
+            {
+              "key": "wasm:91821",
+              "name": "PixelMap.Rendering.PixelMapRenderer.PrepareGpuFrame [wasm-function[91821]]",
+              "self_ms": 6.222,
+              "inclusive_ms": 1224.512,
+              "self_samples": 3,
+              "inclusive_samples": 884
+            },
+            {
+              "key": "wasm:91779",
+              "name": "PixelMap.Rendering.PixelMapRenderer.DrawLabels [wasm-function[91779]]",
+              "self_ms": 23.964,
+              "inclusive_ms": 989.905,
+              "self_samples": 13,
+              "inclusive_samples": 720
+            },
+            {
+              "key": "wasm:91813",
+              "name": "PixelMap.Rendering.PixelMapRenderer.<DrawLabels>g__Covered|59_0 [wasm-function[91813]]",
+              "self_ms": 1.053,
+              "inclusive_ms": 840.998,
+              "self_samples": 1,
+              "inclusive_samples": 609
+            },
+            {
+              "key": "wasm:91110",
+              "name": "PixelMap.Rendering.BuildingRasterizer.CoversAt [wasm-function[91110]]",
+              "self_ms": 2.946,
+              "inclusive_ms": 839.945,
+              "self_samples": 2,
+              "inclusive_samples": 608
+            },
+            {
+              "key": "wasm:91611",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversAt [wasm-function[91611]]",
+              "self_ms": 3.31,
+              "inclusive_ms": 836.999,
+              "self_samples": 3,
+              "inclusive_samples": 606
+            },
+            {
+              "key": "wasm:91625",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareGroup [wasm-function[91625]]",
+              "self_ms": 13.579,
+              "inclusive_ms": 671.871,
+              "self_samples": 8,
+              "inclusive_samples": 486
+            },
+            {
+              "key": "wasm:91612",
+              "name": "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete [wasm-function[91612]]",
+              "self_ms": 10.603,
+              "inclusive_ms": 528.339,
+              "self_samples": 10,
+              "inclusive_samples": 371
+            },
+            {
+              "key": "wasm:91633",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddBuilding [wasm-function[91633]]",
+              "self_ms": 163.058,
+              "inclusive_ms": 442.85,
+              "self_samples": 127,
+              "inclusive_samples": 320
+            },
+            {
+              "key": "wasm:91636",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTriangle [wasm-function[91636]]",
+              "self_ms": 49.722,
+              "inclusive_ms": 376.115,
+              "self_samples": 32,
+              "inclusive_samples": 259
+            },
+            {
+              "key": "wasm:89931",
+              "name": "PixelMap.Controls.BrowserGpuSurface.Draw [wasm-function[89931]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 319.227,
+              "self_samples": 0,
+              "inclusive_samples": 245
+            },
+            {
+              "key": "wasm:91300",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawArtworkImage [wasm-function[91300]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 310.352,
+              "self_samples": 0,
+              "inclusive_samples": 238
+            },
+            {
+              "key": "wasm:91299",
+              "name": "PixelMap.Rendering.GlMapRenderer.DrawCore [wasm-function[91299]]",
+              "self_ms": 1.053,
+              "inclusive_ms": 309.291,
+              "self_samples": 1,
+              "inclusive_samples": 237
+            },
+            {
+              "key": "wasm:91614",
+              "name": "PixelMap.Rendering.GpuSceneDepth.SampleUncached [wasm-function[91614]]",
+              "self_ms": 23.726,
+              "inclusive_ms": 298.828,
+              "self_samples": 16,
+              "inclusive_samples": 228
+            },
+            {
+              "key": "wasm:91626",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAndSampleGroup [wasm-function[91626]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 298.283,
+              "self_samples": 0,
+              "inclusive_samples": 211
+            },
+            {
+              "key": "wasm:91641",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddProjectedTriangle [wasm-function[91641]]",
+              "self_ms": 76.673,
+              "inclusive_ms": 278.179,
+              "self_samples": 54,
+              "inclusive_samples": 192
+            },
+            {
+              "key": "wasm:91634",
+              "name": "PixelMap.Rendering.GpuSceneDepth.AddTerrain [wasm-function[91634]]",
+              "self_ms": 52.039,
+              "inclusive_ms": 213.346,
+              "self_samples": 40,
+              "inclusive_samples": 156
+            },
+            {
+              "key": "wasm:91619",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareCell [wasm-function[91619]]",
+              "self_ms": 2.197,
+              "inclusive_ms": 200.537,
+              "self_samples": 2,
+              "inclusive_samples": 154
+            },
+            {
+              "key": "wasm:91632",
+              "name": "PixelMap.Rendering.GpuSceneDepth.PrepareAt [wasm-function[91632]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 195.341,
+              "self_samples": 0,
+              "inclusive_samples": 150
+            },
+            {
+              "key": "wasm:91838",
+              "name": "PixelMap.Rendering.TerrainSurface.TryHeight [wasm-function[91838]]",
+              "self_ms": 40.2,
+              "inclusive_ms": 169.479,
+              "self_samples": 23,
+              "inclusive_samples": 118
+            },
+            {
+              "key": "wasm:90138",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90138]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 158.462,
+              "self_samples": 0,
+              "inclusive_samples": 129
+            },
+            {
+              "key": "wasm:93964",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93964]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 158.462,
+              "self_samples": 0,
+              "inclusive_samples": 129
+            },
+            {
+              "key": "wasm:91289",
+              "name": "PixelMap.Rendering.GlMapRenderer+GlState..ctor [wasm-function[91289]]",
+              "self_ms": 3.813,
+              "inclusive_ms": 128.308,
+              "self_samples": 2,
+              "inclusive_samples": 96
+            }
+          ]
+        },
+        {
+          "scenario": "walk-stationary-firstperson",
+          "input_sha256": "1f69da98b7eec98fac98fe6be3fd61ad91aa5ae62fda564308933cd42d343781",
+          "output_sha256": "3b419ddccad24211b48f9ebe89eabff67a7ccd9f15925441405f9e4744527ad8",
+          "renamed_nodes": 525,
+          "only_function_names_changed": true,
+          "unchanged_without_native_frames": false,
+          "sample_count": 7503,
+          "sample_weight_ms": 8118.866,
+          "profile_duration_ms": 8119.923,
+          "median_sample_delta_ms": 1.062,
+          "max_sample_delta_ms": 116.888,
+          "stack_categories": {
+            "depth_visibility": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "label_drawing": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_texture_baking": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "terrain_integer_copy": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            },
+            "gl_state_capture": {
+              "inclusive_sample_weight_ms": 0.0,
+              "inclusive_sample_count": 0,
+              "share_of_complete_profile_percent": 0.0
+            }
+          },
+          "referenced_wasm_functions": 339,
+          "mapped_wasm_functions": 208,
+          "mapped_wasm_self_ms": 61.591,
+          "unmapped_wasm_self_ms": 68.741,
+          "foreign_wasm_self_ms": 0.0,
+          "top_mapped_self": [
+            {
+              "key": "wasm:94028",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Obstructs [wasm-function[94028]]",
+              "self_ms": 9.551,
+              "inclusive_ms": 15.921,
+              "self_samples": 9,
+              "inclusive_samples": 15
+            },
+            {
+              "key": "wasm:94093",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Contains [wasm-function[94093]]",
+              "self_ms": 5.31,
+              "inclusive_ms": 5.31,
+              "self_samples": 5,
+              "inclusive_samples": 5
+            },
+            {
+              "key": "wasm:115971",
+              "name": "System.SZGenericArrayEnumeratorBase.Dispose [wasm-function[115971]]",
+              "self_ms": 2.186,
+              "inclusive_ms": 2.186,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:90017",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateFreeRoamCamera [wasm-function[90017]]",
+              "self_ms": 2.158,
+              "inclusive_ms": 11.67,
+              "self_samples": 2,
+              "inclusive_samples": 11
+            },
+            {
+              "key": "wasm:90152",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.PresentGpuTerrain [wasm-function[90152]]",
+              "self_ms": 2.14,
+              "inclusive_ms": 3.199,
+              "self_samples": 2,
+              "inclusive_samples": 3
+            },
+            {
+              "key": "wasm:98315",
+              "name": "System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd [wasm-function[98315]]",
+              "self_ms": 2.127,
+              "inclusive_ms": 3.171,
+              "self_samples": 2,
+              "inclusive_samples": 3
+            },
+            {
+              "key": "wasm:17788",
+              "name": "Microsoft.UI.Xaml.DependencyProperty.GetDefaultValue [wasm-function[17788]]",
+              "self_ms": 2.12,
+              "inclusive_ms": 2.12,
+              "self_samples": 2,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:94099",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.CrossesInterior [wasm-function[94099]]",
+              "self_ms": 2.12,
+              "inclusive_ms": 2.12,
+              "self_samples": 2,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:124701",
+              "name": "System.Threading.Tasks.TaskExceptionHolder.AddFaultException [wasm-function[124701]]",
+              "self_ms": 1.112,
+              "inclusive_ms": 2.176,
+              "self_samples": 1,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:107035",
+              "name": "System.Uri.CreateThis [wasm-function[107035]]",
+              "self_ms": 1.078,
+              "inclusive_ms": 2.154,
+              "self_samples": 1,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:106090",
+              "name": "System.Net.Http.BrowserHttpController.Dispose [wasm-function[106090]]",
+              "self_ms": 1.073,
+              "inclusive_ms": 2.143,
+              "self_samples": 1,
+              "inclusive_samples": 2
+            },
+            {
+              "key": "wasm:124657",
+              "name": "System.Threading.Tasks.TaskCompletionSource`1..ctor [wasm-function[124657]]",
+              "self_ms": 1.069,
+              "inclusive_ms": 1.069,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:118144",
+              "name": "System.Int32.TryFormat [wasm-function[118144]]",
+              "self_ms": 1.068,
+              "inclusive_ms": 1.068,
+              "self_samples": 1,
+              "inclusive_samples": 1
+            },
+            {
+              "key": "wasm:90149",
+              "name": "PixelMap.Controls.PixelMapControl+MapSurface.get_PresentedRenderer [wasm-function[90149]]",
+              "self_ms": 1.068,
+              "inclusive_ms": 4.247,
+              "self_samples": 1,
+              "inclusive_samples": 4
+            },
+            {
+              "key": "wasm:124258",
+              "name": "System.Threading.TimerQueue.ReplaceNextTimer [wasm-function[124258]]",
+              "self_ms": 1.067,
+              "inclusive_ms": 6.441,
+              "self_samples": 1,
+              "inclusive_samples": 6
+            }
+          ],
+          "top_application_inclusive": [
+            {
+              "key": "wasm:90822",
+              "name": "PixelMap.Data.VectorTileSource+<GetTemplateAsync>d__13.MoveNext [wasm-function[90822]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 46.782,
+              "self_samples": 0,
+              "inclusive_samples": 34
+            },
+            {
+              "key": "wasm:90138",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_2 [wasm-function[90138]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 45.672,
+              "self_samples": 0,
+              "inclusive_samples": 43
+            },
+            {
+              "key": "wasm:93964",
+              "name": "PixelMap.Simulation.JourneySession.Tick [wasm-function[93964]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 45.672,
+              "self_samples": 0,
+              "inclusive_samples": 43
+            },
+            {
+              "key": "wasm:90805",
+              "name": "PixelMap.Data.TileRequestCache`1+<ProduceAsync>d__14.MoveNext [wasm-function[90805]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 38.621,
+              "self_samples": 0,
+              "inclusive_samples": 36
+            },
+            {
+              "key": "wasm:90803",
+              "name": "PixelMap.Data.TileRequestCache`1+<GetTileAsync>d__13.MoveNext [wasm-function[90803]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 34.709,
+              "self_samples": 0,
+              "inclusive_samples": 32
+            },
+            {
+              "key": "wasm:90295",
+              "name": "PixelMap.Controls.TileViewport`1+<Fetch>d__20.MoveNext [wasm-function[90295]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 31.216,
+              "self_samples": 0,
+              "inclusive_samples": 29
+            },
+            {
+              "key": "wasm:90658",
+              "name": "PixelMap.Data.ElevationTileSource+<ReadAsync>d__11.MoveNext [wasm-function[90658]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 29.069,
+              "self_samples": 0,
+              "inclusive_samples": 27
+            },
+            {
+              "key": "wasm:93966",
+              "name": "PixelMap.Simulation.JourneySession.FreeRoamStep [wasm-function[93966]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 25.473,
+              "self_samples": 0,
+              "inclusive_samples": 24
+            },
+            {
+              "key": "wasm:93996",
+              "name": "PixelMap.Simulation.JourneySession.WalkFree [wasm-function[93996]]",
+              "self_ms": 1.062,
+              "inclusive_ms": 25.473,
+              "self_samples": 1,
+              "inclusive_samples": 24
+            },
+            {
+              "key": "wasm:90516",
+              "name": "PixelMap.Data.TileRequestCache`1.GetTileAsync [wasm-function[90516]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 24.765,
+              "self_samples": 0,
+              "inclusive_samples": 23
+            },
+            {
+              "key": "wasm:94000",
+              "name": "PixelMap.Simulation.JourneySession.TryWalkMove [wasm-function[94000]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 24.411,
+              "self_samples": 0,
+              "inclusive_samples": 23
+            },
+            {
+              "key": "wasm:90786",
+              "name": "PixelMap.Data.TileRequestCache`1.ProduceAsync [wasm-function[90786]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 22.63,
+              "self_samples": 0,
+              "inclusive_samples": 21
+            },
+            {
+              "key": "wasm:90654",
+              "name": "PixelMap.Data.ElevationTileSource.ReadAsync [wasm-function[90654]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 21.666,
+              "self_samples": 0,
+              "inclusive_samples": 20
+            },
+            {
+              "key": "wasm:94001",
+              "name": "PixelMap.Simulation.JourneySession.Blocked [wasm-function[94001]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 20.166,
+              "self_samples": 0,
+              "inclusive_samples": 19
+            },
+            {
+              "key": "wasm:94030",
+              "name": "PixelMap.Simulation.VectorCollisionWorld.Blocks [wasm-function[94030]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 20.166,
+              "self_samples": 0,
+              "inclusive_samples": 19
+            },
+            {
+              "key": "wasm:90040",
+              "name": "PixelMap.Controls.PixelMapControl.OnJourneyChanged [wasm-function[90040]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 19.14,
+              "self_samples": 0,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:90137",
+              "name": "PixelMap.Controls.PixelMapControl.<HookJourney>b__56_1 [wasm-function[90137]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 19.14,
+              "self_samples": 0,
+              "inclusive_samples": 18
+            },
+            {
+              "key": "wasm:94032",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+ContactSweep.Obstructed [wasm-function[94032]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 18.046,
+              "self_samples": 0,
+              "inclusive_samples": 17
+            },
+            {
+              "key": "wasm:90653",
+              "name": "PixelMap.Data.ElevationTileSource.GetTileAsync [wasm-function[90653]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 17.332,
+              "self_samples": 0,
+              "inclusive_samples": 16
+            },
+            {
+              "key": "wasm:94028",
+              "name": "PixelMap.Simulation.VectorCollisionWorld+TileObstacles.Obstructs [wasm-function[94028]]",
+              "self_ms": 9.551,
+              "inclusive_ms": 15.921,
+              "self_samples": 9,
+              "inclusive_samples": 15
+            },
+            {
+              "key": "wasm:90824",
+              "name": "PixelMap.Data.VectorTileSource+<ReadAsync>d__12.MoveNext [wasm-function[90824]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 14.874,
+              "self_samples": 0,
+              "inclusive_samples": 14
+            },
+            {
+              "key": "wasm:90003",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateRideCamera [wasm-function[90003]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 11.67,
+              "self_samples": 0,
+              "inclusive_samples": 11
+            },
+            {
+              "key": "wasm:90017",
+              "name": "PixelMap.Controls.PixelMapControl.UpdateFreeRoamCamera [wasm-function[90017]]",
+              "self_ms": 2.158,
+              "inclusive_ms": 11.67,
+              "self_samples": 2,
+              "inclusive_samples": 11
+            },
+            {
+              "key": "wasm:90818",
+              "name": "PixelMap.Data.VectorTileSource.GetTileAsync [wasm-function[90818]]",
+              "self_ms": 0.0,
+              "inclusive_ms": 7.433,
+              "self_samples": 0,
+              "inclusive_samples": 7
+            },
+            {
+              "key": "wasm:90009",
+              "name": "PixelMap.Controls.PixelMapControl.InvalidateMap [wasm-function[90009]]",
+              "self_ms": 1.061,
+              "inclusive_ms": 6.38,
+              "self_samples": 1,
+              "inclusive_samples": 6
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

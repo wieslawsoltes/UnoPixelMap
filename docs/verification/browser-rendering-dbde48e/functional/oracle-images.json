@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "workflow_run_id": 42907891884,
+  "artifact_id": 13807507180,
+  "original_archive_sha256": "b5844aabb1bdd1bcd6a250fa1163a92f60e71cf9ebc042559041f9a6d72def61",
+  "archive": "presentation-oracles.zip",
+  "original_member_count": 24,
+  "unique_png_streams": 12,
+  "deduplication": "Only exactly identical original PNG byte streams are shared; no image pixels or PNG bytes are edited or re-encoded. Each source archive member remains explicitly mapped.",
+  "members": [
+    {
+      "original_member": "gpu-direct/presentation-pixel.map.png",
+      "stored_member": "images/94ed8baf3951a8ac8e5523d8664b169f0756a44ef7968fe9a9d871d6239c8c08.png",
+      "sha256": "94ed8baf3951a8ac8e5523d8664b169f0756a44ef7968fe9a9d871d6239c8c08",
+      "bytes": 123809,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-direct/presentation-pixel.png",
+      "stored_member": "images/94b02b0a1d089c5ee484b376b68a5519401e875d4f5447bba85084e7aad18614.png",
+      "sha256": "94b02b0a1d089c5ee484b376b68a5519401e875d4f5447bba85084e7aad18614",
+      "bytes": 198338,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-direct/presentation-normal.map.png",
+      "stored_member": "images/e3e04baebdc8fb4dc9b7523e98cb9ec7ab955ebed24c2b95249214484776a983.png",
+      "sha256": "e3e04baebdc8fb4dc9b7523e98cb9ec7ab955ebed24c2b95249214484776a983",
+      "bytes": 382200,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-direct/presentation-normal.png",
+      "stored_member": "images/0b9e0e320b0390df189f7af7267e76e24567d4ce9cda366eb91747de08ec8787.png",
+      "sha256": "0b9e0e320b0390df189f7af7267e76e24567d4ce9cda366eb91747de08ec8787",
+      "bytes": 642613,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-direct/presentation-minecraft.map.png",
+      "stored_member": "images/40520f974145ae8208a98e02d1da84c747dfe6157f343bf75d407eda251fb2e1.png",
+      "sha256": "40520f974145ae8208a98e02d1da84c747dfe6157f343bf75d407eda251fb2e1",
+      "bytes": 266113,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-direct/presentation-minecraft.png",
+      "stored_member": "images/9b8fc81ce55830af98f5eff198a95fb2de21031cdd4e0178faee73d20f8ceee3.png",
+      "sha256": "9b8fc81ce55830af98f5eff198a95fb2de21031cdd4e0178faee73d20f8ceee3",
+      "bytes": 418169,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-direct/presentation-roblox.map.png",
+      "stored_member": "images/c402a74f7fe2fa18b1cbe994b6f701a5d14c7a81b7bb0382973f86e357e6dae3.png",
+      "sha256": "c402a74f7fe2fa18b1cbe994b6f701a5d14c7a81b7bb0382973f86e357e6dae3",
+      "bytes": 395645,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-direct/presentation-roblox.png",
+      "stored_member": "images/e1dd66b433589107beb665f1fd76ca9fd862aee5a54ebecec3e7875ab7c559bf.png",
+      "sha256": "e1dd66b433589107beb665f1fd76ca9fd862aee5a54ebecec3e7875ab7c559bf",
+      "bytes": 660694,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-direct/presentation-earth-overhead.map.png",
+      "stored_member": "images/7701d67a45c4b15e1bde6c000dad4838ff584c49057d2abad513eeea6dbf118a.png",
+      "sha256": "7701d67a45c4b15e1bde6c000dad4838ff584c49057d2abad513eeea6dbf118a",
+      "bytes": 151901,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-direct/presentation-earth-overhead.png",
+      "stored_member": "images/bf648a532a5420fb7790528c997b91c1e8fd3e44cb84ca010940b7c3a00e1fcd.png",
+      "sha256": "bf648a532a5420fb7790528c997b91c1e8fd3e44cb84ca010940b7c3a00e1fcd",
+      "bytes": 296768,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-direct/presentation-elevation.map.png",
+      "stored_member": "images/6f32a9239d07bb54e691894ca700fb67e43202940f17bffb215f62a64113c108.png",
+      "sha256": "6f32a9239d07bb54e691894ca700fb67e43202940f17bffb215f62a64113c108",
+      "bytes": 144763,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-direct/presentation-elevation.png",
+      "stored_member": "images/7faa7db1dedea6d096361edb92a323e21c6c707622eea91c5a106d202d22433c.png",
+      "sha256": "7faa7db1dedea6d096361edb92a323e21c6c707622eea91c5a106d202d22433c",
+      "bytes": 287360,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-transfer/presentation-pixel.map.png",
+      "stored_member": "images/94ed8baf3951a8ac8e5523d8664b169f0756a44ef7968fe9a9d871d6239c8c08.png",
+      "sha256": "94ed8baf3951a8ac8e5523d8664b169f0756a44ef7968fe9a9d871d6239c8c08",
+      "bytes": 123809,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-transfer/presentation-pixel.png",
+      "stored_member": "images/94b02b0a1d089c5ee484b376b68a5519401e875d4f5447bba85084e7aad18614.png",
+      "sha256": "94b02b0a1d089c5ee484b376b68a5519401e875d4f5447bba85084e7aad18614",
+      "bytes": 198338,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-transfer/presentation-normal.map.png",
+      "stored_member": "images/e3e04baebdc8fb4dc9b7523e98cb9ec7ab955ebed24c2b95249214484776a983.png",
+      "sha256": "e3e04baebdc8fb4dc9b7523e98cb9ec7ab955ebed24c2b95249214484776a983",
+      "bytes": 382200,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-transfer/presentation-normal.png",
+      "stored_member": "images/0b9e0e320b0390df189f7af7267e76e24567d4ce9cda366eb91747de08ec8787.png",
+      "sha256": "0b9e0e320b0390df189f7af7267e76e24567d4ce9cda366eb91747de08ec8787",
+      "bytes": 642613,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-transfer/presentation-minecraft.map.png",
+      "stored_member": "images/40520f974145ae8208a98e02d1da84c747dfe6157f343bf75d407eda251fb2e1.png",
+      "sha256": "40520f974145ae8208a98e02d1da84c747dfe6157f343bf75d407eda251fb2e1",
+      "bytes": 266113,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-transfer/presentation-minecraft.png",
+      "stored_member": "images/9b8fc81ce55830af98f5eff198a95fb2de21031cdd4e0178faee73d20f8ceee3.png",
+      "sha256": "9b8fc81ce55830af98f5eff198a95fb2de21031cdd4e0178faee73d20f8ceee3",
+      "bytes": 418169,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-transfer/presentation-roblox.map.png",
+      "stored_member": "images/c402a74f7fe2fa18b1cbe994b6f701a5d14c7a81b7bb0382973f86e357e6dae3.png",
+      "sha256": "c402a74f7fe2fa18b1cbe994b6f701a5d14c7a81b7bb0382973f86e357e6dae3",
+      "bytes": 395645,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-transfer/presentation-roblox.png",
+      "stored_member": "images/e1dd66b433589107beb665f1fd76ca9fd862aee5a54ebecec3e7875ab7c559bf.png",
+      "sha256": "e1dd66b433589107beb665f1fd76ca9fd862aee5a54ebecec3e7875ab7c559bf",
+      "bytes": 660694,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-transfer/presentation-earth-overhead.map.png",
+      "stored_member": "images/7701d67a45c4b15e1bde6c000dad4838ff584c49057d2abad513eeea6dbf118a.png",
+      "sha256": "7701d67a45c4b15e1bde6c000dad4838ff584c49057d2abad513eeea6dbf118a",
+      "bytes": 151901,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-transfer/presentation-earth-overhead.png",
+      "stored_member": "images/bf648a532a5420fb7790528c997b91c1e8fd3e44cb84ca010940b7c3a00e1fcd.png",
+      "sha256": "bf648a532a5420fb7790528c997b91c1e8fd3e44cb84ca010940b7c3a00e1fcd",
+      "bytes": 296768,
+      "width": 1200,
+      "height": 780
+    },
+    {
+      "original_member": "gpu-transfer/presentation-elevation.map.png",
+      "stored_member": "images/6f32a9239d07bb54e691894ca700fb67e43202940f17bffb215f62a64113c108.png",
+      "sha256": "6f32a9239d07bb54e691894ca700fb67e43202940f17bffb215f62a64113c108",
+      "bytes": 144763,
+      "width": 675,
+      "height": 440
+    },
+    {
+      "original_member": "gpu-transfer/presentation-elevation.png",
+      "stored_member": "images/7faa7db1dedea6d096361edb92a323e21c6c707622eea91c5a106d202d22433c.png",
+      "sha256": "7faa7db1dedea6d096361edb92a323e21c6c707622eea91c5a106d202d22433c",
+      "bytes": 287360,
+      "width": 1200,
+      "height": 780
+    }
+  ]
+}

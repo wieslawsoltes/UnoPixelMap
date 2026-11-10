@@ -1,0 +1,460 @@
+{
+  "jobs": [
+    {
+      "id": 130150583957,
+      "run_id": 42907891884,
+      "workflow_name": "Pixel Atlas · browser and Pages",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/runs/42907891884",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVgnw188AAAAeTZROlQ",
+      "head_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/jobs/130150583957",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130150583957",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-10T21:44:06Z",
+      "started_at": "2026-11-10T21:44:09Z",
+      "completed_at": "2026-11-10T21:58:46Z",
+      "name": "browser",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-10T21:44:10Z",
+          "completed_at": "2026-11-10T21:44:11Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-10T21:44:11Z",
+          "completed_at": "2026-11-10T21:44:13Z"
+        },
+        {
+          "name": "Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-10T21:44:13Z",
+          "completed_at": "2026-11-10T21:44:15Z"
+        },
+        {
+          "name": "Install native graphics and the test font",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-10T21:44:15Z",
+          "completed_at": "2026-11-10T21:44:31Z"
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Data.Checks -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-10T21:44:31Z",
+          "completed_at": "2026-11-10T21:44:45Z"
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Rendering.Tests -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-10T21:44:45Z",
+          "completed_at": "2026-11-10T21:45:27Z"
+        },
+        {
+          "name": "Verify GLES terrain and model shaders",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-10T21:45:27Z",
+          "completed_at": "2026-11-10T21:46:00Z"
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Routing.Tests -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-10T21:46:00Z",
+          "completed_at": "2026-11-10T21:46:07Z"
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Simulation.Tests -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-10T21:46:07Z",
+          "completed_at": "2026-11-10T21:46:12Z"
+        },
+        {
+          "name": "Run node tests/browser/audio.cjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-10T21:46:12Z",
+          "completed_at": "2026-11-10T21:46:14Z"
+        },
+        {
+          "name": "Run node tests/browser/input-adapter.cjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-10T21:46:14Z",
+          "completed_at": "2026-11-10T21:46:14Z"
+        },
+        {
+          "name": "Run node tests/browser/camera-replay-checks.cjs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-10T21:46:14Z",
+          "completed_at": "2026-11-10T21:46:15Z"
+        },
+        {
+          "name": "Run dotnet workload install wasm-tools --skip-manifest-update",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-10T21:46:15Z",
+          "completed_at": "2026-11-10T21:46:35Z"
+        },
+        {
+          "name": "Run dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o \"/home/runner/work/_temp/atlas\"",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-10T21:46:35Z",
+          "completed_at": "2026-11-10T21:58:18Z"
+        },
+        {
+          "name": "Verify the Pages artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-10T21:58:18Z",
+          "completed_at": "2026-11-10T21:58:36Z"
+        },
+        {
+          "name": "Run actions/upload-pages-artifact@v3",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-10T21:58:36Z",
+          "completed_at": "2026-11-10T21:58:42Z"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-11-10T21:58:42Z",
+          "completed_at": "2026-11-10T21:58:43Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32,
+          "started_at": "2026-11-10T21:58:43Z",
+          "completed_at": "2026-11-10T21:58:43Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 33,
+          "started_at": "2026-11-10T21:58:43Z",
+          "completed_at": "2026-11-10T21:58:43Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/check-runs/130150583957",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000348241,
+      "runner_name": "GitHub Actions 1000348241",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 130158519794,
+      "run_id": 42907891884,
+      "workflow_name": "Pixel Atlas · browser and Pages",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/runs/42907891884",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVgnw188AAAAeTg1l8g",
+      "head_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/jobs/130158519794",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130158519794",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-10T21:58:46Z",
+      "started_at": "2026-11-10T21:58:49Z",
+      "completed_at": "2026-11-10T22:11:05Z",
+      "name": "verify",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-10T21:58:50Z",
+          "completed_at": "2026-11-10T21:58:51Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-10T21:58:51Z",
+          "completed_at": "2026-11-10T21:58:53Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-10T21:58:53Z",
+          "completed_at": "2026-11-10T21:58:57Z"
+        },
+        {
+          "name": "Unpack the exact Pages deployment",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-10T21:58:57Z",
+          "completed_at": "2026-11-10T21:58:57Z"
+        },
+        {
+          "name": "Exercise the published map in Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-10T21:58:57Z",
+          "completed_at": "2026-11-10T22:11:00Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-10T22:11:00Z",
+          "completed_at": "2026-11-10T22:11:03Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-10T22:11:03Z",
+          "completed_at": "2026-11-10T22:11:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-10T22:11:03Z",
+          "completed_at": "2026-11-10T22:11:03Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/check-runs/130158519794",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000348271,
+      "runner_name": "GitHub Actions 1000348271",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 130158519966,
+      "run_id": 42907891884,
+      "workflow_name": "Pixel Atlas · browser and Pages",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/runs/42907891884",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVgnw188AAAAeTg1mng",
+      "head_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/jobs/130158519966",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130158519966",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-10T21:58:46Z",
+      "started_at": "2026-11-10T21:58:49Z",
+      "completed_at": "2026-11-10T22:19:31Z",
+      "name": "play-benchmark",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-10T21:58:49Z",
+          "completed_at": "2026-11-10T21:58:50Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-10T21:58:50Z",
+          "completed_at": "2026-11-10T21:58:52Z"
+        },
+        {
+          "name": "Select exact baseline and candidate artifacts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-10T21:58:52Z",
+          "completed_at": "2026-11-10T21:58:54Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-10T21:58:54Z",
+          "completed_at": "2026-11-10T21:58:56Z"
+        },
+        {
+          "name": "Run actions/download-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-10T21:58:56Z",
+          "completed_at": "2026-11-10T21:58:59Z"
+        },
+        {
+          "name": "Verify and unpack both published applications",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-10T21:58:59Z",
+          "completed_at": "2026-11-10T21:58:59Z"
+        },
+        {
+          "name": "Install the pinned browser and record the runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-10T21:58:59Z",
+          "completed_at": "2026-11-10T21:59:12Z"
+        },
+        {
+          "name": "Measure both artifacts with identical play workloads",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-10T21:59:12Z",
+          "completed_at": "2026-11-10T22:11:43Z"
+        },
+        {
+          "name": "Replay identical submitted camera paths across both artifacts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-10T22:11:43Z",
+          "completed_at": "2026-11-10T22:19:27Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-10T22:19:27Z",
+          "completed_at": "2026-11-10T22:19:29Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-10T22:19:29Z",
+          "completed_at": "2026-11-10T22:19:29Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-11-10T22:19:29Z",
+          "completed_at": "2026-11-10T22:19:29Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/check-runs/130158519966",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000348272,
+      "runner_name": "GitHub Actions 1000348272",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 130165285303,
+      "run_id": 42907891884,
+      "workflow_name": "Pixel Atlas · browser and Pages",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/runs/42907891884",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVgnw188AAAAeTnShtw",
+      "head_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/jobs/130165285303",
+      "html_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130165285303",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-10T22:11:06Z",
+      "started_at": "2026-11-10T22:11:11Z",
+      "completed_at": "2026-11-10T22:11:22Z",
+      "name": "deploy",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-10T22:11:11Z",
+          "completed_at": "2026-11-10T22:11:13Z"
+        },
+        {
+          "name": "Run actions/configure-pages@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-10T22:11:13Z",
+          "completed_at": "2026-11-10T22:11:13Z"
+        },
+        {
+          "name": "Run actions/deploy-pages@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-10T22:11:13Z",
+          "completed_at": "2026-11-10T22:11:20Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-10T22:11:20Z",
+          "completed_at": "2026-11-10T22:11:20Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/check-runs/130165285303",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000348279,
+      "runner_name": "GitHub Actions 1000348279",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

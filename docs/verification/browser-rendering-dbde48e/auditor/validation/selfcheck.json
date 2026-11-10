@@ -1,0 +1,196 @@
+{
+  "all_passed": true,
+  "checks": [
+    {
+      "check": "legacy-30-process-14-profile-compatibility",
+      "passed": true,
+      "exact_field_comparisons": 1040
+    },
+    {
+      "check": "retain-observed-fence-censoring",
+      "passed": true,
+      "result": {
+        "submitted_ids": 37,
+        "observed_signal_records": 36,
+        "observed_signal_ids": 36,
+        "in_capture_submissions_with_observed_signal": 35,
+        "signals_for_ids_outside_capture": 1,
+        "submitted_ids_without_observed_signal": 2,
+        "outside_capture_signal_ids": [
+          6
+        ],
+        "unobserved_submission_ids": [
+          42,
+          43
+        ]
+      }
+    },
+    {
+      "check": "reject-partial-browser-identity",
+      "passed": true,
+      "error": "Full browser version equals environment"
+    },
+    {
+      "check": "reject-partial-cpu-identity",
+      "passed": true,
+      "error": "Full CPU model equals environment"
+    },
+    {
+      "check": "preflight-raw-repetition-1",
+      "passed": true,
+      "result": {
+        "valid": true,
+        "cases": [
+          {
+            "name": "map-pan-relief",
+            "steps": 32,
+            "submissions": 34,
+            "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+            "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c"
+          },
+          {
+            "name": "map-orbit-relief",
+            "steps": 32,
+            "submissions": 32,
+            "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+            "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba"
+          },
+          {
+            "name": "walk-look-firstperson",
+            "steps": 32,
+            "submissions": 36,
+            "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+            "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4"
+          }
+        ]
+      }
+    },
+    {
+      "check": "preflight-raw-repetition-2",
+      "passed": true,
+      "result": {
+        "valid": true,
+        "cases": [
+          {
+            "name": "map-pan-relief",
+            "steps": 32,
+            "submissions": 34,
+            "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+            "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c"
+          },
+          {
+            "name": "map-orbit-relief",
+            "steps": 32,
+            "submissions": 32,
+            "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+            "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba"
+          },
+          {
+            "name": "walk-look-firstperson",
+            "steps": 32,
+            "submissions": 36,
+            "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+            "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4"
+          }
+        ]
+      }
+    },
+    {
+      "check": "preflight-exact-cross-process-identity",
+      "passed": true,
+      "result": {
+        "valid": true,
+        "schema": 2,
+        "baseline": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "candidate": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+        "notes": "Exact ordered native inputs and every submitted projection float match. These are controlled camera/render workloads with a fence barrier between inputs, not free-roam simulation or physical display FPS.",
+        "comparisons": [
+          {
+            "name": "map-pan-relief",
+            "exactProjectionSequence": true,
+            "steps": 32,
+            "submissions": 34,
+            "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+            "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c"
+          },
+          {
+            "name": "map-orbit-relief",
+            "exactProjectionSequence": true,
+            "steps": 32,
+            "submissions": 32,
+            "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+            "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba"
+          },
+          {
+            "name": "walk-look-firstperson",
+            "exactProjectionSequence": true,
+            "steps": 32,
+            "submissions": 36,
+            "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+            "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4"
+          }
+        ]
+      }
+    },
+    {
+      "check": "reject-summary-tampering",
+      "passed": true,
+      "error": "Raw-derived capture field: cpu\n+ actual - expected\n\n  {\n    LayoutDurationMs: 0.13799999999999998,\n    RecalcStyleDurationMs: 0.067,\n    ScriptDurationMs: 2056.7960000000003,\n+   TaskDurationMs: 2279.3\n-   TaskDurationMs: 2278.3\n  }\n"
+    },
+    {
+      "check": "reject-profile-parent-cycle",
+      "passed": true,
+      "error": "Profile parent graph has no cycles"
+    },
+    {
+      "check": "reject-quiet-barrier-shortening",
+      "passed": true,
+      "error": "Step 0 retains the complete sequence through its quiet barrier"
+    },
+    {
+      "check": "reject-dropped-ordered-submission",
+      "passed": true,
+      "error": "Step 0 produces a bounded nonempty map submission sequence"
+    },
+    {
+      "check": "reject-extra-unscoped-submission",
+      "passed": true,
+      "error": "No full-capture submission is outside the step sequence\n\n35 !== 34\n"
+    },
+    {
+      "check": "reject-changed-projection",
+      "passed": true,
+      "error": "map-pan-relief: candidate projection hash is valid\n+ actual - expected\n\n+ 'e599201399ac5d0369baafae84a90ec129805493cd2cf8972a7fd5139dcc9a2c'\n- '9400d9b7e0cc9e48de2c7d75f211aba48bc9aaee64b52ddd9ef88c5d802f8e97'\n"
+    },
+    {
+      "check": "withhold-whole-scenario-comparison-after-one-identity-failure",
+      "passed": true,
+      "result": {
+        "comparable": false,
+        "comparative_timing_withheld": true,
+        "reason": "At least one exact ordered workload/runner identity check failed"
+      }
+    }
+  ],
+  "legacy_command": [
+    "python3",
+    "/workspace/scratch/c64783d771e9/new-browser-analysis-20261110/analyze.py",
+    "/workspace/scratch/c64783d771e9/UnoPixelMap/docs/verification/browser-rendering-555990d",
+    "/workspace/scratch/c64783d771e9/new-browser-analysis-20261110/validation/legacy-paired",
+    "--baseline-sha",
+    "53e9c684a45ff1224c91ebeeefbb4d321c1c8c8b",
+    "--baseline-run",
+    "42415166135",
+    "--candidate-sha",
+    "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+    "--candidate-run",
+    "42696985047",
+    "--known-baseline-artifact",
+    "/workspace/scratch/c64783d771e9/new-browser-analysis-20261110/validation/old-baseline-artifact.json",
+    "--harness-hash",
+    "explore.cjs=83d83491198362e499b67a07d1ddcc5ed2f3daaf451dd9493017c48153bae49b",
+    "--replay",
+    "absent"
+  ],
+  "scope": "Analyzer compatibility and corruption checks only; no new performance data or candidate browser measurements."
+}

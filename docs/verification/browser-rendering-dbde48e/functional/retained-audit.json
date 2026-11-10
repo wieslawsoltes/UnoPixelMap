@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "workflow_run_id": 42907891884,
+  "verify_job_id": 130158519794,
+  "browser": "156.0.8078.4",
+  "runtime_mode": "InterpreterAndAOT",
+  "retained_original_reports": 4,
+  "retained_original_png_members": 24,
+  "unique_original_png_streams": 12,
+  "presentation": {
+    "cases": [
+      {
+        "name": "presentation-pixel",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-normal",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-minecraft",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-roblox",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-earth-overhead",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-elevation",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      }
+    ],
+    "total_map_pixels": 1782000,
+    "total_full_capture_pixels": 5616000,
+    "recomputed_image_hashes_and_crops": true,
+    "direct_zero_readbacks": true,
+    "detached_async_pixel_pack": true
+  },
+  "verified_log_markers": {
+    "Trusted browser input checks passed for wheel/pinch routing, pointer capture, key repeat and native editing.": 1,
+    "Browser checks passed: seeded geometry, Earth imagery in isometric and overhead views, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.": 2,
+    "Passed journey scenario drive": 2,
+    "Passed journey scenario groundModes": 2,
+    "Passed journey scenario planVia": 2,
+    "Passed journey scenario phoneRide": 2,
+    "Terrain browser checks passed for real Garda relief, flat comparison, elevation, Map and Earth layers, 2D/3D, picking, orbit, drag, exaggeration, v4 sharing and phone controls.": 2,
+    "DPR2 dense-city NorthUp\u2192ground-clamped Orbit, horizon changes and runtime recovery passed.": 1,
+    "All four rendering styles and CPU/GPU switching passed.": 1,
+    "Desktop trackpad and WebKit gesture routing passed.": 1,
+    "Walking, terrain contact and held-jump behavior passed.": 1,
+    "Native drag, browser Pointer Lock, relative look and pause passed.": 1,
+    "Car driving and all five camera rigs passed.": 1,
+    "Held-touch flights, mixed trackpad takeover, camera reattachment and pinch cancellation passed.": 1,
+    "Walking, driving, aircraft, free flight and camera controls passed.": 1,
+    "Exploration checks passed for GPU defaults, four styles, native gestures, free movement, physical cameras, terrain and mobile controls.": 1
+  },
+  "close_camera_checkpoints": 9,
+  "close_camera_failures": [],
+  "recorded_pages_resource_hashes_consistent": 23,
+  "scope": "Selected retained reports and 24 original PNG members, complete saved job logs, and recorded API/package metadata. The 126 omitted browser-artifact members and original full ZIP digests are not rechecked by this script. Use audit_downloads.py with those ZIPs to recheck them. Presentation equality compares two paths within the same release; this is not a cross-release timing test."
+}

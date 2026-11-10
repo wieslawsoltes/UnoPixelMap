@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "originalArchive": {
+    "bytes": 13798778,
+    "sha256": "b0feae7904d7c8350f7445424dce6fb9313d65fd52b9c238bc914e2a14efa5de",
+    "verified": true
+  },
+  "originalZipMembersCompared": 35,
+  "retainedDecodedMembersCompared": 35,
+  "decodedBytes": 59508542,
+  "originalAndRetainedOutputByteIdentical": true,
+  "outputSha256": "62dab25eee969afadb2746d5310f9eb229ba6ffd923e44dbac7dadb053cc86c8",
+  "outputBytes": 167063,
+  "pythonIndependentMetricChecks": {
+    "processRows": 12,
+    "timingDistributions": 36,
+    "matchedTimingPairs": 576,
+    "passed": true
+  },
+  "sameLengthChangedEnvironmentRejectedBySha256": true,
+  "originalReferenceContractUnchanged": true
+}

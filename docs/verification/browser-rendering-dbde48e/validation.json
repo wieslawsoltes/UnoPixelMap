@@ -1,0 +1,120 @@
+{
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "workflow_run_id": 42907891884,
+  "workflow_url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884",
+  "workflow_conclusion": "success",
+  "jobs": [
+    {
+      "name": "browser",
+      "id": 130150583957,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130150583957",
+      "conclusion": "success",
+      "started_at": "2026-11-10T21:44:09Z",
+      "completed_at": "2026-11-10T21:58:46Z"
+    },
+    {
+      "name": "verify",
+      "id": 130158519794,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130158519794",
+      "conclusion": "success",
+      "started_at": "2026-11-10T21:58:49Z",
+      "completed_at": "2026-11-10T22:11:05Z"
+    },
+    {
+      "name": "play-benchmark",
+      "id": 130158519966,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130158519966",
+      "conclusion": "success",
+      "started_at": "2026-11-10T21:58:49Z",
+      "completed_at": "2026-11-10T22:19:31Z"
+    },
+    {
+      "name": "deploy",
+      "id": 130165285303,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884/job/130165285303",
+      "conclusion": "success",
+      "started_at": "2026-11-10T22:11:11Z",
+      "completed_at": "2026-11-10T22:11:22Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "atlas-play-performance",
+      "id": 13808810774,
+      "sha256": "b0feae7904d7c8350f7445424dce6fb9313d65fd52b9c238bc914e2a14efa5de",
+      "bytes": 13798778
+    },
+    {
+      "name": "github-pages",
+      "id": 13807570605,
+      "sha256": "d1439991dabcd2e9cdd266accc57c723cc79b630080d61afdb1fecbe49d22f3d",
+      "bytes": 88462283
+    },
+    {
+      "name": "atlas-browser-screens",
+      "id": 13807507180,
+      "sha256": "b5844aabb1bdd1bcd6a250fa1163a92f60e71cf9ebc042559041f9a6d72def61",
+      "bytes": 29156949
+    }
+  ],
+  "functional": {
+    "evidence": "functional/README.md",
+    "comparison_cases": 6,
+    "compared_map_pixels": 1782000,
+    "compared_canvas_pixels": 5616000,
+    "different_pixels": 0,
+    "high_dpi_checkpoints": 9,
+    "high_dpi_failures": 0,
+    "scope": "Same-candidate direct/detached pixel equality and full browser journeys; cross-release native GLES hashes are documented separately."
+  },
+  "native": {
+    "evidence": "../rendering-20261110/validation.json",
+    "baseline_identical_gles_sha256": "bd4674613629c8530e52784f3cd1368d492f5ddcab16b83e70988448a115c58a"
+  },
+  "paired_browser": {
+    "evidence": "analysis.json",
+    "held_key_processes": 30,
+    "cpu_profiles": 14,
+    "camera_replay_processes": 12,
+    "comparable_camera_scenarios": [
+      "map-pan-relief",
+      "map-orbit-relief",
+      "walk-look-firstperson"
+    ],
+    "held_key_map_submissions": {
+      "baseline": 799,
+      "candidate": 815
+    },
+    "camera_inputs": 384,
+    "camera_submissions": 408,
+    "replay_scope": "Exact ordered native-input/projection workload, barrier-paced CPU and latency; not physical display FPS."
+  },
+  "profiles": {
+    "evidence": "profiles/README.md",
+    "count": 14,
+    "samples": 92416,
+    "archive_sha256": "a24056c9272d3a394883a259f28ef12c3e82629eee5d7e9155820d292aa28f82",
+    "only_function_names_changed": true
+  },
+  "live_site": {
+    "url": "https://wieslawsoltes.github.io/UnoPixelMap/",
+    "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+    "observed_utc": "2026-11-10T22:20:01.837650+00:00",
+    "observed_bootstrap_src": "./package_801cbc2830341569438a9ce8c44febc16626f1501278ed456482a888efe98347/uno-bootstrap.js",
+    "observations": [
+      "The live document references the exact checked package bootstrap and matching versioned input/audio adapters.",
+      "The dense Manhattan map renders with GPU rendering and Pixel art rendering selected.",
+      "Terrain relief was enabled and reached Terrain ready.",
+      "Start walking here entered first-person free roam with physical telemetry.",
+      "Closing free roam restored the overview map; the final frame shows Map ready, Terrain ready, GPU active and Pixel rendering."
+    ],
+    "screenshot": "live-map.png",
+    "screenshot_sha256": "9a96c5243cb041061f87e82d4cd5f61ab34df76f50cd2661c7aca674ee6ea879",
+    "screenshot_bytes": 347215,
+    "screenshot_pixels": [
+      1800,
+      925
+    ],
+    "scope": "Manual visual live-site smoke check using public live providers; not a performance measurement or deterministic cross-release image oracle."
+  }
+}

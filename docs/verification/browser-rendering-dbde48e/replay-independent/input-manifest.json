@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "artifact": {
+    "id": 13808810774,
+    "runId": 42907891884,
+    "sha256": "b0feae7904d7c8350f7445424dce6fb9313d65fd52b9c238bc914e2a14efa5de",
+    "bytes": 13798778
+  },
+  "source": {
+    "baseline": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+    "candidate": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6"
+  },
+  "harness": {
+    "camera-replay.cjs": "9e3d2987136fc38d10680f8b5654050fad23006bc5c453efcd84f44bb8c4e833",
+    "camera-replay-probe.cjs": "7894b2fd47410abfcd5c83fc7464a45f4a09d8f05bfb368c7037d7cdd268b4bd",
+    "camera-replay-contract.cjs": "69430f8b256d1e088adcb8174c18a2540f7d452eba964c02e49644e7647a3a48",
+    "performance.cjs": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c",
+    "explore.cjs": "7b40495c5abcee619491520fee7637764242ba1c39e1a33b2bdcbff54d0a503b"
+  },
+  "preflight": {
+    "runId": 42906521344,
+    "artifactSha256": "18bb83f62b664fad5dabd8eb9160881e4459ce2b1598f9d5f44d848591352a9f",
+    "cases": [
+      {
+        "name": "map-pan-relief",
+        "exactProjectionSequence": true,
+        "steps": 32,
+        "submissions": 34,
+        "traceSha256": "e5cc61a3d5bbe8ccd5d4983b8a79de07c652a5da56db4cf9e482483152958382",
+        "projectionSequenceSha256": "0caeede981046b2ed9db5eceba1993aa0396396bb7b0d71db7108d01c1839a9c"
+      },
+      {
+        "name": "map-orbit-relief",
+        "exactProjectionSequence": true,
+        "steps": 32,
+        "submissions": 32,
+        "traceSha256": "93355e31f1ea63a19ebe0a70cbab843d4b3542c4087f0324ba8c3e7df4aa0ef6",
+        "projectionSequenceSha256": "e8f2cf8d69f924dad362c63e6395f47f46dd9d00b3d1b0421db1070161b4c1ba"
+      },
+      {
+        "name": "walk-look-firstperson",
+        "exactProjectionSequence": true,
+        "steps": 32,
+        "submissions": 36,
+        "traceSha256": "175fcc24e5a695b437e5535b767efec77561d7f450f89949e930043548aaecea",
+        "projectionSequenceSha256": "a5bf2e064b6cc24d274a08e1f307cca9d0cb1ff4e4459af9e815b3ce08d17fb4"
+      }
+    ]
+  },
+  "files": {
+    "camera-replay/baseline/map-orbit-relief/repetition-1/map-orbit-relief-raw.json": {
+      "bytes": 3135448,
+      "sha256": "551b2b9e7a06ecb7bfb7b34ed2ee2fb06c97d9a63a1ee163d44d5e481cabbbcc"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-1/report.json": {
+      "bytes": 2262595,
+      "sha256": "7ddcbe889251e2637b540fe464a80ef255ccb974f1b04b58eadd6daa0988bebe"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-2/comparison-with-baseline-first.json": {
+      "bytes": 20443,
+      "sha256": "cef8af7fa6ecfbc8f1c749d8699065ccb688173a641634a56ab6791843f64c8d"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-2/map-orbit-relief-raw.json": {
+      "bytes": 3120906,
+      "sha256": "59181baa0d90c21375064f94a62e4b345ad5a8483909dd53c4f2873e6b842071"
+    },
+    "camera-replay/baseline/map-orbit-relief/repetition-2/report.json": {
+      "bytes": 2262999,
+      "sha256": "25b931b4a8badbb9e5a4876da1bf92022d64563456278159809b59cf0a7c557c"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-1/map-pan-relief-raw.json": {
+      "bytes": 3254112,
+      "sha256": "468036a476cc5db532280f8d2e211c6d8ef376b5409a71a1943f9628729698ef"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-1/report.json": {
+      "bytes": 2401364,
+      "sha256": "61ce8206d6f303d6b12a556fd405fa770934e86c48346a45e4f925c190bcbae7"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-2/comparison-with-baseline-first.json": {
+      "bytes": 20497,
+      "sha256": "cfa2d8ac2aa4483db5f43734e82b68596b0f712e0acfe95639e8706d0c94f93a"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-2/map-pan-relief-raw.json": {
+      "bytes": 3249295,
+      "sha256": "c117815b69cd0ec8c57af7ea7fa3d33afd4df1606455668c4c4e5bb398351438"
+    },
+    "camera-replay/baseline/map-pan-relief/repetition-2/report.json": {
+      "bytes": 2401342,
+      "sha256": "bdad4b2944e7356a0e96e303b787168b875d3df75fb61223a544f9da071eba28"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-1/report.json": {
+      "bytes": 1680002,
+      "sha256": "fb29e21d4c062e0db5d49bb890bbb9166bd86438c4b6b249266f58ddf9243ecd"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json": {
+      "bytes": 2111554,
+      "sha256": "85f002756f9d2610fbb2c5da4331b3b5cff6b493aa560b17811aae7ea23249f3"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json": {
+      "bytes": 18210,
+      "sha256": "a5966c3558f1a6a4311069b2b8026a552db41571856eb5638ee445cef18696aa"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-2/report.json": {
+      "bytes": 1679852,
+      "sha256": "e8c91b9fd3dfc37fc64701deaea65c49e3cf01730866af8c6a39d426f6721b7f"
+    },
+    "camera-replay/baseline/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json": {
+      "bytes": 2102746,
+      "sha256": "ccfcc26105e213b714f4c8f7d5fab67f0623ca921bda2b1d2d71fb336219e7ba"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-1/comparison-with-baseline-first.json": {
+      "bytes": 20228,
+      "sha256": "574d6df05d1eb1241d014af054c03d71bdb1d37f577ee9a5fca47710553f2219"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-1/map-orbit-relief-raw.json": {
+      "bytes": 3117604,
+      "sha256": "63eecdfb283159b0e0f00cb949dd3fc53e49cd012ca7bd098c49b348e23504f1"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-1/report.json": {
+      "bytes": 2262756,
+      "sha256": "872224ad5de0dbaf09e5e5cccb40a2cb08877b89759d5124a0b5b8e362675741"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-2/comparison-with-baseline-first.json": {
+      "bytes": 19873,
+      "sha256": "6c9643b55e99b1c57355e8272546f96e9651a118b5b677cc3fcf999f53521d33"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-2/map-orbit-relief-raw.json": {
+      "bytes": 3123905,
+      "sha256": "ab287029edc437a35e1daf6e8fc5045ac69abe5ff02f3c789aa64129a63834db"
+    },
+    "camera-replay/candidate/map-orbit-relief/repetition-2/report.json": {
+      "bytes": 2262448,
+      "sha256": "110d072b40f9df45fc12c7c9c4bab9289d95ac7b6f5945993a548ce0a34717bf"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-1/comparison-with-baseline-first.json": {
+      "bytes": 20282,
+      "sha256": "142ceb5dbb90ec1380e87b0dcd2a4ffae8ffbac590f9ceec2dcd71a90532f8f6"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-1/map-pan-relief-raw.json": {
+      "bytes": 3244524,
+      "sha256": "7d0edc0b8c57795616ce7e1ac17a83cd7d83a8882ee299a10226a1bcfbce803f"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-1/report.json": {
+      "bytes": 2401147,
+      "sha256": "a4ae90fa224fd064075841f19ac529fe6b1e80b96ab78d7f2caf20b1c9345769"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-2/comparison-with-baseline-first.json": {
+      "bytes": 20153,
+      "sha256": "7ba87b35e17eeb260b8655c3652478a86bc55ab126263dd57a0728c116d82fb7"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-2/map-pan-relief-raw.json": {
+      "bytes": 3239978,
+      "sha256": "f13a8da1aca1bcae276f96bb19fbc3df5c38717724d677dcd7830b52deee531c"
+    },
+    "camera-replay/candidate/map-pan-relief/repetition-2/report.json": {
+      "bytes": 2401014,
+      "sha256": "b5d54fea1aedcc3e359fcbeb2b2f053721353afd5f74377b87ead6a4f9f70447"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-1/comparison-with-baseline-first.json": {
+      "bytes": 18162,
+      "sha256": "d353e4f4bcd24559d0a7e464685d4808aa11a7b9cfe1b4846165e74dcedecdfc"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-1/report.json": {
+      "bytes": 1679851,
+      "sha256": "15d4c4df8a964f9ad9dd5d9e0d6f4635afb2e4463ef4439f851450e003d828f1"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-1/walk-look-firstperson-raw.json": {
+      "bytes": 2103276,
+      "sha256": "d62ad26aeab01d5e47eae7ed9fa4e55b75526976a847a1c433d3f536c3d4dddb"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-2/comparison-with-baseline-first.json": {
+      "bytes": 18139,
+      "sha256": "203bbc50aea43f26b2269ab6da14ba91a5a039201a15fd7888669798e8677197"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-2/report.json": {
+      "bytes": 1679811,
+      "sha256": "7a424f40f0aa88b7a9c2d2abe017b7aff9ca11ab09a8cdb693aa76c5e10040ac"
+    },
+    "camera-replay/candidate/walk-look-firstperson/repetition-2/walk-look-firstperson-raw.json": {
+      "bytes": 2102460,
+      "sha256": "e715017bae7b3193525ec93d1e8a001b9b17c2145cefb51c8336a9a44e0e32b2"
+    },
+    "environment.json": {
+      "bytes": 4677,
+      "sha256": "1e1bd1af4fa227d1a2cf228c9eb0e3a00c4aea907309aeef8e5e0106cf411376"
+    },
+    "provenance.json": {
+      "bytes": 46889,
+      "sha256": "51672f8f5b797454c1ac3762a50bfe6b7b6a9bc6308db3820e8a692af93b574c"
+    }
+  }
+}

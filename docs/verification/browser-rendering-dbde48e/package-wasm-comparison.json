@@ -1,0 +1,613 @@
+{
+  "baseline_source": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+  "candidate_source": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "framework_wasm_files": 67,
+  "byte_identical_files": [
+    "CommonServiceLocator.wasm",
+    "HarfBuzzSharp.wasm",
+    "LibTessDotNet.wasm",
+    "Microsoft.Extensions.Logging.Abstractions.wasm",
+    "Microsoft.Extensions.Logging.wasm",
+    "Microsoft.Extensions.Options.wasm",
+    "Silk.NET.Core.wasm",
+    "Silk.NET.OpenGL.wasm",
+    "SkiaSharp.SceneGraph.wasm",
+    "SkiaSharp.Skottie.wasm",
+    "SkiaSharp.Views.Windows.wasm",
+    "System.Collections.Concurrent.wasm",
+    "System.Collections.Immutable.wasm",
+    "System.Collections.NonGeneric.wasm",
+    "System.Collections.Specialized.wasm",
+    "System.Collections.wasm",
+    "System.ComponentModel.Primitives.wasm",
+    "System.ComponentModel.TypeConverter.wasm",
+    "System.ComponentModel.wasm",
+    "System.Console.wasm",
+    "System.Drawing.Primitives.wasm",
+    "System.Drawing.wasm",
+    "System.IO.Compression.wasm",
+    "System.IO.Pipelines.wasm",
+    "System.Linq.Expressions.wasm",
+    "System.Linq.wasm",
+    "System.Memory.wasm",
+    "System.Net.Http.wasm",
+    "System.Net.Primitives.wasm",
+    "System.ObjectModel.wasm",
+    "System.Private.CoreLib.wasm",
+    "System.Private.Uri.wasm",
+    "System.Private.Xml.wasm",
+    "System.Runtime.InteropServices.JavaScript.wasm",
+    "System.Security.Cryptography.wasm",
+    "System.Text.Encodings.Web.wasm",
+    "System.Text.Json.wasm",
+    "System.Text.RegularExpressions.wasm",
+    "System.wasm",
+    "Uno.Core.Extensions.Logging.Singleton.wasm",
+    "Uno.Core.Extensions.Logging.wasm",
+    "Uno.Diagnostics.Eventing.wasm",
+    "Uno.Foundation.Logging.wasm",
+    "Uno.Foundation.Runtime.WebAssembly.wasm",
+    "Uno.Foundation.wasm",
+    "Uno.UI.Composition.wasm",
+    "Uno.UI.Dispatching.wasm",
+    "Uno.UI.FluentTheme.v2.wasm",
+    "Uno.UI.FluentTheme.wasm",
+    "Uno.UI.Lottie.wasm",
+    "Uno.UI.Runtime.Skia.WebAssembly.Browser.wasm",
+    "Uno.UI.Runtime.Skia.wasm",
+    "Uno.UI.Toolkit.wasm",
+    "Uno.UI.wasm",
+    "Uno.WinUI.Graphics2DSK.wasm",
+    "Uno.WinUI.Graphics3DGL.wasm",
+    "Uno.Xaml.wasm",
+    "Uno.wasm"
+  ],
+  "changed_files": [
+    {
+      "assembly": "PixelMap.App.wasm",
+      "baseline": {
+        "file": "PixelMap.App.oe8g6kf73h.wasm",
+        "sha256": "90d49685dd0aa9344c73433b70a243c1c55725b2332255cb379af5be6091a780",
+        "bytes": 6207257
+      },
+      "candidate": {
+        "file": "PixelMap.App.hxxukeq19c.wasm",
+        "sha256": "bb8c45a59c97f75eb3510f8a4cefc86e4237a63a5f175bb3bf9e7253a487f9d5",
+        "bytes": 6207257
+      }
+    },
+    {
+      "assembly": "PixelMap.Audio.wasm",
+      "baseline": {
+        "file": "PixelMap.Audio.gvu9ampze1.wasm",
+        "sha256": "8cb6ce88b293cf17780454cf2650cc40a8b3ec277f4a6a7aa11fec949bb52ade",
+        "bytes": 9493
+      },
+      "candidate": {
+        "file": "PixelMap.Audio.ggbv0wti53.wasm",
+        "sha256": "40e4ae542114fb8ad9c3784d109b01533c226010ecf461ab5031f45508112196",
+        "bytes": 9493
+      }
+    },
+    {
+      "assembly": "PixelMap.Controls.wasm",
+      "baseline": {
+        "file": "PixelMap.Controls.e7qyq5ph70.wasm",
+        "sha256": "d6e8b53bfcdf059081b213c2e2a99caee0b06aad4be5690a9aa75146d96ec219",
+        "bytes": 105237
+      },
+      "candidate": {
+        "file": "PixelMap.Controls.6qhflsazvn.wasm",
+        "sha256": "82733cb6010c9387dd73616f4eb8c4f430f060f0ff8a8b40793a6f211751f878",
+        "bytes": 105237
+      }
+    },
+    {
+      "assembly": "PixelMap.Data.wasm",
+      "baseline": {
+        "file": "PixelMap.Data.yz33an6e8i.wasm",
+        "sha256": "02e346b4e7c65cdbc8cf4fd22139ab94533b3bde99b739f15109c6f186be2a36",
+        "bytes": 3151641
+      },
+      "candidate": {
+        "file": "PixelMap.Data.jz31q692kl.wasm",
+        "sha256": "91f388da1d174f38d6899aad52c1764f5048b0e58a4b3a2fefd093a87cbe331c",
+        "bytes": 3151641
+      }
+    },
+    {
+      "assembly": "PixelMap.Rendering.wasm",
+      "baseline": {
+        "file": "PixelMap.Rendering.je62wwtr8n.wasm",
+        "sha256": "ebbc33aa710dd2e6094af9fc5f5f2f1a2057cac552245c8bc443507e44ffe026",
+        "bytes": 340245
+      },
+      "candidate": {
+        "file": "PixelMap.Rendering.yf5qa7kwuh.wasm",
+        "sha256": "f25b1b6ea6d28cefa732c41e05fe0588d00dce3d7e8de0ef26a90bb5fd9fc7f5",
+        "bytes": 342805
+      }
+    },
+    {
+      "assembly": "PixelMap.Routing.wasm",
+      "baseline": {
+        "file": "PixelMap.Routing.ukh4g1ju47.wasm",
+        "sha256": "fe95e1100c43671b08ccc72e63d613c252d5d6acecdfcf41398a7ad5e08c95be",
+        "bytes": 69397
+      },
+      "candidate": {
+        "file": "PixelMap.Routing.p97zwodarn.wasm",
+        "sha256": "8ddf352682e06543530a20a7dd287fb04297327f6cba750eab4b428117ed86a1",
+        "bytes": 69397
+      }
+    },
+    {
+      "assembly": "PixelMap.Simulation.wasm",
+      "baseline": {
+        "file": "PixelMap.Simulation.gogxuc5tjb.wasm",
+        "sha256": "b0f0cf3644744e9022c615893a7b6badc2ef7adf5ddd809b62cf619682ff1872",
+        "bytes": 57621
+      },
+      "candidate": {
+        "file": "PixelMap.Simulation.97hpcn0vd8.wasm",
+        "sha256": "552bf15c73b0bf3f4aad718e453e2952f39903eab434210793aef023778ec195",
+        "bytes": 57621
+      }
+    },
+    {
+      "assembly": "SkiaSharp.wasm",
+      "baseline": {
+        "file": "SkiaSharp.6bzq5bigir.wasm",
+        "sha256": "be7956755e5d2af9f20f809295a5432fec36542d1b480d9ca2b6f9108dba2f82",
+        "bytes": 143637
+      },
+      "candidate": {
+        "file": "SkiaSharp.zyhq3us1ki.wasm",
+        "sha256": "7bf8fe715f41dff72f54a289c47953422c3f5c2dd4124fdec4d671371b55776c",
+        "bytes": 145173
+      }
+    },
+    {
+      "assembly": "dotnet.native.wasm",
+      "baseline": {
+        "file": "dotnet.native.xb3rs50ucp.wasm",
+        "sha256": "9d99319804c946006f4efe983f00830d430bd841a2170a3a09d09dfb2d9c295f",
+        "bytes": 65957014
+      },
+      "candidate": {
+        "file": "dotnet.native.h9l0fiui0y.wasm",
+        "sha256": "5b3d43dd28d2e03eeb31703ed03bedda44cf9fae46e41609b143e90654f2d6f4",
+        "bytes": 65974054
+      }
+    }
+  ],
+  "scope": "Exact published WASM module bytes; native application module and dependent application assembly metadata can change when renderer implementation changes.",
+  "managed_assembly_versions_identical": true,
+  "managed_assembly_details": [
+    {
+      "assembly": "CommonServiceLocator",
+      "assembly_version": "2.0.5.0",
+      "baseline_methods": 4,
+      "candidate_methods": 4
+    },
+    {
+      "assembly": "HarfBuzzSharp",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 208,
+      "candidate_methods": 208
+    },
+    {
+      "assembly": "LibTessDotNet",
+      "assembly_version": "1.1.15.0",
+      "baseline_methods": 169,
+      "candidate_methods": 169
+    },
+    {
+      "assembly": "Microsoft.Extensions.Logging",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 57,
+      "candidate_methods": 57
+    },
+    {
+      "assembly": "Microsoft.Extensions.Logging.Abstractions",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 36,
+      "candidate_methods": 36
+    },
+    {
+      "assembly": "Microsoft.Extensions.Options",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 6,
+      "candidate_methods": 6
+    },
+    {
+      "assembly": "PixelMap.App",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 3906,
+      "candidate_methods": 3906
+    },
+    {
+      "assembly": "PixelMap.Audio",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 24,
+      "candidate_methods": 24
+    },
+    {
+      "assembly": "PixelMap.Controls",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 439,
+      "candidate_methods": 439
+    },
+    {
+      "assembly": "PixelMap.Data",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 269,
+      "candidate_methods": 269
+    },
+    {
+      "assembly": "PixelMap.Rendering",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 1145,
+      "candidate_methods": 1154,
+      "added_method_names": [
+        "PixelMap.Rendering.GpuSceneDepth+HitAccumulator.HasPermanentModelCover",
+        "PixelMap.Rendering.GpuSceneDepth.CacheSample",
+        "PixelMap.Rendering.GpuSceneDepth.CoversBeforeComplete",
+        "PixelMap.Rendering.GpuSceneDepth.PrepareAndSampleGroup",
+        "PixelMap.Rendering.GpuSceneDepth.SamplePreparedCell",
+        "PixelMap.Rendering.GpuSceneDepth.SampleUncached",
+        "PixelMap.Rendering.PixelMapRenderer.SingleTerrainSource",
+        "PixelMap.Rendering.TerrainCache.GetBlock",
+        "PixelMap.Rendering.TerrainCache.TryCopyTexture"
+      ],
+      "removed_method_names": []
+    },
+    {
+      "assembly": "PixelMap.Routing",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 280,
+      "candidate_methods": 280
+    },
+    {
+      "assembly": "PixelMap.Simulation",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 293,
+      "candidate_methods": 293
+    },
+    {
+      "assembly": "Silk.NET.Core",
+      "assembly_version": "2.16.0.0",
+      "baseline_methods": 76,
+      "candidate_methods": 76
+    },
+    {
+      "assembly": "Silk.NET.OpenGL",
+      "assembly_version": "2.16.0.0",
+      "baseline_methods": 199,
+      "candidate_methods": 199
+    },
+    {
+      "assembly": "SkiaSharp",
+      "assembly_version": "3.119.0.0",
+      "baseline_methods": 1532,
+      "candidate_methods": 1548,
+      "added_method_names": [
+        "SkiaSharp.SKImage.PeekPixels",
+        "SkiaSharp.SKImageInfo.GetPixelBytesOffset",
+        "SkiaSharp.SKImageInfo.get_IsEmpty",
+        "SkiaSharp.SKPixmap.GetPixelSpan",
+        "SkiaSharp.SKPixmap.get_AlphaType",
+        "SkiaSharp.SKPixmap.get_ColorType",
+        "SkiaSharp.SKPixmap.get_Info",
+        "SkiaSharp.SKPixmap.get_RowBytes",
+        "SkiaSharp.SkiaApi.<sk_image_peek_pixels>g____PInvoke|370_0",
+        "SkiaSharp.SkiaApi.sk_image_peek_pixels",
+        "SkiaSharp.SkiaApi.sk_pixmap_get_info",
+        "SkiaSharp.SkiaApi.sk_pixmap_get_row_bytes",
+        "SkiaSharp.SkiaApi.sk_pixmap_get_writable_addr",
+        "SkiaSharp.SkiaExtensions.GetBitShiftPerPixel"
+      ],
+      "removed_method_names": []
+    },
+    {
+      "assembly": "SkiaSharp.SceneGraph",
+      "assembly_version": "3.119.0.0",
+      "baseline_methods": 11,
+      "candidate_methods": 11
+    },
+    {
+      "assembly": "SkiaSharp.Skottie",
+      "assembly_version": "3.119.0.0",
+      "baseline_methods": 28,
+      "candidate_methods": 28
+    },
+    {
+      "assembly": "SkiaSharp.Views.Windows",
+      "assembly_version": "3.119.0.0",
+      "baseline_methods": 46,
+      "candidate_methods": 46
+    },
+    {
+      "assembly": "System",
+      "assembly_version": "4.0.0.0",
+      "baseline_methods": 0,
+      "candidate_methods": 0
+    },
+    {
+      "assembly": "System.Collections",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 252,
+      "candidate_methods": 252
+    },
+    {
+      "assembly": "System.Collections.Concurrent",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 118,
+      "candidate_methods": 118
+    },
+    {
+      "assembly": "System.Collections.Immutable",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 422,
+      "candidate_methods": 422
+    },
+    {
+      "assembly": "System.Collections.NonGeneric",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 51,
+      "candidate_methods": 51
+    },
+    {
+      "assembly": "System.Collections.Specialized",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 38,
+      "candidate_methods": 38
+    },
+    {
+      "assembly": "System.ComponentModel",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 1,
+      "candidate_methods": 1
+    },
+    {
+      "assembly": "System.ComponentModel.Primitives",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 23,
+      "candidate_methods": 23
+    },
+    {
+      "assembly": "System.ComponentModel.TypeConverter",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 490,
+      "candidate_methods": 490
+    },
+    {
+      "assembly": "System.Console",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 73,
+      "candidate_methods": 73
+    },
+    {
+      "assembly": "System.Drawing",
+      "assembly_version": "4.0.0.0",
+      "baseline_methods": 0,
+      "candidate_methods": 0
+    },
+    {
+      "assembly": "System.Drawing.Primitives",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 88,
+      "candidate_methods": 88
+    },
+    {
+      "assembly": "System.IO.Compression",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 202,
+      "candidate_methods": 202
+    },
+    {
+      "assembly": "System.IO.Pipelines",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 5,
+      "candidate_methods": 5
+    },
+    {
+      "assembly": "System.Linq",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 705,
+      "candidate_methods": 705
+    },
+    {
+      "assembly": "System.Linq.Expressions",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 3230,
+      "candidate_methods": 3230
+    },
+    {
+      "assembly": "System.Memory",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 59,
+      "candidate_methods": 59
+    },
+    {
+      "assembly": "System.Net.Http",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 851,
+      "candidate_methods": 851
+    },
+    {
+      "assembly": "System.Net.Primitives",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 1,
+      "candidate_methods": 1
+    },
+    {
+      "assembly": "System.ObjectModel",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 98,
+      "candidate_methods": 98
+    },
+    {
+      "assembly": "System.Private.CoreLib",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 13910,
+      "candidate_methods": 13910
+    },
+    {
+      "assembly": "System.Private.Uri",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 242,
+      "candidate_methods": 242
+    },
+    {
+      "assembly": "System.Private.Xml",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 3557,
+      "candidate_methods": 3557
+    },
+    {
+      "assembly": "System.Runtime.InteropServices.JavaScript",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 241,
+      "candidate_methods": 241
+    },
+    {
+      "assembly": "System.Security.Cryptography",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 16,
+      "candidate_methods": 16
+    },
+    {
+      "assembly": "System.Text.Encodings.Web",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 83,
+      "candidate_methods": 83
+    },
+    {
+      "assembly": "System.Text.Json",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 1664,
+      "candidate_methods": 1664
+    },
+    {
+      "assembly": "System.Text.RegularExpressions",
+      "assembly_version": "10.0.0.0",
+      "baseline_methods": 589,
+      "candidate_methods": 589
+    },
+    {
+      "assembly": "Uno",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 2801,
+      "candidate_methods": 2801
+    },
+    {
+      "assembly": "Uno.Core.Extensions.Logging",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 15,
+      "candidate_methods": 15
+    },
+    {
+      "assembly": "Uno.Core.Extensions.Logging.Singleton",
+      "assembly_version": "1.0.0.0",
+      "baseline_methods": 12,
+      "candidate_methods": 12
+    },
+    {
+      "assembly": "Uno.Diagnostics.Eventing",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 31,
+      "candidate_methods": 31
+    },
+    {
+      "assembly": "Uno.Foundation",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 756,
+      "candidate_methods": 756
+    },
+    {
+      "assembly": "Uno.Foundation.Logging",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 64,
+      "candidate_methods": 64
+    },
+    {
+      "assembly": "Uno.Foundation.Runtime.WebAssembly",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 298,
+      "candidate_methods": 298
+    },
+    {
+      "assembly": "Uno.UI",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 49485,
+      "candidate_methods": 49485
+    },
+    {
+      "assembly": "Uno.UI.Composition",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 1627,
+      "candidate_methods": 1627
+    },
+    {
+      "assembly": "Uno.UI.Dispatching",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 114,
+      "candidate_methods": 114
+    },
+    {
+      "assembly": "Uno.UI.FluentTheme",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 33,
+      "candidate_methods": 33
+    },
+    {
+      "assembly": "Uno.UI.FluentTheme.v2",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 21846,
+      "candidate_methods": 21846
+    },
+    {
+      "assembly": "Uno.UI.Lottie",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 310,
+      "candidate_methods": 310
+    },
+    {
+      "assembly": "Uno.UI.Runtime.Skia",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 53,
+      "candidate_methods": 53
+    },
+    {
+      "assembly": "Uno.UI.Runtime.Skia.WebAssembly.Browser",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 1730,
+      "candidate_methods": 1730
+    },
+    {
+      "assembly": "Uno.UI.Toolkit",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 198,
+      "candidate_methods": 198
+    },
+    {
+      "assembly": "Uno.WinUI.Graphics2DSK",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 11,
+      "candidate_methods": 11
+    },
+    {
+      "assembly": "Uno.WinUI.Graphics3DGL",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 31,
+      "candidate_methods": 31
+    },
+    {
+      "assembly": "Uno.Xaml",
+      "assembly_version": "255.255.255.255",
+      "baseline_methods": 568,
+      "candidate_methods": 568
+    }
+  ]
+}

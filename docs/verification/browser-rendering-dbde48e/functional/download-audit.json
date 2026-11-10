@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "workflow_run_id": 42907891884,
+  "screens": {
+    "artifact_id": 13807507180,
+    "sha256": "b5844aabb1bdd1bcd6a250fa1163a92f60e71cf9ebc042559041f9a6d72def61",
+    "bytes": 29156949,
+    "api_digest_verified": true,
+    "rechecked_original_members": 154,
+    "failure_members": []
+  },
+  "pages": {
+    "artifact_id": 13807570605,
+    "sha256": "d1439991dabcd2e9cdd266accc57c723cc79b630080d61afdb1fecbe49d22f3d",
+    "bytes": 88462283,
+    "api_digest_verified": true,
+    "package": "package_801cbc2830341569438a9ce8c44febc16626f1501278ed456482a888efe98347",
+    "rechecked_report_resources": 23
+  },
+  "scope": "Original archive digests and explicitly reported contents only; no browser or performance rerun."
+}

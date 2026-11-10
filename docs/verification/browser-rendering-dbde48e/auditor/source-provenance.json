@@ -1,0 +1,41 @@
+{
+  "candidate_source": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "baseline_source": "555990d0e086ffb9908d4d98ec30a73a245a6c6e",
+  "baseline_run": 42696985047,
+  "candidate_run": 42907891884,
+  "harness": {
+    "tests/browser/play-performance.cjs": {
+      "sha256": "fe2fa5570db1aa8fa471730c8082d2fb201d1c59ef051c47f059d87062febd44",
+      "git_blob": "001b26470decff923d395c7999268d1015b568f0"
+    },
+    "tests/browser/performance.cjs": {
+      "sha256": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c",
+      "git_blob": "5e2e94e7d093aa12c1c5dd66f318fc94fdde620c"
+    },
+    "tests/browser/explore.cjs": {
+      "sha256": "7b40495c5abcee619491520fee7637764242ba1c39e1a33b2bdcbff54d0a503b",
+      "git_blob": "c4f2ab5d76ae1b95ee4f0986ccc54f4aaf9d386f"
+    },
+    "tests/browser/camera-replay.cjs": {
+      "sha256": "9e3d2987136fc38d10680f8b5654050fad23006bc5c453efcd84f44bb8c4e833",
+      "git_blob": "d1c50b22eb386d201a4a5c66f5be394a520f2c5c"
+    },
+    "tests/browser/camera-replay-probe.cjs": {
+      "sha256": "7894b2fd47410abfcd5c83fc7464a45f4a09d8f05bfb368c7037d7cdd268b4bd",
+      "git_blob": "3ff3a7ce137254e0ddd4a6c4111abb32e7e36e2c"
+    },
+    "tests/browser/camera-replay-contract.cjs": {
+      "sha256": "69430f8b256d1e088adcb8174c18a2540f7d452eba964c02e49644e7647a3a48",
+      "git_blob": "de5aa6ed7b89848ce4dac76164a8d714ce00d790"
+    }
+  },
+  "prior_analyzer": {
+    "path": "docs/verification/browser-rendering-555990d/analyze.py",
+    "sha256": "4bb58fc8035a39ee31db88a4d4500f211f898163a1dc645e496b21b8f48876fd"
+  },
+  "known_baseline_provenance": {
+    "path": "docs/verification/browser-rendering-555990d/provenance.json",
+    "sha256": "45e1ca0e3df27f4bfe9dc67c85e8015e33234ce252f45186739cad3387981d3f",
+    "selected_section": "candidate"
+  }
+}

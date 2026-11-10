@@ -90,6 +90,107 @@ reproduces all 96 trusted inputs and 102 ordered, individually fenced submission
 in each of two independent captures. Its complete raw records and offline verifier
 establish repeatability of the observer before the cross-artifact comparison.
 
+### Current release browser measurements
+
+Source [`dbde48e`](https://github.com/wieslawsoltes/UnoPixelMap/commit/dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6)
+passes all four jobs in [run 42907891884](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42907891884)
+and is deployed to Pages. The live page loads the checked
+`package_801cbc2830341569438a9ce8c44febc16626f1501278ed456482a888efe98347`
+bootstrap. Functional validation passes all camera rigs, styles, terrain,
+CPU/GPU journeys, native gestures, pointer lock, touch takeover and nine DPR2
+close-camera checkpoints. All six direct/detached presentation comparisons match:
+1,782,000 map pixels and 5,616,000 complete-canvas pixels have zero differences.
+
+The comparison remeasures the exact `555990d` Pages artifact from run `42696985047`
+on the same runner as the candidate. Chromium 156.0.8078.4, SwiftShader, AMD EPYC
+9V45, affinity 0–2, viewport 1200 × 780, DPR 1 and the harness are shared. SDK
+10.0.403 and .NET/WASM 10.0.14 match the baseline; this does not include a runtime
+upgrade. Primary summaries are medians across independent process values. The
+older weighted rates/occupancy and pooled within-process distributions remain
+available as secondary measures.
+
+#### Exact submitted-camera workloads
+
+Three scenarios each run four fresh ABBA processes. All 384 trusted native inputs
+and 408 individually fenced map submissions pass the complete ordered projection
+contract, including every tile-refresh frame. All nine comparisons against the
+first baseline and the independent raw audit pass. No tolerance, frame deletion,
+sorting or deduplication is applied to workload identity.
+
+| Controlled workload | Task CPU/input, baseline → candidate | CPU change | First-submission median, baseline → candidate | Latency change |
+| --- | ---: | ---: | ---: | ---: |
+| Map pan over relief | 74.916 → 58.652 ms | −21.71% | 24.95 → 21.30 ms | −14.63% |
+| Map orbit and tilt | 101.214 → 67.089 ms | −33.72% | 31.40 → 28.40 ms | −9.55% |
+| Paused first-person look | 111.701 → 69.496 ms | −37.78% | 72.85 → 39.85 ms | −45.30% |
+
+For latency, each process contributes its own 32-input median; there are two
+processes per variant. The corresponding process-p95 first-submission values are
+151.15 → 62.35 ms for pan, 235.05 → 75.85 ms for orbit, and 268.05 → 117.25 ms for
+paused look. Some individual inputs remain slower, and all matched-step changes
+are retained. CPU includes observation/automation overhead. These barrier-paced
+cases measure controlled CPU/latency, not maximum throughput or locomotion FPS.
+
+Fence fields record when the application observes a signal. They include polling
+cadence and software-GPU work; they do not directly measure actual GPU completion
+or physical display latency. The roughly one-second map fence observations do
+not establish one second of visible lag. Exact projections establish workload
+identity, with pixel correctness supplied by the separate rendering checks.
+
+#### Moving play workloads
+
+The unchanged 30-process held-key protocol runs stationary AB and moving ABBA
+comparisons with an 8,000 ms requested timing window. Task CPU is the main-thread
+`TaskDuration` delta; CPU occupancy uses the longer CDP metric interval, including
+probe-result transfer. Submission rates use actual probe duration. Each moving
+entry below summarizes two processes per variant.
+
+| Moving workload | Task CPU, baseline → candidate | CPU change | Submitted maps/s, baseline → candidate | Rate change |
+| --- | ---: | ---: | ---: | ---: |
+| Walking, first person | 2,554.26 → 2,443.66 ms | −4.33% | 8.985 → 8.809 | −1.95% |
+| Walking, chase | 3,381.87 → 3,160.36 ms | −6.55% | 13.452 → 14.042 | +4.38% |
+| Driving, chase | 4,165.60 → 3,378.86 ms | −18.89% | 9.866 → 9.666 | −2.03% |
+| Driving, first person | 3,560.23 → 2,837.00 ms | −20.31% | 7.196 → 7.684 | +6.78% |
+| Free flight | 2,791.83 → 2,620.19 ms | −6.15% | 10.308 → 10.682 | +3.63% |
+
+Every candidate moving Task CPU observation is below both baseline observations
+for its scenario. Map submission rates remain mixed; this is not a general FPS
+improvement. Chase driving's median submission interval rises 89.95 → 96.60 ms.
+Flight's second candidate repetition has a lower map rate than both baselines,
+despite its higher two-process summary. First-person driving's rAF p95 decreases
+33.3 → 16.8 ms, but rAF measures callback scheduling rather than map rendering or
+physical presentation.
+
+Held-key paths can differ. Chase-driving distances are 175/174 m versus 179/177 m;
+first-person driving is 161/156 m versus 154/155 m. Thus these end-to-end results
+do not isolate a patch or prove identical submitted trajectories. The fixed-camera
+replay provides the separate controlled comparison.
+
+Stationary windows have zero map submissions. Their single-process Task CPU
+observations include first-person walking 349.14 → 381.39 ms (+9.24%), default-map
+idle +2.82%, and stationary flight +0.15%; relief idle and stationary chase driving
+decrease 6.74% and 3.92%. Observed held-key fence p95 also rises 4.31% for walking
+first person and 16.49% for flight. Those fence samples are capture-censored;
+carry-in signals and unobserved tail submissions are counted explicitly. All
+regressions and repetition values remain in the evidence. These small sample
+counts support descriptive comparisons, not confidence intervals.
+
+All 1,614 measured maps use the compositor, with the same 300 × 166 artwork and
+pixel size 4: 799 baseline and 815 candidate. There are zero map readbacks or PBO
+copies, at most two pending direct frames and no release before a fence signal.
+Hardware GPUs and Safari/iOS are outside this performance measurement.
+
+All 14 separately captured CPU profiles are retained and symbolicated from each
+exact published package. Their 92,416 samples and time deltas are unchanged;
+only resolvable method names are replaced. Profiles identify remaining work but
+are not costs from the preceding timing window and cannot causally explain a
+particular throughput result.
+
+[Complete browser evidence](verification/browser-rendering-dbde48e/README.md) ·
+[All process values and distributions](verification/browser-rendering-dbde48e/analysis.json) ·
+[Independent replay audit](verification/browser-rendering-dbde48e/replay-independent/README.md) ·
+[Pixel oracles and functional validation](verification/browser-rendering-dbde48e/functional/README.md) ·
+[Exact-package profiles](verification/browser-rendering-dbde48e/profiles/README.md)
+
 ## Camera clearance and exact Earth preprocessing · 9 November 2026
 
 Third-person follow now checks terrain clearance at the actual interpolated eye.
@@ -148,12 +249,12 @@ keys, with identical overlay fingerprints. This control issues no independent
 depth queries, and no timing gain is claimed.
 [Allocation evidence](verification/gpu-building-cache-20261109/summary.json)
 
-### Current release browser measurements
+### Browser measurements for source 555990d
 
 Source release [`555990d`](https://github.com/wieslawsoltes/UnoPixelMap/commit/555990d0e086ffb9908d4d98ec30a73a245a6c6e)
 passed all four jobs in [run 42696985047](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/42696985047):
 native/build/package checks, browser validation, the paired benchmark and Pages
-deployment. The live site serves the same checked package. Browser validation
+deployment. At that release's validation, the live site served the same checked package. Browser validation
 includes CPU/GPU journeys and terrain, all five camera rigs, four styles, pointer
 lock, touch takeover and DPR2 close-camera recovery. All six compositor-versus-
 detached presentation cases have zero differing map pixels and exact canvas

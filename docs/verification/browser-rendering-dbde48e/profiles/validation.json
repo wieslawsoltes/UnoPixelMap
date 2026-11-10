@@ -1,0 +1,150 @@
+{
+  "archive": "profiles-symbolicated.zip",
+  "archive_sha256": "a24056c9272d3a394883a259f28ef12c3e82629eee5d7e9155820d292aa28f82",
+  "archive_bytes": 2540040,
+  "profile_count": 14,
+  "total_samples": 92416,
+  "profiles": [
+    {
+      "variant": "baseline",
+      "scenario": "car-moving-chase",
+      "samples": 6233,
+      "renamed_nodes": 1948,
+      "input_sha256": "d619a0623477dc1e4af6a9394743e8855c26497d185a9371fc9738583e0134c3",
+      "output_sha256": "c3cedc8a90c496312465ff01792dd3001991b1151a64eb6c6e35417544e8ccae",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "baseline",
+      "scenario": "car-moving-firstperson",
+      "samples": 6356,
+      "renamed_nodes": 2146,
+      "input_sha256": "63d3bbc47216088db0a1a3a2dd32a8f3bff356dc3b899ebcfa04ef79d4cfd401",
+      "output_sha256": "bd5f4bd853ddace81447f460c1d7fadbe36b389287021b44f4871e1fc93e99f6",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "baseline",
+      "scenario": "freeflight-moving",
+      "samples": 6210,
+      "renamed_nodes": 2064,
+      "input_sha256": "a25bdc609884c21fd2de58864c8436901880819bda1154f4d448d6e0fdd6e506",
+      "output_sha256": "b47656bc77b4ff423f32e9dc46d5b802fb217c08e8b1f1946c567116bd8401f4",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "baseline",
+      "scenario": "map-idle-relief",
+      "samples": 7521,
+      "renamed_nodes": 247,
+      "input_sha256": "a0f5f0a519ad19d1fd270b0effc202d78adf572eb46575aff14505253d84568e",
+      "output_sha256": "8554a4a6625d77999b052d5dd5ac1e78e5eab4c0d82327b12354f31de51df493",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "baseline",
+      "scenario": "walk-moving-chase",
+      "samples": 6027,
+      "renamed_nodes": 1827,
+      "input_sha256": "5a47072085cca55445bdd2467f73ee71ceff0b298cb762c279836dea259441dd",
+      "output_sha256": "ec75949f9c8747233f6a4c4553c94f1073f280962c4a90fe2f07cc90da589c77",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "baseline",
+      "scenario": "walk-moving-firstperson",
+      "samples": 6348,
+      "renamed_nodes": 1656,
+      "input_sha256": "563781dbc498383220d67d349a3062fb6b84b103a1c3aa9ecdd6646d24836ccc",
+      "output_sha256": "d2e68f8e75d5d9d75ceb11c786becd69f77ead291345ee0ec8a116d751625e74",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "baseline",
+      "scenario": "walk-stationary-firstperson",
+      "samples": 7516,
+      "renamed_nodes": 530,
+      "input_sha256": "da8fe37243f3d756d108fd4a214ae0931e3bde0445f2cd2ef30495e68d08df86",
+      "output_sha256": "a392d5c83a30e4f208a6486be00b91e7837fcd5499e15f4cdce358063809e099",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "candidate",
+      "scenario": "car-moving-chase",
+      "samples": 6154,
+      "renamed_nodes": 1933,
+      "input_sha256": "d4b1331f7732a5dad1212874314475888982ce664d13e8c4eb42eae85bdcd117",
+      "output_sha256": "1ede02a1313ae95deff313eba1138c0d71076967b05e5edd7511ba8645dac7db",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "candidate",
+      "scenario": "car-moving-firstperson",
+      "samples": 6327,
+      "renamed_nodes": 2034,
+      "input_sha256": "1db6993b33c792d450c9c1e3dc55297f63d273333b10508fbdcedecaee5a1b48",
+      "output_sha256": "c36e0374551f6525d12f587b606bbb5000ac57b1905052d97a0ebda4cf1674de",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "candidate",
+      "scenario": "freeflight-moving",
+      "samples": 6106,
+      "renamed_nodes": 2118,
+      "input_sha256": "58d98231690d74d9f268322e9b310092e7322b17ba191afa7c700cdfbe614377",
+      "output_sha256": "65d5b92f88abf0846ce5f21dc10aec8e0d56553fd0e5ae90b94f112dc754b4c8",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "candidate",
+      "scenario": "map-idle-relief",
+      "samples": 7527,
+      "renamed_nodes": 0,
+      "input_sha256": "c217943e7552407bb1bd5c3831c457578093a4b629e9b9d405830c046abefd24",
+      "output_sha256": "c217943e7552407bb1bd5c3831c457578093a4b629e9b9d405830c046abefd24",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": true
+    },
+    {
+      "variant": "candidate",
+      "scenario": "walk-moving-chase",
+      "samples": 6138,
+      "renamed_nodes": 1446,
+      "input_sha256": "86acd93429f6a92955c865bbc78c63e325ca7530ebe3c578812b54f699eb0f85",
+      "output_sha256": "4ade8f4d4d30e3290e89998abe2c72ffa5964e69248db3bfc48b6f17bdb4579f",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "candidate",
+      "scenario": "walk-moving-firstperson",
+      "samples": 6450,
+      "renamed_nodes": 1815,
+      "input_sha256": "be4568d62b930e7d2a00c7f3ee875e2163d1ce6a6549938af5e28ce410c22788",
+      "output_sha256": "87829ea0fbd7a2eebc8670d8a49573fe86ce78068d78406190fde092541acb76",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    },
+    {
+      "variant": "candidate",
+      "scenario": "walk-stationary-firstperson",
+      "samples": 7503,
+      "renamed_nodes": 525,
+      "input_sha256": "1f69da98b7eec98fac98fe6be3fd61ad91aa5ae62fda564308933cd42d343781",
+      "output_sha256": "3b419ddccad24211b48f9ebe89eabff67a7ccd9f15925441405f9e4744527ad8",
+      "only_function_names_changed": true,
+      "unchanged_without_native_frames": false
+    }
+  ],
+  "scope": "All14 profiles are separate post-timing captures. Every input and output is retained in the archive. Structural comparison proves only node function names change; one candidate idle profile has no native frames and remains byte-identical."
+}

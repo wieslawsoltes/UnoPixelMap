@@ -1,0 +1,890 @@
+{
+  "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+  "run_id": 42907891884,
+  "verify_job_id": 130158519794,
+  "verify_conclusion": "success",
+  "artifact": {
+    "id": 13807507180,
+    "name": "atlas-browser-screens",
+    "sha256": "b5844aabb1bdd1bcd6a250fa1163a92f60e71cf9ebc042559041f9a6d72def61",
+    "bytes": 29156949,
+    "api_digest_verified": true
+  },
+  "browser": "156.0.8078.4",
+  "viewport": {
+    "width": 1200,
+    "height": 780
+  },
+  "deviceScaleFactor": 1,
+  "runtime": {
+    "mode": "InterpreterAndAOT",
+    "configuration": "Release",
+    "profiledAot": "False",
+    "bootstrapConfigSha256": "ece8340e2c548d4ffbf55e8c57fcde5b1992856669f0329cd51f94a3f5bcc580",
+    "loaderName": "dotnet.uy0o651skj.js",
+    "loaderSha256": "e6245eba94e46b626194b4e514fdad99b6438fac1203c2fa2f84348a0a39713a",
+    "resourceManifestHash": "sha256-+5iZXmV156V1NBDTsEiUxOECGqHBuWNs1BdsVGA8WKg=",
+    "nativeWasm": [
+      {
+        "name": "dotnet.native.h9l0fiui0y.wasm",
+        "hash": "sha256-Wz1D3SjS4D7rMXA+0Dvt2kTPn65G5BYJsUPpBlTy1vQ=",
+        "cache": "force-cache"
+      }
+    ],
+    "nativeJavaScript": [
+      {
+        "name": "dotnet.native.gdofu1t086.js"
+      }
+    ],
+    "runtimeJavaScript": [
+      {
+        "name": "dotnet.runtime.5nc8i5dl74.js"
+      }
+    ],
+    "assemblies": [
+      {
+        "virtualPath": "PixelMap.App.wasm",
+        "name": "PixelMap.App.hxxukeq19c.wasm",
+        "hash": "sha256-u4xFpZyX916zUQ+KTO/IbkI3pjpfF1uzv55yU6SH+dU=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "PixelMap.Audio.wasm",
+        "name": "PixelMap.Audio.ggbv0wti53.wasm",
+        "hash": "sha256-QOSuVCEU+4rZw3hNEJsBUzwiYBDs9GGrUDH0VQgRIZY=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "PixelMap.Controls.wasm",
+        "name": "PixelMap.Controls.6qhflsazvn.wasm",
+        "hash": "sha256-gnM8tgEMk4fdc2FvTrjE9DDwYPD/iotAeTpvIRdR+Hg=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "PixelMap.Data.wasm",
+        "name": "PixelMap.Data.jz31q692kl.wasm",
+        "hash": "sha256-kfOI2h0XTzjWiZqtUsF2T1BIsOWKSzov79CTqHy+Mxw=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "PixelMap.Rendering.wasm",
+        "name": "PixelMap.Rendering.yf5qa7kwuh.wasm",
+        "hash": "sha256-8lsbbqbSjO+nMsQeBf4FiNANzj1+jeDvJqkLtf2fx/U=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "PixelMap.Routing.wasm",
+        "name": "PixelMap.Routing.p97zwodarn.wasm",
+        "hash": "sha256-jd81JoLgZUNTCiCn3Sh/sEKXMn9sunUOq0tCgRfthqE=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "PixelMap.Simulation.wasm",
+        "name": "PixelMap.Simulation.97hpcn0vd8.wasm",
+        "hash": "sha256-VSvxXHOwvz9KrXGORT4pUvOZA+q0NCEHk67wI3eOwZU=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "SkiaSharp.SceneGraph.wasm",
+        "name": "SkiaSharp.SceneGraph.rua5a8cxs3.wasm",
+        "hash": "sha256-MzC8KKPxwiBy18qOw6yl5opC9ndNm9e81XXDtTm7Z9I=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "SkiaSharp.Skottie.wasm",
+        "name": "SkiaSharp.Skottie.la08cgmeuy.wasm",
+        "hash": "sha256-g6CTWnQ+QOuOqH2t7Sq9inZYVaN7IOCOs5n9eJKM0Xw=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "SkiaSharp.Views.Windows.wasm",
+        "name": "SkiaSharp.Views.Windows.bwsl3pwm5g.wasm",
+        "hash": "sha256-i+xWzsZXByh6TXoUc8n6CpGySx82/0wdhVI8fv6XAZ8=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "SkiaSharp.wasm",
+        "name": "SkiaSharp.zyhq3us1ki.wasm",
+        "hash": "sha256-e/j+cV9B3/cvVKKJxHlTQiw/XC3UEk/exNZxNxtVd2w=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.Composition.wasm",
+        "name": "Uno.UI.Composition.o8ha8z3gl1.wasm",
+        "hash": "sha256-OObcmYAtWNDHiWVi0HKMpU/4ghkscn49Otp+bQBFEHk=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.Dispatching.wasm",
+        "name": "Uno.UI.Dispatching.iev2zphmg0.wasm",
+        "hash": "sha256-hl2ZCUzPGieDtZvMK3Ocw1Te5kHoHGIEfCE8QlrfpR4=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.FluentTheme.v2.wasm",
+        "name": "Uno.UI.FluentTheme.v2.ktud0rmtvl.wasm",
+        "hash": "sha256-SMlkigWRdB1sj/qC+3Ysn8JP+/put56nzF8miChD9YM=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.FluentTheme.wasm",
+        "name": "Uno.UI.FluentTheme.hmm2vkb1yf.wasm",
+        "hash": "sha256-9+EcmioBDPXp1Ji4sOEH2LDWOgwwh3ACOsIKt/SN0Bo=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.Lottie.wasm",
+        "name": "Uno.UI.Lottie.o8obruisre.wasm",
+        "hash": "sha256-eKLcll4NvgM13SIEeV2EC7Eg8uwpUFOsB+FfirFqnvU=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.Runtime.Skia.WebAssembly.Browser.wasm",
+        "name": "Uno.UI.Runtime.Skia.WebAssembly.Browser.no2dzl6hz9.wasm",
+        "hash": "sha256-12XdSQZc/7ktKrgMNjYrmBFaqyYYLLi4SVAYDLJq44U=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.Runtime.Skia.wasm",
+        "name": "Uno.UI.Runtime.Skia.59un5kiks8.wasm",
+        "hash": "sha256-F/IR+2n+YISjlUv+tFiEL3eypbb+EXAPE8/rLnHR15s=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.Toolkit.wasm",
+        "name": "Uno.UI.Toolkit.9w78itlc66.wasm",
+        "hash": "sha256-+Q+9wwbZYag68pzwbitqFcR5GrIRSLQ+mD35EWGpeFk=",
+        "cache": "force-cache"
+      },
+      {
+        "virtualPath": "Uno.UI.wasm",
+        "name": "Uno.UI.4m88unnvnt.wasm",
+        "hash": "sha256-nKf6FP0weixdTHCRn6VLFWqj6RauSKgbW2WHCEVKb6s=",
+        "cache": "force-cache"
+      }
+    ]
+  },
+  "source_tests": {
+    "source_sha": "dbde48e9fd5318ef309bf31ed4b9b7e1596ec7d6",
+    "files": {
+      "tests/browser/input-adapter-browser.cjs": "d2baef73b1d9a3851eab53e9fd6c58bf3074c602c7318b40605c93284aae55ed",
+      "tests/browser/smoke.cjs": "943053ab52148ab1d0f9e18017d53cb9a1dc3748105747a31f02e82757d8b4e4",
+      "tests/browser/journeys.cjs": "a3e36b7daa7a40cf66f5824073a524c6cf8496b949ad57c56b15b90c2c7d9d1e",
+      "tests/browser/performance.cjs": "efd0a0d4f9a26bf838fb481d0ec3ca1cf92d3e3ae8acb7d3296548a951969f3c",
+      "tests/browser/terrain.cjs": "4bf220f6dae23e63cbedd07abb931a24ac44e25264e94d40e7fb882709da4d66",
+      "tests/browser/explore.cjs": "7b40495c5abcee619491520fee7637764242ba1c39e1a33b2bdcbff54d0a503b"
+    }
+  },
+  "presentation": {
+    "cases": [
+      {
+        "name": "presentation-pixel",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-normal",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-minecraft",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-roblox",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-earth-overhead",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      },
+      {
+        "name": "presentation-elevation",
+        "differentMapPixels": 0,
+        "totalMapPixels": 297000,
+        "maxChannelDelta": 0,
+        "exactCanvas": true
+      }
+    ],
+    "total_map_pixels": 1782000,
+    "total_full_canvas_pixels": 5616000,
+    "image_hashes_recomputed": true,
+    "saved_map_crops_verified": true,
+    "direct_compositor_with_zero_readbacks": true,
+    "detached_with_async_pixel_pack": true
+  },
+  "log_markers": {
+    "Trusted browser input checks passed for wheel/pinch routing, pointer capture, key repeat and native editing.": 1,
+    "Browser checks passed: seeded geometry, Earth imagery in isometric and overhead views, drag, wheel, coordinate search, camera deep link, night lighting, phone viewport and touch pinch.": 2,
+    "Passed journey scenario drive": 2,
+    "Passed journey scenario groundModes": 2,
+    "Passed journey scenario planVia": 2,
+    "Passed journey scenario phoneRide": 2,
+    "Terrain browser checks passed for real Garda relief, flat comparison, elevation, Map and Earth layers, 2D/3D, picking, orbit, drag, exaggeration, v4 sharing and phone controls.": 2,
+    "DPR2 dense-city NorthUp\u2192ground-clamped Orbit, horizon changes and runtime recovery passed.": 1,
+    "All four rendering styles and CPU/GPU switching passed.": 1,
+    "Desktop trackpad and WebKit gesture routing passed.": 1,
+    "Walking, terrain contact and held-jump behavior passed.": 1,
+    "Native drag, browser Pointer Lock, relative look and pause passed.": 1,
+    "Car driving and all five camera rigs passed.": 1,
+    "Held-touch flights, mixed trackpad takeover, camera reattachment and pinch cancellation passed.": 1,
+    "Walking, driving, aircraft, free flight and camera controls passed.": 1,
+    "Exploration checks passed for GPU defaults, four styles, native gestures, free movement, physical cameras, terrain and mobile controls.": 1
+  },
+  "failure_artifacts": [],
+  "close_camera": {
+    "checkpoints": [
+      "north-up",
+      "ground-clamped-close-orbit",
+      "orbit-camera-selection",
+      "near-horizon",
+      "elevated-orbit",
+      "near-horizon-again",
+      "ground-clamped-again",
+      "paused-close-camera",
+      "returned-to-map"
+    ],
+    "geometry": {
+      "width": 1800,
+      "height": 924,
+      "ratio": 2,
+      "canvasWidth": 3600,
+      "canvasHeight": 1848
+    },
+    "failures": []
+  },
+  "file_count": 154,
+  "files": {
+    "evidence/coordinate-pin.png": {
+      "sha256": "c1ea937cd6f234d03acafdb3206fcff490f6b6b81a660d693c948832a92ca8f5",
+      "bytes": 227695
+    },
+    "evidence/desktop-city.png": {
+      "sha256": "68358e9255d9b4147abd562b2a52bf9d585c6160fbf39ef608b941ec219e6791",
+      "bytes": 211982
+    },
+    "evidence/desktop-drag.png": {
+      "sha256": "053b9a11df1734ca499eede3f586c543d3621ba5dacdb8d8d5389b579bee15ac",
+      "bytes": 87910
+    },
+    "evidence/desktop-zoom.png": {
+      "sha256": "68313e1d853b0f73fd974c385d27107f6b8ca65542b3ed8a19d298f50802953c",
+      "bytes": 189290
+    },
+    "evidence/earth-isometric.png": {
+      "sha256": "bf1d1b854bf3c3b3b61bdab0fd9a6529cc8e1f31ca22e15a679ca61d2533b5c5",
+      "bytes": 217217
+    },
+    "evidence/earth-overhead.png": {
+      "sha256": "99d66c8179efa7e821aab219879909bd635158fdacdd32fc7ad0348ce4372a96",
+      "bytes": 274728
+    },
+    "evidence/explore/default-appearance-selections.png": {
+      "sha256": "9e2e2914783b7c54b0c357745e402c462c4a5ec8709ec78c4966bba5e600ef44",
+      "bytes": 348975
+    },
+    "evidence/explore/default-appearance-selections.txt": {
+      "sha256": "ffe579572540f9f20597645e8bc017327f17d982a1ecc05fc58fe708f230a930",
+      "bytes": 2251
+    },
+    "evidence/explore/default-pixel-gpu.png": {
+      "sha256": "51ce238df1589993e3c004179c829cf39eb9f2abba3dfcfa8bab36be68d4a44a",
+      "bytes": 219280
+    },
+    "evidence/explore/desktop-trackpad-camera.png": {
+      "sha256": "952e253322b9d0a520cb38733e7dcef271c2f9e5500532a256a6609668128c4f",
+      "bytes": 62385
+    },
+    "evidence/explore/game-aircraft.png": {
+      "sha256": "e7a4d23d0e0a321cd93cb261e0bf886114e2a0ddcefc5b02873154ba4a4a4ee1",
+      "bytes": 117498
+    },
+    "evidence/explore/game-car-chase.png": {
+      "sha256": "01214a89cf53c420211be7c80f35ea9880abd1b246e9ad47792df85436e78c7f",
+      "bytes": 58600
+    },
+    "evidence/explore/game-free-flight.png": {
+      "sha256": "7ac9c6f29e4b3150a7637196cbe139d5105bc1a9f1b82d08fc80d28a27a5a447",
+      "bytes": 121151
+    },
+    "evidence/explore/game-paused-minecraft.png": {
+      "sha256": "35f50c248d024c3f26fa53c403d986f479ff49f7b91f4fbdc883d7c5dab68e68",
+      "bytes": 97542
+    },
+    "evidence/explore/game-paused-normal.png": {
+      "sha256": "fb1bd27c15dd7fda6f9e14674d07751b7523df06c7e3dc0215a4293dedeee536",
+      "bytes": 125198
+    },
+    "evidence/explore/game-paused-pixel.png": {
+      "sha256": "8f8e69127d69afb322de6122fe0464e3057f69060bb28088291607488143465f",
+      "bytes": 82546
+    },
+    "evidence/explore/game-paused-roblox.png": {
+      "sha256": "d2e355a79f554ba1c6062ae14b424e593c29a1c26c5388f2094011b35093442d",
+      "bytes": 183714
+    },
+    "evidence/explore/game-walking-first-person.png": {
+      "sha256": "6a7d053fae0dd9bcf362025e3a40290be7d974835646c57f79e28ee2f8a5d0d0",
+      "bytes": 65331
+    },
+    "evidence/explore/high-dpi-close-camera-recovered.png": {
+      "sha256": "a02b31017360f177fa438c34326821dde8bf1c200f0e2456dece9f81445042ab",
+      "bytes": 852751
+    },
+    "evidence/explore/high-dpi-close-camera.json": {
+      "sha256": "f9d5a2f955a4a9c2c3d4bca00676d01029e35c022e7730b5f01832fccc6651b3",
+      "bytes": 6316
+    },
+    "evidence/explore/high-dpi-ground-clamped-orbit.png": {
+      "sha256": "7b5df3004afdc0998fd0bd0c3a5d89862cb91cce07c8166fdc3a07d97375cd9a",
+      "bytes": 167727
+    },
+    "evidence/explore/high-dpi-north-up.png": {
+      "sha256": "90db9095640f1da96bdd676059f8877e09b4f6d3b514a70d46f8d4258b712263",
+      "bytes": 131371
+    },
+    "evidence/explore/mobile-dual-stick-flight.png": {
+      "sha256": "93198639fd1f5091ab7d12e630491cf0f6fabcdffb09ea5fd19c3486da4ce164",
+      "bytes": 45049
+    },
+    "evidence/explore/mobile-game-after-look.png": {
+      "sha256": "875a78649f298881c023f5d45a5eae26c50ab05050b5f759ce5e407b0e733193",
+      "bytes": 44961
+    },
+    "evidence/explore/mobile-game-before-look.png": {
+      "sha256": "9ba9e29666e9c3561030bd5aefe4a2a73ef7491e811c5d0ce1557d9922a7fdd1",
+      "bytes": 49757
+    },
+    "evidence/explore/mobile-game-landscape.png": {
+      "sha256": "00d43565ba64ac0fc20e56062c31e2faf31a3fabc25fa0e107ce5bca99c96751",
+      "bytes": 59685
+    },
+    "evidence/explore/mobile-landscape-restarted.png": {
+      "sha256": "b757ba956df18d213e75a2c400879108ecfbc7483120d95b8e715e24c21a396b",
+      "bytes": 50798
+    },
+    "evidence/explore/mobile-landscape-settings-scrolled.png": {
+      "sha256": "b757ba956df18d213e75a2c400879108ecfbc7483120d95b8e715e24c21a396b",
+      "bytes": 50798
+    },
+    "evidence/explore/mobile-map-before-pinch.png": {
+      "sha256": "098389a5c3c3f1f9b185febb0281fb6321160468fbf82e0b84778d9d611535c2",
+      "bytes": 66877
+    },
+    "evidence/explore/mobile-map-pinch-orbit.png": {
+      "sha256": "2f46c2e3090eae4aae12a8eca2cdc7da0aac4d63e19a58cb270ce7c4145d9248",
+      "bytes": 67958
+    },
+    "evidence/explore/mobile-picker-painted.png": {
+      "sha256": "bed211830f9503c837759bbd178c4a1cb4ef3d5db8b83e35c0313ccafbcadf8d",
+      "bytes": 73220
+    },
+    "evidence/explore/terrain-minecraft.png": {
+      "sha256": "b03a33056c9f8468c08b337736c5f98333c65fbfe3cc772ff39efdeaea4123f6",
+      "bytes": 446623
+    },
+    "evidence/explore/terrain-normal-cpu.png": {
+      "sha256": "6407f481e769fb0d9efb4551a6c8012dd319a1e6534a8ff0421e3f6e8271f416",
+      "bytes": 637726
+    },
+    "evidence/explore/terrain-normal.png": {
+      "sha256": "cd25c60f699799a4b5b57337c4dd8a17f724562db5b6167d77c8058893a3e368",
+      "bytes": 638129
+    },
+    "evidence/explore/terrain-pixel-restored.png": {
+      "sha256": "9b20094518240b8dd7183b075cdac6611999c2189d7ee0a34dc10fd051f4e601",
+      "bytes": 264185
+    },
+    "evidence/explore/terrain-pixel.png": {
+      "sha256": "1f1f0c07068b1b5dbdc20896cf375063de3f09662b303d517b1f7759839552ba",
+      "bytes": 264118
+    },
+    "evidence/explore/terrain-roblox.png": {
+      "sha256": "dd8bd5876d2054f5d8e01bd04521b815879d9192fa12fc2a76665d8f25eb6955",
+      "bytes": 665588
+    },
+    "evidence/gpu/coordinate-pin.png": {
+      "sha256": "ab17782bf9fbe0a0efc3cc64d98e5e7b8783431147131fe70cdf8b125491a613",
+      "bytes": 228412
+    },
+    "evidence/gpu/desktop-city.png": {
+      "sha256": "7f787ca9869faf54d02a1e0e74ee61a93059fd6dfa2ad2bcdde3937d424a0cfb",
+      "bytes": 212501
+    },
+    "evidence/gpu/desktop-drag.png": {
+      "sha256": "f769869fa9084f57f39372c5cb8267a5ed5615c815fc5f3fd20945fa921f857e",
+      "bytes": 89201
+    },
+    "evidence/gpu/desktop-zoom.png": {
+      "sha256": "51dca47610efea97a6ff879bcdcf3dae9b3d6693d7b1a6b99d7dc23c207e76fc",
+      "bytes": 185992
+    },
+    "evidence/gpu/earth-isometric.png": {
+      "sha256": "a26c4a897648fb27af322db19db170b6ae23e1e77a11380c2a5b015f9c1d907c",
+      "bytes": 217842
+    },
+    "evidence/gpu/earth-overhead.png": {
+      "sha256": "768255673571d9c10f643e5ad9e8d8a18d03a6d2f0ec5a9f488191db094fae78",
+      "bytes": 275481
+    },
+    "evidence/gpu/journey-bike.png": {
+      "sha256": "05d6b2ce33dfb603e59adcfbbfad075ad30a652dd18bb708f6104d81ca7d709c",
+      "bytes": 147546
+    },
+    "evidence/gpu/journey-boat-phone.png": {
+      "sha256": "3d57d2c001e25496ef98cb3a236629b9f23cfe61caae24d1a330b6e4f9dcee05",
+      "bytes": 64119
+    },
+    "evidence/gpu/journey-boat.png": {
+      "sha256": "870512c5dc817770bc1516fa3f23734e2bb9cb84a5f291fbaeee3802546d528a",
+      "bytes": 76479
+    },
+    "evidence/gpu/journey-drive.png": {
+      "sha256": "d853c787ad10da6ef174870b0aff749f099d18d0669c2676881eaf68d83cdabc",
+      "bytes": 151084
+    },
+    "evidence/gpu/journey-driving.png": {
+      "sha256": "509e1d8fa3a7f81c273e2e255b438aafc5b827f7d1de6c88d437103022e7b314",
+      "bytes": 190769
+    },
+    "evidence/gpu/journey-flight.png": {
+      "sha256": "d79925a24c8c5aa8ded2db116f2a545ea8111cd5e944edeede1452b17ddeb760",
+      "bytes": 69041
+    },
+    "evidence/gpu/journey-plan-via-input.json": {
+      "sha256": "7f5a16bb139e64209bafe468388a416d54210068cc8f65ee1170ed14c4a1536c",
+      "bytes": 376
+    },
+    "evidence/gpu/journey-train.png": {
+      "sha256": "e0e25d2722ba0b613dd970813d206a7b31a6b72794efbd3b2263742b2c2276d7",
+      "bytes": 299144
+    },
+    "evidence/gpu/journey-walk.png": {
+      "sha256": "763200707684be25439b7779d4cfa7406f0a0f29eb52f3c46b340585e7eb8bf6",
+      "bytes": 144349
+    },
+    "evidence/gpu/night-deep-link.png": {
+      "sha256": "c0b89d41c3ef8ba8d29daeb34e07bfcb742d7ad684a66f7ce3491728cf727108",
+      "bytes": 193487
+    },
+    "evidence/gpu/phone-city.png": {
+      "sha256": "0887cddee1dcf49c821ebe11b5c5ef7ca69f0f8bc797532ba46d3880e972736f",
+      "bytes": 74425
+    },
+    "evidence/gpu/phone-earth.png": {
+      "sha256": "35dfb6432d852e9ad3b10522f19090694fb0ff4bf699335e8086c2cdc7be0d71",
+      "bytes": 56680
+    },
+    "evidence/gpu/phone-pinch.png": {
+      "sha256": "c375af98bee6c21b316edff0f23a92ee8e93c778e84db5a5080fd700139e0a37",
+      "bytes": 56908
+    },
+    "evidence/gpu-direct/comparison.json": {
+      "sha256": "9e12867d8aee13f1c0fc49c1a576d03dc1bef25498812c09eb00ae22904c2ef0",
+      "bytes": 934
+    },
+    "evidence/gpu-direct/presentation-earth-overhead.map.png": {
+      "sha256": "7701d67a45c4b15e1bde6c000dad4838ff584c49057d2abad513eeea6dbf118a",
+      "bytes": 151901
+    },
+    "evidence/gpu-direct/presentation-earth-overhead.png": {
+      "sha256": "bf648a532a5420fb7790528c997b91c1e8fd3e44cb84ca010940b7c3a00e1fcd",
+      "bytes": 296768
+    },
+    "evidence/gpu-direct/presentation-earth-overhead.txt": {
+      "sha256": "7960a7d72786243fb58337be30d0a8bba73a95646fcebdaaf692debc83552a60",
+      "bytes": 1584
+    },
+    "evidence/gpu-direct/presentation-elevation.map.png": {
+      "sha256": "6f32a9239d07bb54e691894ca700fb67e43202940f17bffb215f62a64113c108",
+      "bytes": 144763
+    },
+    "evidence/gpu-direct/presentation-elevation.png": {
+      "sha256": "7faa7db1dedea6d096361edb92a323e21c6c707622eea91c5a106d202d22433c",
+      "bytes": 287360
+    },
+    "evidence/gpu-direct/presentation-elevation.txt": {
+      "sha256": "e34bb03849d47c8925180a24b3e84f3816495bc7008400588c2d9a6a94524930",
+      "bytes": 1538
+    },
+    "evidence/gpu-direct/presentation-minecraft.map.png": {
+      "sha256": "40520f974145ae8208a98e02d1da84c747dfe6157f343bf75d407eda251fb2e1",
+      "bytes": 266113
+    },
+    "evidence/gpu-direct/presentation-minecraft.png": {
+      "sha256": "9b8fc81ce55830af98f5eff198a95fb2de21031cdd4e0178faee73d20f8ceee3",
+      "bytes": 418169
+    },
+    "evidence/gpu-direct/presentation-minecraft.txt": {
+      "sha256": "a4be0bc2e345e49a4a267999ef1f86860dbd189ba75a4981b18b643e7f5904b5",
+      "bytes": 1452
+    },
+    "evidence/gpu-direct/presentation-normal.map.png": {
+      "sha256": "e3e04baebdc8fb4dc9b7523e98cb9ec7ab955ebed24c2b95249214484776a983",
+      "bytes": 382200
+    },
+    "evidence/gpu-direct/presentation-normal.png": {
+      "sha256": "0b9e0e320b0390df189f7af7267e76e24567d4ce9cda366eb91747de08ec8787",
+      "bytes": 642613
+    },
+    "evidence/gpu-direct/presentation-normal.txt": {
+      "sha256": "60586fda2e6f768f83e8cc115c8272770f92f954eba14990ab6c9069bcb40e24",
+      "bytes": 1449
+    },
+    "evidence/gpu-direct/presentation-pixel.map.png": {
+      "sha256": "94ed8baf3951a8ac8e5523d8664b169f0756a44ef7968fe9a9d871d6239c8c08",
+      "bytes": 123809
+    },
+    "evidence/gpu-direct/presentation-pixel.png": {
+      "sha256": "94b02b0a1d089c5ee484b376b68a5519401e875d4f5447bba85084e7aad18614",
+      "bytes": 198338
+    },
+    "evidence/gpu-direct/presentation-pixel.txt": {
+      "sha256": "35e74f288b722a49873ae78c8edc2719798f97ef95bb8edd28cd67d447656d1e",
+      "bytes": 1448
+    },
+    "evidence/gpu-direct/presentation-roblox.map.png": {
+      "sha256": "c402a74f7fe2fa18b1cbe994b6f701a5d14c7a81b7bb0382973f86e357e6dae3",
+      "bytes": 395645
+    },
+    "evidence/gpu-direct/presentation-roblox.png": {
+      "sha256": "e1dd66b433589107beb665f1fd76ca9fd862aee5a54ebecec3e7875ab7c559bf",
+      "bytes": 660694
+    },
+    "evidence/gpu-direct/presentation-roblox.txt": {
+      "sha256": "a7a14c7e87e276e4f49df6c0712adaae8f3a7e17434223482329fc86a553b65f",
+      "bytes": 1449
+    },
+    "evidence/gpu-direct/visual.json": {
+      "sha256": "03142125cec693d18d458e6b9b6fb674eb4806c78e69f37c241eec00ac37bd9b",
+      "bytes": 17332
+    },
+    "evidence/gpu-transfer/presentation-earth-overhead.map.png": {
+      "sha256": "7701d67a45c4b15e1bde6c000dad4838ff584c49057d2abad513eeea6dbf118a",
+      "bytes": 151901
+    },
+    "evidence/gpu-transfer/presentation-earth-overhead.png": {
+      "sha256": "bf648a532a5420fb7790528c997b91c1e8fd3e44cb84ca010940b7c3a00e1fcd",
+      "bytes": 296768
+    },
+    "evidence/gpu-transfer/presentation-earth-overhead.txt": {
+      "sha256": "7960a7d72786243fb58337be30d0a8bba73a95646fcebdaaf692debc83552a60",
+      "bytes": 1584
+    },
+    "evidence/gpu-transfer/presentation-elevation.map.png": {
+      "sha256": "6f32a9239d07bb54e691894ca700fb67e43202940f17bffb215f62a64113c108",
+      "bytes": 144763
+    },
+    "evidence/gpu-transfer/presentation-elevation.png": {
+      "sha256": "7faa7db1dedea6d096361edb92a323e21c6c707622eea91c5a106d202d22433c",
+      "bytes": 287360
+    },
+    "evidence/gpu-transfer/presentation-elevation.txt": {
+      "sha256": "e34bb03849d47c8925180a24b3e84f3816495bc7008400588c2d9a6a94524930",
+      "bytes": 1538
+    },
+    "evidence/gpu-transfer/presentation-minecraft.map.png": {
+      "sha256": "40520f974145ae8208a98e02d1da84c747dfe6157f343bf75d407eda251fb2e1",
+      "bytes": 266113
+    },
+    "evidence/gpu-transfer/presentation-minecraft.png": {
+      "sha256": "9b8fc81ce55830af98f5eff198a95fb2de21031cdd4e0178faee73d20f8ceee3",
+      "bytes": 418169
+    },
+    "evidence/gpu-transfer/presentation-minecraft.txt": {
+      "sha256": "a4be0bc2e345e49a4a267999ef1f86860dbd189ba75a4981b18b643e7f5904b5",
+      "bytes": 1452
+    },
+    "evidence/gpu-transfer/presentation-normal.map.png": {
+      "sha256": "e3e04baebdc8fb4dc9b7523e98cb9ec7ab955ebed24c2b95249214484776a983",
+      "bytes": 382200
+    },
+    "evidence/gpu-transfer/presentation-normal.png": {
+      "sha256": "0b9e0e320b0390df189f7af7267e76e24567d4ce9cda366eb91747de08ec8787",
+      "bytes": 642613
+    },
+    "evidence/gpu-transfer/presentation-normal.txt": {
+      "sha256": "60586fda2e6f768f83e8cc115c8272770f92f954eba14990ab6c9069bcb40e24",
+      "bytes": 1449
+    },
+    "evidence/gpu-transfer/presentation-pixel.map.png": {
+      "sha256": "94ed8baf3951a8ac8e5523d8664b169f0756a44ef7968fe9a9d871d6239c8c08",
+      "bytes": 123809
+    },
+    "evidence/gpu-transfer/presentation-pixel.png": {
+      "sha256": "94b02b0a1d089c5ee484b376b68a5519401e875d4f5447bba85084e7aad18614",
+      "bytes": 198338
+    },
+    "evidence/gpu-transfer/presentation-pixel.txt": {
+      "sha256": "35e74f288b722a49873ae78c8edc2719798f97ef95bb8edd28cd67d447656d1e",
+      "bytes": 1448
+    },
+    "evidence/gpu-transfer/presentation-roblox.map.png": {
+      "sha256": "c402a74f7fe2fa18b1cbe994b6f701a5d14c7a81b7bb0382973f86e357e6dae3",
+      "bytes": 395645
+    },
+    "evidence/gpu-transfer/presentation-roblox.png": {
+      "sha256": "e1dd66b433589107beb665f1fd76ca9fd862aee5a54ebecec3e7875ab7c559bf",
+      "bytes": 660694
+    },
+    "evidence/gpu-transfer/presentation-roblox.txt": {
+      "sha256": "a7a14c7e87e276e4f49df6c0712adaae8f3a7e17434223482329fc86a553b65f",
+      "bytes": 1449
+    },
+    "evidence/gpu-transfer/visual.json": {
+      "sha256": "188a7e9dde9663326c83b572585e90d4e642af396fed0d1f545b91d327b1de4c",
+      "bytes": 18029
+    },
+    "evidence/journey-bike.png": {
+      "sha256": "1d76459e9896da4ae833f3da05e906d6b6f658d21f11164214597df7bd6cfe98",
+      "bytes": 142141
+    },
+    "evidence/journey-boat-phone.png": {
+      "sha256": "2110fc0d910e76e459c4a00462345dc22dd0fdbf113cc1191b6d59746a0e3745",
+      "bytes": 63690
+    },
+    "evidence/journey-boat.png": {
+      "sha256": "a9ae705a8ee5eda54e0c6cea7e7e7b04efb9480f3caa592452e829c1b5c02d3d",
+      "bytes": 76135
+    },
+    "evidence/journey-drive.png": {
+      "sha256": "d4b5cf7a09e59d590816e6edbf4ef0220d5813e1c2217b34fc9c07e25dacbe42",
+      "bytes": 150429
+    },
+    "evidence/journey-driving.png": {
+      "sha256": "9eefe3d78bce3e101cf411411000dbeaf18687bc2018d66b6e610e06500f556c",
+      "bytes": 190929
+    },
+    "evidence/journey-flight.png": {
+      "sha256": "5ee9c23aefc7be025326a0eb1f6eca5ecf5b285403cfabe8630a269c5d81ee78",
+      "bytes": 68534
+    },
+    "evidence/journey-plan-via-input.json": {
+      "sha256": "2ee35ce09c445ae59ca40ae5645e875cc788f7238a90f8ad6f8ff269ab069554",
+      "bytes": 376
+    },
+    "evidence/journey-train.png": {
+      "sha256": "9a838b3b9134c38a98fbf8aeff82267feab9824446c2eb03f69994e738eeecc5",
+      "bytes": 298670
+    },
+    "evidence/journey-walk.png": {
+      "sha256": "ea492b5cda3d37dbc81de94c10f863044f6a3b63379795cae120cbd9949ab2ae",
+      "bytes": 179583
+    },
+    "evidence/night-deep-link.png": {
+      "sha256": "e2012bf1047b3b46d6b34a6081cb15a4e73e6432f81290494a52ecd29032ce2a",
+      "bytes": 193034
+    },
+    "evidence/phone-city.png": {
+      "sha256": "4cc25e2a2eaf9d0e24cc2928e8391d5b9da1b87af07871672bbdba0bb2caca4c",
+      "bytes": 74227
+    },
+    "evidence/phone-earth.png": {
+      "sha256": "e2d5b89d8b4593dc0d6cfb876a9ace5f101fa95efceabd5ceee48f4cc9ef22d9",
+      "bytes": 56130
+    },
+    "evidence/phone-pinch.png": {
+      "sha256": "e47dad740d12c06d797431315572f356058bb9b98002d40e93db9a4ca195517b",
+      "bytes": 56174
+    },
+    "evidence/terrain/terrain-before-orbit.png": {
+      "sha256": "249dfb51073ccf165b69c31db5d28b6c6bd82ac52c27d570a91e23f9e497252e",
+      "bytes": 266029
+    },
+    "evidence/terrain/terrain-drag.png": {
+      "sha256": "ca268390674e9b41ff537a5aaa5df379aa3d8ec2009f01e810d37b396463d130",
+      "bytes": 270192
+    },
+    "evidence/terrain/terrain-earth-overhead.png": {
+      "sha256": "39a5e396045ec601f0b8805638b150a3322b305e5685a8f7b3dbaf6d465b9eb5",
+      "bytes": 284563
+    },
+    "evidence/terrain/terrain-earth-perspective.png": {
+      "sha256": "9766d824e67e46e42378ce22e52720157e7acc061c18ae62736394ee5d773d66",
+      "bytes": 293506
+    },
+    "evidence/terrain/terrain-elevation-overhead.png": {
+      "sha256": "a56ac509a7629aaf29da40644ce00a10f13ca18e2cfba277b5834dbb6eeedef5",
+      "bytes": 259448
+    },
+    "evidence/terrain/terrain-elevation-perspective.png": {
+      "sha256": "298207abd8194992d4791e3c30eac548eb16f623d26328d685be313a6e6e8155",
+      "bytes": 263642
+    },
+    "evidence/terrain/terrain-flat-comparison.png": {
+      "sha256": "afdfc406378332c748a456fd70c6180a2acccb41f28968008a0c781b1b10d979",
+      "bytes": 264784
+    },
+    "evidence/terrain/terrain-orbit.png": {
+      "sha256": "b797c28ccf24cf5c2ce7af793c6afc132403e40c1485415deaf453cfb64624f8",
+      "bytes": 276062
+    },
+    "evidence/terrain/terrain-phone-earth.png": {
+      "sha256": "ee9b046abcedff6c0a562cb040aea3be6f8f154cec1ad3d668a954f95592ea6d",
+      "bytes": 99198
+    },
+    "evidence/terrain/terrain-phone-elevation.png": {
+      "sha256": "b8583128586575610642782ae83b122f1fda58c68607d4f58e5271d26389ebc6",
+      "bytes": 75370
+    },
+    "evidence/terrain/terrain-phone-overhead.png": {
+      "sha256": "d55d432855a0dcfe4054f702eb932703db8f61334b457049c31a2dce252db2d2",
+      "bytes": 75472
+    },
+    "evidence/terrain/terrain-phone-perspective.png": {
+      "sha256": "9517cdce2c7a45beeb45d4518f1e79bb8c7fade8cfd6b0e313330a8c558ed385",
+      "bytes": 91803
+    },
+    "evidence/terrain/terrain-picked-elevation.png": {
+      "sha256": "5b361f0a13e0eee5d8feb9660f2aefc7e368da5db30a5c1d0066d876413e8074",
+      "bytes": 264263
+    },
+    "evidence/terrain/terrain-restored-relief.png": {
+      "sha256": "52818a848c7e48834a6ae7f5a98af44fafe3859f92aaea64af532e8c1dfa1891",
+      "bytes": 263218
+    },
+    "evidence/terrain/terrain-share-round-trip.png": {
+      "sha256": "8726cce189540ccb77ba18ab0d7a36cd2c62de86f66c923593103be03f632724",
+      "bytes": 209968
+    },
+    "evidence/terrain/terrain-vector-overhead.png": {
+      "sha256": "85819ba0625e5004a3afb068739e049746d442ebebc482578cf6ca53df19c3df",
+      "bytes": 190029
+    },
+    "evidence/terrain-gpu/terrain-before-orbit.png": {
+      "sha256": "09e1b531e35b0c35df348effc9beb055d59cd7ffc41f542bc4d3437ea63a15e0",
+      "bytes": 267582
+    },
+    "evidence/terrain-gpu/terrain-direct-pending-pick-held.png": {
+      "sha256": "1c8321e0b69e5f2f70b7aa1abd0f3e37cf6dd9af4466b29d2207b8d62d321663",
+      "bytes": 189466
+    },
+    "evidence/terrain-gpu/terrain-direct-pending-pick-reference.png": {
+      "sha256": "e6f299cade725f910130c6a2342b1eeb13781a32c56348d06753232fd63051b6",
+      "bytes": 189484
+    },
+    "evidence/terrain-gpu/terrain-direct-pending-pick-repeated.png": {
+      "sha256": "06db0c79a10cb58a84b6bc66d912c81cd7536097c7b8d8d545e8ced1e40084cb",
+      "bytes": 189468
+    },
+    "evidence/terrain-gpu/terrain-direct-pending-pick-resumed.png": {
+      "sha256": "7fff2a4f4ad56e63841bd6d6aad8c98f81d8d92692d067c1a0e070354cce02c1",
+      "bytes": 270966
+    },
+    "evidence/terrain-gpu/terrain-direct-queue-full.png": {
+      "sha256": "ba4b28ff84af0014c66a189fa77c14fa15d3cd5b8527a8bb0c31b3e7f38aa784",
+      "bytes": 188001
+    },
+    "evidence/terrain-gpu/terrain-drag.png": {
+      "sha256": "d50008ce598bed305ba84d6563d9df59675ee368873de6bb245f6bde542b719d",
+      "bytes": 253143
+    },
+    "evidence/terrain-gpu/terrain-earth-overhead.png": {
+      "sha256": "30aa27dfe4dda9c52875c4314cbd3a942ac565a19f5666c0b8feee105435c2fc",
+      "bytes": 269041
+    },
+    "evidence/terrain-gpu/terrain-earth-perspective.png": {
+      "sha256": "f5672475d7f3dd76ef5d0c992039d32cf0b90adbfdf4d5dc08fc6f506b4422a6",
+      "bytes": 291381
+    },
+    "evidence/terrain-gpu/terrain-elevation-overhead.png": {
+      "sha256": "ea7733362430b367523010872d779b643f318475765bbc0f611547e7ba3f64c7",
+      "bytes": 266007
+    },
+    "evidence/terrain-gpu/terrain-elevation-perspective.png": {
+      "sha256": "117cf65041fc06d22a84b05fc22b91b70406f8d4279e5e944a57a77ba2b9b9e2",
+      "bytes": 263700
+    },
+    "evidence/terrain-gpu/terrain-fallback-elevation.png": {
+      "sha256": "b315bbf8872402bb8e03aa4370dc4034497f20699b0a234dcca1a489f66b00f3",
+      "bytes": 263766
+    },
+    "evidence/terrain-gpu/terrain-fallback-pending-pick-held.png": {
+      "sha256": "51295da921d1340793726c987f49b91a02911e1d3271d349d267a02db64f27ed",
+      "bytes": 264957
+    },
+    "evidence/terrain-gpu/terrain-fallback-pending-pick-reference.png": {
+      "sha256": "654becdb7e82a7bc64e89fe7637ef52773fa785c341300f7940b6cec746d579b",
+      "bytes": 264852
+    },
+    "evidence/terrain-gpu/terrain-fallback-pending-pick-repeated.png": {
+      "sha256": "51295da921d1340793726c987f49b91a02911e1d3271d349d267a02db64f27ed",
+      "bytes": 264957
+    },
+    "evidence/terrain-gpu/terrain-fallback-pending-pick-resumed.png": {
+      "sha256": "6c5a52353dceea354032748810f31b57e8327deade82e518817482cc0c61c44e",
+      "bytes": 265977
+    },
+    "evidence/terrain-gpu/terrain-flat-comparison.png": {
+      "sha256": "c5306e9c4b0b625eccb48b17b7614f16647d5cec7cba64e1f90a923d6366a5a1",
+      "bytes": 265454
+    },
+    "evidence/terrain-gpu/terrain-gpu-disabled.png": {
+      "sha256": "79e9dbf70f8c66e12e2eb63328b222cf3d381d67f6c8741fbf393fa858df24a2",
+      "bytes": 271335
+    },
+    "evidence/terrain-gpu/terrain-gpu-high-dpi-resized.png": {
+      "sha256": "6a72ef53d0667c8aa7e49cb54498686eddd313d4a57bf57edc9527cf18a5e3c9",
+      "bytes": 317383
+    },
+    "evidence/terrain-gpu/terrain-gpu-high-dpi.png": {
+      "sha256": "da0c061261069edd88998d455496f8f96d3533b4f9b717bdab425e8693bda096",
+      "bytes": 270428
+    },
+    "evidence/terrain-gpu/terrain-gpu-recreated.png": {
+      "sha256": "95db16dc9d7331dd4809a4d0c4ebcd03187f09ef4e984dd307865b2e348ab3f0",
+      "bytes": 270993
+    },
+    "evidence/terrain-gpu/terrain-orbit.png": {
+      "sha256": "02f98f575a24aa851cf25d3fe8150b765e700939e467042b61180815db4eb766",
+      "bytes": 265556
+    },
+    "evidence/terrain-gpu/terrain-phone-earth.png": {
+      "sha256": "5f8948d44ae92cd4e5e706e624fa969cd9e8502df56978ef22859f40fd3a1455",
+      "bytes": 99185
+    },
+    "evidence/terrain-gpu/terrain-phone-elevation.png": {
+      "sha256": "6d63912bfc1b2ee55ad27c43d5927e84feb97ec88ffa605f7fbfa7d1e367a915",
+      "bytes": 75395
+    },
+    "evidence/terrain-gpu/terrain-phone-overhead.png": {
+      "sha256": "93ab0ee71ee15b3bfc56f1c4de7d3c59bd762d54178744d02a5ff39de3531481",
+      "bytes": 75498
+    },
+    "evidence/terrain-gpu/terrain-phone-perspective.png": {
+      "sha256": "0123706428e029913750b46172938f82c050c462bb2fdd74d5c89480d390073e",
+      "bytes": 91294
+    },
+    "evidence/terrain-gpu/terrain-picked-elevation.png": {
+      "sha256": "48907e4ee5507748aca1f68fd9d2f3bc05d533b23bf66e2799a3f2d03cce3f54",
+      "bytes": 264774
+    },
+    "evidence/terrain-gpu/terrain-restored-relief.png": {
+      "sha256": "f11f3f14e27ccd4a6fa5b5c4f0c395df495b6278aa50fdacae45ecc89a21e1c8",
+      "bytes": 263700
+    },
+    "evidence/terrain-gpu/terrain-share-round-trip.png": {
+      "sha256": "35948b7c22d2925e5b597f1752d992d4a7a55165f51c237979132203be5c9b4d",
+      "bytes": 146482
+    },
+    "evidence/terrain-gpu/terrain-vector-overhead.png": {
+      "sha256": "5335860b2a1277c4dcccd69cc249e53eb6e3d2bbedfc49a2e120bb50d16baa23",
+      "bytes": 194341
+    }
+  },
+  "scope": "Independent offline audit of exact downloaded functional validation artifacts; no browser or benchmark rerun."
+}
