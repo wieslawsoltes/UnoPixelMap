@@ -8,7 +8,7 @@ const {makeTrace, scenarios} = require("./camera-replay.cjs");
 
 function observerFixture() {
     let time = 0;
-    const listeners = {}, calls = [];
+    const listeners = {}, calls = [], frames = [];
     class WebGLRenderingContext {
         constructor(id) {
             this.canvas = {id}; this.ARRAY_BUFFER = 34962;
@@ -28,6 +28,7 @@ function observerFixture() {
     class WebGL2RenderingContext extends WebGLRenderingContext {}
     const sandbox = {WeakMap, Set, Map, Array, Object, ArrayBuffer, DataView, Error,
         performance: {now: () => ++time}, WebGLRenderingContext, WebGL2RenderingContext,
+        requestAnimationFrame: callback => frames.push(callback),
         addEventListener: (name, callback) => { listeners[name] = callback; }};
     vm.runInNewContext("(" + installCameraReplayProbe.toString() + ")()", sandbox);
     const gl = new WebGL2RenderingContext("uno-canvas");
@@ -46,7 +47,8 @@ function observerFixture() {
         deltaX: input.deltaX, deltaY: input.deltaY, altKey: Boolean(input.modifiers & 1),
         ctrlKey: Boolean(input.modifiers & 2), metaKey: Boolean(input.modifiers & 4), shiftKey: Boolean(input.modifiers & 8)});
     return {gl, state, program, uniform, wheel, calls, WebGL2RenderingContext,
-        advance: milliseconds => { time += milliseconds; }};
+        advance: milliseconds => { time += milliseconds; },
+        animationFrame: () => { for (const callback of frames.splice(0)) callback(); }};
 }
 
 const fixture = observerFixture();
@@ -101,6 +103,11 @@ gl.clientWaitSync(fence, gl.CONDITION_SATISFIED, 0);
 assert.equal(state.ready(), false, "The tile-refresh quiet barrier follows a fast fence");
 fixture.advance(300);
 assert.equal(state.ready(), true);
+assert.equal(state.settled(), false, "The settled predicate returns a Boolean, never a truthy Promise");
+fixture.animationFrame();
+assert.equal(state.settled(), false, "One animation frame does not complete the compositor barrier");
+fixture.animationFrame();
+assert.equal(state.settled(), true);
 const first = JSON.parse(JSON.stringify(state.finish()));
 assert.throws(() => state.finish(), /No camera replay/);
 assert.deepEqual(first.resolves[0].draws[0].tileProjections,
@@ -125,6 +132,10 @@ assert.equal(state.ready(), false, "An earlier frame's fence cannot satisfy the 
 const secondFence = gl.fenceSync(37143, 0);
 gl.clientWaitSync(secondFence, gl.ALREADY_SIGNALED, 0);
 fixture.advance(300);
+assert.equal(state.settled(), false);
+fixture.animationFrame();
+fixture.animationFrame();
+assert.equal(state.settled(), true);
 const second = JSON.parse(JSON.stringify(state.finish()));
 assert.equal(second.resolves[0].draws.length, 1, "Draws cannot leak between frames");
 assert.deepEqual(second.resolves[0].draws[0].uniforms, step.projection[0].draws[1].uniforms);
@@ -142,14 +153,23 @@ const submit = count => {
     return gl.fenceSync(37143, 0);
 };
 const firstOfPair = submit(120);
-const secondOfPair = submit(240);
 gl.clientWaitSync(firstOfPair, gl.ALREADY_SIGNALED, 0);
 fixture.advance(300);
+assert.equal(state.settled(), false);
+fixture.animationFrame();
+const secondOfPair = submit(240);
+fixture.animationFrame();
+assert.equal(state.settled(), false, "A late second resolve invalidates an in-progress animation barrier");
 assert.equal(state.ready(), false, "Every submitted frame needs its own signal");
 gl.clientWaitSync(secondFence, gl.ALREADY_SIGNALED, 0);
 assert.equal(state.ready(), false, "An earlier step's fence cannot finish an interleaved sequence");
 gl.clientWaitSync(secondOfPair, gl.ALREADY_SIGNALED, 0);
+fixture.advance(300);
 assert.equal(state.ready(), true);
+assert.equal(state.settled(), false);
+fixture.animationFrame();
+fixture.animationFrame();
+assert.equal(state.settled(), true);
 const pair = JSON.parse(JSON.stringify(state.finish()));
 const pairStep = checkStep(pair, input, 0);
 assert.deepEqual(pairStep.projection.map(frame => frame.draws[0].count), [120, 240]);
@@ -163,6 +183,7 @@ for (const mutate of [
     raw => { raw.resolves = []; }, raw => { raw.resolves = Array(33).fill(clone(raw.resolves[0])); },
     raw => { raw.resolves[0].signaledAt = null; }, raw => { raw.resolves[0].compositorContext = false; },
     raw => { raw.quietForMs = 249; }, raw => { raw.lastResolveAt++; },
+    raw => { raw.compositorBarrierResolves = 0; },
     raw => { raw.resolves[0].draws[0].tileProjections.pop(); },
     raw => { raw.resolves[0].draws[1].uniforms.uScreenX = [1, 2]; }
 ]) {
@@ -261,4 +282,71 @@ for (const scenario of scenarios) {
                 input.modifiers & 8 ? 1 : 0, input.modifiers & 1 ? 1 : 0],
                 "Every barrier-paced replay event reaches the immediate trackpad route");
 }
-console.log("Camera replay checks passed: native input contract, cached projection state, terrain-instance ranges, context isolation, fence identity and exact sequence comparison.");
+
+async function focusChecks() {
+    // Execute the actual CommonJS module and use its exported helpers. Browser
+    // and image dependencies are unused here; keep these Node checks runnable
+    // before npm/browser installation in the production build job.
+    const uiModule = {exports: {}};
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "explore.cjs"), "utf8"), {
+        module: uiModule, URL, Promise, setTimeout, clearTimeout,
+        process: {argv: [], env: {}},
+        require: name => ["playwright", "pngjs", "./gpu.cjs"].includes(name) ? {} : require(name)
+    }, {filename: "explore.cjs"});
+    const {action, waitForSettledFocus} = uiModule.exports;
+    let disposed = 0, frames = 0, polls = 0, losses = 0, keys = 0;
+    const target = {isConnected: true, dispose: async () => { disposed++; }};
+    const document = {activeElement: null};
+    const sandbox = vm.createContext({document, Promise,
+        requestAnimationFrame: callback => setImmediate(() => {
+            // A closing popup reclaims focus during the first attempted barrier.
+            if (++frames === 1) document.activeElement = null;
+            callback();
+        })});
+    const invoke = (callback, argument) => vm.runInContext("(" + callback.toString() + ")", sandbox)(argument);
+    const locator = {or() { return this; }, waitFor: async () => {},
+        focus: async () => { document.activeElement = target; }, elementHandle: async () => target,
+        getAttribute: async () => "button"};
+    const page = {
+        getByRole: () => locator,
+        waitForFunction: async (callback, argument, options) => {
+            polls++;
+            assert.ok(options.timeout > 0 && options.timeout <= 25000);
+            let value = invoke(callback, argument);
+            assert.equal(typeof value, "boolean", "The focus poller receives a synchronous Boolean predicate");
+            if (!value) {
+                losses++;
+                await new Promise(setImmediate);
+                document.activeElement = target;
+                value = invoke(callback, argument);
+            }
+            assert.equal(value, true);
+        },
+        evaluate: async (callback, argument) => invoke(callback, argument),
+        keyboard: {press: async key => {
+            keys++;
+            assert.equal(key, "Enter");
+            assert.equal(document.activeElement, target);
+            assert.equal(frames, 3, "Keyboard activation waits for two new frames after focus is reacquired");
+        }}
+    };
+    await action(page, "Fixture button");
+    assert.deepEqual({polls, losses, keys, disposed}, {polls: 2, losses: 1, keys: 1, disposed: 1},
+        "An actual exported action retries lost focus before its one keyboard activation and releases the handle");
+
+    const failure = new Error("The browser detached the keyboard target");
+    const failing = {...page, waitForFunction: async () => { throw failure; }};
+    await assert.rejects(waitForSettledFocus(failing, locator, 50), error => error === failure);
+    assert.equal(disposed, 2, "The target handle is disposed when focus polling fails");
+
+    // A hidden or stalled page might never produce another animation frame.
+    // The overall deadline must still release the handle and reject the wait.
+    const stalled = {...page, evaluate: async () => new Promise(() => {})};
+    await assert.rejects(waitForSettledFocus(stalled, locator, 20), /did not keep focus/);
+    assert.equal(disposed, 3, "The target handle is disposed when the animation barrier times out");
+    assert.equal(keys, 1, "Failed focus waits cannot issue another keyboard activation");
+}
+
+focusChecks().then(() => {
+    console.log("Camera replay checks passed: native input contract, projection state, terrain-instance ranges, context isolation, complete fence/animation barriers, exact sequence comparison and focus-loss recovery.");
+}).catch(error => { console.error(error); process.exitCode = 1; });

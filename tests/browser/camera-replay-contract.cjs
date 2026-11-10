@@ -15,6 +15,8 @@ function checkStep(raw, expected, index) {
         Number.isFinite(raw.finishedAt) && raw.lastResolveAt === raw.resolves.at(-1).time &&
         raw.quietForMs === raw.finishedAt - raw.lastResolveAt && raw.quietForMs >= 250,
         `Step ${index} retains the complete sequence through its quiet barrier`);
+    assert.equal(raw.compositorBarrierResolves, raw.resolves.length,
+        `Step ${index} completes its animation-frame barrier after the final submission`);
     let previousSubmission = time;
     const projection = raw.resolves.map((resolve, frame) => {
         const {time: submittedAt, signaledAt, ...projection} = resolve;

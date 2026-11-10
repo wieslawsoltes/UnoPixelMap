@@ -69,13 +69,7 @@ async function measure(browser, scenario, ui, output, report, performanceProbe, 
         for (let index = 0; index < trace.length; index++) {
             await page.evaluate(() => __pixelAtlasCameraReplay.begin());
             await cdp.send("Input.dispatchMouseEvent", {type: "mouseWheel", ...trace[index]});
-            await page.waitForFunction(async () => {
-                if (!__pixelAtlasCameraReplay.ready()) return false;
-                // Let the signaled image enter the compositor before the next
-                // pose. A newly submitted frame must pass the full barrier too.
-                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-                return __pixelAtlasCameraReplay.ready();
-            }, undefined, {timeout: 20000});
+            await page.waitForFunction(() => __pixelAtlasCameraReplay.settled(), undefined, {timeout: 20000});
             const raw = await page.evaluate(() => __pixelAtlasCameraReplay.finish());
             rawSteps.push(raw);
             steps.push(checkStep(raw, trace[index], index));

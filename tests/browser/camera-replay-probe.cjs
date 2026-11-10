@@ -4,6 +4,7 @@
 // are added, and cached uniform values are tracked while measurement is inactive.
 function installCameraReplayProbe() {
     const state = globalThis.__pixelAtlasCameraReplay = {step: null, lastResolveAt: 0};
+    let barrierStep = null, barrierResolveCount = 0, barrierDone = false;
     const contexts = new WeakMap(), shaders = new WeakMap(), programs = new WeakMap();
     const locations = new WeakMap(), fences = new WeakMap();
     const names = new Set(["uScreenX", "uScreenY", "uScreenW", "uArtSize", "uDepth",
@@ -118,12 +119,28 @@ function installCameraReplayProbe() {
     state.ready = () => state.step?.resolves.length > 0 &&
         state.step.resolves.every(resolve => resolve.signaledAt !== null) &&
         performance.now() - state.lastResolveAt >= 250;
+    // Keep the polling predicate synchronous. The pinned Playwright poller
+    // treats an async predicate's Promise as truthy before it settles.
+    state.settled = () => {
+        if (!state.ready()) { barrierStep = null; return false; }
+        const step = state.step, count = step.resolves.length;
+        if (barrierStep === step && barrierResolveCount === count) return barrierDone;
+        barrierStep = step;
+        barrierResolveCount = count;
+        barrierDone = false;
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (state.step === step && step.resolves.length === count && state.ready() &&
+                barrierStep === step && barrierResolveCount === count) barrierDone = true;
+        }));
+        return false;
+    };
     state.finish = () => {
         const step = state.step;
         if (!step) throw new Error("No camera replay step is active");
         step.finishedAt = performance.now();
         step.lastResolveAt = state.lastResolveAt;
         step.quietForMs = step.finishedAt - state.lastResolveAt;
+        step.compositorBarrierResolves = barrierStep === step && barrierDone ? barrierResolveCount : 0;
         state.step = null;
         return step;
     };
