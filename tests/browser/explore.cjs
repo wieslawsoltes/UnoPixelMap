@@ -58,18 +58,37 @@ async function tap(page, locator, touch = false) {
     else await page.mouse.click((left + right) / 2, y);
 }
 
-async function waitForSettledFocus(page, locator) {
+async function waitForSettledFocus(page, locator, timeout = 25000) {
     const target = await locator.elementHandle();
     assert.ok(target, "The keyboard target has an accessibility element");
+    const deadline = Date.now() + timeout;
+    const timeoutError = () => new Error("The keyboard target did not keep focus for two animation frames within " + timeout + " ms");
+    const remaining = () => {
+        const value = deadline - Date.now();
+        if (value <= 0) throw timeoutError();
+        return value;
+    };
     try {
-        await page.waitForFunction(async element => {
-            if (!element.isConnected || document.activeElement !== element) return false;
-            for (let frame = 0; frame < 2; frame++) {
-                await new Promise(requestAnimationFrame);
-                if (document.activeElement !== element) return false;
-            }
-            return true;
-        }, target);
+        for (;;) {
+            // Playwright's poller tests the immediate return value for truthiness.
+            // An async predicate returns a truthy Promise even when it resolves
+            // false, so await the animation barrier separately and retry a loss.
+            await page.waitForFunction(element => element.isConnected && document.activeElement === element,
+                target, {timeout: remaining()});
+            let timer;
+            const expired = new Promise((_, reject) => { timer = setTimeout(() => reject(timeoutError()), remaining()); });
+            try {
+                const settled = await Promise.race([page.evaluate(async element => {
+                    if (!element.isConnected || document.activeElement !== element) return false;
+                    for (let frame = 0; frame < 2; frame++) {
+                        await new Promise(requestAnimationFrame);
+                        if (!element.isConnected || document.activeElement !== element) return false;
+                    }
+                    return true;
+                }, target), expired]);
+                if (settled) return;
+            } finally { clearTimeout(timer); }
+        }
     } finally {
         await target.dispose();
     }
