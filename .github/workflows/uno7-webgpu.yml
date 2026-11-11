@@ -28,10 +28,11 @@ jobs:
         run: |
           npm ci --prefix tests/browser
           (cd tests/browser && npx playwright install --with-deps chromium)
+          sudo apt-get install -y xvfb xauth libvulkan1 mesa-vulkan-drivers
       - name: Verify independent WebGPU canvas presentation
         env:
           PIXELMAP_SHOTS: ${{ runner.temp }}/webgpu-presentation
-        run: node tests/browser/webgpu.cjs --preflight-only
+        run: xvfb-run -a -s '-screen 0 1600x1200x24' node tests/browser/webgpu.cjs --preflight-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -124,6 +125,7 @@ jobs:
         run: |
           npm ci --prefix tests/browser
           (cd tests/browser && npx playwright install --with-deps chromium)
+          sudo apt-get install -y xvfb xauth libvulkan1 mesa-vulkan-drivers
       - name: Exercise WebGPU rendering and browser input
         env:
           PIXELMAP_SHOTS: ${{ runner.temp }}/webgpu-evidence
@@ -135,7 +137,7 @@ jobs:
           python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/preview" > "${{ runner.temp }}/atlas-server.log" 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
-          node tests/browser/webgpu.cjs http://127.0.0.1:8100/UnoPixelMap/
+          xvfb-run -a -s '-screen 0 1600x1200x24' node tests/browser/webgpu.cjs http://127.0.0.1:8100/UnoPixelMap/
       - uses: actions/upload-artifact@v4
         if: always()
         with:

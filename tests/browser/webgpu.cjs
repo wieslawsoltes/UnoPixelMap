@@ -624,20 +624,24 @@ async function deviceLoss(browser) {
     await mkdir(output, { recursive: true });
     const executablePath = process.env.CHROMIUM_PATH || undefined;
     const channel = executablePath ? undefined : "chromium";
-    report.browserLaunch = { channel: channel || "explicit executable", executablePath,
-        gpu: "SwiftShader for ANGLE, Vulkan compositor and WebGPU", gpuWatchdog: "disabled for software CI",
+    const headless = process.env.PIXELMAP_HEADLESS === "1";
+    report.browserLaunch = { channel: channel || "explicit executable", executablePath, headless,
+        gpu: "ANGLE Vulkan; SwiftShader Vulkan compositor and WebGPU", gpuWatchdog: "disabled for software CI",
         enabledFeatures: ["CDPScreenshotNewSurface", "Vulkan"] };
-    const browser = await chromium.launch({ executablePath, channel,
+    const browser = await chromium.launch({ executablePath, channel, headless,
         // Replace only Playwright 1.64.1's feature switch with its merged value;
         // retain every other default argument and avoid duplicate switches.
         ignoreDefaultArgs: ["--enable-features=CDPScreenshotNewSurface"],
         // Software rendering can exceed Chromium's GPU watchdog while compiling
         // cold shaders. Tests still fail on loss/errors and bounded GPU waits.
-        // Match Chromium 156's VULKAN_SWIFTSHADER pixel-test configuration so
-        // the compositor and WebGPU share a compatible software adapter:
+        // Software Vulkan adapter flags follow Chromium 156's pixel tests:
         // https://github.com/chromium/chromium/blob/156.0.8078.4/content/test/gpu/gpu_tests/pixel_test_pages.py
+        // Linux WebGPU canvas capture needs a real window (CI provides Xvfb)
+        // and ANGLE's Vulkan backend. Headless remains an explicit diagnostic.
+        // https://github.com/vercel-labs/agent-browser/blob/main/skill-data/core/references/webgpu.md
+        // https://github.com/vercel-labs/vgpu/issues/109
         args: ["--disable-dev-shm-usage", "--disable-gpu-watchdog", "--enable-features=CDPScreenshotNewSurface,Vulkan",
-            "--use-angle=swiftshader", "--use-vulkan=swiftshader", "--use-webgpu-adapter=swiftshader",
+            "--use-angle=vulkan", "--use-vulkan=swiftshader", "--use-webgpu-adapter=swiftshader",
             "--disable-vulkan-surface", "--enable-unsafe-webgpu", "--enable-unsafe-swiftshader"] });
     try {
         report.browser = await browser.version();

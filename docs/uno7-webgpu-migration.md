@@ -311,6 +311,17 @@ before screenshots, preserves Chromium's screenshot feature when enabling
 Vulkan, and separately verifies a small WebGPU canvas before building the app.
 Transparent captures are rejected and do not establish rendering correctness.
 
+[Run 10](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43116317023)
+reproduced the missing canvas on an independent page: ordinary CSS pixels were
+correct, while a WebGPU green clear remained transparent despite completed queue
+work and no GPU errors. The application builds were skipped by that preflight.
+This matches the headless Linux presentation limitation documented in the
+[agent-browser WebGPU implementation notes](https://github.com/vercel-labs/agent-browser/blob/main/skill-data/core/references/webgpu.md)
+and its [published Xvfb reproduction](https://github.com/vercel-labs/vgpu/issues/109).
+CI now runs full Chromium with a window under Xvfb, installs the Vulkan loader
+and Mesa runtime, and uses the same SwiftShader Vulkan driver for ANGLE and
+WebGPU. The independent opaque-pixel test must pass before Uno builds start.
+
 The WebGPU browser suite observes actual shader compilation, pipeline depth
 and multisample state, map queue submissions and readback calls. Its intended
 coverage includes all styles/quality presets, imagery/elevation/relief, pan/zoom,

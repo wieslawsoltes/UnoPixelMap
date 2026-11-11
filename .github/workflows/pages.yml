@@ -72,13 +72,14 @@ jobs:
         run: |
           npm ci --prefix tests/browser
           (cd tests/browser && npx playwright install --with-deps chromium)
+          sudo apt-get install -y xvfb xauth libvulkan1 mesa-vulkan-drivers
           node tests/browser/input-adapter-browser.cjs
           mkdir -p "${{ runner.temp }}/preview"
           ln -s "${{ runner.temp }}/atlas/wwwroot" "${{ runner.temp }}/preview/UnoPixelMap"
           python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/preview" > /tmp/atlas-server.log 2>&1 &
           # The previous compositor/readback matrix targets the retired GL presenter.
           # Exercise the shared-device WebGPU renderer, input, modes and failure states.
-          PIXELMAP_SHOTS="${{ runner.temp }}/screens" node tests/browser/webgpu.cjs http://127.0.0.1:8100/UnoPixelMap/
+          PIXELMAP_SHOTS="${{ runner.temp }}/screens" xvfb-run -a -s '-screen 0 1600x1200x24' node tests/browser/webgpu.cjs http://127.0.0.1:8100/UnoPixelMap/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
