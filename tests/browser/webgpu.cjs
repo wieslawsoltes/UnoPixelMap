@@ -17,12 +17,14 @@ const consoleHistory = new WeakMap();
 function installProbe() {
     const state = globalThis.__pixelAtlasGpuProbe = {
         modules: [], pipelines: [], errors: [], losses: [], pending: [], devices: [],
+        deviceInfo: [], deviceDestroys: [],
         draws: 0, submits: 0, mapSubmits: 0, writeBytes: 0, readbacks: 0,
         buffers: 0, textures: 0, buffersDestroyed: 0, texturesDestroyed: 0, glContexts: 0
     };
     const map = label => /^PixelMap[ /]/.test(label || "");
     const encoders = new WeakSet(), passes = new WeakSet(), commands = new WeakSet();
     const buffers = new WeakSet(), textures = new WeakSet();
+    const deviceIndices = new WeakMap();
     function wrap(prototype, name, action) {
         if (!prototype?.[name]) return;
         const original = prototype[name];
@@ -35,10 +37,25 @@ function installProbe() {
         });
     wrap(globalThis.GPUAdapter?.prototype, "requestDevice", async function (fn, args) {
         const device = await Reflect.apply(fn, this, args);
+        const deviceIndex = state.devices.length;
+        deviceIndices.set(device, deviceIndex);
         state.devices.push(device);
-        device.addEventListener("uncapturederror", event => state.errors.push(event.error.message));
-        device.lost.then(info => state.losses.push({ reason: info.reason, message: info.message }));
+        // Adapter properties are WebIDL getters, so object spread omits them.
+        const info = this.info;
+        state.deviceInfo.push({ deviceIndex, label: device.label, timeMs: performance.now(),
+            adapter: info ? { vendor: info.vendor, architecture: info.architecture,
+                device: info.device, description: info.description, isFallbackAdapter: info.isFallbackAdapter,
+                subgroupMinSize: info.subgroupMinSize, subgroupMaxSize: info.subgroupMaxSize } : null,
+            features: [...device.features] });
+        device.addEventListener("uncapturederror", event => state.errors.push(`Device ${deviceIndex}: ${event.error.message}`));
+        device.lost.then(info => state.losses.push({ deviceIndex, label: device.label, timeMs: performance.now(),
+            reason: info.reason, message: info.message }));
         return device;
+    });
+    wrap(globalThis.GPUDevice?.prototype, "destroy", function (fn, args) {
+        state.deviceDestroys.push({ deviceIndex: deviceIndices.get(this) ?? null, label: this.label,
+            timeMs: performance.now(), stack: new Error("GPUDevice.destroy observed").stack });
+        return Reflect.apply(fn, this, args);
     });
     wrap(globalThis.GPUDevice?.prototype, "createShaderModule", function (fn, args) {
         const result = Reflect.apply(fn, this, args);
@@ -52,7 +69,7 @@ function installProbe() {
     });
     wrap(globalThis.GPUDevice?.prototype, "createRenderPipeline", function (fn, args) {
         const d = args[0], result = Reflect.apply(fn, this, args);
-        if (map(d?.label)) state.pipelines.push({ label: d.label, samples: d.multisample?.count || 1,
+        if (map(d?.label)) state.pipelines.push({ label: d.label, deviceIndex: deviceIndices.get(this) ?? null, samples: d.multisample?.count || 1,
             depth: d.depthStencil?.format || null, depthWrite: d.depthStencil?.depthWriteEnabled || false,
             format: d.fragment?.targets?.[0]?.format || null });
         return result;
@@ -463,11 +480,17 @@ async function deviceLoss(browser) {
     await mkdir(output, { recursive: true });
     const executablePath = process.env.CHROMIUM_PATH || undefined;
     const channel = executablePath ? undefined : "chromium";
-    report.browserLaunch = { channel: channel || "explicit executable", executablePath, gpu: "SwiftShader", gpuWatchdog: "disabled for software CI" };
+    report.browserLaunch = { channel: channel || "explicit executable", executablePath,
+        gpu: "SwiftShader for ANGLE, Vulkan compositor and WebGPU", gpuWatchdog: "disabled for software CI" };
     const browser = await chromium.launch({ executablePath, channel,
         // Software rendering can exceed Chromium's GPU watchdog while compiling
         // cold shaders. Tests still fail on loss/errors and bounded GPU waits.
-        args: ["--disable-dev-shm-usage", "--disable-gpu-watchdog", "--enable-unsafe-webgpu", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+        // Match Chromium 156's VULKAN_SWIFTSHADER pixel-test configuration so
+        // the compositor and WebGPU share a compatible software adapter:
+        // https://github.com/chromium/chromium/blob/156.0.8078.4/content/test/gpu/gpu_tests/pixel_test_pages.py
+        args: ["--disable-dev-shm-usage", "--disable-gpu-watchdog", "--enable-features=Vulkan",
+            "--use-angle=swiftshader", "--use-vulkan=swiftshader", "--use-webgpu-adapter=swiftshader",
+            "--disable-vulkan-surface", "--enable-unsafe-webgpu", "--enable-unsafe-swiftshader"] });
     try {
         report.browser = await browser.version();
         await desktop(browser);

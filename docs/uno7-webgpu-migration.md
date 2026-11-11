@@ -278,6 +278,15 @@ and Uno source audits found balanced instance/device ownership. The next browser
 configuration tests full Chromium with the software-GPU watchdog disabled and
 bounded completion timeouts, while retaining every device-loss failure.
 
+[Run 8](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43112585477)
+captured the earlier failure more precisely: Chromium could not create the
+shared image backing its application canvas, followed by device loss. It used
+one GPU device and reported no map readback or WebGL contexts. CI now aligns
+ANGLE, Vulkan presentation and Dawn with the
+[Vulkan SwiftShader configuration from Chromium 156's own pixel tests](https://github.com/chromium/chromium/blob/156.0.8078.4/content/test/gpu/gpu_tests/pixel_test_pages.py).
+Adapter identities and explicit device-destruction stacks are retained in the
+evidence; no device-loss or shader errors are filtered out.
+
 The WebGPU browser suite observes actual shader compilation, pipeline depth
 and multisample state, map queue submissions and readback calls. Its intended
 coverage includes all styles/quality presets, imagery/elevation/relief, pan/zoom,
@@ -289,7 +298,7 @@ graphics state, GPU errors/losses, console history and accessibility on failure.
 
 PR CI runs a Debug interpreted publish for earlier startup/shader feedback and
 the Release AOT publish used for delivery. Both run the same package-identity and
-browser scenarios. Release builds are not cancelled midway by follow-up commits;
+browser scenarios. Superseded builds are cancelled per configuration;
 each configuration retains its own screenshots and exact published files,
 including files useful for diagnosing a failed packaging check.
 

@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # Interpreted startup/shader feedback runs alongside the shipping AOT build.
-    # Keep an active Release build alive while newer commits queue behind it.
+    # Superseded revisions no longer consume browser/AOT validation capacity.
     strategy:
       fail-fast: false
       matrix:
@@ -71,7 +71,7 @@ jobs:
             linkOptimization: true
     concurrency:
       group: uno7-browser-${{ github.event.pull_request.number || github.ref }}-${{ matrix.configuration }}
-      cancel-in-progress: ${{ matrix.configuration == 'Debug' }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
