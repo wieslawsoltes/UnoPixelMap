@@ -504,8 +504,24 @@ public sealed unsafe partial class WebGpuMapRenderer
         public void Dispose() => SilkMarshal.Free((nint)Pointer);
     }
 
-    private void Release(ref GpuBuffer* value) { if (value == null) return; api.BufferRelease(value); value = null; }
-    private void Release(ref Texture* value) { if (value == null) return; api.TextureRelease(value); value = null; }
+    // Current-frame resources stay pinned until submission. Destroy retires owned
+    // allocations deterministically in browsers; previously submitted work remains valid.
+    private void Release(ref GpuBuffer* value)
+    {
+        if (value == null) return;
+        var owned = value;
+        value = null;
+        try { api.BufferDestroy(owned); }
+        finally { api.BufferRelease(owned); }
+    }
+    private void Release(ref Texture* value)
+    {
+        if (value == null) return;
+        var owned = value;
+        value = null;
+        try { api.TextureDestroy(owned); }
+        finally { api.TextureRelease(owned); }
+    }
     private void Release(ref TextureView* value) { if (value == null) return; api.TextureViewRelease(value); value = null; }
     private void Release(ref Sampler* value) { if (value == null) return; api.SamplerRelease(value); value = null; }
     private void Release(ref BindGroup* value) { if (value == null) return; api.BindGroupRelease(value); value = null; }

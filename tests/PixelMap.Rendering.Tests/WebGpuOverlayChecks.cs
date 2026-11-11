@@ -14,6 +14,7 @@ internal static class WebGpuOverlayChecks
         LabelAtlasMatchesLegacyText();
         VehicleAndRouteGeometry();
         AntimeridianAndNearPlane();
+        OrthographicReliefRouteDepth();
         ParticleContinuity();
         Console.WriteLine("Passed WebGPU overlay checks: exact label atlas pixels/reuse, six vehicle modes in four styles, homogeneous clipping, antimeridian routing, premultiplication and bounded stationary/teleport particle lifecycle.");
     }
@@ -62,14 +63,19 @@ internal static class WebGpuOverlayChecks
         }
         Assert(expected.GetPixelSpan().SequenceEqual(actual.GetPixelSpan()), "Glyph atlas composition changed legacy text/halo pixels.");
         long revision = overlay.AtlasRevision;
+        long screenRevision = overlay.ScreenRevision;
         var retained = overlay.ScreenVertices.ToArray();
         overlay.AcknowledgeAtlasUpload(revision);
         renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(new(center.Latitude, center.Longitude), 0, Moving: false));
         Assert(overlay.AtlasRevision == revision && overlay.AtlasDirtyBounds.IsEmpty, "Unchanged map labels re-rasterized or dirtied the atlas during simulation.");
         Assert(MemoryMarshal.AsBytes(retained.AsSpan()).SequenceEqual(MemoryMarshal.AsBytes(overlay.ScreenVertices)), "Simulation rebuilt or moved static labels.");
+        Assert(overlay.ScreenRevision == screenRevision, "Vehicle updates invalidated retained label vertex/index buffers.");
+        renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(new(center.Latitude, center.Longitude), 0, AnimationSeconds: 1, Moving: false));
+        Assert(overlay.ScreenRevision == screenRevision, "Time-only simulation invalidated static label uploads.");
         using var future = renderer.PrepareGpuFrame(width, height, camera with { Bearing = 21 }, [tile], PixelStyle.Day, 3,
             null, null, MapRenderStyle.Pixel, false);
         renderer.PrepareWebGpuOverlay(future, overlay);
+        Assert(overlay.ScreenRevision > screenRevision, "A changed camera did not invalidate projected label buffers.");
         var futureLabels = overlay.ScreenVertices.ToArray();
         renderer.PrepareWebGpuOverlay(frame, overlay);
         Assert(MemoryMarshal.AsBytes(retained.AsSpan()).SequenceEqual(MemoryMarshal.AsBytes(overlay.ScreenVertices)),
@@ -77,6 +83,12 @@ internal static class WebGpuOverlayChecks
         renderer.PrepareWebGpuOverlay(future, overlay);
         Assert(MemoryMarshal.AsBytes(futureLabels.AsSpan()).SequenceEqual(MemoryMarshal.AsBytes(overlay.ScreenVertices)),
             "Returning to the newest retained frame reused an older camera's label projection.");
+        long populatedRevision = overlay.ScreenRevision;
+        using var empty = renderer.PrepareGpuFrame(width, height, camera, [], PixelStyle.Day, 3,
+            null, null, MapRenderStyle.Pixel, false);
+        renderer.PrepareWebGpuOverlay(empty, overlay);
+        Assert(overlay.ScreenRevision > populatedRevision && overlay.ScreenVertices.IsEmpty && overlay.ScreenIndices.IsEmpty,
+            "Removing all labels did not invalidate the retained GPU draw count.");
     }
 
     private static void VehicleAndRouteGeometry()
@@ -128,6 +140,27 @@ internal static class WebGpuOverlayChecks
             foreach (var vertex in overlay.WorldVertices)
                 Assert(vertex.Position.W > 0, "A clipped route emitted behind-eye vertices.");
         }
+    }
+
+    private static void OrthographicReliefRouteDepth()
+    {
+        using var renderer = new PixelMapRenderer();
+        using var overlay = new WebGpuSceneOverlay();
+        var elevation = new ElevationSnapshot([new ElevationTile(new(0, 0, 0), 2, [100, 100, 100, 100])]);
+        var terrain = new TerrainOptions(elevation, Relief: true);
+        var camera = new MapCamera(0, 0, 21, 0, 55, false) { GroundAltitudeMeters = 100 };
+        using var frame = renderer.PrepareGpuFrame(900, 600, camera, [], PixelStyle.Day, 2,
+            null, terrain, MapRenderStyle.Pixel, false);
+        var center = new RoutePoint(0, 0);
+        renderer.PrepareWebGpuOverlay(frame, overlay, Route(TravelMode.Drive, center.Move(270, 4), center.Move(90, 4)));
+        Assert(overlay.RouteSegmentCount > 0 && !overlay.WorldVertices.IsEmpty,
+            "An orthographic route draped above flat relief produced no geometry.");
+        foreach (var vertex in overlay.WorldVertices)
+            Assert(vertex.Position.Z >= 0 && vertex.Position.Z <= vertex.Position.W,
+                "The route's depth bias moved a nearest-layer orthographic annotation outside WebGPU's clip interval.");
+        foreach (var vertex in overlay.OccludedVertices)
+            Assert(vertex.Position.Z >= 0 && vertex.Position.Z <= vertex.Position.W,
+                "An orthographic route silhouette exceeded WebGPU's clip interval.");
     }
 
     private static void ParticleContinuity()

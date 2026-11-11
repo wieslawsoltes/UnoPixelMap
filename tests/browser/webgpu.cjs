@@ -101,14 +101,23 @@ function installProbe() {
         return Reflect.apply(fn, this, args);
     });
     wrap(globalThis.GPUQueue?.prototype, "writeBuffer", function (fn, args) {
-        if (buffers.has(args[0])) state.writeBytes += args[2]?.byteLength || 0;
+        if (buffers.has(args[0])) {
+            const data = args[2];
+            // Typed-array offsets/sizes are elements; ArrayBuffer/DataView use bytes.
+            // Emscripten often supplies the whole WASM heap plus a bounded range.
+            const unit = ArrayBuffer.isView(data) ? (data.BYTES_PER_ELEMENT || 1) : 1;
+            const offset = (args[3] || 0) * unit;
+            state.writeBytes += args[4] === undefined
+                ? Math.max(0, (data?.byteLength || 0) - offset)
+                : args[4] * unit;
+        }
         return Reflect.apply(fn, this, args);
     });
 }
 
 async function click(page, name, touch = false) {
-    const control = page.getByRole("button", { name, exact: true })
-        .or(page.getByRole("checkbox", { name, exact: true }));
+    const control = page.getByRole("button", { name, exact: true, disabled: false })
+        .or(page.getByRole("checkbox", { name, exact: true, disabled: false }));
     await control.waitFor({ state: "visible" });
     const bounds = await control.boundingBox();
     assert.ok(bounds?.width && bounds?.height, name + " has a usable hit target");
@@ -211,6 +220,18 @@ async function verifyGpu(page, name) {
     const evidence = await page.evaluate(async () => {
         const s = globalThis.__pixelAtlasGpuProbe;
         await Promise.all(s.pending);
+        let timeout;
+        try {
+            await Promise.race([
+                Promise.all(s.devices.map(device => device.queue.onSubmittedWorkDone()
+                    .catch(error => s.errors.push("GPU queue completion: " + String(error))))),
+                new Promise((_, reject) => {
+                    timeout = setTimeout(() => reject(new Error("GPU work did not complete within 60 seconds")), 60000);
+                })
+            ]);
+        } finally { clearTimeout(timeout); }
+        // GPU errors are dispatched as browser tasks; inspect after they can run.
+        await new Promise(resolve => setTimeout(resolve, 0));
         return { ...s, pending: undefined, devices: undefined };
     });
     await writeFile(join(output, name + "-gpu.json"), JSON.stringify(evidence, null, 2));
@@ -305,11 +326,16 @@ async function mobile(browser) {
     const { context, page } = await open(browser, "", { mobile: true, density: 2 });
     try {
         const before = await capture(page, "mobile-pixel");
+        const beforePinch = await page.evaluate(() => ({
+            frames: PixelAtlasWebGpu.frames, zoom: PixelAtlasWebGpu.zoom
+        }));
         const cdp = await context.newCDPSession(page);
         await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 135, y: 410, id: 0 }, { x: 245, y: 410, id: 1 }] });
         for (let step = 1; step <= 6; step++)
             await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: 135 - step * 5, y: 410, id: 0 }, { x: 245 + step * 5, y: 410, id: 1 }] });
         await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+        await awaitFrame(page, (s, previous) =>
+            s.frames > previous.frames && Math.abs(s.zoom - previous.zoom) > 0.01, beforePinch);
         const after = await capture(page, "mobile-pinch");
         assert.equal(await page.evaluate(() => visualViewport.scale), 1, "Pinch does not zoom the page or controls");
         assert.ok(difference(before, after) > .01, "Touch pinch changes the map");

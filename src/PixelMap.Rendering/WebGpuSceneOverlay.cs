@@ -43,6 +43,9 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
     public ReadOnlySpan<WebGpuOverlayVertex> ScreenVertices => screen.VertexSpan;
     public ReadOnlySpan<uint> ScreenIndices => screen.IndexSpan;
     public long Revision { get; private set; }
+    /// <summary>Changes only when full-resolution label geometry is rebuilt, including
+    /// an empty label set. GPU hosts can retain its vertex/index buffers across simulation.</summary>
+    public long ScreenRevision { get; private set; }
     public int LabelCount { get; private set; }
     public int RouteSegmentCount { get; private set; }
     public int ParticleCount => particleCount;
@@ -75,6 +78,7 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
         {
             PrepareLabelAtlas();
             labelFrame = frame;
+            ScreenRevision++;
         }
         if (route is not null) AppendRoute(route, vehicle?.Progress ?? double.NaN);
         else routePlan = null;
@@ -163,8 +167,13 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
             // Keep those in the nearest depth layer instead of clipping the annotation.
             depth = Math.Clamp(depth, 0, 1);
         }
+        float biasedDepth = depth - bias * point.W;
+        // Draped routes can already occupy the nearest orthographic depth layer.
+        // Applying their separation bias must not move them outside WebGPU's [0, w]
+        // clip interval. Perspective geometry keeps its real near/far clipping.
+        if (!current.Camera.Perspective) biasedDepth = Math.Clamp(biasedDepth, 0, point.W);
         return new(2 * point.X / (current.ArtWidth * current.PixelSize) - point.W,
-            point.W - 2 * point.Y / (current.ArtHeight * current.PixelSize), depth - bias * point.W, point.W);
+            point.W - 2 * point.Y / (current.ArtHeight * current.PixelSize), biasedDepth, point.W);
     }
 
     private Vector4 ScreenPosition(float x, float y) => new(2 * x / frame!.Width - 1, 1 - 2 * y / frame.Height, 0, 1);

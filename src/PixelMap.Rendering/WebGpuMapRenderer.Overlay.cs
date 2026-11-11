@@ -66,15 +66,23 @@ public sealed unsafe partial class WebGpuMapRenderer
             atlasOwner = overlay;
             overlay.AcknowledgeAtlasUpload(atlasRevision);
         }
-        UploadOverlayBatch(worldOverlay, overlay.WorldVertices, overlay.WorldIndices);
-        UploadOverlayBatch(occludedOverlay, overlay.OccludedVertices, overlay.OccludedIndices);
-        UploadOverlayBatch(screenOverlay, overlay.ScreenVertices, overlay.ScreenIndices);
+        UploadOverlayBatch(worldOverlay, overlay.WorldVertices, overlay.WorldIndices, overlay, overlay.Revision);
+        UploadOverlayBatch(occludedOverlay, overlay.OccludedVertices, overlay.OccludedIndices, overlay, overlay.Revision);
+        UploadOverlayBatch(screenOverlay, overlay.ScreenVertices, overlay.ScreenIndices, overlay, overlay.ScreenRevision);
         worldOverlay.Linear = occludedOverlay.Linear = smooth;
         screenOverlay.Linear = TargetIsSrgb;
     }
-    private void UploadOverlayBatch(OverlayBatch batch, ReadOnlySpan<WebGpuOverlayVertex> vertices, ReadOnlySpan<uint> indices)
+    private void UploadOverlayBatch(OverlayBatch batch, ReadOnlySpan<WebGpuOverlayVertex> vertices, ReadOnlySpan<uint> indices,
+        WebGpuSceneOverlay owner, long revision)
     {
-        if (indices.IsEmpty) return;
+        batch.Count = indices.Length;
+        if (ReferenceEquals(batch.Owner, owner) && batch.Revision == revision) return;
+        if (indices.IsEmpty)
+        {
+            batch.Owner = owner;
+            batch.Revision = revision;
+            return;
+        }
         long vertexBytes = (long)vertices.Length * sizeof(WebGpuOverlayVertex), indexBytes = (long)indices.Length * sizeof(uint);
         if (vertexBytes + indexBytes > 32 * 1024 * 1024) throw new NotSupportedException("The overlay exceeds the GPU geometry budget.");
         if (batch.VertexCapacity < vertexBytes)
@@ -88,7 +96,10 @@ public sealed unsafe partial class WebGpuMapRenderer
             Release(ref batch.Indices); batch.Indices = next; batch.IndexCapacity = indexBytes;
         }
         Upload(batch.Vertices, vertices); Upload(batch.Indices, indices);
-        batch.Count = indices.Length;
+        // Publish the upload identity only after both streams have been written.
+        // Counts and bind groups still advance on every draw, including empty batches.
+        batch.Owner = owner;
+        batch.Revision = revision;
     }
     private void DrawWorldOverlay(RenderPassEncoder* pass, WebGpuSceneOverlay? overlay)
     {
@@ -116,7 +127,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         Release(ref labelAtlasView); Release(ref labelAtlas);
         Release(ref overlayLinearSettings); Release(ref overlaySrgbSettings);
         foreach (var batch in new[] { worldOverlay, occludedOverlay, screenOverlay })
-        { Release(ref batch.Vertices); Release(ref batch.Indices); }
+        { Release(ref batch.Vertices); Release(ref batch.Indices); batch.Owner = null; batch.Revision = -1; batch.Count = 0; }
         atlasOwner = null;
     }
     private sealed class OverlayBatch
@@ -125,5 +136,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         internal long VertexCapacity, IndexCapacity;
         internal int Count;
         internal bool Linear;
+        internal WebGpuSceneOverlay? Owner;
+        internal long Revision = -1;
     }
 }

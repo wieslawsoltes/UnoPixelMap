@@ -204,6 +204,9 @@ public sealed partial class PixelMapControl
         {
             if (Failure is not null) return;
             Failure = error.Message;
+            // Preparation can advance CPU geometry before a GPU submission fails.
+            // Never expose that unpresented scene through picking or terrain queries.
+            _presentedScene = null;
             Console.Error.WriteLine($"Pixel Atlas WebGPU rendering failed: {error}");
             ReportBackend(false);
             BrowserWebGpuDiagnostics.Fail(error.Message);
@@ -213,7 +216,7 @@ public sealed partial class PixelMapControl
         {
             lock (_drawing)
             {
-                if (_frame is not { } frame || _presentedScene is not { } scene || _sceneBuilder is not { } builder)
+                if (Failure is not null || _frame is not { } frame || _presentedScene is not { } scene || _sceneBuilder is not { } builder)
                     return null;
                 builder.ActivateGpuFrame(frame);
                 return builder.Pick(point.X, point.Y, frame.Width, frame.Height, frame.Camera, scene.Tiles);
@@ -223,7 +226,7 @@ public sealed partial class PixelMapControl
         internal InteractionView GetInteractionView(MapCamera camera, TerrainOptions? terrain, double width, double height)
         {
             lock (_drawing)
-                return _frame is { } frame && _presentedScene is { } scene
+                return Failure is null && _frame is { } frame && _presentedScene is { } scene
                     ? new(frame.Camera, scene.Terrain, frame.Width, frame.Height)
                     : new(camera, terrain, width, height);
         }
@@ -234,7 +237,7 @@ public sealed partial class PixelMapControl
             lock (_drawing)
             {
                 screen = default;
-                return _frame is { } && _sceneBuilder is { } renderer &&
+                return Failure is null && _presentedScene is not null && _frame is { } && _sceneBuilder is { } renderer &&
                     renderer.TryProjectTerrain(latitude, longitude, width, height, camera, out screen);
             }
         }
@@ -244,7 +247,7 @@ public sealed partial class PixelMapControl
             lock (_drawing)
             {
                 hit = default;
-                return _frame is { } && _sceneBuilder is { } renderer &&
+                return Failure is null && _presentedScene is not null && _frame is { } && _sceneBuilder is { } renderer &&
                     renderer.TryPickTerrain(x, y, width, height, camera, out hit);
             }
         }
@@ -254,7 +257,7 @@ public sealed partial class PixelMapControl
             lock (_drawing)
             {
                 elevationMeters = 0;
-                return _frame is { } && _sceneBuilder is { } renderer &&
+                return Failure is null && _presentedScene is not null && _frame is { } && _sceneBuilder is { } renderer &&
                     renderer.TryGetTerrainElevation(latitude, longitude, out elevationMeters);
             }
         }
