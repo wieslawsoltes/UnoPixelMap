@@ -58,7 +58,12 @@ function run(root, success = true) {
   return match[1];
 }
 
-function fixture(root) {
+function configFile(packageName, layout = 'root') {
+  return layout === 'root' ? 'uno-config.js' : `${packageName}/uno-config.js`;
+}
+
+function fixture(root, layout = 'root') {
+  const configuration = configFile(sdkPackage, layout);
   write(root, 'index.html', `<html><head>
     <script src="audio/journey-audio.js"></script>
     <script src='./input/map-input.js?mode=pointer&amp;debug=false#adapter'></script>
@@ -66,13 +71,13 @@ function fixture(root) {
     <script type="module" src="./${sdkPackage}/uno-bootstrap.js"></script>
     <link rel="stylesheet" href="./${sdkPackage}/uno.css" />
     </head><body></body></html>\n`);
-  write(root, 'service-worker.js', `import { config } from './${sdkPackage}/uno-config.js';\n`);
-  write(root, `${sdkPackage}/uno-config.js`, `const config = {};
+  write(root, 'service-worker.js', `import { config } from './${configuration}';\n`);
+  write(root, configuration, `const config = {};
     config.uno_app_base = "./${sdkPackage}";
     config.dotnet_js_filename = "dotnet.fixture.js";
     config.environmentVariables = {"UNO_BOOTSTRAP_APP_BASE": "${sdkPackage}"};
     export { config };\n`);
-  write(root, `${sdkPackage}/uno-bootstrap.js`, "export const config = import('./uno-config.js');\n");
+  write(root, `${sdkPackage}/uno-bootstrap.js`, `export const config = import('${layout === 'root' ? '../' : './'}uno-config.js');\n`);
   write(root, `${sdkPackage}/require.js`, '/* unchanged dependency */\n');
   write(root, `${sdkPackage}/uno.css`, `body { background: url("/${sdkPackage}/icon.svg"); }\n`);
   write(root, `${sdkPackage}/icon.svg`, '<svg xmlns="http://www.w3.org/2000/svg"/>\n');
@@ -83,7 +88,7 @@ function fixture(root) {
   for (let index = 0; index < 71; index++)
     write(root, `_framework/resource-${index}.wasm`, Buffer.from([0, 97, 115, 109, index]));
   write(root, '_framework/resource-0.wasm.gz', zlib.gzipSync(fs.readFileSync(path.join(root, '_framework/resource-0.wasm'))));
-  for (const file of ['index.html', 'service-worker.js', `${sdkPackage}/uno-config.js`, `${sdkPackage}/module.js`, `${sdkPackage}/uno.css`, `${sdkPackage}/manifest.json`]) {
+  for (const file of ['index.html', 'service-worker.js', configuration, `${sdkPackage}/module.js`, `${sdkPackage}/uno.css`, `${sdkPackage}/manifest.json`]) {
     write(root, `${file}.gz`, zlib.gzipSync(fs.readFileSync(path.join(root, file))));
     write(root, `${file}.br`, zlib.brotliCompressSync(fs.readFileSync(path.join(root, file))));
   }
@@ -93,7 +98,7 @@ function fixture(root) {
   write(root, 'unrelated.bin', 'unrelated root file');
 }
 
-function verifyReferences(root, name) {
+function verifyReferences(root, name, layout = 'root') {
   const digest = name.substring('package_'.length);
   const index = read(root, 'index.html');
   assert.ok(index.includes(`./${name}/uno-bootstrap.js`));
@@ -109,11 +114,20 @@ function verifyReferences(root, name) {
       assert.equal(url.hash, '#adapter');
     }
   }
-  for (const file of ['service-worker.js', `${name}/uno-config.js`, `${name}/uno.css`, `${name}/manifest.json`, `${name}/module.js`]) {
+  const rewritten = [configFile(name, layout), `${name}/uno.css`, `${name}/manifest.json`, `${name}/module.js`];
+  if (layout === 'legacy') rewritten.push('service-worker.js');
+  for (const file of rewritten) {
     assert.ok(read(root, file).includes(name), file);
     assert.ok(!read(root, file).includes(sdkPackage), file);
     assert.ok(!fs.existsSync(path.join(root, file + '.gz')), file);
     assert.ok(!fs.existsSync(path.join(root, file + '.br')), file);
+  }
+  assert.equal(read(root, 'service-worker.js'), `import { config } from './${configFile(name, layout)}';\n`);
+  if (layout === 'root') {
+    assert.ok(!fs.existsSync(path.join(root, name, 'uno-config.js')), 'Bootstrap 10.1 keeps configuration outside the immutable package');
+    const worker = fs.readFileSync(path.join(root, 'service-worker.js'));
+    assert.deepEqual(zlib.gunzipSync(fs.readFileSync(path.join(root, 'service-worker.js.gz'))), worker);
+    assert.deepEqual(zlib.brotliDecompressSync(fs.readFileSync(path.join(root, 'service-worker.js.br'))), worker);
   }
   assert.ok(!fs.existsSync(path.join(root, 'index.html.gz')));
   assert.ok(!fs.existsSync(path.join(root, 'index.html.br')));
@@ -145,7 +159,8 @@ function verifyPublished(root) {
     assert.deepEqual(decompress(fs.readFileSync(file)), fs.readFileSync(file.slice(0, -3)), file);
     compressedCount++;
   }
-  const config = read(root, `${first}/uno-config.js`);
+  assert.ok(!fs.existsSync(path.join(root, first, 'uno-config.js')), 'Uno 7 must publish the Bootstrap 10.1 root configuration');
+  const config = read(root, 'uno-config.js');
   const loader = config.match(/config\.dotnet_js_filename\s*=\s*"([\w.-]+)"/)[1];
   const loaderText = read(root, `_framework/${loader}`);
   const boot = JSON.parse(loaderText.split('/*json-start*/')[1].split('/*json-end*/')[0]);
@@ -178,6 +193,14 @@ try {
   assert.equal(run(firstRoot), first);
   assert.deepEqual(snapshot(firstRoot), initial);
 
+  const legacyRoot = path.join(temporary, 'legacy output');
+  fixture(legacyRoot, 'legacy');
+  const legacy = run(legacyRoot);
+  verifyReferences(legacyRoot, legacy, 'legacy');
+  const legacyInitial = snapshot(legacyRoot);
+  assert.equal(run(legacyRoot), legacy, 'Older package-local configuration remains repeatable');
+  assert.deepEqual(snapshot(legacyRoot), legacyInitial);
+
   const secondRoot = path.join(temporary, 'second');
   fixture(secondRoot);
   assert.equal(run(secondRoot), first, 'Identical contents at a different path must have the same identity');
@@ -206,6 +229,30 @@ try {
   const changedAsset = run(firstRoot);
   assert.notEqual(changedAsset, changedAdapter, 'Packaged asset bytes must contribute to identity');
 
+  const changedConfigRoot = path.join(temporary, 'configuration only');
+  fixture(changedConfigRoot);
+  assert.equal(run(changedConfigRoot), first);
+  fs.appendFileSync(path.join(changedConfigRoot, 'uno-config.js'), '// publish-time configuration update\n');
+  const changedConfig = run(changedConfigRoot);
+  assert.notEqual(changedConfig, first, 'Root configuration bytes must invalidate the bootstrap identity');
+  assert.equal(run(changedConfigRoot), changedConfig, 'Root configuration canonicalization must be idempotent');
+  verifyReferences(changedConfigRoot, changedConfig);
+
+  const missingConfigRoot = path.join(temporary, 'missing root config');
+  fixture(missingConfigRoot);
+  // A stale packaged copy must not conceal the missing file imported by 10.1.
+  fs.renameSync(path.join(missingConfigRoot, 'uno-config.js'), path.join(missingConfigRoot, sdkPackage, 'uno-config.js'));
+  const missingConfigBefore = snapshot(missingConfigRoot);
+  assert.match(run(missingConfigRoot, false), /required published file is missing/);
+  assert.deepEqual(snapshot(missingConfigRoot), missingConfigBefore);
+
+  const mismatchedConfigRoot = path.join(temporary, 'mismatched config');
+  fixture(mismatchedConfigRoot);
+  write(mismatchedConfigRoot, 'uno-config.js', read(mismatchedConfigRoot, 'uno-config.js').replaceAll(sdkPackage, unrelatedPackage));
+  const mismatchedConfigBefore = snapshot(mismatchedConfigRoot);
+  assert.match(run(mismatchedConfigRoot, false), /does not select the active bootstrap package/);
+  assert.deepEqual(snapshot(mismatchedConfigRoot), mismatchedConfigBefore);
+
   const invalidRoot = path.join(temporary, 'invalid');
   fixture(invalidRoot);
   fs.unlinkSync(path.join(invalidRoot, '_framework/dotnet.fixture.js'));
@@ -232,7 +279,17 @@ try {
   assert.equal(run(readOnlyRoot), first, 'Fixing entrypoint permissions must make the identical publish retry succeed');
   verifyReferences(readOnlyRoot, first);
 
-  console.log('Package identity checks passed: deterministic, repeatable, incremental, runtime/adapters/assets, references, gzip/Brotli reuse, preflight failures and read-only retry.');
+  const readOnlyConfigRoot = path.join(temporary, 'read-only root config');
+  fixture(readOnlyConfigRoot);
+  fs.chmodSync(path.join(readOnlyConfigRoot, 'uno-config.js'), 0o444);
+  const readOnlyConfigBefore = snapshot(readOnlyConfigRoot);
+  assert.match(run(readOnlyConfigRoot, false), /entry point is read-only/);
+  assert.deepEqual(snapshot(readOnlyConfigRoot), readOnlyConfigBefore, 'Configuration must be writable before installing a new package');
+  fs.chmodSync(path.join(readOnlyConfigRoot, 'uno-config.js'), 0o644);
+  assert.equal(run(readOnlyConfigRoot), first);
+  verifyReferences(readOnlyConfigRoot, first);
+
+  console.log('Package identity checks passed: root and legacy configuration layouts, deterministic/repeatable/incremental publishing, runtime/adapters/assets/config identity, references, gzip/Brotli reuse, mismatched/missing config preflight and read-only retry.');
   if (process.argv[2]) verifyPublished(path.resolve(process.argv[2]));
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });

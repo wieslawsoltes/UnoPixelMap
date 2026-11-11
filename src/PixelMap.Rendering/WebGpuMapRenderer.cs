@@ -66,8 +66,12 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     public long LastUploadBytes { get; private set; }
     public int LastDrawCalls { get; private set; }
     public double LastSubmissionMilliseconds { get; private set; }
-    public long ResidentBytes => meshBytes + (long)textureLayerCapacity * GpuTerrainTexture.Size * GpuTerrainTexture.Size * 4 +
-        (long)heightLayerCapacity * GpuTerrainMesh.Side * GpuTerrainMesh.Side * 8 + (long)shadowSize * shadowSize * 4;
+    /// <summary>Nominal bytes in owned resident GPU buffers and textures. Scene attachments
+    /// are reported separately; implementation-specific storage and alignment are excluded.</summary>
+    public long ResidentBytes => disposed ? 0 : meshBytes +
+        (long)textureLayerCapacity * GpuTerrainTexture.Size * GpuTerrainTexture.Size * 4 +
+        (long)heightLayerCapacity * GpuTerrainMesh.Side * GpuTerrainMesh.Side * 8 +
+        (long)shadowSize * shadowSize * 4 + StaticResidentBytes + OverlayResidentBytes;
     public long AttachmentBytes { get; private set; }
     public int RenderWidth => attachmentWidth;
     public int RenderHeight => attachmentHeight;

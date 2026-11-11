@@ -9,14 +9,13 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: uno7-webgpu-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
-
 jobs:
   regression:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    concurrency:
+      group: uno7-regression-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     env:
       PIXELMAP_TEST_FONT: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
     steps:
@@ -55,8 +54,24 @@ jobs:
           if-no-files-found: ignore
 
   browser:
+    name: WebGPU browser (${{ matrix.configuration }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # Interpreted startup/shader feedback runs alongside the shipping AOT build.
+    # Keep an active Release build alive while newer commits queue behind it.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - configuration: Debug
+            execution: Interpreter
+            linkOptimization: false
+          - configuration: Release
+            execution: InterpreterAndAOT
+            linkOptimization: true
+    concurrency:
+      group: uno7-browser-${{ github.event.pull_request.number || github.ref }}-${{ matrix.configuration }}
+      cancel-in-progress: ${{ matrix.configuration == 'Debug' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -70,7 +85,7 @@ jobs:
       - name: Install the browser toolchain
         run: dotnet workload install wasm-tools --skip-manifest-update
       - name: Publish the Uno 7 WebGPU application
-        run: dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o "${{ runner.temp }}/atlas"
+        run: dotnet publish src/PixelMap.App -c ${{ matrix.configuration }} -f net10.0-browserwasm -p:WasmShellMonoRuntimeExecutionMode=${{ matrix.execution }} -p:WasmShellEmccLinkOptimization=${{ matrix.linkOptimization }} -o "${{ runner.temp }}/atlas"
       - name: Verify immutable bootstrap and runtime package identity
         run: node tests/packaging/package-identity.cjs "${{ runner.temp }}/atlas/wwwroot"
       - name: Install the pinned Chromium browser
@@ -92,15 +107,16 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: uno7-webgpu-browser-evidence
+          name: uno7-webgpu-${{ matrix.configuration }}-browser-evidence
           path: |
             ${{ runner.temp }}/webgpu-evidence
             ${{ runner.temp }}/atlas-server.log
           if-no-files-found: ignore
           retention-days: 14
       - uses: actions/upload-artifact@v4
-        if: success()
+        if: always()
         with:
-          name: uno7-webgpu-publish
+          name: uno7-webgpu-${{ matrix.configuration }}-publish
           path: ${{ runner.temp }}/atlas/wwwroot
+          if-no-files-found: ignore
           retention-days: 7

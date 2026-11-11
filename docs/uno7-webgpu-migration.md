@@ -41,6 +41,14 @@ Authoritative upstream references:
 Uno explicitly describes its WebGPU backend as experimental. This migration uses
 published APIs and pinned releases, rather than private host reflection.
 
+Bootstrap 10.1.1 moves `uno-config.js` beside `index.html` at the publish root.
+The deployment finalizer follows the selected bootstrapper's config import,
+checks its package identity, and includes the root configuration in transactional
+hashing and rewrites. The packaging gate still verifies loader integrity,
+compressed representations and byte-preserving repeated finalization. Its
+root-layout, incremental-publish, rollback and retry fixtures pass. See
+[publishing details](publishing.md).
+
 ## Host and control migration
 
 The application and control library declare `Skia;WebGpu`. SkiaSharp remains
@@ -95,7 +103,9 @@ coordinate precision loss. Perspective clipping and depth mapping follow the
 existing camera and terrain conventions.
 
 A `GpuMapFrame` owns immutable geometry/source references. Controls advance
-the displayed frame and the interaction/picking state together. Existing sparse
+the displayed frame and the interaction/picking state together. A failed GPU
+submission invalidates interaction queries instead of exposing geometry that
+was prepared but never displayed. Existing sparse
 CPU depth queries remain available for label visibility, picking and terrain
 interaction without reading a GPU depth buffer back to the CPU.
 
@@ -116,10 +126,18 @@ Normal and Roblox styles implement:
 - Quality-dependent multisampling and edge antialiasing.
 - Correct final encoding for linear and sRGB target formats.
 
+Roblox vertical terrain faces use explicit outward world-space normals; their
+zero vertical component cannot orient a derivative normal reliably. Top and
+bevel faces retain their geometric normals.
+
 The shadow projection is a single stabilized sun projection, not a cascaded
 shadow system. Terrain and building geometry supply the shadow casters. Vehicle
 and route overlays use hardware scene depth; they do not currently cast or
 receive the full physical-lighting shadow treatment.
+
+The renderer retains a separate complete building index stream for sun casters,
+so camera-frustum culling does not erase shadows from loaded offscreen buildings.
+An unchanged immutable frame and quality preset reuse the previous shadow map.
 
 Pixel and Minecraft retain their logical pixel grid, palette treatment, window
 details and nearest-neighbor resolve. Their prior baked ground-shadow appearance
@@ -152,9 +170,21 @@ boat, train and aircraft models retain physical and miniature representations.
 World effects use a fixed 56-particle buffer and preserve pause, seek, teleport,
 resume and continuity behavior.
 
+An unchanged stationary standalone vehicle advances its simulation timestamp
+without rebuilding geometry or submitting an identical frame. Routes and gates
+retain their animation updates. Orthographic route depth bias is clamped to the
+WebGPU clip interval so annotations raised above the terrain remain visible.
+
 Labels reuse the existing Unicode placement, ordering, collision and occlusion
 rules. A bounded 2048 × 2048 atlas caches font assets; only changed atlas regions
 are uploaded. Labels are GPU quads, not a rasterized viewport overlay.
+Label buffers have a separate revision and remain resident across vehicle-only
+updates. Retained-frame reactivation restores the matching camera and label
+sources, including an A → B → A → B sequence.
+Smooth styles rasterize glyph assets at the physical display density, quantized
+in quarter steps and bounded to 3×. Logical text metrics and collision boxes stay
+unchanged. Pixel and Minecraft keep their original 1× glyph artwork. Segmented
+long names include populated filtering guards to prevent atlas-boundary seams.
 `PrepareGpuFrame(..., prepareLegacyOverlay: false)` avoids recording the old
 Skia label display list. The default parameter remains true for regression
 callers that exercise the historical renderer.
@@ -164,6 +194,9 @@ callers that exercise the historical renderer.
 The map does not release Uno's API, device, queue, target texture or target view.
 It owns and releases its own GPU buffers, views, textures, samplers, bind groups,
 pipeline layouts, pipelines, shader modules, encoders and command buffers.
+Owned buffers and textures are explicitly destroyed before their native handles
+are released; reclamation does not depend on JavaScript garbage collection.
+Previously submitted work retains the resource lifetime guaranteed by WebGPU.
 
 The target is valid only during `RenderOverride`. Resize recreates the
 extent-dependent attachments. Unload releases scene resources and GPU resources
@@ -174,6 +207,9 @@ Retained mesh storage is bounded to 128 MiB. Intermediate attachments are bounde
 separately to 256 MiB. Tile arrays, atlas storage, uniforms, pipelines and driver
 allocations are additional. `ResidentBytes` is a bounded-resource estimate, not
 total process or GPU-driver memory; `AttachmentBytes` is reported separately.
+The resident estimate includes the glyph atlas, retained overlay buffer capacity,
+uniforms, shared indices and material textures. Driver layout, padding and
+pipeline storage are not measurable from those nominal allocation sizes.
 
 Unavailable WebGPU, absent adapters, startup exceptions, uncaptured GPU errors
 and device loss show an accessible HTML recovery panel with a reload action.
@@ -188,8 +224,10 @@ callbacks. Intentional page teardown suppresses that diagnostic.
 
 The restored package graph matches the versions above. Rendering-library Release
 compilation succeeded. The full native regression job also passed on GitHub for
-[7d8b6f4](https://github.com/wieslawsoltes/UnoPixelMap/commit/7d8b6f4748d37fd2c606c061e577bd2cd8810bb3):
-[workflow run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43105401404).
+[fee37c5](https://github.com/wieslawsoltes/UnoPixelMap/commit/fee37c54d188f49cedd50494b51ac3588b67750c):
+[workflow run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43107888651).
+The browser application also completed managed compilation, native linking and
+AOT compilation before reaching a custom publish-versioning layout mismatch.
 
 That job includes data, elevation, imagery, routing, simulation, input and audio
 checks; the complete CPU rendering corpus; and the retained GLES reference
@@ -202,8 +240,12 @@ WebGPU scene's entire raster output.
 The new `--webgpu-overlay` checks passed locally: Unicode atlas/halo composition,
 all six vehicle modes across four styles, route and gate geometry, antimeridian
 and near-plane clipping, finite vertices, valid indices, atlas reuse, particle
-capacity and lifecycle. Follow-up checks cover retained-frame reactivation and
-idle timestamp advancement.
+capacity and lifecycle. Follow-up checks covering retained-frame reactivation,
+independent label revisions, empty label sets, orthographic route depth and idle
+timestamp advancement passed locally and in the current native CI job.
+The high-DPI follow-up also passed exact 1×, 2× and 3× comparisons against direct
+scaled text, including a segmented Unicode name, density-only invalidation,
+bucket reuse, the atlas density cap and unchanged pixel-style glyph density.
 
 Exact production WGSL and 22 pipeline variants were accepted by native Dawn
 validation on SwiftShader. This is shader/layout validation only.
@@ -213,9 +255,9 @@ validation on SwiftShader. This is shader/layout validation only.
 The first native complete-frame fixture aborted in SwiftShader after submission.
 A sky-only variant also aborted, while independent clear and constant-triangle
 fixtures succeeded. No complete-frame native screenshot or timing is established
-by that run. The local execution environment then became unavailable; the
-implementation commits had already been saved in the PR. Published browser CI
-is the authoritative integration gate and is still being investigated.
+by that run. Local Chromium cannot start because this execution environment
+denies its required process sockets. Published browser CI is the authoritative
+integration gate and is still being investigated.
 
 The WebGPU browser suite observes actual shader compilation, pipeline depth
 and multisample state, map queue submissions and readback calls. Its intended
@@ -223,6 +265,12 @@ coverage includes all styles/quality presets, imagery/elevation/relief, pan/zoom
 all six route demonstrations, walking, resize, high-DPI mobile pinch, unavailable
 WebGPU and device loss. It retains screenshots, errors and bounded counters.
 The suite must pass before this migration is considered ready.
+
+PR CI runs a Debug interpreted publish for earlier startup/shader feedback and
+the Release AOT publish used for delivery. Both run the same package-identity and
+browser scenarios. Release builds are not cancelled midway by follow-up commits;
+each configuration retains its own screenshots and exact published files,
+including files useful for diagnosing a failed packaging check.
 
 `frameMilliseconds` measures CPU preparation and submission.
 `submissionMilliseconds` measures renderer-side CPU work. Neither is a GPU

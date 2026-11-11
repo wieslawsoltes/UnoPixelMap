@@ -14,6 +14,8 @@ public sealed unsafe partial class WebGpuMapRenderer
     private long atlasRevision = -1;
     private WebGpuSceneOverlay? atlasOwner;
     private readonly OverlayBatch worldOverlay = new(), occludedOverlay = new(), screenOverlay = new();
+    private long OverlayResidentBytes => (long)atlasWidth * atlasHeight * 4 + 32 +
+        worldOverlay.Bytes + occludedOverlay.Bytes + screenOverlay.Bytes;
 
     private void InitializeOverlayResources()
     {
@@ -134,6 +136,7 @@ public sealed unsafe partial class WebGpuMapRenderer
     {
         internal GpuBuffer* Vertices, Indices;
         internal long VertexCapacity, IndexCapacity;
+        internal long Bytes => VertexCapacity + IndexCapacity;
         internal int Count;
         internal bool Linear;
         internal WebGpuSceneOverlay? Owner;

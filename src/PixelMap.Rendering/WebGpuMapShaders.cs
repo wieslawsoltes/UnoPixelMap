@@ -223,7 +223,13 @@ internal static class WebGpuMapShaders
             }
             if(smoothStyle()){
                 var normal=normalize(cross(dx,dy));
-                if(normal.z<0.0){normal=-normal;}
+                if(style()==3u&&v.face>4u){
+                    // Vertical block sides have no Z component to orient. Their
+                    // world-space outward directions are north, east, south, west.
+                    var sides=array<vec3f,4>(vec3f(0.0,1.0,0.0),vec3f(1.0,0.0,0.0),
+                        vec3f(0.0,-1.0,0.0),vec3f(-1.0,0.0,0.0));
+                    normal=sides[(v.face-1u)%4u];
+                }else if(normal.z<0.0){normal=-normal;}
                 color=lighting(color/255.0,v.world,normal,select(0.86,0.38,style()==3u),0.0,vec3f(0.0));
             }else{color=clamp(floor(color*shade),vec3f(0.0),vec3f(255.0))/255.0;}
             return vec4f(color,sampleColor.a);

@@ -47,10 +47,19 @@ namespace PixelMap.Build
                 var oldPackage = FindPackage(index);
                 var packagePath = Path.Combine(root, oldPackage);
                 var frameworkPath = Path.Combine(root, "_framework");
-                var configPath = Path.Combine(packagePath, "uno-config.js");
-                RequireFile(Path.Combine(packagePath, "uno-bootstrap.js"));
+                var bootstrapPath = Path.Combine(packagePath, "uno-bootstrap.js");
+                var bootstrap = ReadText(bootstrapPath);
+                // Bootstrap 10.1 imports ../uno-config.js from the hashed package,
+                // keeping the publish-rewritten loader selection beside index.html.
+                // Follow the selected bootstrapper, not an unrelated/stale config
+                // from an incremental publish of the previous package layout.
+                var rootConfig = bootstrap.IndexOf("../uno-config.js", StringComparison.Ordinal) >= 0;
+                var configPath = Path.Combine(rootConfig ? root : packagePath, "uno-config.js");
                 RequireFile(Path.Combine(packagePath, "require.js"));
                 var config = ReadText(configPath);
+                var appBase = Regex.Match(config, @"config\.uno_app_base\s*=\s*[""'](?<path>[^""']+)[""']");
+                if (!appBase.Success || appBase.Groups["path"].Value.TrimEnd('/').Split('/').Last() != oldPackage)
+                    throw new InvalidDataException("Published uno-config.js does not select the active bootstrap package.");
                 var loader = Regex.Match(config, @"config\.dotnet_js_filename\s*=\s*[""'](?<file>dotnet(?:\.[a-z0-9]+)?\.js)[""']");
                 if (!loader.Success)
                     throw new InvalidDataException("Published uno-config.js does not select a supported .NET loader.");
@@ -64,6 +73,8 @@ namespace PixelMap.Build
                 var text = new Dictionary<string, string>(StringComparer.Ordinal);
                 foreach (var file in LogicalFiles(packagePath).Where(IsText))
                     text.Add(file, ReadText(file));
+                if (rootConfig)
+                    text.Add(configPath, config);
                 text.Add(indexPath, index);
                 var workerPath = Path.Combine(root, "service-worker.js");
                 if (File.Exists(workerPath))
@@ -72,6 +83,7 @@ namespace PixelMap.Build
                 var files = LogicalFiles(packagePath).Concat(LogicalFiles(frameworkPath))
                     .Concat(Adapters.Select(adapter => Path.Combine(root, adapter)))
                     .Concat(new[] { indexPath })
+                    .Concat(rootConfig ? new[] { configPath } : new string[0])
                     .Concat(File.Exists(workerPath) ? new[] { workerPath } : new string[0])
                     .OrderBy(file => RelativePath(root, file), StringComparer.Ordinal).ToArray();
                 var digest = ComputeIdentity(root, files, text, indexPath, oldPackage, packageReference);

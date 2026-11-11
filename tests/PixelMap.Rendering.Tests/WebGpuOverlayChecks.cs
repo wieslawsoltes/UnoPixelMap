@@ -12,11 +12,12 @@ internal static class WebGpuOverlayChecks
     {
         Assert(Marshal.SizeOf<WebGpuOverlayVertex>() == 48, "The WebGPU overlay vertex ABI must be 48 bytes.");
         LabelAtlasMatchesLegacyText();
+        HighDpiLabelAtlas();
         VehicleAndRouteGeometry();
         AntimeridianAndNearPlane();
         OrthographicReliefRouteDepth();
         ParticleContinuity();
-        Console.WriteLine("Passed WebGPU overlay checks: exact label atlas pixels/reuse, six vehicle modes in four styles, homogeneous clipping, antimeridian routing, premultiplication and bounded stationary/teleport particle lifecycle.");
+        Console.WriteLine("Passed WebGPU overlay checks: exact label atlas pixels/reuse at 1x/2x/3x density, six vehicle modes in four styles, homogeneous clipping, antimeridian routing, premultiplication and bounded stationary/teleport particle lifecycle.");
     }
 
     private static void LabelAtlasMatchesLegacyText()
@@ -89,6 +90,82 @@ internal static class WebGpuOverlayChecks
         renderer.PrepareWebGpuOverlay(empty, overlay);
         Assert(overlay.ScreenRevision > populatedRevision && overlay.ScreenVertices.IsEmpty && overlay.ScreenIndices.IsEmpty,
             "Removing all labels did not invalidate the retained GPU draw count.");
+    }
+
+    private static void HighDpiLabelAtlas()
+    {
+        const int width = 903, height = 603;
+        var tileId = new TileId(14, 8192, 8192);
+        var center = new RoutePoint(Math.Atan(Math.Sinh(Math.PI * (1 - 2 * (tileId.Y + .5) / (1 << tileId.Z)))) * 180 / Math.PI,
+            (tileId.X + .5) / (1 << tileId.Z) * 360 - 180);
+        var camera = new MapCamera(center.Latitude, center.Longitude, 15.4, 0, 0);
+        var tile = new MapTile(tileId, [Label(1, "Racibórz — Śródmieście — The Riverside Architectural Quarter", 2048, 2048)]);
+        using var renderer = new PixelMapRenderer();
+        TestLabelFont.Apply(renderer);
+        using var frame = renderer.PrepareGpuFrame(width, height, camera, [tile], PixelStyle.Day, 1, null, null,
+            MapRenderStyle.Normal, prepareLegacyOverlay: false);
+        using var overlay = new WebGpuSceneOverlay();
+        var drawLabels = typeof(PixelMapRenderer).GetMethod("DrawLabels", BindingFlags.Instance | BindingFlags.NonPublic)!
+            .CreateDelegate<Action<SKCanvas, int, int, double, int, PixelPalette>>(renderer);
+        foreach (int scale in new[] { 2, 3 })
+        {
+            renderer.PrepareWebGpuOverlay(frame, overlay, labelRasterScale: scale);
+            Assert(overlay.LabelRasterScale == scale && overlay.LabelCount == 1 && overlay.Atlas is not null,
+                "High-DPI preparation lost the label or its requested glyph density.");
+            Assert(overlay.Atlas!.Width == 2048 && overlay.Atlas.Height == 2048,
+                "High-DPI glyphs exceeded the fixed atlas memory budget.");
+            Validate(overlay.ScreenVertices, overlay.ScreenIndices);
+            if (scale == 3)
+                Assert(overlay.ScreenVertices.Length > 4, "The high-DPI fixture must exercise a segmented label.");
+            using var expected = new SKBitmap(width * scale, height * scale, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using var actual = new SKBitmap(width * scale, height * scale, SKColorType.Bgra8888, SKAlphaType.Premul);
+            using (var canvas = new SKCanvas(expected))
+            {
+                canvas.Clear(SKColors.Transparent);
+                canvas.Scale(scale);
+                drawLabels(canvas, width, height, camera.Zoom, 1, PixelPalette.Day);
+            }
+            using (var canvas = new SKCanvas(actual))
+            using (var atlasImage = SKImage.FromBitmap(overlay.Atlas))
+            {
+                canvas.Clear(SKColors.Transparent);
+                var vertices = overlay.ScreenVertices;
+                for (int i = 0; i < vertices.Length; i += 4)
+                {
+                    var a = vertices[i]; var c = vertices[i + 2];
+                    var source = new SKRect(MathF.Round(a.Uv.X * overlay.Atlas.Width), MathF.Round(a.Uv.Y * overlay.Atlas.Height),
+                        MathF.Round(c.Uv.X * overlay.Atlas.Width), MathF.Round(c.Uv.Y * overlay.Atlas.Height));
+                    var destination = new SKRect(MathF.Round((a.Position.X + 1) * actual.Width * .5f), MathF.Round((1 - a.Position.Y) * actual.Height * .5f),
+                        MathF.Round((c.Position.X + 1) * actual.Width * .5f), MathF.Round((1 - c.Position.Y) * actual.Height * .5f));
+                    canvas.DrawImage(atlasImage, source, destination, new SKSamplingOptions(SKFilterMode.Nearest));
+                }
+            }
+            Assert(expected.GetPixelSpan().SequenceEqual(actual.GetPixelSpan()),
+                $"The {scale}x glyph atlas changed logical label placement, glyph rasterization, halo or segment continuity.");
+            long atlasRevision = overlay.AtlasRevision, screenRevision = overlay.ScreenRevision;
+            overlay.AcknowledgeAtlasUpload(atlasRevision);
+            renderer.PrepareWebGpuOverlay(frame, overlay, labelRasterScale: scale + .01f);
+            Assert(overlay.AtlasRevision == atlasRevision && overlay.ScreenRevision == screenRevision && overlay.AtlasDirtyBounds.IsEmpty,
+                "Fractional target rounding within a density bucket invalidated retained label assets.");
+        }
+        long beforeDensityChange = overlay.ScreenRevision;
+        renderer.PrepareWebGpuOverlay(frame, overlay, labelRasterScale: 1.24f);
+        Assert(overlay.LabelRasterScale == 1.25f && overlay.ScreenRevision > beforeDensityChange,
+            "A density-only change did not rebuild labels on the same retained map frame.");
+        long quantizedRevision = overlay.ScreenRevision;
+        renderer.PrepareWebGpuOverlay(frame, overlay, labelRasterScale: 1.26f);
+        Assert(overlay.LabelRasterScale == 1.25f && overlay.ScreenRevision == quantizedRevision,
+            "Equivalent quarter-step densities rebuilt label geometry.");
+        renderer.PrepareWebGpuOverlay(frame, overlay, labelRasterScale: 8);
+        Assert(overlay.LabelRasterScale == 3, "A high-density display exceeded the bounded 3x glyph density.");
+        foreach (var style in new[] { MapRenderStyle.Pixel, MapRenderStyle.Minecraft })
+        {
+            using var pixelFrame = renderer.PrepareGpuFrame(width, height, camera, [tile], PixelStyle.Day, 3, null, null,
+                style, prepareLegacyOverlay: false);
+            renderer.PrepareWebGpuOverlay(pixelFrame, overlay, labelRasterScale: 3);
+            Assert(overlay.LabelRasterScale == 1 && overlay.LabelCount == 1,
+                "A pixel style changed its original glyph artwork at high display density.");
+        }
     }
 
     private static void VehicleAndRouteGeometry()

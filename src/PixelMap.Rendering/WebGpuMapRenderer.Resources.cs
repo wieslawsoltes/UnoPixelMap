@@ -7,6 +7,18 @@ namespace PixelMap.Rendering;
 
 public sealed unsafe partial class WebGpuMapRenderer
 {
+    private long StaticResidentBytes
+    {
+        get
+        {
+            long bytes = (long)(uniforms.Length + instances.Length + resolveValues.Length) * sizeof(float) +
+                (long)(GpuTerrainMesh.Indices.Length + TerrainBlockMesh.CubeIndices.Length + TerrainBlockMesh.BeveledIndices.Length) * sizeof(ushort) +
+                7L * PixelPalette.Day.Materials.Length * 4 + (long)bitmapWidth * bitmapHeight * 4;
+            foreach (var level in PixelWindowFilter.Levels) bytes += (long)level.Width * level.Height * 2;
+            return bytes;
+        }
+    }
+
     private void InitializeResources()
     {
         uniformBuffer = CreateBuffer((ulong)uniforms.Length * sizeof(float), BufferUsage.Uniform | BufferUsage.CopyDst);

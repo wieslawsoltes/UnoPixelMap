@@ -29,6 +29,7 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
     private GpuMapFrame? labelFrame;
     private bool disposed;
     private bool labelsChanged;
+    private float requestedLabelRasterScale = 1;
     private VehiclePose? lastVehicle;
     private TravelMode lastVehicleMode;
     private bool hasNavigation;
@@ -46,13 +47,16 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
     /// <summary>Changes only when full-resolution label geometry is rebuilt, including
     /// an empty label set. GPU hosts can retain its vertex/index buffers across simulation.</summary>
     public long ScreenRevision { get; private set; }
+    /// <summary>Physical atlas texels per logical label pixel. Smooth styles use a
+    /// bounded quarter-step density; pixel styles retain their original glyph artwork.</summary>
+    public float LabelRasterScale { get; private set; } = 1;
     public int LabelCount { get; private set; }
     public int RouteSegmentCount { get; private set; }
     public int ParticleCount => particleCount;
     public int WorldTriangleCount => world.IndexCount / 3;
     public int ScreenTriangleCount => screen.IndexCount / 3;
 
-    internal bool Begin(GpuMapFrame next)
+    internal bool Begin(GpuMapFrame next, float labelRasterScale)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
         ObjectDisposedException.ThrowIf(next.IsDisposed, next);
@@ -67,7 +71,9 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
         focal = MapCamera.Focal(next.Height);
         near = (float)next.Camera.NearLimit(next.Height);
         far = (float)next.Camera.FarLimit(next.Height);
-        labelsChanged = !ReferenceEquals(labelFrame, next);
+        requestedLabelRasterScale = MapRendering.Smooth(next.RenderStyle) && float.IsFinite(labelRasterScale)
+            ? MathF.Round(Math.Clamp(labelRasterScale, 1, 3) * 4, MidpointRounding.AwayFromZero) * .25f : 1;
+        labelsChanged = !ReferenceEquals(labelFrame, next) || LabelRasterScale != requestedLabelRasterScale;
         if (labelsChanged) pendingLabels.Clear();
         return labelsChanged;
     }
@@ -78,6 +84,7 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
         {
             PrepareLabelAtlas();
             labelFrame = frame;
+            LabelRasterScale = requestedLabelRasterScale;
             ScreenRevision++;
         }
         if (route is not null) AppendRoute(route, vehicle?.Progress ?? double.NaN);
