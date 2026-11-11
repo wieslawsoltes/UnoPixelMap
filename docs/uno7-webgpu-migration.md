@@ -229,6 +229,9 @@ only its subscription token; unload, initialization failure and teardown detach
 the callback and error listener. One pending loss continuation per device avoids
 accumulation across reloads, and a generation guard rejects stale notifications.
 The HTML panel remains available if managed error reporting itself fails.
+The observer lives in the reusable control's existing `map-input.js` asset.
+Embedding hosts do not need the sample application's HTML or globals; an
+optional `PixelAtlasGraphics.fail(message)` hook supplies custom recovery UI.
 
 ## Verification and evidence
 
@@ -271,6 +274,18 @@ separately destroys Uno's actual shared device and checks that map work stops.
 
 Exact production WGSL and 22 pipeline variants were accepted by native Dawn
 validation on SwiftShader. This is shader/layout validation only.
+
+[Run 11](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43117004105)
+on `423e279` passed the independent presentation test and the desktop scenario
+in both Debug and Release AOT: initial city and camera movement, all four styles, all three
+quality presets, imagery, relief, elevation, free-roam movement and resize.
+The images contain the actual 3D city and Uno UI. Fenced Debug GPU evidence records
+607 map draws, 40 map submissions, depth-writing and 4× multisampled pipelines,
+zero map texture readbacks, zero WebGL contexts and no GPU errors or losses.
+The complete suite then stopped in the first journey when its short preview
+finished before the pause action. This desktop result does not establish the
+remaining journey, mobile and device-loss scenarios; their latest outcome is
+recorded in the PR.
 
 ### Validation investigations
 

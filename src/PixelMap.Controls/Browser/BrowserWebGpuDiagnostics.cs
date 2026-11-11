@@ -52,11 +52,11 @@ internal static partial class BrowserWebGpuDiagnostics
     [JSImport("globalThis.PixelAtlasInput.failWebGpu")]
     private static partial void ReportFailure(string message);
 
-    [JSImport("globalThis.PixelAtlasGraphics.observeDevice")]
+    [JSImport("globalThis.PixelAtlasInput.observeWebGpuDevice")]
     private static partial JSObject ObserveSharedDevice(JSObject device,
         [JSMarshalAs<JSType.Function<JSType.String>>] Action<string> failed);
 
-    [JSImport("globalThis.PixelAtlasGraphics.stopObserving")]
+    [JSImport("globalThis.PixelAtlasInput.stopObservingWebGpuDevice")]
     private static partial void StopObserving(JSObject subscription);
 
     [SupportedOSPlatform("browser")]

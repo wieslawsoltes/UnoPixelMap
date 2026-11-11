@@ -125,7 +125,13 @@ await UnoPlatformHostBuilder.Create()
 
 The control no longer needs a native GL shim, a resolver linker override, host reflection, or a separate graphics context. WebGPU and a secure browser origin (HTTPS or localhost) are required. The application includes accessible HTML recovery UI for unavailable adapters and device loss.
 
-Load `input/map-input.js` before Uno's bootstrap script in the browser host. The adapter preserves native trackpad deltas, scopes browser gesture cancellation to the map after XAML hit testing, manages pointer capture and releases input on focus loss.
+Load `input/map-input.js` before Uno's bootstrap script in the browser host:
+
+```html
+<script src="input/map-input.js"></script>
+```
+
+This control asset preserves native trackpad deltas, scopes browser gesture cancellation to the map after XAML hit testing, manages pointer capture and releases input on focus loss. It also supplies frame diagnostics and per-canvas observation of Uno's shared WebGPU device. Device loss stops map submissions and invalidates picking without requiring the sample application's HTML. A host can optionally define `globalThis.PixelAtlasGraphics.fail(message)` to display its own recovery panel; the sample application's host demonstrates that accessible UI.
 
 ```xml
 <Grid xmlns:maps="using:PixelMap.Controls">
@@ -215,17 +221,21 @@ dotnet run -c Release --project tests/PixelMap.Routing.Tests
 dotnet run -c Release --project tests/PixelMap.Simulation.Tests
 node tests/browser/audio.cjs
 node tests/browser/input-adapter.cjs
+node tests/browser/webgpu-lifecycle.cjs
 dotnet publish src/PixelMap.App -f net10.0-browserwasm -c Release -o artifacts/browser
 python3 -m http.server 8000 --directory artifacts/browser/wwwroot
 ```
 
 Open http://localhost:8000/. Append `-- --benchmark --output artifacts/rendering` to the renderer test command for fixed-resolution timing and exact image hashes across the bundled scene, camera modes, palettes and vehicle journeys. Add `--visual-only` to capture images without timing, `--filter persp65` to select cases, or `--compare path/to/baseline/report.json` to check a previous capture. The routing tests use deterministic data by default. Append `-- --live` for explicit public-provider integration checks.
 
+The browser checks use headed Chromium. Follow the [browser setup and presentation preflight](tests/browser/README.md) to install its pinned dependencies and, on a Linux server, Xvfb and the Vulkan runtime. With the application server still running, use:
+
 ```sh
-npm ci --prefix tests/browser
-(cd tests/browser && npx playwright install chromium)
-PIXELMAP_SHOTS=artifacts/webgpu node tests/browser/webgpu.cjs http://localhost:8000/
+PIXELMAP_SHOTS=artifacts/webgpu xvfb-run -a -s '-screen 0 1600x1200x24' \
+  node tests/browser/webgpu.cjs http://localhost:8000/
 ```
+
+On an interactive desktop, omit the `xvfb-run` wrapper. The independent presentation preflight checks that WebGPU pixels reach browser screenshots before exercising the application.
 
 The retained GL renderer is excluded from the production assembly and compiled into the regression test assembly. On Linux with EGL and Mesa installed, the opt-in GLES reference checks exercise compiled terrain and building shaders, hardware depth, CPU/GPU image comparisons, navigation overlays, retained-frame lifetime and high-DPI composition. Add `--gpu-benchmark` for fixed-resolution CPU/GPU timings that include synchronous framebuffer readback.
 
@@ -237,7 +247,7 @@ LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless dotnet run -c Release \
 
 The PR workflow publishes the AOT-enabled Uno 7 browser app and exercises that exact artifact. The Pages workflow applies the same checks to main before deployment. The WebGPU probe observes real shader compilation, pipeline creation, depth state, queue submissions and readback calls; screenshots and diagnostics are retained as CI artifacts. It exercises the four styles, quality presets, imagery/elevation/relief, camera movement, all six route demonstrations, walking, resize, high-DPI mobile pinch, unsupported-browser recovery and shared-device loss. Native reference tests continue to cover projection, sparse visibility, route/simulation semantics, terrain and label compatibility. `PIXELMAP_SHOTS` selects the browser evidence directory.
 
-The old `smoke.cjs`, `journeys.cjs`, `terrain.cjs`, `explore.cjs` and GL-oriented `performance.cjs` scripts are historical pre-migration probes and are no longer the production CI entry points. They assume the retired CPU/GPU switch and presentation paths. `npm test --prefix tests/browser -- http://localhost:8000/` runs the current WebGPU integration suite.
+The old `smoke.cjs`, `journeys.cjs`, `terrain.cjs`, `explore.cjs` and GL-oriented `performance.cjs` scripts are historical pre-migration probes and are no longer the production CI entry points. They assume the retired CPU/GPU switch and presentation paths. `npm test --prefix tests/browser -- http://localhost:8000/` runs the current WebGPU integration suite with the same headed browser setup; prefix it with `xvfb-run -a -s '-screen 0 1600x1200x24'` on a Linux server.
 
 ## Sources and coverage
 

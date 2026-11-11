@@ -1,15 +1,16 @@
-// Subscription lifecycle checks. These exercise the HTML observer, not a GPU
-// implementation; webgpu.cjs separately verifies actual browser device loss.
+// Subscription lifecycle checks. These exercise the reusable control asset, not
+// a GPU implementation; webgpu.cjs separately verifies actual browser device loss.
 const assert = require("node:assert/strict");
 const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 const { runInNewContext } = require("node:vm");
 
+const script = readFileSync(join(__dirname, "../../src/PixelMap.Controls/Browser/map-input.js"), "utf8");
 const html = readFileSync(join(__dirname, "../../src/PixelMap.App/Platforms/WebAssembly/index.html"), "utf8");
-const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
-assert.ok(script, "The browser graphics observer exists in the application HTML");
+const applicationScript = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+assert.ok(applicationScript, "The sample application provides its optional graphics recovery UI");
 
-function environment() {
+function environment(includeApplication = true) {
     const windowEvents = new EventTarget();
     const nodes = new Map();
     const log = [];
@@ -24,12 +25,14 @@ function environment() {
             return nodes.get(id);
         }
     };
-    const host = { document, GPUAdapter: Adapter, queueMicrotask,
+    const host = { document, window: windowEvents, GPUAdapter: Adapter, queueMicrotask,
         addEventListener: windowEvents.addEventListener.bind(windowEvents),
         console: { error: (...args) => log.push(args) } };
-    runInNewContext(script, host, { filename: "PixelAtlasGraphics" });
+    runInNewContext(script, host, { filename: "map-input.js" });
+    if (includeApplication) runInNewContext(applicationScript, host, { filename: "PixelAtlasGraphics" });
     assert.equal(Adapter.prototype.requestDevice, requestDevice, "Observation must not patch global device creation");
-    return { graphics: host.PixelAtlasGraphics, document, log, pagehide(persisted) {
+    return { adapter: host.PixelAtlasInput, graphics: host.PixelAtlasGraphics,
+        diagnostics: host.PixelAtlasWebGpu, document, log, pagehide(persisted) {
         const event = new Event("pagehide");
         event.persisted = persisted;
         windowEvents.dispatchEvent(event);
@@ -67,20 +70,20 @@ const flush = () => new Promise(resolve => queueMicrotask(resolve));
 
 (async () => {
     {
-        const { graphics } = environment();
+        const { adapter, graphics } = environment();
         const old = new DeviceEvents(), current = new DeviceEvents(), unrelated = new DeviceEvents();
         const callbacks = [];
         for (let i = 0; i < 100; i++) {
-            const subscription = graphics.observeDevice(old, value => callbacks.push(value));
+            const subscription = adapter.observeWebGpuDevice(old, value => callbacks.push(value));
             assert.equal(old.listeners.size, 1);
-            graphics.stopObserving(subscription);
-            graphics.stopObserving(subscription);
+            adapter.stopObservingWebGpuDevice(subscription);
+            adapter.stopObservingWebGpuDevice(subscription);
             assert.equal(subscription.failed, null, "Detach releases the managed delegate");
             assert.equal(subscription.record, null, "Detach releases the device record");
             assert.equal(old.listeners.size, 0);
         }
         assert.equal(old.lossSubscriptions, 1, "Reloads must not accumulate pending lost-promise handlers");
-        graphics.observeDevice(current, value => callbacks.push(value));
+        adapter.observeWebGpuDevice(current, value => callbacks.push(value));
         old.lose();
         unrelated.lose();
         old.error("Stale error");
@@ -100,11 +103,11 @@ const flush = () => new Promise(resolve => queueMicrotask(resolve));
             "Observing and detaching never destroy a borrowed device");
     }
     {
-        const { graphics } = environment();
+        const { adapter, graphics } = environment();
         const device = new DeviceEvents();
         let first = 0, second = 0;
-        const a = graphics.observeDevice(device, () => { first++; graphics.stopObserving(a); });
-        graphics.observeDevice(device, () => { second++; });
+        const a = adapter.observeWebGpuDevice(device, () => { first++; adapter.stopObservingWebGpuDevice(a); });
+        adapter.observeWebGpuDevice(device, () => { second++; });
         assert.equal(device.listeners.size, 1, "A shared device uses one error listener");
         device.error("Invalid bind group");
         assert.equal(first, 1);
@@ -115,19 +118,19 @@ const flush = () => new Promise(resolve => queueMicrotask(resolve));
         await flush();
         assert.equal(first + second, 2);
         let late = 0;
-        const cancelled = graphics.observeDevice(device, () => { late++; });
-        graphics.stopObserving(cancelled);
+        const cancelled = adapter.observeWebGpuDevice(device, () => { late++; });
+        adapter.stopObservingWebGpuDevice(cancelled);
         await flush();
         assert.equal(late, 0, "A detached late subscriber cannot receive a queued loss");
-        graphics.observeDevice(device, () => { late++; });
+        adapter.observeWebGpuDevice(device, () => { late++; });
         await flush();
         assert.equal(late, 1, "Attaching to an already-lost device must fail managed initialization");
         assert.equal(device.lossSubscriptions, 1);
     }
     {
-        const { graphics, document, log } = environment();
+        const { adapter, graphics, document, log } = environment();
         const device = new DeviceEvents();
-        graphics.observeDevice(device, () => { throw new Error("Managed runtime is unavailable"); });
+        adapter.observeWebGpuDevice(device, () => { throw new Error("Managed runtime is unavailable"); });
         device.error("Validation failed");
         assert.equal(device.listeners.size, 0);
         assert.equal(document.getElementById("pixelmap-graphics-error").hidden, false,
@@ -137,17 +140,47 @@ const flush = () => new Promise(resolve => queueMicrotask(resolve));
         const broken = new DeviceEvents();
         broken.failAttachment = true;
         let called = false;
-        assert.throws(() => graphics.observeDevice(broken, () => { called = true; }), /Attachment failed/);
+        assert.throws(() => adapter.observeWebGpuDevice(broken, () => { called = true; }), /Attachment failed/);
         assert.equal(broken.listeners.size, 0, "Partially attached observers must be cleaned up");
         broken.lose();
         await flush();
         assert.equal(called, false);
     }
     {
-        const { graphics, pagehide } = environment();
+        const { adapter, graphics, diagnostics } = environment(false);
+        assert.equal(graphics, undefined, "A reusable control host does not need the sample application's globals");
+        const device = new DeviceEvents();
+        let failure;
+        const subscription = adapter.observeWebGpuDevice(device, message => {
+            failure = message;
+            adapter.stopObservingWebGpuDevice(subscription);
+            adapter.failWebGpu(message);
+        });
+        device.lose();
+        await flush();
+        assert.match(failure, /device was lost/i, "Device loss reaches managed rendering without application HTML");
+        assert.equal(diagnostics.failure, failure, "The control's failure import remains available in a bare host");
+        assert.equal(subscription.active, false);
+        assert.equal(subscription.failed, null);
+        assert.equal(device.listeners.size, 0);
+        assert.equal(device.destroyCalls, 0);
+    }
+    {
+        const { adapter, graphics, diagnostics, log } = environment(false);
+        const device = new DeviceEvents();
+        adapter.observeWebGpuDevice(device, () => { throw new Error("Managed runtime is unavailable"); });
+        device.error("Bare-host validation failed");
+        assert.equal(graphics, undefined);
+        assert.match(diagnostics.failure, /Bare-host validation failed/,
+            "Failure diagnostics survive managed teardown without an optional HTML callback");
+        assert.equal(device.listeners.size, 0);
+        assert.equal(log.length, 1);
+    }
+    {
+        const { adapter, graphics, pagehide } = environment();
         const device = new DeviceEvents();
         let calls = 0;
-        graphics.observeDevice(device, () => { calls++; });
+        adapter.observeWebGpuDevice(device, () => { calls++; });
         pagehide(true);
         assert.equal(device.listeners.size, 1, "A page retained for history keeps its live observer");
         pagehide(false);
@@ -155,7 +188,7 @@ const flush = () => new Promise(resolve => queueMicrotask(resolve));
         device.lose();
         await flush();
         assert.equal(calls, 0);
-        assert.equal(graphics.observeDevice(new DeviceEvents(), () => { calls++; }).active, false);
+        assert.equal(adapter.observeWebGpuDevice(new DeviceEvents(), () => { calls++; }).active, false);
     }
-    console.log("Passed scoped WebGPU observer lifecycle checks: shared-device identity, managed callback, deterministic detach, reload reuse, pending-loss cancellation, error fallback and page teardown.");
+    console.log("Passed scoped WebGPU observer lifecycle checks: shared-device identity, managed callback, deterministic detach, reload reuse, pending-loss cancellation, optional application UI, error fallback and page teardown.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

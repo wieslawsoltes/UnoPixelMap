@@ -113,8 +113,8 @@ Pages workflows validate shared-device WebGPU rendering; these historical
 measurements do not describe the new renderer. See
 [Uno 7 migration and validation](uno7-webgpu-migration.md) for the current gates.
 
-A push that runs the Pages workflow can request a paired play benchmark and pin
-its baseline in the commit message:
+A push that ran the old Pages workflow could request a paired play benchmark
+and pin its baseline in the commit message:
 
 ```text
 [play-benchmark] [play-baseline:42300149918]
@@ -128,10 +128,10 @@ SHAs, and records each archive's SHA-256 digest. After downloading and extractin
 the applications, it verifies the boot-resource hashes and package references.
 It fails if the requested baseline is unavailable.
 
-Manual dispatch retains the `play_benchmark` and `baseline_run_id` inputs. If no
-baseline is specified, selection uses the latest other successful `main`
+Manual dispatch exposed the `play_benchmark` and `baseline_run_id` inputs. If no
+baseline was specified, selection used the latest other successful `main`
 run. Malformed, repeated or conflicting commit markers and workflow inputs
-fail validation. Commit messages enter the parser through an environment
+failed validation. Commit messages entered the parser through an environment
 variable and are treated as data, never shell or Python source.
 
 The evidence records whether the baseline came from an input, a commit marker
@@ -139,5 +139,5 @@ or automatic selection, together with the requested and resolved run IDs.
 Moving scenarios run baseline → candidate → candidate → baseline, in fresh
 browser processes. Pages artifacts are retained for seven days and paired
 performance artifacts for 30 days; checked-in CSVs and provenance preserve the
-reported measurements after artifact expiry. See [current results and their
+reported measurements after artifact expiry. See [historical results and their
 scope](performance.md).

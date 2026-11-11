@@ -534,17 +534,53 @@ async function desktop(browser) {
 }
 
 async function journeys(browser) {
-    for (const mode of ["Drive", "Bike", "Walk", "Boat", "Train", "Flight"]) {
+    const modes = [["Drive", "CAR"], ["Bike", "BICYCLE"], ["Walk", "WALKING"],
+        ["Boat", "BOAT"], ["Train", "TRAIN"], ["Flight", "AIRCRAFT"]];
+    for (const [mode, badge] of modes) {
         const { context, page } = await open(browser, "journey/" + mode);
+        const name = "journey-" + mode.toLowerCase();
         try {
-            await click(page, "Preview route");
+            await page.getByRole("group", { name: badge, exact: true }).waitFor({ state: "visible" });
+            await page.getByRole("group", { name: "Trip ready", exact: true }).waitFor({ state: "visible" });
+            const progress = page.getByRole("slider", { name: "Journey progress", exact: true });
+            const position = async () => {
+                const value = await progress.getAttribute("aria-valuenow");
+                assert.ok(value !== null && value.trim() !== "" && Number.isFinite(Number(value)),
+                    name + ": accessible journey progress is numeric");
+                return Number(value);
+            };
+            assert.equal(await position(), 0, name + ": the selected demo starts at its origin");
+            // Compile and finish the static route before starting its short preview.
+            // A software GPU can take longer than the whole route to render three
+            // frames: observe simulation progress, then pause before any GPU fence.
+            await verifyGpu(page, name + "-ready");
             const before = await page.evaluate(() => PixelAtlasWebGpu.frames);
-            await awaitFrame(page, (s, previous) => s.frames > previous + 2, before);
+            const slider = await progress.elementHandle();
+            assert.ok(slider, name + ": the route progress control exists");
+            await click(page, "Preview route");
+            try {
+                await page.waitForFunction(element => {
+                    const failure = globalThis.PixelAtlasGraphics?.failure || globalThis.PixelAtlasWebGpu?.failure;
+                    if (failure) throw new Error(failure);
+                    const value = Number(element.getAttribute("aria-valuenow"));
+                    if (value >= 1000) throw new Error("Journey finished before pause could be exercised");
+                    return value > 0;
+                }, slider, { polling: 50, timeout: 15000 });
+            } finally { await slider.dispose(); }
             await click(page, "Pause or resume journey");
-            await capture(page, "journey-" + mode.toLowerCase());
-            await verifyGpu(page, "journey-" + mode.toLowerCase());
+            const paused = page.getByRole("group", { name: "Journey paused", exact: true });
+            await paused.waitFor({ state: "visible" });
+            const pausedProgress = await position();
+            assert.ok(pausedProgress > 0 && pausedProgress < 1000,
+                name + ": preview advances along its route and pauses before the destination");
+            await awaitFrame(page, (s, previous) => s.frames > previous, before);
+            await capture(page, name);
+            await paused.waitFor({ state: "visible" });
+            const capturedProgress = await position();
+            assert.equal(capturedProgress, pausedProgress, name + ": paused motion stays fixed through GPU completion and capture");
+            report.scenarios.at(-1).journey = { mode, badge, pausedProgress, capturedProgress };
         } catch (error) {
-            await saveFailure(page, "journey-" + mode.toLowerCase(), error);
+            await saveFailure(page, name, error);
             throw error;
         } finally { await context.close(); }
     }
