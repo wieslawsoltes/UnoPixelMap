@@ -80,7 +80,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         common[1] = TextureEntry(1, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Vertex | ShaderStage.Fragment);
         common[2] = TextureEntry(2, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
         common[3] = SamplerEntry(3, SamplerBindingType.Filtering);
-        common[4] = TextureEntry(4, TextureSampleType.Depth, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
+        common[4] = TextureEntry(4, TextureSampleType.Depth, TextureViewDimension.Dimension2DArray, ShaderStage.Fragment);
         common[5] = SamplerEntry(5, SamplerBindingType.Comparison);
         commonLayout = CreateLayout(common, 6);
         projectionLayout = CreateLayout(common, 1);
@@ -178,16 +178,25 @@ public sealed unsafe partial class WebGpuMapRenderer
         finally { SilkMarshal.Free((nint)code); }
     }
 
-    private void EnsureShadow(int size)
+    private void EnsureShadow(int size, int count)
     {
-        if (shadowSize == size) return;
+        if (shadowSize == size && shadowCascadeCount == count) return;
+        if (count is < 1 or > WebGpuShadowCascades.MaximumCount || (long)size * size * count * 4 > 48L * 1024 * 1024)
+            throw new NotSupportedException("The sun shadow array exceeds its bounded 48 MiB budget.");
         Release(ref commonGroup);
+        ReleaseShadowLayers();
         Release(ref shadowView);
         Release(ref shadowTexture);
         shadowSize = 0;
+        shadowCascadeCount = 0;
         retainedShadowFrame = null;
-        shadowTexture = CreateTexture(size, size, TextureFormat.Depth32float, TextureUsage.RenderAttachment | TextureUsage.TextureBinding);
-        shadowView = CreateView(shadowTexture, TextureFormat.Depth32float);
+        shadowTexture = CreateTexture(size, size, TextureFormat.Depth32float, TextureUsage.RenderAttachment | TextureUsage.TextureBinding,
+            layers: count, name: "PixelMap sun shadow array");
+        shadowView = CreateView(shadowTexture, TextureFormat.Depth32float, TextureViewDimension.Dimension2DArray,
+            layers: count, name: "PixelMap sun shadow sampling view");
+        for (int i = 0; i < count; i++)
+            shadowLayerViews[i] = (nint)CreateView(shadowTexture, TextureFormat.Depth32float,
+                baseArrayLayer: i, name: $"PixelMap sun shadow layer {i}");
         var entries = stackalloc BindGroupEntry[6];
         entries[0] = new() { Binding = 0, Buffer = uniformBuffer, Size = UniformStride };
         entries[1] = new() { Binding = 1, TextureView = paletteView };
@@ -197,6 +206,17 @@ public sealed unsafe partial class WebGpuMapRenderer
         entries[5] = new() { Binding = 5, Sampler = comparisonSampler };
         commonGroup = CreateGroup(commonLayout, entries, 6);
         shadowSize = size;
+        shadowCascadeCount = count;
+    }
+
+    private void ReleaseShadowLayers()
+    {
+        for (int i = 0; i < shadowLayerViews.Length; i++)
+        {
+            var view = (TextureView*)shadowLayerViews[i];
+            Release(ref view);
+            shadowLayerViews[i] = 0;
+        }
     }
 
     private void EnsureAttachments(int width, int height, int samples)
@@ -454,11 +474,11 @@ public sealed unsafe partial class WebGpuMapRenderer
         LastUploadBytes += (long)bytes;
     }
     private Texture* CreateTexture(int width, int height, TextureFormat format, TextureUsage usage,
-        int layers = 1, int samples = 1, int mipLevels = 1)
+        int layers = 1, int samples = 1, int mipLevels = 1, string? name = null)
     {
         if (width <= 0 || height <= 0 || width > maximumTextureSize || height > maximumTextureSize)
             throw new NotSupportedException("The map texture exceeds the shared WebGPU device's dimensions.");
-        using var label = new NativeLabel($"PixelMap texture {format} {width}x{height} ({samples}x)");
+        using var label = new NativeLabel(name ?? $"PixelMap texture {format} {width}x{height} ({samples}x)");
         var descriptor = new TextureDescriptor
         {
             Label = label.Pointer,
@@ -470,14 +490,15 @@ public sealed unsafe partial class WebGpuMapRenderer
         return texture;
     }
     private TextureView* CreateView(Texture* texture, TextureFormat format,
-        TextureViewDimension dimension = TextureViewDimension.Dimension2D, int layers = 1, int mipLevels = 1)
+        TextureViewDimension dimension = TextureViewDimension.Dimension2D, int layers = 1, int mipLevels = 1,
+        int baseArrayLayer = 0, string? name = null)
     {
-        using var label = new NativeLabel($"PixelMap view {format}");
+        using var label = new NativeLabel(name ?? $"PixelMap view {format}");
         var descriptor = new TextureViewDescriptor
         {
             Label = label.Pointer,
             Format = format, Dimension = dimension, Aspect = TextureAspect.All,
-            BaseMipLevel = 0, MipLevelCount = (uint)mipLevels, BaseArrayLayer = 0, ArrayLayerCount = (uint)layers
+            BaseMipLevel = 0, MipLevelCount = (uint)mipLevels, BaseArrayLayer = (uint)baseArrayLayer, ArrayLayerCount = (uint)layers
         };
         var view = api.TextureCreateView(texture, &descriptor);
         Require(view, "GPU texture view");
@@ -560,6 +581,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         Release(ref backgroundModule); Release(ref terrainModule); Release(ref buildingModule);
         Release(ref rimModule); Release(ref resolveModule); Release(ref overlayModule);
         Release(ref terrainArtworkView); Release(ref terrainHeightView); Release(ref paletteView); Release(ref roomView);
+        ReleaseShadowLayers();
         Release(ref shadowView); Release(ref bitmapOverlayView);
         Release(ref terrainArtwork); Release(ref terrainHeights); Release(ref paletteTexture); Release(ref roomTexture);
         Release(ref shadowTexture); Release(ref bitmapOverlayTexture);

@@ -675,9 +675,19 @@ public sealed partial class JourneyPanel : UserControl
 
     private static void SetEnabled(Control element, bool enabled)
     {
-        if (element.IsEnabled == enabled) return;
+        bool previous = element.IsEnabled;
+        if (previous == enabled) return;
         element.IsEnabled = enabled;
-        FrameworkElementAutomationPeer.FromElement(element)?.InvalidatePeer();
+        var peer = FrameworkElementAutomationPeer.FromElement(element);
+        if (peer is null) return;
+        // Uno 7 can initialize semantic DOM after a control was disabled without
+        // seeding the peer's automatic IsEnabled cache. InvalidatePeer alone can
+        // then miss re-enabling it. Publish the actual transition through public
+        // UIA APIs, then synchronize the peer's other cached properties as usual.
+        bool current = element.IsEnabled;
+        if (current != previous)
+            peer.RaisePropertyChangedEvent(AutomationElementIdentifiers.IsEnabledProperty, previous, current);
+        peer.InvalidatePeer();
     }
 
     private static string Distance(double meters) => meters < 1000 ? $"{meters:0} m" : $"{meters / 1000:0.##} km";

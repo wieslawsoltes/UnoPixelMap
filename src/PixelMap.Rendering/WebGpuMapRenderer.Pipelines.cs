@@ -38,10 +38,13 @@ public sealed unsafe partial class WebGpuMapRenderer
                 samples, depth: true, depthWrite: true, cull: CullMode.Back);
             rimPipeline = CreatePipeline("roof edges", rimModule, buildingLayout, &edge, TextureFormat.Rgba16float,
                 samples, depth: true, depthWrite: false, topology: PrimitiveTopology.TriangleStrip);
-            shadowTerrainPipeline = CreatePipeline("terrain sun shadows", terrainModule, shadowTerrainLayout, &tile, TextureFormat.Undefined,
-                1, depth: true, depthWrite: true, vertexEntry: "shadow_vs", shadow: true);
-            shadowBuildingPipeline = CreatePipeline("building sun shadows", buildingModule, shadowBuildingLayout, &building, TextureFormat.Undefined,
-                1, depth: true, depthWrite: true, vertexEntry: "shadow_vs", shadow: true);
+            for (int i = 0; i < WebGpuShadowCascades.MaximumCount; i++)
+            {
+                shadowTerrainPipelines[i] = (nint)CreatePipeline($"terrain sun shadows {i}", terrainModule, shadowTerrainLayout, &tile, TextureFormat.Undefined,
+                    1, depth: true, depthWrite: true, vertexEntry: $"shadow{i}_vs", shadow: true);
+                shadowBuildingPipelines[i] = (nint)CreatePipeline($"building sun shadows {i}", buildingModule, shadowBuildingLayout, &building, TextureFormat.Undefined,
+                    1, depth: true, depthWrite: true, vertexEntry: $"shadow{i}_vs", shadow: true);
+            }
             resolvePipeline = CreatePipeline("HDR resolve", resolveModule, resolvePipelineLayout, null, targetFormat, 1);
             overlayWorldPipeline = CreatePipeline("world overlays", overlayModule, overlayPipelineLayout, &overlay, TextureFormat.Rgba16float,
                 samples, depth: true, depthWrite: false, blend: true);
@@ -103,7 +106,14 @@ public sealed unsafe partial class WebGpuMapRenderer
     private void ReleasePipelines()
     {
         Release(ref backgroundPipeline); Release(ref terrainPipeline); Release(ref buildingPipeline); Release(ref rimPipeline);
-        Release(ref shadowTerrainPipeline); Release(ref shadowBuildingPipeline); Release(ref resolvePipeline);
+        for (int i = 0; i < WebGpuShadowCascades.MaximumCount; i++)
+        {
+            var terrain = (RenderPipeline*)shadowTerrainPipelines[i];
+            var building = (RenderPipeline*)shadowBuildingPipelines[i];
+            Release(ref terrain); Release(ref building);
+            shadowTerrainPipelines[i] = shadowBuildingPipelines[i] = 0;
+        }
+        Release(ref resolvePipeline);
         Release(ref overlayWorldPipeline); Release(ref overlayOccludedPipeline); Release(ref overlayScreenPipeline);
         pipelineSamples = 0;
     }

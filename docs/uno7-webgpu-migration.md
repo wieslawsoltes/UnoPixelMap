@@ -119,7 +119,7 @@ in an explicit diagnostic instead of an invalid draw.
 
 Normal and Roblox styles implement:
 
-- A directional sun shadow map with 3 × 3 percentage-closer filtering.
+- Cascaded directional sun shadows with 3 × 3 percentage-closer filtering.
 - GGX-based material lighting and sky illumination.
 - A linear-light RGBA16F scene target.
 - Height-dependent atmospheric fog.
@@ -131,10 +131,22 @@ Roblox vertical terrain faces use explicit outward world-space normals; their
 zero vertical component cannot orient a derivative normal reliably. Top and
 bevel faces retain their geometric normals.
 
-The shadow projection is a single stabilized sun projection, not a cascaded
-shadow system. Terrain and building geometry supply the shadow casters. Vehicle
-and route overlays use hardware scene depth; they do not currently cast or
+High uses two sun cascades and Ultra uses three; Balanced retains one. Each
+cascade fits a slice of the camera's visible depth range, with finer coverage
+near a physical walking camera. Separate depth-array layers retain the same
+512-byte per-draw uniform contract. Fixed shadow vertex entry points select each
+matrix without overwriting uniforms between encoded passes. Overlapping slices
+blend across the final 10% of each interval, and bias follows each layer's
+physical texel size. Terrain and building geometry supply the shadow casters.
+Vehicle and route overlays use scene depth; they do not currently cast or
 receive the full physical-lighting shadow treatment.
+
+Receiver radii and light-grid snapping use double-precision Mercator coordinates
+before conversion to local physical metres. Quantizing directly in physical
+metres while scaling a global Mercator anchor by latitude caused fractional-texel
+drift during north–south pans. The corrected grid preserves its angular spacing
+until the fitted radius crosses a quantization boundary; filtering has a padded
+border and the previous snapping-translation sign is corrected.
 
 The renderer retains a separate complete building index stream for sun casters,
 so camera-frustum culling does not erase shadows from loaded offscreen buildings.
@@ -151,11 +163,11 @@ is retained. Smooth styles disable the old baked shadow so it is not doubled
 with the new sun pass. Primitive-edge and color-rounding differences from the
 GL renderer are possible; full-frame bit identity has not been claimed.
 
-| Quality | Smooth geometry samples | Sun map | Requested scene-pixel cap | Bloom |
-| --- | --- | --- | --- | --- |
-| Balanced | 1 | 1024 × 1024 | 2,073,600 | off |
-| High (default) | 4 | 1536 × 1536 | 3,686,400 | enabled |
-| Ultra | 4 | 2048 × 2048 | 8,294,400 | enabled |
+| Quality | Smooth geometry samples | Sun depth layers | Shadow storage | Requested scene-pixel cap | Bloom |
+| --- | --- | --- | --- | --- | --- |
+| Balanced | 1 | 1 × 1024 × 1024 | 4 MiB | 2,073,600 | off |
+| High (default) | 4 | 2 × 1536 × 1536 | 18 MiB | 3,686,400 | enabled |
+| Ultra | 4 | 3 × 2048 × 2048 | 48 MiB | 8,294,400 | enabled |
 
 The actual smooth resolution is constrained by both the pixel cap and a
 256 MiB attachment budget. Ultra may therefore render below its requested pixel
@@ -163,6 +175,12 @@ cap, particularly with multisampling. Physical display density is included;
 logical projection coordinates remain unchanged. Pixel styles preserve the
 logical grid; Balanced alone may increase their moving pixel size under CPU
 submission pressure.
+
+Shadow storage is bounded separately at 48 MiB and included in nominal resident
+bytes. It is not included in the scene attachment budget. Each changed scene
+submits one shadow geometry pass per cascade; unchanged scenes reuse all layers.
+The additional High/Ultra depth work buys finer nearby shadows rather than a
+measured frame-rate improvement. Pixel styles bind only a 1 × 1 placeholder.
 
 ### Native scene overlays
 
@@ -272,8 +290,19 @@ loss notifications, partial attachment failure and HTML diagnostics during
 managed teardown. It validates the observer protocol; the real browser suite
 separately destroys Uno's actual shared device and checks that map work stops.
 
-Exact production WGSL and 22 pipeline variants were accepted by native Dawn
-validation on SwiftShader. This is shader/layout validation only.
+The cascade geometry checks pass 300 physical/map, perspective/orthographic,
+desktop/handset and Day/Dusk fits, including overlap coverage, complete offscreen
+caster heights, signed/exaggerated altitude and artwork-unit independence. North
+and south motion at positive/negative mid-latitudes and 80° reduces the worst
+tested fixed-point phase residual from 0.319214 to 0.000122 shadow texel. For the
+street-camera fixture, near-layer spacing is 0.0286 m at High and 0.0144 m at
+Ultra, compared with 0.1562 m for the prior single-map fit. These are projection
+measurements, not measured image quality or hardware throughput.
+
+The six exact production WGSL modules, 26 pipeline variants and 26 encoded
+passes pass native Dawn validation on its Null backend. This validates shader
+semantics and binding/command contracts; the Null backend does not execute a
+graphics driver or produce rendering evidence.
 
 [Run 11](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43117004105)
 on `423e279` passed the independent presentation test and the desktop scenario
@@ -286,6 +315,21 @@ The complete suite then stopped in the first journey when its short preview
 finished before the pause action. This desktop result does not establish the
 remaining journey, mobile and device-loss scenarios; their latest outcome is
 recorded in the PR.
+
+[Run 12](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43119733973)
+on `0b9c737` again passed native regression, presentation, both publishes and
+package checks, and desktop rendering. Debug also passed Drive and Bike before
+Walk stalled on Pause's disabled accessibility state while the preview was still
+moving. The application now publishes actual enabled-state transitions through
+the public `RaisePropertyChangedEvent` API, followed by peer invalidation. This
+handles the automatic peer cache retaining its initial enabled value when the
+browser accessibility tree is created after a control has already been disabled.
+See Uno 7.0.32's
+[automatic property cache](https://github.com/unoplatform/uno/blob/7.0.32/src/Uno.UI/UI/Xaml/Automation/Peers/AutomationPeer.mux.cs)
+and [browser property routing](https://github.com/unoplatform/uno/blob/7.0.32/src/Uno.UI.Runtime.WebAssembly.Browser/Accessibility/WebAssemblyAccessibility.cs).
+The browser check also uses the public 0.25× playback option and checks the
+enabled semantic state after pausing. Independent suites and all six route modes
+retain their failures and continue, with a failing overall exit if any case fails.
 
 ### Validation investigations
 
@@ -338,7 +382,10 @@ and Mesa runtime, and uses the same SwiftShader Vulkan driver for ANGLE and
 WebGPU. The independent opaque-pixel test must pass before Uno builds start.
 
 The WebGPU browser suite observes actual shader compilation, pipeline depth
-and multisample state, map queue submissions and readback calls. Its intended
+and multisample state, map queue submissions and readback calls. Its cascade
+probe follows actual textures and views into submitted render passes and requires
+geometry draws in every expected layer. This rejects an unused array or repeated
+draws into layer zero. Its intended
 coverage includes all styles/quality presets, imagery/elevation/relief, pan/zoom,
 all six route demonstrations, walking, resize, high-DPI mobile pinch, unavailable
 WebGPU and device loss. It retains screenshots, errors and bounded counters.
@@ -366,10 +413,13 @@ retired because they observe APIs removed by this migration. Their source and
 previous evidence remain available for historical comparisons. They are not
 valid WebGPU benchmark results.
 
-The renderer does not implement cascaded shadows, temporal antialiasing,
-screen-space reflections, global illumination, volumetric clouds, photogrammetric
+The renderer does not implement temporal antialiasing, screen-space reflections,
+global illumination, volumetric clouds, photogrammetric
 city assets, or GPU-driven streaming/culling. Map content is still derived from
 the existing vector, imagery and elevation providers. A future AAA acceptance
 gate must specify target hardware, scene/content quality, frame-time percentiles,
 memory limits and visual baselines. This migration supplies concrete shader and
 resource infrastructure without declaring those broader targets already met.
+Ground artwork also retains its source raster resolution; close street views can
+expose texture texels even when geometry, labels and shadows render at higher
+resolution.

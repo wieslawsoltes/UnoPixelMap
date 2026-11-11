@@ -24,7 +24,7 @@ const consoleHistory = new WeakMap();
 function installProbe() {
     const state = globalThis.__pixelAtlasGpuProbe = {
         modules: [], pipelines: [], errors: [], losses: [], pending: [], devices: [],
-        deviceInfo: [], deviceDestroys: [],
+        deviceInfo: [], deviceDestroys: [], shadowTextures: [],
         draws: 0, submits: 0, mapSubmits: 0, writeBytes: 0, readbacks: 0,
         buffers: 0, textures: 0, buffersDestroyed: 0, texturesDestroyed: 0, glContexts: 0
     };
@@ -32,6 +32,8 @@ function installProbe() {
     const encoders = new WeakSet(), passes = new WeakSet(), commands = new WeakSet();
     const buffers = new WeakSet(), textures = new WeakSet();
     const deviceIndices = new WeakMap();
+    const shadowTextures = new WeakMap(), shadowViews = new WeakMap(), shadowPasses = new WeakMap();
+    const shadowEncoders = new WeakMap(), shadowCommands = new WeakMap();
     function wrap(prototype, name, action) {
         if (!prototype?.[name]) return;
         const original = prototype[name];
@@ -89,6 +91,24 @@ function installProbe() {
     wrap(globalThis.GPUDevice?.prototype, "createTexture", function (fn, args) {
         const result = Reflect.apply(fn, this, args);
         if (map(args[0]?.label)) { textures.add(result); state.textures++; }
+        if (args[0]?.label === "PixelMap sun shadow array") {
+            const record = { id: state.shadowTextures.length + 1, label: result.label,
+                width: result.width, height: result.height, layers: result.depthOrArrayLayers,
+                format: result.format, samples: result.sampleCount, usage: result.usage,
+                submittedPasses: {}, submittedDraws: {}, invalidRenderViews: 0, destroyed: false };
+            state.shadowTextures.push(record);
+            shadowTextures.set(result, record);
+        }
+        return result;
+    });
+    wrap(globalThis.GPUTexture?.prototype, "createView", function (fn, args) {
+        const result = Reflect.apply(fn, this, args), texture = shadowTextures.get(this);
+        if (texture) {
+            const d = args[0] || {}, baseArrayLayer = d.baseArrayLayer ?? 0;
+            const dimension = d.dimension ?? (texture.layers > 1 ? "2d-array" : "2d");
+            const arrayLayerCount = d.arrayLayerCount ?? (dimension === "2d" ? 1 : texture.layers - baseArrayLayer);
+            shadowViews.set(result, { texture, baseArrayLayer, arrayLayerCount });
+        }
         return result;
     });
     wrap(globalThis.GPUBuffer?.prototype, "destroy", function (fn, args) {
@@ -97,21 +117,31 @@ function installProbe() {
     });
     wrap(globalThis.GPUTexture?.prototype, "destroy", function (fn, args) {
         if (textures.has(this)) { textures.delete(this); state.texturesDestroyed++; }
+        const shadow = shadowTextures.get(this);
+        if (shadow) shadow.destroyed = true;
         return Reflect.apply(fn, this, args);
     });
     wrap(globalThis.GPUDevice?.prototype, "createCommandEncoder", function (fn, args) {
         const result = Reflect.apply(fn, this, args);
-        if (map(args[0]?.label)) encoders.add(result);
+        if (map(args[0]?.label)) { encoders.add(result); shadowEncoders.set(result, []); }
         return result;
     });
     wrap(globalThis.GPUCommandEncoder?.prototype, "beginRenderPass", function (fn, args) {
         const result = Reflect.apply(fn, this, args);
-        if (encoders.has(this)) passes.add(result);
+        if (encoders.has(this)) {
+            passes.add(result);
+            const shadow = shadowViews.get(args[0]?.depthStencilAttachment?.view);
+            if (shadow) {
+                const record = { ...shadow, draws: 0 };
+                shadowPasses.set(result, record);
+                shadowEncoders.get(this).push(record);
+            }
+        }
         return result;
     });
     wrap(globalThis.GPUCommandEncoder?.prototype, "finish", function (fn, args) {
         const result = Reflect.apply(fn, this, args);
-        if (encoders.has(this)) commands.add(result);
+        if (encoders.has(this)) { commands.add(result); shadowCommands.set(result, shadowEncoders.get(this)); }
         return result;
     });
     wrap(globalThis.GPUCommandEncoder?.prototype, "copyTextureToBuffer", function (fn, args) {
@@ -121,12 +151,25 @@ function installProbe() {
     for (const name of ["draw", "drawIndexed", "drawIndirect", "drawIndexedIndirect"])
         wrap(globalThis.GPURenderPassEncoder?.prototype, name, function (fn, args) {
             if (passes.has(this)) state.draws++;
+            const shadow = shadowPasses.get(this);
+            if (shadow) shadow.draws++;
             return Reflect.apply(fn, this, args);
         });
     wrap(globalThis.GPUQueue?.prototype, "submit", function (fn, args) {
         state.submits++;
         if (args[0]?.some(buffer => commands.has(buffer))) state.mapSubmits++;
-        return Reflect.apply(fn, this, args);
+        const result = Reflect.apply(fn, this, args);
+        // Count only passes in command buffers that actually reach the queue.
+        // Unsubmitted encoders and unused texture-array layers prove nothing.
+        for (const command of args[0] || [])
+            for (const pass of shadowCommands.get(command) || []) {
+                const { texture, baseArrayLayer: layer, arrayLayerCount, draws } = pass;
+                texture.submittedPasses[layer] = (texture.submittedPasses[layer] || 0) + 1;
+                texture.submittedDraws[layer] = (texture.submittedDraws[layer] || 0) + draws;
+                if (arrayLayerCount !== 1 || layer < 0 || layer >= texture.layers)
+                    texture.invalidRenderViews++;
+            }
+        return result;
     });
     wrap(globalThis.GPUQueue?.prototype, "writeBuffer", function (fn, args) {
         if (buffers.has(args[0])) {
@@ -342,7 +385,7 @@ async function verifyGpu(page, name) {
         return { ...s, pending: undefined, devices: undefined };
     });
     await writeFile(join(output, name + "-gpu.json"), JSON.stringify(evidence, null, 2));
-    await assertGraphicsHealthy(page, name + " GPU completion");
+    const { diagnostic } = await assertGraphicsHealthy(page, name + " GPU completion");
     assert.deepEqual(evidence.errors, [], name + ": all WGSL modules and GPU work validate");
     assert.deepEqual(evidence.losses, [], name + ": shared device remains available");
     assert.ok(evidence.modules.length >= 2 && evidence.pipelines.length >= 2, "Native map shader modules and pipelines exist");
@@ -350,7 +393,27 @@ async function verifyGpu(page, name) {
     assert.ok(evidence.draws > 0 && evidence.mapSubmits > 0, "Map commands reach the actual WebGPU queue");
     assert.equal(evidence.readbacks, 0, "Map presentation performs no texture readback");
     assert.equal(evidence.glContexts, 0, "Production opens no WebGL rendering context");
+    if (diagnostic.style === "Normal" || diagnostic.style === "Roblox")
+        verifyShadowLayers(evidence, diagnostic.quality, name);
     return evidence;
+}
+
+function verifyShadowLayers(evidence, quality, name) {
+    const presets = { Balanced: { size: 1024, layers: 1 }, High: { size: 1536, layers: 2 }, Ultra: { size: 2048, layers: 3 } };
+    const expected = presets[quality];
+    assert.ok(expected, name + ": shadow quality is recognized");
+    const texture = evidence.shadowTextures.findLast(record => !record.destroyed);
+    assert.ok(texture, name + ": a live sun shadow texture exists");
+    assert.equal(texture.format, "depth32float", name + ": shadow storage uses depth");
+    assert.equal(texture.samples, 1, name + ": sun layers use independently sampled depth");
+    assert.equal(texture.width, expected.size, name + ": shadow width matches its quality budget");
+    assert.equal(texture.height, expected.size, name + ": shadow height matches its quality budget");
+    assert.equal(texture.layers, expected.layers, name + ": the allocated cascade count matches its quality");
+    assert.equal(texture.invalidRenderViews, 0, name + ": each shadow pass addresses one valid array layer");
+    for (let layer = 0; layer < expected.layers; layer++) {
+        assert.ok(texture.submittedPasses[layer] > 0, `${name}: cascade ${layer} receives a submitted render pass`);
+        assert.ok(texture.submittedDraws[layer] > 0, `${name}: cascade ${layer} receives actual geometry draws`);
+    }
 }
 
 function inspectRegion(png, { x, y, width, height }) {
@@ -496,10 +559,21 @@ async function desktop(browser) {
             previous = image;
         }
         await menu(page, "Normal rendering");
+        let lightingImage;
         for (const quality of ["Balanced", "Ultra", "High"]) {
             await menu(page, quality + " quality", "Rendering quality");
             await awaitFrame(page, (s, expected) => s.quality === expected, quality);
-            await capture(page, "quality-" + quality.toLowerCase());
+            lightingImage = await capture(page, "quality-" + quality.toLowerCase());
+        }
+        // Dusk changes the sun's elevation, exercising a different caster-depth
+        // fit; night also exercises emissive windows through the HDR resolve.
+        for (const [command, palette] of [["Golden hour", "dusk"], ["After dark", "night"], ["Daylight", "day"]]) {
+            const frames = await page.evaluate(() => PixelAtlasWebGpu.frames);
+            await menu(page, command);
+            await awaitFrame(page, (s, previous) => s.frames > previous, frames);
+            const image = await capture(page, "lighting-" + palette);
+            assert.ok(difference(lightingImage, image) > .01, "Changing the lighting palette changes the rendered city");
+            lightingImage = image;
         }
         await click(page, "Earth imagery layer");
         await awaitFrame(page, s => s.imageryCount > 0);
@@ -519,8 +593,15 @@ async function desktop(browser) {
         await page.keyboard.down("w");
         try { await awaitFrame(page, (s, frames) => s.frames > frames + 3, before); }
         finally { await page.keyboard.up("w"); }
-        await capture(page, "free-roam-walk");
         await click(page, "Pause free roam");
+        await page.getByRole("button", { name: "Resume free roam", exact: true }).waitFor({ state: "visible" });
+        // Freeze the physical camera before comparing nearby High/Ultra shadows.
+        await capture(page, "free-roam-walk");
+        await menu(page, "Ultra quality", "Rendering quality");
+        await awaitFrame(page, s => s.quality === "Ultra");
+        await capture(page, "free-roam-walk-ultra");
+        await menu(page, "High quality", "Rendering quality");
+        await awaitFrame(page, s => s.quality === "High");
         await click(page, "Exit free roam");
         await page.setViewportSize({ width: 960, height: 640 });
         await awaitFrame(page, s => s.physicalWidth <= 960);
@@ -536,10 +617,12 @@ async function desktop(browser) {
 async function journeys(browser) {
     const modes = [["Drive", "CAR"], ["Bike", "BICYCLE"], ["Walk", "WALKING"],
         ["Boat", "BOAT"], ["Train", "TRAIN"], ["Flight", "AIRCRAFT"]];
+    const failures = [];
     for (const [mode, badge] of modes) {
-        const { context, page } = await open(browser, "journey/" + mode);
         const name = "journey-" + mode.toLowerCase();
+        let context, page;
         try {
+            ({ context, page } = await open(browser, "journey/" + mode));
             await page.getByRole("group", { name: badge, exact: true }).waitFor({ state: "visible" });
             await page.getByRole("group", { name: "Trip ready", exact: true }).waitFor({ state: "visible" });
             const progress = page.getByRole("slider", { name: "Journey progress", exact: true });
@@ -550,6 +633,32 @@ async function journeys(browser) {
                 return Number(value);
             };
             assert.equal(await position(), 0, name + ": the selected demo starts at its origin");
+            // Choose the real slow-motion control. Keep the production 1x default;
+            // this test needs time for software rendering and input round trips.
+            const speed = page.getByRole("combobox", { name: "Playback speed", exact: true });
+            const openSpeed = async () => {
+                const bounds = await speed.boundingBox();
+                assert.ok(bounds?.width && bounds?.height, name + ": playback speed has a usable hit target");
+                await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+                await page.waitForFunction(() => document.querySelector('[aria-label="Playback speed"]')?.getAttribute("aria-expanded") === "true");
+                await page.waitForFunction(() => document.activeElement?.getAttribute("elementtype") === "ScrollContentPresenter");
+            };
+            await openSpeed();
+            await page.keyboard.press("End");
+            await page.keyboard.press("Enter");
+            await page.getByRole("listbox").waitFor({ state: "hidden" });
+            // Reopen to verify the committed selection, rather than assuming that
+            // keyboard focus in the popup changed the session's playback speed.
+            await openSpeed();
+            const quarterSpeed = page.getByRole("option", { name: "0.25×", exact: true });
+            await quarterSpeed.waitFor({ state: "visible" });
+            const quarterSpeedId = await quarterSpeed.getAttribute("id");
+            assert.ok(quarterSpeedId, name + ": the quarter-speed option has an accessibility identity");
+            // Uno 7.0.32 publishes the selected ComboBoxItem as the head's
+            // active descendant when realizing a freshly reopened dropdown.
+            await page.waitForFunction(id => document.querySelector('[aria-label="Playback speed"]')?.getAttribute("aria-activedescendant") === id, quarterSpeedId);
+            await page.keyboard.press("Escape");
+            await page.getByRole("listbox").waitFor({ state: "hidden" });
             // Compile and finish the static route before starting its short preview.
             // A software GPU can take longer than the whole route to render three
             // frames: observe simulation progress, then pause before any GPU fence.
@@ -557,6 +666,13 @@ async function journeys(browser) {
             const before = await page.evaluate(() => PixelAtlasWebGpu.frames);
             const slider = await progress.elementHandle();
             assert.ok(slider, name + ": the route progress control exists");
+            // The panel keeps its action-row geometry while the telemetry changes.
+            // Cache the actual hit target before playback; do not spend the short
+            // preview re-querying an accessibility enabled flag or layout bounds.
+            const pauseButton = page.getByRole("button", { name: "Pause or resume journey", exact: true });
+            assert.equal(await pauseButton.isDisabled(), true, name + ": pause is semantically disabled before playback");
+            const pauseBounds = await pauseButton.boundingBox();
+            assert.ok(pauseBounds?.width && pauseBounds?.height, name + ": pause has a usable hit target");
             await click(page, "Preview route");
             try {
                 await page.waitForFunction(element => {
@@ -567,9 +683,11 @@ async function journeys(browser) {
                     return value > 0;
                 }, slider, { polling: 50, timeout: 15000 });
             } finally { await slider.dispose(); }
-            await click(page, "Pause or resume journey");
+            await page.mouse.click(pauseBounds.x + pauseBounds.width / 2, pauseBounds.y + pauseBounds.height / 2);
             const paused = page.getByRole("group", { name: "Journey paused", exact: true });
             await paused.waitFor({ state: "visible" });
+            await page.getByRole("button", { name: "Pause or resume journey", exact: true, disabled: false }).waitFor({ state: "visible" });
+            assert.equal(await pauseButton.isDisabled(), false, name + ": pause/resume publishes its enabled accessibility state");
             const pausedProgress = await position();
             assert.ok(pausedProgress > 0 && pausedProgress < 1000,
                 name + ": preview advances along its route and pauses before the destination");
@@ -578,12 +696,16 @@ async function journeys(browser) {
             await paused.waitFor({ state: "visible" });
             const capturedProgress = await position();
             assert.equal(capturedProgress, pausedProgress, name + ": paused motion stays fixed through GPU completion and capture");
-            report.scenarios.at(-1).journey = { mode, badge, pausedProgress, capturedProgress };
+            report.scenarios.at(-1).journey = { mode, badge, playbackRate: .25, pausedProgress, capturedProgress };
         } catch (error) {
-            await saveFailure(page, name, error);
-            throw error;
-        } finally { await context.close(); }
+            if (page) await saveFailure(page, name, error);
+            failures.push(new Error(name + ": " + error.message, { cause: error }));
+            console.error(name + " failed:", error);
+        } finally {
+            if (context) await context.close().catch(error => failures.push(new Error(name + " cleanup: " + error.message, { cause: error })));
+        }
     }
+    if (failures.length) throw new AggregateError(failures, failures.map(error => error.message).join("\n"));
 }
 
 async function mobile(browser) {
@@ -683,11 +805,21 @@ async function deviceLoss(browser) {
         report.browser = await browser.version();
         await presentationPreflight(browser);
         if (!preflightOnly) {
-            await desktop(browser);
-            await journeys(browser);
-            await mobile(browser);
-            await unavailable(browser);
-            await deviceLoss(browser);
+            // Each suite owns and closes its browser contexts. Preserve every
+            // failure while letting independent input/recovery checks finish.
+            const failures = [];
+            report.failures = [];
+            for (const [name, run] of [["desktop", desktop], ["journeys", journeys],
+                ["mobile", mobile], ["unavailable", unavailable], ["device-loss", deviceLoss]]) {
+                try { await run(browser); }
+                catch (error) {
+                    failures.push(error);
+                    report.failures.push({ name, failure: error.stack || String(error) });
+                    console.error(name + " suite failed:", error);
+                }
+            }
+            if (failures.length) throw new AggregateError(failures,
+                report.failures.map(failure => failure.name).join(", ") + " browser suites failed");
         }
         assert.deepEqual(report.errors, [], "No application exceptions occurred");
         report.passed = true;

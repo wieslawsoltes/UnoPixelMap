@@ -46,10 +46,13 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     private PipelineLayout* backgroundLayout, sceneLayout, buildingLayout, shadowTerrainLayout, shadowBuildingLayout, resolvePipelineLayout, overlayPipelineLayout;
     private ShaderModule* backgroundModule, terrainModule, buildingModule, rimModule, resolveModule, overlayModule;
     private RenderPipeline* backgroundPipeline, terrainPipeline, buildingPipeline, rimPipeline, resolvePipeline;
-    private RenderPipeline* shadowTerrainPipeline, shadowBuildingPipeline, overlayWorldPipeline, overlayOccludedPipeline, overlayScreenPipeline;
+    private RenderPipeline* overlayWorldPipeline, overlayOccludedPipeline, overlayScreenPipeline;
+    private readonly nint[] shadowTerrainPipelines = new nint[WebGpuShadowCascades.MaximumCount];
+    private readonly nint[] shadowBuildingPipelines = new nint[WebGpuShadowCascades.MaximumCount];
     private Texture* sceneTexture, multisampleTexture, depthTexture, photographTexture, shadowTexture, bitmapOverlayTexture;
     private TextureView* sceneView, multisampleView, depthView, photographView, shadowView, bitmapOverlayView;
-    private int attachmentWidth, attachmentHeight, attachmentSamples, shadowSize, bitmapWidth, bitmapHeight;
+    private readonly nint[] shadowLayerViews = new nint[WebGpuShadowCascades.MaximumCount];
+    private int attachmentWidth, attachmentHeight, attachmentSamples, shadowSize, shadowCascadeCount, bitmapWidth, bitmapHeight;
     private TextureFormat pipelineTargetFormat;
     private int pipelineSamples;
     private long meshBytes;
@@ -58,6 +61,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     private WebGpuRenderOptions options;
     private GpuMapFrame? retainedShadowFrame;
     private WebGpuQuality retainedShadowQuality;
+    private int retainedShadowCascadeCount;
     private int maximumTextureSize, heightLayerCapacity, textureLayerCapacity;
     private ulong maximumBufferSize, maximumStorageBindingSize;
 
@@ -72,7 +76,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     public long ResidentBytes => disposed ? 0 : meshBytes +
         (long)textureLayerCapacity * GpuTerrainTexture.Size * GpuTerrainTexture.Size * 4 +
         (long)heightLayerCapacity * GpuTerrainMesh.Side * GpuTerrainMesh.Side * 8 +
-        (long)shadowSize * shadowSize * 4 + StaticResidentBytes + OverlayResidentBytes;
+        (long)shadowSize * shadowSize * shadowCascadeCount * 4 + StaticResidentBytes + OverlayResidentBytes;
     public long AttachmentBytes { get; private set; }
     public int RenderWidth => attachmentWidth;
     public int RenderHeight => attachmentHeight;
@@ -136,7 +140,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             bool smooth = MapRendering.Smooth(frame.RenderStyle);
             int samples = smooth ? options.SampleCount : 1;
             (int width, int height) = RasterSize(frame, targetWidth, targetHeight, smooth, samples);
-            EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1);
+            EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1, smooth ? options.ShadowCascades : 1);
             EnsureAttachments(width, height, samples);
             EnsurePipelines(targetFormat, samples);
             UploadPalette(frame.Palette);
@@ -152,7 +156,8 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             var encoderDescriptor = new CommandEncoderDescriptor { Label = encoderLabel.Pointer };
             encoder = api.DeviceCreateCommandEncoder(device, &encoderDescriptor);
             Require(encoder, "command encoder");
-            bool drawShadows = smooth && (!ReferenceEquals(retainedShadowFrame, frame) || retainedShadowQuality != Quality);
+            bool drawShadows = smooth && (!ReferenceEquals(retainedShadowFrame, frame) || retainedShadowQuality != Quality ||
+                retainedShadowCascadeCount != shadowCascadeCount);
             if (drawShadows) DrawShadow(encoder, frame);
             else if (!smooth) ClearShadow(encoder);
             bool photograph = frame.PreservePhotograph && frame.Camera.Pitch < 30;
@@ -195,7 +200,12 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             Require(commands, "command buffer");
             api.QueueSubmit(queue, 1, &commands);
             scenePreparation.Commit();
-            if (drawShadows) { retainedShadowFrame = frame; retainedShadowQuality = Quality; }
+            if (drawShadows)
+            {
+                retainedShadowFrame = frame;
+                retainedShadowQuality = Quality;
+                retainedShadowCascadeCount = shadowCascadeCount;
+            }
             TrimCaches();
         }
         catch
@@ -315,21 +325,31 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         var sun = Vector3.Normalize(new Vector3(-.45f, -.55f, palette == PixelStyle.Dusk ? .35f : .82f));
         Set4(u, 11, sun.X, sun.Y, sun.Z, smooth ? 1 : 0);
         Set4(u, 12, 1.0f, palette == PixelStyle.Dusk ? .68f : .94f, palette == PixelStyle.Dusk ? .4f : .82f, .12f);
-        double pitch = frame.Camera.PitchRadians, bearing = frame.Camera.Bearing * Math.PI / 180;
-        double distance = MapCamera.Focal(frame.Height) / (frame.PixelsPerMeter * frame.PixelSize);
-        var eye = new Vector3((float)(-Math.Sin(bearing) * Math.Sin(pitch) * distance),
-            (float)(-Math.Cos(bearing) * Math.Sin(pitch) * distance),
-            (float)(frame.Camera.TargetAltitudeMeters + Math.Cos(pitch) * distance));
-        if (!frame.Camera.Perspective) eye = new(eye.X, eye.Y, Math.Max(eye.Z, 100));
+        var eye = WebGpuShadowCascades.CameraEye(frame);
         Set4(u, 13, eye.X, eye.Y, eye.Z, 0);
-        var shadow = ShadowMatrix(frame, sun, eye);
-        Set4(u, 14, shadow.M11, shadow.M12, shadow.M13, shadow.M14);
-        Set4(u, 15, shadow.M21, shadow.M22, shadow.M23, shadow.M24);
-        Set4(u, 16, shadow.M31, shadow.M32, shadow.M33, shadow.M34);
-        Set4(u, 17, shadow.M41, shadow.M42, shadow.M43, shadow.M44);
+        if (smooth)
+        {
+            var cascades = WebGpuShadowCascades.Create(frame, sun, shadowCascadeCount, shadowSize, options.ShadowDistance);
+            for (int i = 0; i < cascades.Count; i++)
+            {
+                var layer = cascades.Layers[i];
+                var shadow = layer.Matrix;
+                int matrixOffset = i == 0 ? 14 : i == 1 ? 21 : 25;
+                Set4(u, matrixOffset, shadow.M11, shadow.M12, shadow.M13, shadow.M14);
+                Set4(u, matrixOffset + 1, shadow.M21, shadow.M22, shadow.M23, shadow.M24);
+                Set4(u, matrixOffset + 2, shadow.M31, shadow.M32, shadow.M33, shadow.M34);
+                Set4(u, matrixOffset + 3, shadow.M41, shadow.M42, shadow.M43, shadow.M44);
+                u[29 * 4 + i] = layer.Far;
+                u[30 * 4 + i] = layer.TexelSize;
+                u[31 * 4 + i] = layer.InverseDepthRange;
+            }
+            Set4(u, 20, cascades.View.X, cascades.View.Y, cascades.View.Z, cascades.View.W);
+            u[29 * 4 + 3] = cascades.Count;
+            u[30 * 4 + 3] = WebGpuShadowCascades.BlendFraction;
+            u[31 * 4 + 3] = cascades.Near;
+        }
         Set4(u, 18, attachmentWidth, attachmentHeight, frame.Width, frame.Height);
         Set4(u, 19, frame.PixelSize, t.Perspective ? 0 : 1, (float)palette, attachmentSamples == 1 ? 1 : 0);
-        Set4(u, 20, targetWidth, targetHeight, 0, 0);
     }
 
     private static void FillProjection(Span<float> u, GpuMapFrame frame, TileTransform t, Vector3 world)
@@ -360,29 +380,10 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         Set4(u, 6, world.X, world.Y, world.Z, t.Perspective ? 1 : 0);
     }
 
-    private Matrix4x4 ShadowMatrix(GpuMapFrame frame, Vector3 sun, Vector3 eye)
-    {
-        float span = (float)(Math.Max(frame.Width, frame.Height) / (frame.PixelsPerMeter * frame.PixelSize));
-        float radius = Math.Clamp(span * .9f, 120, options.ShadowDistance);
-        Vector3 center = frame.Camera.IsFreeLook ? new(eye.X, eye.Y, 0) : Vector3.Zero;
-        // Stabilize the light-space origin on shadow texels, retaining detail while panning.
-        var lightView = Matrix4x4.CreateLookAt(center + sun * (radius * 2.5f), center, Vector3.UnitZ);
-        var shadow = lightView * Matrix4x4.CreateOrthographic(radius * 2, radius * 2, 1, radius * 6);
-        double meters = MapCamera.EarthCircumference * Math.Cos(Math.Clamp(frame.Camera.Latitude,
-            -MapCamera.MaxLatitude, MapCamera.MaxLatitude) * Math.PI / 180);
-        double anchorX = frame.Camera.CenterX * meters, anchorY = -frame.Camera.CenterY * meters;
-        double lightX = anchorX * shadow.M11 + anchorY * shadow.M21;
-        double lightY = anchorX * shadow.M12 + anchorY * shadow.M22;
-        double texel = 2d / Math.Max(1, shadowSize);
-        shadow.M41 += (float)(Math.Round(lightX / texel) * texel - lightX);
-        shadow.M42 += (float)(Math.Round(lightY / texel) * texel - lightY);
-        return shadow;
-    }
-
-    private void DrawTerrain(RenderPassEncoder* pass, GpuMapFrame frame, bool shadow)
+    private void DrawTerrain(RenderPassEncoder* pass, GpuMapFrame frame, bool shadow, int cascade = 0)
     {
         if (frame.Terrain.Length == 0) return;
-        api.RenderPassEncoderSetPipeline(pass, shadow ? shadowTerrainPipeline : terrainPipeline);
+        api.RenderPassEncoderSetPipeline(pass, shadow ? (RenderPipeline*)shadowTerrainPipelines[cascade] : terrainPipeline);
         SetFrame(pass, shadow ? projectionGroup : commonGroup, 0);
         api.RenderPassEncoderSetBindGroup(pass, 1, MapRendering.Smooth(frame.RenderStyle) ? terrainLinearGroup : terrainNearestGroup, 0, null);
         api.RenderPassEncoderSetVertexBuffer(pass, 0, instanceBuffer, 0, (ulong)(frame.Terrain.Length * 80));
@@ -397,9 +398,9 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         LastDrawCalls++;
     }
 
-    private void DrawBuildings(RenderPassEncoder* pass, bool shadow)
+    private void DrawBuildings(RenderPassEncoder* pass, bool shadow, int cascade = 0)
     {
-        api.RenderPassEncoderSetPipeline(pass, shadow ? shadowBuildingPipeline : buildingPipeline);
+        api.RenderPassEncoderSetPipeline(pass, shadow ? (RenderPipeline*)shadowBuildingPipelines[cascade] : buildingPipeline);
         foreach (var draw in buildingDraws)
         {
             var mesh = draw.Resource;
@@ -432,18 +433,24 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
 
     private void DrawShadow(CommandEncoder* encoder, GpuMapFrame frame)
     {
-        var depth = DepthAttachment(shadowView, clear: true);
-        using var label = new NativeLabel("PixelMap sun shadow pass");
-        var descriptor = new RenderPassDescriptor { Label = label.Pointer, DepthStencilAttachment = &depth };
-        var pass = api.CommandEncoderBeginRenderPass(encoder, &descriptor);
-        try { DrawTerrain(pass, frame, shadow: true); DrawBuildings(pass, shadow: true); }
-        finally { EndPass(pass); }
+        for (int i = 0; i < shadowCascadeCount; i++)
+        {
+            var depth = DepthAttachment((TextureView*)shadowLayerViews[i], clear: true);
+            using var label = new NativeLabel($"PixelMap sun shadow {i}");
+            var descriptor = new RenderPassDescriptor { Label = label.Pointer, DepthStencilAttachment = &depth };
+            var pass = api.CommandEncoderBeginRenderPass(encoder, &descriptor);
+            Require(pass, "sun shadow render pass");
+            // The entry point fixes its layer's matrix. All per-draw frame slots
+            // stay immutable until submit, so later passes cannot overwrite them.
+            try { DrawTerrain(pass, frame, shadow: true, i); DrawBuildings(pass, shadow: true, i); }
+            finally { EndPass(pass); }
+        }
     }
 
     private void ClearShadow(CommandEncoder* encoder)
     {
-        var depth = DepthAttachment(shadowView, clear: true);
-        using var label = new NativeLabel("PixelMap sun shadow pass");
+        var depth = DepthAttachment((TextureView*)shadowLayerViews[0], clear: true);
+        using var label = new NativeLabel("PixelMap sun shadow 0");
         var descriptor = new RenderPassDescriptor { Label = label.Pointer, DepthStencilAttachment = &depth };
         EndPass(api.CommandEncoderBeginRenderPass(encoder, &descriptor));
     }
