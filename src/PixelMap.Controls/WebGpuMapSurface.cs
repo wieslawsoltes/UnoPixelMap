@@ -65,7 +65,18 @@ public sealed partial class PixelMapControl
                 var scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle,
                     vehicleMode, gate, quality, terrain, renderStyle);
                 if (scene == _scene) return;
+                bool retainedIdle = Failure is null && scene.Route is null && scene.Gate is null &&
+                    _presentedScene is { } displayed && scene.Vehicle is { Moving: false } idle &&
+                    (scene with { Vehicle = displayed.Vehicle }) == displayed &&
+                    _prepared?.Matches(scene, Math.Max(1, (int)Math.Ceiling(ActualWidth)),
+                        Math.Max(1, (int)Math.Ceiling(ActualHeight)), ArtworkPixelSize(scene)) == true &&
+                    _overlay?.TryAdvanceStationaryVehicle(scene.VehicleMode, idle) == true;
                 _scene = scene;
+                if (retainedIdle)
+                {
+                    _presentedScene = scene;
+                    return;
+                }
                 if (Failure is null) Invalidate();
             }
         }

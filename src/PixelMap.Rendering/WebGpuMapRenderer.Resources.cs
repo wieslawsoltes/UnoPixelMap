@@ -173,6 +173,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         Release(ref shadowView);
         Release(ref shadowTexture);
         shadowSize = 0;
+        retainedShadowFrame = null;
         shadowTexture = CreateTexture(size, size, TextureFormat.Depth32float, TextureUsage.RenderAttachment | TextureUsage.TextureBinding);
         shadowView = CreateView(shadowTexture, TextureFormat.Depth32float);
         var entries = stackalloc BindGroupEntry[6];
@@ -315,6 +316,16 @@ public sealed unsafe partial class WebGpuMapRenderer
             resource.IndexSource = indices;
             resource.IndexCount = indices.Length;
         }
+        // Viewer frustum/cap rejection must not remove offscreen shadow casters.
+        // Keep a complete index stream only while the main stream is culled.
+        if ((!ReferenceEquals(indices, source.Indices) || resource.ShadowIndices != null) &&
+            !ReferenceEquals(resource.ShadowIndexSource, source.Indices))
+        {
+            UploadMesh(resource, ref resource.ShadowIndices, ref resource.ShadowIndexBytes,
+                source.Indices.AsSpan(), BufferUsage.Index);
+            resource.ShadowIndexSource = source.Indices;
+            resource.ShadowIndexCount = source.Indices.Length;
+        }
         var edges = draw.Selection?.RoofEdges ?? source.RoofEdges;
         if (!ReferenceEquals(resource.EdgeSource, edges))
         {
@@ -376,7 +387,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         meshBytes -= resource.Bytes;
         Release(ref resource.Group);
         Release(ref resource.Vertices); Release(ref resource.Indices);
-        Release(ref resource.Models); Release(ref resource.Edges);
+        Release(ref resource.Models); Release(ref resource.Edges); Release(ref resource.ShadowIndices);
     }
     private void UploadPalette(PixelPalette palette)
     {
@@ -507,6 +518,7 @@ public sealed unsafe partial class WebGpuMapRenderer
     {
         if (disposed) return;
         disposed = true;
+        retainedShadowFrame = null;
         ReleasePipelines(); ReleaseAttachments(); ReleaseOverlayResources();
         foreach (var resource in buildingCache.Values) DestroyBuilding(resource);
         buildingCache.Clear(); terrainCache.Clear(); textureCache.Clear();

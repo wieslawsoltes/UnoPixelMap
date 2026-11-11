@@ -19,7 +19,13 @@ public sealed partial class PixelMapRenderer
             ObjectDisposedException.ThrowIf(frame.IsDisposed, frame);
             ActivateGpuFrameCore(frame);
             if (overlay.Begin(frame))
+            {
+                // A host can display retained frames in any order, independently of
+                // the last frame prepared or activated. Rebuild this small visible list
+                // from the actual displayed frame; tile geometry remains cached.
+                PrepareVisible(frame.Width, frame.Height, frame.PixelSize, frame.Camera, frame.Tiles);
                 PrepareLabels(null, frame.Width, frame.Height, frame.Camera.Zoom, frame.PixelSize, frame.Palette, overlay);
+            }
             overlay.Complete(route, vehicle, mode, gate);
         }
     }

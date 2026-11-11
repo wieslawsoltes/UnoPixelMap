@@ -38,15 +38,16 @@
             let closing = false;
             addEventListener("pagehide", () => { closing = true; }, {once: true});
             GPUAdapter.prototype.requestDevice = function (...args) {
-                return Reflect.apply(requestDevice, this, args).then(device => {
+                const request = Reflect.apply(requestDevice, this, args);
+                request.then(device => {
                     device.lost.then(info => {
                         if (!closing) PixelAtlasGraphics.fail("The graphics device was lost. Reload Pixel Atlas to rebuild its resources. " + info.message);
                     });
                     device.addEventListener("uncapturederror", event => {
                         if (!closing) PixelAtlasGraphics.fail("WebGPU could not render this scene. " + event.error.message);
                     });
-                    return device;
-                });
+                }, () => { /* The original promise carries initialization failure to Uno. */ });
+                return request;
             };
         }
         document.addEventListener("DOMContentLoaded", async () => {

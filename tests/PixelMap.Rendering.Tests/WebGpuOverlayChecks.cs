@@ -67,6 +67,16 @@ internal static class WebGpuOverlayChecks
         renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(new(center.Latitude, center.Longitude), 0, Moving: false));
         Assert(overlay.AtlasRevision == revision && overlay.AtlasDirtyBounds.IsEmpty, "Unchanged map labels re-rasterized or dirtied the atlas during simulation.");
         Assert(MemoryMarshal.AsBytes(retained.AsSpan()).SequenceEqual(MemoryMarshal.AsBytes(overlay.ScreenVertices)), "Simulation rebuilt or moved static labels.");
+        using var future = renderer.PrepareGpuFrame(width, height, camera with { Bearing = 21 }, [tile], PixelStyle.Day, 3,
+            null, null, MapRenderStyle.Pixel, false);
+        renderer.PrepareWebGpuOverlay(future, overlay);
+        var futureLabels = overlay.ScreenVertices.ToArray();
+        renderer.PrepareWebGpuOverlay(frame, overlay);
+        Assert(MemoryMarshal.AsBytes(retained.AsSpan()).SequenceEqual(MemoryMarshal.AsBytes(overlay.ScreenVertices)),
+            "Reactivating a retained frame used a newer camera's label projection.");
+        renderer.PrepareWebGpuOverlay(future, overlay);
+        Assert(MemoryMarshal.AsBytes(futureLabels.AsSpan()).SequenceEqual(MemoryMarshal.AsBytes(overlay.ScreenVertices)),
+            "Returning to the newest retained frame reused an older camera's label projection.");
     }
 
     private static void VehicleAndRouteGeometry()
@@ -138,10 +148,16 @@ internal static class WebGpuOverlayChecks
         int count = overlay.ParticleCount;
         renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(point, 0, 1000, Moving: false, SpeedMetersPerSecond: 0));
         Assert(overlay.ParticleCount == count, "Stationary time incorrectly aged the frozen simulation effects.");
+        long revision = overlay.Revision;
+        var idle = new VehiclePose(point, 0, 2000, Moving: false, SpeedMetersPerSecond: 0);
+        Assert(overlay.TryAdvanceStationaryVehicle(TravelMode.Drive, idle), "An identical stopped vehicle could not skip frame submission.");
+        Assert(overlay.Revision == revision && overlay.ParticleCount == count, "The idle timestamp changed retained GPU geometry.");
+        Assert(!overlay.TryAdvanceStationaryVehicle(TravelMode.Drive, idle with { Bearing = 10 }), "A changed pose skipped rendering.");
+        Assert(!overlay.TryAdvanceStationaryVehicle(TravelMode.Drive, idle with { AnimationSeconds = 1999 }), "A backwards simulation clock skipped rendering.");
         point = point.Move(0, 1);
-        renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(point, 0, 1000.1, SpeedMetersPerSecond: 10));
+        renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(point, 0, 2000.1, SpeedMetersPerSecond: 10));
         Assert(overlay.ParticleCount > 0 && overlay.ParticleCount <= count + 1, "Resuming after idle emitted a catch-up burst.");
-        renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(point, 0, 1000.2, Continuity: 1));
+        renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(point, 0, 2000.2, Continuity: 1));
         Assert(overlay.ParticleCount == 0, "Teleport left a stale particle trail.");
     }
 

@@ -55,6 +55,8 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     private long generation, meshBytes;
     private bool disposed;
     private WebGpuRenderOptions options;
+    private GpuMapFrame? retainedShadowFrame;
+    private WebGpuQuality retainedShadowQuality;
     private int maximumTextureSize, heightLayerCapacity, textureLayerCapacity;
     private ulong maximumBufferSize, maximumStorageBindingSize;
 
@@ -143,8 +145,9 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             var encoderDescriptor = new CommandEncoderDescriptor { Label = encoderLabel.Pointer };
             encoder = api.DeviceCreateCommandEncoder(device, &encoderDescriptor);
             Require(encoder, "command encoder");
-            if (smooth) DrawShadow(encoder, frame);
-            else ClearShadow(encoder);
+            bool drawShadows = smooth && (!ReferenceEquals(retainedShadowFrame, frame) || retainedShadowQuality != Quality);
+            if (drawShadows) DrawShadow(encoder, frame);
+            else if (!smooth) ClearShadow(encoder);
             bool photograph = frame.PreservePhotograph && frame.Camera.Pitch < 30;
             var pass = BeginScenePass(encoder, clear: true);
             try
@@ -184,6 +187,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             commands = api.CommandEncoderFinish(encoder, null);
             Require(commands, "command buffer");
             api.QueueSubmit(queue, 1, &commands);
+            if (drawShadows) { retainedShadowFrame = frame; retainedShadowQuality = Quality; }
             TrimCaches();
         }
         finally
@@ -243,7 +247,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         foreach (var draw in frame.Buildings)
         {
             var source = draw.Mesh;
-            if (draw.Selection is { Indices.Length: 0, RoofEdges.Length: 0 } || source.Vertices.Length == 0) continue;
+            if (source.Vertices.Length == 0) continue;
             var resource = GetBuilding(draw);
             // The rebased source transform includes the wrap copy; recover that copy
             // from the source tile's nearest world instance for PBR world coordinates.
@@ -383,12 +387,14 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         foreach (var draw in buildingDraws)
         {
             var mesh = draw.Resource;
-            if (mesh.IndexCount == 0) continue;
+            int indexCount = shadow && mesh.ShadowIndices != null ? mesh.ShadowIndexCount : mesh.IndexCount;
+            if (indexCount == 0) continue;
             SetFrame(pass, shadow ? projectionGroup : commonGroup, draw.UniformOffset);
             api.RenderPassEncoderSetBindGroup(pass, 1, mesh.Group, 0, null);
             api.RenderPassEncoderSetVertexBuffer(pass, 0, mesh.Vertices, 0, (ulong)mesh.VertexBytes);
-            api.RenderPassEncoderSetIndexBuffer(pass, mesh.Indices, IndexFormat.Uint32, 0, (ulong)mesh.IndexBytes);
-            api.RenderPassEncoderDrawIndexed(pass, (uint)mesh.IndexCount, 1, 0, 0, 0);
+            api.RenderPassEncoderSetIndexBuffer(pass, shadow && mesh.ShadowIndices != null ? mesh.ShadowIndices : mesh.Indices,
+                IndexFormat.Uint32, 0, (ulong)(shadow && mesh.ShadowIndices != null ? mesh.ShadowIndexBytes : mesh.IndexBytes));
+            api.RenderPassEncoderDrawIndexed(pass, (uint)indexCount, 1, 0, 0, 0);
             LastDrawCalls++;
         }
         if (shadow) return;
@@ -490,11 +496,11 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     private sealed class TextureResource(int layer) { internal readonly int Layer = layer; internal long Generation; }
     private sealed class BuildingResource
     {
-        internal GpuBuffer* Vertices, Indices, Models, Edges;
+        internal GpuBuffer* Vertices, Indices, Models, Edges, ShadowIndices;
         internal BindGroup* Group;
-        internal long VertexBytes, IndexBytes, ModelBytes, EdgeBytes, Generation, Revision = -1, FoundationRevision = -1;
-        internal int IndexCount, EdgeCount;
-        internal object? IndexSource, EdgeSource;
-        internal long Bytes => VertexBytes + IndexBytes + ModelBytes + EdgeBytes;
+        internal long VertexBytes, IndexBytes, ModelBytes, EdgeBytes, ShadowIndexBytes, Generation, Revision = -1, FoundationRevision = -1;
+        internal int IndexCount, EdgeCount, ShadowIndexCount;
+        internal object? IndexSource, EdgeSource, ShadowIndexSource;
+        internal long Bytes => VertexBytes + IndexBytes + ModelBytes + EdgeBytes + ShadowIndexBytes;
     }
 }

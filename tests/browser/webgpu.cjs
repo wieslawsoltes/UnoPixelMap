@@ -196,6 +196,8 @@ function difference(a, b) {
 
 async function capture(page, name) {
     const bytes = await page.screenshot({ path: join(output, name + ".png"), timeout: 30000 });
+    if (name === "desktop-pixel" || name === "style-normal")
+        console.log("PIXELMAP_PREVIEW " + name + " " + bytes.toString("base64"));
     const pixels = PNG.sync.read(bytes), measured = inspectPixels(pixels);
     assert.ok(measured.colors > 12 && measured.luminance > 8 && measured.luminance < 250,
         `${name}: central map contains varied rendered geometry, not a blank canvas (${JSON.stringify(measured)})`);
@@ -278,7 +280,8 @@ async function desktop(browser) {
         const gpu = await verifyGpu(page, "desktop");
         assert.ok(gpu.pipelines.some(p => p.samples === 4), "Smooth quality creates multisampled geometry pipelines");
     } catch (error) {
-        await page.screenshot({ path: join(output, "desktop-failure.png") }).catch(() => {});
+        await page.screenshot({ path: join(output, "desktop-failure.png") })
+            .then(bytes => console.log("PIXELMAP_PREVIEW desktop-failure " + bytes.toString("base64"))).catch(() => {});
         await writeFile(join(output, "desktop-failure.txt"), await page.locator("body").ariaSnapshot().catch(() => "unavailable"));
         throw error;
     } finally { await context.close(); }

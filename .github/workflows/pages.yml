@@ -26,6 +26,8 @@ jobs:
           sudo apt-get install -y libegl1 libgl1-mesa-dri fonts-dejavu-core
       - run: dotnet run --project tests/PixelMap.Data.Checks -c Release
       - run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release
+      - name: Verify WebGPU overlay geometry, labels and lifecycle
+        run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-overlay
       - name: Verify retained GLES reference renderer
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'

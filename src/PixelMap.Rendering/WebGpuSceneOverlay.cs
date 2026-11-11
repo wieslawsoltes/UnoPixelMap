@@ -29,6 +29,9 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
     private GpuMapFrame? labelFrame;
     private bool disposed;
     private bool labelsChanged;
+    private VehiclePose? lastVehicle;
+    private TravelMode lastVehicleMode;
+    private bool hasNavigation;
     private double worldSize, meters, bearingSin, bearingCos, pitchSin, pitchCos, focal;
     private float near, far;
 
@@ -86,7 +89,25 @@ public sealed partial class WebGpuSceneOverlay : IDisposable
                 AppendGate(checkpoint, mode, mode == TravelMode.Flight ? sample.AltitudeMeters : 0, sample.AnimationSeconds);
         }
         else ResetParticles();
+        lastVehicle = vehicle;
+        lastVehicleMode = route?.Mode ?? mode;
+        hasNavigation = route is not null || gate is not null;
         Revision++;
+    }
+
+    /// <summary>Consume an idle standalone vehicle's timestamp without rebuilding or
+    /// submitting an identical picture. Camera/source/quality equality is the host's
+    /// responsibility. Route and gate animations are deliberately excluded.</summary>
+    public bool TryAdvanceStationaryVehicle(TravelMode mode, VehiclePose vehicle)
+    {
+        ObjectDisposedException.ThrowIf(disposed, this);
+        if (hasNavigation || mode != lastVehicleMode || lastVehicle is not { Moving: false } previous ||
+            !double.IsFinite(previous.AnimationSeconds) || !double.IsFinite(vehicle.AnimationSeconds) ||
+            vehicle.AnimationSeconds < previous.AnimationSeconds ||
+            (vehicle with { AnimationSeconds = previous.AnimationSeconds }) != previous) return false;
+        AdvanceParticles(mode, vehicle);
+        lastVehicle = vehicle;
+        return true;
     }
 
     private H Project(double x, double y, double renderedAltitude)
