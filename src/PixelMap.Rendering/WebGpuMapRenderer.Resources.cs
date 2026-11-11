@@ -262,7 +262,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         {
             if (freeHeights.Count == 0)
             {
-                var victim = terrainCache.Where(p => p.Value.Generation != generation).MinBy(p => p.Value.Generation);
+                var victim = terrainCache.Where(p => p.Value.Generation != scenePreparation.Generation).MinBy(p => p.Value.Generation);
                 if (victim.Key is null) throw new NotSupportedException("The frame exceeds the retained terrain layer budget.");
                 freeHeights.Push(victim.Value.Layer);
                 terrainCache.Remove(victim.Key);
@@ -270,7 +270,7 @@ public sealed unsafe partial class WebGpuMapRenderer
             resource = new(freeHeights.Pop());
             terrainCache.Add(source.ResourceKey, resource);
         }
-        resource.Generation = generation;
+        resource.Generation = scenePreparation.Generation;
         if (resource.Revision != source.Revision)
         {
             heightsUpload.AsSpan().Clear();
@@ -293,7 +293,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         {
             if (freeTextures.Count == 0)
             {
-                var victim = textureCache.Where(p => p.Value.Generation != generation).MinBy(p => p.Value.Generation);
+                var victim = textureCache.Where(p => p.Value.Generation != scenePreparation.Generation).MinBy(p => p.Value.Generation);
                 if (victim.Key is null) throw new NotSupportedException("The frame exceeds the retained artwork layer budget.");
                 freeTextures.Push(victim.Value.Layer);
                 textureCache.Remove(victim.Key);
@@ -304,7 +304,7 @@ public sealed unsafe partial class WebGpuMapRenderer
                 WriteTexture(terrainArtwork, p, (nuint)source.Texels.Length * sizeof(uint), GpuTerrainTexture.Size,
                     GpuTerrainTexture.Size, GpuTerrainTexture.Size * 4, layer: resource.Layer);
         }
-        resource.Generation = generation;
+        resource.Generation = scenePreparation.Generation;
         return resource;
     }
     private BuildingResource GetBuilding(GpuBuildingDraw draw)
@@ -315,7 +315,7 @@ public sealed unsafe partial class WebGpuMapRenderer
             resource = new();
             buildingCache.Add(source.ResourceKey, resource);
         }
-        resource.Generation = generation;
+        resource.Generation = scenePreparation.Generation;
         if (resource.Revision != source.Revision)
         {
             UploadMesh(resource, ref resource.Vertices, ref resource.VertexBytes, source.Vertices.AsSpan(), BufferUsage.Vertex);
@@ -380,7 +380,7 @@ public sealed unsafe partial class WebGpuMapRenderer
     {
         while (meshBytes + additional > CacheBudget)
         {
-            var victim = buildingCache.Where(p => !ReferenceEquals(p.Value, owner) && p.Value.Generation != generation)
+            var victim = buildingCache.Where(p => !ReferenceEquals(p.Value, owner) && p.Value.Generation != scenePreparation.Generation)
                 .MinBy(p => p.Value.Generation);
             if (victim.Key is null) throw new NotSupportedException("The visible building working set exceeds the 128 MiB GPU mesh budget.");
             DestroyBuilding(victim.Value);
@@ -391,7 +391,7 @@ public sealed unsafe partial class WebGpuMapRenderer
     {
         // Pin every current draw. Only stale resources can be evicted; commands in
         // the submitted frame retain their native references until GPU completion.
-        foreach (var key in buildingCache.Where(p => generation - p.Value.Generation > 180).Select(p => p.Key).ToArray())
+        foreach (var key in buildingCache.Where(p => scenePreparation.IsExpired(p.Value.Generation)).Select(p => p.Key).ToArray())
         { DestroyBuilding(buildingCache[key]); buildingCache.Remove(key); }
     }
     private void DestroyBuilding(BuildingResource resource)
@@ -546,6 +546,8 @@ public sealed unsafe partial class WebGpuMapRenderer
     {
         if (disposed) return;
         disposed = true;
+        scenePreparation.Invalidate();
+        buildingDraws.Clear();
         retainedShadowFrame = null;
         ReleasePipelines(); ReleaseAttachments(); ReleaseOverlayResources();
         foreach (var resource in buildingCache.Values) DestroyBuilding(resource);

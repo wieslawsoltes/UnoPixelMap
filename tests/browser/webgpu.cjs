@@ -3,12 +3,16 @@
 const assert = require("node:assert/strict");
 const { mkdir, writeFile } = require("node:fs/promises");
 const { join } = require("node:path");
+// Playwright exposes browser-process stderr through this debug namespace.
+// Set it before loading Playwright and retain any caller-selected namespaces.
+process.env.DEBUG = [process.env.DEBUG, "pw:browser"].filter(Boolean).join(",");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
 
 const base = process.argv[2] || "http://127.0.0.1:8100/UnoPixelMap/";
 const output = process.env.PIXELMAP_SHOTS || "webgpu-evidence";
 const report = { renderer: "Uno 7 WebGPU", scenarios: [], errors: [], timingMeaning: "CPU preparation/submission only; software GPU timings are not hardware FPS benchmarks." };
+const consoleHistory = new WeakMap();
 
 function installProbe() {
     const state = globalThis.__pixelAtlasGpuProbe = {
@@ -154,6 +158,63 @@ async function awaitFrame(page, predicate, argument) {
         return state?.frames > 0 && new Function("s", "arg", `return (${predicate})(s,arg)`)(state, argument);
     }, { predicate: predicate.toString(), argument }, { timeout: 120000 });
     await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    // Device loss and validation errors can arrive after the frame predicate,
+    // including while the two animation-frame callbacks are pending.
+    await assertGraphicsHealthy(page, "Frame readiness");
+}
+
+async function graphicsSnapshot(page) {
+    return page.evaluate(() => {
+        const graphics = globalThis.PixelAtlasGraphics;
+        const diagnostic = globalThis.PixelAtlasWebGpu;
+        const panel = document.getElementById("pixelmap-graphics-error");
+        const style = panel && getComputedStyle(panel);
+        const bounds = panel?.getBoundingClientRect();
+        const source = globalThis.__pixelAtlasGpuProbe;
+        const { pending = [], devices = [], ...gpu } = source || {};
+        return {
+            graphics: graphics ? { state: graphics.state, failure: graphics.failure } : null,
+            diagnostic: diagnostic ? { ...diagnostic } : null,
+            errorOverlay: {
+                visible: !!(panel && bounds.width > 0 && bounds.height > 0 &&
+                    style.display !== "none" && style.visibility !== "hidden" && style.visibility !== "collapse"),
+                text: panel?.textContent?.trim() || ""
+            },
+            gpu: source ? { ...gpu, pendingCount: pending.length, deviceCount: devices.length } : null
+        };
+    });
+}
+
+async function assertGraphicsHealthy(page, name) {
+    const snapshot = await graphicsSnapshot(page);
+    assert.equal(snapshot.graphics?.state, "available", `${name}: WebGPU is available (${snapshot.graphics?.failure || "no availability state"})`);
+    assert.ok(!snapshot.graphics?.failure, `${name}: ${snapshot.graphics?.failure}`);
+    assert.ok(!snapshot.diagnostic?.failure, `${name}: ${snapshot.diagnostic?.failure}`);
+    assert.equal(snapshot.errorOverlay.visible, false, `${name}: the graphics error panel must be hidden (${snapshot.errorOverlay.text})`);
+    assert.deepEqual(snapshot.gpu?.errors, [], `${name}: GPU validation remains successful`);
+    assert.deepEqual(snapshot.gpu?.losses, [], `${name}: the shared GPU device remains available`);
+    return snapshot;
+}
+
+async function saveFailure(page, name, error) {
+    // Capture without awaiting shader promises or queue completion: a failed
+    // device must not prevent the original diagnostic from reaching artifacts.
+    const evidence = { name, failure: error.stack || String(error), url: page.url() };
+    try { evidence.snapshot = await graphicsSnapshot(page); }
+    catch (failure) { evidence.snapshotError = String(failure); }
+    try {
+        const bytes = await page.screenshot({ path: join(output, name + "-failure.png"), timeout: 30000 });
+        console.log("PIXELMAP_PREVIEW " + name + "-failure " + bytes.toString("base64"));
+    } catch (failure) { evidence.screenshotError = String(failure); }
+    try {
+        evidence.accessibility = await page.locator("body").ariaSnapshot({ timeout: 10000 });
+        await writeFile(join(output, name + "-failure.txt"), evidence.accessibility);
+    } catch (failure) { evidence.accessibilityError = String(failure); }
+    try { evidence.finalSnapshot = await graphicsSnapshot(page); }
+    catch (failure) { evidence.finalSnapshotError = String(failure); }
+    evidence.console = consoleHistory.get(page) || [];
+    await writeFile(join(output, name + "-failure.json"), JSON.stringify(evidence, null, 2))
+        .catch(failure => console.error("Could not save failure evidence:", failure));
 }
 
 async function open(browser, hash = "", { mobile = false, density = 1 } = {}) {
@@ -161,21 +222,36 @@ async function open(browser, hash = "", { mobile = false, density = 1 } = {}) {
         deviceScaleFactor: density, isMobile: mobile, hasTouch: mobile });
     const page = await context.newPage();
     page.setDefaultTimeout(30000);
-    page.on("pageerror", error => { report.errors.push(error.message); console.error(error.message); });
+    const history = [];
+    consoleHistory.set(page, history);
+    const remember = (type, text) => {
+        history.push({ type, text: text.slice(0, 3000) });
+        if (history.length > 200) history.shift();
+    };
+    page.on("pageerror", error => { remember("pageerror", error.message); report.errors.push(error.message); console.error(error.message); });
+    page.on("crash", () => { remember("crash", "Browser page crashed"); report.errors.push("Browser page crashed"); });
     page.on("console", message => {
+        remember(message.type(), message.text());
         if (message.type() === "error") console.error("Browser:", message.text().slice(0, 3000));
     });
-    await page.addInitScript(installProbe);
-    for (const host of ["tiles.openfreemap.org", "tiles.maps.eox.at", "routing.openstreetmap.de"])
-        await page.route(`https://${host}/**`, route => route.abort());
-    const address = new URL(base);
-    address.hash = hash;
-    await page.goto(address.href, { waitUntil: "domcontentloaded", timeout: 120000 });
-    await awaitFrame(page, s => s.patches > 0);
-    const accessibility = page.getByRole("button", { name: "Enable accessibility", exact: true });
-    if (await accessibility.count()) await accessibility.evaluate(element => element.click());
-    await page.getByRole("button", { name: "Map appearance", exact: true }).waitFor({ state: "visible" });
-    return { context, page };
+    try {
+        await page.addInitScript(installProbe);
+        for (const host of ["tiles.openfreemap.org", "tiles.maps.eox.at", "routing.openstreetmap.de"])
+            await page.route(`https://${host}/**`, route => route.abort());
+        const address = new URL(base);
+        address.hash = hash;
+        await page.goto(address.href, { waitUntil: "domcontentloaded", timeout: 120000 });
+        await awaitFrame(page, s => s.patches > 0);
+        const accessibility = page.getByRole("button", { name: "Enable accessibility", exact: true });
+        if (await accessibility.count()) await accessibility.evaluate(element => element.click());
+        await page.getByRole("button", { name: "Map appearance", exact: true }).waitFor({ state: "visible" });
+        return { context, page };
+    } catch (error) {
+        const name = (hash || (mobile ? "mobile" : "desktop")).replace(/[^a-z0-9-]/gi, "-").toLowerCase() + "-startup";
+        await saveFailure(page, name, error);
+        await context.close().catch(() => {});
+        throw error;
+    }
 }
 
 function inspectPixels(png) {
@@ -204,13 +280,14 @@ function difference(a, b) {
 }
 
 async function capture(page, name) {
+    await assertGraphicsHealthy(page, name + " before screenshot");
     const bytes = await page.screenshot({ path: join(output, name + ".png"), timeout: 30000 });
+    const { diagnostic } = await assertGraphicsHealthy(page, name + " after screenshot");
     if (name === "desktop-pixel" || name === "style-normal")
         console.log("PIXELMAP_PREVIEW " + name + " " + bytes.toString("base64"));
     const pixels = PNG.sync.read(bytes), measured = inspectPixels(pixels);
     assert.ok(measured.colors > 12 && measured.luminance > 8 && measured.luminance < 250,
         `${name}: central map contains varied rendered geometry, not a blank canvas (${JSON.stringify(measured)})`);
-    const diagnostic = await page.evaluate(() => ({ ...globalThis.PixelAtlasWebGpu }));
     report.scenarios.push({ name, ...measured, diagnostic });
     console.log(name, JSON.stringify(diagnostic));
     return pixels;
@@ -235,6 +312,7 @@ async function verifyGpu(page, name) {
         return { ...s, pending: undefined, devices: undefined };
     });
     await writeFile(join(output, name + "-gpu.json"), JSON.stringify(evidence, null, 2));
+    await assertGraphicsHealthy(page, name + " GPU completion");
     assert.deepEqual(evidence.errors, [], name + ": all WGSL modules and GPU work validate");
     assert.deepEqual(evidence.losses, [], name + ": shared device remains available");
     assert.ok(evidence.modules.length >= 2 && evidence.pipelines.length >= 2, "Native map shader modules and pipelines exist");
@@ -301,9 +379,7 @@ async function desktop(browser) {
         const gpu = await verifyGpu(page, "desktop");
         assert.ok(gpu.pipelines.some(p => p.samples === 4), "Smooth quality creates multisampled geometry pipelines");
     } catch (error) {
-        await page.screenshot({ path: join(output, "desktop-failure.png") })
-            .then(bytes => console.log("PIXELMAP_PREVIEW desktop-failure " + bytes.toString("base64"))).catch(() => {});
-        await writeFile(join(output, "desktop-failure.txt"), await page.locator("body").ariaSnapshot().catch(() => "unavailable"));
+        await saveFailure(page, "desktop", error);
         throw error;
     } finally { await context.close(); }
 }
@@ -318,6 +394,9 @@ async function journeys(browser) {
             await click(page, "Pause or resume journey");
             await capture(page, "journey-" + mode.toLowerCase());
             await verifyGpu(page, "journey-" + mode.toLowerCase());
+        } catch (error) {
+            await saveFailure(page, "journey-" + mode.toLowerCase(), error);
+            throw error;
         } finally { await context.close(); }
     }
 }
@@ -345,6 +424,9 @@ async function mobile(browser) {
         await awaitFrame(page, s => s.style === "Normal");
         await capture(page, "mobile-normal-high-dpi");
         await verifyGpu(page, "mobile");
+    } catch (error) {
+        await saveFailure(page, "mobile", error);
+        throw error;
     } finally { await context.close(); }
 }
 
@@ -379,8 +461,13 @@ async function deviceLoss(browser) {
 
 (async () => {
     await mkdir(output, { recursive: true });
-    const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined,
-        args: ["--disable-dev-shm-usage", "--enable-unsafe-webgpu", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+    const executablePath = process.env.CHROMIUM_PATH || undefined;
+    const channel = executablePath ? undefined : "chromium";
+    report.browserLaunch = { channel: channel || "explicit executable", executablePath, gpu: "SwiftShader", gpuWatchdog: "disabled for software CI" };
+    const browser = await chromium.launch({ executablePath, channel,
+        // Software rendering can exceed Chromium's GPU watchdog while compiling
+        // cold shaders. Tests still fail on loss/errors and bounded GPU waits.
+        args: ["--disable-dev-shm-usage", "--disable-gpu-watchdog", "--enable-unsafe-webgpu", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
     try {
         report.browser = await browser.version();
         await desktop(browser);

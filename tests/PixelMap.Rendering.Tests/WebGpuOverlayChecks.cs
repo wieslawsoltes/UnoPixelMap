@@ -17,7 +17,8 @@ internal static class WebGpuOverlayChecks
         AntimeridianAndNearPlane();
         OrthographicReliefRouteDepth();
         ParticleContinuity();
-        Console.WriteLine("Passed WebGPU overlay checks: exact label atlas pixels/reuse at 1x/2x/3x density, six vehicle modes in four styles, homogeneous clipping, antimeridian routing, premultiplication and bounded stationary/teleport particle lifecycle.");
+        RetainedSceneResourceLifetime();
+        Console.WriteLine("Passed WebGPU overlay checks: exact label atlas pixels/reuse at 1x/2x/3x density, six vehicle modes in four styles, homogeneous clipping, antimeridian routing, premultiplication, bounded stationary/teleport particle lifecycle and retained scene residency during animation.");
     }
 
     private static void LabelAtlasMatchesLegacyText()
@@ -269,6 +270,47 @@ internal static class WebGpuOverlayChecks
         Assert(overlay.ParticleCount > 0 && overlay.ParticleCount <= count + 1, "Resuming after idle emitted a catch-up burst.");
         renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(point, 0, 2000.2, Continuity: 1));
         Assert(overlay.ParticleCount == 0, "Teleport left a stale particle trail.");
+    }
+
+    private static void RetainedSceneResourceLifetime()
+    {
+        using var renderer = new PixelMapRenderer();
+        using var overlay = new WebGpuSceneOverlay();
+        using var frame = renderer.PrepareGpuFrame(600, 400, new(0, 0, 19, 0, 50, true), [], PixelStyle.Day, 1,
+            null, null, MapRenderStyle.Normal, false);
+        var preparation = new WebGpuScenePreparation();
+        var key = new WebGpuScenePreparation.Key(frame, WebGpuQuality.High, 600, 400, 600, 400, 1536);
+        Assert(preparation.Begin(key), "A new renderer did not request its initial scene upload.");
+        preparation.Commit();
+        long pinned = preparation.Generation;
+        var point = new RoutePoint(0, 0);
+        for (int i = 0; i < 240; i++)
+        {
+            point = point.Move(0, .1);
+            long revision = overlay.Revision;
+            renderer.PrepareWebGpuOverlay(frame, overlay, vehicle: new(point, 0, i * .1, SpeedMetersPerSecond: 1));
+            Assert(overlay.Revision > revision, "The residency fixture must animate actual overlay geometry.");
+            Assert(!preparation.Begin(key), "An overlay-only frame requested another scene upload.");
+            preparation.Commit();
+            Assert(!preparation.IsExpired(pinned), "Simulation aged live map resources beyond the eviction threshold.");
+        }
+        Assert(preparation.Generation == pinned, "Overlay animation advanced scene resource residency age.");
+
+        Assert(preparation.Begin(key with { TargetWidth = 601 }), "A target resize reused old scene uniforms.");
+        preparation.Invalidate(); // A partial upload or failed submission cannot publish reuse.
+        Assert(preparation.Begin(key), "Returning after a failed preparation reused partially replaced streams.");
+        preparation.Commit();
+        long retired = preparation.Generation;
+        for (uint width = 601; width <= 780; width++)
+        {
+            Assert(preparation.Begin(key with { TargetWidth = width }), "A new target extent skipped preparation.");
+            preparation.Commit();
+        }
+        Assert(!preparation.IsExpired(retired), "An inactive scene expired before the 180-preparation retention window.");
+        Assert(preparation.Begin(key with { TargetWidth = 781 }), "A final resized scene skipped preparation.");
+        preparation.Commit();
+        Assert(preparation.IsExpired(retired), "Inactive resources stopped aging after scene reuse was enabled.");
+        Assert(!preparation.IsExpired(preparation.Generation), "The current scene became eligible for eviction.");
     }
 
     private static void Validate(ReadOnlySpan<WebGpuOverlayVertex> vertices, ReadOnlySpan<uint> indices)

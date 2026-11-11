@@ -52,7 +52,8 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     private int attachmentWidth, attachmentHeight, attachmentSamples, shadowSize, bitmapWidth, bitmapHeight;
     private TextureFormat pipelineTargetFormat;
     private int pipelineSamples;
-    private long generation, meshBytes;
+    private long meshBytes;
+    private readonly WebGpuScenePreparation scenePreparation = new();
     private bool disposed;
     private WebGpuRenderOptions options;
     private GpuMapFrame? retainedShadowFrame;
@@ -127,24 +128,26 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         long started = Stopwatch.GetTimestamp();
         LastUploadBytes = 0;
         LastDrawCalls = 0;
-        generation++;
-        options = WebGpuRenderOptions.For(Quality);
-        bool smooth = MapRendering.Smooth(frame.RenderStyle);
-        int samples = smooth ? options.SampleCount : 1;
-        (int width, int height) = RasterSize(frame, targetWidth, targetHeight, smooth, samples);
-        EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1);
-        EnsureAttachments(width, height, samples);
-        EnsurePipelines(targetFormat, samples);
-        UploadPalette(frame.Palette);
-        PrepareFrame(frame, targetWidth, targetHeight, smooth);
-        if (overlay is not null) UploadBitmapOverlay(overlay);
-        PrepareOverlay(sceneOverlay, smooth);
-        UpdateResolve(frame, targetWidth, targetHeight, smooth, overlay is not null);
-
         CommandEncoder* encoder = null;
         CommandBuffer* commands = null;
         try
         {
+            options = WebGpuRenderOptions.For(Quality);
+            bool smooth = MapRendering.Smooth(frame.RenderStyle);
+            int samples = smooth ? options.SampleCount : 1;
+            (int width, int height) = RasterSize(frame, targetWidth, targetHeight, smooth, samples);
+            EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1);
+            EnsureAttachments(width, height, samples);
+            EnsurePipelines(targetFormat, samples);
+            UploadPalette(frame.Palette);
+            // A new immutable map frame or projection budget replaces the scene
+            // streams. Animated overlays keep the same instances, uniforms and draws.
+            if (scenePreparation.Begin(new(frame, Quality, targetWidth, targetHeight, width, height, shadowSize)))
+                PrepareFrame(frame, targetWidth, targetHeight, smooth);
+            if (overlay is not null) UploadBitmapOverlay(overlay);
+            PrepareOverlay(sceneOverlay, smooth);
+            UpdateResolve(frame, targetWidth, targetHeight, smooth, overlay is not null);
+
             using var encoderLabel = new NativeLabel("PixelMap frame");
             var encoderDescriptor = new CommandEncoderDescriptor { Label = encoderLabel.Pointer };
             encoder = api.DeviceCreateCommandEncoder(device, &encoderDescriptor);
@@ -191,8 +194,17 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             commands = api.CommandEncoderFinish(encoder, null);
             Require(commands, "command buffer");
             api.QueueSubmit(queue, 1, &commands);
+            scenePreparation.Commit();
             if (drawShadows) { retainedShadowFrame = frame; retainedShadowQuality = Quality; }
             TrimCaches();
+        }
+        catch
+        {
+            // Preparation can partially replace GPU streams before a failure.
+            // Neither those streams nor a partially encoded shadow pass are reusable.
+            scenePreparation.Invalidate();
+            retainedShadowFrame = null;
+            throw;
         }
         finally
         {
@@ -222,11 +234,11 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     {
         foreach (var draw in frame.Terrain)
         {
-            if (terrainCache.TryGetValue(draw.Mesh.ResourceKey, out var h)) h.Generation = generation;
-            if (textureCache.TryGetValue(draw.Texture, out var t)) t.Generation = generation;
+            if (terrainCache.TryGetValue(draw.Mesh.ResourceKey, out var h)) h.Generation = scenePreparation.Generation;
+            if (textureCache.TryGetValue(draw.Texture, out var t)) t.Generation = scenePreparation.Generation;
         }
         foreach (var draw in frame.Buildings)
-            if (buildingCache.TryGetValue(draw.Mesh.ResourceKey, out var b)) b.Generation = generation;
+            if (buildingCache.TryGetValue(draw.Mesh.ResourceKey, out var b)) b.Generation = scenePreparation.Generation;
         uniforms.AsSpan().Clear();
         var transform = frame.Terrain.Length > 0 ? frame.Terrain[0].Transform :
             frame.Buildings.Length > 0 ? frame.Buildings[0].Transform : default;

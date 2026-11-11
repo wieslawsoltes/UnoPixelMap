@@ -6,9 +6,10 @@ This branch migrates Pixel Atlas from Uno.Sdk 6.7.30 to Uno.Sdk 7.0.5 and replac
 every production map presentation path with Uno's shared-device
 `WebGpuCanvasElement`. The Uno UI also uses the WebGPU graphics provider.
 
-The source implementation is present. Native regression validation has passed;
-the published browser integration and visual-quality gates are still being
-worked through. The quality target is a modern real-time 3D renderer. Implemented
+The production renderer, migration checks and native regression validation are
+present. Published-browser integration and visual acceptance remain required
+gates; their latest outcome is recorded in the PR and linked CI runs below.
+The quality target is a modern real-time 3D renderer. Implemented
 graphics features do not by themselves establish commercial AAA visual quality,
 hardware frame rates, or a measured improvement over the previous release.
 
@@ -138,6 +139,11 @@ receive the full physical-lighting shadow treatment.
 The renderer retains a separate complete building index stream for sun casters,
 so camera-frustum culling does not erase shadows from loaded offscreen buildings.
 An unchanged immutable frame and quality preset reuse the previous shadow map.
+The same frame also retains terrain instances, building uniforms and draw
+selection while route or vehicle overlays animate. Physical/raster dimensions,
+quality and shadow-size changes invalidate this scene state. Residency age
+advances with scene preparation, so animated overlays cannot evict buffers they
+still use. Reuse is committed after queue submission and invalidated on failure.
 
 Pixel and Minecraft retain their logical pixel grid, palette treatment, window
 details and nearest-neighbor resolve. Their prior baked ground-shadow appearance
@@ -246,18 +252,31 @@ timestamp advancement passed locally and in the current native CI job.
 The high-DPI follow-up also passed exact 1×, 2× and 3× comparisons against direct
 scaled text, including a segmented Unicode name, density-only invalidation,
 bucket reuse, the atlas density cap and unchanged pixel-style glyph density.
+The scene-retention guard covers 240 changing overlays, retry after failed
+preparation and eviction after 181 distinct scene preparations. This validates
+the managed retention policy; it does not measure GPU completion time.
 
 Exact production WGSL and 22 pipeline variants were accepted by native Dawn
 validation on SwiftShader. This is shader/layout validation only.
 
-### Unresolved during validation
+### Validation investigations
 
 The first native complete-frame fixture aborted in SwiftShader after submission.
 A sky-only variant also aborted, while independent clear and constant-triangle
 fixtures succeeded. No complete-frame native screenshot or timing is established
 by that run. Local Chromium cannot start because this execution environment
 denies its required process sockets. Published browser CI is the authoritative
-integration gate and is still being investigated.
+integration gate.
+
+[Run 7](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43110751306)
+on `998bdaf` successfully published the interpreted application and passed the
+strict package-identity checks. Chromium then reported a lost graphics device
+with `A valid external Instance reference no longer exists.` before a usable
+scene screenshot was captured. Its frame counters establish submission only;
+the captured recovery panel is not accepted rendering evidence. The application
+and Uno source audits found balanced instance/device ownership. The next browser
+configuration tests full Chromium with the software-GPU watchdog disabled and
+bounded completion timeouts, while retaining every device-loss failure.
 
 The WebGPU browser suite observes actual shader compilation, pipeline depth
 and multisample state, map queue submissions and readback calls. Its intended
@@ -265,6 +284,8 @@ coverage includes all styles/quality presets, imagery/elevation/relief, pan/zoom
 all six route demonstrations, walking, resize, high-DPI mobile pinch, unavailable
 WebGPU and device loss. It retains screenshots, errors and bounded counters.
 The suite must pass before this migration is considered ready.
+Screenshot checks reject the recovery panel before and after capture and retain
+graphics state, GPU errors/losses, console history and accessibility on failure.
 
 PR CI runs a Debug interpreted publish for earlier startup/shader feedback and
 the Release AOT publish used for delivery. Both run the same package-identity and
