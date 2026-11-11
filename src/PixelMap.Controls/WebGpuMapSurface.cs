@@ -46,6 +46,8 @@ public sealed partial class PixelMapControl
         private WebGpuMapRenderer? _gpu;
         private WebGpuSceneOverlay? _overlay;
         private GpuMapFrame? _frame;
+        private IDisposable? _deviceObservation;
+        private long _deviceObservationGeneration;
         private PreparedScene? _prepared;
         private Scene? _scene, _presentedScene;
         private MapCamera? _timedCamera;
@@ -85,11 +87,21 @@ public sealed partial class PixelMapControl
         {
             lock (_drawing)
             {
+                DetachDeviceObservation();
                 Failure = null;
                 try
                 {
                     // The API is Uno's ABI-compatible shim. The context's borrowed
                     // device and queue must never be released by this control.
+                    long observationGeneration = _deviceObservationGeneration;
+                    _deviceObservation = BrowserWebGpuDiagnostics.ObserveDevice((nint)context.Device, message =>
+                    {
+                        lock (_drawing)
+                        {
+                            if (observationGeneration == _deviceObservationGeneration)
+                                Fail(new InvalidOperationException(message));
+                        }
+                    });
                     _gpu = new(context.Api, context.Device, context.Queue);
                     _overlay = new();
                     _sceneBuilder ??= new();
@@ -97,6 +109,7 @@ public sealed partial class PixelMapControl
                 catch (Exception error)
                 {
                     // Uno does not call OnDestroy when Init fails.
+                    DetachDeviceObservation();
                     _gpu?.Dispose();
                     _gpu = null;
                     _overlay?.Dispose();
@@ -171,6 +184,7 @@ public sealed partial class PixelMapControl
         {
             lock (_drawing)
             {
+                DetachDeviceObservation();
                 _gpu?.Dispose();
                 _gpu = null;
                 ReleaseScene();
@@ -182,10 +196,25 @@ public sealed partial class PixelMapControl
         {
             lock (_drawing)
             {
+                DetachDeviceObservation();
                 _scene = null;
                 ReleaseScene();
                 // GPU resources are released by OnDestroy in Uno's lifecycle.
                 ReportBackend(false);
+            }
+        }
+
+        private void DetachDeviceObservation()
+        {
+            _deviceObservationGeneration++;
+            var previous = _deviceObservation;
+            _deviceObservation = null;
+            try { previous?.Dispose(); }
+            catch (Exception error)
+            {
+                // Browser teardown can invalidate JS proxies. Still release owned
+                // scene resources and let the generation guard reject old callbacks.
+                Console.Error.WriteLine($"Pixel Atlas could not detach its WebGPU observer: {error}");
             }
         }
 
@@ -205,6 +234,7 @@ public sealed partial class PixelMapControl
         {
             if (Failure is not null) return;
             Failure = error.Message;
+            DetachDeviceObservation();
             // Preparation can advance CPU geometry before a GPU submission fails.
             // Never expose that unpresented scene through picking or terrain queries.
             _presentedScene = null;

@@ -9,7 +9,14 @@ process.env.DEBUG = [process.env.DEBUG, "pw:browser"].filter(Boolean).join(",");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
 
-const base = process.argv[2] || "http://127.0.0.1:8100/UnoPixelMap/";
+function parseArguments(args) {
+    const addresses = args.filter(value => value !== "--preflight-only");
+    assert.ok(addresses.length <= 1 && addresses.every(value => !value.startsWith("--")),
+        "Usage: node webgpu.cjs [base URL] [--preflight-only]");
+    return { base: addresses[0] || "http://127.0.0.1:8100/UnoPixelMap/", preflightOnly: args.includes("--preflight-only") };
+}
+
+const { base, preflightOnly } = parseArguments(process.argv.slice(2));
 const output = process.env.PIXELMAP_SHOTS || "webgpu-evidence";
 const report = { renderer: "Uno 7 WebGPU", scenarios: [], errors: [], timingMeaning: "CPU preparation/submission only; software GPU timings are not hardware FPS benchmarks." };
 const consoleHistory = new WeakMap();
@@ -298,6 +305,9 @@ function difference(a, b) {
 
 async function capture(page, name) {
     await assertGraphicsHealthy(page, name + " before screenshot");
+    // CPU frame counters and RAF callbacks do not imply that cold GPU work or
+    // presentation has completed. Fence real work before judging its pixels.
+    await verifyGpu(page, name);
     const bytes = await page.screenshot({ path: join(output, name + ".png"), timeout: 30000 });
     const { diagnostic } = await assertGraphicsHealthy(page, name + " after screenshot");
     if (name === "desktop-pixel" || name === "style-normal")
@@ -313,19 +323,22 @@ async function capture(page, name) {
 async function verifyGpu(page, name) {
     const evidence = await page.evaluate(async () => {
         const s = globalThis.__pixelAtlasGpuProbe;
-        await Promise.all(s.pending);
         let timeout;
         try {
             await Promise.race([
-                Promise.all(s.devices.map(device => device.queue.onSubmittedWorkDone()
-                    .catch(error => s.errors.push("GPU queue completion: " + String(error))))),
+                (async () => {
+                    await Promise.all([...s.pending, ...s.devices.map(device => device.queue.onSubmittedWorkDone()
+                        .catch(error => s.errors.push("GPU queue completion: " + String(error))))]);
+                    // Let completed GPU work reach the compositor before capture.
+                    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                    // GPU errors are dispatched as browser tasks.
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                })(),
                 new Promise((_, reject) => {
-                    timeout = setTimeout(() => reject(new Error("GPU work did not complete within 60 seconds")), 60000);
+                    timeout = setTimeout(() => reject(new Error("GPU shader queries, queue work or presentation did not complete within 60 seconds")), 60000);
                 })
             ]);
         } finally { clearTimeout(timeout); }
-        // GPU errors are dispatched as browser tasks; inspect after they can run.
-        await new Promise(resolve => setTimeout(resolve, 0));
         return { ...s, pending: undefined, devices: undefined };
     });
     await writeFile(join(output, name + "-gpu.json"), JSON.stringify(evidence, null, 2));
@@ -338,6 +351,125 @@ async function verifyGpu(page, name) {
     assert.equal(evidence.readbacks, 0, "Map presentation performs no texture readback");
     assert.equal(evidence.glContexts, 0, "Production opens no WebGL rendering context");
     return evidence;
+}
+
+function inspectRegion(png, { x, y, width, height }) {
+    assert.ok(width > 0 && height > 0 && x >= 0 && y >= 0 && x + width <= png.width && y + height <= png.height,
+        "Presentation sample region is inside the screenshot");
+    const minimum = [255, 255, 255, 255], maximum = [0, 0, 0, 0];
+    for (let row = y; row < y + height; row++)
+        for (let column = x; column < x + width; column++) {
+            const offset = (row * png.width + column) * 4;
+            for (let channel = 0; channel < 4; channel++) {
+                minimum[channel] = Math.min(minimum[channel], png.data[offset + channel]);
+                maximum[channel] = Math.max(maximum[channel], png.data[offset + channel]);
+            }
+        }
+    return { minimum, maximum };
+}
+
+function assertRegionColor(measured, expected, name) {
+    assert.ok(expected.every((value, index) => measured.minimum[index] >= value - 3 && measured.maximum[index] <= value + 3),
+        `${name}: expected opaque RGBA ${JSON.stringify(expected)}, measured ${JSON.stringify(measured)}`);
+}
+
+async function presentationPreflight(browser) {
+    // A routed localhost document needs no server or published Uno files. Its
+    // separate context/device has no map probe and cannot affect map counters.
+    const address = "http://127.0.0.1/__pixelmap_webgpu_presentation__.html";
+    const context = await browser.newContext({ viewport: { width: 320, height: 240 }, deviceScaleFactor: 1 });
+    const page = await context.newPage();
+    const evidence = { url: address, expected: { css: [255, 0, 255, 255], gpu: [0, 255, 0, 255] },
+        pageErrors: [], console: [], passed: false };
+    let pageBytes, canvasBytes;
+    page.on("pageerror", error => evidence.pageErrors.push(error.message));
+    page.on("crash", () => evidence.pageErrors.push("Presentation page crashed"));
+    page.on("console", message => {
+        evidence.console.push({ type: message.type(), text: message.text().slice(0, 3000) });
+        if (evidence.console.length > 200) evidence.console.shift();
+    });
+    const screenshotPage = () => page.screenshot({ path: join(output, "presentation-page.png"), timeout: 30000 });
+    const screenshotCanvas = () => page.locator("canvas").screenshot({ path: join(output, "presentation-canvas.png"), timeout: 30000 });
+    try {
+        await page.route(address, route => route.fulfill({ contentType: "text/html", body: `<!doctype html>
+            <html><head><title>Independent WebGPU presentation</title><link rel="icon" href="data:,">
+            <style>html,body{margin:0;width:100%;height:100%;background:#ff00ff}
+            canvas{position:absolute;left:64px;top:48px;width:192px;height:128px;background:#000}</style></head>
+            <body><canvas width="192" height="128" aria-label="WebGPU green clear"></canvas></body></html>` }));
+        await page.goto(address, { waitUntil: "domcontentloaded", timeout: 30000 });
+        await page.evaluate(async () => {
+            const state = globalThis.__pixelAtlasPresentation = { errors: [], losses: [], queueCompleted: false };
+            let timeout;
+            try {
+                await Promise.race([
+                    (async () => {
+                        if (!isSecureContext || !navigator.gpu) throw new Error("Secure-context WebGPU is unavailable");
+                        const adapter = await navigator.gpu.requestAdapter({ powerPreference: "high-performance" });
+                        if (!adapter) throw new Error("No WebGPU presentation adapter is available");
+                        const info = adapter.info;
+                        state.adapter = { vendor: info.vendor, architecture: info.architecture, device: info.device,
+                            description: info.description, isFallbackAdapter: info.isFallbackAdapter };
+                        const device = await adapter.requestDevice({ label: "Independent presentation device" });
+                        globalThis.__pixelAtlasPresentationDevice = device;
+                        device.addEventListener("uncapturederror", event => state.errors.push(event.error.message));
+                        device.lost.then(info => state.losses.push({ reason: info.reason, message: info.message }));
+                        const canvas = document.querySelector("canvas");
+                        const canvasContext = canvas.getContext("webgpu");
+                        if (!canvasContext) throw new Error("A WebGPU canvas context could not be created");
+                        // Match Uno 7.0.32's browser canvas presentation format.
+                        state.format = "rgba8unorm";
+                        canvasContext.configure({ device, format: state.format, alphaMode: "opaque" });
+                        const encoder = device.createCommandEncoder({ label: "Independent green clear" });
+                        const pass = encoder.beginRenderPass({ colorAttachments: [{
+                            view: canvasContext.getCurrentTexture().createView(),
+                            clearValue: { r: 0, g: 1, b: 0, a: 1 }, loadOp: "clear", storeOp: "store"
+                        }] });
+                        pass.end();
+                        device.queue.submit([encoder.finish()]);
+                        await device.queue.onSubmittedWorkDone();
+                        state.queueCompleted = true;
+                        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    })(),
+                    new Promise((_, reject) => {
+                        timeout = setTimeout(() => reject(new Error("Independent WebGPU initialization, queue or presentation timed out after 60 seconds")), 60000);
+                    })
+                ]);
+            } catch (error) { state.failure = String(error); throw error; }
+            finally { clearTimeout(timeout); }
+        });
+        pageBytes = await screenshotPage();
+        canvasBytes = await screenshotCanvas();
+        evidence.gpu = await page.evaluate(() => globalThis.__pixelAtlasPresentation);
+        const wholePage = PNG.sync.read(pageBytes), canvas = PNG.sync.read(canvasBytes);
+        evidence.colors = {
+            pageCss: inspectRegion(wholePage, { x: 16, y: 16, width: 24, height: 24 }),
+            pageGpu: inspectRegion(wholePage, { x: 96, y: 80, width: 64, height: 64 }),
+            canvasGpu: inspectRegion(canvas, { x: 8, y: 8, width: canvas.width - 16, height: canvas.height - 16 })
+        };
+        assert.deepEqual(evidence.pageErrors, [], "Independent presentation has no page exceptions");
+        assert.deepEqual(evidence.gpu.errors, [], "Independent WebGPU clear validates");
+        assert.deepEqual(evidence.gpu.losses, [], "Independent WebGPU device remains available");
+        assert.equal(evidence.gpu.queueCompleted, true, "Independent clear completed on the real GPU queue");
+        assertRegionColor(evidence.colors.pageCss, evidence.expected.css, "Full-page CSS background");
+        assertRegionColor(evidence.colors.pageGpu, evidence.expected.gpu, "Full-page WebGPU canvas");
+        assertRegionColor(evidence.colors.canvasGpu, evidence.expected.gpu, "Canvas screenshot");
+        evidence.passed = true;
+        report.scenarios.push({ name: "webgpu-presentation", adapter: evidence.gpu.adapter, colors: evidence.colors });
+    } catch (error) {
+        evidence.failure = error.stack || String(error);
+        if (!pageBytes) pageBytes = await screenshotPage().catch(() => null);
+        if (!canvasBytes) canvasBytes = await screenshotCanvas().catch(() => null);
+        throw error;
+    } finally {
+        if (!evidence.gpu)
+            evidence.gpu = await page.evaluate(() => globalThis.__pixelAtlasPresentation || null)
+                .catch(error => ({ snapshotError: String(error) }));
+        await writeFile(join(output, "presentation.json"), JSON.stringify(evidence, null, 2));
+        console.log("WebGPU presentation:", JSON.stringify(evidence));
+        if (pageBytes) console.log("PIXELMAP_PREVIEW presentation-" + (evidence.passed ? "passed " : "failure ") + pageBytes.toString("base64"));
+        await context.close();
+    }
 }
 
 async function desktop(browser) {
@@ -464,6 +596,7 @@ async function unavailable(browser) {
 async function deviceLoss(browser) {
     const { context, page } = await open(browser);
     try {
+        await verifyGpu(page, "device-loss-before");
         await page.evaluate(() => {
             const devices = globalThis.__pixelAtlasGpuProbe.devices;
             if (!devices.length) throw new Error("No real application GPUDevice was acquired");
@@ -471,8 +604,19 @@ async function deviceLoss(browser) {
         });
         await page.getByRole("heading", { name: "WebGPU is unavailable" }).waitFor({ state: "visible" });
         assert.match(await page.locator("#pixelmap-graphics-detail").innerText(), /device was lost/i);
+        await page.waitForFunction(() => !!globalThis.PixelAtlasWebGpu?.failure, null, { timeout: 10000 });
+        const stopped = await page.evaluate(async () => {
+            const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
+            await nextFrame(); await nextFrame();
+            const before = globalThis.__pixelAtlasGpuProbe.mapSubmits;
+            await nextFrame(); await nextFrame();
+            return { before, after: globalThis.__pixelAtlasGpuProbe.mapSubmits,
+                failure: globalThis.PixelAtlasWebGpu.failure };
+        });
+        assert.ok(stopped.failure, "Managed scene receives actual shared-device loss");
+        assert.equal(stopped.after, stopped.before, "A failed scene stops submitting map GPU work");
         await page.screenshot({ path: join(output, "device-loss-recovery.png") });
-        report.scenarios.push({ name: "device-loss", actionableDiagnostic: true });
+        report.scenarios.push({ name: "device-loss", actionableDiagnostic: true, managed: stopped });
     } finally { await context.close(); }
 }
 
@@ -481,26 +625,33 @@ async function deviceLoss(browser) {
     const executablePath = process.env.CHROMIUM_PATH || undefined;
     const channel = executablePath ? undefined : "chromium";
     report.browserLaunch = { channel: channel || "explicit executable", executablePath,
-        gpu: "SwiftShader for ANGLE, Vulkan compositor and WebGPU", gpuWatchdog: "disabled for software CI" };
+        gpu: "SwiftShader for ANGLE, Vulkan compositor and WebGPU", gpuWatchdog: "disabled for software CI",
+        enabledFeatures: ["CDPScreenshotNewSurface", "Vulkan"] };
     const browser = await chromium.launch({ executablePath, channel,
+        // Replace only Playwright 1.64.1's feature switch with its merged value;
+        // retain every other default argument and avoid duplicate switches.
+        ignoreDefaultArgs: ["--enable-features=CDPScreenshotNewSurface"],
         // Software rendering can exceed Chromium's GPU watchdog while compiling
         // cold shaders. Tests still fail on loss/errors and bounded GPU waits.
         // Match Chromium 156's VULKAN_SWIFTSHADER pixel-test configuration so
         // the compositor and WebGPU share a compatible software adapter:
         // https://github.com/chromium/chromium/blob/156.0.8078.4/content/test/gpu/gpu_tests/pixel_test_pages.py
-        args: ["--disable-dev-shm-usage", "--disable-gpu-watchdog", "--enable-features=Vulkan",
+        args: ["--disable-dev-shm-usage", "--disable-gpu-watchdog", "--enable-features=CDPScreenshotNewSurface,Vulkan",
             "--use-angle=swiftshader", "--use-vulkan=swiftshader", "--use-webgpu-adapter=swiftshader",
             "--disable-vulkan-surface", "--enable-unsafe-webgpu", "--enable-unsafe-swiftshader"] });
     try {
         report.browser = await browser.version();
-        await desktop(browser);
-        await journeys(browser);
-        await mobile(browser);
-        await unavailable(browser);
-        await deviceLoss(browser);
+        await presentationPreflight(browser);
+        if (!preflightOnly) {
+            await desktop(browser);
+            await journeys(browser);
+            await mobile(browser);
+            await unavailable(browser);
+            await deviceLoss(browser);
+        }
         assert.deepEqual(report.errors, [], "No application exceptions occurred");
         report.passed = true;
-        console.log("WebGPU integration passed:", report.scenarios.length, "scenarios");
+        console.log(preflightOnly ? "WebGPU presentation preflight passed:" : "WebGPU integration passed:", report.scenarios.length, "scenarios");
     } catch (error) {
         report.passed = false;
         report.failure = error.stack || String(error);

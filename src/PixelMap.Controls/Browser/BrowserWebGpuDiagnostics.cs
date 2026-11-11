@@ -1,4 +1,6 @@
 using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.Versioning;
+using Uno.UI.Composition.WebGpu;
 
 namespace PixelMap.Controls;
 
@@ -6,6 +8,23 @@ namespace PixelMap.Controls;
 /// user data are read back. Reporting failure works even when the UI device is lost.</summary>
 internal static partial class BrowserWebGpuDiagnostics
 {
+    /// <summary>Observe the exact device borrowed from Uno's canvas context. Its
+    /// native handle is the imported pointer accepted by Uno's public JS interop;
+    /// disposing this subscription never destroys or releases the borrowed device.</summary>
+    internal static IDisposable? ObserveDevice(nint device, Action<string> failed)
+    {
+        if (!OperatingSystem.IsBrowser()) return null;
+        ArgumentNullException.ThrowIfNull(failed);
+        if (device == 0) throw new ArgumentException("A live shared WebGPU device is required.", nameof(device));
+        // Uno's browser importer returns this same wasm32 pointer as an int. Keep
+        // its unsigned bit pattern; GetJsObject performs the JS handle-table lookup.
+        // JS interop canonicalizes proxies: this lookup can return the JSObject
+        // Uno already holds for presentation and resize. It is borrowed too; only
+        // our newly created subscription token is owned and disposed below.
+        var browserDevice = WebGpuJsInterop.GetJsObject(unchecked((int)device));
+        return new DeviceObservation(ObserveSharedDevice(browserDevice, failed));
+    }
+
     internal static void Report(long frames, long preparations, int width, int height,
         int physicalWidth, int physicalHeight, int pixelSize, int patches, int triangles, int draws,
         long uploadBytes, long residentBytes, double frameMilliseconds, double submissionMilliseconds,
@@ -32,4 +51,25 @@ internal static partial class BrowserWebGpuDiagnostics
 
     [JSImport("globalThis.PixelAtlasInput.failWebGpu")]
     private static partial void ReportFailure(string message);
+
+    [JSImport("globalThis.PixelAtlasGraphics.observeDevice")]
+    private static partial JSObject ObserveSharedDevice(JSObject device,
+        [JSMarshalAs<JSType.Function<JSType.String>>] Action<string> failed);
+
+    [JSImport("globalThis.PixelAtlasGraphics.stopObserving")]
+    private static partial void StopObserving(JSObject subscription);
+
+    [SupportedOSPlatform("browser")]
+    private sealed class DeviceObservation(JSObject subscription) : IDisposable
+    {
+        private JSObject? current = subscription;
+
+        public void Dispose()
+        {
+            var previous = Interlocked.Exchange(ref current, null);
+            if (previous is null) return;
+            try { StopObserving(previous); }
+            finally { previous.Dispose(); }
+        }
+    }
 }

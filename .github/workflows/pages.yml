@@ -20,6 +20,9 @@ jobs:
         with:
           # Pin the .NET 10 toolchain used for the Uno 7 WebGPU migration.
           dotnet-version: '10.0.403'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Install native graphics and the test font
         run: |
           sudo apt-get update
@@ -38,6 +41,7 @@ jobs:
       - run: node tests/browser/audio.cjs
       - run: node tests/browser/input-adapter.cjs
       - run: node tests/browser/camera-replay-checks.cjs
+      - run: node tests/browser/webgpu-lifecycle.cjs
       - run: dotnet workload install wasm-tools --skip-manifest-update
       - run: dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o "${{ runner.temp }}/atlas"
       - name: Verify the Pages artifact
@@ -51,6 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/browser/package-lock.json
       - uses: actions/download-artifact@v4
         with:
           name: github-pages

@@ -219,10 +219,16 @@ pipeline storage are not measurable from those nominal allocation sizes.
 
 Unavailable WebGPU, absent adapters, startup exceptions, uncaptured GPU errors
 and device loss show an accessible HTML recovery panel with a reload action.
-This panel does not depend on the failed GPU device. A forwarding observer on
-the standard browser `requestDevice` API adds loss/error listeners to the
-device Uno creates; it does not request another device or replace Uno's native
-callbacks. Intentional page teardown suppresses that diagnostic.
+This panel does not depend on the failed GPU device. The canvas obtains the
+actual shared browser device through Uno's public `WebGpuJsInterop.GetJsObject`
+API and observes that device's loss/error events. A managed callback stops map
+submissions, clears the displayed scene used by picking, and reports failure to
+the UI. No global device-creation hook or additional device is needed.
+The device and its existing JavaScript proxy remain borrowed. Each canvas owns
+only its subscription token; unload, initialization failure and teardown detach
+the callback and error listener. One pending loss continuation per device avoids
+accumulation across reloads, and a generation guard rejects stale notifications.
+The HTML panel remains available if managed error reporting itself fails.
 
 ## Verification and evidence
 
@@ -256,6 +262,13 @@ The scene-retention guard covers 240 changing overlays, retry after failed
 preparation and eviction after 181 distinct scene preparations. This validates
 the managed retention policy; it does not measure GPU completion time.
 
+The browser observer lifecycle regression exercises 100 reloads with one pending
+loss continuation, exact-device notification, shared subscriptions, deterministic
+callback/listener release, stale and unrelated devices, cancellation of queued
+loss notifications, partial attachment failure and HTML diagnostics during
+managed teardown. It validates the observer protocol; the real browser suite
+separately destroys Uno's actual shared device and checks that map work stops.
+
 Exact production WGSL and 22 pipeline variants were accepted by native Dawn
 validation on SwiftShader. This is shader/layout validation only.
 
@@ -269,8 +282,9 @@ denies its required process sockets. Published browser CI is the authoritative
 integration gate.
 
 [Run 7](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43110751306)
-on `998bdaf` successfully published the interpreted application and passed the
-strict package-identity checks. Chromium then reported a lost graphics device
+on `998bdaf` successfully published both the interpreted application and the full
+Release AOT application and passed their strict package-identity checks.
+Chromium then reported a lost graphics device
 with `A valid external Instance reference no longer exists.` before a usable
 scene screenshot was captured. Its frame counters establish submission only;
 the captured recovery panel is not accepted rendering evidence. The application
@@ -287,6 +301,16 @@ ANGLE, Vulkan presentation and Dawn with the
 Adapter identities and explicit device-destruction stacks are retained in the
 evidence; no device-loss or shader errors are filtered out.
 
+[Run 9](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43114129603)
+published both Debug and Release applications and passed package verification. Its
+aligned software adapter reported no device loss or GPU error, but the whole
+application screenshot was transparent, including the Uno toolbar. Its native
+map commands had been submitted; GPU completion had not yet been checked before
+capture. The next test revision jointly bounds shader queries and queue fences
+before screenshots, preserves Chromium's screenshot feature when enabling
+Vulkan, and separately verifies a small WebGPU canvas before building the app.
+Transparent captures are rejected and do not establish rendering correctness.
+
 The WebGPU browser suite observes actual shader compilation, pipeline depth
 and multisample state, map queue submissions and readback calls. Its intended
 coverage includes all styles/quality presets, imagery/elevation/relief, pan/zoom,
@@ -296,7 +320,10 @@ The suite must pass before this migration is considered ready.
 Screenshot checks reject the recovery panel before and after capture and retain
 graphics state, GPU errors/losses, console history and accessibility on failure.
 
-PR CI runs a Debug interpreted publish for earlier startup/shader feedback and
+PR CI first checks a small independent WebGPU canvas using the same Chromium
+configuration, including browser composition and screenshot pixels. This quick
+gate has no Uno or application renderer dependency. PR CI then runs a Debug
+interpreted publish for earlier startup/shader feedback and
 the Release AOT publish used for delivery. Both run the same package-identity and
 browser scenarios. Superseded builds are cancelled per configuration;
 each configuration retains its own screenshots and exact published files,

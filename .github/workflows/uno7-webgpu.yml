@@ -10,6 +10,36 @@ permissions:
   contents: read
 
 jobs:
+  presentation:
+    name: WebGPU presentation preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: uno7-presentation-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/browser/package-lock.json
+      - name: Install the pinned Chromium browser
+        run: |
+          npm ci --prefix tests/browser
+          (cd tests/browser && npx playwright install --with-deps chromium)
+      - name: Verify independent WebGPU canvas presentation
+        env:
+          PIXELMAP_SHOTS: ${{ runner.temp }}/webgpu-presentation
+        run: node tests/browser/webgpu.cjs --preflight-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: uno7-webgpu-presentation
+          path: ${{ runner.temp }}/webgpu-presentation
+          if-no-files-found: ignore
+          retention-days: 14
+
   regression:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -46,6 +76,7 @@ jobs:
           node tests/browser/audio.cjs
           node tests/browser/input-adapter.cjs
           node tests/browser/camera-replay-checks.cjs
+          node tests/browser/webgpu-lifecycle.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -55,6 +86,7 @@ jobs:
 
   browser:
     name: WebGPU browser (${{ matrix.configuration }})
+    needs: presentation
     runs-on: ubuntu-latest
     timeout-minutes: 60
     # Interpreted startup/shader feedback runs alongside the shipping AOT build.

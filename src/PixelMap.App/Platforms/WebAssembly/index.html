@@ -30,25 +30,76 @@
                 else show();
             }
         };
-        // Uno owns the shared device and its native loss callback. Observe the
-        // public browser device when it is acquired, without creating a second
-        // device or replacing Uno's callbacks. HTML remains usable after GPU loss.
-        if (globalThis.GPUAdapter?.prototype.requestDevice) {
-            const requestDevice = GPUAdapter.prototype.requestDevice;
+        // MapSurface supplies the actual borrowed GPUDevice through Uno's public
+        // WebGpuJsInterop. Observation changes neither device creation nor ownership.
+        // Each subscription notifies managed rendering too, so a loss stops submissions
+        // and invalidates picking instead of only covering an otherwise live renderer.
+        {
+            const watchedDevices = new WeakMap();
+            const activeObservations = new Set();
             let closing = false;
-            addEventListener("pagehide", () => { closing = true; }, {once: true});
-            GPUAdapter.prototype.requestDevice = function (...args) {
-                const request = Reflect.apply(requestDevice, this, args);
-                request.then(device => {
+            function detach(subscription) {
+                if (!subscription?.active) return;
+                subscription.active = false;
+                subscription.failed = null;
+                const record = subscription.record;
+                subscription.record = null;
+                activeObservations.delete(subscription);
+                record.subscriptions.delete(subscription);
+                if (!record.subscriptions.size)
+                    record.device.removeEventListener("uncapturederror", record.error);
+            }
+            function report(subscription, message) {
+                if (!subscription.active || closing) return;
+                const failed = subscription.failed;
+                // Clear the marshalled delegate before invoking it: managed Fail
+                // disposes the same subscription, and queued notifications must stop.
+                detach(subscription);
+                try { failed(message); }
+                catch (error) { console.error("Pixel Atlas could not notify its renderer of WebGPU failure.", error); }
+                finally {
+                    // Keep HTML diagnostics available even during managed teardown.
+                    if (!PixelAtlasGraphics.failure) PixelAtlasGraphics.fail(message);
+                }
+            }
+            PixelAtlasGraphics.observeDevice = (device, failed) => {
+                if (!device || typeof device.lost?.then !== "function" ||
+                    typeof device.addEventListener !== "function" || typeof failed !== "function")
+                    throw new Error("Uno did not expose a live shared browser GPUDevice.");
+                if (closing) return { active: false, record: null, failed: null };
+                let record = watchedDevices.get(device);
+                if (!record) {
+                    record = { device, subscriptions: new Set(), loss: null, error: null };
+                    record.error = event => {
+                        const message = "WebGPU could not render this scene. " + (event.error?.message || "An uncaptured GPU error occurred.");
+                        for (const subscription of [...record.subscriptions]) report(subscription, message);
+                    };
+                    watchedDevices.set(device, record);
+                    // A promise cannot be unsubscribed. Install it only once per
+                    // device; detached subscriptions retain no managed callbacks.
                     device.lost.then(info => {
-                        if (!closing) PixelAtlasGraphics.fail("The graphics device was lost. Reload Pixel Atlas to rebuild its resources. " + info.message);
+                        record.loss = "The graphics device was lost. Reload Pixel Atlas to rebuild its resources. " + info.message;
+                        for (const subscription of [...record.subscriptions]) report(subscription, record.loss);
                     });
-                    device.addEventListener("uncapturederror", event => {
-                        if (!closing) PixelAtlasGraphics.fail("WebGPU could not render this scene. " + event.error.message);
-                    });
-                }, () => { /* The original promise carries initialization failure to Uno. */ });
-                return request;
+                }
+                const subscription = { active: true, record, failed };
+                record.subscriptions.add(subscription);
+                activeObservations.add(subscription);
+                try {
+                    if (record.subscriptions.size === 1) device.addEventListener("uncapturederror", record.error);
+                    if (record.loss !== null) queueMicrotask(() => report(subscription, record.loss));
+                    return subscription;
+                } catch (error) {
+                    detach(subscription);
+                    throw error;
+                }
             };
+            PixelAtlasGraphics.stopObserving = detach;
+            addEventListener("pagehide", event => {
+                if (event.persisted) return;
+                closing = true;
+                for (const subscription of [...activeObservations]) detach(subscription);
+            });
         }
         document.addEventListener("DOMContentLoaded", async () => {
             const graphics = globalThis.PixelAtlasGraphics;
