@@ -3,8 +3,8 @@ using PixelMap.Data;
 
 namespace PixelMap.Rendering;
 
-/// <summary>A retained geometry frame prepared for <see cref="GlMapRenderer"/>. The
-/// frame owns its label display list. Tile geometry and artwork are shared immutable
+/// <summary>A retained geometry frame prepared for <see cref="WebGpuMapRenderer"/>. The
+/// frame optionally owns a legacy label display list. Tile geometry and artwork are shared immutable
 /// snapshots, so preparing another camera does not change a pending frame.</summary>
 public sealed class GpuMapFrame : IDisposable
 {

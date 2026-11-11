@@ -2,6 +2,12 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--webgpu-overlay", StringComparer.Ordinal))
+{
+    WebGpuOverlayChecks.Run();
+    return;
+}
+
 if (args.Contains("--gpu-building-mesh", StringComparer.Ordinal))
 {
     await GpuBuildingMeshChecks.RunAsync();

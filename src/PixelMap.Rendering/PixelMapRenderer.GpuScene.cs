@@ -11,6 +11,7 @@ public sealed partial class PixelMapRenderer
     private GpuMapFrame? lastGpuScene, activeGpuScene;
     private SKPicture? gpuLabelPicture;
     private GpuSceneDepth? activeGpuDepth;
+    private bool gpuSceneLegacyOverlay = true;
 
     private sealed class GpuBuildingCache(GpuBuildingMesh mesh)
     {
@@ -33,7 +34,7 @@ public sealed partial class PixelMapRenderer
     /// <summary>Prepare a retained hardware frame in the selected geometry/material style.</summary>
     public GpuMapFrame PrepareGpuFrame(int width, int height, MapCamera camera, IReadOnlyList<MapTile> tiles,
         PixelStyle style, int pixelSize, IReadOnlyList<ImageryTile>? imagery,
-        TerrainOptions? terrainOptions, MapRenderStyle renderStyle)
+        TerrainOptions? terrainOptions, MapRenderStyle renderStyle, bool prepareLegacyOverlay = true)
     {
         lock (sync)
         {
@@ -48,7 +49,7 @@ public sealed partial class PixelMapRenderer
             CurrentTerrain = navigationTerrain is { } visualTerrain && (visualTerrain.Relief || visualTerrain.Hypsometric) ? visualTerrain : null;
             var options = CurrentTerrain ?? new TerrainOptions(ElevationSnapshot.Empty, Relief: false) { RenderStyle = renderStyle };
             var view = (width, height, camera, style, pixelSize, GeometryGpuGeneration);
-            if (view == lastView && CurrentTerrain == lastTerrain && gpuLabelPicture is not null && lastGpuScene is { } cached &&
+            if (prepareLegacyOverlay == gpuSceneLegacyOverlay && view == lastView && CurrentTerrain == lastTerrain && (!prepareLegacyOverlay || gpuLabelPicture is not null) && lastGpuScene is { } cached &&
                 ReferenceEquals(activeGpuScene, cached) &&
                 SameTiles(tiles, lastTiles) && SameTiles(imagery, lastImagery))
             {
@@ -60,7 +61,7 @@ public sealed partial class PixelMapRenderer
                     MaximumAltitude = cached.MaximumAltitude,
                     PreservePhotograph = cached.PreservePhotograph,
                     NavigationTerrain = navigationTerrain,
-                    Overlay = RetainGpuPicture(gpuLabelPicture),
+                    Overlay = prepareLegacyOverlay && gpuLabelPicture is not null ? RetainGpuPicture(gpuLabelPicture) : null,
                     Tiles = cached.Tiles,
                     Imagery = cached.Imagery
                 };
@@ -70,7 +71,9 @@ public sealed partial class PixelMapRenderer
             }
 
             reliefSurface ??= new();
-            bool shadows = camera.Pitch >= 1;
+            // Smooth WebGPU scenes use the renderer's sun shadow map. Pixel styles
+            // retain their authored ground shadows for the established map appearance.
+            bool shadows = camera.Pitch >= 1 && (prepareLegacyOverlay || !MapRendering.Smooth(renderStyle));
             var textureStyle = (style, pixelSize, shadows, renderStyle);
             if (terrainTextureStyle != textureStyle || !SameTerrainSources(tiles, terrainTextureTiles, static tile => tile.Id) ||
                 !SameTerrainSources(imagery, terrainTextureImagery, static tile => tile.Id))
@@ -142,16 +145,27 @@ public sealed partial class PixelMapRenderer
             };
             result.Depth = new(result);
             ActivateGpuFrameCore(result);
-            using var recorder = new SKPictureRecorder();
-            var viewport = new SKRect(0, 0, width, height);
-            var overlay = recorder.BeginRecording(viewport);
-            overlay.ClipRect(viewport);
-            DrawLabels(overlay, width, height, camera.Zoom, pixelSize, colors);
-            gpuLabelPicture?.Dispose();
-            gpuLabelPicture = recorder.EndRecording();
-            result.Overlay = RetainGpuPicture(gpuLabelPicture);
-            lastPicture?.Dispose();
-            lastPicture = RetainGpuPicture(result.Overlay);
+            if (prepareLegacyOverlay)
+            {
+                using var recorder = new SKPictureRecorder();
+                var viewport = new SKRect(0, 0, width, height);
+                var overlay = recorder.BeginRecording(viewport);
+                overlay.ClipRect(viewport);
+                DrawLabels(overlay, width, height, camera.Zoom, pixelSize, colors);
+                gpuLabelPicture?.Dispose();
+                gpuLabelPicture = recorder.EndRecording();
+                result.Overlay = RetainGpuPicture(gpuLabelPicture);
+                lastPicture?.Dispose();
+                lastPicture = RetainGpuPicture(result.Overlay);
+            }
+            else
+            {
+                gpuLabelPicture?.Dispose();
+                gpuLabelPicture = null;
+                lastPicture?.Dispose();
+                lastPicture = null;
+            }
+            gpuSceneLegacyOverlay = prepareLegacyOverlay;
             lastGpuScene = result;
             return result;
         }
