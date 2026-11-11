@@ -1,0 +1,104 @@
+name: Uno 7 · WebGPU migration
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ['docs/**', 'README.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uno7-webgpu-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PIXELMAP_TEST_FONT: /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install reference graphics and fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1-mesa-dri fonts-dejavu-core
+      - run: dotnet run --project tests/PixelMap.Data.Checks -c Release
+      - run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release
+      - name: Verify retained GLES reference renderer
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
+        run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --gpu-terrain --gpu-output="${{ runner.temp }}/gpu-reference"
+      - run: dotnet run --project tests/PixelMap.Routing.Tests -c Release
+      - run: dotnet run --project tests/PixelMap.Simulation.Tests -c Release
+      - name: Verify browser adapters and deterministic camera replay
+        run: |
+          node tests/browser/audio.cjs
+          node tests/browser/input-adapter.cjs
+          node tests/browser/camera-replay-checks.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: uno7-reference-rendering
+          path: ${{ runner.temp }}/gpu-reference
+          if-no-files-found: ignore
+
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/browser/package-lock.json
+      - name: Install the browser toolchain
+        run: dotnet workload install wasm-tools --skip-manifest-update
+      - name: Publish the Uno 7 WebGPU application
+        run: dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o "${{ runner.temp }}/atlas"
+      - name: Verify immutable bootstrap and runtime package identity
+        run: node tests/packaging/package-identity.cjs "${{ runner.temp }}/atlas/wwwroot"
+      - name: Install the pinned Chromium browser
+        run: |
+          npm ci --prefix tests/browser
+          (cd tests/browser && npx playwright install --with-deps chromium)
+      - name: Exercise WebGPU rendering and browser input
+        env:
+          PIXELMAP_SHOTS: ${{ runner.temp }}/webgpu-evidence
+        run: |
+          set -euo pipefail
+          node tests/browser/input-adapter-browser.cjs
+          mkdir -p "${{ runner.temp }}/preview"
+          ln -s "${{ runner.temp }}/atlas/wwwroot" "${{ runner.temp }}/preview/UnoPixelMap"
+          python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/preview" > "${{ runner.temp }}/atlas-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          node tests/browser/webgpu.cjs http://127.0.0.1:8100/UnoPixelMap/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: uno7-webgpu-browser-evidence
+          path: |
+            ${{ runner.temp }}/webgpu-evidence
+            ${{ runner.temp }}/atlas-server.log
+          if-no-files-found: ignore
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: uno7-webgpu-publish
+          path: ${{ runner.temp }}/atlas/wwwroot
+          retention-days: 7

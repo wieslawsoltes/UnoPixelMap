@@ -46,5 +46,23 @@ failure must not silently switch the application to the removed renderer.
 
 ## Verification record
 
-Implementation and measurements pending. No frame-rate, speedup, or visual-parity
-claim is established by the initial migration plan.
+The restored package graph has been verified: Uno.Sdk 7.0.5 resolves Uno.WinUI,
+Composition.WebGpu and Graphics3DWebGpu 7.0.32, Silk.NET.WebGPU 2.23.0, SkiaSharp
+4.151.1 and the .NET 10 browser bootstrap 10.1.1. No Uno 6 graphics package or
+Silk.NET.OpenGL dependency remains in the production project graph.
+
+SkiaSharp is retained for CPU asset preparation (tile textures, image decoding,
+and glyph atlases) and reference-renderer tests. The browser registers only the
+WebGPU graphics provider. The `Skia` feature supplies the matching native asset
+libraries; it does not select a Skia rendering or presentation fallback.
+
+The previous optional paired GL/compositor/readback benchmark job has been
+retired because its instrumentation measures APIs removed by this migration.
+Its historical scripts and measurements remain available for interpreting old
+results. PR and Pages validation now run the WebGPU browser probe, alongside
+the existing native data, rendering-reference, routing, simulation, input,
+audio, and package-identity checks.
+
+Native restores succeed with .NET SDK 10.0.403 and the matching wasm-tools
+workload. Browser execution and rendering measurements are pending. No frame-rate,
+speedup, or visual-parity claim is established by restore success.

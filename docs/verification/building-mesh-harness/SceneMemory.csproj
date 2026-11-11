@@ -9,6 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="../../../src/PixelMap.Data/PixelMap.Data.csproj" />
     <ProjectReference Include="../../../src/PixelMap.Rendering/PixelMap.Rendering.csproj" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.151.1" />
   </ItemGroup>
 </Project>
