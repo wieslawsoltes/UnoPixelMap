@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -7,8 +5,6 @@ using Microsoft.UI.Xaml.Media;
 using PixelMap.Data;
 using PixelMap.Rendering;
 using PixelMap.Routing;
-using SkiaSharp;
-using Uno.WinUI.Graphics2DSK;
 using Windows.Foundation;
 
 namespace PixelMap.Controls;
@@ -25,8 +21,9 @@ public sealed partial class PixelMapControl : UserControl
     public static readonly DependencyProperty IsEarthImageryEnabledProperty = DependencyProperty.Register(nameof(IsEarthImageryEnabled),
         typeof(bool), typeof(PixelMapControl), new PropertyMetadata(false, (o, _) => ((PixelMapControl)o).EarthChanged()));
 
-    public static readonly DependencyProperty IsGpuRenderingEnabledProperty = DependencyProperty.Register(nameof(IsGpuRenderingEnabled),
-        typeof(bool), typeof(PixelMapControl), new PropertyMetadata(true, (o, _) => ((PixelMapControl)o).GpuRenderingChanged()));
+    public static readonly DependencyProperty RenderingQualityProperty = DependencyProperty.Register(nameof(RenderingQuality),
+        typeof(WebGpuQuality), typeof(PixelMapControl), new PropertyMetadata(WebGpuQuality.High,
+            (o, _) => ((PixelMapControl)o).RenderingQualityChanged()));
 
     public static readonly DependencyProperty RenderStyleProperty = DependencyProperty.Register(nameof(RenderStyle),
         typeof(MapRenderStyle), typeof(PixelMapControl), new PropertyMetadata(MapRenderStyle.Pixel,
@@ -67,7 +64,7 @@ public sealed partial class PixelMapControl : UserControl
         _elevations = new(_elevationSource.GetTileAsync, LayerChanged, retainPreviousOnFailure: true);
         var dispatcher = DispatcherQueue;
         var layers = new Grid { Background = Brush(170, 187, 161) };
-        _surface = new(layers, isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)), FramePresented);
+        _surface = new(isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)), FramePresented);
         _pinLabel = new TextBlock { FontSize = 12, Foreground = Brush(255, 247, 220), TextTrimming = TextTrimming.CharacterEllipsis };
         _pin = new Border
         {
@@ -140,7 +137,15 @@ public sealed partial class PixelMapControl : UserControl
     public MapCamera Camera { get => (MapCamera)GetValue(CameraProperty); set => SetValue(CameraProperty, Normalize(value).ForViewport(ActualWidth, ActualHeight).OnTerrain(_terrain, ActualHeight)); }
     public PixelStyle Palette { get => (PixelStyle)GetValue(PaletteProperty); set => SetValue(PaletteProperty, value); }
     public bool IsEarthImageryEnabled { get => (bool)GetValue(IsEarthImageryEnabledProperty); set => SetValue(IsEarthImageryEnabledProperty, value); }
-    public bool IsGpuRenderingEnabled { get => (bool)GetValue(IsGpuRenderingEnabledProperty); set => SetValue(IsGpuRenderingEnabledProperty, value); }
+    public WebGpuQuality RenderingQuality
+    {
+        get => (WebGpuQuality)GetValue(RenderingQualityProperty);
+        set
+        {
+            if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            SetValue(RenderingQualityProperty, value);
+        }
+    }
     public MapRenderStyle RenderStyle
     {
         get => (MapRenderStyle)GetValue(RenderStyleProperty);
@@ -151,8 +156,7 @@ public sealed partial class PixelMapControl : UserControl
         }
     }
     public bool IsGpuRenderingActive { get; private set; }
-    public string StatusText => !IsGpuRenderingEnabled ? _layerStatus
-        : $"{_layerStatus} · {(IsGpuRenderingActive ? "GPU active" : "CPU fallback")}";
+    public string StatusText => $"{_layerStatus} · {(_surface.Failure is not null ? "WebGPU unavailable" : IsGpuRenderingActive ? "WebGPU active" : "Starting WebGPU")}";
     public event EventHandler? CameraChanged;
     public event EventHandler? StatusChanged;
     private int _frameUpdateQueued;
@@ -328,7 +332,7 @@ public sealed partial class PixelMapControl : UserControl
         StatusChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private void GpuRenderingChanged()
+    private void RenderingQualityChanged()
     {
         InvalidateMap();
         StatusChanged?.Invoke(this, EventArgs.Empty);
@@ -337,7 +341,7 @@ public sealed partial class PixelMapControl : UserControl
     private void RenderStyleChanged()
     {
         _worldContacts.Update(CollisionTiles(), _elevationSnapshot);
-        GpuRenderingChanged();
+        RenderingQualityChanged();
     }
 
     private void SetGpuRenderingActive(bool isActive)
@@ -363,164 +367,10 @@ public sealed partial class PixelMapControl : UserControl
             : _earthDisplay;
         _surface.Present(Camera, DisplayTiles(), imagery, Palette,
             _motion.IsEnabled || _touches.Count != 0 || Journey.Active && Journey.Follow,
-            Journey.Route, CurrentVehicle(), Journey.Vehicle.Mode, Journey.NextCheckpoint, IsGpuRenderingEnabled, _terrain, RenderStyle);
+            Journey.Route, CurrentVehicle(), Journey.Vehicle.Mode, Journey.NextCheckpoint, RenderingQuality, _terrain, RenderStyle);
     }
 
     private bool TryGetRenderedTerrainElevation(double latitude, double longitude, out double elevationMeters) =>
         _surface.TryGetTerrainElevation(latitude, longitude, out elevationMeters);
 
-    private sealed partial class MapSurface(Grid layers, Action<bool> backendChanged, Action framePresented) : SKCanvasElement
-    {
-        private sealed record Scene(MapCamera Camera, IReadOnlyList<MapTile> Tiles, IReadOnlyList<ImageryTile>? Imagery,
-            PixelStyle Palette, bool Moving, RoutePlan? Route, VehiclePose? Vehicle, TravelMode VehicleMode,
-            RoutePosition? Gate, bool UseGpuRendering, TerrainOptions? Terrain, MapRenderStyle RenderStyle);
-        private readonly object _drawing = new();
-        private PixelMapRenderer? _renderer;
-        private volatile Scene? _scene;
-        private Scene? _presentedScene;
-        private MapCamera? _timedCamera;
-        private double _movingCost = 16;
-        private int _interactivePixelSize = 2;
-        private bool _gpuRenderingActive;
-
-
-        internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery,
-            PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, TravelMode vehicleMode,
-            RoutePosition? gate, bool useGpuRendering, TerrainOptions? terrain, MapRenderStyle renderStyle)
-        {
-            lock (_drawing)
-            {
-                _scene = new Scene(camera, tiles, imagery, palette, moving, route, vehicle, vehicleMode, gate, useGpuRendering, terrain, renderStyle);
-                PresentGpuTerrain(_scene);
-            }
-        }
-
-        internal void Release()
-        {
-            lock (_drawing)
-            {
-                _scene = _presentedScene = null;
-                ReleaseGpuTerrain();
-                _renderer?.Dispose();
-                _renderer = null;
-                ReportBackend(false);
-            }
-        }
-
-        internal MapFeature? Pick(Point point, int width, int height)
-        {
-            lock (_drawing)
-            {
-                if (_presentedScene is not { } scene || PresentedRenderer is not { } renderer) return null;
-                if (_terrainGpuPresented && _gpuDisplayed is { } displayed)
-                {
-                    width = displayed.Frame.Width;
-                    height = displayed.Frame.Height;
-                }
-                return renderer.Pick(point.X, point.Y, width, height, scene.Camera, scene.Tiles);
-            }
-        }
-
-        internal InteractionView GetInteractionView(MapCamera camera, TerrainOptions? terrain, double width, double height)
-        {
-            lock (_drawing)
-            {
-                if (_terrainGpuPresented && _gpuDisplayed is { } displayed)
-                    return new(displayed.Frame.Camera, displayed.Request.Scene.Terrain,
-                        displayed.Frame.Width, displayed.Frame.Height);
-                return new(camera, terrain, width, height);
-            }
-        }
-
-        internal bool TryProjectTerrain(double latitude, double longitude, int width, int height, MapCamera camera,
-            out (double X, double Y) screen)
-        {
-            lock (_drawing)
-            {
-                screen = default;
-                return PresentedRenderer is { } renderer && renderer.TryProjectTerrain(latitude, longitude, width, height, camera, out screen);
-            }
-        }
-
-        internal bool TryPickTerrain(double x, double y, int width, int height, MapCamera camera, out TerrainHit hit)
-        {
-            lock (_drawing)
-            {
-                hit = default;
-                return PresentedRenderer is { } renderer && renderer.TryPickTerrain(x, y, width, height, camera, out hit);
-            }
-        }
-
-        internal bool TryGetTerrainElevation(double latitude, double longitude, out double elevationMeters)
-        {
-            lock (_drawing)
-            {
-                elevationMeters = 0;
-                return PresentedRenderer is { } renderer && renderer.TryGetTerrainElevation(latitude, longitude, out elevationMeters);
-            }
-        }
-
-        protected override void RenderOverride(SKCanvas canvas, Size area)
-        {
-            lock (_drawing)
-            {
-                if (DrawGpuPresentation(canvas, area)) return;
-                if (_scene is { } scene)
-                {
-                    QueueGpuInitialization();
-                    _terrainGpuPresented = false;
-                    DrawScene(canvas, area, scene);
-                    if (!ReferenceEquals(_presentedScene, scene))
-                    {
-                        _presentedScene = scene;
-                        framePresented();
-                    }
-                }
-            }
-        }
-
-        private void DrawScene(SKCanvas canvas, Size area, Scene scene)
-        {
-            _renderer ??= new();
-            var camera = scene.Camera;
-            int size = ArtworkPixelSize(scene);
-            long start = Stopwatch.GetTimestamp();
-            bool useSkiaGpu = scene.UseGpuRendering && !UsesGpuTerrain(scene);
-            _renderer.Draw(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height),
-                camera, scene.Tiles, scene.Palette, size, scene.Imagery, useGpuRendering: useSkiaGpu,
-                allowDeferredGpuRendering: useSkiaGpu && CompositionCapabilities.GetForCurrentView().AreEffectsFast(),
-                terrainOptions: scene.Terrain, renderStyle: scene.RenderStyle);
-            ReportBackend(_renderer.IsGpuRenderingActive);
-            if (scene.Gate is { } gate && scene.Route is { } trip && scene.Vehicle is { } driver)
-                _renderer.DrawGate(canvas, camera, area.Width, area.Height, gate, trip.Mode, trip.Mode == TravelMode.Flight ? driver.AltitudeMeters : 0, driver.AnimationSeconds);
-            if (scene.Route is { } route)
-                _renderer.DrawNavigation(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height), camera, route, scene.Vehicle, size);
-            else if (scene.Vehicle is { } vehicle)
-                _renderer.DrawVehicle(canvas, (int)Math.Ceiling(area.Width), (int)Math.Ceiling(area.Height), camera, scene.VehicleMode, vehicle, size);
-            TrackFrameCost(scene, Stopwatch.GetElapsedTime(start).TotalMilliseconds);
-        }
-
-        private int ArtworkPixelSize(Scene scene) => scene.RenderStyle is MapRenderStyle.Normal or MapRenderStyle.Roblox
-            ? 1 : scene.Moving ? _interactivePixelSize : 2;
-
-        private void TrackFrameCost(Scene scene, double milliseconds)
-        {
-            // Adjust only after an actual camera change. Resolution hysteresis avoids thrashing the terrain cache.
-            if (scene.Moving && _timedCamera != scene.Camera)
-            {
-                double ms = Math.Min(100, milliseconds);
-                _movingCost = .75 * _movingCost + .25 * ms;
-                if (_movingCost > 29 && _interactivePixelSize < 4) { _interactivePixelSize++; _movingCost = 20; }
-                else if (_movingCost < 10 && _interactivePixelSize > 2) { _interactivePixelSize--; _movingCost = 16; }
-            }
-            _timedCamera = scene.Camera;
-        }
-
-        private void ReportBackend(bool isActive)
-        {
-            if (_gpuRenderingActive == isActive) return;
-            _gpuRenderingActive = isActive;
-            backendChanged(isActive);
-        }
-    }
 }

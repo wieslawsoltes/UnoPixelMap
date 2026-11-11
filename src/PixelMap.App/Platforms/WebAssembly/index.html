@@ -30,6 +30,25 @@
                 else show();
             }
         };
+        // Uno owns the shared device and its native loss callback. Observe the
+        // public browser device when it is acquired, without creating a second
+        // device or replacing Uno's callbacks. HTML remains usable after GPU loss.
+        if (globalThis.GPUAdapter?.prototype.requestDevice) {
+            const requestDevice = GPUAdapter.prototype.requestDevice;
+            let closing = false;
+            addEventListener("pagehide", () => { closing = true; }, {once: true});
+            GPUAdapter.prototype.requestDevice = function (...args) {
+                return Reflect.apply(requestDevice, this, args).then(device => {
+                    device.lost.then(info => {
+                        if (!closing) PixelAtlasGraphics.fail("The graphics device was lost. Reload Pixel Atlas to rebuild its resources. " + info.message);
+                    });
+                    device.addEventListener("uncapturederror", event => {
+                        if (!closing) PixelAtlasGraphics.fail("WebGPU could not render this scene. " + event.error.message);
+                    });
+                    return device;
+                });
+            };
+        }
         document.addEventListener("DOMContentLoaded", async () => {
             const graphics = globalThis.PixelAtlasGraphics;
             document.getElementById("pixelmap-graphics-retry").addEventListener("click", () => location.reload());

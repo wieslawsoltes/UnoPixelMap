@@ -55,8 +55,11 @@
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
-                            <ToggleMenuFlyoutItem x:Name="GpuRenderingItem" Text="GPU rendering" IsChecked="True" Click="OnGpuRendering"
-                                                 ToolTipService.ToolTip="Uses retained GPU geometry and shaders, with automatic CPU fallback when GPU resources are unavailable." />
+                            <MenuFlyoutSubItem Text="Rendering quality">
+                                <ToggleMenuFlyoutItem x:Name="BalancedQualityItem" Text="Balanced quality" Tag="Balanced" Click="OnRenderingQuality" />
+                                <ToggleMenuFlyoutItem x:Name="HighQualityItem" Text="High quality" Tag="High" IsChecked="True" Click="OnRenderingQuality" />
+                                <ToggleMenuFlyoutItem x:Name="UltraQualityItem" Text="Ultra quality" Tag="Ultra" Click="OnRenderingQuality" />
+                            </MenuFlyoutSubItem>
                             <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief"
                                                  ToolTipService.ToolTip="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." />
                             <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />

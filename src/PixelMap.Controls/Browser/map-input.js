@@ -9,6 +9,9 @@
     const gestures = new WeakMap();
     let position = { x: 0, y: 0, target: null };
     let listeners, wheel, pointer, keyboard, safariGesture, contextPointer, mouseRequest, lockOwner = 0;
+    // A single reused object keeps diagnostics bounded, including during long drives.
+    // These are submission counters; frameMilliseconds does not measure GPU completion.
+    const graphics = globalThis.PixelAtlasWebGpu = { backend: "WebGPU", frames: 0, preparations: 0 };
 
     function nativeInput(target) {
         return target instanceof Element && target.closest("input,textarea,select,iframe,[contenteditable]");
@@ -309,6 +312,21 @@
 
         releaseMouse,
 
-        isMouseCaptured(id) { return ownsMouse(id); }
+        isMouseCaptured(id) { return ownsMouse(id); },
+
+        reportWebGpu(frames, preparations, width, height, physicalWidth, physicalHeight,
+            pixelSize, patches, triangles, draws, uploadBytes, residentBytes,
+            frameMilliseconds, submissionMilliseconds, style, quality, renderWidth, renderHeight,
+            attachmentBytes, imageryCount, relief, elevation, zoom) {
+            Object.assign(graphics, { frames, preparations, width, height, physicalWidth, physicalHeight,
+                pixelSize, patches, triangles, draws, uploadBytes, residentBytes,
+                frameMilliseconds, submissionMilliseconds, style, quality, renderWidth, renderHeight,
+                attachmentBytes, imageryCount, relief, elevation, zoom, failure: null });
+        },
+
+        failWebGpu(message) {
+            graphics.failure = String(message);
+            globalThis.PixelAtlasGraphics?.fail(graphics.failure);
+        }
     };
 })();

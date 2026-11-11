@@ -123,7 +123,9 @@ public sealed partial class MainPage : Page
         PerspectiveItem.IsChecked = camera.Perspective;
         if (!cameraOnly)
         {
-            GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
+            BalancedQualityItem.IsChecked = Map.RenderingQuality == WebGpuQuality.Balanced;
+            HighQualityItem.IsChecked = Map.RenderingQuality == WebGpuQuality.High;
+            UltraQualityItem.IsChecked = Map.RenderingQuality == WebGpuQuality.Ultra;
             PixelStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Pixel;
             NormalStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Normal;
             MinecraftStyleItem.IsChecked = Map.RenderStyle == MapRenderStyle.Minecraft;
@@ -197,10 +199,11 @@ public sealed partial class MainPage : Page
 
     private void OnPerspective(object sender, RoutedEventArgs e) => ChooseCamera(Map.Camera with { Perspective = !Map.Camera.Perspective });
 
-    private void OnGpuRendering(object sender, RoutedEventArgs e)
+    private void OnRenderingQuality(object sender, RoutedEventArgs e)
     {
-        Map.IsGpuRenderingEnabled = !Map.IsGpuRenderingEnabled;
-        GpuRenderingItem.IsChecked = Map.IsGpuRenderingEnabled;
+        if (sender is ToggleMenuFlyoutItem item && Enum.TryParse<WebGpuQuality>(item.Tag?.ToString(), out var quality))
+            Map.RenderingQuality = quality;
+        SyncReadout();
     }
 
     private void OnRenderStyle(object sender, RoutedEventArgs e)
@@ -434,7 +437,7 @@ public sealed partial class MainPage : Page
         AddHelp("Elevation", "Choose Elevation for altitude colors. Terrain relief works with Map and Earth too. Camera tools adjust vertical exaggeration from 1× to 4×. Elevation readouts remain in real metres above sea level.");
         AddHelp("Journeys", "Use Route beside search. Choose stops or try a vehicle demo. Preview, take control, or jump to a turn.");
         AddHelp("Free roam", "Choose Play to walk, drive, cycle, sail, pilot or fly freely from the map center. WASD moves, dragging looks around, Space jumps or brakes, and Page Up / Down changes flight altitude. Two independent touch sticks control movement and look.");
-        AddHelp("Graphics", "View selects Pixel art, Normal, Minecraft or Roblox rendering. GPU rendering starts enabled. Every style works with Map, Earth and Elevation.");
+        AddHelp("Graphics", "View selects Pixel art, Normal, Minecraft or Roblox rendering. All views use WebGPU. Rendering quality selects Balanced, High or Ultra. Every style works with Map, Earth and Elevation.");
         AddHelp("Drop a pin", "Enter latitude, longitude in the search field and press Enter.");
     }
 
