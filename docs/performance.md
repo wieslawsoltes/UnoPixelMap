@@ -1,5 +1,7 @@
 # Rendering performance
 
+> Historical renderer measurements: the CPU, GL and Skia performance results in this document precede the Uno 7 WebGPU migration. See [the migration record](uno7-webgpu-migration.md) for the current pipeline and its separate verification. These measurements do not establish a WebGPU speedup.
+
 The original CPU optimization measurements compare the renderer with commit `31efd232a2e6e273fd0a56f23e8d50319d29f433`. The retained GPU terrain implementation builds on elevation commit `c238352dcb9df7fd2cfb8ba5e86fd20f38169597`. GPU rendering and Pixel art are enabled by default. The View menu can switch to the CPU backend.
 
 ## Early label occlusion and aligned terrain textures · 10 November 2026
