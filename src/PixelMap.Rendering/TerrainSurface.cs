@@ -841,9 +841,16 @@ internal sealed class TerrainSurface : IDisposable
     {
         hit = default;
         int x = (int)Math.Floor(screenX / pixelSize), y = (int)Math.Floor(screenY / pixelSize);
-        if (!TrySample(x, y, out float altitude, out float inverse)) return false;
-        float physicalHeight = gpuScene is { } scene && scene.Depth.TryTerrain(x, y, out _, out _, out float gpuHeight)
-            ? gpuHeight : groundHeight[y * width + x];
+        float altitude, inverse, physicalHeight;
+        if (gpuScene is { } scene)
+        {
+            if (!scene.Depth.TryTerrain(x, y, out altitude, out inverse, out physicalHeight)) return false;
+        }
+        else
+        {
+            if (!TrySample(x, y, out altitude, out inverse)) return false;
+            physicalHeight = groundHeight[y * width + x];
+        }
         double sx = x + .5 - logicalWidth * .5 / pixelSize, sy = y + .5 - logicalHeight * .5 / pixelSize;
         var (sp, cp) = Math.SinCos(camera.PitchRadians);
         double z = altitude - camera.TargetPixels / pixelSize;
