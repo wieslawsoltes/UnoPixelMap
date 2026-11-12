@@ -37,8 +37,10 @@ per variant, retains separate preparation, overlay and picking timings, and repo
 managed allocations. Linux `CLOCK_THREAD_CPUTIME_ID` adds actual calling-thread CPU
 time; it is explicitly null on other platforms or if unavailable. Process/renderer
 identity, the exact harness-source hashes, explicit font hash, CPU and affinity are
-stored beside the raw results. Recorded uncommitted paths identify exploratory
-runs; published evidence should use committed application source.
+stored beside the raw results. Clean committed application source is required by
+default, and checkout identity is checked again after both builds. `--allow-dirty`
+permits explicitly exploratory runs whose uncommitted paths are recorded; these
+runs should not be used as published evidence.
 
 These measurements establish CPU cost and exact prepared output for the listed
 workloads. They do not measure GPU rasterization, browser scheduling, display FPS,

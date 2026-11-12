@@ -10,7 +10,6 @@ import json
 import os
 from pathlib import Path
 import platform
-import shutil
 import statistics
 import subprocess
 import tempfile
@@ -115,6 +114,7 @@ def main():
     parser.add_argument("--dotnet", default="dotnet")
     parser.add_argument("--font", type=Path, default=Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"))
     parser.add_argument("--samples", type=int, default=32)
+    parser.add_argument("--allow-dirty", action="store_true", help="Allow explicitly exploratory measurements of uncommitted source")
     args = parser.parse_args()
     if not 1 <= args.samples <= 256:
         parser.error("samples must be between 1 and 256")
@@ -146,6 +146,8 @@ def main():
         manifest["cpuModels"] = sorted({line.split(":", 1)[1].strip() for line in Path("/proc/cpuinfo").read_text().splitlines()
                                        if line.startswith("model name")})
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    if not args.allow_dirty and any(source["uncommitted"] for source in manifest["sources"].values()):
+        raise SystemExit("Use clean committed source for evidence, or --allow-dirty for an explicitly exploratory run.")
     with tempfile.TemporaryDirectory(prefix="pixelmap-native-") as temporary:
         hosts = {}
         for variant, root in roots.items():
@@ -159,6 +161,12 @@ def main():
             run([args.dotnet, "build", frozen / HARNESS_FILES[0], "-c", "Release", "-m:1",
                  "-p:UseSharedCompilation=false", "-p:RendererSourceRoot=" + str(root), "-o", hosts[variant]],
                 output / f"build-{variant}.log", environment)
+        # The renderer roots are ordinary checkouts. Refuse to publish timing if
+        # a concurrent edit or checkout changed them while either build ran.
+        for variant, root in roots.items():
+            identity = manifest["sources"][variant]
+            if git(root, "rev-parse", "HEAD") != identity["commit"] or git(root, "status", "--porcelain") != identity["uncommitted"]:
+                raise SystemExit(f"{variant} checkout changed during compilation; no measurement was started.")
         runs = []
         for index, variant in enumerate(manifest["order"]):
             label = f"{index + 1}-{variant}"
