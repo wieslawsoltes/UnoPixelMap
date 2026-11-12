@@ -34,7 +34,11 @@ scene hashing, fixture loading and report generation are outside the timed regio
 
 `comparison.json` aggregates medians and interpolated p95 values from both runs
 per variant, retains separate preparation, overlay and picking timings, and reports
-managed allocations. Linux `CLOCK_THREAD_CPUTIME_ID` adds actual calling-thread CPU
+managed allocations. `PreparationOverlayAndPicking` sums each sample's three
+phases before computing the median and p95; this exposes deferred depth work when
+the twelve sparse picking probes request geometry that labels did not need.
+Preparation/overlay gains must not be presented as the same gain for applications
+that perform many screen-space picks every frame. Linux `CLOCK_THREAD_CPUTIME_ID` adds actual calling-thread CPU
 time; it is explicitly null on other platforms or if unavailable. Process/renderer
 identity, the exact harness-source hashes, explicit font hash, CPU and affinity are
 stored beside the raw results. Clean committed application source is required by

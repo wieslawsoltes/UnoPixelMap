@@ -90,12 +90,15 @@ def compare(runs):
             after = [s for i in (1, 2) for s in workloads[i]["Samples"]]
             metrics = {}
             if kind == "frames":
-                for phase in ("Preparation", "Overlay", "Picking", "PreparationAndOverlay"):
+                for phase in ("Preparation", "Overlay", "Picking", "PreparationAndOverlay", "PreparationOverlayAndPicking"):
                     for unit in ("WallMilliseconds", "ThreadCpuMilliseconds", "AllocatedBytes"):
                         def value(sample):
-                            if phase != "PreparationAndOverlay":
+                            if phase in ("Preparation", "Overlay", "Picking"):
                                 return sample[phase][unit]
-                            values = [sample[part][unit] for part in ("Preparation", "Overlay")]
+                            parts = ("Preparation", "Overlay", "Picking") if phase == "PreparationOverlayAndPicking" else ("Preparation", "Overlay")
+                            # Sum each sample before computing its distribution:
+                            # medians of individual phases are not additive.
+                            values = [sample[part][unit] for part in parts]
                             return sum(values) if all(v is not None for v in values) else None
                         metrics[f"{phase}.{unit}"] = compare_metric([value(s) for s in before], [value(s) for s in after])
             else:
