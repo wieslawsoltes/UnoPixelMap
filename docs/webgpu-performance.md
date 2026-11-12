@@ -92,8 +92,8 @@ host prepares frames without legacy overlays, while `TryPickTerrain` and
 were rejected even when the presented terrain mesh was valid. Relief taps and
 scale readouts therefore fell back to camera/DEM unprojection, and pins used the
 geographic elevation projection fallback. Feature picking also failed to recognize
-the matching retained mesh. The later retained-view fix accepts a live GPU frame
-while preserving camera, viewport and disposal guards. Relief scale readouts,
+the matching retained mesh. The later retained-view fix accepts the renderer-owned
+GPU view while preserving camera, viewport and ownership guards. Relief scale readouts,
 taps and pins can now use the presented mesh; flat/hidden-relief location queries
 retain camera unprojection. Geographic movement-height sampling is unchanged.
 These UI callbacks are outside the renderer callback's stopwatch; the paired
@@ -201,18 +201,26 @@ and visibility tests compare the results bit-for-bit with the frozen eager oracl
 ### Retained GPU interaction
 
 The shared `HasRetainedView` predicate recognizes the native geometry generation
-through a live `activeGpuScene`; CPU/legacy generations continue to require their
-retained picture. `TryPickTerrain`, `TryProjectTerrain` and the aligned feature-pick
-path use this predicate with their existing camera, viewport, terrain and
-tile-source checks. A disposed GPU frame cannot borrow an old picture, and a
-stale GPU reference cannot authorize a later CPU view without a picture.
+through the renderer's retained `activeGpuDepth` reference matching
+`activeGpuScene.Depth`; CPU/legacy generations continue to require their retained
+picture. The caller's frame and the renderer independently own depth references.
+Disposing the caller's frame releases that ownership while terrain picking,
+projection and feature inspection remain valid through the renderer's retained
+view. Passing a disposed frame to `ActivateGpuFrame` is still rejected.
+
+`TryPickTerrain`, `TryProjectTerrain` and the aligned feature-pick path use this
+predicate with their existing camera, viewport, terrain and tile-source checks.
+Releasing or replacing the renderer's view ends its eligibility, even if an old
+picture survives or another frame reuses the pooled depth storage. A stale GPU
+reference cannot authorize a later CPU view without a picture.
 
 GPU-only frames therefore expose the same terrain coordinates, physical heights,
 mesh projections and feature picks as equivalent legacy-overlay frames. Tests
 cover all four styles, perspective and orthographic views, wrapped worlds,
-A→B→A activation with changed terrain/style/viewport, both disposed-picture cases,
-and GPU→CPU→GPU transitions. Geographic height sampling for movement retains its
-existing independent contract.
+A→B→A activation with changed terrain/style/viewport, independent caller/renderer
+reference transitions with both overlay modes, cached frame wrappers, actual
+pooled storage reuse and GPU→CPU→GPU transitions. Geographic height sampling for
+movement retains its existing independent contract.
 
 ### WebGPU commands, pipelines and staging
 
@@ -290,7 +298,7 @@ Native validation now includes:
 |---|---:|---|
 | Terrain artwork invalidation | 74 | Source replacement/removal, ordering, coverage and retained texels |
 | Terrain-only picking | 193,384 | 44 frames; mixed visibility queries, geographic picks, model/cache isolation, ties and fallback |
-| Retained GPU interaction | 5,520 | 29 views; GPU-only/legacy equality, successful terrain/projection/feature answers and lifetime guards |
+| Retained GPU interaction | 7,691 | 41 views; exact pre/post caller-disposal answers, independent renderer ownership, GPU-only/legacy equality and lifetime guards |
 | Depth index pressure | 15,037 | Actual exact/coarse budget exhaustion, cached answers before the transition and uncached recomputation afterward |
 | Large-building depth chunks | 595,630 | Conservative rejection, projection reuse and exact eager results |
 | Sparse/eager depth | 11,935,261 | 56 frames; projection, terrain, model, query-order and retained-frame parity |
@@ -299,7 +307,11 @@ Native validation now includes:
 Label images, overlay buffers and atlas bytes also match exactly. Large fixtures
 prove that offscreen work is actually rejected; they include all styles,
 concave/disconnected roofs and holes, clipping boundaries, signed foundations,
-nonfinite input, retained frames and scratch reuse. The complete local native suite
-passes with the terrain-only picking and retained-view changes, including existing
-terrain/navigation/feature-picking checks and CPU fallback behavior. Broader
+nonfinite input, retained frames and scratch reuse. Existing terrain/navigation,
+feature-picking and CPU fallback checks remain in the complete native CI suite.
+The ownership correction also passes the unchanged native GLES reference on
+surfaceless Mesa llvmpipe: 408 CPU/GPU mesh intersections, retained-frame picking,
+48 rendering cases and complete EGL context destruction/recreation. These checks
+exercise queries after the rendering helper disposes its caller-owned frame;
+the renderer's independent ownership keeps the displayed view valid. Broader
 application regressions remain in CI.

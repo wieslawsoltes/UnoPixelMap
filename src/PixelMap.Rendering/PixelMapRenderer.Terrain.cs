@@ -21,11 +21,12 @@ public sealed partial class PixelMapRenderer
 
     internal TerrainOptions? CurrentTerrain { get; private set; }
 
-    // A native geometry frame retains its interaction view without a legacy
-    // SKPicture. Keep the generation check so a disposed GPU frame cannot borrow
-    // its old picture, or authorize a later CPU view through a stale scene.
+    // The renderer retains depth independently of the caller's frame ownership,
+    // including after that frame is disposed. Require that retained depth to
+    // belong to the active GPU view; pictures and stale CPU/GPU state cannot
+    // substitute for ownership in a different rendering generation.
     private bool HasRetainedView => lastView.GpuGeneration == GeometryGpuGeneration
-        ? activeGpuScene is { IsDisposed: false }
+        ? activeGpuDepth is not null && ReferenceEquals(activeGpuDepth, activeGpuScene?.Depth)
         : lastPicture is not null;
 
     /// <summary>Sample the active rendered height field, including its LOD, stitched
