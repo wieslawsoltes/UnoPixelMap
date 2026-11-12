@@ -124,6 +124,9 @@ def main():
     output.mkdir(parents=True, exist_ok=False)
     args.font = args.font.resolve(strict=True)
     environment = {**os.environ, "PIXELMAP_TEST_FONT": str(args.font), "DOTNET_TieredCompilation": "0"}
+    # Snapshot once before either build; an editor changing the checkout while the
+    # baseline compiles must not silently give the candidate a different harness.
+    frozen_sources = {name: (harness / name).read_bytes() for name in HARNESS_FILES}
     manifest = {
         "scope": "Native CPU preparation/overlay/picking and source invalidation; no device, GPU timing, browser or display FPS.",
         "order": ["baseline", "candidate", "candidate", "baseline"],
@@ -136,7 +139,7 @@ def main():
                               "tree": git(root, "rev-parse", "HEAD^{tree}"),
                               "uncommitted": git(root, "status", "--porcelain")}
                     for variant, root in roots.items()},
-        "frozenHarnessFiles": {name: sha256(harness / name) for name in HARNESS_FILES},
+        "frozenHarnessFiles": {name: hashlib.sha256(data).hexdigest() for name, data in frozen_sources.items()},
         "driverSha256": sha256(Path(__file__)),
     }
     if Path("/proc/cpuinfo").exists():
@@ -147,10 +150,10 @@ def main():
         hosts = {}
         for variant, root in roots.items():
             frozen = Path(temporary) / variant
-            for name in HARNESS_FILES:
+            for name, data in frozen_sources.items():
                 destination = frozen / name
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(harness / name, destination)
+                destination.write_bytes(data)
             hosts[variant] = frozen / "host"
             print(f"Building {variant} from {manifest['sources'][variant]['commit']}...", flush=True)
             run([args.dotnet, "build", frozen / HARNESS_FILES[0], "-c", "Release", "-m:1",

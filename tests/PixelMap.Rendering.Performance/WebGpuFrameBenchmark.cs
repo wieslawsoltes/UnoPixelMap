@@ -114,6 +114,11 @@ internal static class WebGpuFrameBenchmark
                     geometry.AppendData(MemoryMarshal.AsBytes(draw.Mesh.Vertices.AsSpan()));
                     Append(geometry, draw.Mesh.TriangleIndices.Length);
                     geometry.AppendData(MemoryMarshal.AsBytes(draw.Mesh.TriangleIndices.AsSpan()));
+                    Append(geometry, draw.Mesh.HeightLight?.Length ?? -1);
+                    if (draw.Mesh.HeightLight is { } heights) geometry.AppendData(MemoryMarshal.AsBytes(heights.AsSpan()));
+                    Append(artwork, draw.Mesh.Id);
+                    Append(artwork, draw.Mesh.Copy);
+                    Append(artwork, draw.Texture.Texels.Length);
                     artwork.AppendData(MemoryMarshal.AsBytes(draw.Texture.Texels.AsSpan()));
                 }
                 Append(geometry, current.Buildings.Length);
@@ -127,14 +132,29 @@ internal static class WebGpuFrameBenchmark
                     geometry.AppendData(MemoryMarshal.AsBytes(draw.Mesh.Indices.AsSpan()));
                     Append(geometry, draw.Mesh.Models.Length);
                     geometry.AppendData(MemoryMarshal.AsBytes(draw.Mesh.Models.AsSpan()));
+                    Append(geometry, draw.Mesh.RoofEdges.Length);
+                    geometry.AppendData(MemoryMarshal.AsBytes(draw.Mesh.RoofEdges.AsSpan()));
                     Append(geometry, draw.Selection?.Models.Length ?? -1);
-                    if (draw.Selection is { } selection) geometry.AppendData(selection.Models);
+                    if (draw.Selection is { } selection)
+                    {
+                        geometry.AppendData(selection.Models);
+                        Append(geometry, selection.Indices.Length);
+                        geometry.AppendData(MemoryMarshal.AsBytes(selection.Indices.AsSpan()));
+                        Append(geometry, selection.RoofEdges.Length);
+                        geometry.AppendData(MemoryMarshal.AsBytes(selection.RoofEdges.AsSpan()));
+                    }
                 }
+                Append(annotations, overlay.WorldVertices.Length);
                 annotations.AppendData(MemoryMarshal.AsBytes(overlay.WorldVertices));
+                Append(annotations, overlay.WorldIndices.Length);
                 annotations.AppendData(MemoryMarshal.AsBytes(overlay.WorldIndices));
+                Append(annotations, overlay.OccludedVertices.Length);
                 annotations.AppendData(MemoryMarshal.AsBytes(overlay.OccludedVertices));
+                Append(annotations, overlay.OccludedIndices.Length);
                 annotations.AppendData(MemoryMarshal.AsBytes(overlay.OccludedIndices));
+                Append(annotations, overlay.ScreenVertices.Length);
                 annotations.AppendData(MemoryMarshal.AsBytes(overlay.ScreenVertices));
+                Append(annotations, overlay.ScreenIndices.Length);
                 annotations.AppendData(MemoryMarshal.AsBytes(overlay.ScreenIndices));
                 if (overlay.AtlasRevision != atlasRevision)
                 {
