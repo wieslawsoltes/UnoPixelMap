@@ -8,6 +8,13 @@ if (args.Contains("--webgpu-bloom", StringComparer.Ordinal))
     return;
 }
 
+var facadeOutput = args.FirstOrDefault(value => value.StartsWith("--webgpu-facade-output=", StringComparison.Ordinal));
+if (facadeOutput is not null)
+{
+    WebGpuFacadeChecks.WriteFixture(facadeOutput["--webgpu-facade-output=".Length..]);
+    return;
+}
+
 if (args.Contains("--webgpu-overlay", StringComparer.Ordinal))
 {
     WebGpuOverlayChecks.Run();
@@ -117,6 +124,8 @@ if (args.Contains("--styles", StringComparer.Ordinal))
     RenderStyleChecks.Run();
     return;
 }
+
+WebGpuFacadeChecks.Run();
 
 const int width = 256, height = 256;
 var id = new TileId(14, 8192, 8192);
