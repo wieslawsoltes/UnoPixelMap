@@ -41,9 +41,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         };
         comparisonSampler = api.DeviceCreateSampler(device, &comparison);
         Require(comparisonSampler, "shadow comparison sampler");
-        terrainArtwork = CreateTexture(GpuTerrainTexture.Size, GpuTerrainTexture.Size, TextureFormat.Rgba8Unorm,
-            TextureUsage.TextureBinding | TextureUsage.CopyDst, layers: textureLayerCapacity);
-        terrainArtworkView = CreateView(terrainArtwork, TextureFormat.Rgba8Unorm, TextureViewDimension.Dimension2DArray, layers: textureLayerCapacity);
+        InitializeTerrainArtwork();
         terrainHeights = CreateTexture(GpuTerrainMesh.Side, GpuTerrainMesh.Side, TextureFormat.RG32float,
             TextureUsage.TextureBinding | TextureUsage.CopyDst, layers: heightLayerCapacity);
         terrainHeightView = CreateView(terrainHeights, TextureFormat.RG32float, TextureViewDimension.Dimension2DArray, layers: heightLayerCapacity);
@@ -121,7 +119,8 @@ public sealed unsafe partial class WebGpuMapRenderer
         entries[1] = new() { Binding = 1, TextureView = terrainHeightView };
         entries[2] = new() { Binding = 2, Sampler = nearestSampler };
         terrainNearestGroup = CreateGroup(terrainLayout, entries, 3);
-        entries[2].Sampler = linearSampler;
+        entries[0].TextureView = terrainFilteredView;
+        entries[2].Sampler = terrainAnisotropicSampler;
         terrainLinearGroup = CreateGroup(terrainLayout, entries, 3);
     }
 
@@ -342,6 +341,7 @@ public sealed unsafe partial class WebGpuMapRenderer
             fixed (uint* p = source.Texels)
                 WriteTexture(terrainArtwork, p, (nuint)source.Texels.Length * sizeof(uint), GpuTerrainTexture.Size,
                     GpuTerrainTexture.Size, GpuTerrainTexture.Size * 4, layer: resource.Layer);
+            terrainMipmaps!.MarkDirty(resource.Layer);
         }
         resource.Generation = scenePreparation.Generation;
         return resource;
@@ -593,6 +593,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         foreach (var resource in buildingCache.Values) DestroyBuilding(resource);
         buildingCache.Clear(); terrainCache.Clear(); textureCache.Clear();
         Release(ref commonGroup); Release(ref projectionGroup); Release(ref terrainNearestGroup); Release(ref terrainLinearGroup);
+        ReleaseTerrainArtworkResources();
         Release(ref backgroundLayout); Release(ref sceneLayout); Release(ref buildingLayout); Release(ref shadowTerrainLayout); Release(ref shadowBuildingLayout);
         Release(ref resolvePipelineLayout); Release(ref overlayPipelineLayout);
         Release(ref commonLayout); Release(ref projectionLayout); Release(ref terrainLayout); Release(ref modelLayout);

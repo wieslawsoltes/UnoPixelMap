@@ -74,7 +74,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     /// <summary>Nominal bytes in owned resident GPU buffers and textures. Scene attachments
     /// are reported separately; implementation-specific storage and alignment are excluded.</summary>
     public long ResidentBytes => disposed ? 0 : meshBytes +
-        (long)textureLayerCapacity * GpuTerrainTexture.Size * GpuTerrainTexture.Size * 4 +
+        TerrainArtworkResidentBytes +
         (long)heightLayerCapacity * GpuTerrainMesh.Side * GpuTerrainMesh.Side * 8 +
         (long)shadowSize * shadowSize * shadowCascadeCount * 4 + StaticResidentBytes + OverlayResidentBytes;
     public long AttachmentBytes { get; private set; }
@@ -106,7 +106,15 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         if (maximumTextureSize < GpuTerrainTexture.Size || textureLayerCapacity < MaximumTerrainDraws ||
             heightLayerCapacity < MaximumTerrainDraws || limits.MaxBindGroups < 2 || limits.MaxVertexAttributes < 5 ||
             limits.MaxUniformBufferBindingSize < UniformStride || UniformStride % alignment != 0 ||
-            maximumBufferSize < (ulong)uniforms.Length * sizeof(float) || maximumStorageBindingSize < 32)
+            maximumBufferSize < (ulong)uniforms.Length * sizeof(float) ||
+            maximumStorageBindingSize < (ulong)textureLayerCapacity * sizeof(uint) ||
+            limits.MaxStorageTexturesPerShaderStage < 1 || limits.MaxStorageBuffersPerShaderStage < 1 ||
+            limits.MaxComputeInvocationsPerWorkgroup < WebGpuTerrainMipmaps.WorkgroupSize * WebGpuTerrainMipmaps.WorkgroupSize ||
+            limits.MaxComputeWorkgroupSizeX < WebGpuTerrainMipmaps.WorkgroupSize ||
+            limits.MaxComputeWorkgroupSizeY < WebGpuTerrainMipmaps.WorkgroupSize ||
+            limits.MaxComputeWorkgroupSizeZ < 1 ||
+            limits.MaxComputeWorkgroupsPerDimension < Math.Max(textureLayerCapacity,
+                (WebGpuTerrainMipmaps.ScratchSize + WebGpuTerrainMipmaps.WorkgroupSize - 1) / WebGpuTerrainMipmaps.WorkgroupSize))
             throw new NotSupportedException("The shared WebGPU device cannot support the map's bounded texture, vertex and uniform layouts.");
         for (int i = heightLayerCapacity - 1; i >= 0; i--) freeHeights.Push(i);
         for (int i = textureLayerCapacity - 1; i >= 0; i--) freeTextures.Push(i);
@@ -158,6 +166,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             var encoderDescriptor = new CommandEncoderDescriptor { Label = encoderLabel.Pointer };
             encoder = api.DeviceCreateCommandEncoder(device, &encoderDescriptor);
             Require(encoder, "command encoder");
+            GenerateTerrainMipmaps(encoder, smooth);
             bool drawShadows = smooth && (!ReferenceEquals(retainedShadowFrame, frame) || retainedShadowQuality != Quality ||
                 retainedShadowCascadeCount != shadowCascadeCount);
             if (drawShadows) DrawShadow(encoder, frame);
@@ -201,6 +210,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             commands = api.CommandEncoderFinish(encoder, null);
             Require(commands, "command buffer");
             api.QueueSubmit(queue, 1, &commands);
+            terrainMipmaps!.Commit();
             scenePreparation.Commit();
             if (drawShadows)
             {

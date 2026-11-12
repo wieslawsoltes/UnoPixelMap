@@ -20,6 +20,7 @@ internal static class WebGpuOverlayChecks
         RetainedSceneResourceLifetime();
         WebGpuShadowCascadeChecks.Run();
         WebGpuBloomChecks.Run();
+        WebGpuTerrainMipChecks.Run();
         Console.WriteLine("Passed WebGPU overlay checks: exact label atlas pixels/reuse at 1x/2x/3x density, six vehicle modes in four styles, homogeneous clipping, antimeridian routing, premultiplication, bounded stationary/teleport particle lifecycle and retained scene residency during animation.");
     }
 

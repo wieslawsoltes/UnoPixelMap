@@ -243,7 +243,18 @@ internal static class WebGpuMapShaders
         }
         @fragment fn fs(v:TerrainVertex)->@location(0) vec4f {
             let dx=dpdx(v.world); let dy=dpdy(v.world);
-            let sampleColor=textureSampleLevel(artwork,terrainSampler,v.uv,v.layer,0.0);
+            // Derivatives precede style branches. Smooth terrain uses the true
+            // perspective footprint; art styles keep the exact base-level bytes.
+            let uvDx=dpdx(v.uv); let uvDy=dpdy(v.uv);
+            var sampleColor:vec4f;
+            var linearAlbedo:vec3f;
+            if(smoothStyle()){
+                let filtered=textureSampleGrad(artwork,terrainSampler,v.uv,v.layer,uvDx,uvDy);
+                linearAlbedo=filtered.bgr;
+                sampleColor=vec4f(toSrgb(filtered.rgb),filtered.a);
+            }else{
+                sampleColor=textureSampleLevel(artwork,terrainSampler,v.uv,v.layer,0.0);
+            }
             var color=floor(sampleColor.bgr*255.0+0.5);
             if(f.horizon.w>0.5){color=mixBytes(color,elevationColor(v.heightLight.x),0.64);}
             var shade=clamp(0.72+v.heightLight.y*0.4,0.52,1.16);
@@ -279,7 +290,11 @@ internal static class WebGpuMapShaders
                         vec3f(0.0,-1.0,0.0),vec3f(-1.0,0.0,0.0));
                     normal=sides[(v.face-1u)%4u];
                 }else if(normal.z<0.0){normal=-normal;}
-                color=lighting(color/255.0,v.world,normal,select(0.86,0.38,style()==3u),0.0,vec3f(0.0));
+                // Normal terrain keeps the filtered linear value without a
+                // byte quantization or second sRGB decode. Existing palette
+                // effects deliberately operate on their encoded art colors.
+                if(f.horizon.w>0.5||style()==3u){linearAlbedo=toLinear(color/255.0);}
+                color=lightingLinear(linearAlbedo,v.world,normal,select(0.86,0.38,style()==3u),0.0,vec3f(0.0));
             }else{color=clamp(floor(color*shade),vec3f(0.0),vec3f(255.0))/255.0;}
             return vec4f(color,sampleColor.a);
         }
