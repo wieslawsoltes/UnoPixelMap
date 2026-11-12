@@ -130,13 +130,17 @@ async function menu(page, name, submenu) {
     await item(name).waitFor({state: "hidden"});
     await page.mouse.move(viewport.width / 2, 20);
 }
-async function healthy(page) {
-    const state = await page.evaluate(() => __pixelAtlasWebGpuPerformance.snapshot());
+function checkHealth(state) {
     assert.equal(state.deviceCount, 1, "The application uses Uno's one shared device");
     assert.deepEqual(state.errors, [], "No WebGPU validation or shader errors");
     assert.deepEqual(state.losses, [], "No device losses during performance measurement");
-    assert.ok(!state.diagnostic?.failure, "The managed renderer remains healthy");
+    // Failures can stop rendering without publishing another successful frame.
+    // The last copied diagnostic cannot establish the renderer's current health.
+    assert.equal(state.liveFailure, null, "The live managed renderer remains healthy");
     return state;
+}
+async function healthy(page) {
+    return checkHealth(await page.evaluate(() => __pixelAtlasWebGpuPerformance.snapshot()));
 }
 async function settle(page) {
     // This barrier is outside measured CPU/render latency. It prevents a prior
@@ -426,4 +430,4 @@ async function main() {
     finally { save(); await browser.close(); }
 }
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
-module.exports = {distribution, makeTrace, checkStep, imageDifference, summarizeSteps, compare};
+module.exports = {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps, compare};

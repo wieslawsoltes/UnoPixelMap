@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const vm = require("node:vm");
 const {installPerformanceProbe} = require("./webgpu-performance-probe.cjs");
-const {distribution, makeTrace, checkStep, imageDifference, summarizeSteps} = require("./webgpu-performance.cjs");
+const {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps} = require("./webgpu-performance.cjs");
 
 function fixture() {
     let clock = 0;
@@ -30,7 +30,10 @@ function fixture() {
         requestAnimationFrame: callback => frames.push(callback), addEventListener: (name, callback) => { events[name] = callback; }};
     vm.runInNewContext("(" + installPerformanceProbe.toString() + ")()", sandbox);
     sandbox.PixelAtlasWebGpu = {};
-    sandbox.PixelAtlasInput = {reportWebGpu: frame => Object.assign(sandbox.PixelAtlasWebGpu, frame)};
+    sandbox.PixelAtlasInput = {
+        reportWebGpu: frame => Object.assign(sandbox.PixelAtlasWebGpu, frame, {failure: null}),
+        failWebGpu: message => { sandbox.PixelAtlasWebGpu.failure = String(message); }
+    };
     const state = sandbox.__pixelAtlasWebGpuPerformance;
     return {sandbox, state, events, frames, calls, queueWaiters,
         tick: value => { clock = value; }, adapter: new GPUAdapter(),
@@ -185,6 +188,14 @@ async function main() {
         "An unexpected first allocation cannot be masked by a later matching mesh size");
     assert.match(invalidLayout.state.errors[0], /Unexpected first map Vertex allocation/);
     assert.throws(() => invalidLayout.state.beginSceneCapture(), /Expected exactly one/);
+
+    checkHealth(JSON.parse(JSON.stringify(state.snapshot())));
+    f.sandbox.PixelAtlasInput.failWebGpu("Managed throughput draw failed");
+    const unhealthy = JSON.parse(JSON.stringify(state.snapshot()));
+    assert.equal(unhealthy.diagnostic.failure, null, "The previous successful frame remains available for diagnosis");
+    assert.equal(unhealthy.liveFailure, "Managed throughput draw failed", "A later managed failure is observed without a new frame");
+    assert.throws(() => checkHealth(unhealthy), /live managed renderer remains healthy/,
+        "Final health fails even when earlier submissions/telemetry would pass throughput checks");
 
     const trace = makeTrace({motion: "pan"}, {x: 0, y: 60, width: 1200, height: 699}, 2);
     assert.equal(trace.length, 8);

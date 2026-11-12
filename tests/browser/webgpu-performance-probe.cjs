@@ -257,7 +257,8 @@ function installPerformanceProbe() {
     state.unchangedAndQuietSince = (version, quiet = 300) => Number.isSafeInteger(version) && version >= 0 &&
         state.mapSubmits === version && now() - state.lastMapSubmitAt >= quiet;
     state.snapshot = () => ({adapters: state.adapters, errors: [...state.errors], losses: [...state.losses],
-        deviceCount: state.devices.length, mapSubmits: state.mapSubmits, diagnostic: state.lastDiagnostic});
+        deviceCount: state.devices.length, mapSubmits: state.mapSubmits, diagnostic: state.lastDiagnostic,
+        liveFailure: globalThis.PixelAtlasWebGpu?.failure ?? null});
 }
 
 module.exports = {installPerformanceProbe};
