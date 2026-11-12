@@ -408,6 +408,8 @@ function verifyRenderGraph(evidence, diagnostic, name) {
     const live = graph.textures.filter(texture => !texture.destroyed);
     const frame = graph.frames.at(-1), passes = frame.passes;
     const smooth = diagnostic.style === "Normal" || diagnostic.style === "Roblox";
+    if (!smooth) assert.equal(passes.filter(pass => /^PixelMap sun shadow /.test(pass.label)).length, 0,
+        name + ": pixel styles submit no unused shadow clears or draws");
     const maximumLevels = smooth ? ({ Balanced: 0, High: 5, Ultra: 6 }[diagnostic.quality]) : 0;
     assert.notEqual(maximumLevels, undefined, name + ": bloom quality is recognized");
     const scene = live.findLast(texture => texture.label === "PixelMap scene color");
