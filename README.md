@@ -214,7 +214,7 @@ The status bar reports **WebGPU active**. `RenderingQuality`, `IsGpuRenderingAct
 
 The earlier [performance methodology and results](docs/performance.md) describe the pre-migration CPU/GL/Skia paths. Their timing and memory improvements must not be read as a measured WebGPU speedup.
 
-The [WebGPU performance follow-up](docs/webgpu-performance.md) measures the merged renderer against localized artwork invalidation, deferred label depth work, offscreen building chunks, batched mip copies and retained pipelines. Its frozen native CI replay reduces preparation/overlay time by 18–52% across nine moving-camera cases while preserving exact output; source-streaming improvements and browser measurements are reported separately with raw evidence.
+The [WebGPU performance follow-up](docs/webgpu-performance.md) measures the merged renderer against localized artwork invalidation, deferred label depth work, offscreen building chunks, batched mip copies and retained pipelines. Its frozen native CI replay reduces preparation/overlay time by 24–56% across nine moving-camera cases while preserving exact output. The guide also reports the deferred picking cost, including a local regression when twelve picks are added to every walking frame; source-streaming improvements and browser measurements are reported separately with raw evidence.
 
 ## Build and test
 

@@ -6,7 +6,8 @@
     "artifactId": 13957378588,
     "archiveSha256": "e7ccb205b5451b70d0b1e0f3d765419d612ae77b650bf53e3c7373ddb1c01f70",
     "identityChecks": 10944,
-    "identityFailures": 0
+    "identityFailures": 0,
+    "scope": "Earlier independent CI run; superseded as primary table by nativeSdkCI with explicit isolated SDK provenance."
   },
   "nativeLocal": {
     "identityChecks": 10944,
@@ -31,6 +32,18 @@
       "bytes": 1738,
       "sha256": "c1cff61f32ff131be8e13643731cedde0eecc042018e579869dc89df5352066d"
     },
+    "native-ci-sdk-comparison.json": {
+      "bytes": 53095,
+      "sha256": "8602630fbc0ecfdcc7270e36ef3db13b738f1dbfcb7463901b0053a200340d16"
+    },
+    "native-ci-sdk-manifest.json": {
+      "bytes": 1766,
+      "sha256": "835826bab5c5848165635981775193c9376778f07ee87afffad01804760c0803"
+    },
+    "native-ci-sdk.zip": {
+      "bytes": 284099,
+      "sha256": "64eee1952b209275956182f5a0519ffffd2cb63ab0100ba3a9be6f8cb31bc568"
+    },
     "native-ci.zip": {
       "bytes": 284161,
       "sha256": "e7ccb205b5451b70d0b1e0f3d765419d612ae77b650bf53e3c7373ddb1c01f70"
@@ -47,9 +60,27 @@
       "bytes": 289801,
       "sha256": "8f75dadde7dd24a941a72a6119c889cea77f973a8c27beb52c04255fa44a0675"
     },
+    "native-picking-inclusive.json": {
+      "bytes": 38957,
+      "sha256": "375ed48db92931e24f7763e33fedd877122e7b956acc888a28b686780e7f0fb0"
+    },
     "shader-fixtures-debug.json": {
       "bytes": 4137,
       "sha256": "8ee90688a0ea797a2c6b38a4d09cfb91e6293efaf0efb521a50331cfc1339cb6"
     }
-  }
+  },
+  "nativeSdkCI": {
+    "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43254794602",
+    "source": "4dbb962e4c3de1bcc3f441e06f27e84d385be96b",
+    "artifactId": 13961592826,
+    "archiveSha256": "64eee1952b209275956182f5a0519ffffd2cb63ab0100ba3a9be6f8cb31bc568",
+    "sdkVersion": "10.0.403",
+    "runtime": ".NET 10.0.15",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "identityChecks": 10944,
+    "identityFailures": 0,
+    "sameProductionSourceAsCandidate": true,
+    "scope": "Primary native CI results; earlier CI and local results retained as independent runs."
+  },
+  "productionSourceTree": "e83f1bad72867fc565b20214ff07389082a95782"
 }

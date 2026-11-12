@@ -14,8 +14,11 @@ quality limits remain in [the migration guide](uno7-webgpu-migration.md).
 
 ## Results: native CPU frame preparation
 
-The primary table comes from the [paired CI run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43248840497)
-on an AMD EPYC 7763 runner. One frozen harness was compiled against both revisions;
+The primary table comes from the [paired CI run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43254794602)
+on an AMD EPYC 9V74 runner, using isolated .NET SDK 10.0.403 and runtime 10.0.15.
+The candidate checkout is `4dbb962`, whose production `src` tree is identical to
+`16048b7`; its later changes improve the benchmark and toolchain provenance.
+One frozen harness was compiled against both revisions;
 all compilation finished before measurements. Baseline/candidate/candidate/baseline
 (ABBA) order, an explicit hashed font, 32 warm-up poses and 32 measured poses per
 workload/run keep the work comparable. Tiered compilation is disabled for both
@@ -29,15 +32,15 @@ timing. All **10,944 identity comparisons passed**, including repeated runs.
 
 | Moving workload | Baseline median, ms | Optimized median, ms | Time reduction | Baseline → optimized p95, ms |
 |---|---:|---:|---:|---:|
-| pan-pixel | 15.776 | 10.917 | 30.8% | 17.032 → 12.465 |
-| walk-pixel | 5.598 | 2.996 | 46.5% | 6.353 → 3.621 |
-| orbit-pixel | 16.420 | 11.293 | 31.2% | 17.667 → 13.297 |
-| pan-normal | 16.678 | 12.483 | 25.2% | 17.875 → 13.124 |
-| walk-normal | 6.022 | 3.162 | 47.5% | 6.523 → 3.947 |
-| orbit-normal | 16.884 | 12.224 | 27.6% | 18.111 → 13.932 |
-| pan-roblox | 17.002 | 13.855 | 18.5% | 18.123 → 15.034 |
-| walk-roblox | 7.956 | 3.833 | 51.8% | 8.612 → 4.643 |
-| orbit-roblox | 17.298 | 13.515 | 21.9% | 18.600 → 15.634 |
+| pan-pixel | 13.436 | 8.977 | 33.2% | 14.081 → 10.376 |
+| walk-pixel | 4.446 | 2.276 | 48.8% | 5.141 → 2.688 |
+| orbit-pixel | 13.980 | 9.144 | 34.6% | 14.668 → 11.038 |
+| pan-normal | 14.372 | 10.194 | 29.1% | 14.801 → 10.769 |
+| walk-normal | 5.020 | 2.422 | 51.7% | 5.699 → 3.097 |
+| orbit-normal | 14.539 | 9.915 | 31.8% | 16.619 → 11.354 |
+| pan-roblox | 14.768 | 11.238 | 23.9% | 15.942 → 12.022 |
+| walk-roblox | 6.598 | 2.901 | 56.0% | 7.464 → 3.543 |
+| orbit-roblox | 15.173 | 11.087 | 26.9% | 16.156 → 12.824 |
 
 The nine cases use bundled Manhattan data, a 1200 × 700 logical viewport and
 identical deterministic pan, orbit and first-person walking cameras. Smooth styles
@@ -47,8 +50,35 @@ is null instead of zero on unsupported platforms.
 
 An independent local ABBA run also passed all 10,944 identity comparisons and
 measured 18–48% lower preparation/overlay time. The primary CI run measures
-18–52% lower time. These are separate machines/runs, not a combined sample pool.
+24–56% lower time. These are separate machines/runs, not a combined sample pool.
 The source, font, harness and renderer hashes are retained for each.
+
+### Picking-inclusive cost and the deferred-work tradeoff
+
+The benchmark also performs twelve sparse screen-space terrain picks after each
+prepared frame. Labels now request less depth geometry, so the later picking phase
+can become its first consumer. The walking cases show this cost shift clearly:
+
+| Walking style | Picking alone, baseline → optimized ms | Preparation + overlay + 12 picks, baseline → optimized ms | Combined reduction |
+|---|---:|---:|---:|
+| Pixel | 0.765 → 2.633 | 5.165 → 5.094 | 1.4% |
+| Normal | 1.153 → 3.139 | 6.094 → 5.591 | 8.2% |
+| Roblox | 1.222 → 3.480 | 7.739 → 6.470 | 16.4% |
+
+Combined distributions sum the phases **within each sample** before calculating
+medians; they are not sums of the phase medians. In the independent local run,
+Pixel walking with all twelve picks regressed 12.6% (5.687 → 6.405 ms), despite its
+faster preparation/overlay phase. The other local walking totals and all primary
+CI totals improved. Frequent-picking applications therefore must use the combined
+results rather than applying the preparation-only percentage to their whole frame.
+
+The application does not issue twelve screen-space picks on every walking frame.
+Its movement contacts and terrain-following camera use geographic height sampling.
+Screen-space picking serves map interaction and the visible scale bar; camera-driven
+scale updates are throttled to roughly 100 ms and query two points. The depth path
+is used for visible terrain relief; flat/hidden-relief views use camera
+unprojection. These real interaction costs remain relevant, and the paired browser
+protocol includes input handling and main-thread work beyond the renderer callback.
 
 ## Results: source streaming and artwork
 
@@ -59,14 +89,14 @@ presented terrain texture is hashed and compared against the baseline.
 
 | Source update | Baseline median, ms | Optimized median, ms | Speedup | Rebaked visible textures/frame |
 |---|---:|---:|---:|---:|
-| distant-vector-stream-pixel | 15.400 | 0.845 | 18.22× | 63 → 0 |
-| local-vector-stream-pixel | 12.130 | 1.174 | 10.33× | 63 → 1 |
-| local-imagery-stream-pixel | 491.957 | 3.142 | 156.55× | 63 → 1 |
-| source-priority-control-pixel | 0.809 | 0.797 | 1.01× | 0 → 0 |
-| distant-vector-stream-normal | 13.372 | 0.851 | 15.72× | 64 → 0 |
-| local-vector-stream-normal | 12.546 | 1.098 | 11.43× | 64 → 1 |
-| local-imagery-stream-normal | 328.605 | 1.574 | 208.81× | 64 → 1 |
-| source-priority-control-normal | 0.860 | 0.832 | 1.03× | 0 → 0 |
+| distant-vector-stream-pixel | 11.814 | 0.650 | 18.17× | 63 → 0 |
+| local-vector-stream-pixel | 10.132 | 0.907 | 11.18× | 63 → 1 |
+| local-imagery-stream-pixel | 395.295 | 2.479 | 159.45× | 63 → 1 |
+| source-priority-control-pixel | 0.655 | 0.625 | 1.05× | 0 → 0 |
+| distant-vector-stream-normal | 10.048 | 0.664 | 15.12× | 64 → 0 |
+| local-vector-stream-normal | 10.529 | 0.823 | 12.79× | 64 → 1 |
+| local-imagery-stream-normal | 263.391 | 1.150 | 229.07× | 64 → 1 |
+| source-priority-control-normal | 0.658 | 0.651 | 1.01× | 0 → 0 |
 
 A distant update now retains all visible artwork. A local vector or imagery
 replacement rebakes one patch instead of 63–64 in these scenes. Base texture data
@@ -77,7 +107,7 @@ upload. The actual WebGPU host keeps unchanged texture identities and array laye
 
 Managed allocations for local imagery updates fell from roughly 16.6–16.8 MB to
 281 kB per frame in the same CI run. The source-priority controls rebake no textures
-in either implementation; their medians remain within roughly 1–3%. The large
+in either implementation; their medians remain within roughly 1–5%. The large
 imagery speedups describe these source-churn cases, not every moving frame.
 
 ## Implementation
@@ -188,8 +218,11 @@ Vulkan results do not establish physical-GPU FPS, display latency or mobile ther
 ## Reproduction and permanent evidence
 
 - [Native benchmark source and protocol](../tests/PixelMap.Rendering.Performance/README.md).
-- [CI comparison JSON](verification/webgpu-performance-16048b7/native-ci-comparison.json)
-  and [raw CI archive](verification/webgpu-performance-16048b7/native-ci.zip).
+- [Primary isolated-SDK CI comparison](verification/webgpu-performance-16048b7/native-ci-sdk-comparison.json)
+  and [original raw CI archive](verification/webgpu-performance-16048b7/native-ci-sdk.zip).
+- [Picking-inclusive totals derived from raw samples](verification/webgpu-performance-16048b7/native-picking-inclusive.json).
+- [Earlier independent CI comparison](verification/webgpu-performance-16048b7/native-ci-comparison.json)
+  and [raw earlier CI archive](verification/webgpu-performance-16048b7/native-ci.zip).
 - [Independent local comparison](verification/webgpu-performance-16048b7/native-local-comparison.json)
   and [raw local archive](verification/webgpu-performance-16048b7/native-local.zip).
 - [GPU shader fixture results](verification/webgpu-performance-16048b7/shader-fixtures-debug.json).
