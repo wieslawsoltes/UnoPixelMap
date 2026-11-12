@@ -454,6 +454,7 @@ internal static class WebGpuMapShaders
         @group(0) @binding(2) var photograph:texture_2d<f32>;
         @group(0) @binding(3) var overlay:texture_2d<f32>;
         @group(0) @binding(4) var linearSampler:sampler;
+        @group(0) @binding(5) var bloom:texture_2d<f32>;
         @vertex fn vs(@builtin(vertex_index) id:u32)->@builtin(position) vec4f {
             let p=vec2f(f32((id<<1u)&2u),f32(id&2u));return vec4f(p*2.0-1.0,0.0,1.0);
         }
@@ -484,16 +485,14 @@ internal static class WebGpuMapShaders
                         color=(sampleScene(uv+direction*(-1.0/6.0))+sampleScene(uv+direction*(1.0/6.0)))*0.5;
                     }
                 }
-                if(r.effects.x>0.0){
-                    var bloom=vec3f(0.0);
-                    for(var y=-1;y<=1;y++){for(var x=-1;x<=1;x++){
-                        bloom+=max(vec3f(0.0),sampleScene(uv+vec2f(f32(x),f32(y))*texel*2.5)-vec3f(1.0));
-                    }}
-                    color+=bloom*(r.effects.x/9.0);
-                }
                 if(r.settings.z>0.0){
                     let photo=textureSampleLevel(photograph,linearSampler,uv,0.0);
                     if(photo.a>0.5){color=mix(color,photo.rgb,r.settings.z);}
+                }
+                // A normalized scattering fraction keeps uniform radiance and
+                // hue stable instead of adding energy at each pyramid level.
+                if(r.effects.x>0.0){
+                    color=mix(color,textureSampleLevel(bloom,linearSampler,uv,0.0).rgb,r.effects.x);
                 }
                 color=srgb(aces(color*r.effects.z));
             }

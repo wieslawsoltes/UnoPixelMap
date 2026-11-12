@@ -138,10 +138,12 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         {
             options = WebGpuRenderOptions.For(Quality);
             bool smooth = MapRendering.Smooth(frame.RenderStyle);
+            bool photograph = frame.PreservePhotograph && frame.Camera.Pitch < 30;
             int samples = smooth ? options.SampleCount : 1;
-            (int width, int height) = RasterSize(frame, targetWidth, targetHeight, smooth, samples);
+            var attachments = RasterSize(frame, targetWidth, targetHeight, smooth, samples, photograph);
+            int width = attachments.Width, height = attachments.Height;
             EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1, smooth ? options.ShadowCascades : 1);
-            EnsureAttachments(width, height, samples);
+            EnsureAttachments(attachments);
             EnsurePipelines(targetFormat, samples);
             UploadPalette(frame.Palette);
             // A new immutable map frame or projection budget replaces the scene
@@ -160,8 +162,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
                 retainedShadowCascadeCount != shadowCascadeCount);
             if (drawShadows) DrawShadow(encoder, frame);
             else if (!smooth) ClearShadow(encoder);
-            bool photograph = frame.PreservePhotograph && frame.Camera.Pitch < 30;
-            var pass = BeginScenePass(encoder, clear: true);
+            var pass = BeginScenePass(encoder, clear: true, preserve: photograph);
             try
             {
                 api.RenderPassEncoderSetPipeline(pass, backgroundPipeline);
@@ -182,10 +183,11 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
                 var to = new ImageCopyTexture { Texture = photographTexture, Aspect = TextureAspect.All };
                 var extent = new Extent3D((uint)width, (uint)height, 1);
                 api.CommandEncoderCopyTextureToTexture(encoder, &from, &to, &extent);
-                pass = BeginScenePass(encoder, clear: false);
+                pass = BeginScenePass(encoder, clear: false, preserve: false);
                 try { DrawBuildings(pass, shadow: false); DrawWorldOverlay(pass, sceneOverlay); }
                 finally { EndPass(pass); }
             }
+            DrawBloom(encoder);
             pass = BeginTargetPass(encoder, target, clear: true);
             try
             {
@@ -224,20 +226,18 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         }
     }
 
-    private (int Width, int Height) RasterSize(GpuMapFrame frame, uint targetWidth, uint targetHeight, bool smooth, int samples)
+    private WebGpuAttachmentPlan RasterSize(GpuMapFrame frame, uint targetWidth, uint targetHeight,
+        bool smooth, int samples, bool photograph)
     {
         if (!smooth)
         {
-            long bytes = (long)frame.ArtWidth * frame.ArtHeight * 20;
-            if (bytes > AttachmentBudget || frame.ArtWidth > maximumTextureSize || frame.ArtHeight > maximumTextureSize)
+            var plan = WebGpuBloomLayout.Plan(frame.ArtWidth, frame.ArtHeight, 1, photograph, 0);
+            if (plan.TotalBytes > AttachmentBudget || frame.ArtWidth > maximumTextureSize || frame.ArtHeight > maximumTextureSize)
                 throw new NotSupportedException("The logical pixel grid exceeds the map surface budget.");
-            return (frame.ArtWidth, frame.ArtHeight);
+            return plan;
         }
-        long bytesPerPixel = samples > 1 ? samples * 12L + 16 : 20;
-        long maximum = Math.Min(options.MaximumScenePixels, AttachmentBudget / bytesPerPixel);
-        double scale = Math.Min(1, Math.Sqrt(maximum / ((double)targetWidth * targetHeight)));
-        scale = Math.Min(scale, (double)maximumTextureSize / Math.Max(targetWidth, targetHeight));
-        return (Math.Max(1, (int)Math.Floor(targetWidth * scale)), Math.Max(1, (int)Math.Floor(targetHeight * scale)));
+        return WebGpuBloomLayout.Fit(targetWidth, targetHeight, maximumTextureSize,
+            options.MaximumScenePixels, AttachmentBudget, samples, photograph, options.BloomLevels);
     }
 
     private void PrepareFrame(GpuMapFrame frame, uint targetWidth, uint targetHeight, bool smooth)
@@ -439,7 +439,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         EndPass(api.CommandEncoderBeginRenderPass(encoder, &descriptor));
     }
 
-    private RenderPassEncoder* BeginScenePass(CommandEncoder* encoder, bool clear)
+    private RenderPassEncoder* BeginScenePass(CommandEncoder* encoder, bool clear, bool preserve)
     {
         var color = new RenderPassColorAttachment
         {
@@ -447,10 +447,13 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             ResolveTarget = attachmentSamples > 1 ? sceneView : null,
             DepthSlice = uint.MaxValue,
             LoadOp = clear ? LoadOp.Clear : LoadOp.Load,
-            StoreOp = StoreOp.Store,
+            // The resolved scene survives for bloom/presentation. Only an
+            // intermediate photograph pass needs the multisample color again.
+            StoreOp = attachmentSamples > 1 && !preserve ? StoreOp.Discard : StoreOp.Store,
             ClearValue = new(0, 0, 0, 0)
         };
         var depth = DepthAttachment(depthView, clear);
+        depth.DepthStoreOp = preserve ? StoreOp.Store : StoreOp.Discard;
         using var label = new NativeLabel("PixelMap scene pass");
         var descriptor = new RenderPassDescriptor { Label = label.Pointer, ColorAttachmentCount = 1, ColorAttachments = &color, DepthStencilAttachment = &depth };
         var pass = api.CommandEncoderBeginRenderPass(encoder, &descriptor);

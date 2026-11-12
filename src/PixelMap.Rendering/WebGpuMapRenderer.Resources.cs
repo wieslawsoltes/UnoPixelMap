@@ -70,6 +70,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         rimModule = CreateModule(WebGpuMapShaders.Rim);
         resolveModule = CreateModule(WebGpuMapShaders.Resolve);
         overlayModule = CreateModule(WebGpuMapShaders.Overlay);
+        InitializeBloomResources();
         InitializeOverlayResources();
     }
 
@@ -95,11 +96,12 @@ public sealed unsafe partial class WebGpuMapRenderer
             Buffer = new BufferBindingLayout { Type = BufferBindingType.ReadOnlyStorage, MinBindingSize = 32 }
         };
         modelLayout = CreateLayout(&model, 1);
-        var resolve = stackalloc BindGroupLayoutEntry[5];
+        var resolve = stackalloc BindGroupLayoutEntry[6];
         resolve[0] = UniformEntry(0, 64, dynamic: false, ShaderStage.Fragment);
         for (uint i = 1; i <= 3; i++) resolve[i] = TextureEntry(i, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
         resolve[4] = SamplerEntry(4, SamplerBindingType.Filtering);
-        resolveLayout = CreateLayout(resolve, 5);
+        resolve[5] = TextureEntry(5, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
+        resolveLayout = CreateLayout(resolve, 6);
         var over = stackalloc BindGroupLayoutEntry[3];
         over[0] = TextureEntry(0, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
         over[1] = SamplerEntry(1, SamplerBindingType.Filtering);
@@ -219,32 +221,45 @@ public sealed unsafe partial class WebGpuMapRenderer
         }
     }
 
-    private void EnsureAttachments(int width, int height, int samples)
+    private void EnsureAttachments(WebGpuAttachmentPlan plan)
     {
-        if (attachmentWidth == width && attachmentHeight == height && attachmentSamples == samples) return;
+        int width = plan.Width, height = plan.Height, samples = plan.Samples;
+        if (attachmentWidth == width && attachmentHeight == height && attachmentSamples == samples &&
+            (photographTexture != null) == plan.Photograph && bloomLevelCount == plan.BloomLevels) return;
         ReleaseAttachments();
-        sceneTexture = CreateTexture(width, height, TextureFormat.Rgba16float,
-            TextureUsage.RenderAttachment | TextureUsage.TextureBinding | TextureUsage.CopySrc);
-        sceneView = CreateView(sceneTexture, TextureFormat.Rgba16float);
-        photographTexture = CreateTexture(width, height, TextureFormat.Rgba16float,
-            TextureUsage.TextureBinding | TextureUsage.CopyDst);
-        photographView = CreateView(photographTexture, TextureFormat.Rgba16float);
-        depthTexture = CreateTexture(width, height, TextureFormat.Depth24Plus, TextureUsage.RenderAttachment, samples: samples);
-        depthView = CreateView(depthTexture, TextureFormat.Depth24Plus);
-        if (samples > 1)
+        try
         {
-            multisampleTexture = CreateTexture(width, height, TextureFormat.Rgba16float, TextureUsage.RenderAttachment, samples: samples);
-            multisampleView = CreateView(multisampleTexture, TextureFormat.Rgba16float);
+            sceneTexture = CreateTexture(width, height, TextureFormat.Rgba16float,
+                TextureUsage.RenderAttachment | TextureUsage.TextureBinding | TextureUsage.CopySrc, name: "PixelMap scene color");
+            sceneView = CreateView(sceneTexture, TextureFormat.Rgba16float);
+            if (plan.Photograph)
+            {
+                photographTexture = CreateTexture(width, height, TextureFormat.Rgba16float,
+                    TextureUsage.TextureBinding | TextureUsage.CopyDst, name: "PixelMap photograph");
+                photographView = CreateView(photographTexture, TextureFormat.Rgba16float);
+            }
+            depthTexture = CreateTexture(width, height, TextureFormat.Depth24Plus, TextureUsage.RenderAttachment,
+                samples: samples, name: "PixelMap scene depth");
+            depthView = CreateView(depthTexture, TextureFormat.Depth24Plus);
+            if (samples > 1)
+            {
+                multisampleTexture = CreateTexture(width, height, TextureFormat.Rgba16float, TextureUsage.RenderAttachment,
+                    samples: samples, name: "PixelMap scene multisample");
+                multisampleView = CreateView(multisampleTexture, TextureFormat.Rgba16float);
+            }
+            attachmentWidth = width;
+            attachmentHeight = height;
+            attachmentSamples = samples;
+            CreateBloomAttachments(plan.BloomLevels);
+            AttachmentBytes = plan.TotalBytes;
+            RebuildResolveGroup();
         }
-        attachmentWidth = width;
-        attachmentHeight = height;
-        attachmentSamples = samples;
-        AttachmentBytes = (long)width * height * (samples > 1 ? samples * 12L + 16 : 20);
-        RebuildResolveGroup();
+        catch { ReleaseAttachments(); throw; }
     }
     private void ReleaseAttachments()
     {
         Release(ref resolveGroup);
+        ReleaseBloomAttachments();
         Release(ref multisampleView); Release(ref multisampleTexture);
         Release(ref sceneView); Release(ref sceneTexture);
         Release(ref depthView); Release(ref depthTexture);
@@ -256,23 +271,27 @@ public sealed unsafe partial class WebGpuMapRenderer
     {
         Release(ref resolveGroup);
         if (sceneView == null) return;
-        var entries = stackalloc BindGroupEntry[5];
+        var entries = stackalloc BindGroupEntry[6];
         entries[0] = new() { Binding = 0, Buffer = resolveBuffer, Size = 64 };
         entries[1] = new() { Binding = 1, TextureView = sceneView };
-        entries[2] = new() { Binding = 2, TextureView = photographView };
+        // The inactive photograph/bloom bindings can share the sampled scene;
+        // this group is only bound while writing the caller's separate target.
+        entries[2] = new() { Binding = 2, TextureView = photographView != null ? photographView : sceneView };
         entries[3] = new() { Binding = 3, TextureView = bitmapOverlayView };
         entries[4] = new() { Binding = 4, Sampler = linearSampler };
-        resolveGroup = CreateGroup(resolveLayout, entries, 5);
+        entries[5] = new() { Binding = 5, TextureView = BloomResolveView };
+        resolveGroup = CreateGroup(resolveLayout, entries, 6);
     }
     private bool TargetIsSrgb => pipelineTargetFormat is TextureFormat.Rgba8UnormSrgb or TextureFormat.Bgra8UnormSrgb;
 
     private void UpdateResolve(GpuMapFrame frame, uint targetWidth, uint targetHeight, bool smooth, bool hasBitmapOverlay)
     {
-        float photographOpacity = frame.PreservePhotograph ? (float)(209d / 255 * Math.Max(0, 1 - frame.Camera.Pitch / 30)) : 0;
+        float photographOpacity = photographTexture != null ? (float)(209d / 255 * Math.Max(0, 1 - frame.Camera.Pitch / 30)) : 0;
         Set4(resolveValues, 0, attachmentWidth, attachmentHeight, 0, 0);
         Set4(resolveValues, 1, targetWidth, targetHeight, frame.Width, frame.Height);
         Set4(resolveValues, 2, smooth ? 1 : 0, frame.PixelSize, photographOpacity, hasBitmapOverlay ? 1 : 0);
-        Set4(resolveValues, 3, smooth ? options.Bloom : 0, attachmentSamples == 1 ? 1 : 0, options.Exposure, TargetIsSrgb ? 1 : 0);
+        Set4(resolveValues, 3, smooth && bloomLevelCount > 0 ? options.Bloom : 0,
+            attachmentSamples == 1 ? 1 : 0, options.Exposure, TargetIsSrgb ? 1 : 0);
         Upload(resolveBuffer, resolveValues.AsSpan());
     }
 
@@ -570,7 +589,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         scenePreparation.Invalidate();
         buildingDraws.Clear();
         retainedShadowFrame = null;
-        ReleasePipelines(); ReleaseAttachments(); ReleaseOverlayResources();
+        ReleasePipelines(); ReleaseAttachments(); ReleaseBloomResources(); ReleaseOverlayResources();
         foreach (var resource in buildingCache.Values) DestroyBuilding(resource);
         buildingCache.Clear(); terrainCache.Clear(); textureCache.Clear();
         Release(ref commonGroup); Release(ref projectionGroup); Release(ref terrainNearestGroup); Release(ref terrainLinearGroup);
