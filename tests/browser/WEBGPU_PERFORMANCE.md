@@ -35,7 +35,9 @@ renderer workload, not a network-streaming or whole-world coverage benchmark.
 
 Queue completion is **not a GPU timestamp**: it includes preceding queued work
 and callback scheduling. Each serialized input waits for its map submissions to
-complete and for a quiet boundary. This measures latency, not maximum throughput.
+complete and for 350 ms without another submission or queue-completion callback.
+Readiness and capture closure occur in one browser task, so a deferred native
+frame cannot race a later automation call. This measures latency, not maximum throughput.
 The benchmark does not add per-frame queue fences during its separate six-second
 held-key walking phase; only the start and end boundaries observe completion
 without blocking submission. That phase records before/after physical telemetry;

@@ -143,7 +143,7 @@ async function settle(page) {
     // queue backlog from being mistaken for this input's GPU execution time.
     await page.waitForFunction(() => __pixelAtlasWebGpuPerformance.lastDiagnostic?.patches > 0, undefined, {timeout: 120000});
     for (let attempt = 0; attempt < 30; attempt++) {
-        const stable = await page.evaluate(async () => {
+        const version = await page.evaluate(async () => {
             const state = __pixelAtlasWebGpuPerformance, version = state.mapSubmits;
             let timer;
             try {
@@ -152,11 +152,13 @@ async function settle(page) {
                 })]);
                 await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
             } finally { clearTimeout(timer); }
-            return state.mapSubmits === version;
+            return version;
         });
         await page.waitForTimeout(350);
-        const quiet = await page.evaluate(() => performance.now() - __pixelAtlasWebGpuPerformance.lastMapSubmitAt >= 300);
-        if (stable && quiet) { await healthy(page); return; }
+        // A submission just after the fence can already look 300 ms old here
+        // while its GPU work is still pending. Require the fenced version too.
+        const quiet = await page.evaluate(version => __pixelAtlasWebGpuPerformance.unchangedAndQuietSince(version), version);
+        if (quiet) { await healthy(page); return; }
     }
     throw new Error("Map did not become quiescent before a deterministic camera measurement");
 }
@@ -186,14 +188,16 @@ async function sceneProjection(page) {
 async function step(page, cdp, input) {
     await page.evaluate(() => __pixelAtlasWebGpuPerformance.begin("step"));
     await cdp.send("Input.dispatchMouseEvent", {type: "mouseWheel", ...input});
-    await page.waitForFunction(() => {
+    const capture = await page.waitForFunction(() => {
         const state = __pixelAtlasWebGpuPerformance;
         if (state.errors.length || state.losses.length || globalThis.PixelAtlasWebGpu?.failure)
             throw new Error("WebGPU failed during camera replay");
-        return state.ready();
+        return state.finishStepIfReady();
     }, undefined, {timeout: 120000});
-    const raw = await page.evaluate(() => __pixelAtlasWebGpuPerformance.finish());
-    return {raw, result: checkStep(raw, input)};
+    try {
+        const raw = await capture.jsonValue();
+        return {raw, result: checkStep(raw, input)};
+    } finally { await capture.dispose(); }
 }
 async function captureMap(page, output, name, bounds) {
     await settle(page);
@@ -318,6 +322,7 @@ async function measure(browser, variant, repetition, scenario, base, output, ste
         result.failure = error.stack || String(error);
         result.gpu = await page.evaluate(() => globalThis.__pixelAtlasWebGpuPerformance?.snapshot()).catch(() => null);
         result.pending = await page.evaluate(() => globalThis.__pixelAtlasWebGpuPerformance?.active).catch(() => null);
+        result.lastCompleted = await page.evaluate(() => globalThis.__pixelAtlasWebGpuPerformance?.lastCompleted).catch(() => null);
         fs.writeFileSync(path.join(output, prefix + "-failure.json"), JSON.stringify(result, null, 2) + "\n");
         await page.screenshot({path: path.join(output, prefix + "-failure.png"), timeout: 15000}).catch(() => {});
         fs.writeFileSync(path.join(output, prefix + "-failure.txt"), await page.locator("body").ariaSnapshot().catch(() => ""));

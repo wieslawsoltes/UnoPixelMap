@@ -11,6 +11,7 @@ function installPerformanceProbe() {
     const sceneBuffers = new WeakMap();
     const uniformUsage = 0x40, vertexUsage = 0x20;
     const sceneUniformBytes = 513 * 512, terrainInstanceBytes = 64 * 80;
+    let firstMapVertexSeen = false;
     const map = label => /^PixelMap[ /]/.test(label || "");
     const now = () => performance.now();
     const queuePrefix = () => {
@@ -63,8 +64,14 @@ function installPerformanceProbe() {
             // and 64 80-byte terrain instances. Fail closed if that ABI changes.
             // No buffer content is copied unless an explicit untimed capture is active.
             const descriptor = args[0];
-            const kind = descriptor.size === sceneUniformBytes && (descriptor.usage & uniformUsage) ? "uniform" :
-                descriptor.size === terrainInstanceBytes && (descriptor.usage & vertexUsage) ? "terrain" : null;
+            let kind = descriptor.size === sceneUniformBytes && (descriptor.usage & uniformUsage) ? "uniform" : null;
+            if ((descriptor.usage & vertexUsage) && !firstMapVertexSeen) {
+                firstMapVertexSeen = true;
+                // InitializeResources allocates this before any building/overlay
+                // vertices. Later mesh buffers can legitimately have the same size.
+                if (descriptor.size === terrainInstanceBytes && state.sceneBufferCounts.uniform === 1) kind = "terrain";
+                else state.errors.push("Unexpected first map Vertex allocation; expected the terrain instance buffer after scene uniforms");
+            }
             if (kind) { sceneBuffers.set(result, kind); state.sceneBufferCounts[kind]++; }
         }
         return result;
@@ -137,7 +144,10 @@ function installPerformanceProbe() {
                 // not install per-frame queue callbacks or artificial backpressure.
                 if (active.mode === "step") {
                     active.pending++;
-                    this.onSubmittedWorkDone().then(() => { sample.queueCompletedAt = now(); })
+                    this.onSubmittedWorkDone().then(() => {
+                        sample.queueCompletedAt = now();
+                        active.lastQueueCompletedAt = sample.queueCompletedAt;
+                    })
                         .catch(error => state.errors.push("Queue completion: " + error))
                         .finally(() => { active.pending--; });
                 }
@@ -181,7 +191,8 @@ function installPerformanceProbe() {
         if (state.sceneCapture) throw new Error("Camera payload capture cannot overlap measurement");
         if (!["step", "throughput"].includes(mode)) throw new Error("Unknown performance window mode");
         state.active = {mode, startedAt: now(), startMapSubmits: state.mapSubmits, inputs: [], submissions: [],
-            frames: [], raf: [], longTasks: [], pending: 0, bufferUploadBytes: 0, textureUploadBytes: 0,
+            frames: [], raf: [], longTasks: [], pending: 0, lastQueueCompletedAt: null,
+            bufferUploadBytes: 0, textureUploadBytes: 0,
             bufferAllocations: 0, textureAllocations: 0};
         if (mode === "throughput") state.boundaries = {start: queuePrefix(), end: null};
         const capture = state.active;
@@ -195,7 +206,9 @@ function installPerformanceProbe() {
     state.ready = (quiet = 350) => {
         const capture = state.active;
         return Boolean(capture && capture.inputs.length === 1 && capture.submissions.length && !capture.pending &&
-            now() - state.lastMapSubmitAt >= quiet && state.lastDiagnosticAt >= state.lastMapSubmitAt);
+            Number.isFinite(capture.lastQueueCompletedAt) &&
+            now() - Math.max(state.lastMapSubmitAt, capture.lastQueueCompletedAt) >= quiet &&
+            state.lastDiagnosticAt >= state.lastMapSubmitAt);
     };
     state.finish = () => {
         if (!state.active) throw new Error("No active performance window");
@@ -207,8 +220,12 @@ function installPerformanceProbe() {
         if (result.mode === "throughput") state.boundaries.end = queuePrefix();
         delete result.pending;
         state.active = null;
+        state.lastCompleted = result;
         return result;
     };
+    // Keep readiness and capture closure in one JavaScript task. Another native
+    // frame can arrive between two separate Playwright protocol calls.
+    state.finishStepIfReady = (quiet = 350) => state.active?.mode === "step" && state.ready(quiet) ? state.finish() : null;
     state.throughputBoundaries = async () => {
         if (!state.boundaries?.end) throw new Error("The throughput window has not finished");
         const [startQueuePrefixMilliseconds, endQueueDrainMilliseconds] =
@@ -237,6 +254,8 @@ function installPerformanceProbe() {
         await Promise.all(state.compilation);
         await Promise.all(state.devices.map(device => device.queue.onSubmittedWorkDone()));
     };
+    state.unchangedAndQuietSince = (version, quiet = 300) => Number.isSafeInteger(version) && version >= 0 &&
+        state.mapSubmits === version && now() - state.lastMapSubmitAt >= quiet;
     state.snapshot = () => ({adapters: state.adapters, errors: [...state.errors], losses: [...state.losses],
         deviceCount: state.devices.length, mapSubmits: state.mapSubmits, diagnostic: state.lastDiagnostic});
 }

@@ -49,12 +49,15 @@ async function main() {
     const texture = device.createTexture({label: "PixelMap heights", format: "rg32float"});
     const uniform = device.createBuffer({label: "PixelMap buffer Uniform, CopyDst", size: 513 * 512, usage: 64 | 8});
     const terrain = device.createBuffer({label: "PixelMap buffer Vertex, CopyDst", size: 64 * 80, usage: 32 | 8});
+    const equallySizedMesh = device.createBuffer({label: "PixelMap buffer Vertex, CopyDst", size: 64 * 80, usage: 32 | 8});
+    assert.equal(state.sceneBufferCounts.terrain, 1, "A later equally sized mesh is not the terrain instance buffer");
     state.beginSceneCapture();
     assert.throws(() => state.begin("step"), /cannot overlap/);
     const cameraData = Float32Array.from({length: 132}, (_, index) => index / 10);
     const terrainData = Float32Array.from({length: 20}, (_, index) => index / 5);
     device.queue.writeBuffer(uniform, 0, cameraData, 2, 128);
     device.queue.writeBuffer(terrain, 0, terrainData);
+    device.queue.writeBuffer(equallySizedMesh, 0, new Float32Array(20).fill(999));
     const scene = JSON.parse(JSON.stringify(state.finishSceneCapture()));
     const cameraWords = new Uint32Array(cameraData.buffer, 2 * 4, 128);
     const terrainWords = new Uint32Array(terrainData.buffer);
@@ -96,6 +99,8 @@ async function main() {
     assert.equal(state.ready(), false, "Queue completion still requires the quiet boundary");
     f.tick(400); assert.equal(state.ready(), true);
     const raw = JSON.parse(JSON.stringify(state.finish()));
+    assert.equal(state.unchangedAndQuietSince(state.mapSubmits), true, "The fenced submission version is quiet");
+    assert.equal(state.unchangedAndQuietSince(null), false, "A missing fence version cannot establish readiness");
     assert.equal(raw.submissions[0].queueCompletedAt, 20);
     const checked = checkStep(raw, input);
     assert.equal(checked.inputToFirstSubmitMilliseconds, 2);
@@ -133,6 +138,53 @@ async function main() {
     assert.equal(boundaries.startQueuePrefixMilliseconds, 400);
     assert.equal(boundaries.endQueueDrainMilliseconds, 300);
     assert.deepEqual(JSON.parse(JSON.stringify(state.snapshot().errors)), []);
+    const fencedVersion = state.mapSubmits;
+    f.tick(805); device.queue.submit([command]);
+    f.tick(1150);
+    assert.equal(state.unchangedAndQuietSince(fencedVersion), false,
+        "A later submission aged 345 ms still invalidates the previous queue fence");
+    assert.equal(state.unchangedAndQuietSince(state.mapSubmits), true,
+        "The final recheck requires the current submission version");
+
+    const deferred = fixture(), deferredDevice = await deferred.adapter.requestDevice();
+    const deferredState = deferred.state;
+    const deferredCommand = deferredDevice.createCommandEncoder({label: "PixelMap frame"}).finish();
+    const reportFrame = frames => deferred.sandbox.PixelAtlasInput.reportWebGpu({frames,
+        frameMilliseconds: 2, submissionMilliseconds: 1, uploadBytes: 0});
+    const completeDeferred = async at => {
+        deferred.tick(at);
+        for (const resolve of deferred.queueWaiters.splice(0)) resolve();
+        await Promise.resolve(); await Promise.resolve(); await Promise.resolve();
+    };
+    deferredState.begin("step");
+    deferred.tick(1); deferred.wheel(input);
+    deferred.tick(2); deferredDevice.queue.submit([deferredCommand]);
+    deferred.tick(3); reportFrame(1);
+    await completeDeferred(2000);
+    assert.equal(deferredState.finishStepIfReady(), null,
+        "Slow GPU work cannot consume the quiet interval before its completion callback");
+    deferred.tick(2350); assert.equal(deferredState.ready(), true);
+    deferred.tick(2351); deferredDevice.queue.submit([deferredCommand]);
+    deferred.tick(2352); reportFrame(2);
+    assert.equal(deferredState.finishStepIfReady(), null,
+        "An intervening submission invalidates an older readiness observation instead of throwing at finish");
+    await completeDeferred(2400);
+    deferred.tick(2749); assert.equal(deferredState.finishStepIfReady(), null);
+    deferred.tick(2750);
+    const finished = JSON.parse(JSON.stringify(deferredState.finishStepIfReady()));
+    assert.equal(checkStep(finished, input).mapSubmits, 2);
+    assert.equal(deferredState.active, null, "Atomic readiness closes the timed window in the same task");
+    deferred.tick(2751); deferredDevice.queue.submit([deferredCommand]);
+    assert.equal(finished.mapSubmits, 2, "Later work cannot mutate the completed capture returned to automation");
+
+    const invalidLayout = fixture(), invalidDevice = await invalidLayout.adapter.requestDevice();
+    invalidDevice.createBuffer({label: "PixelMap buffer Uniform, CopyDst", size: 513 * 512, usage: 64 | 8});
+    invalidDevice.createBuffer({label: "PixelMap buffer Vertex, CopyDst", size: 16, usage: 32 | 8});
+    invalidDevice.createBuffer({label: "PixelMap buffer Vertex, CopyDst", size: 64 * 80, usage: 32 | 8});
+    assert.equal(invalidLayout.state.sceneBufferCounts.terrain, 0,
+        "An unexpected first allocation cannot be masked by a later matching mesh size");
+    assert.match(invalidLayout.state.errors[0], /Unexpected first map Vertex allocation/);
+    assert.throws(() => invalidLayout.state.beginSceneCapture(), /Expected exactly one/);
 
     const trace = makeTrace({motion: "pan"}, {x: 0, y: 60, width: 1200, height: 699}, 2);
     assert.equal(trace.length, 8);
