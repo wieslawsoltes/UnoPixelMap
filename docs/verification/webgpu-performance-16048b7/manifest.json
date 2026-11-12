@@ -1,0 +1,55 @@
+{
+  "baseline": "a9a284263da76a201114381467bf45aa4823a2d6",
+  "candidate": "16048b7981ba2b08f57f437dc833457a886df56d",
+  "nativeCI": {
+    "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43248840497",
+    "artifactId": 13957378588,
+    "archiveSha256": "e7ccb205b5451b70d0b1e0f3d765419d612ae77b650bf53e3c7373ddb1c01f70",
+    "identityChecks": 10944,
+    "identityFailures": 0
+  },
+  "nativeLocal": {
+    "identityChecks": 10944,
+    "identityFailures": 0,
+    "scope": "Independent local ABBA; use CI results as the primary table."
+  },
+  "shaderDebug": {
+    "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43242587176",
+    "source": "8a017277f2fbab8eb7409dbdc3745542bad27c56",
+    "artifactId": 13956760411,
+    "archiveSha256": "01c215aa0f5ab68490631ad944c3c9b932d09da8e40e495fe3aa1197b889acc6",
+    "productionShaderPath": "src/PixelMap.Rendering/WebGpuMapShaders.cs",
+    "productionShaderBlob": "4c19169b9522a0a40a19b6053a550d699717a265",
+    "sameProductionShaderInCandidate": true
+  },
+  "files": {
+    "native-ci-comparison.json": {
+      "bytes": 52994,
+      "sha256": "e81ccde6a0e0bb1e87c534c5c45de95e0f249dc90b7ebb2fb5faef460b880de7"
+    },
+    "native-ci-manifest.json": {
+      "bytes": 1738,
+      "sha256": "c1cff61f32ff131be8e13643731cedde0eecc042018e579869dc89df5352066d"
+    },
+    "native-ci.zip": {
+      "bytes": 284161,
+      "sha256": "e7ccb205b5451b70d0b1e0f3d765419d612ae77b650bf53e3c7373ddb1c01f70"
+    },
+    "native-local-comparison.json": {
+      "bytes": 53304,
+      "sha256": "18ff2545ee6f4440677fabd429b809a5d00d4d6610649e84320a7eef11aed4f8"
+    },
+    "native-local-manifest.json": {
+      "bytes": 1764,
+      "sha256": "39c87aa5abb8cbeff78b6020d16dd89b797f3c8ae17a96138dc5607bfbcd32e1"
+    },
+    "native-local.zip": {
+      "bytes": 289801,
+      "sha256": "8f75dadde7dd24a941a72a6119c889cea77f973a8c27beb52c04255fa44a0675"
+    },
+    "shader-fixtures-debug.json": {
+      "bytes": 4137,
+      "sha256": "8ee90688a0ea797a2c6b38a4d09cfb91e6293efaf0efb521a50331cfc1339cb6"
+    }
+  }
+}

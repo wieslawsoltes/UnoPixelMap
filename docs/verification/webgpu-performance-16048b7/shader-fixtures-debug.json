@@ -1,0 +1,169 @@
+{
+  "passed": true,
+  "bloom": [
+    {
+      "name": "subthreshold constant",
+      "width": 65,
+      "height": 49,
+      "levels": 5,
+      "maximumError": 0,
+      "comparedChannels": 3300
+    },
+    {
+      "name": "HDR constant odd extent",
+      "width": 65,
+      "height": 49,
+      "levels": 6,
+      "maximumError": 0,
+      "comparedChannels": 3300
+    },
+    {
+      "name": "photograph shares linear scattering",
+      "width": 31,
+      "height": 17,
+      "levels": 5,
+      "maximumError": 0.0015625000000003553,
+      "comparedChannels": 576
+    },
+    {
+      "name": "one-axis pyramid",
+      "width": 1,
+      "height": 33,
+      "levels": 6,
+      "maximumError": 0,
+      "comparedChannels": 68
+    },
+    {
+      "name": "HDR impulse High",
+      "width": 128,
+      "height": 96,
+      "levels": 5,
+      "maximumError": 0.00041104971838268334,
+      "comparedChannels": 12288
+    },
+    {
+      "name": "HDR impulse Ultra odd extent",
+      "width": 65,
+      "height": 49,
+      "levels": 6,
+      "maximumError": 0.0007861013544299134,
+      "comparedChannels": 3300
+    }
+  ],
+  "facade": {
+    "cases": 558,
+    "comparedChannels": 4464,
+    "maximumError": 0.000622723340999165,
+    "maximumNormalizedError": 0.3113616704995825,
+    "tolerances": [
+      0.012,
+      0.0004,
+      0.002
+    ],
+    "maximumErrorByStyle": {
+      "normal": 0.000622723340999165,
+      "roblox": 0.0000021908848725771257
+    },
+    "continuityPairs": 108,
+    "maximumContinuityDelta": 0.0001506805419921875,
+    "reference": "Double-precision intersections with individual periodic windows and original binary room lamps; linear-light area integrals, coverage-weighted squared roughness, and exact Roblox pane-tint first moment. No production filtering helper is evaluated by this oracle."
+  },
+  "terrain": {
+    "comparedBytes": 266256,
+    "maximumError": 1,
+    "baseBytesPreserved": 1048576,
+    "dirtyLayers": [
+      3,
+      0,
+      2
+    ],
+    "levels": [
+      {
+        "layer": 0,
+        "mip": 1,
+        "comparedBytes": 65536,
+        "maximumError": 0
+      },
+      {
+        "layer": 0,
+        "mip": 4,
+        "comparedBytes": 1024,
+        "maximumError": 0
+      },
+      {
+        "layer": 0,
+        "mip": 8,
+        "comparedBytes": 4,
+        "maximumError": 0
+      },
+      {
+        "layer": 1,
+        "mip": 1,
+        "comparedBytes": 65536,
+        "maximumError": 0
+      },
+      {
+        "layer": 1,
+        "mip": 4,
+        "comparedBytes": 1024,
+        "maximumError": 0
+      },
+      {
+        "layer": 1,
+        "mip": 8,
+        "comparedBytes": 4,
+        "maximumError": 0
+      },
+      {
+        "layer": 2,
+        "mip": 1,
+        "comparedBytes": 65536,
+        "maximumError": 1
+      },
+      {
+        "layer": 2,
+        "mip": 4,
+        "comparedBytes": 1024,
+        "maximumError": 0
+      },
+      {
+        "layer": 2,
+        "mip": 8,
+        "comparedBytes": 4,
+        "maximumError": 0
+      },
+      {
+        "layer": 3,
+        "mip": 1,
+        "comparedBytes": 65536,
+        "maximumError": 1
+      },
+      {
+        "layer": 3,
+        "mip": 4,
+        "comparedBytes": 1024,
+        "maximumError": 1
+      },
+      {
+        "layer": 3,
+        "mip": 8,
+        "comparedBytes": 4,
+        "maximumError": 0
+      }
+    ],
+    "description": "Production compute shader, sRGB input views, reusable unorm storage scratch and ordered per-layer copies; extra dirty-buffer capacity is intentionally not dispatched."
+  },
+  "lighting": {
+    "cases": 11232,
+    "comparedChannels": 33696,
+    "maximumAbsoluteError": 0,
+    "backlitCases": 5184,
+    "omittedShadowCases": 1158,
+    "originalComparisons": 29970,
+    "optimizedComparisons": 16092,
+    "comparisonReduction": 0.4630630630630631,
+    "referenceCommit": "a9a284263da76a201114381467bf45aa4823a2d6",
+    "referenceSha256": "e91c58f9d99f336af9cc837f2deae1282fdc83097adffc3b38d779a85b1046d5",
+    "description": "Production lighting versus the frozen original on the same device; counters instrument comparison calls only. They do not measure GPU duration or full-frame speedup."
+  }
+}
