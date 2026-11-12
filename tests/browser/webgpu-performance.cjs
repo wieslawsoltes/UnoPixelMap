@@ -120,14 +120,25 @@ async function click(page, name) {
     await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
 }
 async function menu(page, name, submenu) {
+    const {waitForSettledFocus} = require("./explore.cjs");
     await click(page, "Map appearance");
     const item = text => page.getByRole("menuitem", {name: text, exact: true})
         .or(page.getByRole("menuitemcheckbox", {name: text, exact: true}));
-    if (submenu) { await item(submenu).focus(); await page.keyboard.press("ArrowRight"); }
-    await item(name).waitFor({state: "visible"});
-    await item(name).focus();
+    if (submenu) {
+        const parent = item(submenu);
+        await parent.waitFor({state: "visible"});
+        await parent.focus();
+        await waitForSettledFocus(page, parent);
+        await page.keyboard.press("ArrowRight");
+    }
+    const command = item(name);
+    await command.waitFor({state: "visible"});
+    await command.focus();
+    // Uno's semantic peer can gain DOM focus before its managed popup catches
+    // up. Configure quality only after the existing two-frame focus barrier.
+    await waitForSettledFocus(page, command);
     await page.keyboard.press("Enter");
-    await item(name).waitFor({state: "hidden"});
+    await command.waitFor({state: "hidden"});
     await page.mouse.move(viewport.width / 2, 20);
 }
 function checkHealth(state) {
@@ -430,4 +441,4 @@ async function main() {
     finally { save(); await browser.close(); }
 }
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
-module.exports = {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps, compare};
+module.exports = {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps, compare, menu};

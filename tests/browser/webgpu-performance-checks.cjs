@@ -1,4 +1,6 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const vm = require("node:vm");
 const {installPerformanceProbe} = require("./webgpu-performance-probe.cjs");
 const {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps} = require("./webgpu-performance.cjs");
@@ -42,7 +44,55 @@ function fixture() {
             altKey: Boolean(input.modifiers & 1), ctrlKey: Boolean(input.modifiers & 2),
             metaKey: Boolean(input.modifiers & 4), shiftKey: Boolean(input.modifiers & 8)})};
 }
+async function menuFocusChecks() {
+    // Run the real menu and focus helpers without installing or launching a
+    // browser. Only explore's unused browser/image imports are substituted.
+    const uiModule = {exports: {}};
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "explore.cjs"), "utf8"), {
+        module: uiModule, URL, Promise, setTimeout, clearTimeout, process: {argv: [], env: {}},
+        require: name => ["playwright", "pngjs", "./gpu.cjs"].includes(name) ? {} : require(name)
+    }, {filename: "explore.cjs"});
+    const performanceModule = {exports: {}};
+    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "webgpu-performance.cjs"), "utf8"), {
+        module: performanceModule,
+        require: name => name === "./explore.cjs" ? uiModule.exports : require(name)
+    }, {filename: "webgpu-performance.cjs"});
+    let frames = 0, focusedAt = 0, disposed = 0, rootOpen = false, submenuOpen = false;
+    const keys = [], document = {activeElement: null};
+    const sandbox = vm.createContext({document, Promise,
+        requestAnimationFrame: callback => setImmediate(() => { frames++; callback(); })});
+    const invoke = (callback, argument) => vm.runInContext("(" + callback.toString() + ")", sandbox)(argument);
+    const targets = new Map();
+    for (const name of ["Map appearance", "Rendering quality", "High quality"]) {
+        const element = {name, isConnected: true, dispose: async () => { disposed++; }};
+        targets.set(name, {or() { return this; },
+            waitFor: async ({state}) => {
+                const visible = name === "Map appearance" || (name === "Rendering quality" ? rootOpen : submenuOpen);
+                assert.equal(visible, state === "visible", name + " has the requested popup state");
+            },
+            boundingBox: async () => ({x: 10, y: 10, width: 80, height: 30}),
+            focus: async () => { document.activeElement = element; focusedAt = frames; },
+            elementHandle: async () => element});
+    }
+    const page = {
+        getByRole: (_, {name}) => targets.get(name),
+        mouse: {click: async () => { rootOpen = true; }, move: async () => {}},
+        waitForFunction: async (callback, argument) => assert.equal(invoke(callback, argument), true),
+        evaluate: async (callback, argument) => invoke(callback, argument),
+        keyboard: {press: async key => {
+            assert.ok(frames - focusedAt >= 2, "Native menu input cannot precede managed focus settling");
+            keys.push(key);
+            assert.equal(document.activeElement.name, key === "ArrowRight" ? "Rendering quality" : "High quality");
+            if (key === "ArrowRight") submenuOpen = true;
+            else { assert.equal(key, "Enter"); rootOpen = submenuOpen = false; }
+        }}
+    };
+    await performanceModule.exports.menu(page, "High quality", "Rendering quality");
+    assert.deepEqual(keys, ["ArrowRight", "Enter"], "One native activation follows each completed focus barrier");
+    assert.equal(disposed, 2, "Both focus barriers release their target handles");
+}
 async function main() {
+    await menuFocusChecks();
     const f = fixture(), device = await f.adapter.requestDevice(), state = f.state;
     const mapEncoder = device.createCommandEncoder({label: "PixelMap frame"});
     const command = mapEncoder.finish();
