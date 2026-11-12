@@ -51,6 +51,12 @@ if (args.Contains("--terrain-picking", StringComparer.Ordinal))
     return;
 }
 
+if (args.Contains("--gpu-retained-interaction", StringComparer.Ordinal))
+{
+    GpuRetainedInteractionChecks.Run();
+    return;
+}
+
 if (args.Contains("--depth-memory-pressure", StringComparer.Ordinal))
 {
     GpuDepthMemoryChecks.RunPressureChecks();
@@ -239,6 +245,7 @@ TerrainRenderingChecks.Run();
 GpuDepthChecks.Run();
 GpuBuildingDepthChunkChecks.Run();
 GpuTerrainPickingChecks.Run();
+GpuRetainedInteractionChecks.Run();
 GpuDepthMemoryChecks.RunPressureChecks();
 await TerrainTextureCacheChecks.RunAsync();
 GpuBuildingSelectionChecks.Run();
