@@ -42,6 +42,11 @@ default, and checkout identity is checked again after both builds. `--allow-dirt
 permits explicitly exploratory runs whose uncommitted paths are recorded; these
 runs should not be used as published evidence.
 
+The driver runs SDK selection/builds from the harness checkout, records
+`sdkVersion` and `dotnet-info.txt`, and uses that same compiler for both temporary
+hosts. CI installs the declared 10.0.403 SDK in an isolated directory and asserts
+its version, avoiding implicit selection of newer preinstalled runner SDKs.
+
 These measurements establish CPU cost and exact prepared output for the listed
 workloads. They do not measure GPU rasterization, browser scheduling, display FPS,
 network decoding or sustained device thermals. The paired Release AOT workflow in

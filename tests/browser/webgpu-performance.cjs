@@ -386,6 +386,7 @@ async function main() {
     fs.mkdirSync(output, {recursive: true});
     const report = {schema: 1, protocol: "webgpu-native-input-abba-v1", capturedAtUtc: new Date().toISOString(),
         revisions: {baseline: process.env.PERF_BASELINE_REVISION || null, candidate: process.env.PERF_CANDIDATE_REVISION || null},
+        dotnetSdk: {baseline: process.env.PERF_BASELINE_SDK_VERSION || null, candidate: process.env.PERF_CANDIDATE_SDK_VERSION || null},
         viewport, deviceScaleFactor: 1, repetitions, stepsPerSegment: steps, movingMilliseconds: movingMs,
         cpu: os.cpus()[0]?.model, availableParallelism: os.availableParallelism(), browserArgs,
         renderer: "Uno shared WebGPU / SwiftShader Vulkan software adapter", scenarios: selected,

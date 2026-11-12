@@ -35,9 +35,9 @@ def git(root, *args):
     return subprocess.check_output(["git", "-C", str(root), *args], text=True).strip()
 
 
-def run(command, log, env):
+def run(command, log, env, cwd=None):
     with log.open("w") as output:
-        result = subprocess.run([str(x) for x in command], stdout=output, stderr=subprocess.STDOUT, env=env)
+        result = subprocess.run([str(x) for x in command], stdout=output, stderr=subprocess.STDOUT, env=env, cwd=cwd)
     if result.returncode:
         print(log.read_text()[-12000:], flush=True)
         raise RuntimeError(f"Command failed ({result.returncode}); full output: {log}")
@@ -127,11 +127,14 @@ def main():
     # Snapshot once before either build; an editor changing the checkout while the
     # baseline compiles must not silently give the candidate a different harness.
     frozen_sources = {name: (harness / name).read_bytes() for name in HARNESS_FILES}
+    sdk_version = subprocess.check_output([args.dotnet, "--version"], text=True, cwd=harness, env=environment).strip()
+    run([args.dotnet, "--info"], output / "dotnet-info.txt", environment, cwd=harness)
     manifest = {
         "scope": "Native CPU preparation/overlay/picking and source invalidation; no device, GPU timing, browser or display FPS.",
         "order": ["baseline", "candidate", "candidate", "baseline"],
         "warmupFrames": 32, "measuredFramesPerRun": args.samples,
         "tieredCompilation": False, "fontSha256": sha256(args.font),
+        "sdkVersion": sdk_version,
         "platform": platform.platform(), "architecture": platform.machine(),
         "processor": platform.processor(),
         "affinity": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else None,
@@ -160,7 +163,7 @@ def main():
             print(f"Building {variant} from {manifest['sources'][variant]['commit']}...", flush=True)
             run([args.dotnet, "build", frozen / HARNESS_FILES[0], "-c", "Release", "-m:1",
                  "-p:UseSharedCompilation=false", "-p:RendererSourceRoot=" + str(root), "-o", hosts[variant]],
-                output / f"build-{variant}.log", environment)
+                output / f"build-{variant}.log", environment, cwd=harness)
         # The renderer roots are ordinary checkouts. Refuse to publish timing if
         # a concurrent edit or checkout changed them while either build ran.
         for variant, root in roots.items():

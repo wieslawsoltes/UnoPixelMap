@@ -6,6 +6,12 @@ one runner. `.github/workflows/webgpu-performance.yml` builds both packages in
 parallel, checks package integrity, then executes baseline/candidate/candidate/
 baseline (ABBA) for each scene. Application compilation does not overlap timing.
 
+Both publish runners install .NET SDK 10.0.403 in an isolated directory and assert
+the selected version from the source checkout before installing `wasm-tools`.
+The runtime/workloads therefore cannot silently bind to a preinstalled .NET 11
+SDK in the checkout parent or a newer .NET 10 feature band. Package artifacts
+record the selected SDK, and the comparison requires matching 10.0.403 identities.
+
 The default scenes are Pixel pan, Normal pan, Normal orbit and paused Normal
 first-person walking-camera look. Each uses native CDP wheel input through the
 real application adapter, a closed eight-step warm-up and the same measured
