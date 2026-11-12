@@ -707,6 +707,10 @@ async function desktop(browser) {
     try {
         const first = await capture(page, "desktop-pixel");
         assert.ok(await page.evaluate(() => PixelAtlasWebGpu.triangles > 0), "The opening city contains 3D building geometry");
+        const initialPipelines = await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines);
+        assert.equal(initialPipelines.length, 8, "Pixel startup compiles only its six scene and two presentation pipelines");
+        assert.equal(initialPipelines.filter(pipeline => /sun shadows/.test(pipeline.label)).length, 0,
+            "Pixel startup does not compile unused shadow pipelines");
         await page.mouse.move(720, 410);
         await page.mouse.down();
         await page.mouse.move(810, 445, { steps: 8 });
@@ -717,20 +721,34 @@ async function desktop(browser) {
         assert.ok(difference(first, await capture(page, "desktop-camera")) > .03, "Pan and wheel change map geometry");
 
         const styles = [["Normal rendering", "Normal"], ["Minecraft rendering", "Minecraft"], ["Roblox rendering", "Roblox"], ["Pixel art rendering", "Pixel"]];
-        let previous;
+        let previous, smoothPipelines;
         for (const [command, style] of styles) {
             await menu(page, command);
             await awaitFrame(page, (s, expected) => s.style === expected, style);
             const image = await capture(page, "style-" + style.toLowerCase());
             if (previous) assert.ok(difference(previous, image) > .005, "Rendering styles produce distinct map output");
             previous = image;
+            const pipelines = await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines.length);
+            if (style === "Normal") smoothPipelines = pipelines;
+            else assert.equal(pipelines, smoothPipelines,
+                style + ": switching between warmed sample-count variants reuses all compiled pipelines");
         }
         await menu(page, "Normal rendering");
-        let lightingImage;
+        let lightingImage, ultraPipelines;
         for (const quality of ["Balanced", "Ultra", "High"]) {
             await menu(page, quality + " quality", "Rendering quality");
             await awaitFrame(page, (s, expected) => s.quality === expected, quality);
             lightingImage = await capture(page, "quality-" + quality.toLowerCase());
+            const pipelines = await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines);
+            if (quality === "Balanced") assert.equal(pipelines.length, smoothPipelines,
+                "Balanced reuses its 1x scene and the first existing shadow cascade");
+            if (quality === "Ultra") {
+                ultraPipelines = pipelines.length;
+                assert.equal(ultraPipelines, smoothPipelines + 4,
+                    "Ultra compiles only the two newly needed shadow-cascade pairs");
+            }
+            if (quality === "High") assert.equal(pipelines.length, ultraPipelines,
+                "Returning to High reuses compiled pipelines");
         }
         // Dusk changes the sun's elevation, exercising a different caster-depth
         // fit; night also exercises emissive windows through the HDR resolve.
@@ -795,6 +813,8 @@ async function desktop(browser) {
         await capture(page, "resized");
         const gpu = await verifyGpu(page, "desktop");
         assert.ok(gpu.pipelines.some(p => p.samples === 4), "Smooth quality creates multisampled geometry pipelines");
+        assert.equal(gpu.pipelines.length, ultraPipelines,
+            "Lighting, photography, walking and resize reuse the established pipeline cache");
     } catch (error) {
         await saveFailure(page, "desktop", error);
         throw error;

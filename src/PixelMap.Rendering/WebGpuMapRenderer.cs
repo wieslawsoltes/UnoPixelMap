@@ -152,7 +152,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             int width = attachments.Width, height = attachments.Height;
             EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1, smooth ? options.ShadowCascades : 1);
             EnsureAttachments(attachments);
-            EnsurePipelines(targetFormat, samples);
+            EnsurePipelines(targetFormat, samples, smooth);
             UploadPalette(frame.Palette);
             // A new immutable map frame or projection budget replaces the scene
             // streams. Animated overlays keep the same instances, uniforms and draws.
