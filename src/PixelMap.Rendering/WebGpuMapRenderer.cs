@@ -324,29 +324,13 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             palette == PixelStyle.Night ? .6f : 1.1f);
         var sun = Vector3.Normalize(new Vector3(-.45f, -.55f, palette == PixelStyle.Dusk ? .35f : .82f));
         Set4(u, 11, sun.X, sun.Y, sun.Z, smooth ? 1 : 0);
-        Set4(u, 12, 1.0f, palette == PixelStyle.Dusk ? .68f : .94f, palette == PixelStyle.Dusk ? .4f : .82f, .12f);
+        Set4(u, 12, 1.0f, palette == PixelStyle.Dusk ? .68f : .94f, palette == PixelStyle.Dusk ? .4f : .82f, 0);
         var eye = WebGpuShadowCascades.CameraEye(frame);
         Set4(u, 13, eye.X, eye.Y, eye.Z, 0);
         if (smooth)
         {
             var cascades = WebGpuShadowCascades.Create(frame, sun, shadowCascadeCount, shadowSize, options.ShadowDistance);
-            for (int i = 0; i < cascades.Count; i++)
-            {
-                var layer = cascades.Layers[i];
-                var shadow = layer.Matrix;
-                int matrixOffset = i == 0 ? 14 : i == 1 ? 21 : 25;
-                Set4(u, matrixOffset, shadow.M11, shadow.M12, shadow.M13, shadow.M14);
-                Set4(u, matrixOffset + 1, shadow.M21, shadow.M22, shadow.M23, shadow.M24);
-                Set4(u, matrixOffset + 2, shadow.M31, shadow.M32, shadow.M33, shadow.M34);
-                Set4(u, matrixOffset + 3, shadow.M41, shadow.M42, shadow.M43, shadow.M44);
-                u[29 * 4 + i] = layer.Far;
-                u[30 * 4 + i] = layer.TexelSize;
-                u[31 * 4 + i] = layer.InverseDepthRange;
-            }
-            Set4(u, 20, cascades.View.X, cascades.View.Y, cascades.View.Z, cascades.View.W);
-            u[29 * 4 + 3] = cascades.Count;
-            u[30 * 4 + 3] = WebGpuShadowCascades.BlendFraction;
-            u[31 * 4 + 3] = cascades.Near;
+            cascades.WriteUniforms(u);
         }
         Set4(u, 18, attachmentWidth, attachmentHeight, frame.Width, frame.Height);
         Set4(u, 19, frame.PixelSize, t.Perspective ? 0 : 1, (float)palette, attachmentSamples == 1 ? 1 : 0);

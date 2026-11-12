@@ -150,11 +150,12 @@ Roblox vertical terrain faces use explicit outward world-space normals; their
 zero vertical component cannot orient a derivative normal reliably. Top and
 bevel faces retain their geometric normals.
 
-High uses two sun cascades and Ultra uses three; Balanced retains one. Each
+High uses two sun cascades and Ultra uses four; Balanced retains one. Each
 cascade fits a slice of the camera's visible depth range, with finer coverage
 near a physical walking camera. Separate depth-array layers retain the same
-512-byte per-draw uniform contract. Fixed shadow vertex entry points select each
-matrix without overwriting uniforms between encoded passes. Overlapping slices
+512-byte per-draw uniform contract: four affine projections occupy twelve
+four-component rows, with homogeneous W fixed at one. Fixed shadow vertex entry
+points select each matrix without overwriting uniforms between encoded passes. Overlapping slices
 blend across the final 10% of each interval, and bias follows each layer's
 physical texel size. Terrain and building geometry supply the shadow casters.
 Vehicle and route overlays use scene depth; they do not currently cast or
@@ -186,7 +187,7 @@ GL renderer are possible; full-frame bit identity has not been claimed.
 | --- | --- | --- | --- | --- | --- |
 | Balanced | 1 | 1 × 1024 × 1024 | 4 MiB | 2,073,600 | off |
 | High (default) | 4 | 2 × 1536 × 1536 | 18 MiB | 3,686,400 | enabled |
-| Ultra | 4 | 3 × 2048 × 2048 | 48 MiB | 8,294,400 | enabled |
+| Ultra | 4 | 4 × 2048 × 2048 | 64 MiB | 8,294,400 | enabled |
 
 The actual smooth resolution is constrained by both the pixel cap and a
 256 MiB attachment budget. Ultra may therefore render below its requested pixel
@@ -195,7 +196,7 @@ logical projection coordinates remain unchanged. Pixel styles preserve the
 logical grid; Balanced alone may increase their moving pixel size under CPU
 submission pressure.
 
-Shadow storage is bounded separately at 48 MiB and included in nominal resident
+Shadow storage is bounded separately at 64 MiB and included in nominal resident
 bytes. It is not included in the scene attachment budget. Each changed scene
 submits one shadow geometry pass per cascade; unchanged scenes reuse all layers.
 The additional High/Ultra depth work buys finer nearby shadows rather than a
@@ -309,16 +310,24 @@ loss notifications, partial attachment failure and HTML diagnostics during
 managed teardown. It validates the observer protocol; the real browser suite
 separately destroys Uno's actual shared device and checks that map work stops.
 
-The cascade geometry checks pass 300 physical/map, perspective/orthographic,
+The cascade geometry checks pass 400 physical/map, perspective/orthographic,
 desktop/handset and Day/Dusk fits, including overlap coverage, complete offscreen
 caster heights, signed/exaggerated altitude and artwork-unit independence. North
 and south motion at positive/negative mid-latitudes and 80° reduces the worst
 tested fixed-point phase residual from 0.319214 to 0.000122 shadow texel. For the
-street-camera fixture, near-layer spacing is 0.0286 m at High and 0.0144 m at
+street-camera fixture, near-layer spacing is 0.0286 m at High and 0.0215 m at
 Ultra, compared with 0.1562 m for the prior single-map fit. These are projection
 measurements, not measured image quality or hardware throughput.
 
-The six exact production WGSL modules, 26 pipeline variants and 26 encoded
+The four-layer refinement adds 27,542 High-to-Ultra comparisons, including exact
+split/blend boundaries and their adjacent floating-point depths. Both the
+selected layer and every contributing cross-fade layer retain at least High's
+sampling density within the tested shared range. At the 49 m facade fixture,
+High's far layer supplies 1.1003 m per texel and Ultra supplies 0.0521 m. Separate
+checks compare packed three-row affine projections with the original homogeneous
+matrices for receivers and casters, and preserve unrelated uniform fields.
+
+The six exact production WGSL modules, 28 pipeline variants and 28 encoded
 passes pass native Dawn validation on its Null backend. This validates shader
 semantics and binding/command contracts; the Null backend does not execute a
 graphics driver or produce rendering evidence.
@@ -362,8 +371,12 @@ Visual review found that the DPR-2 screenshot contained a 1× map texture even
 though the surrounding Uno UI used native pixels. The viewport fix above and the
 new 31-scenario gate explicitly require native target/scene dimensions at DPR 2,
 including an initial Normal view with a visible map label. Review also identified
-a nearby facade where Ultra's middle cascade had a visible stepped shadow edge;
-functional success alone does not establish that this quality concern is resolved.
+a nearby facade where Ultra's middle cascade had a visible stepped shadow edge.
+Its measured receiver range is approximately 38–60 m. Ultra now preserves High's
+24 m near interval, adds 64 m and 256 m coverage, and extends to 2400 m at street
+level. This targets that facade without reducing near sampling or jumping from
+the second slice directly to the far map. The updated native checks pass;
+the next browser run verifies the actual visual result.
 The flight demo's unavailable external map data leaves uniform ground near its
 airport origin in the offline fixture. Its screenshot establishes route/aircraft
 overlay and playback behavior, not detailed airport terrain quality.

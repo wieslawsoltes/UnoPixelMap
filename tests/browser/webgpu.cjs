@@ -399,7 +399,7 @@ async function verifyGpu(page, name) {
 }
 
 function verifyShadowLayers(evidence, quality, name) {
-    const presets = { Balanced: { size: 1024, layers: 1 }, High: { size: 1536, layers: 2 }, Ultra: { size: 2048, layers: 3 } };
+    const presets = { Balanced: { size: 1024, layers: 1 }, High: { size: 1536, layers: 2 }, Ultra: { size: 2048, layers: 4 } };
     const expected = presets[quality];
     assert.ok(expected, name + ": shadow quality is recognized");
     const texture = evidence.shadowTextures.findLast(record => !record.destroyed);

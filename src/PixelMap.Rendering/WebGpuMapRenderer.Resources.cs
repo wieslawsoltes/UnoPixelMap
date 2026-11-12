@@ -181,8 +181,8 @@ public sealed unsafe partial class WebGpuMapRenderer
     private void EnsureShadow(int size, int count)
     {
         if (shadowSize == size && shadowCascadeCount == count) return;
-        if (count is < 1 or > WebGpuShadowCascades.MaximumCount || (long)size * size * count * 4 > 48L * 1024 * 1024)
-            throw new NotSupportedException("The sun shadow array exceeds its bounded 48 MiB budget.");
+        if (count is < 1 or > WebGpuShadowCascades.MaximumCount || (long)size * size * count * 4 > 64L * 1024 * 1024)
+            throw new NotSupportedException("The sun shadow array exceeds its bounded 64 MiB budget.");
         Release(ref commonGroup);
         ReleaseShadowLayers();
         Release(ref shadowView);

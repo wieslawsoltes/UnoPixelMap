@@ -10,10 +10,10 @@ internal static class WebGpuMapShaders
             view: vec4f, ground: vec4f, lens: vec4f, world: vec4f,
             sky: vec4f, horizon: vec4f, groundColor: vec4f,
             quality: vec4f, sun: vec4f, sunColor: vec4f, eye: vec4f,
-            shadow0: vec4f, shadow1: vec4f, shadow2: vec4f, shadow3: vec4f,
+            shadowRow0: vec4f, shadowRow1: vec4f, shadowRow2: vec4f, shadowRow3: vec4f,
             post: vec4f, misc: vec4f, shadowView: vec4f,
-            shadowB0: vec4f, shadowB1: vec4f, shadowB2: vec4f, shadowB3: vec4f,
-            shadowC0: vec4f, shadowC1: vec4f, shadowC2: vec4f, shadowC3: vec4f,
+            shadowRow4: vec4f, shadowRow5: vec4f, shadowRow6: vec4f, shadowRow7: vec4f,
+            shadowRow8: vec4f, shadowRow9: vec4f, shadowRow10: vec4f, shadowRow11: vec4f,
             shadowSplits: vec4f, shadowTexels: vec4f, shadowDepths: vec4f,
         }
         @group(0) @binding(0) var<uniform> f: Frame;
@@ -22,6 +22,9 @@ internal static class WebGpuMapShaders
         @group(0) @binding(3) var roomSampler: sampler;
         @group(0) @binding(4) var shadows: texture_depth_2d_array;
         @group(0) @binding(5) var shadowSampler: sampler_comparison;
+        // Matches WebGpuShadowCascades.BlendFraction. Four metadata components
+        // belong to the four layers; count and near are in eye.w and sunColor.w.
+        const SHADOW_BLEND_FRACTION: f32 = 0.10;
 
         fn style() -> u32 { return u32(f.ground.w + 0.5); }
         fn smoothStyle() -> bool { return style() == 1u || style() == 3u; }
@@ -37,9 +40,14 @@ internal static class WebGpuMapShaders
             return vec4f(2.0*s.x/f.view.x-s.z, s.z-2.0*s.y/f.view.y, (depth+s.z)*0.5, s.z);
         }
         fn shadowPosition(p: vec3f, layer: u32) -> vec4f {
-            if(layer==1u){return mat4x4f(f.shadowB0,f.shadowB1,f.shadowB2,f.shadowB3)*vec4f(p,1.0);}
-            if(layer==2u){return mat4x4f(f.shadowC0,f.shadowC1,f.shadowC2,f.shadowC3)*vec4f(p,1.0);}
-            return mat4x4f(f.shadow0,f.shadow1,f.shadow2,f.shadow3)*vec4f(p,1.0);
+            var x=f.shadowRow0; var y=f.shadowRow1; var z=f.shadowRow2;
+            if(layer==1u){x=f.shadowRow3;y=f.shadowRow4;z=f.shadowRow5;}
+            if(layer==2u){x=f.shadowRow6;y=f.shadowRow7;z=f.shadowRow8;}
+            if(layer==3u){x=f.shadowRow9;y=f.shadowRow10;z=f.shadowRow11;}
+            let point=vec4f(p,1.0);
+            // Directional light projections are affine: three explicit rows
+            // reproduce the previous mat4 transform with homogeneous W = 1.
+            return vec4f(dot(x,point),dot(y,point),dot(z,point),1.0);
         }
         fn worldPosition(p: vec2f, z: f32, origin: vec3f) -> vec3f {
             return vec3f(origin.x+p.x*origin.z, -(origin.y+p.y*origin.z), z);
@@ -70,18 +78,18 @@ internal static class WebGpuMapShaders
         }
         fn shadowVisibility(world: vec3f, normal: vec3f) -> f32 {
             if(f.sun.w<0.5){return 1.0;}
-            let count=u32(f.shadowSplits.w+0.5);
+            let count=u32(f.eye.w+0.5);
             let depth=dot(f.shadowView,vec4f(world,1.0));
-            if(count==0u||depth<f.shadowDepths.w||depth>f.shadowSplits[count-1u]){return 1.0;}
+            if(count==0u||depth<f.sunColor.w||depth>f.shadowSplits[count-1u]){return 1.0;}
             var layer=0u;
-            for(var i=0u;i<2u;i++){
+            for(var i=0u;i<3u;i++){
                 if(layer+1u<count&&depth>f.shadowSplits[layer]){layer+=1u;}
             }
             let result=sampleShadow(world,normal,layer);
-            var start=f.shadowDepths.w;
+            var start=f.sunColor.w;
             if(layer>0u){start=f.shadowSplits[layer-1u];}
             let end=f.shadowSplits[layer];
-            let blendStart=end-(end-start)*f.shadowTexels.w;
+            let blendStart=end-(end-start)*SHADOW_BLEND_FRACTION;
             if(depth<=blendStart){return result;}
             var next=1.0;
             if(layer+1u<count){next=sampleShadow(world,normal,layer+1u);}
@@ -217,6 +225,9 @@ internal static class WebGpuMapShaders
         @vertex fn shadow2_vs(tile:Tile,@builtin(vertex_index) id:u32)->@builtin(position) vec4f {
             return shadowPosition(makeVertex(tile,id).world,2u);
         }
+        @vertex fn shadow3_vs(tile:Tile,@builtin(vertex_index) id:u32)->@builtin(position) vec4f {
+            return shadowPosition(makeVertex(tile,id).world,3u);
+        }
         fn elevationColor(altitude:f32)->vec3f{
             var stops=array<f32,7>(-500.0,0.0,500.0,1500.0,3000.0,4500.0,6000.0);
             var colors=array<vec3f,7>(vec3f(66,106,131),vec3f(113,156,120),vec3f(166,180,124),
@@ -322,6 +333,7 @@ internal static class WebGpuMapShaders
         @vertex fn shadow0_vs(v:Input)->@builtin(position) vec4f {return buildingShadow(v,0u);}
         @vertex fn shadow1_vs(v:Input)->@builtin(position) vec4f {return buildingShadow(v,1u);}
         @vertex fn shadow2_vs(v:Input)->@builtin(position) vec4f {return buildingShadow(v,2u);}
+        @vertex fn shadow3_vs(v:Input)->@builtin(position) vec4f {return buildingShadow(v,3u);}
         fn windowCoverage(room:vec2f,footprint:vec2f)->vec2f {
             let start=vec2f(0.17,0.23); let duty=vec2f(0.76,0.75)-start;
             let width=max(footprint,vec2f(0.0001));

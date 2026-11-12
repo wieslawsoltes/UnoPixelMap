@@ -8,7 +8,7 @@ namespace PixelMap.Rendering;
 /// light-depth interval, including models rejected by the viewer's index selection.</summary>
 internal sealed class WebGpuShadowCascades
 {
-    internal const int MaximumCount = 3;
+    internal const int MaximumCount = 4;
     internal const float BlendFraction = .10f;
     internal Vector3 Eye { get; }
     internal Vector4 View { get; }
@@ -20,6 +20,36 @@ internal sealed class WebGpuShadowCascades
     private WebGpuShadowCascades(Vector3 eye, Vector4 view, float near,
         WebGpuShadowCascade[] layers, WebGpuShadowBounds bounds)
         => (Eye, View, Near, Layers, Bounds) = (eye, view, near, layers, bounds);
+
+    /// <summary>Pack four affine world-to-shadow transforms into the existing
+    /// 512-byte frame ABI. Three dot-product rows replace each four-column matrix;
+    /// homogeneous W is exactly one for directional orthographic light fits.</summary>
+    internal void WriteUniforms(Span<float> frame)
+    {
+        if (frame.Length < 128) throw new ArgumentException("A WebGPU frame slot contains 128 floats.", nameof(frame));
+        for (int i = 0; i < Count; i++)
+        {
+            var layer = Layers[i];
+            var m = layer.Matrix;
+            Row(frame, i * 3, new(m.M11, m.M21, m.M31, m.M41));
+            Row(frame, i * 3 + 1, new(m.M12, m.M22, m.M32, m.M42));
+            Row(frame, i * 3 + 2, new(m.M13, m.M23, m.M33, m.M43));
+            frame[29 * 4 + i] = layer.Far;
+            frame[30 * 4 + i] = layer.TexelSize;
+            frame[31 * 4 + i] = layer.InverseDepthRange;
+        }
+        frame[12 * 4 + 3] = Near;
+        frame[13 * 4 + 3] = Count;
+        frame[20 * 4] = View.X; frame[20 * 4 + 1] = View.Y;
+        frame[20 * 4 + 2] = View.Z; frame[20 * 4 + 3] = View.W;
+
+        static void Row(Span<float> target, int row, Vector4 values)
+        {
+            int offset = (row < 4 ? row + 14 : row + 17) * 4;
+            target[offset] = values.X; target[offset + 1] = values.Y;
+            target[offset + 2] = values.Z; target[offset + 3] = values.W;
+        }
+    }
 
     internal static Vector3 CameraEye(GpuMapFrame frame)
     {
@@ -37,7 +67,7 @@ internal sealed class WebGpuShadowCascades
         int count, int resolution, float shadowDistance)
     {
         if (count is < 1 or > MaximumCount || resolution < 16 || shadowDistance <= 0)
-            throw new ArgumentOutOfRangeException(nameof(count), "Shadow fits require one to three layers and a positive range/resolution.");
+            throw new ArgumentOutOfRangeException(nameof(count), "Shadow fits require one to four layers and a positive range/resolution.");
         sun = Vector3.Normalize(sun);
         var bounds = FindBounds(frame);
         var eye = CameraEye(frame);
@@ -63,18 +93,22 @@ internal sealed class WebGpuShadowCascades
             // contains no receiver with a meaningful longitudinal interval.
             far = near + 1;
         }
-        if (far - near > shadowDistance)
+        // Additional quality layers extend the High interval at its far end.
+        // Moving its near end would put the same receiver into a different,
+        // potentially coarser first layer when selecting Ultra.
+        float priorityDistance = count > 2 ? Math.Min(shadowDistance, WebGpuRenderOptions.For(WebGpuQuality.High).ShadowDistance) : shadowDistance;
+        if (far - near > priorityDistance)
         {
             // A free eye prioritizes its nearest receivers. A map lens retains a
             // bounded interval around its focus even when zoomed far above Earth.
             float focus = perspective ? focalDistance : 0;
-            float start = frame.Camera.IsFreeLook ? near : Math.Clamp(focus - shadowDistance * .5f, near, far - shadowDistance);
+            float start = frame.Camera.IsFreeLook ? near : Math.Clamp(focus - priorityDistance * .5f, near, far - priorityDistance);
             near = start;
-            far = start + shadowDistance;
+            far = Math.Min(far, start + shadowDistance);
         }
 
         Span<float> splits = stackalloc float[MaximumCount];
-        Split(near, far, perspective, count, splits);
+        Split(near, far, Math.Min(far - near, priorityDistance), perspective, count, splits);
         float halfWidth = perspective ? (float)(frame.Width / (2 * MapCamera.Focal(frame.Height))) : frame.Width / (2 * logicalPpm);
         float halfHeight = perspective ? (float)(frame.Height / (2 * MapCamera.Focal(frame.Height))) : frame.Height / (2 * logicalPpm);
         var lightRight = Vector3.Normalize(Vector3.Cross(Math.Abs(sun.Z) < .99f ? Vector3.UnitZ : Vector3.UnitY, sun));
@@ -139,15 +173,24 @@ internal sealed class WebGpuShadowCascades
         return new(eye, view, near, layers, bounds);
     }
 
-    private static void Split(float near, float far, bool perspective, int count, Span<float> splits)
+    private static void Split(float near, float far, float priorityRange, bool perspective, int count, Span<float> splits)
     {
         float range = far - near;
-        if (count == 2)
-            splits[0] = perspective ? near + Math.Min(range * .35f, Math.Max(24, Math.Max(0, near) * 7)) : near + range * .5f;
+        if (count >= 2)
+            splits[0] = perspective ? near + Math.Min(priorityRange * .35f, Math.Max(24, Math.Max(0, near) * 7)) : near + priorityRange * .5f;
         if (count == 3)
         {
-            splits[0] = perspective ? near + Math.Min(range * .25f, Math.Max(16, Math.Max(0, near) * 3)) : near + range / 3;
             splits[1] = perspective ? near + Math.Min(range * .65f, Math.Max(96, Math.Max(0, near) * 15)) : near + range * (2f / 3);
+        }
+        if (count == 4)
+        {
+            // At street level these end at 24, 64 and 256 metres. The middle
+            // layers cover nearby facades without replacing the fine first fit
+            // or making the next transition jump directly to the far map.
+            splits[1] = perspective ? near + Math.Min(range * .60f, Math.Max(64, Math.Max(0, near) * 15)) :
+                splits[0] + (far - splits[0]) / 3;
+            splits[2] = perspective ? near + Math.Min(range * .82f, Math.Max(256, Math.Max(0, near) * 31)) :
+                splits[0] + (far - splits[0]) * (2f / 3);
         }
         splits[count - 1] = far;
     }

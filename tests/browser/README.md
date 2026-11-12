@@ -34,7 +34,7 @@ The software CI profile uses ANGLE's Vulkan backend and an explicit SwiftShader 
 
 Application captures await shader queries, GPU queue completion and compositor frames within a joint 60-second timeout. Errors, lost devices, visible failure panels, transparent/blank output and unexpected readbacks fail the checks. The deliberate device-loss scenario separately requires the managed scene to report failure and stop submitting map work.
 
-The shadow probe follows actual depth textures, per-layer views and submitted render passes. Balanced must draw one layer, High two and Ultra three; allocated but unused layers and repeatedly drawing into layer zero fail. Dusk, night and daylight captures exercise lighting changes. Paused close-up walking captures retain High and Ultra output for visual review.
+The shadow probe follows actual depth textures, per-layer views and submitted render passes. Balanced must draw one layer, High two and Ultra four; allocated but unused layers and repeatedly drawing into layer zero fail. Dusk, night and daylight captures exercise lighting changes. Paused close-up walking captures retain High and Ultra output for visual review.
 
 Journey checks select the real 0.25× playback control, require motion, pause before the destination and require unchanged progress throughout GPU completion and capture. They also verify that Pause's accessibility state changes from disabled to enabled. Independent suites and route modes retain every failure and continue through their remaining cases; any failure still fails the run.
 
