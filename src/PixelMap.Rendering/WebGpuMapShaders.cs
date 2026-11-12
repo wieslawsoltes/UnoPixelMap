@@ -4,7 +4,16 @@ namespace PixelMap.Rendering;
 // framebuffer readback or JavaScript drawing context is involved in this path.
 internal static class WebGpuMapShaders
 {
-    internal const string Common = """
+    internal const string ColorSpace = """
+        fn toLinear(c: vec3f) -> vec3f {
+            return select(c/12.92, pow((c+0.055)/1.055, vec3f(2.4)), c > vec3f(0.04045));
+        }
+        fn toSrgb(c: vec3f) -> vec3f {
+            return select(c*12.92, 1.055*pow(max(c, vec3f(0.0)), vec3f(1.0/2.4))-0.055, c > vec3f(0.0031308));
+        }
+        """;
+
+    internal const string Common = ColorSpace + """
         struct Frame {
             screenX: vec4f, screenY: vec4f, screenW: vec4f,
             view: vec4f, ground: vec4f, lens: vec4f, world: vec4f,
@@ -52,12 +61,6 @@ internal static class WebGpuMapShaders
         fn worldPosition(p: vec2f, z: f32, origin: vec3f) -> vec3f {
             return vec3f(origin.x+p.x*origin.z, -(origin.y+p.y*origin.z), z);
         }
-        fn toLinear(c: vec3f) -> vec3f {
-            return select(c/12.92, pow((c+0.055)/1.055, vec3f(2.4)), c > vec3f(0.04045));
-        }
-        fn toSrgb(c: vec3f) -> vec3f {
-            return select(c*12.92, 1.055*pow(max(c, vec3f(0.0)), vec3f(1.0/2.4))-0.055, c > vec3f(0.0031308));
-        }
         fn sampleShadow(world: vec3f, normal: vec3f, layer: u32) -> f32 {
             let ndl=clamp(dot(normal,f.sun.xyz),0.0,1.0);
             let texelWorld=f.shadowTexels[layer];
@@ -95,7 +98,7 @@ internal static class WebGpuMapShaders
             if(layer+1u<count){next=sampleShadow(world,normal,layer+1u);}
             return mix(result,next,smoothstep(blendStart,end,depth));
         }
-        fn lighting(albedoSrgb: vec3f, world: vec3f, normalInput: vec3f, roughness: f32, metallic: f32, emission: vec3f) -> vec3f {
+        fn lightingLinear(albedoLinear: vec3f, world: vec3f, normalInput: vec3f, roughness: f32, metallic: f32, emission: vec3f) -> vec3f {
             let normal = normalize(normalInput);
             let view = normalize(f.eye.xyz-world);
             let light = normalize(f.sun.xyz);
@@ -104,7 +107,7 @@ internal static class WebGpuMapShaders
             let ndv = max(dot(normal,view),0.001);
             let ndh = max(dot(normal,halfDirection),0.0);
             let vdh = max(dot(view,halfDirection),0.0);
-            let base = toLinear(albedoSrgb);
+            let base = albedoLinear;
             let f0 = mix(vec3f(0.04),base,metallic);
             let fresnel = f0+(vec3f(1.0)-f0)*pow(1.0-vdh,5.0);
             let a = max(0.045,roughness*roughness);
@@ -122,6 +125,9 @@ internal static class WebGpuMapShaders
             let distance = length(f.eye.xyz-world);
             let fog = 1.0-exp(-distance*f.quality.y*exp(-max(world.z,0.0)*0.00032));
             return mix(direct+ambient+emission,toLinear(f.horizon.rgb)*0.9,clamp(fog,0.0,0.92));
+        }
+        fn lighting(albedoSrgb: vec3f, world: vec3f, normalInput: vec3f, roughness: f32, metallic: f32, emission: vec3f) -> vec3f {
+            return lightingLinear(toLinear(albedoSrgb),world,normalInput,roughness,metallic,emission);
         }
         fn material(id: u32, part: i32) -> vec3f {
             return textureLoad(palette, vec2i(part,i32(id)),0).bgr;
@@ -279,7 +285,7 @@ internal static class WebGpuMapShaders
         }
         """;
 
-    internal const string Buildings = Common + """
+    internal const string Buildings = Common + WebGpuFacadeShading.Wgsl + """
         @group(1) @binding(0) var<storage,read> models:array<vec4f>;
         struct Input {
             @location(0) position:vec2f, @location(1) surface:vec3f,
@@ -344,6 +350,7 @@ internal static class WebGpuMapShaders
             let footprint=abs(dpdx(v.facade))+abs(dpdy(v.facade));
             let face=v.model.z; let seed=v.model.x; let mat=v.model.y;
             var color=material(mat,select(2,0,face==1u));
+            var filteredAlbedo=vec3f(0.0);
             var roughness=0.82; var metal=0.0; var emission=vec3f(0.0);
             if(face!=0u){
                 if(style()==2u){let cell=fract(v.facade*0.5);if(min(min(cell.x,1.0-cell.x),min(cell.y,1.0-cell.y))<0.06){color*=0.78;}}
@@ -362,10 +369,13 @@ internal static class WebGpuMapShaders
                     color*=select(1.0,0.76,seam<0.055);
                     if((i32(floor(v.facade.x*0.5))+i32(floor(v.facade.y*0.5)))%3==0){color*=0.94;}
                 }else if(style()==3u){
-                    let pane=fract(v.facade/vec2f(2.8,3.6));
-                    let glass=pane.x>0.18&&pane.x<0.82&&pane.y>0.24&&pane.y<0.78;
-                    color=clamp(wall*1.12+vec3f(10.0/255.0),vec3f(0.0),vec3f(1.0));
-                    if(glass){color=mix(material(mat,5),vec3f(225,246,250)/255.0,0.12+pane.y*0.22);roughness=0.16;metal=0.2;}else{roughness=0.32;}
+                    let surface=robloxFacade(v.facade/vec2f(2.8,3.6),footprint/vec2f(2.8,3.6),wall,material(mat,5));
+                    filteredAlbedo=surface.albedo;roughness=surface.roughness;metal=surface.metallic;
+                }else if(style()==1u){
+                    let roomMeters=vec2f(3.2+f32((seed>>2u)&3u)*0.6,3.2+f32(seed&3u)*0.22);
+                    let surface=normalFacade(v.facade/roomMeters,footprint/roomMeters,seed,
+                        wall,material(mat,5),material(mat,6),f.misc.z>0.5);
+                    filteredAlbedo=surface.albedo;roughness=surface.roughness;metal=surface.metallic;emission=surface.emission;
                 }else{
                     let floorMeters=3.2+f32(seed&3u)*0.22;
                     let bayMeters=3.2+f32((seed>>2u)&3u)*0.6;
@@ -381,7 +391,6 @@ internal static class WebGpuMapShaders
                             let lamps=textureSampleLevel(rooms,roomSampler,(room+vec2f(f32(seed),0.0))/vec2f(256.0,16.0),lod).g;
                             color=mix(wall,mix(material(mat,5),material(mat,6),lamps),coverage);
                         }else if(glass){color=window;}
-                        if(glass&&style()==1u){roughness=0.18;metal=0.28;if(lit&&f.misc.z>0.5){emission=toLinear(window)*2.5;}}
                     }else{
                         if(v.wall.y<0.01||v.building.x*f.ground.z*f.lens.x<0.35){discard;}
                         let floorPixels=max(0.01,f.ground.z*f.lens.x*floorMeters);
@@ -398,7 +407,11 @@ internal static class WebGpuMapShaders
                     }
                 }
             }
-            if(smoothStyle()){color=lighting(color,v.world,v.normal,roughness,metal,emission);}
+            if(smoothStyle()){
+                var albedo=filteredAlbedo;
+                if(face!=0u){albedo=toLinear(color);}
+                color=lightingLinear(albedo,v.world,v.normal,roughness,metal,emission);
+            }
             return vec4f(color,1.0);
         }
         """;
