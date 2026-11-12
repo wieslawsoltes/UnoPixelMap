@@ -2,6 +2,12 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--webgpu-bloom", StringComparer.Ordinal))
+{
+    WebGpuBloomChecks.Run();
+    return;
+}
+
 if (args.Contains("--webgpu-overlay", StringComparer.Ordinal))
 {
     WebGpuOverlayChecks.Run();
