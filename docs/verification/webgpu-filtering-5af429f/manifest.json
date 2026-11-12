@@ -1,0 +1,562 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "5af429f94d016364f840df0f22d0fc8c02e010c4",
+  "sourceTree": "2dc51e10eb271af91f40fe6e13bf33cda6c10413",
+  "baseCommit": "c6a26075b5767e2aa82e87e949194e82c0e9cb1e",
+  "ciCheckoutCommit": "51e4a6babf33fd320e072fe16665d099ebc4c295",
+  "ciCheckoutTree": "2dc51e10eb271af91f40fe6e13bf33cda6c10413",
+  "checkoutTreeEqualsSource": true,
+  "checkoutParents": [
+    "c6a26075b5767e2aa82e87e949194e82c0e9cb1e",
+    "5af429f94d016364f840df0f22d0fc8c02e010c4"
+  ],
+  "checkoutMetadataUrl": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/git/commits/51e4a6babf33fd320e072fe16665d099ebc4c295",
+  "pullRequest": "https://github.com/wieslawsoltes/UnoPixelMap/pull/1",
+  "workflow": {
+    "runNumber": 18,
+    "runId": 43167877049,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43167877049",
+    "jobs": {
+      "regression": {
+        "id": 131013902327,
+        "conclusion": "success"
+      },
+      "presentation": {
+        "id": 131013902682,
+        "conclusion": "success"
+      },
+      "Debug": {
+        "id": 131014155874,
+        "conclusion": "success",
+        "browserScenarios": 34
+      },
+      "Release": {
+        "id": 131014155567,
+        "conclusion": "success",
+        "browserScenarios": 34
+      }
+    }
+  },
+  "originalEvidenceArtifacts": {
+    "Debug": {
+      "artifactId": 13921631207,
+      "filename": "unopixelmap-run18-debug.zip",
+      "bytes": 19762418,
+      "sha256": "7fe252f64d789e9886c5cf904c42adf51e9ce9b6ea398d4cf66fa00a2944b4a5",
+      "expectedSha256": "7fe252f64d789e9886c5cf904c42adf51e9ce9b6ea398d4cf66fa00a2944b4a5",
+      "digestVerified": true
+    },
+    "Release": {
+      "artifactId": 13922031027,
+      "filename": "unopixelmap-run18-release.zip",
+      "bytes": 19717112,
+      "sha256": "f3c2b231ce82d36cc563bc6d04c9ac29c0222f41a4cadca47e2aa99b1c56071d",
+      "expectedSha256": "f3c2b231ce82d36cc563bc6d04c9ac29c0222f41a4cadca47e2aa99b1c56071d",
+      "digestVerified": true
+    }
+  },
+  "publishArtifacts": {
+    "Debug": {
+      "artifactId": 13921496627,
+      "package": "package_b9602cef9f27a7baef439daa968f9dfd096db06726d95eb47a8292b6e294ebb9",
+      "bootEntryCount": 89,
+      "compressedFileCount": 210
+    },
+    "Release": {
+      "artifactId": 13921761583,
+      "package": "package_f4e2ee2f71ba27aac034fbc11864b255497cc82ab237a2c84b2467a416926fc1",
+      "bootEntryCount": 73,
+      "compressedFileCount": 254
+    }
+  },
+  "shaderFixtureEquality": {
+    "byteIdentical": true,
+    "sha256": "d5af65aced48c6189aed990b32150d2d7814a99c38e4d25d0b70bf28f1ab8280",
+    "Debug": {
+      "configuration": "Debug",
+      "artifactId": 13921631207,
+      "entry": "webgpu-evidence/shader-fixtures.json",
+      "entryBytes": 3515,
+      "entrySha256": "d5af65aced48c6189aed990b32150d2d7814a99c38e4d25d0b70bf28f1ab8280",
+      "zipEntryModified": "2026-11-12T06:29:44",
+      "zipTimestampTimeZone": "not encoded in ZIP"
+    },
+    "Release": {
+      "configuration": "Release",
+      "artifactId": 13922031027,
+      "entry": "webgpu-evidence/shader-fixtures.json",
+      "entryBytes": 3515,
+      "entrySha256": "d5af65aced48c6189aed990b32150d2d7814a99c38e4d25d0b70bf28f1ab8280",
+      "zipEntryModified": "2026-11-12T06:37:50",
+      "zipTimestampTimeZone": "not encoded in ZIP"
+    }
+  },
+  "captureTimeMeaning": "Original ZIP entry filesystem modification times are preserved. ZIP contains no timezone. Report frame identifiers match selected trace submission identifiers; deviceInfo.timeMs is not a capture timestamp.",
+  "integrityScope": "Every retained file except manifest.json itself is hashed below. Original payload hashes inside gpu-traces.zip are verified independently of ZIP compression.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 8283,
+      "sha256": "12c53fc996ea6d1d966bd163dd35c68bd73d8fbff203beac0b52ddd1591a0bbc",
+      "source": {
+        "kind": "derived narrative",
+        "sources": [
+          "debug-report.json",
+          "release-report.json",
+          "shader-fixtures.json",
+          "null-validation.json",
+          "gpu-traces.zip",
+          "metrics.json"
+        ]
+      }
+    },
+    {
+      "path": "debug-report.json",
+      "bytes": 33145,
+      "sha256": "691641bfe7fa53ab0b433445204df9c224994388d82f705ce680ae28426c8844",
+      "source": {
+        "configuration": "Debug",
+        "artifactId": 13921631207,
+        "entry": "webgpu-evidence/report.json",
+        "entryBytes": 33145,
+        "entrySha256": "691641bfe7fa53ab0b433445204df9c224994388d82f705ce680ae28426c8844",
+        "zipEntryModified": "2026-11-12T06:39:44",
+        "zipTimestampTimeZone": "not encoded in ZIP"
+      }
+    },
+    {
+      "path": "free-roam-walk-ultra.png",
+      "bytes": 208097,
+      "sha256": "31e7245e81c3218b772ecb7ebbabfa88630d814e05e9f653b5d450adf95c06ea",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/free-roam-walk-ultra.png",
+        "entryBytes": 208097,
+        "entrySha256": "31e7245e81c3218b772ecb7ebbabfa88630d814e05e9f653b5d450adf95c06ea",
+        "zipEntryModified": "2026-11-12T06:41:38",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 1200,
+          "height": 800
+        }
+      }
+    },
+    {
+      "path": "free-roam-walk.png",
+      "bytes": 222393,
+      "sha256": "e35ee2f2b45e8bbd8c12ef373e92c589e85524f5a127cc68bde3c040f6afc986",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/free-roam-walk.png",
+        "entryBytes": 222393,
+        "entrySha256": "e35ee2f2b45e8bbd8c12ef373e92c589e85524f5a127cc68bde3c040f6afc986",
+        "zipEntryModified": "2026-11-12T06:41:28",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 1200,
+          "height": 800
+        }
+      }
+    },
+    {
+      "path": "gpu-traces.zip",
+      "bytes": 301364,
+      "sha256": "1446fdd3ef1ecb119ca233e491bfed1f31283de5dfc8be9330127c55ada40711",
+      "format": "ZIP_DEFLATED",
+      "uncompressedBytes": 12399692,
+      "entries": [
+        {
+          "entry": "release/style-normal-gpu.json",
+          "bytes": 821704,
+          "sha256": "1b2afc04fe70bc2d4d577a21143bc17d7ed3ede3a28ec8bf2731f112da2c75ed",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/style-normal-gpu.json",
+            "entryBytes": 821704,
+            "entrySha256": "1b2afc04fe70bc2d4d577a21143bc17d7ed3ede3a28ec8bf2731f112da2c75ed",
+            "zipEntryModified": "2026-11-12T06:38:30",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/style-roblox-gpu.json",
+          "bytes": 1597578,
+          "sha256": "b0bb402770441fb52e8d4a98337be2bf757bfb2651977574792b39788de2e74c",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/style-roblox-gpu.json",
+            "entryBytes": 1597578,
+            "entrySha256": "b0bb402770441fb52e8d4a98337be2bf757bfb2651977574792b39788de2e74c",
+            "zipEntryModified": "2026-11-12T06:38:46",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/lighting-night-gpu.json",
+          "bytes": 1153293,
+          "sha256": "26910dc7220fb81ea8eae050e9db99b1e188206bca14a738c3125c2a90271142",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/lighting-night-gpu.json",
+            "entryBytes": 1153293,
+            "entrySha256": "26910dc7220fb81ea8eae050e9db99b1e188206bca14a738c3125c2a90271142",
+            "zipEntryModified": "2026-11-12T06:39:38",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/photograph-normal-gpu.json",
+          "bytes": 1487274,
+          "sha256": "e1f5dca74b755dbbb7fcef568f663025df6a7463ff63d60cb6a90df29a80d660",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/photograph-normal-gpu.json",
+            "entryBytes": 1487274,
+            "entrySha256": "e1f5dca74b755dbbb7fcef568f663025df6a7463ff63d60cb6a90df29a80d660",
+            "zipEntryModified": "2026-11-12T06:40:04",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/photograph-pixel-gpu.json",
+          "bytes": 979136,
+          "sha256": "7026bdd7357c56fe187d5faacf236707044385c39d96d0cf2b2893c2d23b16c8",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/photograph-pixel-gpu.json",
+            "entryBytes": 979136,
+            "entrySha256": "7026bdd7357c56fe187d5faacf236707044385c39d96d0cf2b2893c2d23b16c8",
+            "zipEntryModified": "2026-11-12T06:40:10",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/free-roam-walk-gpu.json",
+          "bytes": 442251,
+          "sha256": "f26d53567b82b169c923149265fbcc00d169460c8f0ae66363f7a238dda02b80",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/free-roam-walk-gpu.json",
+            "entryBytes": 442251,
+            "entrySha256": "f26d53567b82b169c923149265fbcc00d169460c8f0ae66363f7a238dda02b80",
+            "zipEntryModified": "2026-11-12T06:41:28",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/free-roam-walk-ultra-gpu.json",
+          "bytes": 368529,
+          "sha256": "ad2ffac7db0669b1f21211123d28455eaa93766d1abc66a63a95621ab07b152f",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/free-roam-walk-ultra-gpu.json",
+            "entryBytes": 368529,
+            "entrySha256": "ad2ffac7db0669b1f21211123d28455eaa93766d1abc66a63a95621ab07b152f",
+            "zipEntryModified": "2026-11-12T06:41:38",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/mobile-normal-initial-high-dpi-gpu.json",
+          "bytes": 473370,
+          "sha256": "382b7bae83c4e8af82287c9070a8fb4bbd5ba25c2110a1c023eae5f848de2500",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/mobile-normal-initial-high-dpi-gpu.json",
+            "entryBytes": 473370,
+            "entrySha256": "382b7bae83c4e8af82287c9070a8fb4bbd5ba25c2110a1c023eae5f848de2500",
+            "zipEntryModified": "2026-11-12T06:44:14",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/desktop-gpu.json",
+          "bytes": 774063,
+          "sha256": "9ea1f84e1f7833a9bcece886367dbc6831aafe291c9df0e1cb7970b3599d867c",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/desktop-gpu.json",
+            "entryBytes": 774063,
+            "entrySha256": "9ea1f84e1f7833a9bcece886367dbc6831aafe291c9df0e1cb7970b3599d867c",
+            "zipEntryModified": "2026-11-12T06:41:58",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/mobile-gpu.json",
+          "bytes": 703818,
+          "sha256": "5208a183feb7a430b2be6cebe861e80099cd5cc9ef94d3d11069d68c3469347d",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/mobile-gpu.json",
+            "entryBytes": 703818,
+            "entrySha256": "5208a183feb7a430b2be6cebe861e80099cd5cc9ef94d3d11069d68c3469347d",
+            "zipEntryModified": "2026-11-12T06:44:52",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "release/quality-ultra-gpu.json",
+          "bytes": 883905,
+          "sha256": "68aff633de6f3acfcdc261d7236504d823dbbb744c549d85c66ab2a6e985064a",
+          "source": {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/quality-ultra-gpu.json",
+            "entryBytes": 883905,
+            "entrySha256": "68aff633de6f3acfcdc261d7236504d823dbbb744c549d85c66ab2a6e985064a",
+            "zipEntryModified": "2026-11-12T06:39:14",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "debug/style-normal-gpu.json",
+          "bytes": 821696,
+          "sha256": "5d3825a7b5f568d3ae0b28e3faf89ffdd38e64b9aca59a1decdaa92e96cadba8",
+          "source": {
+            "configuration": "Debug",
+            "artifactId": 13921631207,
+            "entry": "webgpu-evidence/style-normal-gpu.json",
+            "entryBytes": 821696,
+            "entrySha256": "5d3825a7b5f568d3ae0b28e3faf89ffdd38e64b9aca59a1decdaa92e96cadba8",
+            "zipEntryModified": "2026-11-12T06:30:42",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "debug/free-roam-walk-gpu.json",
+          "bytes": 392068,
+          "sha256": "4a163763be2dbac114f1084c9c1e6fbf4e2994c79171ad73555fe3209682bb45",
+          "source": {
+            "configuration": "Debug",
+            "artifactId": 13921631207,
+            "entry": "webgpu-evidence/free-roam-walk-gpu.json",
+            "entryBytes": 392068,
+            "entrySha256": "4a163763be2dbac114f1084c9c1e6fbf4e2994c79171ad73555fe3209682bb45",
+            "zipEntryModified": "2026-11-12T06:34:40",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "debug/mobile-gpu.json",
+          "bytes": 703818,
+          "sha256": "33fad9a7ad93f5b94f109f466f27561315774155dee1f057772f55968949af49",
+          "source": {
+            "configuration": "Debug",
+            "artifactId": 13921631207,
+            "entry": "webgpu-evidence/mobile-gpu.json",
+            "entryBytes": 703818,
+            "entrySha256": "33fad9a7ad93f5b94f109f466f27561315774155dee1f057772f55968949af49",
+            "zipEntryModified": "2026-11-12T06:39:28",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        },
+        {
+          "entry": "debug/desktop-gpu.json",
+          "bytes": 797189,
+          "sha256": "aec0a4bd8341ca2fd9d9cadcfe68cc27f901db5574e4478dec4a2f560291ed2f",
+          "source": {
+            "configuration": "Debug",
+            "artifactId": 13921631207,
+            "entry": "webgpu-evidence/desktop-gpu.json",
+            "entryBytes": 797189,
+            "entrySha256": "aec0a4bd8341ca2fd9d9cadcfe68cc27f901db5574e4478dec4a2f560291ed2f",
+            "zipEntryModified": "2026-11-12T06:35:24",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        }
+      ]
+    },
+    {
+      "path": "lighting-night.png",
+      "bytes": 975189,
+      "sha256": "de0d25a259b08cd2d4ecc0e8cc609178738801bbb5559935ec8ef95397802dbb",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/lighting-night.png",
+        "entryBytes": 975189,
+        "entrySha256": "de0d25a259b08cd2d4ecc0e8cc609178738801bbb5559935ec8ef95397802dbb",
+        "zipEntryModified": "2026-11-12T06:39:38",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 1200,
+          "height": 800
+        }
+      }
+    },
+    {
+      "path": "metrics.json",
+      "bytes": 17518,
+      "sha256": "7ba7c1f22ff6cb5c4f0257e42302e9323cece78051fb8d4d43dddb24cfa4e0f9",
+      "source": {
+        "kind": "derived",
+        "sources": [
+          "debug-report.json",
+          "release-report.json",
+          "shader-fixtures.json",
+          "gpu-traces.zip"
+        ],
+        "note": "Selected calculations from the external read-only audit summaries. Original reports and trace contents remain unchanged."
+      }
+    },
+    {
+      "path": "mobile-normal-initial-high-dpi.png",
+      "bytes": 1028876,
+      "sha256": "bcb9732627ba0723ccfce20a85e5cf047fd745b31e5075ffd5dcf46ee1f8e12b",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/mobile-normal-initial-high-dpi.png",
+        "entryBytes": 1028876,
+        "entrySha256": "bcb9732627ba0723ccfce20a85e5cf047fd745b31e5075ffd5dcf46ee1f8e12b",
+        "zipEntryModified": "2026-11-12T06:44:14",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 780,
+          "height": 1688
+        }
+      }
+    },
+    {
+      "path": "null-validation.json",
+      "bytes": 4758,
+      "sha256": "0da625ab5550d277d7c4d73b79d42e57dd75d2926e00ba1cbf81f9bbd1bb529b",
+      "source": {
+        "kind": "original local Dawn Null validation report",
+        "sourceFilename": "null-validation.json",
+        "sha256": "0da625ab5550d277d7c4d73b79d42e57dd75d2926e00ba1cbf81f9bbd1bb529b",
+        "bytes": 4758,
+        "assemblySha256": "0a1d2a24650ea0012f8bf3849a309620bf238bc9816d07f8cd693d44939b85f4",
+        "backend": "null",
+        "limitation": "Dawn Null validates WGSL and WebGPU layouts only. No shaders execute, no GPU is rendered, and no browser, pixel-quality, or hardware-performance proof is inferred."
+      }
+    },
+    {
+      "path": "photograph-normal.png",
+      "bytes": 763734,
+      "sha256": "f07b0dd88974c8d5cf539f693fdbd1895880347da146fb190388ca1aee510ded",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/photograph-normal.png",
+        "entryBytes": 763734,
+        "entrySha256": "f07b0dd88974c8d5cf539f693fdbd1895880347da146fb190388ca1aee510ded",
+        "zipEntryModified": "2026-11-12T06:40:06",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 1200,
+          "height": 800
+        }
+      }
+    },
+    {
+      "path": "photograph-pixel.png",
+      "bytes": 165611,
+      "sha256": "1d238065fbf74dc6d4e2a0535994ad17a602ab8c6c78522d44a52597441eadcf",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/photograph-pixel.png",
+        "entryBytes": 165611,
+        "entrySha256": "1d238065fbf74dc6d4e2a0535994ad17a602ab8c6c78522d44a52597441eadcf",
+        "zipEntryModified": "2026-11-12T06:40:10",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 1200,
+          "height": 800
+        }
+      }
+    },
+    {
+      "path": "release-report.json",
+      "bytes": 33155,
+      "sha256": "cadcce69bd73180b04b1e237874c0e498a88841ea1121208eeb92e1d585c727e",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/report.json",
+        "entryBytes": 33155,
+        "entrySha256": "cadcce69bd73180b04b1e237874c0e498a88841ea1121208eeb92e1d585c727e",
+        "zipEntryModified": "2026-11-12T06:45:00",
+        "zipTimestampTimeZone": "not encoded in ZIP"
+      }
+    },
+    {
+      "path": "shader-fixtures.json",
+      "bytes": 3515,
+      "sha256": "d5af65aced48c6189aed990b32150d2d7814a99c38e4d25d0b70bf28f1ab8280",
+      "source": {
+        "byteIdenticalAcrossConfigurations": true,
+        "sources": [
+          {
+            "configuration": "Debug",
+            "artifactId": 13921631207,
+            "entry": "webgpu-evidence/shader-fixtures.json",
+            "entryBytes": 3515,
+            "entrySha256": "d5af65aced48c6189aed990b32150d2d7814a99c38e4d25d0b70bf28f1ab8280",
+            "zipEntryModified": "2026-11-12T06:29:44",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          },
+          {
+            "configuration": "Release",
+            "artifactId": 13922031027,
+            "entry": "webgpu-evidence/shader-fixtures.json",
+            "entryBytes": 3515,
+            "entrySha256": "d5af65aced48c6189aed990b32150d2d7814a99c38e4d25d0b70bf28f1ab8280",
+            "zipEntryModified": "2026-11-12T06:37:50",
+            "zipTimestampTimeZone": "not encoded in ZIP"
+          }
+        ]
+      }
+    },
+    {
+      "path": "style-normal.png",
+      "bytes": 1123055,
+      "sha256": "24d57877c91ab5cb2ed962b2d2029a61845ef9328df44aced23272b152f0f0d4",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/style-normal.png",
+        "entryBytes": 1123055,
+        "entrySha256": "24d57877c91ab5cb2ed962b2d2029a61845ef9328df44aced23272b152f0f0d4",
+        "zipEntryModified": "2026-11-12T06:38:30",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 1200,
+          "height": 800
+        }
+      }
+    },
+    {
+      "path": "style-roblox.png",
+      "bytes": 1317237,
+      "sha256": "96a01359d69552730fa71fefa8cffad14495ff09c755bf799309a1ad20347a7f",
+      "source": {
+        "configuration": "Release",
+        "artifactId": 13922031027,
+        "entry": "webgpu-evidence/style-roblox.png",
+        "entryBytes": 1317237,
+        "entrySha256": "96a01359d69552730fa71fefa8cffad14495ff09c755bf799309a1ad20347a7f",
+        "zipEntryModified": "2026-11-12T06:38:46",
+        "zipTimestampTimeZone": "not encoded in ZIP",
+        "pixelDimensions": {
+          "width": 1200,
+          "height": 800
+        }
+      }
+    }
+  ]
+}

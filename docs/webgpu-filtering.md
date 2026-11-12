@@ -6,13 +6,43 @@ removes unused photograph storage and unnecessary final attachment stores.
 
 ## Validation status
 
-The integrated Release rendering and native test projects build successfully with
-.NET 10.0.403. The existing Skia obsolete-API warnings remain. The independent
-facade reference, bloom invariants, allocation limits and terrain retention checks
-pass natively. Full execution of the new WGSL fixtures and application render-graph
-assertions is a required Debug/Release browser CI gate; its results will be recorded
-here after the published builds finish. Earlier migration screenshots and passing
-reports remain in [the baseline record](verification/uno7-webgpu-dad16fc/README.md).
+Source `5af429f94d016364f840df0f22d0fc8c02e010c4` passed all four jobs in
+[run 18](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43167877049):
+the full native/reference regression, independent presentation preflight, Debug
+interpreted browser build and Release AOT browser build. Both published builds
+passed all **34 scenarios**, package integrity and two byte-preserving finalization
+passes. The existing Skia obsolete-API warnings remain.
+
+The [permanent verification record](verification/webgpu-filtering-5af429f/README.md)
+preserves both original reports, identical numerical shader results, selected
+original Release screenshots, compressed original GPU traces and file hashes.
+Earlier migration evidence remains in [the baseline record](verification/uno7-webgpu-dad16fc/README.md).
+An additional Dawn Null check compiled all ten production WGSL modules and
+validated 32 explicit pipeline contracts with no messages or validation errors;
+the browser checks separately establish actual GPU execution and raster output.
+
+| Actual GPU fixture | Observed result in both configurations |
+| --- | --- |
+| Terrain reduction | 266,256 compared bytes; maximum difference one encoded byte |
+| Original artwork and untouched layer | 1,048,576 base bytes preserved exactly; clean layer unchanged |
+| Facade material reference | 558 cases / 4,464 channels; maximum absolute error 0.000622724 |
+| Filtering continuity | 108 pairs; maximum channel delta 0.000150681 |
+| HDR bloom | Six fixtures / 22,832 channels; maximum absolute error 0.0015625; constant fields exact |
+
+Application captures report one shared GPU device and zero unexpected GPU errors,
+losses, persistent render-graph errors, map readbacks or WebGL contexts. The
+intentional device-loss scenarios stop new map submissions. A retained Debug
+walking frame uploads only 64 bytes and submits no terrain mip work or shadow
+passes; Release's walking capture still contains late tile uploads, so the warm
+walking measurement belongs specifically to Debug. Both configurations verify
+physical layer reuse and current mip generations through independent queue probes.
+
+Visual review found intact facade/roof geometry, restrained night bloom, coherent
+photograph composition and sharp high-DPI labels. Close-up ground artwork still
+reveals source texels, and Roblox roofs retain fine procedural stud patterns.
+The captures are stylized map content and do not prove temporal stability or a
+commercial AAA acceptance result. Cross-configuration walking views differ
+(31 metres travelled in Release, 38 in Debug); they are qualitative comparisons.
 
 ## Terrain filtering
 

@@ -16,6 +16,11 @@ The documentation/evidence head `f5ddbe9` also passed all four jobs in
 [run 16](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43132383428).
 Subsequent facade, terrain filtering and HDR bloom changes are described with
 their own validation status in [WebGPU filtering and HDR quality](webgpu-filtering.md).
+They pass all 34 browser scenarios in Debug and Release AOT, plus the complete
+native/reference and presentation jobs, in
+[run 18](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43167877049).
+The [new verification record](verification/webgpu-filtering-5af429f/README.md)
+preserves their numerical results, original screenshots and submitted GPU traces.
 The quality target is a modern real-time 3D renderer. Implemented
 graphics features do not by themselves establish commercial AAA visual quality,
 hardware frame rates, or a measured improvement over the previous release.
@@ -299,7 +304,7 @@ optional `PixelAtlasGraphics.fail(message)` hook supplies custom recovery UI.
 
 ## Verification and evidence
 
-### Final migration verification
+### Baseline migration verification
 
 | Gate | Result on `dad16fc` |
 | --- | --- |

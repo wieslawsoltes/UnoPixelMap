@@ -54,8 +54,8 @@ scratch texture is allocated only when smooth dirty work first occurs and adds
 **6,291,456 bytes**, plus a **384-byte** layer-index buffer. `ResidentBytes`
 reports these allocations exactly, excluding implementation-specific alignment
 and object metadata. Mip levels add 8 MiB minus 128 bytes to the previous
-24 MiB base artwork array. These are allocation and work-count improvements;
-they are not a measured hardware frame-rate claim.
+24 MiB base artwork array. These are bounded allocation and work-count
+requirements; they are not a measured hardware frame-rate claim.
 
 ## Validation
 
@@ -66,8 +66,13 @@ the production reducer, check a black/white mean near encoded 188 rather than
 128, validate alpha and isolated clean layers, and confirm the submitted
 compute/copy order, sRGB views, sampler modes and current mip generations.
 
-The GPU fixtures and complete application regression run remain authoritative
-for runtime WebGPU validation and visual quality.
+The GPU fixtures and all 34 application scenarios passed in both Debug and
+Release AOT in [run 18](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43167877049).
+They compare 266,256 mip bytes within one encoded byte and preserve 1,048,576
+original base bytes exactly. The first smooth Debug capture processes all 96
+pending layers in eight dispatches and 768 copies; later retained frames execute
+no mip work. Original reports and compressed GPU traces are in the
+[verification record](verification/webgpu-filtering-5af429f/README.md).
 
 ## API references
 
