@@ -68,7 +68,6 @@ public sealed unsafe partial class WebGpuMapRenderer
         rimModule = CreateModule(WebGpuMapShaders.Rim);
         resolveModule = CreateModule(WebGpuMapShaders.Resolve);
         overlayModule = CreateModule(WebGpuMapShaders.Overlay);
-        InitializeBloomResources();
         InitializeOverlayResources();
     }
 

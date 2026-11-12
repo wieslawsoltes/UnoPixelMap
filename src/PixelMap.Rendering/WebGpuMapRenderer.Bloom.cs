@@ -23,26 +23,41 @@ public sealed unsafe partial class WebGpuMapRenderer
         _ => (TextureView*)bloomUpViews[0]
     };
 
-    private void InitializeBloomResources()
+    private void EnsureBloomResources()
     {
-        var entries = stackalloc BindGroupLayoutEntry[4];
-        entries[0] = TextureEntry(0, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
-        entries[1] = TextureEntry(1, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
-        entries[2] = SamplerEntry(2, SamplerBindingType.Filtering);
-        entries[3] = UniformEntry(3, 64, dynamic: false, ShaderStage.Fragment);
-        bloomLayout = CreateLayout(entries, 4);
-        bloomPipelineLayout = CreatePipelineLayout(bloomLayout);
-        bloomPrefilterModule = CreateModule(WebGpuBloomShaders.Prefilter);
-        bloomDownModule = CreateModule(WebGpuBloomShaders.Downsample);
-        bloomUpModule = CreateModule(WebGpuBloomShaders.Upsample);
-        bloomPrefilterPipeline = CreatePipeline("bloom prefilter", bloomPrefilterModule, bloomPipelineLayout, null, TextureFormat.Rgba16float, 1);
-        bloomDownPipeline = CreatePipeline("bloom downsample", bloomDownModule, bloomPipelineLayout, null, TextureFormat.Rgba16float, 1);
-        bloomUpPipeline = CreatePipeline("bloom upsample", bloomUpModule, bloomPipelineLayout, null, TextureFormat.Rgba16float, 1);
+        if (bloomUpPipeline != null) return;
+        try
+        {
+            var entries = stackalloc BindGroupLayoutEntry[4];
+            entries[0] = TextureEntry(0, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
+            entries[1] = TextureEntry(1, TextureSampleType.Float, TextureViewDimension.Dimension2D, ShaderStage.Fragment);
+            entries[2] = SamplerEntry(2, SamplerBindingType.Filtering);
+            entries[3] = UniformEntry(3, 64, dynamic: false, ShaderStage.Fragment);
+            bloomLayout = CreateLayout(entries, 4);
+            bloomPipelineLayout = CreatePipelineLayout(bloomLayout);
+            bloomPrefilterModule = CreateModule(WebGpuBloomShaders.Prefilter);
+            bloomDownModule = CreateModule(WebGpuBloomShaders.Downsample);
+            bloomUpModule = CreateModule(WebGpuBloomShaders.Upsample);
+            bloomPrefilterPipeline = CreatePipeline("bloom prefilter", bloomPrefilterModule, bloomPipelineLayout, null, TextureFormat.Rgba16float, 1);
+            bloomDownPipeline = CreatePipeline("bloom downsample", bloomDownModule, bloomPipelineLayout, null, TextureFormat.Rgba16float, 1);
+            bloomUpPipeline = CreatePipeline("bloom upsample", bloomUpModule, bloomPipelineLayout, null, TextureFormat.Rgba16float, 1);
+        }
+        catch
+        {
+            // Unlike constructor initialization, a failed quality transition can
+            // be retried by the retained renderer. Do not keep a partial cache.
+            ReleaseBloomResources();
+            throw;
+        }
     }
 
     private void CreateBloomAttachments(int levels)
     {
         bloomLevelCount = levels;
+        if (levels == 0) return;
+        // Pixel/Minecraft/Balanced-only sessions never compile bloom pipelines.
+        // Once created these fixed-format pipelines survive extent/quality changes.
+        EnsureBloomResources();
         int width = attachmentWidth, height = attachmentHeight;
         for (int i = 0; i < levels; i++)
         {
