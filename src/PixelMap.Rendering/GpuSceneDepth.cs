@@ -11,7 +11,7 @@ namespace PixelMap.Rendering;
 /// preparation bins conservative terrain/model bounds; a queried cell prepares only
 /// its contributing geometry. Exact clipped primitives are retained for later queries,
 /// leaving unqueried vertices and all fragment rendering to GL.</summary>
-internal sealed class GpuSceneDepth
+internal sealed partial class GpuSceneDepth
 {
     private const int CellSize = 16;
     private const int MaximumCellsPerProxy = 64;
@@ -428,6 +428,12 @@ internal sealed class GpuSceneDepth
         var transform = draw.Transform;
         var source = mesh.Vertices;
         var range = mesh.Ranges[group.Model];
+        if (range.VertexCount >= GpuBuildingDepthChunks.MinimumVertices &&
+            (group.Screen.Left <= 0 || group.Screen.Top <= 0 || group.Screen.Right >= width || group.Screen.Bottom >= height))
+        {
+            AddChunkedBuilding(draw, group, range);
+            return;
+        }
         var projected = storage.ProjectedVertices;
         if (projected.Length < range.VertexCount)
             storage.ProjectedVertices = projected = new Vertex[range.VertexCount];
@@ -789,6 +795,8 @@ internal sealed class GpuSceneDepth
         internal int IndexCapacityBytes;
         // Indexed primitives retain value copies, so model scratch can span tiles and frames.
         internal Vertex[] ProjectedVertices = [];
+        internal int[] ProjectedVertexStamps = [];
+        internal int ProjectionStamp;
     }
 
     private record struct Vertex(H Screen, float Height = 0, int ClipCode = -1)

@@ -35,6 +35,7 @@ internal sealed class GpuBuildingMesh
     internal readonly float[] RoofEdges;
     internal readonly float[] Models;
     internal readonly GpuBuildingRange[] Ranges;
+    internal readonly GpuBuildingDepthChunks DepthChunks;
     internal readonly long Revision;
     internal readonly long FoundationRevision;
     internal long Frame;
@@ -51,6 +52,7 @@ internal sealed class GpuBuildingMesh
         // checked array length also bounds every packed index below that limit.
         Models = new float[checked(count * ModelStride)];
         Ranges = new GpuBuildingRange[count];
+        DepthChunks = new(count);
         var caps = new Cap[count];
         int vertices = 0, indices = 0, edges = 0;
         for (int modelIndex = 0; modelIndex < count; modelIndex++)
@@ -101,6 +103,7 @@ internal sealed class GpuBuildingMesh
         RoofEdges = source.RoofEdges;
         Models = models;
         Ranges = source.Ranges;
+        DepthChunks = source.DepthChunks;
         Revision = source.Revision;
         FoundationRevision = foundationRevision;
         Frame = source.Frame;
