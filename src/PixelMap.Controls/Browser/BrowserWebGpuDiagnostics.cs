@@ -29,12 +29,14 @@ internal static partial class BrowserWebGpuDiagnostics
         int physicalWidth, int physicalHeight, int pixelSize, int patches, int triangles, int draws,
         long uploadBytes, long residentBytes, double frameMilliseconds, double submissionMilliseconds,
         string style, string quality, int renderWidth, int renderHeight, long attachmentBytes,
-        int imageryCount, bool relief, bool elevation, double zoom)
+        int imageryCount, bool relief, bool elevation, double zoom,
+        double preparationMilliseconds, double overlayMilliseconds)
     {
         if (!OperatingSystem.IsBrowser()) return;
         ReportFrame(frames, preparations, width, height, physicalWidth, physicalHeight, pixelSize,
             patches, triangles, draws, uploadBytes, residentBytes, frameMilliseconds, submissionMilliseconds, style, quality,
-            renderWidth, renderHeight, attachmentBytes, imageryCount, relief, elevation, zoom);
+            renderWidth, renderHeight, attachmentBytes, imageryCount, relief, elevation, zoom,
+            preparationMilliseconds, overlayMilliseconds);
     }
 
     internal static void Fail(string message)
@@ -47,7 +49,8 @@ internal static partial class BrowserWebGpuDiagnostics
         int physicalWidth, int physicalHeight, int pixelSize, int patches, int triangles, int draws,
         double uploadBytes, double residentBytes, double frameMilliseconds, double submissionMilliseconds,
         string style, string quality, int renderWidth, int renderHeight, double attachmentBytes,
-        int imageryCount, bool relief, bool elevation, double zoom);
+        int imageryCount, bool relief, bool elevation, double zoom,
+        double preparationMilliseconds, double overlayMilliseconds);
 
     [JSImport("globalThis.PixelAtlasInput.failWebGpu")]
     private static partial void ReportFailure(string message);
