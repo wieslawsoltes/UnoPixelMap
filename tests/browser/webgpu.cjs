@@ -8,6 +8,8 @@ const { join } = require("node:path");
 process.env.DEBUG = [process.env.DEBUG, "pw:browser"].filter(Boolean).join(",");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
+const { installRenderGraphProbe } = require("./webgpu-rendergraph-probe.cjs");
+const { runShaderFixtures } = require("./webgpu-shader-fixtures.cjs");
 
 function parseArguments(args) {
     const addresses = args.filter(value => value !== "--preflight-only");
@@ -302,7 +304,7 @@ async function open(browser, hash = "", { mobile = false, density = 1 } = {}) {
         if (message.type() === "error") console.error("Browser:", message.text().slice(0, 3000));
     });
     try {
-        await page.addInitScript(installProbe);
+        await page.addInitScript({ content: `(${installProbe.toString()})();(${installRenderGraphProbe.toString()})();` });
         for (const host of ["tiles.openfreemap.org", "tiles.maps.eox.at", "routing.openstreetmap.de"])
             await page.route(`https://${host}/**`, route => route.abort());
         const address = new URL(base);
@@ -395,7 +397,168 @@ async function verifyGpu(page, name) {
     assert.equal(evidence.glContexts, 0, "Production opens no WebGL rendering context");
     if (diagnostic.style === "Normal" || diagnostic.style === "Roblox")
         verifyShadowLayers(evidence, diagnostic.quality, name);
+    verifyRenderGraph(evidence, diagnostic, name);
     return evidence;
+}
+
+function verifyRenderGraph(evidence, diagnostic, name) {
+    const graph = evidence.renderGraph;
+    assert.ok(graph?.submissions > 0, name + ": render-graph commands reach the real queue");
+    assert.deepEqual(graph.errors, [], name + ": every submitted resource dependency remains valid across frame eviction");
+    const live = graph.textures.filter(texture => !texture.destroyed);
+    const frame = graph.frames.at(-1), passes = frame.passes;
+    const smooth = diagnostic.style === "Normal" || diagnostic.style === "Roblox";
+    const maximumLevels = smooth ? ({ Balanced: 0, High: 5, Ultra: 6 }[diagnostic.quality]) : 0;
+    assert.notEqual(maximumLevels, undefined, name + ": bloom quality is recognized");
+    const scene = live.findLast(texture => texture.label === "PixelMap scene color");
+    assert.ok(scene, name + ": scene color has an independently observed allocation");
+    const photo = live.filter(texture => texture.label === "PixelMap photograph");
+    const boundTexture = (pass, binding) => pass.inputs.find(view => view.group === 0 && view.binding === binding && view.textureId !== undefined);
+    const expectTexture = (view, textureId, description) => {
+        assert.ok(view, name + ": " + description + " has a bound texture view");
+        assert.equal(view.textureId, textureId, name + ": " + description + " uses the exact submitted producer");
+        assert.deepEqual([view.mip, view.mips, view.layer, view.layers], [0, 1, 0, 1],
+            name + ": " + description + " addresses the complete single-level image");
+    };
+    let width = scene.width, height = scene.height;
+    const sizes = [];
+    while (sizes.length < maximumLevels && (width > 1 || height > 1)) {
+        width = Math.max(1, Math.ceil(width / 2));
+        height = Math.max(1, Math.ceil(height / 2));
+        sizes.push([width, height]);
+    }
+    const bloom = passes.filter(pass => /^PixelMap bloom (down|up) \d+$/.test(pass.label));
+    const expectedOrder = sizes.map((_, index) => `PixelMap bloom down ${index}`)
+        .concat(sizes.slice(1).map((_, index) => `PixelMap bloom up ${sizes.length - 2 - index}`));
+    assert.deepEqual(bloom.map(pass => pass.label), expectedOrder, name + ": the submitted bloom pyramid is complete and ordered");
+    const presentation = passes.findIndex(pass => pass.label === "PixelMap presentation pass");
+    assert.ok(presentation >= 0, name + ": the final composition pass is submitted");
+    const bloomOutputs = new Map();
+    for (const pass of bloom) {
+        assert.equal(pass.draws, 1, name + ": every bloom level executes one fullscreen draw");
+        assert.ok(passes.indexOf(pass) < presentation, name + ": bloom completes before composition");
+        assert.equal(pass.colors.length, 1, name + ": bloom writes one HDR target");
+        const output = pass.colors[0].view;
+        assert.ok(output, name + ": bloom writes an independently observed texture view");
+        const texture = graph.textures[output.textureId - 1];
+        const index = Number(pass.label.match(/\d+$/)[0]);
+        assert.equal(texture.label, pass.label, name + ": each bloom pass writes its own allocated level");
+        expectTexture(output, texture.id, pass.label + " output");
+        assert.deepEqual([texture.width, texture.height], sizes[index], name + ": bloom keeps exact odd-sized extents");
+        assert.equal(texture.format, "rgba16float", name + ": bloom remains in HDR");
+        assert.equal(texture.samples, 1, name + ": postprocessing has no redundant MSAA storage");
+        assert.equal(pass.colors[0].store, "store", name + ": bloom output survives for its consumer");
+        const source = boundTexture(pass, 0), detail = boundTexture(pass, 1);
+        const down = pass.label.startsWith("PixelMap bloom down ");
+        const expectedSource = down ? (index === 0 ? scene.id : bloomOutputs.get(`PixelMap bloom down ${index - 1}`)) :
+            bloomOutputs.get(index + 2 === sizes.length ? `PixelMap bloom down ${index + 1}` : `PixelMap bloom up ${index + 1}`);
+        const expectedDetail = down ? (index === 0 ? photo[0]?.id ?? scene.id : expectedSource) :
+            bloomOutputs.get(`PixelMap bloom down ${index}`);
+        assert.notEqual(expectedSource, undefined, name + ": bloom source was produced earlier in this submission");
+        assert.notEqual(expectedDetail, undefined, name + ": bloom detail was produced earlier in this submission");
+        expectTexture(source, expectedSource, pass.label + " source");
+        expectTexture(detail, expectedDetail, pass.label + " detail");
+        assert.ok(pass.inputs.every(view => view.textureId !== output.textureId ||
+            view.mip + view.mips <= output.mip || output.mip + output.mips <= view.mip),
+            name + ": bloom never samples the subresource it writes");
+        bloomOutputs.set(pass.label, output.textureId);
+    }
+    assert.equal(live.filter(texture => /^PixelMap bloom (down|up) \d+$/.test(texture.label)).length,
+        Math.max(0, sizes.length * 2 - 1), name + ": only the active quality owns bloom attachments");
+    const composition = passes[presentation];
+    expectTexture(boundTexture(composition, 1), scene.id, "composition scene");
+    expectTexture(boundTexture(composition, 2), photo[0]?.id ?? scene.id, "composition photograph");
+    expectTexture(boundTexture(composition, 5), sizes.length ?
+        bloomOutputs.get(sizes.length === 1 ? "PixelMap bloom down 0" : "PixelMap bloom up 0") : scene.id,
+        "composition bloom");
+    const scenePasses = passes.filter(pass => pass.label === "PixelMap scene pass");
+    assert.ok(scenePasses.length === 1 || scenePasses.length === 2, name + ": scene has one pass plus an optional photograph continuation");
+    assert.equal(photo.length,
+        scenePasses.length - 1, name + ": photograph storage exists only when its copy is needed");
+    const finalSceneIndex = passes.indexOf(scenePasses.at(-1));
+    assert.ok(finalSceneIndex < presentation && bloom.every(pass => passes.indexOf(pass) > finalSceneIndex),
+        name + ": the completed scene precedes every bloom and presentation consumer");
+    for (const [index, pass] of scenePasses.entries()) {
+        const final = index === scenePasses.length - 1;
+        assert.equal(pass.colors.length, 1, name + ": scene writes one HDR image");
+        assert.ok(pass.depth?.view && pass.colors[0].view, name + ": scene owns observed color and depth attachments");
+        const color = pass.colors[0], attachment = graph.textures[color.view.textureId - 1];
+        expectTexture(attachment.samples > 1 ? color.resolve : color.view, scene.id, "resolved scene");
+        assert.equal(color.load, index === 0 ? "clear" : "load", name + ": photographic continuation preserves scene color");
+        assert.equal(pass.depth.load, index === 0 ? "clear" : "load", name + ": photographic continuation preserves scene depth");
+        assert.equal(pass.depth.store, final ? "discard" : "store", name + ": depth is stored only across the photograph continuation");
+        assert.equal(color.store, final && attachment.samples > 1 ? "discard" : "store",
+            name + ": the final multisample attachment is discarded after resolve");
+    }
+    const photoCopies = passes.filter(pass => pass.kind === "copy" && pass.destination?.label === "PixelMap photograph");
+    assert.equal(photoCopies.length, photo.length, name + ": the optional photograph has exactly one submitted copy");
+    if (photo.length) {
+        const copy = photoCopies[0], position = passes.indexOf(copy);
+        expectTexture(copy.source, scene.id, "photograph copy source");
+        expectTexture(copy.destination, photo[0].id, "photograph copy destination");
+        const extent = Array.isArray(copy.extent) || ArrayBuffer.isView(copy.extent) ? Array.from(copy.extent) :
+            [copy.extent.width, copy.extent.height ?? 1, copy.extent.depthOrArrayLayers ?? 1];
+        assert.deepEqual([extent[0], extent[1] ?? 1, extent[2] ?? 1], [scene.width, scene.height, 1],
+            name + ": photograph copy preserves the complete resolved image");
+        assert.ok(passes.indexOf(scenePasses[0]) < position && position < passes.indexOf(scenePasses[1]),
+            name + ": photograph is copied between the terrain pass and its loaded continuation");
+    }
+    const attachmentLabels = /^(PixelMap (scene color|scene depth|scene multisample|photograph)|PixelMap bloom (down|up) \d+)$/;
+    const attachmentBytes = live.filter(texture => attachmentLabels.test(texture.label)).reduce((sum, texture) =>
+        sum + texture.width * texture.height * texture.layers * texture.samples *
+            (texture.format === "rgba16float" ? 8 : 4), 0);
+    assert.ok(attachmentBytes <= 256 * 1024 * 1024, name + ": observed attachments stay inside the 256 MiB budget");
+    const artwork = live.find(texture => texture.label === "PixelMap terrain artwork");
+    assert.ok(artwork, name + ": terrain artwork exists");
+    assert.equal(artwork.mips, 9, name + ": terrain has a complete 256-to-1 mip chain");
+    const terrainPasses = scenePasses.filter(pass => pass.terrainInputs?.length);
+    if (diagnostic.patches > 0) assert.equal(terrainPasses.length, 1,
+        name + ": a submitted scene terrain draw exposes its actual sampled resources");
+    for (const pass of terrainPasses) {
+        const sampled = pass.terrainInputs.find(entry => entry.group === 1 && entry.binding === 0 && entry.textureId !== undefined);
+        const sampler = pass.terrainInputs.find(entry => entry.group === 1 && entry.binding === 2)?.sampler;
+        assert.ok(sampled && sampler, name + ": terrain draw binds its artwork view and sampler together");
+        assert.equal(sampled.textureId, artwork.id, name + ": terrain samples the retained artwork allocation");
+        assert.deepEqual([sampled.mip, sampled.mips, sampled.layer, sampled.layers],
+            [0, smooth ? 9 : 1, 0, artwork.layers], name + ": the submitted terrain view exposes exactly the selected style's mip range");
+        assert.equal(sampled.format, smooth ? "rgba8unorm-srgb" : "rgba8unorm",
+            name + ": smooth terrain decodes linear light while art styles preserve encoded mip-zero values");
+        assert.deepEqual([sampler.magFilter ?? "nearest", sampler.minFilter ?? "nearest", sampler.mipmapFilter ?? "nearest"],
+            smooth ? ["linear", "linear", "linear"] : ["nearest", "nearest", "nearest"],
+            name + ": the actual terrain draw uses the style's spatial and mip filters");
+        assert.equal(sampler.maxAnisotropy ?? 1, smooth ? 8 : 1,
+            name + ": the actual terrain draw uses bounded anisotropy only for smooth styles");
+        if (smooth) assert.equal(sampler.lodMaxClamp, 8,
+            name + ": the submitted smooth sampler reaches the complete terrain mip chain");
+    }
+    if (smooth) for (const [key, version] of Object.entries(artwork.uploads)) {
+        const layer = Number(key.split(":")[1]);
+        for (let mip = 1; mip < artwork.mips; mip++)
+            assert.equal(artwork.copiedVersions[`${mip}:${layer}`], version,
+                `${name}: terrain mip ${mip} layer ${layer} contains the latest uploaded artwork`);
+    }
+    for (const pass of passes.filter(pass => /^PixelMap terrain mip /.test(pass.label))) {
+        assert.equal(pass.kind, "compute", name + ": terrain mips are generated by compute");
+        assert.equal(pass.dispatches.length, 1, name + ": each mip batches its dirty layers in one dispatch");
+        const source = pass.inputs.find(view => view.binding === 0), destination = pass.inputs.find(view => view.binding === 1);
+        assert.ok(source && destination, name + ": mip pass binds source and destination views");
+        assert.equal(source.label, "PixelMap terrain artwork", name + ": reduction reads the retained artwork array");
+        assert.equal(destination.label, "PixelMap terrain mip scratch", name + ": compute writes the reusable storage array");
+        assert.equal(source.format, "rgba8unorm-srgb", name + ": input decoding occurs in linear light");
+        assert.equal(destination.format, "rgba8unorm", name + ": encoded output uses the storage-compatible format");
+        assert.equal(source.mips, 1, name + ": source mip view cannot overlap the destination");
+        assert.equal(destination.mips, 1, name + ": destination addresses exactly one mip");
+        assert.ok(passes.indexOf(pass) < passes.indexOf(scenePasses[0]), name + ": mips complete before scene sampling");
+        const nextCompute = passes.findIndex((candidate, index) => index > passes.indexOf(pass) && candidate.kind === "compute");
+        const copies = passes.slice(passes.indexOf(pass) + 1, nextCompute < 0 ? passes.indexOf(scenePasses[0]) : nextCompute)
+            .filter(candidate => candidate.kind === "copy" && candidate.destination?.label === "PixelMap terrain artwork");
+        assert.equal(copies.length, pass.dispatches[0][2], name + ": every dispatched dirty layer reaches the final artwork mip");
+        for (const copy of copies) {
+            assert.equal(copy.source.textureId, destination.textureId, name + ": copy consumes the compute scratch array");
+            assert.equal(copy.destination.textureId, source.textureId, name + ": copy returns to the sampled artwork array");
+            assert.equal(copy.destination.mip, source.mip + 1, name + ": copied reduction becomes the next source mip");
+        }
+    }
 }
 
 function verifyShadowLayers(evidence, quality, name) {
@@ -578,6 +741,26 @@ async function desktop(browser) {
         await click(page, "Earth imagery layer");
         await awaitFrame(page, s => s.imageryCount > 0);
         await capture(page, "earth-imagery");
+        // The photograph continuation is only active below 30 degrees. Exercise
+        // it through the real camera UI in both HDR and art styles, then verify
+        // that leaving it retires the otherwise unused full-size attachment.
+        await menu(page, "Camera angles and orbit");
+        await click(page, "North-up plan");
+        await click(page, "Close panel");
+        await awaitFrame(page, s => s.imageryCount > 0 &&
+            globalThis.__pixelAtlasGpuProbe.renderGraph.textures.some(texture =>
+                texture.label === "PixelMap photograph" && !texture.destroyed));
+        await capture(page, "photograph-normal");
+        await menu(page, "Pixel art rendering");
+        await awaitFrame(page, s => s.style === "Pixel");
+        await capture(page, "photograph-pixel");
+        await menu(page, "Normal rendering");
+        await awaitFrame(page, s => s.style === "Normal");
+        await menu(page, "Camera angles and orbit");
+        await click(page, "Isometric · 55°");
+        await click(page, "Close panel");
+        await awaitFrame(page, () => !globalThis.__pixelAtlasGpuProbe.renderGraph.textures.some(texture =>
+            texture.label === "PixelMap photograph" && !texture.destroyed));
         await menu(page, "Terrain relief");
         await awaitFrame(page, s => s.relief);
         await capture(page, "terrain-relief");
@@ -841,7 +1024,9 @@ async function deviceLoss(browser) {
             // failure while letting independent input/recovery checks finish.
             const failures = [];
             report.failures = [];
-            for (const [name, run] of [["desktop", desktop], ["journeys", journeys],
+            for (const [name, run] of [["shader-fixtures", async instance =>
+                report.scenarios.push(await runShaderFixtures(instance, base, output))],
+                ["desktop", desktop], ["journeys", journeys],
                 ["mobile", mobile], ["unavailable", unavailable], ["device-loss", deviceLoss]]) {
                 try { await run(browser); }
                 catch (error) {

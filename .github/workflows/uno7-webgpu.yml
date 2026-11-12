@@ -121,6 +121,8 @@ jobs:
         run: dotnet publish src/PixelMap.App -c ${{ matrix.configuration }} -f net10.0-browserwasm -p:WasmShellMonoRuntimeExecutionMode=${{ matrix.execution }} -p:WasmShellEmccLinkOptimization=${{ matrix.linkOptimization }} -o "${{ runner.temp }}/atlas"
       - name: Verify immutable bootstrap and runtime package identity
         run: node tests/packaging/package-identity.cjs "${{ runner.temp }}/atlas/wwwroot"
+      - name: Export independent facade references and production WGSL
+        run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-facade-output="${{ runner.temp }}/webgpu-evidence/facade-fixture.json"
       - name: Install the pinned Chromium browser
         run: |
           npm ci --prefix tests/browser

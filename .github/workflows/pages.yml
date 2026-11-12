@@ -55,6 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.403'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -68,6 +71,8 @@ jobs:
         run: |
           mkdir -p "${{ runner.temp }}/atlas/wwwroot"
           tar -xf "${{ runner.temp }}/pages/artifact.tar" -C "${{ runner.temp }}/atlas/wwwroot"
+      - name: Export independent facade references and production WGSL
+        run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-facade-output="${{ runner.temp }}/screens/facade-fixture.json"
       - name: Exercise the published map in Chromium
         run: |
           npm ci --prefix tests/browser

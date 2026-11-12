@@ -11,6 +11,7 @@ internal static class WebGpuFacadeChecks
     private readonly record struct Weights(double Coverage, double Lamps, double Tint);
     private sealed record Expected(string Name, double[] Albedo, double Roughness, double[] Emission,
         double Metallic, double Tolerance);
+    private sealed record Continuity(string Name, int LeftIndex, int RightIndex, double Tolerance);
     private static readonly Vector3 Wall = new(.34f, .27f, .19f);
     private static readonly Vector3 Glass = new(.075f, .17f, .26f);
     private static readonly Vector3 Lamp = new(1f, .8f, .36f);
@@ -20,7 +21,7 @@ internal static class WebGpuFacadeChecks
         CheckSpatialReference();
         CheckPartitionEnergy();
         CheckResolvedRooms();
-        Console.WriteLine($"Validated {Cases().Count} independent WebGPU façade reference cases: signed/repeating window edges, lamp energy, linear albedo, roughness variance, tint moments and resolved rooms. Actual WGSL verification requires the browser readback fixture.");
+        Console.WriteLine($"Validated {Cases().Count} independent WebGPU façade reference cases: signed/repeating window edges, lamp energy, linear albedo, squared roughness, tint moments and resolved rooms. Actual WGSL verification requires the browser readback fixture.");
     }
 
     internal static void WriteFixture(string path)
@@ -31,27 +32,73 @@ internal static class WebGpuFacadeChecks
         var expected = new List<Expected>(samples.Count);
         foreach (var sample in samples)
         {
+            Append(sample);
+            expected.Add(Shade(sample, Integrate(sample)));
+        }
+        // Mip-filtered lamps are an approximation above one room per axis.
+        // These probes compare neighboring GPU results directly; they must not
+        // be presented as exact matches to the independent spatial integral.
+        var continuity = new List<Continuity>();
+        foreach (var pair in ContinuityCases())
+            continuity.Add(new(pair.Name, Append(pair.Left), Append(pair.Right), .003));
+
+        int Append(Sample sample)
+        {
+            int index = inputs.Count / 20;
             inputs.AddRange([sample.Room.X, sample.Room.Y, sample.Footprint.X, sample.Footprint.Y,
                 sample.Roblox ? 1 : 0, sample.Seed, sample.Night ? 1 : 0, 0,
                 sample.Wall.X, sample.Wall.Y, sample.Wall.Z, 0,
                 sample.Glass.X, sample.Glass.Y, sample.Glass.Z, 0,
                 sample.Lamp.X, sample.Lamp.Y, sample.Lamp.Z, 0]);
-            expected.Add(Shade(sample, Integrate(sample)));
+            return index;
         }
         var fixture = new
         {
-            width = samples.Count, height = 1, strideFloats = 20,
+            width = inputs.Count / 20, height = 1, strideFloats = 20,
             wgsl = WebGpuMapShaders.ColorSpace + WebGpuFacadeShading.Wgsl + FixtureShader,
             mips = PixelWindowFilter.Levels.Select(level => new
                 { width = level.Width, height = level.Height, base64 = Convert.ToBase64String(level.Pixels) }),
-            inputs, expected,
-            reference = "Double-precision intersections with individual periodic windows and original binary room lamps; linear-light area integrals, coverage-weighted squared roughness, and exact Roblox pane-tint first moment. No production filtering helper is evaluated by this oracle."
+            inputs, expected, continuity,
+            reference = "Double-precision intersections with individual periodic windows and original binary room lamps; linear-light area integrals, coverage-weighted squared roughness, and exact Roblox pane-tint first moment. No production filtering helper is evaluated by this oracle.",
+            continuityReference = "GPU output pairs at room footprints 1, 2 and 4 +/- 0.0001; horizontal, vertical and diagonal transitions include window edges, cell seams and signed texture-repeat phases. Each material channel must remain within 0.003 across a pair. These probes establish continuity of the mip approximation, not exact intermediate-scale spatial integration."
         };
         path = Path.GetFullPath(path);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, JsonSerializer.Serialize(fixture, new JsonSerializerOptions
             { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, WriteIndented = true }));
-        Console.WriteLine($"Wrote {samples.Count} production-WGSL façade cases and the actual RG8 room mip chain: {path}");
+        Console.WriteLine($"Wrote {samples.Count} production-WGSL façade reference cases, {continuity.Count} GPU continuity pairs and the actual RG8 room mip chain: {path}");
+    }
+
+    private static IEnumerable<(string Name, Sample Left, Sample Right)> ContinuityCases()
+    {
+        const float epsilon = .0001f;
+        foreach (bool roblox in new[] { false, true })
+        foreach (float span in new[] { 1f, 2, 4 })
+        foreach (int axis in new[] { 0, 1, 2 })
+        {
+            var phases = new[]
+            {
+                Vector2.Zero,
+                roblox ? new Vector2(.18f, .24f) : new Vector2(.17f, .23f),
+                roblox ? new Vector2(.82f, .78f) : new Vector2(.76f, .75f),
+                new Vector2(255.9999f, 15.9999f),
+                new Vector2(-.0001f, -.0001f),
+                new Vector2(-256, -16)
+            };
+            for (int phase = 0; phase < phases.Length; phase++)
+            {
+                string name = $"{(roblox ? "roblox" : "normal")}-continuity-span{span}-axis{axis}-phase{phase}";
+                Vector2 Footprint(float value) => axis switch
+                {
+                    0 => new(value, .37f),
+                    1 => new(.37f, value),
+                    _ => new(value)
+                };
+                var left = new Sample(name + "-left", roblox, phases[phase], Footprint(span - epsilon),
+                    255, true, Wall, Glass, Lamp);
+                yield return (name, left, left with { Name = name + "-right", Footprint = Footprint(span + epsilon) });
+            }
+        }
     }
 
     private static List<Sample> Cases()
