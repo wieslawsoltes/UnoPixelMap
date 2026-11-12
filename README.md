@@ -4,9 +4,9 @@
 
 Pixel Atlas is an interactive Uno Platform 7 map control with a native WebGPU renderer for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable pixel art. Choose an overhead, isometric or perspective camera, plan a journey, preview its directions, or explore freely on foot, in a vehicle or with a flying camera. The UI and every map style share one WebGPU device. Pixel art is the default style; the View menu offers Balanced, High and Ultra rendering quality. Normal, Minecraft and Roblox rendering styles are available independently of the map layer. A world overview, the opening Lower Manhattan neighborhood, northern Lake Garda terrain and six route demonstrations are bundled with the app.
 
-![Pixel Atlas displaying Lower Manhattan in a 1200 × 780 Chromium viewport](docs/manhattan.png)
+![Pixel Atlas displaying Lower Manhattan through native WebGPU in the verified Release AOT build](docs/verification/uno7-webgpu-dad16fc/style-normal.png)
 
-The gallery images document the earlier renderer. The [Uno 7 migration record](docs/uno7-webgpu-migration.md) identifies the new implementation and its separate verification evidence.
+This screenshot is from the verified Uno 7 Release AOT WebGPU build. The [browser verification record](docs/verification/uno7-webgpu-dad16fc/README.md) preserves original screenshots, GPU diagnostics and both passing 31-scenario reports. The [migration guide](docs/uno7-webgpu-migration.md) documents the implementation and quality boundaries. The other gallery links below show the earlier renderer.
 
 [Explore the East River waterfront in detail](docs/seaport.png) · [See a live search result for Racibórz, Poland](docs/raciborz.png)
 

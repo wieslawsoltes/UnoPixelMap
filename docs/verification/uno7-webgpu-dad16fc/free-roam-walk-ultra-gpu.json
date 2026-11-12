@@ -1,0 +1,1271 @@
+{
+  "modules": [
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module"
+  ],
+  "pipelines": [
+    {
+      "label": "PixelMap sky (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap sky (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap sky (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap sky (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap sky (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap sky (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap sky (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap sky (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (4x)",
+      "deviceIndex": 0,
+      "samples": 4,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    }
+  ],
+  "errors": [],
+  "losses": [],
+  "deviceInfo": [
+    {
+      "deviceIndex": 0,
+      "label": "",
+      "timeMs": 1390.6999999999534,
+      "adapter": {
+        "vendor": "google",
+        "architecture": "swiftshader",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": true,
+        "subgroupMinSize": 4,
+        "subgroupMaxSize": 4
+      },
+      "features": [
+        "core-features-and-limits",
+        "timestamp-query"
+      ]
+    }
+  ],
+  "deviceDestroys": [],
+  "shadowTextures": [
+    {
+      "id": 1,
+      "label": "PixelMap sun shadow array",
+      "width": 1,
+      "height": 1,
+      "layers": 1,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 13
+      },
+      "submittedDraws": {
+        "0": 0
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 2,
+      "label": "PixelMap sun shadow array",
+      "width": 1536,
+      "height": 1536,
+      "layers": 2,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1,
+        "1": 1
+      },
+      "submittedDraws": {
+        "0": 2,
+        "1": 2
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 3,
+      "label": "PixelMap sun shadow array",
+      "width": 1,
+      "height": 1,
+      "layers": 1,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1
+      },
+      "submittedDraws": {
+        "0": 0
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 4,
+      "label": "PixelMap sun shadow array",
+      "width": 1536,
+      "height": 1536,
+      "layers": 2,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1,
+        "1": 1
+      },
+      "submittedDraws": {
+        "0": 2,
+        "1": 2
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 5,
+      "label": "PixelMap sun shadow array",
+      "width": 1,
+      "height": 1,
+      "layers": 1,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1
+      },
+      "submittedDraws": {
+        "0": 0
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 6,
+      "label": "PixelMap sun shadow array",
+      "width": 1536,
+      "height": 1536,
+      "layers": 2,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1,
+        "1": 1
+      },
+      "submittedDraws": {
+        "0": 2,
+        "1": 2
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 7,
+      "label": "PixelMap sun shadow array",
+      "width": 1024,
+      "height": 1024,
+      "layers": 1,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1
+      },
+      "submittedDraws": {
+        "0": 2
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 8,
+      "label": "PixelMap sun shadow array",
+      "width": 2048,
+      "height": 2048,
+      "layers": 4,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "submittedDraws": {
+        "0": 2,
+        "1": 2,
+        "2": 2,
+        "3": 2
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 9,
+      "label": "PixelMap sun shadow array",
+      "width": 1536,
+      "height": 1536,
+      "layers": 2,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 17,
+        "1": 17
+      },
+      "submittedDraws": {
+        "0": 130,
+        "1": 130
+      },
+      "invalidRenderViews": 0,
+      "destroyed": true
+    },
+    {
+      "id": 10,
+      "label": "PixelMap sun shadow array",
+      "width": 2048,
+      "height": 2048,
+      "layers": 4,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 1,
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "submittedDraws": {
+        "0": 10,
+        "1": 10,
+        "2": 10,
+        "3": 10
+      },
+      "invalidRenderViews": 0,
+      "destroyed": false
+    }
+  ],
+  "draws": 682,
+  "submits": 276,
+  "mapSubmits": 39,
+  "writeBytes": 84182588,
+  "readbacks": 0,
+  "buffers": 81,
+  "textures": 52,
+  "buffersDestroyed": 2,
+  "texturesDestroyed": 41,
+  "glContexts": 0
+}

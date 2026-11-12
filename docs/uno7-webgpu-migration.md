@@ -6,9 +6,12 @@ This branch migrates Pixel Atlas from Uno.Sdk 6.7.30 to Uno.Sdk 7.0.5 and replac
 every production map presentation path with Uno's shared-device
 `WebGpuCanvasElement`. The Uno UI also uses the WebGPU graphics provider.
 
-The production renderer, migration checks and native regression validation are
-present. Published-browser integration and visual acceptance remain required
-gates; their latest outcome is recorded in the PR and linked CI runs below.
+The production renderer passes the full native regression suite and all 31
+published-browser scenarios in both Debug and Release AOT. The final source
+revision is `dad16fcd65f8ceb67e43eed95c4af0ef9787609f`, verified by
+[run 15](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943).
+Selected original screenshots, both scenario reports, GPU traces and file hashes
+are preserved in the [browser verification record](verification/uno7-webgpu-dad16fc/README.md).
 The quality target is a modern real-time 3D renderer. Implemented
 graphics features do not by themselves establish commercial AAA visual quality,
 hardware frame rates, or a measured improvement over the previous release.
@@ -273,7 +276,40 @@ optional `PixelAtlasGraphics.fail(message)` hook supplies custom recovery UI.
 
 ## Verification and evidence
 
-### Passed
+### Final migration verification
+
+| Gate | Result on `dad16fc` |
+| --- | --- |
+| Native data, rendering, GLES references, routing, simulation, input and audio | Passed |
+| Independent WebGPU presentation and opaque-pixel checks | Passed |
+| Debug interpreted publish and package identity | Passed |
+| Debug browser scenarios | 31 passed, no report errors or failures |
+| Release AOT publish and package identity | Passed |
+| Release AOT browser scenarios | 31 passed, no report errors or failures |
+
+The actual CI checkout is PR merge `78fdef7f0a1ef1147a960760eb7c9f4f0cf4dabd`
+against base `c6a26075b5767e2aa82e87e949194e82c0e9cb1e`. The final documentation
+commit adds the original evidence without changing the tested application,
+shaders or harness. The [evidence manifest](verification/uno7-webgpu-dad16fc/manifest.json)
+records source/build identities and SHA-256 hashes; the [verification page](verification/uno7-webgpu-dad16fc/README.md)
+includes the actual Release screenshots and explains their scope.
+
+Both browser builds pass the initial and post-pinch Normal density checks:
+390 × 736 logical pixels map to a 780 × 1472 native target and scene at DPR 2.
+Pinch changes map zoom while page scale and UI layout remain fixed. All six
+journey modes reach an intermediate position and remain exactly paused through
+queue completion and capture. Destroying Uno's actual shared device reports a
+managed failure and leaves the map-submission count unchanged afterward.
+Desktop/mobile GPU records contain no unexpected errors, losses, map texture
+readbacks or WebGL contexts. The Ultra shadow probe verifies submitted geometry
+in each of the four depth-array layers.
+
+Independent visual review confirms native-density label/facade detail and the
+finer Ultra facade shadow at the same paused camera position. Still images do
+not establish temporal stability or hardware frame rates. Both configurations
+use full Chromium under Xvfb with the Google SwiftShader software adapter.
+
+### Native checks and earlier integration results
 
 The restored package graph matches the versions above. Rendering-library Release
 compilation succeeded. The full native regression job also passed on GitHub for
@@ -393,9 +429,8 @@ The new mobile scenario then used the incorrect accessible name `Pixel rendering
 when returning to the existing `Pixel art rendering` menu item. That locator
 timeout fails both complete browser results despite the passed initial density
 assertions and other suites. The test now uses the exact existing UI label,
-matching the desktop style checks. Pinch and the final Normal density capture
-remain required in the follow-up run; the assertion has not been removed or
-relaxed.
+matching the desktop style checks. Run 15 passes pinch and the final Normal
+density capture in both configurations with the original assertions retained.
 
 The flight demo's unavailable external map data leaves uniform ground near its
 airport origin in the offline fixture. Its screenshot establishes route/aircraft
@@ -459,7 +494,8 @@ draws into layer zero. Its intended
 coverage includes all styles/quality presets, imagery/elevation/relief, pan/zoom,
 all six route demonstrations, walking, resize, high-DPI mobile pinch, unavailable
 WebGPU and device loss. It retains screenshots, errors and bounded counters.
-The suite must pass before this migration is considered ready.
+The suite passes for the final source revision above and remains a required
+integration check for subsequent rendering changes.
 Screenshot checks reject the recovery panel before and after capture and retain
 graphics state, GPU errors/losses, console history and accessibility on failure.
 
