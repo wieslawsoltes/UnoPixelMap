@@ -206,6 +206,8 @@ Normal and Roblox styles add directional sun shadows with percentage-closer filt
 
 Map labels reuse the existing Unicode layout, collision and visibility rules. A bounded cached font atlas supplies texture samples to GPU glyph quads. Route and vehicle geometry uses the map's homogeneous projection and depth convention. Data decoding, glyph rasterization on cache misses, terrain artwork preparation, label layout and sparse picking still run on the CPU. Those asset and interaction operations are separate from the WebGPU rendering passes.
 
+The map requests native display pixels through a density-aware canvas viewport while camera, input and picking coordinates stay in logical pixels. The presentation texture is bounded at 32 MiB of color and 8192 pixels per dimension; unusually large viewports scale down within those limits. Smooth label atlas density is independently capped at 3×.
+
 The status bar reports **WebGPU active**. `RenderingQuality`, `IsGpuRenderingActive` and `RenderStyle` describe the public control state. The former `IsGpuRenderingEnabled` switch was removed because the control now has one rendering backend. Uno describes its WebGPU backend as experimental; the exact package versions, lifecycle contract, remaining quality boundaries and validation results are documented in the [migration guide](docs/uno7-webgpu-migration.md).
 
 The earlier [performance methodology and results](docs/performance.md) describe the pre-migration CPU/GL/Skia paths. Their timing and memory improvements must not be read as a measured WebGPU speedup.

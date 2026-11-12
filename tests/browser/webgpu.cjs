@@ -711,7 +711,39 @@ async function journeys(browser) {
 async function mobile(browser) {
     const { context, page } = await open(browser, "", { mobile: true, density: 2 });
     try {
+        assert.equal(await page.evaluate(() => devicePixelRatio), 2, "The mobile browser exposes the requested device-pixel ratio");
+        const captureNativeResolution = async name => {
+            const pixels = await capture(page, name);
+            const display = await page.evaluate(() => {
+                const canvas = document.getElementById("uno-canvas");
+                return { dpr: devicePixelRatio, viewportWidth: innerWidth, viewportHeight: innerHeight,
+                    canvasWidth: canvas?.width, canvasHeight: canvas?.height, diagnostic: PixelAtlasWebGpu };
+            });
+            const s = display.diagnostic;
+            assert.equal(display.dpr, 2, name + ": device-pixel ratio stays at two");
+            assert.equal(s.style, "Normal", name + ": resolution is checked in the continuous style");
+            assert.equal(s.quality, "High", name + ": the full-resolution mobile case uses High quality");
+            // Logical diagnostic bounds are rounded up once. At DPR2 that can
+            // differ from rounding physical bounds by at most one pixel.
+            assert.ok(Math.abs(s.physicalWidth - s.width * display.dpr) <= 1,
+                `${name}: native target width ${s.physicalWidth} must cover ${s.width} logical pixels at DPR${display.dpr}`);
+            assert.ok(Math.abs(s.physicalHeight - s.height * display.dpr) <= 1,
+                `${name}: native target height ${s.physicalHeight} must cover ${s.height} logical pixels at DPR${display.dpr}`);
+            assert.ok(s.physicalWidth * s.physicalHeight <= 3_686_400, name + ": this viewport fits the High-quality scene budget");
+            assert.equal(s.renderWidth, s.physicalWidth, name + ": map color/depth buffers keep the native target width");
+            assert.equal(s.renderHeight, s.physicalHeight, name + ": map color/depth buffers keep the native target height");
+            assert.equal(pixels.width, display.viewportWidth * display.dpr, name + ": screenshot retains physical display pixels");
+            report.scenarios.at(-1).display = display;
+            return pixels;
+        };
         const before = await capture(page, "mobile-pixel");
+        // The initial camera includes the Financial District label. Keep a
+        // continuous, native-density view of that label before the pinch zooms in.
+        await menu(page, "Normal rendering");
+        await awaitFrame(page, s => s.style === "Normal");
+        await captureNativeResolution("mobile-normal-initial-high-dpi");
+        await menu(page, "Pixel rendering");
+        await awaitFrame(page, s => s.style === "Pixel");
         const beforePinch = await page.evaluate(() => ({
             frames: PixelAtlasWebGpu.frames, zoom: PixelAtlasWebGpu.zoom
         }));
@@ -729,7 +761,7 @@ async function mobile(browser) {
         assert.ok(bounds.scrollWidth <= bounds.width + 1, "Mobile layout does not overflow horizontally");
         await menu(page, "Normal rendering");
         await awaitFrame(page, s => s.style === "Normal");
-        await capture(page, "mobile-normal-high-dpi");
+        await captureNativeResolution("mobile-normal-high-dpi");
         await verifyGpu(page, "mobile");
     } catch (error) {
         await saveFailure(page, "mobile", error);

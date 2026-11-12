@@ -55,8 +55,22 @@ public sealed partial class PixelMapControl
         private int _interactivePixelSize = 2;
         private bool _active;
         private long _frames, _preparations;
+        private int _viewportWidth = 1, _viewportHeight = 1;
 
         internal string? Failure { get; private set; }
+
+        internal void SetViewport(double width, double height)
+        {
+            lock (_drawing)
+            {
+                int w = Math.Max(1, (int)Math.Ceiling(width));
+                int h = Math.Max(1, (int)Math.Ceiling(height));
+                if (_viewportWidth == w && _viewportHeight == h) return;
+                _viewportWidth = w;
+                _viewportHeight = h;
+                if (Failure is null) Invalidate();
+            }
+        }
 
         internal void Present(MapCamera camera, IReadOnlyList<MapTile> tiles, IReadOnlyList<ImageryTile>? imagery,
             PixelStyle palette, bool moving, RoutePlan? route, VehiclePose? vehicle, TravelMode vehicleMode,
@@ -70,8 +84,7 @@ public sealed partial class PixelMapControl
                 bool retainedIdle = Failure is null && scene.Route is null && scene.Gate is null &&
                     _presentedScene is { } displayed && scene.Vehicle is { Moving: false } idle &&
                     (scene with { Vehicle = displayed.Vehicle }) == displayed &&
-                    _prepared?.Matches(scene, Math.Max(1, (int)Math.Ceiling(ActualWidth)),
-                        Math.Max(1, (int)Math.Ceiling(ActualHeight)), ArtworkPixelSize(scene)) == true &&
+                    _prepared?.Matches(scene, _viewportWidth, _viewportHeight, ArtworkPixelSize(scene)) == true &&
                     _overlay?.TryAdvanceStationaryVehicle(scene.VehicleMode, idle) == true;
                 _scene = scene;
                 if (retainedIdle)
@@ -130,8 +143,8 @@ public sealed partial class PixelMapControl
                 long started = Stopwatch.GetTimestamp();
                 try
                 {
-                    int width = Math.Max(1, (int)Math.Ceiling(ActualWidth));
-                    int height = Math.Max(1, (int)Math.Ceiling(ActualHeight));
+                    int width = _viewportWidth;
+                    int height = _viewportHeight;
                     int pixelSize = ArtworkPixelSize(scene);
                     if (_frame is null || _prepared?.Matches(scene, width, height, pixelSize) != true)
                     {

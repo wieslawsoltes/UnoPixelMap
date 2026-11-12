@@ -38,4 +38,6 @@ The shadow probe follows actual depth textures, per-layer views and submitted re
 
 Journey checks select the real 0.25× playback control, require motion, pause before the destination and require unchanged progress throughout GPU completion and capture. They also verify that Pause's accessibility state changes from disabled to enabled. Independent suites and route modes retain every failure and continue through their remaining cases; any failure still fails the run.
 
+The mobile context requests DPR 2 and explicitly checks the actual browser density, native map-target dimensions, scene-buffer dimensions and physical screenshot width. An initial Normal capture retains a visible map label before the pinch changes its visibility. A DPR-2 screenshot containing an upscaled 1× map target fails this gate.
+
 `PIXELMAP_SHOTS` selects the evidence directory. It contains `presentation.json`, page/canvas preflight images, per-capture GPU records, application screenshots and `report.json`. Failures also preserve graphics state, device identities/destruction stacks, console history and the accessibility tree.

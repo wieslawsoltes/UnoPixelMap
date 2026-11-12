@@ -82,7 +82,7 @@ public sealed partial class PixelMapControl : UserControl
             Visibility = Visibility.Collapsed
         };
         _pin.SizeChanged += (_, _) => PositionMarker();
-        layers.Children.Add(_surface);
+        layers.Children.Add(new MapSurfaceViewport(_surface));
         layers.Children.Add(_pin);
         Content = layers;
         IsTabStop = true;

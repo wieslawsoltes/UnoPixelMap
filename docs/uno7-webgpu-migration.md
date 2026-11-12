@@ -74,6 +74,25 @@ It renders into the supplied texture view. No second browser graphics context,
 texture-to-CPU copy, image upload for final presentation, or full-frame CPU
 overlay bitmap participates in the production path.
 
+`MapSurfaceViewport` keeps logical layout and input coordinates separate from
+native texture dimensions. Uno 7.0.32 records a visual into a fresh local drawing
+session, then applies display density when replaying it. The canvas's target-size
+calculation therefore misses the root density in that recording path. A public
+`Canvas` host arranges the WebGPU element at the requested physical dimensions and
+applies an inverse `ScaleTransform`; `XamlRoot.RasterizationScale` and its `Changed`
+event keep it synchronized. Camera preparation, picking and the marker remain in
+logical coordinates, and the existing glyph-density calculation uses the actual
+native target. No private reflection or alternate graphics context is involved.
+See the pinned [visual recording path](https://github.com/unoplatform/uno/blob/7.0.32/src/Uno.UI.Composition/Composition/Visual.skia.cs)
+and [canvas target sizing](https://github.com/unoplatform/uno/blob/7.0.32/src/AddIns/Uno.WinUI.Graphics3DWebGpu/WebGpuCanvasElement.cs).
+
+The host clips the expanded child to its logical viewport and bounds the
+presentation texture at 8,388,608 pixels (32 MiB of color) and 8192 pixels per
+dimension. Very large requested targets scale down proportionally. This borrowed
+Uno texture is separate from the renderer's own scene/shadow budgets. A zero-sized
+viewport clears its child size and clip; loading, unloading and display-density
+changes attach and detach only the public root event.
+
 The public `IsGpuRenderingEnabled` switch was removed. Its replacement is
 `RenderingQuality` with `Balanced`, `High` and `Ultra` values.
 `IsGpuRenderingActive` remains a read-only status indicator. The View menu
@@ -330,6 +349,24 @@ and [browser property routing](https://github.com/unoplatform/uno/blob/7.0.32/sr
 The browser check also uses the public 0.25× playback option and checks the
 enabled semantic state after pausing. Independent suites and all six route modes
 retain their failures and continue, with a failing overall exit if any case fails.
+
+[Run 13](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43123975745)
+on `a2b1351` passed native regression, independent presentation and all 30 browser
+scenarios in both Debug and Release AOT. Every journey paused at an intermediate
+position and retained exactly that progress through capture. Destroying the real
+shared device reported a managed failure and kept map submissions at 4 → 4.
+Release desktop evidence records 741 draws, 41 map submissions and zero GPU
+errors, unexpected losses, readbacks or WebGL contexts.
+
+Visual review found that the DPR-2 screenshot contained a 1× map texture even
+though the surrounding Uno UI used native pixels. The viewport fix above and the
+new 31-scenario gate explicitly require native target/scene dimensions at DPR 2,
+including an initial Normal view with a visible map label. Review also identified
+a nearby facade where Ultra's middle cascade had a visible stepped shadow edge;
+functional success alone does not establish that this quality concern is resolved.
+The flight demo's unavailable external map data leaves uniform ground near its
+airport origin in the offline fixture. Its screenshot establishes route/aircraft
+overlay and playback behavior, not detailed airport terrain quality.
 
 ### Validation investigations
 
