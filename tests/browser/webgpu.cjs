@@ -742,7 +742,7 @@ async function mobile(browser) {
         await menu(page, "Normal rendering");
         await awaitFrame(page, s => s.style === "Normal");
         await captureNativeResolution("mobile-normal-initial-high-dpi");
-        await menu(page, "Pixel rendering");
+        await menu(page, "Pixel art rendering");
         await awaitFrame(page, s => s.style === "Pixel");
         const beforePinch = await page.evaluate(() => ({
             frames: PixelAtlasWebGpu.frames, zoom: PixelAtlasWebGpu.zoom

@@ -376,7 +376,27 @@ Its measured receiver range is approximately 38–60 m. Ultra now preserves High
 24 m near interval, adds 64 m and 256 m coverage, and extends to 2400 m at street
 level. This targets that facade without reducing near sampling or jumping from
 the second slice directly to the far map. The updated native checks pass;
-the next browser run verifies the actual visual result.
+the following browser run verifies the actual visual result.
+
+[Run 14](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43127009651)
+on `02d5e63` passes the full native regression and independent presentation gates.
+Its Debug and Release AOT browser evidence confirms the corrected native density: a 390 × 736
+logical map uses a 780 × 1472 target and scene inside the 780 × 1688 DPR-2
+screenshot. The initial Normal view includes a visibly sharp Financial District
+label, aligned map geometry and native-density Uno controls. The four-layer Ultra
+street capture has a finer facade shadow than the earlier three-layer fit; each
+High/Ultra pair uses the same paused camera within its run. Across runs, the
+movement-driven camera can stop at a different position, so those images are not
+a pixel-identical before/after benchmark.
+
+The new mobile scenario then used the incorrect accessible name `Pixel rendering`
+when returning to the existing `Pixel art rendering` menu item. That locator
+timeout fails both complete browser results despite the passed initial density
+assertions and other suites. The test now uses the exact existing UI label,
+matching the desktop style checks. Pinch and the final Normal density capture
+remain required in the follow-up run; the assertion has not been removed or
+relaxed.
+
 The flight demo's unavailable external map data leaves uniform ground near its
 airport origin in the offline fixture. Its screenshot establishes route/aircraft
 overlay and playback behavior, not detailed airport terrain quality.
