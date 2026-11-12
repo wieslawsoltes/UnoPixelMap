@@ -552,7 +552,11 @@ function verifyRenderGraph(evidence, diagnostic, name) {
         const nextCompute = passes.findIndex((candidate, index) => index > passes.indexOf(pass) && candidate.kind === "compute");
         const copies = passes.slice(passes.indexOf(pass) + 1, nextCompute < 0 ? passes.indexOf(scenePasses[0]) : nextCompute)
             .filter(candidate => candidate.kind === "copy" && candidate.destination?.label === "PixelMap terrain artwork");
-        assert.equal(copies.length, pass.dispatches[0][2], name + ": every dispatched dirty layer reaches the final artwork mip");
+        assert.equal(copies.reduce((sum, copy) => sum + copy.extent[2], 0), pass.dispatches[0][2],
+            name + ": every dispatched dirty layer reaches the final artwork mip");
+        const runs = pass.dirtyLayers.reduce((count, layer, index, layers) =>
+            count + (index === 0 || layer !== layers[index - 1] + 1 ? 1 : 0), 0);
+        assert.equal(copies.length, runs, name + ": consecutive dirty layers share one array copy");
         for (const copy of copies) {
             assert.equal(copy.source.textureId, destination.textureId, name + ": copy consumes the compute scratch array");
             assert.equal(copy.destination.textureId, source.textureId, name + ": copy returns to the sampled artwork array");
