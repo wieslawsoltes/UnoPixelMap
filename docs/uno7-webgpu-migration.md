@@ -6,12 +6,16 @@ This branch migrates Pixel Atlas from Uno.Sdk 6.7.30 to Uno.Sdk 7.0.5 and replac
 every production map presentation path with Uno's shared-device
 `WebGpuCanvasElement`. The Uno UI also uses the WebGPU graphics provider.
 
-The production renderer passes the full native regression suite and all 31
-published-browser scenarios in both Debug and Release AOT. The final source
+The migration baseline passes the full native regression suite and all 31
+published-browser scenarios in both Debug and Release AOT. That source
 revision is `dad16fcd65f8ceb67e43eed95c4af0ef9787609f`, verified by
 [run 15](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943).
 Selected original screenshots, both scenario reports, GPU traces and file hashes
 are preserved in the [browser verification record](verification/uno7-webgpu-dad16fc/README.md).
+The documentation/evidence head `f5ddbe9` also passed all four jobs in
+[run 16](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43132383428).
+Subsequent facade, terrain filtering and HDR bloom changes are described with
+their own validation status in [WebGPU filtering and HDR quality](webgpu-filtering.md).
 The quality target is a modern real-time 3D renderer. Implemented
 graphics features do not by themselves establish commercial AAA visual quality,
 hardware frame rates, or a measured improvement over the previous release.
@@ -107,11 +111,14 @@ exposes the three quality choices and the four existing rendering styles.
 flowchart TD
     Sources["Vector tiles, imagery and DEM"] --> Prepare["Retained geometry and asset preparation"]
     Prepare --> Shadow["Sun shadow depth pass"]
-    Prepare --> Scene["HDR terrain and building pass"]
+    Prepare --> Mips["Dirty terrain mip compute and copies"]
+    Mips --> Scene["HDR terrain and building pass"]
     Shadow --> Scene
     Navigation["Routes, vehicles, gates and particles"] --> World["Depth-tested world overlays"]
     Scene --> World
-    World --> Resolve["Tone mapping, bloom and pixel resolve"]
+    World --> Bloom["Smooth HDR bloom pyramid"]
+    Bloom --> Resolve["Exposure, tone mapping and pixel resolve"]
+    World --> Resolve
     Atlas["Cached Unicode label atlas"] --> Labels["GPU screen labels"]
     Resolve --> Labels
     Labels --> Uno["Uno shared WebGPU target"]
@@ -145,7 +152,9 @@ Normal and Roblox styles implement:
 - GGX-based material lighting and sky illumination.
 - A linear-light RGBA16F scene target.
 - Height-dependent atmospheric fog.
-- ACES-fit tone mapping and a small bright-pass bloom resolve.
+- Normalized multiscale HDR bloom followed by ACES-fit tone mapping.
+- Linear-light terrain mipmaps with explicit gradients and requested 8x anisotropic filtering.
+- Analytic smooth facade coverage shared by albedo, roughness, metallic response and emission.
 - Quality-dependent multisampling and edge antialiasing.
 - Correct final encoding for linear and sRGB target formats.
 
@@ -189,8 +198,8 @@ GL renderer are possible; full-frame bit identity has not been claimed.
 | Quality | Smooth geometry samples | Sun depth layers | Shadow storage | Requested scene-pixel cap | Bloom |
 | --- | --- | --- | --- | --- | --- |
 | Balanced | 1 | 1 × 1024 × 1024 | 4 MiB | 2,073,600 | off |
-| High (default) | 4 | 2 × 1536 × 1536 | 18 MiB | 3,686,400 | enabled |
-| Ultra | 4 | 4 × 2048 × 2048 | 64 MiB | 8,294,400 | enabled |
+| High (default) | 4 | 2 × 1536 × 1536 | 18 MiB | 3,686,400 | 5 levels, 0.035 scattering |
+| Ultra | 4 | 4 × 2048 × 2048 | 64 MiB | 8,294,400 | 6 levels, 0.055 scattering |
 
 The actual smooth resolution is constrained by both the pixel cap and a
 256 MiB attachment budget. Ultra may therefore render below its requested pixel
@@ -198,6 +207,20 @@ cap, particularly with multisampling. Physical display density is included;
 logical projection coordinates remain unchanged. Pixel styles preserve the
 logical grid; Balanced alone may increase their moving pixel size under CPU
 submission pressure.
+
+The exact attachment plan includes odd-sized downsample/reconstruction textures
+and allocates an RGBA16F photograph copy only when its path is active. Final
+multisample color and depth use discard stores; the first photographic pass
+retains them for its continuation. Bloom uses distinct source/output textures,
+no extra submission or CPU readback, and no allocations or passes in art styles
+or Balanced quality. Shader/pipeline creation is also deferred until bloom is used.
+
+Terrain artwork has nine levels. Smooth styles sample its sRGB view, while Pixel
+and Minecraft retain nearest sampling of the original unorm mip-zero bytes.
+Eight compute passes batch dirty layers through a reusable storage scratch array;
+ordered GPU copies return each level to the sampled array. An unchanged frame
+does not regenerate mips. See [terrain mipmaps](terrain-mipmaps.md) for the public
+API compatibility decision and exact resident-byte accounting.
 
 Shadow storage is bounded separately at 64 MiB and included in nominal resident
 bytes. It is not included in the scene attachment budget. Each changed scene

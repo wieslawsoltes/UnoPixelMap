@@ -233,11 +233,18 @@ Open http://localhost:8000/. Append `-- --benchmark --output artifacts/rendering
 The browser checks use headed Chromium. Follow the [browser setup and presentation preflight](tests/browser/README.md) to install its pinned dependencies and, on a Linux server, Xvfb and the Vulkan runtime. With the application server still running, use:
 
 ```sh
+dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- \
+  --webgpu-facade-output=artifacts/webgpu/facade-fixture.json
 PIXELMAP_SHOTS=artifacts/webgpu xvfb-run -a -s '-screen 0 1600x1200x24' \
   node tests/browser/webgpu.cjs http://localhost:8000/
 ```
 
 On an interactive desktop, omit the `xvfb-run` wrapper. The independent presentation preflight checks that WebGPU pixels reach browser screenshots before exercising the application.
+
+Normal and Roblox additionally use coverage-filtered facade materials, a nine-level
+linear-light terrain mip chain with requested 8x anisotropy, and normalized HDR
+bloom pyramids at High/Ultra quality. The [filtering and HDR quality record](docs/webgpu-filtering.md)
+describes their algorithms, memory costs and independent shader validation.
 
 The retained GL renderer is excluded from the production assembly and compiled into the regression test assembly. On Linux with EGL and Mesa installed, the opt-in GLES reference checks exercise compiled terrain and building shaders, hardware depth, CPU/GPU image comparisons, navigation overlays, retained-frame lifetime and high-DPI composition. Add `--gpu-benchmark` for fixed-resolution CPU/GPU timings that include synchronous framebuffer readback.
 
