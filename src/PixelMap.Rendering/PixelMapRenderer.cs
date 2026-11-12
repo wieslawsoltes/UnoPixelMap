@@ -422,6 +422,10 @@ public sealed partial class PixelMapRenderer : IDisposable
         target.ShadowSources.Clear();
         target.ShadowSources.AddRange(shadowSources);
         terrain.Remove(targetId);
+        // A new, replaced or evicted neighboring caster can change this tile even
+        // when its own vector source is unchanged. Retire every cached descendant
+        // or ancestor patch that may contain the updated baked ground shadow.
+        reliefSurface?.InvalidateTextures(targetId);
     }
 
     private static bool SameTiles<T>(IReadOnlyList<T>? tiles, List<T> previous) where T : class

@@ -108,6 +108,42 @@ internal sealed class TerrainSurface : IDisposable
         textures.Clear();
     }
 
+    /// <summary>Artwork is clipped to dyadic source tile bounds. Streaming a source
+    /// affects only intersecting cached patches; unchanged immutable texels retain
+    /// their identity, so their GPU array layer and mip chain remain reusable.</summary>
+    internal void InvalidateTextures(IReadOnlySet<TileId> sources)
+    {
+        if (sources.Count == 0 || textures.Count == 0) return;
+        foreach (var entry in textures)
+            foreach (var source in sources)
+                if (Overlaps(entry.Key, source))
+                {
+                    entry.Value.Dispose();
+                    textures.Remove(entry.Key);
+                    break;
+                }
+    }
+
+    internal void InvalidateTextures(TileId source)
+    {
+        foreach (var entry in textures)
+            if (Overlaps(entry.Key, source))
+            {
+                entry.Value.Dispose();
+                textures.Remove(entry.Key);
+            }
+    }
+
+    private static bool Overlaps(TileId a, TileId b)
+    {
+        // Adjacent source rectangles share no texels: BakeTerrainTexture clips
+        // each vector source to its own bounds. World copies share canonical IDs.
+        if ((uint)a.Z > 30 || (uint)b.Z > 30) return true;
+        return a.Z >= b.Z
+            ? (a.X >> (a.Z - b.Z)) == b.X && (a.Y >> (a.Z - b.Z)) == b.Y
+            : (b.X >> (b.Z - a.Z)) == a.X && (b.Y >> (b.Z - a.Z)) == a.Y;
+    }
+
     internal unsafe void Draw(SKBitmap bitmap, BuildingRasterizer depth, MapCamera view, int logicalWidth,
         int logicalHeight, int pixelSize, TerrainOptions terrain, bool preservePhotograph,
         Func<TileId, SKBitmap, SKRect[]> bake)

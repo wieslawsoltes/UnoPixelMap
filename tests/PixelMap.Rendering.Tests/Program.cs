@@ -2,6 +2,18 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--terrain-artwork", StringComparer.Ordinal))
+{
+    await TerrainArtworkInvalidationChecks.RunAsync();
+    return;
+}
+
+if (args.Contains("--terrain-streaming-cost", StringComparer.Ordinal))
+{
+    await TerrainArtworkInvalidationChecks.RunBenchmarkAsync(args);
+    return;
+}
+
 if (args.Contains("--webgpu-bloom", StringComparer.Ordinal))
 {
     WebGpuBloomChecks.Run();
@@ -126,6 +138,7 @@ if (args.Contains("--styles", StringComparer.Ordinal))
 }
 
 WebGpuFacadeChecks.Run();
+await TerrainArtworkInvalidationChecks.RunAsync();
 
 const int width = 256, height = 256;
 var id = new TileId(14, 8192, 8192);
