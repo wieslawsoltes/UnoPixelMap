@@ -7,14 +7,17 @@ physical scene resolution, 4× MSAA in High/Ultra, shadows, HDR bloom, terrain m
 anisotropic filtering, map styles and native-density labels are preserved.
 
 **Measured application baseline:** `a9a284263da76a201114381467bf45aa4823a2d6`.
-**Measured optimized application:** `16048b7981ba2b08f57f437dc833457a886df56d`.
-Both are committed source trees. Later documentation or benchmark-only changes do
-not change that production implementation. Migration architecture and its existing
-quality limits remain in [the migration guide](uno7-webgpu-migration.md).
+**Measured optimization checkpoint:** `16048b7981ba2b08f57f437dc833457a886df56d`.
+The timing tables below describe these committed source trees. The later CI
+checkout `4dbb962` has the same production `src` tree as `16048b7`. Terrain-only
+picking and retained GPU interaction were improved after that checkpoint; their
+implementation and exact regression results are documented below. Updated native
+and browser measurements for the final source are pending. Migration architecture
+and its existing quality limits remain in [the migration guide](uno7-webgpu-migration.md).
 
-## Results: native CPU frame preparation
+## Checkpoint results: native CPU frame preparation
 
-The primary table comes from the [paired CI run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43254794602)
+This preserved table comes from the [paired CI run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43254794602)
 on an AMD EPYC 9V74 runner, using isolated .NET SDK 10.0.403 and runtime 10.0.15.
 The candidate checkout is `4dbb962`, whose production `src` tree is identical to
 `16048b7`; its later changes improve the benchmark and toolchain provenance.
@@ -49,17 +52,19 @@ managed allocations are preserved alongside wall time; unavailable thread timing
 is null instead of zero on unsupported platforms.
 
 An independent local ABBA run also passed all 10,944 identity comparisons and
-measured 18–48% lower preparation/overlay time. The primary CI run measures
+measured 18–48% lower preparation/overlay time. The isolated-SDK checkpoint CI run measured
 24–56% lower time. These are separate machines/runs, not a combined sample pool.
 The source, font, harness and renderer hashes are retained for each.
 
-### Picking-inclusive cost and the deferred-work tradeoff
+### Checkpoint picking cost and the subsequent fix
 
 The benchmark also performs twelve sparse screen-space terrain picks after each
-prepared frame. Labels now request less depth geometry, so the later picking phase
-can become its first consumer. The walking cases show this cost shift clearly:
+prepared frame. At the `16048b7` / `4dbb962` checkpoint, labels requested less depth
+geometry, but a later terrain pick still demanded the combined terrain/model
+sample. Picking consequently became the first consumer of some building geometry.
+These checkpoint walking results expose that cost shift:
 
-| Walking style | Picking alone, baseline → optimized ms | Preparation + overlay + 12 picks, baseline → optimized ms | Combined reduction |
+| Walking style | Picking alone, baseline → checkpoint ms | Preparation + overlay + 12 picks, baseline → checkpoint ms | Combined reduction |
 |---|---:|---:|---:|
 | Pixel | 0.765 → 2.633 | 5.165 → 5.094 | 1.4% |
 | Normal | 1.153 → 3.139 | 6.094 → 5.591 | 8.2% |
@@ -68,19 +73,33 @@ can become its first consumer. The walking cases show this cost shift clearly:
 Combined distributions sum the phases **within each sample** before calculating
 medians; they are not sums of the phase medians. In the independent local run,
 Pixel walking with all twelve picks regressed 12.6% (5.687 → 6.405 ms), despite its
-faster preparation/overlay phase. The other local walking totals and all primary
+faster preparation/overlay phase. The other local walking totals and all checkpoint
 CI totals improved. Frequent-picking applications therefore must use the combined
 results rather than applying the preparation-only percentage to their whole frame.
+The subsequent terrain-only demand change removes the redundant building
+preparation from these queries. The table above remains evidence of the earlier
+checkpoint; final-source measurements will establish the resulting timing change.
 
 The application does not issue twelve screen-space picks on every walking frame.
 Its movement contacts and terrain-following camera use geographic height sampling.
-Screen-space picking serves map interaction and the visible scale bar; camera-driven
-scale updates are throttled to roughly 100 ms and query two points. The depth path
-is used for visible terrain relief; flat/hidden-relief views use camera
-unprojection. These real interaction costs remain relevant, and the paired browser
-protocol includes input handling and main-thread work beyond the renderer callback.
+Map interaction and the visible desktop scale bar request screen-space locations;
+camera-driven scale updates are throttled to roughly 100 ms and query two points.
+The scale bar is hidden below 790 logical pixels of page width.
 
-## Results: source streaming and artwork
+The baseline and measured checkpoint had a separate readiness defect: the WebGPU
+host prepares frames without legacy overlays, while `TryPickTerrain` and
+`TryProjectTerrain` required a nonnull legacy `SKPicture`. Those GPU-only frames
+were rejected even when the presented terrain mesh was valid. Relief taps and
+scale readouts therefore fell back to camera/DEM unprojection, and pins used the
+geographic elevation projection fallback. Feature picking also failed to recognize
+the matching retained mesh. The later retained-view fix accepts a live GPU frame
+while preserving camera, viewport and disposal guards. Relief scale readouts,
+taps and pins can now use the presented mesh; flat/hidden-relief location queries
+retain camera unprojection. Geographic movement-height sampling is unchanged.
+These UI callbacks are outside the renderer callback's stopwatch; the paired
+browser protocol includes input handling and main-thread work beyond that scope.
+
+## Checkpoint results: source streaming and artwork
 
 These fixed-camera workloads replace one deterministic vector or imagery source
 at a time over nine real bundled city tiles. They deliberately isolate source
@@ -158,6 +177,43 @@ The full replay tables above include the cost of chunk checks and metadata reuse
 Near-first model sorting and another repeated-pixel cache were measured and
 rejected because their benefit did not justify their overhead or complexity.
 
+### Terrain-only picking
+
+`GpuSceneDepth.TryTerrain` returns the terrain triangle selected independently of
+building and roof-rim depth. It now reuses an existing complete cached hit, or
+prepares only terrain groups contributing to the queried pixel. Sampling retains
+the existing finite-depth checks, interpolation and source-order tie rules across
+local cells, large proxies and exact/coarse index-budget fallback. A building over
+the queried pixel does not change the underlying terrain intersection.
+
+Terrain-only answers never enter the complete occlusion cache, mark a cell
+complete, or consume its model-occlusion query budget. A later `CoversAt` query
+still demands the models needed for its altitude and subpixel position. No new
+persistent cache or pooled state is introduced. `TerrainSurface.TryPick` obtains
+rendered altitude, inverse depth and physical height from one GPU query instead
+of querying the same pixel twice; the CPU sampling path is unchanged.
+
+The isolation fixture performs 32 terrain queries in one cell containing 48
+overlapping buildings and prepares none of those models. Its first occlusion
+query prepares one model; a later complete query prepares all 48. Mixed picking
+and visibility tests compare the results bit-for-bit with the frozen eager oracle.
+
+### Retained GPU interaction
+
+The shared `HasRetainedView` predicate recognizes the native geometry generation
+through a live `activeGpuScene`; CPU/legacy generations continue to require their
+retained picture. `TryPickTerrain`, `TryProjectTerrain` and the aligned feature-pick
+path use this predicate with their existing camera, viewport, terrain and
+tile-source checks. A disposed GPU frame cannot borrow an old picture, and a
+stale GPU reference cannot authorize a later CPU view without a picture.
+
+GPU-only frames therefore expose the same terrain coordinates, physical heights,
+mesh projections and feature picks as equivalent legacy-overlay frames. Tests
+cover all four styles, perspective and orthographic views, wrapped worlds,
+A→B→A activation with changed terrain/style/viewport, both disposed-picture cases,
+and GPU→CPU→GPU transitions. Geographic height sampling for movement retains its
+existing independent contract.
+
 ### WebGPU commands, pipelines and staging
 
 | Work | Baseline | Optimized |
@@ -218,7 +274,7 @@ Vulkan results do not establish physical-GPU FPS, display latency or mobile ther
 ## Reproduction and permanent evidence
 
 - [Native benchmark source and protocol](../tests/PixelMap.Rendering.Performance/README.md).
-- [Primary isolated-SDK CI comparison](verification/webgpu-performance-16048b7/native-ci-sdk-comparison.json)
+- [Isolated-SDK checkpoint CI comparison](verification/webgpu-performance-16048b7/native-ci-sdk-comparison.json)
   and [original raw CI archive](verification/webgpu-performance-16048b7/native-ci-sdk.zip).
 - [Picking-inclusive totals derived from raw samples](verification/webgpu-performance-16048b7/native-picking-inclusive.json).
 - [Earlier independent CI comparison](verification/webgpu-performance-16048b7/native-ci-comparison.json)
@@ -228,10 +284,22 @@ Vulkan results do not establish physical-GPU FPS, display latency or mobile ther
 - [GPU shader fixture results](verification/webgpu-performance-16048b7/shader-fixtures-debug.json).
 - [Evidence manifest and hashes](verification/webgpu-performance-16048b7/manifest.json).
 
-Focused native validation includes 74 terrain artwork comparisons, exact label
-images/overlay buffers/atlas bytes, 595,630 new large-building depth comparisons,
-11,935,261 sparse/eager depth comparisons and 9,063,600 raster comparisons. Large
-fixtures prove that offscreen work is actually rejected; they include all styles,
+Native validation now includes:
+
+| Check | Exact comparisons | Coverage |
+|---|---:|---|
+| Terrain artwork invalidation | 74 | Source replacement/removal, ordering, coverage and retained texels |
+| Terrain-only picking | 193,384 | 44 frames; mixed visibility queries, geographic picks, model/cache isolation, ties and fallback |
+| Retained GPU interaction | 5,520 | 29 views; GPU-only/legacy equality, successful terrain/projection/feature answers and lifetime guards |
+| Depth index pressure | 15,037 | Actual exact/coarse budget exhaustion, cached answers before the transition and uncached recomputation afterward |
+| Large-building depth chunks | 595,630 | Conservative rejection, projection reuse and exact eager results |
+| Sparse/eager depth | 11,935,261 | 56 frames; projection, terrain, model, query-order and retained-frame parity |
+| Independent depth raster | 9,063,600 | 562 frames; raster coverage and numerical boundary cases |
+
+Label images, overlay buffers and atlas bytes also match exactly. Large fixtures
+prove that offscreen work is actually rejected; they include all styles,
 concave/disconnected roofs and holes, clipping boundaries, signed foundations,
-nonfinite input, retained frames and scratch reuse. Existing broader application
-regressions remain in CI.
+nonfinite input, retained frames and scratch reuse. The complete local native suite
+passes with the terrain-only picking and retained-view changes, including existing
+terrain/navigation/feature-picking checks and CPU fallback behavior. Broader
+application regressions remain in CI.
