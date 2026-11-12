@@ -1,0 +1,193 @@
+{
+  "modules": [
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module",
+    "PixelMap WGSL module"
+  ],
+  "pipelines": [
+    {
+      "label": "PixelMap sky (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap buildings (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": true,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap roof edges (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap terrain sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 0 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 1 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 2 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap terrain sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap building sun shadows 3 (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth32float",
+      "depthWrite": true,
+      "format": null
+    },
+    {
+      "label": "PixelMap HDR resolve (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    },
+    {
+      "label": "PixelMap world overlays (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap occluded route silhouettes (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": "depth24plus",
+      "depthWrite": false,
+      "format": "rgba16float"
+    },
+    {
+      "label": "PixelMap screen labels (1x)",
+      "deviceIndex": 0,
+      "samples": 1,
+      "depth": null,
+      "depthWrite": false,
+      "format": "rgba8unorm"
+    }
+  ],
+  "errors": [],
+  "losses": [],
+  "deviceInfo": [
+    {
+      "deviceIndex": 0,
+      "label": "",
+      "timeMs": 1366.8999999999069,
+      "adapter": {
+        "vendor": "google",
+        "architecture": "swiftshader",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": true,
+        "subgroupMinSize": 4,
+        "subgroupMaxSize": 4
+      },
+      "features": [
+        "core-features-and-limits",
+        "timestamp-query"
+      ]
+    }
+  ],
+  "deviceDestroys": [],
+  "shadowTextures": [
+    {
+      "id": 1,
+      "label": "PixelMap sun shadow array",
+      "width": 1,
+      "height": 1,
+      "layers": 1,
+      "format": "depth32float",
+      "samples": 1,
+      "usage": 20,
+      "submittedPasses": {
+        "0": 5
+      },
+      "submittedDraws": {
+        "0": 0
+      },
+      "invalidRenderViews": 0,
+      "destroyed": false
+    }
+  ],
+  "draws": 47,
+  "submits": 41,
+  "mapSubmits": 5,
+  "writeBytes": 15134840,
+  "readbacks": 0,
+  "buffers": 42,
+  "textures": 14,
+  "buffersDestroyed": 8,
+  "texturesDestroyed": 4,
+  "glContexts": 0
+}

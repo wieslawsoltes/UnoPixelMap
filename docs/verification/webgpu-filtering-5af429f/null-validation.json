@@ -1,0 +1,207 @@
+{
+  "backend": "null",
+  "package": "webgpu@0.6.2",
+  "assembly": "/workspace/scratch/unopixelmap-webgpu-next/src/PixelMap.Rendering/bin/Release/net10.0/PixelMap.Rendering.dll",
+  "assemblySha256": "0a1d2a24650ea0012f8bf3849a309620bf238bc9816d07f8cd693d44939b85f4",
+  "modules": [
+    {
+      "name": "WebGpuMapShaders.Background",
+      "sha256": "71d31cf8119ee4f2c173abbd908cb8cce32d00821d4153e9bc9db0de89173c2f",
+      "bytes": 7074,
+      "messages": []
+    },
+    {
+      "name": "WebGpuMapShaders.Terrain",
+      "sha256": "b0afc15f8d4cda4b53ebb8ef1586ef52cce55c76f1a919a598b3095fec56118c",
+      "bytes": 13085,
+      "messages": []
+    },
+    {
+      "name": "WebGpuMapShaders.Buildings",
+      "sha256": "2de41a7d7bde7476f72f71319b28f4ef526157f4d534852c65055d7e58414b37",
+      "bytes": 18120,
+      "messages": []
+    },
+    {
+      "name": "WebGpuMapShaders.Rim",
+      "sha256": "cf5a2421177167644a5b8039c09e1182febdc8f668405d24c8dc19079f527308",
+      "bytes": 7911,
+      "messages": []
+    },
+    {
+      "name": "WebGpuMapShaders.Resolve",
+      "sha256": "6ede50383a2ae2b3c383aaf54b0ee2a45ae95028e62dc003bbf4a1ee6e906687",
+      "bytes": 3353,
+      "messages": []
+    },
+    {
+      "name": "WebGpuMapShaders.Overlay",
+      "sha256": "4067569fb91f371203cf42fc89c8da00aaf228303596ae1a479d59026912302c",
+      "bytes": 999,
+      "messages": []
+    },
+    {
+      "name": "WebGpuBloomShaders.Prefilter",
+      "sha256": "064e1823c5d74ebfd929bcf23e7bb631bf2607528d1707a8875522800c614861",
+      "bytes": 1534,
+      "messages": []
+    },
+    {
+      "name": "WebGpuBloomShaders.Downsample",
+      "sha256": "e23165d19d8a5edf02c228fe5f5629effb60a5b241c5575f2b1af2b802fa4700",
+      "bytes": 1348,
+      "messages": []
+    },
+    {
+      "name": "WebGpuBloomShaders.Upsample",
+      "sha256": "e3de4baba407fb3a699bc173ce0adc09a4ad34409374ef02d7b3f7692a65aaf6",
+      "bytes": 1179,
+      "messages": []
+    },
+    {
+      "name": "WebGpuTerrainMipShaders.Reduce",
+      "sha256": "c4b7f24893cca41ee94f7e58fc47ca29a8f8acc04782a0091f8849fa5f813a15",
+      "bytes": 1159,
+      "messages": []
+    }
+  ],
+  "pipelines": [
+    {
+      "label": "sky 1x",
+      "passed": true
+    },
+    {
+      "label": "terrain 1x",
+      "passed": true
+    },
+    {
+      "label": "facade buildings 1x",
+      "passed": true
+    },
+    {
+      "label": "roof edges 1x",
+      "passed": true
+    },
+    {
+      "label": "world overlay 1x less-equal",
+      "passed": true
+    },
+    {
+      "label": "world overlay 1x greater",
+      "passed": true
+    },
+    {
+      "label": "sky 4x",
+      "passed": true
+    },
+    {
+      "label": "terrain 4x",
+      "passed": true
+    },
+    {
+      "label": "facade buildings 4x",
+      "passed": true
+    },
+    {
+      "label": "roof edges 4x",
+      "passed": true
+    },
+    {
+      "label": "world overlay 4x less-equal",
+      "passed": true
+    },
+    {
+      "label": "world overlay 4x greater",
+      "passed": true
+    },
+    {
+      "label": "resolve rgba8unorm",
+      "passed": true
+    },
+    {
+      "label": "screen overlay rgba8unorm",
+      "passed": true
+    },
+    {
+      "label": "resolve rgba8unorm-srgb",
+      "passed": true
+    },
+    {
+      "label": "screen overlay rgba8unorm-srgb",
+      "passed": true
+    },
+    {
+      "label": "resolve bgra8unorm",
+      "passed": true
+    },
+    {
+      "label": "screen overlay bgra8unorm",
+      "passed": true
+    },
+    {
+      "label": "resolve bgra8unorm-srgb",
+      "passed": true
+    },
+    {
+      "label": "screen overlay bgra8unorm-srgb",
+      "passed": true
+    },
+    {
+      "label": "terrain shadow 0",
+      "passed": true
+    },
+    {
+      "label": "building shadow 0",
+      "passed": true
+    },
+    {
+      "label": "terrain shadow 1",
+      "passed": true
+    },
+    {
+      "label": "building shadow 1",
+      "passed": true
+    },
+    {
+      "label": "terrain shadow 2",
+      "passed": true
+    },
+    {
+      "label": "building shadow 2",
+      "passed": true
+    },
+    {
+      "label": "terrain shadow 3",
+      "passed": true
+    },
+    {
+      "label": "building shadow 3",
+      "passed": true
+    },
+    {
+      "label": "bloom Prefilter",
+      "passed": true
+    },
+    {
+      "label": "bloom Downsample",
+      "passed": true
+    },
+    {
+      "label": "bloom Upsample",
+      "passed": true
+    },
+    {
+      "label": "terrain linear mip reduction",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "limitation": "Dawn Null validates WGSL and WebGPU layouts only. No shaders execute, no GPU is rendered, and no browser, pixel-quality, or hardware-performance proof is inferred.",
+  "adapter": {
+    "vendor": "",
+    "architecture": "",
+    "device": "null-backend",
+    "description": ""
+  },
+  "passed": true
+}

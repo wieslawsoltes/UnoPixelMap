@@ -1,0 +1,77 @@
+{
+  "url": "http://127.0.0.1/__pixelmap_webgpu_presentation__.html",
+  "expected": {
+    "css": [
+      255,
+      0,
+      255,
+      255
+    ],
+    "gpu": [
+      0,
+      255,
+      0,
+      255
+    ]
+  },
+  "pageErrors": [],
+  "console": [],
+  "passed": true,
+  "gpu": {
+    "errors": [],
+    "losses": [],
+    "queueCompleted": true,
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader",
+      "device": "",
+      "description": "",
+      "isFallbackAdapter": true
+    },
+    "format": "rgba8unorm"
+  },
+  "colors": {
+    "pageCss": {
+      "minimum": [
+        255,
+        0,
+        255,
+        255
+      ],
+      "maximum": [
+        255,
+        0,
+        255,
+        255
+      ]
+    },
+    "pageGpu": {
+      "minimum": [
+        0,
+        255,
+        0,
+        255
+      ],
+      "maximum": [
+        0,
+        255,
+        0,
+        255
+      ]
+    },
+    "canvasGpu": {
+      "minimum": [
+        0,
+        255,
+        0,
+        255
+      ],
+      "maximum": [
+        0,
+        255,
+        0,
+        255
+      ]
+    }
+  }
+}

@@ -9,6 +9,53 @@
     <link rel="icon" href="favicon.ico">
     <script src="audio/journey-audio.js"></script>
     <script src="input/map-input.js"></script>
+    <script>
+        // A visible diagnostic survives failures before the Uno visual tree exists.
+        // This is capability detection, not a claim that a frame has rendered.
+        globalThis.PixelAtlasGraphics = {
+            state: "checking",
+            failure: null,
+            fail(message) {
+                const graphics = globalThis.PixelAtlasGraphics;
+                graphics.state = "unavailable";
+                graphics.failure = String(message);
+                const show = () => {
+                    document.documentElement.dataset.pixelmapGraphics = graphics.state;
+                    const panel = document.getElementById("pixelmap-graphics-error");
+                    document.getElementById("pixelmap-graphics-detail").textContent = graphics.failure;
+                    panel.hidden = false;
+                    document.getElementById("pixelmap-graphics-title").focus();
+                };
+                if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", show, {once: true});
+                else show();
+            }
+        };
+        document.addEventListener("DOMContentLoaded", async () => {
+            const graphics = globalThis.PixelAtlasGraphics;
+            document.getElementById("pixelmap-graphics-retry").addEventListener("click", () => location.reload());
+            if (!globalThis.isSecureContext) {
+                graphics.fail("WebGPU requires a secure connection. Open Pixel Atlas over HTTPS or localhost.");
+                return;
+            }
+            if (!navigator.gpu) {
+                graphics.fail("This browser does not provide WebGPU. Update your browser and enable hardware acceleration, then try again.");
+                return;
+            }
+            try {
+                const adapter = await navigator.gpu.requestAdapter({powerPreference: "high-performance"});
+                if (!adapter) {
+                    graphics.fail("No WebGPU graphics adapter is available. Check that hardware acceleration is enabled and your graphics driver is current.");
+                    return;
+                }
+                if (!graphics.failure) {
+                    graphics.state = "available";
+                    document.documentElement.dataset.pixelmapGraphics = graphics.state;
+                }
+            } catch (error) {
+                graphics.fail("The browser could not initialize WebGPU. " + (error?.message || String(error)));
+            }
+        }, {once: true});
+    </script>
     <script src="./require.js"></script>
     <script type="module" src="./uno-bootstrap.js"></script>
     $(ADDITIONAL_CSS)
@@ -18,9 +65,28 @@
         #uno-body { isolation: isolate; }
         #uno-body > .uno-loader { z-index: -1; pointer-events: none; }
         #uno-canvas { touch-action: none; overscroll-behavior: none; }
+        #pixelmap-graphics-error {
+            position: fixed; inset: 0; z-index: 2147483647; box-sizing: border-box;
+            display: grid; align-content: center; justify-items: start; gap: 1rem;
+            padding: clamp(1.5rem, 6vw, 5rem); background: #142f32; color: #f5f1e8;
+            font: 1rem/1.6 system-ui, sans-serif;
+        }
+        #pixelmap-graphics-error[hidden] { display: none; }
+        #pixelmap-graphics-error h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.5rem); }
+        #pixelmap-graphics-error p { max-width: 44rem; margin: 0; }
+        #pixelmap-graphics-retry {
+            border: 0; border-radius: .5rem; padding: .65rem 1.25rem;
+            background: #f6c069; color: #142f32; font: inherit; font-weight: 600; cursor: pointer;
+        }
+        #pixelmap-graphics-retry:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
     </style>
 </head>
 <body>
+    <section id="pixelmap-graphics-error" role="alert" aria-labelledby="pixelmap-graphics-title" hidden>
+        <h1 id="pixelmap-graphics-title" tabindex="-1">WebGPU is unavailable</h1>
+        <p id="pixelmap-graphics-detail"></p>
+        <button id="pixelmap-graphics-retry" type="button">Try again</button>
+    </section>
     <div id="uno-body" class="container-fluid uno-body">
         <div class="uno-loader" loading-position="bottom" loading-alert="none" role="status" aria-label="Opening Pixel Atlas">
             <img class="logo" src="" alt="Pixel Atlas">

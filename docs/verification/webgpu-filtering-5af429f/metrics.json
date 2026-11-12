@@ -1,0 +1,673 @@
+{
+  "kind": "derived audit of original Debug and Release artifacts; no new tests",
+  "sourceCommit": "5af429f94d016364f840df0f22d0fc8c02e010c4",
+  "runId": 43167877049,
+  "scenarioCountPerConfiguration": 34,
+  "timingLimit": "SwiftShader software GPU evidence; no hardware FPS or GPU-duration claim.",
+  "captureIdentity": {
+    "wallClockCaptureTimestampsRecorded": false,
+    "matchingMethod": "Scenario filename plus report diagnostic.frames matched with renderGraph latest submission; selected PNG and trace SHA-256 recorded. deviceInfo.timeMs is relative device creation time, not a capture timestamp.",
+    "allSelectedScenarioFramesMatch": true
+  },
+  "peaks": {
+    "Release": {
+      "attachmentBytes": 70407600,
+      "residentBytes": 207719882,
+      "combinedNominalBytes": 257994530,
+      "attachmentBudgetBytes": 268435456
+    },
+    "Debug": {
+      "attachmentBytes": 70407600,
+      "residentBytes": 207719666,
+      "combinedNominalBytes": 257994314,
+      "attachmentBudgetBytes": 268435456
+    }
+  },
+  "fixtureMetrics": {
+    "byteIdenticalDebugAndRelease": true,
+    "bloomCases": 6,
+    "bloomComparedChannels": 22832,
+    "bloomMaximumAbsoluteError": 0.0015625000000003553,
+    "facadeCases": 558,
+    "facadeComparedChannels": 4464,
+    "facadeMaximumError": 0.000622723340999165,
+    "facadeMaximumNormalizedError": 0.3113616704995825,
+    "facadeContinuityPairs": 108,
+    "facadeMaximumContinuityDelta": 0.0001506805419921875,
+    "terrainComparedBytes": 266256,
+    "terrainMaximumEncodedByteError": 1,
+    "terrainBaseBytesPreserved": 1048576
+  },
+  "pairedCaptures": {
+    "style-normal": {
+      "Debug": {
+        "frame": 15,
+        "uploadBytes": 20944800,
+        "attachmentBytes": 51443488,
+        "mipDispatches": 8
+      },
+      "Release": {
+        "frame": 14,
+        "uploadBytes": 20944800,
+        "attachmentBytes": 51443488,
+        "mipDispatches": 8
+      },
+      "equalAttachmentBytes": true
+    },
+    "quality-ultra": {
+      "Debug": {
+        "frame": 21,
+        "uploadBytes": 6208,
+        "attachmentBytes": 51451848,
+        "mipDispatches": 0
+      },
+      "Release": {
+        "frame": 20,
+        "uploadBytes": 6208,
+        "attachmentBytes": 51451848,
+        "mipDispatches": 0
+      },
+      "equalAttachmentBytes": true
+    },
+    "quality-balanced": {
+      "Debug": {
+        "frame": 20,
+        "uploadBytes": 6208,
+        "attachmentBytes": 10065600,
+        "mipDispatches": 0
+      },
+      "Release": {
+        "frame": 19,
+        "uploadBytes": 6208,
+        "attachmentBytes": 10065600,
+        "mipDispatches": 0
+      },
+      "equalAttachmentBytes": true
+    },
+    "photograph-normal": {
+      "Debug": {
+        "frame": 27,
+        "uploadBytes": 10200196,
+        "attachmentBytes": 58153888,
+        "mipDispatches": 8
+      },
+      "Release": {
+        "frame": 26,
+        "uploadBytes": 10994252,
+        "attachmentBytes": 58153888,
+        "mipDispatches": 8
+      },
+      "equalAttachmentBytes": true
+    },
+    "photograph-pixel": {
+      "Debug": {
+        "frame": 28,
+        "uploadBytes": 10496784,
+        "attachmentBytes": 4200000,
+        "mipDispatches": 0
+      },
+      "Release": {
+        "frame": 27,
+        "uploadBytes": 10521200,
+        "attachmentBytes": 4200000,
+        "mipDispatches": 0
+      },
+      "equalAttachmentBytes": true
+    },
+    "free-roam-walk": {
+      "Debug": {
+        "frame": 43,
+        "uploadBytes": 64,
+        "attachmentBytes": 50266288,
+        "mipDispatches": 0
+      },
+      "Release": {
+        "frame": 40,
+        "uploadBytes": 2438148,
+        "attachmentBytes": 50266288,
+        "mipDispatches": 8
+      },
+      "equalAttachmentBytes": true
+    },
+    "free-roam-walk-ultra": {
+      "Debug": {
+        "frame": 44,
+        "uploadBytes": 10304,
+        "attachmentBytes": 50274648,
+        "mipDispatches": 0
+      },
+      "Release": {
+        "frame": 41,
+        "uploadBytes": 10304,
+        "attachmentBytes": 50274648,
+        "mipDispatches": 0
+      },
+      "equalAttachmentBytes": true
+    },
+    "resized": {
+      "Debug": {
+        "frame": 48,
+        "uploadBytes": 42144,
+        "attachmentBytes": 30794160,
+        "mipDispatches": 0
+      },
+      "Release": {
+        "frame": 45,
+        "uploadBytes": 44456,
+        "attachmentBytes": 30794160,
+        "mipDispatches": 0
+      },
+      "equalAttachmentBytes": true
+    },
+    "mobile-normal-initial-high-dpi": {
+      "Debug": {
+        "frame": 4,
+        "uploadBytes": 11561192,
+        "attachmentBytes": 70407600,
+        "mipDispatches": 8
+      },
+      "Release": {
+        "frame": 3,
+        "uploadBytes": 11561192,
+        "attachmentBytes": 70407600,
+        "mipDispatches": 8
+      },
+      "equalAttachmentBytes": true
+    },
+    "mobile-normal-high-dpi": {
+      "Debug": {
+        "frame": 12,
+        "uploadBytes": 14993044,
+        "attachmentBytes": 70407600,
+        "mipDispatches": 8
+      },
+      "Release": {
+        "frame": 12,
+        "uploadBytes": 14993044,
+        "attachmentBytes": 70407600,
+        "mipDispatches": 8
+      },
+      "equalAttachmentBytes": true
+    },
+    "mobile-pinch": {
+      "Debug": {
+        "frame": 11,
+        "uploadBytes": 64,
+        "attachmentBytes": 861120,
+        "mipDispatches": 0
+      },
+      "Release": {
+        "frame": 11,
+        "uploadBytes": 64,
+        "attachmentBytes": 861120,
+        "mipDispatches": 0
+      },
+      "equalAttachmentBytes": true
+    }
+  },
+  "warmRetentionEvidence": {
+    "DebugWalking": {
+      "configuration": "Debug",
+      "capture": "free-roam-walk",
+      "gpu": {
+        "submission": 43,
+        "operationCounts": {
+          "render": 11
+        },
+        "terrainMipDispatches": 0,
+        "dirtyLayers": 0,
+        "terrainMipCopies": 0,
+        "bloomPasses": 9,
+        "shadowPasses": 0,
+        "sceneStoreOps": [
+          {
+            "color": "discard",
+            "depth": "discard"
+          }
+        ]
+      },
+      "reported": {
+        "frames": 43,
+        "preparations": 38,
+        "uploadBytes": 64,
+        "residentBytes": 159485170,
+        "attachmentBytes": 50266288,
+        "renderWidth": 1200,
+        "renderHeight": 683,
+        "style": "Normal",
+        "quality": "High"
+      }
+    },
+    "ReleaseWalking": {
+      "configuration": "Release",
+      "capture": "free-roam-walk",
+      "gpu": {
+        "submission": 40,
+        "operationCounts": {
+          "compute": 8,
+          "copy": 64,
+          "render": 13
+        },
+        "terrainMipDispatches": 8,
+        "dirtyLayers": 8,
+        "terrainMipCopies": 64,
+        "bloomPasses": 9,
+        "shadowPasses": 2,
+        "sceneStoreOps": [
+          {
+            "color": "discard",
+            "depth": "discard"
+          }
+        ]
+      },
+      "reported": {
+        "frames": 40,
+        "preparations": 37,
+        "uploadBytes": 2438148,
+        "residentBytes": 159485386,
+        "attachmentBytes": 50266288,
+        "renderWidth": 1200,
+        "renderHeight": 683,
+        "style": "Normal",
+        "quality": "High"
+      },
+      "note": "This capture is still reducing8 dirty layers and is not a64-byte warm frame."
+    },
+    "ReleaseMobilePinch": {
+      "configuration": "Release",
+      "capture": "mobile-pinch",
+      "gpu": {
+        "submission": 11,
+        "operationCounts": {
+          "render": 3
+        },
+        "terrainMipDispatches": 0,
+        "dirtyLayers": 0,
+        "terrainMipCopies": 0,
+        "bloomPasses": 0,
+        "shadowPasses": 1,
+        "sceneStoreOps": [
+          {
+            "color": "store",
+            "depth": "discard"
+          }
+        ]
+      },
+      "reported": {
+        "frames": 11,
+        "preparations": 10,
+        "uploadBytes": 64,
+        "residentBytes": 69151814,
+        "attachmentBytes": 861120,
+        "renderWidth": 195,
+        "renderHeight": 368,
+        "style": "Pixel",
+        "quality": "High"
+      }
+    }
+  },
+  "intentionalDeviceLoss": {
+    "Debug": {
+      "before": 3,
+      "after": 3,
+      "failure": "The graphics device was lost. Reload the page to rebuild its resources. Device was destroyed."
+    },
+    "Release": {
+      "before": 2,
+      "after": 2,
+      "failure": "The graphics device was lost. Reload the page to rebuild its resources. Device was destroyed."
+    }
+  },
+  "finalContexts": {
+    "Debug": {
+      "desktop": {
+        "deviceCount": 1,
+        "gpuErrors": 0,
+        "graphErrors": 0,
+        "deviceLosses": 0,
+        "readbacks": 0,
+        "glContexts": 0,
+        "mapSubmissions": 48,
+        "draws": 1169,
+        "artworkVersions": {
+          "uploadedLayers": 96,
+          "minimumBaseVersion": 7,
+          "maximumBaseVersion": 16,
+          "layersWithAllMipsCurrent": 96,
+          "currentLowerMipSubresources": 768,
+          "pendingLayers": 0,
+          "mips": 9,
+          "nominalBytes": 33554304
+        }
+      },
+      "mobile": {
+        "deviceCount": 1,
+        "gpuErrors": 0,
+        "graphErrors": 0,
+        "deviceLosses": 0,
+        "readbacks": 0,
+        "glContexts": 0,
+        "mapSubmissions": 12,
+        "draws": 89,
+        "artworkVersions": {
+          "uploadedLayers": 96,
+          "minimumBaseVersion": 1,
+          "maximumBaseVersion": 2,
+          "layersWithAllMipsCurrent": 96,
+          "currentLowerMipSubresources": 768,
+          "pendingLayers": 0,
+          "mips": 9,
+          "nominalBytes": 33554304
+        }
+      }
+    },
+    "Release": {
+      "desktop": {
+        "deviceCount": 1,
+        "gpuErrors": 0,
+        "graphErrors": 0,
+        "deviceLosses": 0,
+        "readbacks": 0,
+        "glContexts": 0,
+        "mapSubmissions": 45,
+        "draws": 1103,
+        "artworkVersions": {
+          "uploadedLayers": 96,
+          "minimumBaseVersion": 8,
+          "maximumBaseVersion": 16,
+          "currentLayers": 96,
+          "currentLowerMipSubresources": 768
+        }
+      },
+      "mobile": {
+        "deviceCount": 1,
+        "gpuErrors": 0,
+        "graphErrors": 0,
+        "deviceLosses": 0,
+        "readbacks": 0,
+        "glContexts": 0,
+        "mapSubmissions": 12,
+        "draws": 88,
+        "artworkVersions": {
+          "uploadedLayers": 96,
+          "minimumBaseVersion": 1,
+          "maximumBaseVersion": 2,
+          "currentLayers": 96,
+          "currentLowerMipSubresources": 768
+        }
+      }
+    }
+  },
+  "captureStates": {
+    "style-normal": {
+      "latestFrame": {
+        "submission": 14,
+        "operationCounts": {
+          "compute": 8,
+          "copy": 768,
+          "render": 13
+        },
+        "terrainMipDispatches": 8,
+        "dirtyLayers": 96,
+        "terrainMipCopies": 768,
+        "bloomPasses": 9,
+        "shadowPasses": 2,
+        "sceneStoreOps": [
+          {
+            "color": "discard",
+            "depth": "discard"
+          }
+        ]
+      },
+      "artworkVersions": {
+        "uploadedLayers": 96,
+        "minimumBaseVersion": 1,
+        "maximumBaseVersion": 2,
+        "currentLayers": 96,
+        "currentLowerMipSubresources": 768
+      },
+      "attachmentBytes": 51443488,
+      "attachmentComponents": {
+        "scene color": 6710400,
+        "scene depth": 13420800,
+        "scene multisample": 26841600,
+        "bloom": 4470688
+      },
+      "sampledArtwork": {
+        "format": "rgba8unorm-srgb",
+        "mip": 0,
+        "mips": 9,
+        "layers": 96
+      },
+      "sampledSampler": {
+        "label": "PixelMap terrain anisotropic sampler",
+        "addressModeU": "clamp-to-edge",
+        "addressModeV": "clamp-to-edge",
+        "addressModeW": "clamp-to-edge",
+        "magFilter": "linear",
+        "minFilter": "linear",
+        "mipmapFilter": "linear",
+        "lodMinClamp": 0,
+        "lodMaxClamp": 8,
+        "maxAnisotropy": 8
+      }
+    },
+    "quality-ultra": {
+      "latestFrame": {
+        "submission": 20,
+        "operationCounts": {
+          "render": 17
+        },
+        "terrainMipDispatches": 0,
+        "dirtyLayers": 0,
+        "terrainMipCopies": 0,
+        "bloomPasses": 11,
+        "shadowPasses": 4,
+        "sceneStoreOps": [
+          {
+            "color": "discard",
+            "depth": "discard"
+          }
+        ]
+      },
+      "artworkVersions": {
+        "uploadedLayers": 96,
+        "minimumBaseVersion": 3,
+        "maximumBaseVersion": 4,
+        "currentLayers": 96,
+        "currentLowerMipSubresources": 768
+      },
+      "attachmentBytes": 51451848,
+      "attachmentComponents": {
+        "scene color": 6710400,
+        "scene depth": 13420800,
+        "scene multisample": 26841600,
+        "bloom": 4479048
+      },
+      "sampledArtwork": {
+        "format": "rgba8unorm-srgb",
+        "mip": 0,
+        "mips": 9,
+        "layers": 96
+      },
+      "sampledSampler": {
+        "label": "PixelMap terrain anisotropic sampler",
+        "addressModeU": "clamp-to-edge",
+        "addressModeV": "clamp-to-edge",
+        "addressModeW": "clamp-to-edge",
+        "magFilter": "linear",
+        "minFilter": "linear",
+        "mipmapFilter": "linear",
+        "lodMinClamp": 0,
+        "lodMaxClamp": 8,
+        "maxAnisotropy": 8
+      }
+    },
+    "photograph-normal": {
+      "latestFrame": {
+        "submission": 26,
+        "operationCounts": {
+          "compute": 8,
+          "copy": 329,
+          "render": 14
+        },
+        "terrainMipDispatches": 8,
+        "dirtyLayers": 41,
+        "terrainMipCopies": 328,
+        "bloomPasses": 9,
+        "shadowPasses": 2,
+        "sceneStoreOps": [
+          {
+            "color": "store",
+            "depth": "store"
+          },
+          {
+            "color": "discard",
+            "depth": "discard"
+          }
+        ]
+      },
+      "artworkVersions": {
+        "uploadedLayers": 96,
+        "minimumBaseVersion": 5,
+        "maximumBaseVersion": 9,
+        "currentLayers": 96,
+        "currentLowerMipSubresources": 768
+      },
+      "attachmentBytes": 58153888,
+      "attachmentComponents": {
+        "scene color": 6710400,
+        "photograph": 6710400,
+        "scene depth": 13420800,
+        "scene multisample": 26841600,
+        "bloom": 4470688
+      },
+      "sampledArtwork": {
+        "format": "rgba8unorm-srgb",
+        "mip": 0,
+        "mips": 9,
+        "layers": 96
+      },
+      "sampledSampler": {
+        "label": "PixelMap terrain anisotropic sampler",
+        "addressModeU": "clamp-to-edge",
+        "addressModeV": "clamp-to-edge",
+        "addressModeW": "clamp-to-edge",
+        "magFilter": "linear",
+        "minFilter": "linear",
+        "mipmapFilter": "linear",
+        "lodMinClamp": 0,
+        "lodMaxClamp": 8,
+        "maxAnisotropy": 8
+      }
+    },
+    "photograph-pixel": {
+      "latestFrame": {
+        "submission": 27,
+        "operationCounts": {
+          "render": 4,
+          "copy": 1
+        },
+        "terrainMipDispatches": 0,
+        "dirtyLayers": 0,
+        "terrainMipCopies": 0,
+        "bloomPasses": 0,
+        "shadowPasses": 1,
+        "sceneStoreOps": [
+          {
+            "color": "store",
+            "depth": "store"
+          },
+          {
+            "color": "store",
+            "depth": "discard"
+          }
+        ]
+      },
+      "artworkVersions": {
+        "uploadedLayers": 96,
+        "minimumBaseVersion": 5,
+        "maximumBaseVersion": 9,
+        "currentLayers": 72,
+        "currentLowerMipSubresources": 576
+      },
+      "attachmentBytes": 4200000,
+      "attachmentComponents": {
+        "scene color": 1680000,
+        "photograph": 1680000,
+        "scene depth": 840000
+      },
+      "sampledArtwork": {
+        "format": "rgba8unorm",
+        "mip": 0,
+        "mips": 1,
+        "layers": 96
+      },
+      "sampledSampler": {
+        "label": "PixelMap sampler Nearest",
+        "addressModeU": "clamp-to-edge",
+        "addressModeV": "clamp-to-edge",
+        "addressModeW": "clamp-to-edge",
+        "magFilter": "nearest",
+        "minFilter": "nearest",
+        "mipmapFilter": "nearest",
+        "lodMinClamp": 0,
+        "lodMaxClamp": 0,
+        "maxAnisotropy": 1
+      }
+    },
+    "mobile-normal-initial-high-dpi": {
+      "latestFrame": {
+        "submission": 3,
+        "operationCounts": {
+          "compute": 8,
+          "copy": 416,
+          "render": 13
+        },
+        "terrainMipDispatches": 8,
+        "dirtyLayers": 52,
+        "terrainMipCopies": 416,
+        "bloomPasses": 9,
+        "shadowPasses": 2,
+        "sceneStoreOps": [
+          {
+            "color": "discard",
+            "depth": "discard"
+          }
+        ]
+      },
+      "artworkVersions": {
+        "uploadedLayers": 52,
+        "minimumBaseVersion": 1,
+        "maximumBaseVersion": 1,
+        "currentLayers": 52,
+        "currentLowerMipSubresources": 416
+      },
+      "attachmentBytes": 70407600,
+      "attachmentComponents": {
+        "scene color": 9185280,
+        "scene depth": 18370560,
+        "scene multisample": 36741120,
+        "bloom": 6110640
+      },
+      "sampledArtwork": {
+        "format": "rgba8unorm-srgb",
+        "mip": 0,
+        "mips": 9,
+        "layers": 96
+      },
+      "sampledSampler": {
+        "label": "PixelMap terrain anisotropic sampler",
+        "addressModeU": "clamp-to-edge",
+        "addressModeV": "clamp-to-edge",
+        "addressModeW": "clamp-to-edge",
+        "magFilter": "linear",
+        "minFilter": "linear",
+        "mipmapFilter": "linear",
+        "lodMinClamp": 0,
+        "lodMaxClamp": 8,
+        "maxAnisotropy": 8
+      }
+    }
+  }
+}

@@ -113,6 +113,7 @@
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" AutomationProperties.Name="Playback options">
                             <ComboBox x:Name="Rate" HorizontalAlignment="Stretch" AutomationProperties.Name="Playback speed" SelectionChanged="OnRate">
                                 <ComboBoxItem Tag="1" Content="1×" /><ComboBoxItem Tag="4" Content="4×" /><ComboBoxItem Tag="12" Content="12×" />
+                                <ComboBoxItem Tag="0.25" Content="0.25×" />
                             </ComboBox>
                             <ToggleButton x:Name="Follow" Grid.Column="1" Content="Follow" Padding="8,4" Click="OnFollow" AutomationProperties.Name="Follow vehicle" />
                             <ToggleButton x:Name="Sound" Grid.Column="2" Content="Sound" Padding="8,4" Click="OnSound" AutomationProperties.Name="Vehicle sound" />

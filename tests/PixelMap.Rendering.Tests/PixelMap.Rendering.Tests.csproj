@@ -4,10 +4,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/PixelMap.App/MapViewLink.cs" Link="MapViewLink.cs" />
+    <Compile Include="../../src/PixelMap.Rendering/GlMapRenderer.cs" Link="Reference/GlMapRenderer.cs" />
+    <Compile Include="../../src/PixelMap.Rendering/GlMapShaders.cs" Link="Reference/GlMapShaders.cs" />
     <ProjectReference Include="../../src/PixelMap.Rendering/PixelMap.Rendering.csproj" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.151.1" />
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0" />
   </ItemGroup>
 </Project>

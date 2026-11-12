@@ -9,7 +9,9 @@
 
   <!-- Import this file AFTER Uno.Sdk's Sdk.targets. Our final Publish callback
        then follows nested AOT publishing, Uno's config/worker/WebGL fixups and
-       all other SDK callbacks. Uno 10.0.98 hashes the package before those steps.
+       all other SDK callbacks. Bootstrap 10.1.1 keeps the generated config at
+       wwwroot/uno-config.js and rewrites its loader after the package hash.
+       Finalize that root entrypoint with the package and framework identities.
        This also applies to ordinary local dotnet publish, with no CI-only salt. -->
   <Target Name="VersionPixelMapWasmPackage"
           AfterTargets="Publish"

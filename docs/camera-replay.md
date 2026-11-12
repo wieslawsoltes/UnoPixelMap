@@ -1,4 +1,11 @@
-# Deterministic submitted-camera replay
+# Historical GL submitted-camera replay
+
+This document describes the retained Uno 6 / GL benchmark protocol. Its WebGL
+observer and commands apply only to matching historical application artifacts;
+they cannot measure the Uno 7 WebGPU renderer. The former Pages play-benchmark
+job has been removed. Current shader, presentation and input validation uses the
+[WebGPU browser suite](../tests/browser/README.md), with its evidence explained
+in the [migration document](uno7-webgpu-migration.md).
 
 The held-key play benchmark measures the application as it runs, including its
 simulation, input handling, camera, UI and rendering. Its trajectories depend on
@@ -23,7 +30,7 @@ Each case has 32 ordered inputs at integral CSS coordinates. External map
 providers are blocked and the bundled data supplies the scene. Viewport,
 resolution, browser, CPU identity, affinity-visible parallelism, browser flags
 and harness hashes are recorded. The existing moving play cases remain separate.
-The browser build pins SDK 10.0.403 and its .NET/WASM 10.0.14 runtime to match the
+The historical browser build pinned SDK 10.0.403 and its .NET/WASM 10.0.14 runtime to match the
 retained baseline. Refresh the paired baseline deliberately when changing that
 toolchain; a runtime upgrade is a separate variable from renderer source changes.
 
@@ -102,9 +109,9 @@ node tests/browser/camera-replay.cjs --compare \
   /tmp/replay-comparison.json
 ```
 
-Omit `CAMERA_REPLAY_CASES` to run all three cases. The Pages play-benchmark job
-runs each case in baseline/candidate/candidate/baseline order in fresh processes.
-It compares all three later captures with the first baseline's exact sequence,
+Omit `CAMERA_REPLAY_CASES` to run all three historical cases. The retired Pages
+play-benchmark job ran each case in baseline/candidate/candidate/baseline order
+in fresh processes. It compared all three later captures with the first baseline's exact sequence,
 checking both cross-artifact identity and repeatability. The same-artifact
 preflight runs two independent captures before using a changed observer for
 performance conclusions.

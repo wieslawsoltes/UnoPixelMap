@@ -2,9 +2,11 @@
 
 [Explore the live map](https://wieslawsoltes.github.io/UnoPixelMap/) · [Lake Garda elevation](https://wieslawsoltes.github.io/UnoPixelMap/#v4/45.875000/10.850000/12.300/-25.00/58.00/Day/Elevation/Perspective/0.0/Relief/1.00) · [Earth in 3D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/55.00/Day/Earth) · [Earth in 2D](https://wieslawsoltes.github.io/UnoPixelMap/#v2/40.704100/-74.016300/15.750/-18.00/0.00/Day/Earth)
 
-Pixel Atlas is an interactive Uno Platform map control for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable pixel art. Choose an overhead, isometric or perspective camera, plan a journey, preview its directions, or explore freely on foot, in a vehicle or with a flying camera. GPU rendering and Pixel art are enabled by default. Normal, Minecraft and Roblox rendering styles are available independently of the map layer. A world overview, the opening Lower Manhattan neighborhood, northern Lake Garda terrain and six route demonstrations are bundled with the app.
+Pixel Atlas is an interactive Uno Platform 7 map control with a native WebGPU renderer for the browser. It streams worldwide vector tiles and turns building footprints, height and minimum-height attributes into explorable pixel art. Choose an overhead, isometric or perspective camera, plan a journey, preview its directions, or explore freely on foot, in a vehicle or with a flying camera. The UI and every map style share one WebGPU device. Pixel art is the default style; the View menu offers Balanced, High and Ultra rendering quality. Normal, Minecraft and Roblox rendering styles are available independently of the map layer. A world overview, the opening Lower Manhattan neighborhood, northern Lake Garda terrain and six route demonstrations are bundled with the app.
 
-![Pixel Atlas displaying Lower Manhattan in a 1200 × 780 Chromium viewport](docs/manhattan.png)
+![Pixel Atlas displaying Lower Manhattan through native WebGPU in the verified Release AOT build](docs/verification/webgpu-filtering-5af429f/style-normal.png)
+
+This screenshot is from the verified Uno 7 Release AOT WebGPU build with filtered terrain, facade materials and multiscale HDR bloom. The [browser verification record](docs/verification/webgpu-filtering-5af429f/README.md) preserves original screenshots, numerical shader results, GPU diagnostics and both passing 34-scenario reports. The [migration guide](docs/uno7-webgpu-migration.md) documents the implementation and quality boundaries. The other gallery links below show the earlier renderer.
 
 [Explore the East River waterfront in detail](docs/seaport.png) · [See a live search result for Racibórz, Poland](docs/raciborz.png)
 
@@ -19,9 +21,9 @@ Search by place name, address or decimal latitude and longitude. The city guide 
 | Style | Terrain and buildings | Image sampling |
 | --- | --- | --- |
 | Pixel | Continuous terrain with palette-quantized lighting, pixel façades and roofs | Adaptive pixel-art resolution with nearest-neighbor presentation |
-| Normal | Continuous terrain, smooth lighting and unprocessed Earth imagery | Full logical resolution |
+| Normal | Continuous terrain, sun shadows, GGX lighting, atmospheric fog and unprocessed Earth imagery | Bounded physical resolution, HDR resolve and quality-dependent antialiasing |
 | Minecraft | Quantized terrain cells with flat tops and vertical walls, stair-stepped building footprints and block materials | Pixel-art resolution |
-| Roblox | Bevelled terrain blocks, simplified building forms and plastic-like shading | Full logical resolution |
+| Roblox | Bevelled terrain blocks, simplified building forms, physical lighting and sun shadows | Bounded physical resolution, HDR resolve and quality-dependent antialiasing |
 
 Perspective Pixel windows now retain their average glass and lamp contribution as façades become distant or turn away from the camera. Well-resolved nearby windows keep their original pixels. [Algorithm, visual comparison and measured cost](docs/pixel-window-filtering.md)
 
@@ -50,7 +52,7 @@ Mouse-wheel zoom changes chase distance. In free flight it changes movement spee
 
 [Drive through Manhattan](https://wieslawsoltes.github.io/UnoPixelMap/#journey/drive) · [Ride the subway](https://wieslawsoltes.github.io/UnoPixelMap/#journey/train) · [Cross the East River](https://wieslawsoltes.github.io/UnoPixelMap/#journey/boat) · [Fly between airports](https://wieslawsoltes.github.io/UnoPixelMap/#journey/flight) · [Cycle](https://wieslawsoltes.github.io/UnoPixelMap/#journey/bike) · [Walk](https://wieslawsoltes.github.io/UnoPixelMap/#journey/walk)
 
-Open Journeys to choose a travel mode and edit 2–24 ordered stops. Search for a stop, enter its coordinates or pick it on the map. Stops can be reordered, reversed and removed. Two-stop walking, cycling and driving requests expose alternative routes when the provider supplies them. The itinerary includes per-leg distance, duration, turn instructions and roundabout exits. Preview compresses the journey into a 12–80 second tour with pause, scrubbing and adjustable playback speed. The next maneuver updates with distance along the route. Manual driving displays speed from the vehicle simulation.
+Open Journeys to choose a travel mode and edit 2–24 ordered stops. Search for a stop, enter its coordinates or pick it on the map. Stops can be reordered, reversed and removed. Two-stop walking, cycling and driving requests expose alternative routes when the provider supplies them. The itinerary includes per-leg distance, duration, turn instructions and roundabout exits. Preview compresses the journey into a 12–80 second tour at 1×, with pause, scrubbing and adjustable playback speed. Choose 0.25× to inspect motion slowly, or 4×/12× for a faster tour. The next maneuver updates with distance along the route. Manual driving displays speed from the vehicle simulation.
 
 Take manual control to start a checkpoint challenge. Each vehicle has its own acceleration, braking, drag, steering response, sprite animation and synthesized sound. The train follows its track, the boat carries turning inertia, and the aircraft supports throttle-dependent lift and altitude. Mapped building and shoreline contacts constrain free movement. Ordered gates award points, and recovery returns the vehicle to its last checkpoint. Cruise follows the planned path. Chase, north-up, cockpit and orbit camera rigs keep the vehicle in the usable viewport beside the journey panel.
 
@@ -89,30 +91,47 @@ Mapzen Terrain Tiles provide worldwide, keyless Terrarium elevation data. The de
 
 Ground vehicles and trains follow the sampled surface. Ocean surfaces use sea level, while land and inland water retain signed DEM elevations. Aircraft use absolute altitude and terrain-relative clearance, with swept ground contacts, taxiing and landing handling. Rendered navigation objects follow the selected mesh while the simulation retains physical DEM heights. The camera keeps a local terrain datum, supports terrain-anchored gestures and adjusts perspective eye clearance above slopes.
 
-The default GPU backend renders terrain and buildings with retained geometry, vertex and fragment shaders, and hardware depth testing. Sparse CPU visibility queries keep labels, routes, vehicles and feature inspection aligned with the selected mesh. The CPU renderer remains available through the same control. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
+The default GPU backend renders terrain and buildings with retained geometry, vertex and fragment shaders, and hardware depth testing. Sparse CPU visibility queries keep labels, routes, vehicles and feature inspection aligned with the selected mesh. The production control uses WebGPU for every view; CPU and GL implementations remain regression references. Source DEM detail varies by region, and the height field uses adaptive sampling at the current art resolution. [Elevation provider, fixtures and attribution](src/PixelMap.Data/Elevation/README.md)
 
 Building meshes use lossless 32-byte vertices and exact output allocation. On the captured dense Manhattan corpus, this reduces constructor allocation by 53.6% and retained mesh/edge payload by 146.3 MB while preserving the original geometry and rendered pixels. The fixed-corpus AOT replay also lowers peak allocated Wasm memory by 161.56 MiB while completing all 27 camera/control checkpoints. [Mesh layout and memory evidence](docs/building-mesh-memory.md) · [Current measurements and limitations](docs/performance.md#current-release-browser-measurements)
 
 ## Reuse the control
 
-Reference `src/PixelMap.Controls/PixelMap.Controls.csproj` from a Skia-rendered Uno app. The browser app uses Uno.Sdk 6.7.30 on .NET 10.
-
-Browser hosts using Uno 6.7.135 also include the GL readback adapter and its linker flag. It supplies asynchronous WebGL2 pixel-pack transfers and BGRA compatibility for synchronous capture. Adjust the source path to the referenced control project. The adapter targets Uno 6.7's resolver behavior and needs verification when upgrading Uno.
+Reference `src/PixelMap.Controls/PixelMap.Controls.csproj` from an Uno 7 app. The browser app pins Uno.Sdk 7.0.5 and .NET 10. All Uno-dependent libraries must be rebuilt for Uno 7.
 
 ```xml
 <PropertyGroup>
-    <UnoFeatures>SkiaRenderer;Skia;GLCanvas</UnoFeatures>
-    <EmccExtraLDFlags Condition="'$(TargetFramework)' == 'net10.0-browserwasm'">$(EmccExtraLDFlags);-Wl,--wrap=uno_gl_resolve</EmccExtraLDFlags>
+    <UnoFeatures>Skia;WebGpu</UnoFeatures>
 </PropertyGroup>
 <ItemGroup>
-    <WasmShellNativeCompile Include="../PixelMap.Controls/Browser/pixel_map_gl_readback.c"
-                            Condition="'$(TargetFramework)' == 'net10.0-browserwasm'" />
     <Content Include="../PixelMap.Controls/Browser/map-input.js"
              Link="input/map-input.js" UnoDeploy="Root" CopyToOutputDirectory="PreserveNewest" />
 </ItemGroup>
 ```
 
-Load `input/map-input.js` before Uno's bootstrap script in the browser host. The adapter preserves native trackpad deltas, scopes browser gesture cancellation to the map after XAML hit testing, manages pointer capture and releases input on focus loss.
+`Skia` supplies CPU asset decoding, tile artwork and font-atlas native libraries. Select only the WebGPU UI provider on the host:
+
+```csharp
+using Uno.UI.Hosting;
+using Uno.UI.Composition.WebGpu;
+
+await UnoPlatformHostBuilder.Create()
+    .App(() => new App())
+    .GraphicsBackend(WebGpuBackend.CreateGraphicsProvider())
+    .UseWebAssembly()
+    .Build()
+    .RunAsync();
+```
+
+The control no longer needs a native GL shim, a resolver linker override, host reflection, or a separate graphics context. WebGPU and a secure browser origin (HTTPS or localhost) are required. The application includes accessible HTML recovery UI for unavailable adapters and device loss.
+
+Load `input/map-input.js` before Uno's bootstrap script in the browser host:
+
+```html
+<script src="input/map-input.js"></script>
+```
+
+This control asset preserves native trackpad deltas, scopes browser gesture cancellation to the map after XAML hit testing, manages pointer capture and releases input on focus loss. It also supplies frame diagnostics and per-canvas observation of Uno's shared WebGPU device. Device loss stops map submissions and invalidates picking without requiring the sample application's HTML. A host can optionally define `globalThis.PixelAtlasGraphics.fail(message)` to display its own recovery panel; the sample application's host demonstrates that accessible UI.
 
 ```xml
 <Grid xmlns:maps="using:PixelMap.Controls">
@@ -125,7 +144,7 @@ using PixelMap.Rendering;
 
 Atlas.IsEarthImageryEnabled = true;
 Atlas.IsTerrainEnabled = true;
-Atlas.IsGpuRenderingEnabled = true;
+Atlas.RenderingQuality = WebGpuQuality.High;
 Atlas.TerrainExaggeration = 1;
 Atlas.Palette = PixelStyle.Dusk;
 Atlas.RenderStyle = MapRenderStyle.Pixel;
@@ -170,22 +189,30 @@ Atlas.SetFreeRoamInput(default);
 | Project | Responsibility |
 | --- | --- |
 | PixelMap.Data | Bounded MVT protobuf decoding, source catalog, request coalescing, cancellation and separate byte-bounded caches for vector tiles, satellite imagery and elevation. Bounded Terrarium PNG decoding, immutable height snapshots and indexed water surfaces. Photon geocoding with an injectable endpoint. |
-| PixelMap.Rendering | Wrapped Web Mercator camera, cached terrain blocks, palette shaders, orthographic and perspective rendering, depth-tested walls and roof holes, map labels, feature picking, route overlays, vehicle sprites and world-anchored particles. The GPU terrain backend uses retained GL geometry, hardware depth, pixel shaders and sparse overlay visibility queries. Terrain relief shares the adaptive stitched height field across both backends. |
+| PixelMap.Rendering | Wrapped Web Mercator camera, cached terrain blocks, palette shaders, orthographic and perspective rendering, depth-tested walls and roof holes, map labels, feature picking, route overlays, vehicle sprites and world-anchored particles. The production renderer uses retained WebGPU geometry, WGSL shaders, hardware depth, shadow maps, HDR composition and native GPU overlays. Sparse CPU queries support label layout and picking against the same terrain. |
 | PixelMap.Routing | Provider-separated routes and alternatives, bounded local A* rail/ferry searches, great-circle flight paths, ordered stops, maneuver metadata and shared provider-distance route sampling. |
 | PixelMap.Simulation | Fixed 60 Hz clock, vehicle profiles, free roaming and flight, jumping, rail following, manual inputs, preview transport, cruise, checkpoint scoring and recovery, spatially indexed mapped collisions and replaceable world rules. |
 | PixelMap.Audio | Coalesced motion parameters and discrete cues through an injectable sound device. The browser adapter owns a bounded Web Audio graph and releases completed transient sounds. |
-| PixelMap.Controls | Uno input and accessible keyboard navigation, scoped browser gestures, physical-eye cameras and follow rigs, viewport tile scheduling, journey orchestration, and retained GPU presentation through Skia with a GLCanvasElement fallback. Pixel styles adapt resolution to measured frame cost and return to 2-DIP pixels at rest. |
+| PixelMap.Controls | Uno input and accessible keyboard navigation, scoped browser gestures, physical-eye cameras and follow rigs, viewport tile scheduling, journey orchestration, and direct shared-device WebGpuCanvasElement presentation. Balanced pixel styles adapt resolution to CPU submission cost and return to 2-DIP pixels at rest; High and Ultra preserve the 2-DIP grid. |
 | PixelMap.App | Responsive XAML explorer, search, city guide, compass, scale, lighting, shareable camera links, journey planner and free-roam HUD with independent movement/look sticks. |
 
-## Rendering backends
+## WebGPU rendering
 
-The View menu includes **GPU rendering**, enabled by default. Terrain, free-camera views and the additional styles use a retained WebGL2/OpenGL ES 3 renderer. In supported browser Skia canvases, it draws on the compositor's graphics context and presents retained artwork textures directly. Uno's `GLCanvasElement` supplies a separate-context fallback. Vertex shaders project the stitched height field, instanced terrain blocks and extruded building meshes. Fragment shaders implement each style's lighting and materials while preserving elevation colors, façade details, roof edges and overhead Earth blending. A depth attachment resolves terrain and building occlusion at the selected style's resolution. Pixel styles use nearest-neighbor presentation.
+`WebGpuMapRenderer` draws into the texture supplied by Uno's `WebGpuCanvasElement`. Its device and queue are borrowed; the map owns and releases its pipelines, bind groups, buffers and intermediate textures. Terrain, buildings, route ribbons, vehicle models, checkpoint gates, particles and map labels are GPU draws. There is no production WebGL context, framebuffer readback, image transfer, or per-frame Skia overlay bitmap.
 
-Terrain artwork, height buffers and building meshes remain cached across camera movement. Tile-priority reordering preserves those textures. Face indices and roof-rim vertices are reused independently when only the other stream changes. A 48 MiB texture-cache budget can retain up to 192 GPU-only artwork tiles, with exact CPU reconstruction when needed. Building foundations follow the same selected terrain triangles used by picking. Conservative bounds prepare exact visibility geometry only where labels, picking or overlays query it; cheap label rejection precedes occlusion when ordering permits. Depth-index membership buffers have a 16 MiB active capacity limit and retain exact queries through a bounded fallback. [Visibility algorithm and measured preparation costs](docs/sparse-visibility.md)
+Terrain geometry, elevation layers, artwork and building models are retained across camera changes. Terrain patches are instanced; building indices use the existing conservative visibility selection. Camera-relative coordinates preserve precision around the globe. The renderer queries the device limits, bounds attachment and mesh memory, and releases replaced resources on resize and unload.
 
-The direct browser path retains at most two outstanding GPU submissions and presents their textures without framebuffer readback. The separate-context fallback queues art-resolution transfers into two pixel-pack buffers and copies only after a signaled, zero-timeout GPU-fence poll. Both paths coalesce pending camera changes and pair retained artwork with its labels, terrain picking, markers, route graphics, gates, sprites and effects. Overlays render at native DPI, and overlay-only animation reuses the terrain image. Resources are released on unload and GPU initialization failures select the CPU renderer.
+Normal and Roblox styles add directional sun shadows with percentage-closer filtering, GGX-based material lighting, sky illumination, height fog, an HDR intermediate target and tone mapping. Smooth terrain uses a nine-level linear-light mip chain with requested 8× anisotropy; facade material and emission filtering follow pixel coverage. High and Ultra add normalized five- and six-level HDR bloom pyramids.
 
-Flat Pixel views retain the GPU-backed Skia path using `SKVertices` and `SKRuntimeEffect`. The status bar reports **GPU active** or **CPU fallback** when the option is selected. The control exposes `IsGpuRenderingEnabled`, `IsGpuRenderingActive` and `RenderStyle`. CPU and GPU rasterization can differ at primitive boundaries and in color rounding. Artwork contains approximately 4×, 9× or 16× fewer pixels at pixel sizes 2, 3 and 4; the fallback transfers artwork at those same dimensions. Performance measurements distinguish CPU preparation, GL work, presentation and browser scheduling. [Performance methodology and results](docs/performance.md)
+High uses two shadow cascades and Ultra uses four, concentrating detail near the camera and blending between slices; their depth storage is bounded at 18 MiB and 64 MiB respectively. Balanced uses one 4 MiB shadow map. High and Ultra use 4× multisampling for smooth geometry. Pixel and Minecraft preserve their logical pixel grid and use nearest-neighbor resolve. These are implemented rendering features; they do not establish a measured hardware frame-rate or commercial AAA visual-quality claim.
+
+Map labels reuse the existing Unicode layout, collision and visibility rules. A bounded cached font atlas supplies texture samples to GPU glyph quads. Route and vehicle geometry uses the map's homogeneous projection and depth convention. Data decoding, glyph rasterization on cache misses, terrain artwork preparation, label layout and sparse picking still run on the CPU. Those asset and interaction operations are separate from the WebGPU rendering passes.
+
+The map requests native display pixels through a density-aware canvas viewport while camera, input and picking coordinates stay in logical pixels. The presentation texture is bounded at 32 MiB of color and 8192 pixels per dimension; unusually large viewports scale down within those limits. Smooth label atlas density is independently capped at 3×.
+
+The status bar reports **WebGPU active**. `RenderingQuality`, `IsGpuRenderingActive` and `RenderStyle` describe the public control state. The former `IsGpuRenderingEnabled` switch was removed because the control now has one rendering backend. Uno describes its WebGPU backend as experimental; the exact package versions, lifecycle contract, remaining quality boundaries and validation results are documented in the [migration guide](docs/uno7-webgpu-migration.md).
+
+The earlier [performance methodology and results](docs/performance.md) describe the pre-migration CPU/GL/Skia paths. Their timing and memory improvements must not be read as a measured WebGPU speedup.
 
 ## Build and test
 
@@ -193,30 +220,35 @@ Flat Pixel views retain the GPU-backed Skia path using `SKVertices` and `SKRunti
 dotnet workload install wasm-tools
 dotnet run -c Release --project tests/PixelMap.Data.Checks
 dotnet run -c Release --project tests/PixelMap.Rendering.Tests
+dotnet run -c Release --project tests/PixelMap.Rendering.Tests -- --webgpu-overlay
 dotnet run -c Release --project tests/PixelMap.Routing.Tests
 dotnet run -c Release --project tests/PixelMap.Simulation.Tests
 node tests/browser/audio.cjs
 node tests/browser/input-adapter.cjs
+node tests/browser/webgpu-lifecycle.cjs
 dotnet publish src/PixelMap.App -f net10.0-browserwasm -c Release -o artifacts/browser
 python3 -m http.server 8000 --directory artifacts/browser/wwwroot
 ```
 
 Open http://localhost:8000/. Append `-- --benchmark --output artifacts/rendering` to the renderer test command for fixed-resolution timing and exact image hashes across the bundled scene, camera modes, palettes and vehicle journeys. Add `--visual-only` to capture images without timing, `--filter persp65` to select cases, or `--compare path/to/baseline/report.json` to check a previous capture. The routing tests use deterministic data by default. Append `-- --live` for explicit public-provider integration checks.
 
+The browser checks use headed Chromium. Follow the [browser setup and presentation preflight](tests/browser/README.md) to install its pinned dependencies and, on a Linux server, Xvfb and the Vulkan runtime. With the application server still running, use:
+
 ```sh
-npm ci --prefix tests/browser
-(cd tests/browser && npx playwright install chromium)
-node tests/browser/smoke.cjs http://localhost:8000/
-node tests/browser/journeys.cjs http://localhost:8000/
-node tests/browser/terrain.cjs http://localhost:8000/
-node tests/browser/explore.cjs http://localhost:8000/
-node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-visual --visual
-node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-motion --motion
-node tests/browser/performance.cjs http://localhost:8000/ artifacts/browser-gpu --motion --gpu
-node tests/browser/performance.cjs http://localhost:8000/ artifacts/terrain-gpu --motion --gpu --terrain
+dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- \
+  --webgpu-facade-output=artifacts/webgpu/facade-fixture.json
+PIXELMAP_SHOTS=artifacts/webgpu xvfb-run -a -s '-screen 0 1600x1200x24' \
+  node tests/browser/webgpu.cjs http://localhost:8000/
 ```
 
-On Linux with EGL and Mesa installed, the opt-in GLES checks exercise compiled terrain and building shaders, hardware depth, CPU/GPU image comparisons, navigation overlays, retained-frame lifetime and high-DPI composition. Add `--gpu-benchmark` for fixed-resolution CPU/GPU timings that include synchronous framebuffer readback.
+On an interactive desktop, omit the `xvfb-run` wrapper. The independent presentation preflight checks that WebGPU pixels reach browser screenshots before exercising the application.
+
+Normal and Roblox additionally use coverage-filtered facade materials, a nine-level
+linear-light terrain mip chain with requested 8x anisotropy, and normalized HDR
+bloom pyramids at High/Ultra quality. The [filtering and HDR quality record](docs/webgpu-filtering.md)
+describes their algorithms, memory costs and independent shader validation.
+
+The retained GL renderer is excluded from the production assembly and compiled into the regression test assembly. On Linux with EGL and Mesa installed, the opt-in GLES reference checks exercise compiled terrain and building shaders, hardware depth, CPU/GPU image comparisons, navigation overlays, retained-frame lifetime and high-DPI composition. Add `--gpu-benchmark` for fixed-resolution CPU/GPU timings that include synchronous framebuffer readback.
 
 ```sh
 LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless dotnet run -c Release \
@@ -224,7 +256,9 @@ LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless dotnet run -c Release \
   --gpu-output=artifacts/gpu-terrain
 ```
 
-The Pages workflow builds the AOT-enabled browser app from main, runs the engine checks, exercises the exact publish artifact with Chromium, and publishes it after verification. Journey browser checks cover all six modes, route alternatives, waypoint picking, perspective projection, manual keyboard/touch inputs and Web Audio activation. Terrain browser checks exercise the Garda fixtures, all three layers, overhead and perspective, orbit, dragging, elevation inspection, exaggeration, saved views and handset layout. Exploration checks exercise default GPU rendering, four styles, page-scale-preserving gestures, pointer lock, free movement, camera switching and simultaneous touch sticks. Map, journey and terrain checks run with CPU and GPU modes in CI. Set `PIXELMAP_SHOTS` to save browser captures.
+The PR workflow publishes the AOT-enabled Uno 7 browser app and exercises that exact artifact. The Pages workflow applies the same checks to main before deployment. The WebGPU probe observes real shader compilation, pipeline creation, depth state, queue submissions and readback calls; screenshots and diagnostics are retained as CI artifacts. It exercises the four styles, quality presets, imagery/elevation/relief, camera movement, all six route demonstrations, walking, resize, high-DPI mobile pinch, unsupported-browser recovery and shared-device loss. Native reference tests continue to cover projection, sparse visibility, route/simulation semantics, terrain and label compatibility. `PIXELMAP_SHOTS` selects the browser evidence directory.
+
+The old `smoke.cjs`, `journeys.cjs`, `terrain.cjs`, `explore.cjs` and GL-oriented `performance.cjs` scripts are historical pre-migration probes and are no longer the production CI entry points. They assume the retired CPU/GPU switch and presentation paths. `npm test --prefix tests/browser -- http://localhost:8000/` runs the current WebGPU integration suite with the same headed browser setup; prefix it with `xvfb-run -a -s '-screen 0 1600x1200x24'` on a Linux server.
 
 ## Sources and coverage
 

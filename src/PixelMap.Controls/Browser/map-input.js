@@ -9,6 +9,85 @@
     const gestures = new WeakMap();
     let position = { x: 0, y: 0, target: null };
     let listeners, wheel, pointer, keyboard, safariGesture, contextPointer, mouseRequest, lockOwner = 0;
+    // A single reused object keeps diagnostics bounded, including during long drives.
+    // These are submission counters; frameMilliseconds does not measure GPU completion.
+    const graphics = globalThis.PixelAtlasWebGpu = { backend: "WebGPU", frames: 0, preparations: 0 };
+
+    // Each canvas supplies Uno's actual borrowed GPUDevice. Keep observation in
+    // the reusable control asset; application-specific recovery UI is optional.
+    const watchedDevices = new WeakMap();
+    const activeObservations = new Set();
+    let closing = false;
+
+    function detachWebGpuDevice(subscription) {
+        if (!subscription?.active) return;
+        subscription.active = false;
+        subscription.failed = null;
+        const record = subscription.record;
+        subscription.record = null;
+        activeObservations.delete(subscription);
+        record.subscriptions.delete(subscription);
+        if (!record.subscriptions.size)
+            record.device.removeEventListener("uncapturederror", record.error);
+    }
+
+    function failWebGpu(message) {
+        graphics.failure = String(message);
+        globalThis.PixelAtlasGraphics?.fail?.(graphics.failure);
+    }
+
+    function reportDeviceFailure(subscription, message) {
+        if (!subscription.active || closing) return;
+        const failed = subscription.failed;
+        // Clear the marshalled delegate before invoking it: managed Fail disposes
+        // the same subscription, and queued notifications must stop.
+        detachWebGpuDevice(subscription);
+        try { failed(message); }
+        catch (error) { console.error("The map could not notify its renderer of WebGPU failure.", error); }
+        finally {
+            // Preserve diagnostics even if managed teardown prevents its callback.
+            if (!graphics.failure) failWebGpu(message);
+        }
+    }
+
+    function observeWebGpuDevice(device, failed) {
+        if (!device || typeof device.lost?.then !== "function" ||
+            typeof device.addEventListener !== "function" || typeof failed !== "function")
+            throw new Error("Uno did not expose a live shared browser GPUDevice.");
+        if (closing) return { active: false, record: null, failed: null };
+        let record = watchedDevices.get(device);
+        if (!record) {
+            record = { device, subscriptions: new Set(), loss: null, error: null };
+            record.error = event => {
+                const message = "WebGPU could not render this scene. " + (event.error?.message || "An uncaptured GPU error occurred.");
+                for (const subscription of [...record.subscriptions]) reportDeviceFailure(subscription, message);
+            };
+            watchedDevices.set(device, record);
+            // A promise cannot be unsubscribed. Install it only once per device;
+            // detached subscriptions retain no managed callbacks.
+            device.lost.then(info => {
+                record.loss = "The graphics device was lost. Reload the page to rebuild its resources. " + info.message;
+                for (const subscription of [...record.subscriptions]) reportDeviceFailure(subscription, record.loss);
+            });
+        }
+        const subscription = { active: true, record, failed };
+        record.subscriptions.add(subscription);
+        activeObservations.add(subscription);
+        try {
+            if (record.subscriptions.size === 1) device.addEventListener("uncapturederror", record.error);
+            if (record.loss !== null) queueMicrotask(() => reportDeviceFailure(subscription, record.loss));
+            return subscription;
+        } catch (error) {
+            detachWebGpuDevice(subscription);
+            throw error;
+        }
+    }
+
+    window.addEventListener("pagehide", event => {
+        if (event.persisted) return;
+        closing = true;
+        for (const subscription of [...activeObservations]) detachWebGpuDevice(subscription);
+    });
 
     function nativeInput(target) {
         return target instanceof Element && target.closest("input,textarea,select,iframe,[contenteditable]");
@@ -309,6 +388,21 @@
 
         releaseMouse,
 
-        isMouseCaptured(id) { return ownsMouse(id); }
+        isMouseCaptured(id) { return ownsMouse(id); },
+
+        observeWebGpuDevice,
+        stopObservingWebGpuDevice: detachWebGpuDevice,
+
+        reportWebGpu(frames, preparations, width, height, physicalWidth, physicalHeight,
+            pixelSize, patches, triangles, draws, uploadBytes, residentBytes,
+            frameMilliseconds, submissionMilliseconds, style, quality, renderWidth, renderHeight,
+            attachmentBytes, imageryCount, relief, elevation, zoom) {
+            Object.assign(graphics, { frames, preparations, width, height, physicalWidth, physicalHeight,
+                pixelSize, patches, triangles, draws, uploadBytes, residentBytes,
+                frameMilliseconds, submissionMilliseconds, style, quality, renderWidth, renderHeight,
+                attachmentBytes, imageryCount, relief, elevation, zoom, failure: null });
+        },
+
+        failWebGpu
     };
 })();

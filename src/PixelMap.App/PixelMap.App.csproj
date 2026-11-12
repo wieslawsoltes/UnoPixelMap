@@ -6,7 +6,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>PixelMap.App</RootNamespace>
     <UnoSingleProject>true</UnoSingleProject>
-    <UnoFeatures>SkiaRenderer;Skia;GLCanvas</UnoFeatures>
+    <!-- Skia remains for CPU asset decoding and reference rasterization. The host
+         registers only WebGPU, so neither the UI nor the map uses a GL presenter. -->
+    <UnoFeatures>Skia;WebGpu</UnoFeatures>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationTitle>Pixel Atlas</ApplicationTitle>
     <ApplicationId>dev.pixelmap.atlas</ApplicationId>
     <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
@@ -15,11 +18,9 @@
     <WasmShellWebAppBasePath>./</WasmShellWebAppBasePath>
     <WasmShellIndexHtmlPath>$(MSBuildProjectDirectory)/Platforms/WebAssembly/index.html</WasmShellIndexHtmlPath>
     <WasmShellMonoRuntimeExecutionMode Condition="'$(Configuration)' == 'Release'">InterpreterAndAOT</WasmShellMonoRuntimeExecutionMode>
-    <EmccExtraLDFlags>$(EmccExtraLDFlags);-Wl,--wrap=uno_gl_resolve</EmccExtraLDFlags>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../PixelMap.Controls/PixelMap.Controls.csproj" />
-    <WasmShellNativeCompile Include="../PixelMap.Controls/Browser/pixel_map_gl_readback.c" />
     <Content Include="../PixelMap.Audio/Browser/journey-audio.js" Link="audio/journey-audio.js" UnoDeploy="Root" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../PixelMap.Controls/Browser/map-input.js" Link="input/map-input.js" UnoDeploy="Root" CopyToOutputDirectory="PreserveNewest" />
     <UnoIcon Include="Assets/atlas.svg" />

@@ -1,0 +1,506 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/wieslawsoltes/UnoPixelMap",
+  "pullRequest": "https://github.com/wieslawsoltes/UnoPixelMap/pull/1",
+  "source": {
+    "head": "dad16fcd65f8ceb67e43eed95c4af0ef9787609f",
+    "checkoutMerge": "78fdef7f0a1ef1147a960760eb7c9f4f0cf4dabd",
+    "base": "c6a26075b5767e2aa82e87e949194e82c0e9cb1e",
+    "checkoutRef": "refs/remotes/pull/1/merge",
+    "headUrl": "https://github.com/wieslawsoltes/UnoPixelMap/commit/dad16fcd65f8ceb67e43eed95c4af0ef9787609f",
+    "checkoutUrl": "https://github.com/wieslawsoltes/UnoPixelMap/commit/78fdef7f0a1ef1147a960760eb7c9f4f0cf4dabd"
+  },
+  "workflow": {
+    "name": "Uno 7 · WebGPU migration",
+    "id": 415184912,
+    "runId": 43128831943,
+    "runNumber": 15,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943",
+    "conclusion": "success"
+  },
+  "regression": {
+    "jobId": 130887638902,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/job/130887638902",
+    "conclusion": "success",
+    "artifacts": [
+      {
+        "name": "uno7-reference-rendering",
+        "id": 13903912167,
+        "zipSha256": "14f35c08e8e3c82c8984f05db511a9fd167237ebb6d80092ac77ea640dda80b4",
+        "zipSizeBytes": 6234,
+        "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/artifacts/13903912167"
+      }
+    ]
+  },
+  "presentation": {
+    "jobId": 130887639284,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/job/130887639284",
+    "conclusion": "success",
+    "reportMember": "report.json",
+    "artifacts": [
+      {
+        "name": "uno7-webgpu-presentation",
+        "id": 13903878277,
+        "zipSha256": "5326fe820c734c88511d8ce19d1715bbb49d605ea87b47983da1d2aefa016c1e",
+        "zipSizeBytes": 1656,
+        "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/artifacts/13903878277",
+        "downloadedArchiveSha256Verified": true
+      }
+    ],
+    "scenarioCount": 1,
+    "passed": true,
+    "queueCompleted": true,
+    "gpuErrorCount": 0,
+    "unexpectedLossCount": 0,
+    "adapter": {
+      "vendor": "google",
+      "architecture": "swiftshader",
+      "device": "",
+      "description": "",
+      "isFallbackAdapter": true
+    },
+    "format": "rgba8unorm",
+    "expectedColors": {
+      "css": [
+        255,
+        0,
+        255,
+        255
+      ],
+      "gpu": [
+        0,
+        255,
+        0,
+        255
+      ]
+    },
+    "observedColors": {
+      "pageCss": {
+        "minimum": [
+          255,
+          0,
+          255,
+          255
+        ],
+        "maximum": [
+          255,
+          0,
+          255,
+          255
+        ]
+      },
+      "pageGpu": {
+        "minimum": [
+          0,
+          255,
+          0,
+          255
+        ],
+        "maximum": [
+          0,
+          255,
+          0,
+          255
+        ]
+      },
+      "canvasGpu": {
+        "minimum": [
+          0,
+          255,
+          0,
+          255
+        ],
+        "maximum": [
+          0,
+          255,
+          0,
+          255
+        ]
+      }
+    }
+  },
+  "configurations": {
+    "Debug": {
+      "jobId": 130887872984,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/job/130887872984",
+      "conclusion": "success",
+      "runtimeMode": "Interpreter",
+      "package": {
+        "identity": "package_592d855148445434a456e6e105f411dfdc69b4e1bbf3e6a8abca3eb932f04f06",
+        "logicalFiles": 158,
+        "bootResources": 89,
+        "compressedRepresentations": 210,
+        "idempotencePasses": 2
+      },
+      "reportMember": "webgpu-evidence/report.json",
+      "artifacts": [
+        {
+          "name": "uno7-webgpu-Debug-browser-evidence",
+          "id": 13904782212,
+          "zipSha256": "56812f395f420fd2090054a692bacc11b3669c78290548a1f290c6406679506b",
+          "zipSizeBytes": 17166978,
+          "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/artifacts/13904782212",
+          "downloadedArchiveSha256Verified": true
+        },
+        {
+          "name": "uno7-webgpu-Debug-publish",
+          "id": 13904182853,
+          "zipSha256": "a3f44f7c2cc75a7f641c80a1d005352616643a2cc6e51083813b8694f4c7dde3",
+          "zipSizeBytes": 58807057,
+          "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/artifacts/13904182853"
+        }
+      ],
+      "passed": true,
+      "scenarioCount": 31,
+      "applicationErrorCount": 0,
+      "suiteFailureCount": 0,
+      "trustedBrowserInputPassed": true,
+      "browserVersion": "156.0.8078.4",
+      "gpu": {
+        "desktop": {
+          "draws": 740,
+          "mapSubmissions": 40,
+          "errorCount": 0,
+          "unexpectedLossCount": 0,
+          "readbacks": 0,
+          "glContexts": 0,
+          "deviceCount": 1
+        },
+        "mobile": {
+          "draws": 76,
+          "mapSubmissions": 13,
+          "errorCount": 0,
+          "unexpectedLossCount": 0,
+          "readbacks": 0,
+          "glContexts": 0,
+          "deviceCount": 1
+        }
+      },
+      "mobileNativeResolution": {
+        "mobile-normal-initial-high-dpi": {
+          "dpr": 2,
+          "logical": [
+            390,
+            736
+          ],
+          "physical": [
+            780,
+            1472
+          ],
+          "render": [
+            780,
+            1472
+          ],
+          "zoom": 16.5
+        },
+        "mobile-normal-high-dpi": {
+          "dpr": 2,
+          "logical": [
+            390,
+            736
+          ],
+          "physical": [
+            780,
+            1472
+          ],
+          "render": [
+            780,
+            1472
+          ],
+          "zoom": 17.128031222613043
+        }
+      },
+      "intentionalDeviceLoss": {
+        "actionableDiagnostic": true,
+        "managedFailure": true,
+        "mapSubmissionsBefore": 3,
+        "mapSubmissionsAfter": 3
+      },
+      "preservedReport": "debug-report.json"
+    },
+    "Release": {
+      "jobId": 130887873125,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/job/130887873125",
+      "conclusion": "success",
+      "runtimeMode": "InterpreterAndAOT",
+      "package": {
+        "identity": "package_45c51ba4904ba82853254ec65290bb63957405f70e50b30a143fd454b5f92d9d",
+        "logicalFiles": 142,
+        "bootResources": 73,
+        "compressedRepresentations": 254,
+        "idempotencePasses": 2
+      },
+      "reportMember": "webgpu-evidence/report.json",
+      "artifacts": [
+        {
+          "name": "uno7-webgpu-Release-browser-evidence",
+          "id": 13904049977,
+          "zipSha256": "f1a9fbeca15cdebac8e1395262d0fd99504d8629adeb28b8e0cee227a76ac150",
+          "zipSizeBytes": 17067140,
+          "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/artifacts/13904049977",
+          "downloadedArchiveSha256Verified": true
+        },
+        {
+          "name": "uno7-webgpu-Release-publish",
+          "id": 13906075227,
+          "zipSha256": "5fbad18ccb6350b4c1d3ce50dd236e94bc14ea5010898702a315f03ea7fc2cdf",
+          "zipSizeBytes": 97002740,
+          "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43128831943/artifacts/13906075227"
+        }
+      ],
+      "passed": true,
+      "scenarioCount": 31,
+      "applicationErrorCount": 0,
+      "suiteFailureCount": 0,
+      "trustedBrowserInputPassed": true,
+      "browserVersion": "156.0.8078.4",
+      "gpu": {
+        "desktop": {
+          "draws": 837,
+          "mapSubmissions": 43,
+          "errorCount": 0,
+          "unexpectedLossCount": 0,
+          "readbacks": 0,
+          "glContexts": 0,
+          "deviceCount": 1
+        },
+        "mobile": {
+          "draws": 70,
+          "mapSubmissions": 12,
+          "errorCount": 0,
+          "unexpectedLossCount": 0,
+          "readbacks": 0,
+          "glContexts": 0,
+          "deviceCount": 1
+        }
+      },
+      "mobileNativeResolution": {
+        "mobile-normal-initial-high-dpi": {
+          "dpr": 2,
+          "logical": [
+            390,
+            736
+          ],
+          "physical": [
+            780,
+            1472
+          ],
+          "render": [
+            780,
+            1472
+          ],
+          "zoom": 16.5
+        },
+        "mobile-normal-high-dpi": {
+          "dpr": 2,
+          "logical": [
+            390,
+            736
+          ],
+          "physical": [
+            780,
+            1472
+          ],
+          "render": [
+            780,
+            1472
+          ],
+          "zoom": 17.128031222613043
+        }
+      },
+      "intentionalDeviceLoss": {
+        "actionableDiagnostic": true,
+        "managedFailure": true,
+        "mapSubmissionsBefore": 2,
+        "mapSubmissionsAfter": 2
+      },
+      "preservedReport": "report.json"
+    }
+  },
+  "evidenceNotes": [
+    "GitHub Actions checked out the pull-request merge commit, not the source head directly.",
+    "ZIP SHA256 values and byte counts are recorded from successful actions/upload-artifact logs; downloaded browser-evidence and presentation archives are also rehashed locally.",
+    "Publish archive digests are retained from CI logs; those archives were not downloaded for screenshot selection.",
+    "Browser validation uses headed full Chromium under Xvfb and the SwiftShader software adapter. It validates rendering, input, resource use and failure handling, not hardware GPU frame-rate performance.",
+    "PNG evidence files are unmodified originals extracted from the recorded browser-evidence archives."
+  ],
+  "browserEnvironment": {
+    "version": "156.0.8078.4",
+    "channel": "chromium",
+    "headless": false,
+    "gpu": "ANGLE Vulkan; SwiftShader Vulkan compositor and WebGPU",
+    "gpuWatchdog": "disabled for software CI",
+    "enabledFeatures": [
+      "CDPScreenshotNewSurface",
+      "Vulkan"
+    ]
+  },
+  "preservedFiles": [
+    {
+      "path": "debug-report.json",
+      "bytes": 28520,
+      "sha256": "58020f61d57cf61bed181105876027b9dc8b3957ce16ca7b311550fb36f303e5",
+      "configuration": "Debug",
+      "artifactId": 13904782212,
+      "archiveMember": "webgpu-evidence/report.json"
+    },
+    {
+      "path": "desktop-gpu.json",
+      "bytes": 29283,
+      "sha256": "087e28414bb1669be914d06785221c52e3525093565d53e77c9fdd8280d154b9",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/desktop-gpu.json"
+    },
+    {
+      "path": "free-roam-walk-gpu.json",
+      "bytes": 28425,
+      "sha256": "e3af0e330386d2bbde7e4978f9f88e4b3d65ed6a4261d6faa872d520852ad5d1",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/free-roam-walk-gpu.json"
+    },
+    {
+      "path": "free-roam-walk-ultra-gpu.json",
+      "bytes": 28887,
+      "sha256": "ce3d2d54e4050a26a0d9b8cd97e86ab1999b4c7f9e6c1bac735107afd3127d90",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/free-roam-walk-ultra-gpu.json"
+    },
+    {
+      "path": "free-roam-walk-ultra.png",
+      "bytes": 106153,
+      "sha256": "10ae6094e706b6e0f382dab296f4fb86d37636f61eac13341692822855d7ea48",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/free-roam-walk-ultra.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "path": "free-roam-walk.png",
+      "bytes": 146920,
+      "sha256": "cdf0996a59d8db4099890e5cb216b9b7138dee903ec26b0f7d1014aa415b332f",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/free-roam-walk.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "path": "journey-drive-gpu.json",
+      "bytes": 4293,
+      "sha256": "5e91cddeab4cb95bca0c913f9b990518b38086df117ce9432819e932f3a57309",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/journey-drive-gpu.json"
+    },
+    {
+      "path": "journey-drive.png",
+      "bytes": 398129,
+      "sha256": "4970d6161652f4dab4daabc9717a3f92262de595eedf650a47206550090ba013",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/journey-drive.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "path": "lighting-night-gpu.json",
+      "bytes": 28419,
+      "sha256": "8577ff9670dd484a408d2c9800d07aeb268072afcf03fd7292665f827324e82b",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/lighting-night-gpu.json"
+    },
+    {
+      "path": "lighting-night.png",
+      "bytes": 946962,
+      "sha256": "0c402f598338ba538eac9913a2fcccc883fdf12fb6ad0038f92971bb0a2011c0",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/lighting-night.png",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "path": "mobile-gpu.json",
+      "bytes": 14445,
+      "sha256": "fef310a74d72bdc0a990391a45560b08462bb90720f3b269336bc92532c78c13",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/mobile-gpu.json"
+    },
+    {
+      "path": "mobile-normal-high-dpi-gpu.json",
+      "bytes": 14445,
+      "sha256": "fef310a74d72bdc0a990391a45560b08462bb90720f3b269336bc92532c78c13",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/mobile-normal-high-dpi-gpu.json"
+    },
+    {
+      "path": "mobile-normal-high-dpi.png",
+      "bytes": 377610,
+      "sha256": "a0cf063e60fd0803e54beffe9cf62fdff9fb1bdc92a406f3ae50097070614016",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/mobile-normal-high-dpi.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "path": "mobile-normal-initial-high-dpi-gpu.json",
+      "bytes": 7688,
+      "sha256": "5ed0518f3ce02af57db657c10cde19202edb9fe181365e0f5a0cbf02f37253fe",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/mobile-normal-initial-high-dpi-gpu.json"
+    },
+    {
+      "path": "mobile-normal-initial-high-dpi.png",
+      "bytes": 655907,
+      "sha256": "9a9b6c1952a1018f9a20abc3039e8140900bfbae7b52590fb7112b331f657b35",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/mobile-normal-initial-high-dpi.png",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "path": "presentation.json",
+      "bytes": 1078,
+      "sha256": "6f2a8d39fc8a85273200fdbad35f4497c54d7fda54f41495ffce1fd260de4ce0",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/presentation.json"
+    },
+    {
+      "path": "report.json",
+      "bytes": 28513,
+      "sha256": "384e3b89fb448252d03fa1da1f2f2da22da927537e0f95f1742b775726128271",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/report.json"
+    },
+    {
+      "path": "style-normal-gpu.json",
+      "bytes": 7692,
+      "sha256": "a5d96a3a757c6f74c3b2965c1abc7cbd2d546a3a14b52eb25d9ac9e698e17d39",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/style-normal-gpu.json"
+    },
+    {
+      "path": "style-normal.png",
+      "bytes": 1114002,
+      "sha256": "8d25320bf63dd280c1e33a2fc69dc6090b030792a3a5df01e5ffc32cd9592998",
+      "configuration": "Release",
+      "artifactId": 13904049977,
+      "archiveMember": "webgpu-evidence/style-normal.png",
+      "width": 1200,
+      "height": 800
+    }
+  ]
+}

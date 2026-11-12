@@ -492,6 +492,9 @@ public sealed partial class PixelMapRenderer : IDisposable
     }
 
     private void DrawLabels(SKCanvas canvas, int w, int h, double zoom, int pixelSize, PixelPalette colors)
+        => PrepareLabels(canvas, w, h, zoom, pixelSize, colors, null);
+
+    private void PrepareLabels(SKCanvas? canvas, int w, int h, double zoom, int pixelSize, PixelPalette colors, WebGpuSceneOverlay? overlay)
     {
         candidates.Clear(); names.Clear(); occupied.Clear();
         var elevation = CurrentTerrain;
@@ -576,6 +579,11 @@ public sealed partial class PixelMapRenderer : IDisposable
             if (!resolvedOcclusion && Covered(candidate)) continue;
             names.Add(label.Text);
             occupied.Add(bounds);
+            if (overlay is not null)
+            {
+                overlay.AddLabel(label.Text, size, x, y, colors, font.Typeface);
+                continue;
+            }
             if (label.Glyphs is null)
             {
                 font.Size = size;
@@ -584,9 +592,9 @@ public sealed partial class PixelMapRenderer : IDisposable
             if (label.Glyphs is not { } glyphs) continue;
             paint.Style = SKPaintStyle.Stroke; paint.StrokeWidth = 2.8f;
             paint.Color = new(colors.LabelHalo);
-            canvas.DrawText(glyphs, x, y, paint);
+            canvas!.DrawText(glyphs, x, y, paint);
             paint.Style = SKPaintStyle.Fill; paint.Color = new(colors.Label);
-            canvas.DrawText(glyphs, x, y, paint);
+            canvas!.DrawText(glyphs, x, y, paint);
         }
 
         bool Covered(in LabelCandidate candidate) => (elevation is not null || candidate.Label.Street) &&

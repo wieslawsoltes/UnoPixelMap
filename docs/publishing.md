@@ -4,9 +4,11 @@ The browser publish pipeline versions its bootstrap package from the finalized d
 
 ## Why the extra publish step is needed
 
-The installed Uno.Wasm.Bootstrap 10.0.98 computes its package-folder hash before generating `uno-config.js`. The static assets can therefore retain the same package path while the generated configuration selects a different fingerprinted .NET loader. The ordering is visible in the pinned SDK's [ShellTask implementation](https://github.com/unoplatform/Uno.Wasm.Bootstrap/blob/5b87c821e575a61f1ea12826f03a80fef1c1f27f/src/Uno.Wasm.Bootstrap/ShellTask.cs).
+Uno 7 selects Uno.Wasm.Bootstrap **10.1.1** for this project's .NET 10 target. This bootstrapper deliberately publishes `uno-config.js` beside `index.html`, outside the hashed package: publishing updates its fingerprinted .NET loader reference after the static package hash is computed. The packaged bootstrapper imports `../uno-config.js`; the service worker also imports the root configuration. The exact behavior is documented in the pinned [root configuration specification](https://github.com/unoplatform/Uno.Wasm.Bootstrap/blob/10.1.1/specs/008-root-uno-config/spec.md) and [publishing guide](https://github.com/unoplatform/Uno.Wasm.Bootstrap/blob/10.1.1/doc/deploy-and-publish.md).
 
-This occurred during verification of the camera/rendering release: the preceding deployment and the new artifact both used `package_b15685d25e9696411d12c8dce8322288e85f8f1b`, and the connected browser continued executing the old native bundle after an ordinary reload. A matching bootstrap-folder name was insufficient to establish which C# release was running. PWA support was disabled in these artifacts.
+The project finalizer retains a whole-deployment identity, including root configuration and runtime bytes. A change limited to managed code therefore selects a new package URL and adapter version as well. Hosts should send `Cache-Control: no-cache` for root entry points, including `uno-config.js`, and may cache fingerprinted package and framework resources as immutable.
+
+Under the previous Bootstrap 10.0.98 layout, configuration lived inside the package. During verification of the camera/rendering release, the preceding deployment and the new artifact both used `package_b15685d25e9696411d12c8dce8322288e85f8f1b`, and the connected browser continued executing the old native bundle after an ordinary reload. A matching bootstrap-folder name was insufficient to establish which C# release was running. PWA support was disabled in those artifacts.
 
 The project-owned fix is in [VersionWasmPackage.targets](../build/VersionWasmPackage.targets) and [VersionWasmPackage.cs](../build/VersionWasmPackage.cs), introduced by [1829855](https://github.com/wieslawsoltes/UnoPixelMap/commit/1829855ea07d1fd43b66d4478210398a605bb3c9).
 
@@ -14,7 +16,9 @@ The project-owned fix is in [VersionWasmPackage.targets](../build/VersionWasmPac
 
 The app imports `Uno.Sdk` props and targets explicitly, then imports the project finalizer last. Its `AfterTargets="Publish"` callback follows Uno's nested AOT publish, configuration update, WebGL/worker fixups and the SDK's other publish callbacks. Inner and cross-targeting publishes skip it.
 
-The finalizer resolves the active package from the generated index and computes a SHA-256 identity over sorted logical files: the finalized `_framework` contents, active package assets and configuration, generated index and service worker, and the two root browser adapters. File paths and content hashes are length-prefixed. Its package references and adapter-version parameters are normalized so the result is independent of the current package name and output directory. Compressed transport representations are excluded from identity inputs.
+The finalizer resolves the active package from the generated index and follows that bootstrapper's configuration import. Bootstrap 10.1's root configuration is required; a stale package-local copy cannot conceal a missing root file. Older package-local layouts remain supported by the standalone task for historical artifact verification. The configuration must select the same package as the index and name an existing .NET loader.
+
+It computes a SHA-256 identity over sorted logical files: the finalized `_framework` contents, active package assets, the selected configuration, generated index and service worker, and the two root browser adapters. File paths and content hashes are length-prefixed. Its package references and adapter-version parameters are normalized so the result is independent of the current package name and output directory. Compressed transport representations are excluded from identity inputs.
 
 The resulting `package_<64 hex digits>` name appears in the generated package references. The index also receives a matching `pixelmap-build` query parameter for `audio/journey-audio.js` and `input/map-input.js`.
 
@@ -34,7 +38,7 @@ The focused regression uses Node's standard library to invoke the production MSB
 node tests/packaging/package-identity.cjs
 ```
 
-It covers deterministic identities, repeated finalization, repeated SDK publishing into the same directory, runtime/adapter/asset changes, rewritten references, real gzip/Brotli reuse, missing-loader and destination conflicts, and read-only failure followed by a successful retry.
+It covers both root and legacy configuration layouts, deterministic identities, repeated finalization, repeated SDK publishing into the same directory, runtime/adapter/asset/configuration changes, rewritten references, real gzip/Brotli reuse, missing-loader/configuration and mismatched-package failures, destination conflicts, and read-only index/configuration failures followed by successful retries.
 
 The Pages workflow verifies the already finalized output after ordinary publishing:
 
@@ -43,7 +47,7 @@ dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -o artifacts/a
 node tests/packaging/package-identity.cjs artifacts/atlas/wwwroot
 ```
 
-The artifact verifier first requires the 64-digit package identity and both adapter version parameters. It snapshots the entire artifact, runs the task twice, and requires both passes to preserve every path and byte. It then verifies the loader's boot-resource hashes and decompresses the remaining gzip/Brotli files for comparison with their logical content. A skipped or incorrectly ordered publish hook therefore fails verification.
+The artifact verifier first requires the 64-digit package identity and both adapter version parameters. It snapshots the entire artifact, runs the task twice, and requires both passes to preserve every path and byte. It then requires the current root configuration layout, verifies the selected loader's boot-resource hashes and decompresses the remaining gzip/Brotli files for comparison with their logical content. A skipped or incorrectly ordered publish hook therefore fails verification.
 
 Applying the finalizer to the exact rendering artifact from run `42291311815` produced `package_0c8dc2c18e3de69f54efa23b7bc3750b1cc94303e46edc0827e7e6ded4a8aff6`. All 72 boot-resource hashes and all 219 framework files, including compressed variants, were preserved. All 250 remaining compressed representations decoded to their corresponding logical files, and both verification passes were byte-for-byte no-ops. These are packaging checks against that exact artifact; the paired rendering measurements remain documented separately in [performance.md](performance.md).
 
@@ -101,10 +105,16 @@ The connected browser then loaded the package above at 1800 × 924 CSS pixels, D
 
 The [frozen-corpus memory comparison](verification/corpus-memory-comparison-c937ddd.json) separately measures the original and compact artifacts against the same captured response bodies and three camera cycles. The [paired browser performance record](verification/browser-rendering-c937ddd-provenance.json) compares this exact candidate artifact with pinned baseline run `42300149918`; its mixed timing results are retained in [performance.md](performance.md#paired-browser-measurements-for-c937ddd).
 
-## Pinning performance baselines
+## Historical GL performance baseline workflow
 
-A push that runs the Pages workflow can request a paired play benchmark and pin
-its baseline in the commit message:
+The following procedure records the previous GL presenter workflow. Its commit
+markers and manual inputs are retired by the Uno 7 migration. Current PR and
+Pages workflows validate shared-device WebGPU rendering; these historical
+measurements do not describe the new renderer. See
+[Uno 7 migration and validation](uno7-webgpu-migration.md) for the current gates.
+
+A push that ran the old Pages workflow could request a paired play benchmark
+and pin its baseline in the commit message:
 
 ```text
 [play-benchmark] [play-baseline:42300149918]
@@ -118,10 +128,10 @@ SHAs, and records each archive's SHA-256 digest. After downloading and extractin
 the applications, it verifies the boot-resource hashes and package references.
 It fails if the requested baseline is unavailable.
 
-Manual dispatch retains the `play_benchmark` and `baseline_run_id` inputs. If no
-baseline is specified, selection uses the latest other successful `main`
+Manual dispatch exposed the `play_benchmark` and `baseline_run_id` inputs. If no
+baseline was specified, selection used the latest other successful `main`
 run. Malformed, repeated or conflicting commit markers and workflow inputs
-fail validation. Commit messages enter the parser through an environment
+failed validation. Commit messages entered the parser through an environment
 variable and are treated as data, never shell or Python source.
 
 The evidence records whether the baseline came from an input, a commit marker
@@ -129,5 +139,5 @@ or automatic selection, together with the requested and resolved run IDs.
 Moving scenarios run baseline → candidate → candidate → baseline, in fresh
 browser processes. Pages artifacts are retained for seven days and paired
 performance artifacts for 30 days; checked-in CSVs and provenance preserve the
-reported measurements after artifact expiry. See [current results and their
+reported measurements after artifact expiry. See [historical results and their
 scope](performance.md).
