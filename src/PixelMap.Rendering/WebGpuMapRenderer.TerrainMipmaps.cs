@@ -157,13 +157,13 @@ public sealed unsafe partial class WebGpuMapRenderer
                 try { api.ComputePassEncoderEnd(pass); }
                 finally { api.ComputePassEncoderRelease(pass); }
             }
-            foreach (uint layer in layers)
+            foreach (var copy in terrainMipmaps.PreparedCopies)
             {
                 var source = new ImageCopyTexture
-                { Texture = terrainMipScratch, Aspect = TextureAspect.All, Origin = new Origin3D(0, 0, layer) };
+                { Texture = terrainMipScratch, Aspect = TextureAspect.All, Origin = new Origin3D(0, 0, copy.FirstLayer) };
                 var destination = new ImageCopyTexture
-                { Texture = terrainArtwork, MipLevel = (uint)level, Aspect = TextureAspect.All, Origin = new Origin3D(0, 0, layer) };
-                var extent = new Extent3D((uint)size, (uint)size, 1);
+                { Texture = terrainArtwork, MipLevel = (uint)level, Aspect = TextureAspect.All, Origin = new Origin3D(0, 0, copy.FirstLayer) };
+                var extent = new Extent3D((uint)size, (uint)size, copy.LayerCount);
                 api.CommandEncoderCopyTextureToTexture(encoder, &source, &destination, &extent);
             }
         }

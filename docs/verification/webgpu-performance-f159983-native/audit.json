@@ -1,0 +1,222 @@
+{
+  "scope": "Recomputed native CPU comparison of exact clean source f159983 against a9a2842; separate replication from the earlier EPYC 9V74 run. No GPU, browser or display measurement.",
+  "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411",
+  "job": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/job/131819284919",
+  "jobConclusion": "success",
+  "artifactId": 14027586572,
+  "archive": "native-original.zip",
+  "archiveBytes": 285496,
+  "archiveSha256": "e4121c50b06b4049c8458b5516969b80cb9fe36bb3865f4429036ea4062c60ff",
+  "artifactDigestMatches": true,
+  "sources": {
+    "baseline": {
+      "commit": "a9a284263da76a201114381467bf45aa4823a2d6",
+      "tree": "e4787159a5c29c1fbd149af7315eca7ed0b8b82d",
+      "uncommitted": ""
+    },
+    "candidate": {
+      "commit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+      "tree": "35584c004b091eedc72198bf15afe8a7f5215dfa",
+      "uncommitted": ""
+    }
+  },
+  "productionSrcTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+  "sameProductionSrcAs4a3b9c4": true,
+  "cpuModels": [
+    "AMD EPYC 7763 64-Core Processor"
+  ],
+  "sdkVersion": "10.0.403",
+  "runtime": ".NET 10.0.15",
+  "frozenHarnessFileHashesMatch": true,
+  "driverHashMatches": true,
+  "recomputedComparisonEqualsOriginal": true,
+  "identityChecks": 10944,
+  "identityFailures": [],
+  "independentCombinedDistributions": 36,
+  "combinedReductionPercentRange": [
+    23.56503697521848,
+    55.640243902439025
+  ],
+  "preparationOverlayReductionPercentRange": [
+    21.84058891032059,
+    53.8558547197175
+  ],
+  "combined": {
+    "pan-pixel": {
+      "baseline": {
+        "samples": 64,
+        "median": 15.84085,
+        "p95": 16.70369
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 10.6182,
+        "p95": 12.145239999999996
+      },
+      "medianSpeedup": 1.4918583187357555,
+      "medianReductionPercent": 32.96950605554626
+    },
+    "walk-pixel": {
+      "baseline": {
+        "samples": 64,
+        "median": 6.00825,
+        "p95": 6.562015
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 3.1353999999999997,
+        "p95": 3.6666049999999997
+      },
+      "medianSpeedup": 1.9162626778082543,
+      "medianReductionPercent": 47.815087587899974
+    },
+    "orbit-pixel": {
+      "baseline": {
+        "samples": 64,
+        "median": 16.5304,
+        "p95": 17.29787
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 10.85275,
+        "p95": 12.936774999999999
+      },
+      "medianSpeedup": 1.52315311787335,
+      "medianReductionPercent": 34.34671877268548
+    },
+    "pan-normal": {
+      "baseline": {
+        "samples": 64,
+        "median": 16.90055,
+        "p95": 17.742874999999998
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 11.797899999999998,
+        "p95": 12.401789999999998
+      },
+      "medianSpeedup": 1.4325049373193535,
+      "medianReductionPercent": 30.192212679469023
+    },
+    "walk-normal": {
+      "baseline": {
+        "samples": 64,
+        "median": 6.6584,
+        "p95": 7.14097
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 2.95365,
+        "p95": 3.615295
+      },
+      "medianSpeedup": 2.254295532646048,
+      "medianReductionPercent": 55.640243902439025
+    },
+    "orbit-normal": {
+      "baseline": {
+        "samples": 64,
+        "median": 17.021700000000003,
+        "p95": 17.977034999999997
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 11.52855,
+        "p95": 13.096895
+      },
+      "medianSpeedup": 1.4764822982942352,
+      "medianReductionPercent": 32.27145349759426
+    },
+    "pan-roblox": {
+      "baseline": {
+        "samples": 64,
+        "median": 17.2548,
+        "p95": 18.002355
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 13.1887,
+        "p95": 13.997759999999998
+      },
+      "medianSpeedup": 1.3083018038169036,
+      "medianReductionPercent": 23.56503697521848
+    },
+    "walk-roblox": {
+      "baseline": {
+        "samples": 64,
+        "median": 8.626750000000001,
+        "p95": 9.265775
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 4.534800000000001,
+        "p95": 5.047904999999999
+      },
+      "medianSpeedup": 1.902344094557643,
+      "medianReductionPercent": 47.43327440809111
+    },
+    "orbit-roblox": {
+      "baseline": {
+        "samples": 64,
+        "median": 17.4853,
+        "p95": 18.279915
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 12.9972,
+        "p95": 14.810645
+      },
+      "medianSpeedup": 1.3453128366109623,
+      "medianReductionPercent": 25.66784670551835
+    }
+  },
+  "controls": {
+    "source-priority-control-pixel": {
+      "baseline": {
+        "samples": 64,
+        "median": 0.74255,
+        "p95": 0.76471
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 0.74405,
+        "p95": 0.7614650000000001
+      },
+      "medianSpeedup": 0.9979840064511795,
+      "medianReductionPercent": -0.2020065988822317
+    },
+    "source-priority-control-normal": {
+      "baseline": {
+        "samples": 64,
+        "median": 0.7625,
+        "p95": 0.78439
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 0.76095,
+        "p95": 0.806555
+      },
+      "medianSpeedup": 1.0020369275248044,
+      "medianReductionPercent": 0.20327868852457742
+    }
+  },
+  "negativeStreamingWorkloads": {
+    "source-priority-control-pixel": {
+      "baseline": {
+        "samples": 64,
+        "median": 0.74255,
+        "p95": 0.76471
+      },
+      "candidate": {
+        "samples": 64,
+        "median": 0.74405,
+        "p95": 0.7614650000000001
+      },
+      "medianSpeedup": 0.9979840064511795,
+      "medianReductionPercent": -0.2020065988822317
+    }
+  },
+  "passed": true,
+  "comparison": "comparison.json",
+  "comparisonSha256": "c7f1acbed97dde267e36960295bd9650e215baaef493e0a7830c655e2368cad8",
+  "derivation": "Combine preparation and overlay, or preparation, overlay and twelve picks, within each raw sample before pooling runs 1/4 and 2/3 and computing median/p95. No phase-median addition."
+}

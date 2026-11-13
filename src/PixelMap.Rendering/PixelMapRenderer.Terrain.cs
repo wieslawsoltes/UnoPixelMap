@@ -21,6 +21,14 @@ public sealed partial class PixelMapRenderer
 
     internal TerrainOptions? CurrentTerrain { get; private set; }
 
+    // The renderer retains depth independently of the caller's frame ownership,
+    // including after that frame is disposed. Require that retained depth to
+    // belong to the active GPU view; pictures and stale CPU/GPU state cannot
+    // substitute for ownership in a different rendering generation.
+    private bool HasRetainedView => lastView.GpuGeneration == GeometryGpuGeneration
+        ? activeGpuDepth is not null && ReferenceEquals(activeGpuDepth, activeGpuScene?.Depth)
+        : lastPicture is not null;
+
     /// <summary>Sample the active rendered height field, including its LOD, stitched
     /// edges and block-style surface. The result is unexaggerated metres above sea level.</summary>
     public bool TryGetTerrainElevation(double latitude, double longitude, out double elevationMeters)
@@ -43,7 +51,7 @@ public sealed partial class PixelMapRenderer
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             hit = default;
-            return lastPicture is not null && lastTerrain is not null && lastView.Camera == camera &&
+            return HasRetainedView && lastTerrain is not null && lastView.Camera == camera &&
                 lastView.Width == width && lastView.Height == height && x >= 0 && y >= 0 && x < width && y < height &&
                 reliefSurface is not null && reliefSurface.TryPick(x, y, width, height, lastView.PixelSize, out hit);
         }
@@ -59,7 +67,7 @@ public sealed partial class PixelMapRenderer
         {
             ObjectDisposedException.ThrowIf(disposed, this);
             screen = default;
-            if (!double.IsFinite(latitude) || !double.IsFinite(longitude) || lastPicture is null ||
+            if (!double.IsFinite(latitude) || !double.IsFinite(longitude) || !HasRetainedView ||
                 lastTerrain is null || lastView.Camera != camera || lastView.Width != width || lastView.Height != height ||
                 reliefSurface is null || !reliefSurface.TryHeight((longitude + 180) / 360, MapCamera.MercatorY(latitude), out double surface))
                 return false;

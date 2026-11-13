@@ -152,7 +152,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             int width = attachments.Width, height = attachments.Height;
             EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1, smooth ? options.ShadowCascades : 1);
             EnsureAttachments(attachments);
-            EnsurePipelines(targetFormat, samples);
+            EnsurePipelines(targetFormat, samples, smooth);
             UploadPalette(frame.Palette);
             // A new immutable map frame or projection budget replaces the scene
             // streams. Animated overlays keep the same instances, uniforms and draws.
@@ -170,7 +170,6 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             bool drawShadows = smooth && (!ReferenceEquals(retainedShadowFrame, frame) || retainedShadowQuality != Quality ||
                 retainedShadowCascadeCount != shadowCascadeCount);
             if (drawShadows) DrawShadow(encoder, frame);
-            else if (!smooth) ClearShadow(encoder);
             var pass = BeginScenePass(encoder, clear: true, preserve: photograph);
             try
             {
@@ -259,7 +258,9 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         }
         foreach (var draw in frame.Buildings)
             if (buildingCache.TryGetValue(draw.Mesh.ResourceKey, out var b)) b.Generation = scenePreparation.Generation;
-        uniforms.AsSpan().Clear();
+        // Every used building slot is overwritten by a full template copy.
+        // Clear only that 512-byte template, not all 513 staging slots each frame.
+        uniforms.AsSpan(0, UniformFloats).Clear();
         var transform = frame.Terrain.Length > 0 ? frame.Terrain[0].Transform :
             frame.Buildings.Length > 0 ? frame.Buildings[0].Transform : default;
         FillUniform(uniforms.AsSpan(0, UniformFloats), frame, transform, default, targetWidth, targetHeight, smooth);
@@ -439,14 +440,6 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             try { DrawTerrain(pass, frame, shadow: true, i); DrawBuildings(pass, shadow: true, i); }
             finally { EndPass(pass); }
         }
-    }
-
-    private void ClearShadow(CommandEncoder* encoder)
-    {
-        var depth = DepthAttachment((TextureView*)shadowLayerViews[0], clear: true);
-        using var label = new NativeLabel("PixelMap sun shadow 0");
-        var descriptor = new RenderPassDescriptor { Label = label.Pointer, DepthStencilAttachment = &depth };
-        EndPass(api.CommandEncoderBeginRenderPass(encoder, &descriptor));
     }
 
     private RenderPassEncoder* BeginScenePass(CommandEncoder* encoder, bool clear, bool preserve)

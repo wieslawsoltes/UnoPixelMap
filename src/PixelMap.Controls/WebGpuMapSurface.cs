@@ -146,8 +146,10 @@ public sealed partial class PixelMapControl
                     int width = _viewportWidth;
                     int height = _viewportHeight;
                     int pixelSize = ArtworkPixelSize(scene);
+                    double preparationMilliseconds = 0;
                     if (_frame is null || _prepared?.Matches(scene, width, height, pixelSize) != true)
                     {
+                        long preparationStarted = Stopwatch.GetTimestamp();
                         var request = new PreparedScene(scene, width, height, pixelSize);
                         var next = builder.PrepareGpuFrame(width, height, scene.Camera, request.Tiles,
                             scene.Palette, pixelSize, request.Imagery, scene.Terrain, scene.RenderStyle,
@@ -157,10 +159,13 @@ public sealed partial class PixelMapControl
                         _prepared = request;
                         previous?.Dispose();
                         _preparations++;
+                        preparationMilliseconds = Stopwatch.GetElapsedTime(preparationStarted).TotalMilliseconds;
                     }
+                    long overlayStarted = Stopwatch.GetTimestamp();
                     builder.ActivateGpuFrame(_frame);
                     builder.PrepareWebGpuOverlay(_frame, overlay, scene.Route, scene.Vehicle, scene.VehicleMode, scene.Gate,
                         labelRasterScale: Math.Max((float)context.PixelWidth / width, (float)context.PixelHeight / height));
+                    double overlayMilliseconds = Stopwatch.GetElapsedTime(overlayStarted).TotalMilliseconds;
                     gpu.Quality = scene.Quality;
                     gpu.Draw(_frame, context.TargetView, context.TargetFormat,
                         (uint)context.PixelWidth, (uint)context.PixelHeight, sceneOverlay: overlay);
@@ -177,7 +182,8 @@ public sealed partial class PixelMapControl
                         gpu.LastUploadBytes, gpu.ResidentBytes, elapsed, gpu.LastSubmissionMilliseconds,
                         scene.RenderStyle.ToString(), scene.Quality.ToString(), gpu.RenderWidth, gpu.RenderHeight,
                         gpu.AttachmentBytes, scene.Imagery?.Count ?? 0,
-                        scene.Terrain?.Relief == true, scene.Terrain?.Hypsometric == true, scene.Camera.Zoom);
+                        scene.Terrain?.Relief == true, scene.Terrain?.Hypsometric == true, scene.Camera.Zoom,
+                        preparationMilliseconds, overlayMilliseconds);
                     framePresented();
                 }
                 catch (Exception error)

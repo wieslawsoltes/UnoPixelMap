@@ -1,0 +1,672 @@
+{
+  "schema": 1,
+  "scope": "GitHub job conclusions, source provenance and original terminal-log evidence for the completed integration run; independent from the incomplete paired browser performance attempt.",
+  "run": {
+    "id": 43263360196,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196",
+    "name": "Uno 7 · WebGPU migration",
+    "number": 42,
+    "attempt": 1,
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAtUtc": "2026-11-12T16:52:21Z",
+    "completedByUtc": "2026-11-12T17:18:20Z"
+  },
+  "source": {
+    "head": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56",
+    "headTree": "353460159fc607c7d4c3765a08259f5e0f33781f",
+    "base": "a9a284263da76a201114381467bf45aa4823a2d6",
+    "checkout": "d407757af166a61c6dd38d4008c4abfe37870d30",
+    "checkoutTree": "353460159fc607c7d4c3765a08259f5e0f33781f",
+    "checkoutParents": [
+      "a9a284263da76a201114381467bf45aa4823a2d6",
+      "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+    ],
+    "headAndCheckoutTreesMatch": true
+  },
+  "jobs": [
+    {
+      "id": 131340266377,
+      "name": "WebGPU presentation preflight",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/job/131340266377",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Install the pinned Chromium browser",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Verify independent WebGPU canvas presentation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        }
+      ],
+      "terminalEvidence": [
+        "2026-11-12T16:53:35.3601536Z WebGPU presentation: {\"url\":\"http://127.0.0.1/__pixelmap_webgpu_presentation__.html\",\"expected\":{\"css\":[255,0,255,255],\"gpu\":[0,255,0,255]},\"pageErrors\":[],\"console\":[],\"passed\":true,\"gpu\":{\"errors\":[],\"losses\":[],\"queueCompleted\":true,\"adapter\":{\"vendor\":\"google\",\"architecture\":\"swiftshader\",\"device\":\"\",\"description\":\"\",\"isFallbackAdapter\":true},\"format\":\"rgba8unorm\"},\"colors\":{\"pageCss\":{\"minimum\":[255,0,255,255],\"maximum\":[255,0,255,255]},\"pageGpu\":{\"minimum\":[0,255,0,255],\"maximum\":[0,255,0,255]},\"canvasGpu\":{\"minimum\":[0,255,0,255],\"maximum\":[0,255,0,255]}}}",
+        "2026-11-12T16:53:35.3696008Z WebGPU presentation preflight passed: 1 scenarios"
+      ]
+    },
+    {
+      "id": 131340267170,
+      "name": "regression",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/job/131340267170",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Verify the isolated .NET compiler",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install reference graphics and fonts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Data.Checks -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Rendering.Tests -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Verify WebGPU overlay geometry, labels and lifecycle",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Verify retained GLES reference renderer",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Routing.Tests -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run dotnet run --project tests/PixelMap.Simulation.Tests -c Release",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Verify browser adapters and deterministic camera replay",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29
+        }
+      ],
+      "terminalEvidence": [
+        "2026-11-12T16:52:49.6172499Z Elevation decoding, seamless sampling, water surfaces and request lifetime checks passed.",
+        "2026-11-12T16:52:53.6451278Z Tile viewport checks passed for mixed LOD, retained fallback, retries and cancellation.",
+        "2026-11-12T16:52:53.6452753Z Tile geometry and request lifetime checks passed (1421 anchor-tile building features).",
+        "2026-11-12T16:53:11.2192893Z Passed 74 exact streamed-artwork comparisons: localized vector/imagery arrival, replacement/removal, distant sources, priority order, duplicate IDs, mixed zooms, world copies, neighboring shadows and caster eviction.",
+        "2026-11-12T16:53:11.2702371Z Passed projection, wrap, drag, anchored zoom, courtyard, raised base, depth order, picking and cross-tile shadow checks.",
+        "2026-11-12T16:53:12.5647231Z Passed 74 exact Earth textures (3,989,462 pixels), natural imagery, replacement/cache reuse, codec guards and 131,072 palette/Bayer clusters against the frozen raster.",
+        "2026-11-12T16:53:13.0144648Z Passed Earth quadrants, pitch, wrap, missing tile, model composition, palette (69 inks on RGB fixture), seam phase and determinism.",
+        "2026-11-12T16:53:13.4567333Z Passed 24 exact eager/deferred label images, 12 ambiguous-sort tie fallbacks; 12 crowded views reduced depth queries from 8004 to 344.",
+        "2026-11-12T16:53:13.6486479Z Passed 54 exact tie images and WebGPU label buffers: 30 irrelevant ties avoided eager depth; 24 visible ambiguities preserved the original sort winner; atlas texels match exactly.",
+        "2026-11-12T16:53:16.6198636Z Passed 16 real-city exact label images, including 16 with visible glyphs.",
+        "2026-11-12T16:53:21.0073303Z Passed 28 exact real-city WebGPU label buffers across four styles, tile reorder, palette changes and retained frames.",
+        "2026-11-12T16:53:21.0606592Z Passed 24 chase-spring ridge clearance cases with signed terrain, unchanged eye orientation and viewport resize.",
+        "2026-11-12T16:53:21.1282571Z Passed 12424 already-aligned aim poses with exact yaw/pitch preservation, repeated aims, resized viewports and clipped-target rejection.",
+        "2026-11-12T16:53:21.1329581Z Passed 486 fixed-eye inset aim cases, worst screen error 0.000099px.",
+        "2026-11-12T16:53:21.2296267Z Passed 84 free-camera poses, physical-eye interpolation, analytic inset aim, physical near/far clipping, terrain datum, close model picking, bounded horizon requests and v5 style/view links.",
+        "2026-11-12T16:53:21.2298836Z Passed camera orbit, fit, short-arc flight, six vehicle symbols, pause/seek effects and route wrap checks.",
+        "2026-11-12T16:53:21.3382624Z Passed true perspective frustum, ray inverse, anchors, target altitude, inset route fit, homogeneous raster registration, model depth, holes, picking and navigation alignment.",
+        "2026-11-12T16:53:21.3548239Z Passed 432 steep-slope follow anchors with 0.0117px maximum projection error.",
+        "2026-11-12T16:53:21.4686998Z Passed 54 elevated route fits with top, bottom and side UI insets.",
+        "2026-11-12T16:53:21.4895255Z Passed full-vertex terrain fitting for dense routes with unevenly sampled mountain peaks.",
+        "2026-11-12T16:53:21.4914060Z Passed terrain camera datum, height-field inverse, orbit/zoom/drag and flight-follow anchors, signed heights and v1–v4 view links.",
+        "2026-11-12T16:53:21.5940380Z Passed 35,547 exact terrain height/lighting pairs across zoom 0–22, signed DEMs, void fallback, ocean masking, longitude wrap and polar borders.",
+        "2026-11-12T16:53:22.2906818Z Passed 28 exact retained terrain layouts across motion, LOD, style, DEM, CPU/GPU handoffs, resizing and repeated worlds.",
+        "2026-11-12T16:53:22.7815832Z Passed elevation relief, flat compatibility, height-field picking (0.0001px), 2D tint, signed datum, foundations, thin models, ridge occlusion, stale-view picking, wrapped LOD seams, Earth draping and cache invalidation. Warm terrain orbit 19.2 ms/frame at 640×420 / 2.",
+        "2026-11-12T16:53:22.7864974Z Passed 128 exact GPU depth interpolation comparisons across projection, terrain, near-plane weights and winding.",
+        "2026-11-12T16:53:22.8029182Z Passed 936 exact direct clipping-code comparisons across viewport and near/far boundaries.",
+        "2026-11-12T16:53:23.2689849Z Passed 595,630 exact large-building depth checks across 50 frames: all styles, disconnected concave roofs/holes, clipping boundaries, signed foundations, nonfinite chunks, retained frames and pooled projection-stamp rollover.",
+        "2026-11-12T16:53:23.7294969Z Passed 193,384 exact terrain-picking and mixed-occlusion checks across 44 frames: terrain-only model isolation, full-cache/cell-budget isolation, public geographic picks, all styles, source-order ties, index fallback, nonfinite terrain, retained frames and pooled storage reuse.",
+        "2026-11-12T16:53:24.4247419Z Passed 7,691 exact retained-view interaction checks across 41 views: 3,794 terrain hits, 811 mesh projections, 1,019 feature picks; GPU-only/legacy equality, A→B→A, caller/renderer ownership, cached frame wrappers, camera/viewport guards, pooled reuse and GPU→CPU→GPU transitions.",
+        "2026-11-12T16:53:25.5620869Z Passed 15,037 exact pressure queries: active exact/coarse budgets, source-order terrain ties, model rims, cached/held frames, pooled capacity reuse and adaptive large grids.",
+        "2026-11-12T16:53:33.7060893Z Passed 42 asymmetric cached-BGRA interior-boundary comparisons at patch zooms 16–22, including zoom22/local131071.",
+        "2026-11-12T16:53:33.9168851Z Passed 768 exact terrain copies against Skia across patch zoom 0–22, all render styles, day/night, shadow and pixel-size changes, edge subpixels, BGRA channels and padded strides; mixed/partial/photographic coverage remains composited.",
+        "2026-11-12T16:53:33.9170586Z Passed opaque/nonopaque terrain texture round trips, 48 MiB mixed-cache budget, CPU fallback, retained frames and source invalidation.",
+        "2026-11-12T16:53:34.0647557Z Passed GPU building-cache motion, source replacement, 33-tile eviction, style reset and held-frame replay.",
+        "2026-11-12T16:53:34.0649794Z Passed independent building face/rim reuse, changed-stream invalidation, retained contents and cold-selection equivalence from 1122 physical-camera poses.",
+        "2026-11-12T16:53:35.0500712Z Passed 22 building mesh cases / 845,516 vertices: every old logical float bit, index, rim and range matches; real-tile constructor allocation 301,916,376 -> 143,586,448 bytes; vertex payload 39,973,344 -> 26,648,896 bytes; GPU leaves CPU edge tables lazy.",
+        "2026-11-12T16:53:35.3908151Z Passed 405,674 float-accumulated samples in 291 resolved footprint bounds, 221 general-path cases, exceptional inputs and 32 exact nearby CPU images.",
+        "2026-11-12T16:53:38.5493388Z Passed 11,935,261 exact sparse/eager depth queries across 56 frames: all styles, projection modes, near-plane crossings, raised/courtyard roofs, signed terrain, wrapped worlds, bounded overflow and retained A→B→A frames.",
+        "2026-11-12T16:53:39.6292755Z Passed 24 terrain navigation cases covering routes, six vehicle types, heading, paused/seeked effects, gates, LOD, palettes, exaggeration, flat tint and public mesh projection, plus 25 grazing-slope gates and building occlusion.",
+        "2026-11-12T16:53:39.6481446Z Passed disconnected footprint and enclosing courtyard clipping checks.",
+        "2026-11-12T16:53:41.2188630Z Passed 48 exact standalone idle/reuse/resume pixel and effects-state comparisons, pose guards and route/mode/reset transitions.",
+        "2026-11-12T16:53:41.2191432Z Passed four render styles, bounded voxel/bevel topology, immutable frame switching, terrain height/picking, Pixel restoration and world-scale standalone vehicles.",
+        "2026-11-12T16:53:41.3503387Z Passed 360 exact GPU fallback, toggle, cached-redraw and resize checks on CPU canvases.",
+        "2026-11-12T16:53:45.2927766Z Passed 27542 High-to-Ultra receiver-depth comparisons, including both sides of every split and cross-fade boundary.",
+        "2026-11-12T16:53:45.2983751Z Passed 400 WebGPU shadow fits: physical/map perspective and orthographic projections, overlapping receivers, complete offscreen caster depth, artwork units, stable geographic texels, monotonic quality and packed affine uniforms.",
+        "2026-11-12T16:53:45.3961308Z Passed HDR bloom checks: exact odd/degenerate pyramid allocations, optional photograph and quality budgets, normalized symmetric kernels, constant radiance, HDR exposure/hue linearity and interior impulse energy/spread. Shader execution is verified separately in browser CI.",
+        "2026-11-12T16:53:45.4076559Z Passed terrain mip ownership and array-copy checks: deferred Pixel uploads, bounded layers, failed-submit retry, reassignment, unchanged holes, coalesced runs and exact resident bytes.",
+        "2026-11-12T16:53:45.4080840Z Passed WebGPU overlay checks: exact label atlas pixels/reuse at 1x/2x/3x density, six vehicle modes in four styles, homogeneous clipping, antimeridian routing, premultiplication, bounded stationary/teleport particle lifecycle and retained scene residency during animation.",
+        "2026-11-12T16:53:50.6927945Z Passed 16 exact shared-GL-state draws, warm uniform/query reuse, float-bit preservation and failed-upload retry.",
+        "2026-11-12T16:53:51.1020536Z Passed 8 exact same-context texture images, four styles, Earth blending, shared GL state, deferred picture replay, pending Skia drawing, resize and image lifetime checks.",
+        "2026-11-12T16:53:52.2820051Z Passed 64 exact hardware-culling/fragment-discard comparisons: four styles, art scales, courtyard/disconnected/intersecting/raised/flat caps, orthographic and physical cameras above, below and inside buildings.",
+        "2026-11-12T16:53:52.3687259Z Passed 65,536 exact scalar/SIMD/prepared-row window colors across palettes, signed room boundaries, filter transitions and mip levels.",
+        "2026-11-12T16:53:52.4160239Z Passed 222,912 exact reused-row window samples across signed story/window boundaries and lamp repeats.",
+        "2026-11-12T16:53:52.4272624Z Passed 4,096 signed window-footprint intersections (coverage 0.000058, lamps 0.000044), mip energy and 2,048 exact resolved samples.",
+        "2026-11-12T16:53:53.5348021Z Passed resolved, distant and grazing Pixel façade fixtures, spatial-reference quality, retained lamp contribution and CPU/GPU footprint parity.",
+        "2026-11-12T16:53:53.8495220Z Passed native GLES rendering, immutable redraw and upload reuse for all four render styles across Map, Earth and Elevation.",
+        "2026-11-12T16:53:56.1559034Z Passed 108 exact physical-camera GLES visibility comparisons, depth queries, retained stream restoration and upload reuse across all styles and terrain layers.",
+        "2026-11-12T16:53:56.9131720Z Passed 32 exact bounded GPU-cache frames across all styles, motion, physical-camera culling and held-frame replay; retained uploads and oversized-tile recovery also pass.",
+        "2026-11-12T16:54:01.7430837Z Passed 408 native GPU/CPU mesh intersection checks and stale-camera rejection.",
+        "2026-11-12T16:54:01.8351592Z Passed retained GPU frame mutation, reactivation, picking and cache identity checks.",
+        "2026-11-12T16:54:01.8783046Z Passed stationary A/B/A route-cache invalidation with delayed building publication.",
+        "2026-11-12T16:54:02.1073389Z Passed 2× destination framebuffer, nearest art pixels, physical-resolution text and independent read/draw target restoration.",
+        "2026-11-12T16:54:14.9501581Z Passed six GPU ridge-occluded gate, route and vehicle overlays through full-resolution GL composition.",
+        "2026-11-12T16:54:15.9153273Z Passed 48 native GLES terrain, model, tint, Earth, projection, style, resize and exact redraw checks. Reports /home/runner/work/_temp/gpu-reference",
+        "2026-11-12T16:54:15.9900787Z Passed complete EGL context destruction and recreation with identical terrain pixels.",
+        "2026-11-12T16:54:23.7733057Z All routing checks passed.",
+        "2026-11-12T16:54:27.7708141Z Water, bridge, tunnel, raised-building, courtyard and tile-resolution checks passed.",
+        "2026-11-12T16:54:28.5066934Z Seek, score, pause, invalid-input, transactional-load and audio-lifetime checks passed.",
+        "2026-11-12T16:54:28.5440231Z Elevation grounding, streaming, aircraft clearance, water surfaces and 3D contact checks passed.",
+        "2026-11-12T16:54:28.6190884Z Free-roam movement, reverse, jump, gravity, sliding, flight, water, streamed rail and lifecycle checks passed.",
+        "2026-11-12T16:54:28.6192986Z Fixed-step, manual steering, obstacle, shoreline, recovery and audio checks passed.",
+        "2026-11-12T16:54:28.7596301Z Audio checks passed for six instruments, activation, bounded cues, pause, visibility and disposal.",
+        "2026-11-12T16:54:28.7986196Z Browser input checks passed for map-scoped pinch, two-axis trackpad motion, wheel units, Safari gestures, pointer capture/lock, UI pass-through and disposal.",
+        "2026-11-12T16:54:28.9472984Z Camera replay checks passed: native input contract, projection state, terrain-instance ranges, context isolation, complete fence/animation barriers, exact sequence comparison and focus-loss recovery.",
+        "2026-11-12T16:54:28.9882119Z Passed scoped WebGPU observer lifecycle checks: shared-device identity, managed callback, deterministic detach, reload reuse, pending-loss cancellation, optional application UI, error fallback and page teardown."
+      ]
+    },
+    {
+      "id": 131341092771,
+      "name": "WebGPU browser (Debug)",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/job/131341092771",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Verify the isolated .NET compiler",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install the browser toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Publish the Uno 7 WebGPU application",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify immutable bootstrap and runtime package identity",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Export independent facade references and production WGSL",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Install the pinned Chromium browser",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Exercise WebGPU rendering and browser input",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27
+        }
+      ],
+      "terminalEvidence": [
+        "2026-11-12T16:57:49.7865739Z Package identity checks passed: root and legacy configuration layouts, deterministic/repeatable/incremental publishing, runtime/adapters/assets/config identity, references, gzip/Brotli reuse, mismatched/missing config preflight and read-only retry.",
+        "2026-11-12T16:57:53.0908122Z Published artifact: package_9ded6770301ddad47dc5fffa57ef810ac91c1f8a2d5b6eb0d7071dd701e32484; 89 boot resources and 210 compressed representations verified; two passes preserve all artifact bytes.",
+        "2026-11-12T16:58:00.7337462Z Wrote 558 production-WGSL façade reference cases, 108 GPU continuity pairs and the actual RG8 room mip chain: /home/runner/work/_temp/webgpu-evidence/facade-fixture.json",
+        "2026-11-12T16:58:24.2224154Z Trusted browser input checks passed for wheel/pinch routing, pointer capture, key repeat and native editing.",
+        "2026-11-12T16:58:25.7600446Z WebGPU presentation: {\"url\":\"http://127.0.0.1/__pixelmap_webgpu_presentation__.html\",\"expected\":{\"css\":[255,0,255,255],\"gpu\":[0,255,0,255]},\"pageErrors\":[],\"console\":[],\"passed\":true,\"gpu\":{\"errors\":[],\"losses\":[],\"queueCompleted\":true,\"adapter\":{\"vendor\":\"google\",\"architecture\":\"swiftshader\",\"device\":\"\",\"description\":\"\",\"isFallbackAdapter\":true},\"format\":\"rgba8unorm\"},\"colors\":{\"pageCss\":{\"minimum\":[255,0,255,255],\"maximum\":[255,0,255,255]},\"pageGpu\":{\"minimum\":[0,255,0,255],\"maximum\":[0,255,0,255]},\"canvasGpu\":{\"minimum\":[0,255,0,255],\"maximum\":[0,255,0,255]}}}",
+        "2026-11-12T17:07:49.6579293Z WebGPU integration passed: 34 scenarios"
+      ]
+    },
+    {
+      "id": 131341093449,
+      "name": "WebGPU browser (Release)",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/job/131341093449",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Verify the isolated .NET compiler",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install the browser toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Publish the Uno 7 WebGPU application",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify immutable bootstrap and runtime package identity",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Export independent facade references and production WGSL",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Install the pinned Chromium browser",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Exercise WebGPU rendering and browser input",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 24
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 25
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27
+        }
+      ],
+      "terminalEvidence": [
+        "2026-11-12T17:08:15.3589689Z Package identity checks passed: root and legacy configuration layouts, deterministic/repeatable/incremental publishing, runtime/adapters/assets/config identity, references, gzip/Brotli reuse, mismatched/missing config preflight and read-only retry.",
+        "2026-11-12T17:08:19.9600020Z Published artifact: package_b92a50bcc3acbb15730925a3e31c57c4e4a2ed24ae7514040a3f2d478e6ab8e9; 73 boot resources and 254 compressed representations verified; two passes preserve all artifact bytes.",
+        "2026-11-12T17:08:29.9286473Z Wrote 558 production-WGSL façade reference cases, 108 GPU continuity pairs and the actual RG8 room mip chain: /home/runner/work/_temp/webgpu-evidence/facade-fixture.json",
+        "2026-11-12T17:08:54.2355908Z Trusted browser input checks passed for wheel/pinch routing, pointer capture, key repeat and native editing.",
+        "2026-11-12T17:08:56.4757603Z WebGPU presentation: {\"url\":\"http://127.0.0.1/__pixelmap_webgpu_presentation__.html\",\"expected\":{\"css\":[255,0,255,255],\"gpu\":[0,255,0,255]},\"pageErrors\":[],\"console\":[],\"passed\":true,\"gpu\":{\"errors\":[],\"losses\":[],\"queueCompleted\":true,\"adapter\":{\"vendor\":\"google\",\"architecture\":\"swiftshader\",\"device\":\"\",\"description\":\"\",\"isFallbackAdapter\":true},\"format\":\"rgba8unorm\"},\"colors\":{\"pageCss\":{\"minimum\":[255,0,255,255],\"maximum\":[255,0,255,255]},\"pageGpu\":{\"minimum\":[0,255,0,255],\"maximum\":[0,255,0,255]},\"canvasGpu\":{\"minimum\":[0,255,0,255],\"maximum\":[0,255,0,255]}}}",
+        "2026-11-12T17:18:08.9194729Z WebGPU integration passed: 34 scenarios"
+      ]
+    }
+  ],
+  "browser": {
+    "Debug": {
+      "execution": "Interpreter",
+      "scenarios": 34,
+      "package": "package_9ded6770301ddad47dc5fffa57ef810ac91c1f8a2d5b6eb0d7071dd701e32484",
+      "bootResources": 89,
+      "compressedRepresentations": 210
+    },
+    "Release": {
+      "execution": "InterpreterAndAOT",
+      "scenarios": 34,
+      "package": "package_b92a50bcc3acbb15730925a3e31c57c4e4a2ed24ae7514040a3f2d478e6ab8e9",
+      "bootResources": 73,
+      "compressedRepresentations": 254
+    },
+    "facadeFixtureExportsPerBuild": {
+      "productionWgslReferenceCases": 558,
+      "gpuContinuityPairs": 108,
+      "texture": "actual RG8 room mip chain"
+    },
+    "graphics": "Chromium / SwiftShader Vulkan software adapter",
+    "deviceDestruction": "The final device-loss scenario deliberately destroys the actual application GPUDevice and verifies actionable UI and halted map submissions."
+  },
+  "artifacts": [
+    {
+      "id": 13966911809,
+      "name": "uno7-webgpu-Release-browser-evidence",
+      "size_in_bytes": 19403982,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13966911809",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13966911809/zip",
+      "expired": false,
+      "created_at": "2026-11-12T17:18:10Z",
+      "expires_at": "2026-11-26T17:18:09Z",
+      "updated_at": "2026-11-12T17:18:10Z",
+      "digest": "sha256:b0053e29461646e84e052f0052431b4cb21d9578e5de6cfa80e69c962f17dba5",
+      "workflow_run": {
+        "id": 43263360196,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+      }
+    },
+    {
+      "id": 13966697507,
+      "name": "uno7-webgpu-Release-publish",
+      "size_in_bytes": 97016205,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13966697507",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13966697507/zip",
+      "expired": false,
+      "created_at": "2026-11-12T17:18:16Z",
+      "expires_at": "2026-11-19T17:18:11Z",
+      "updated_at": "2026-11-12T17:18:16Z",
+      "digest": "sha256:f2cd7960854cb00807d4450f866a0c9e84e10eac97c68bab63fffadebc430b7e",
+      "workflow_run": {
+        "id": 43263360196,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+      }
+    },
+    {
+      "id": 13965925322,
+      "name": "uno7-reference-rendering",
+      "size_in_bytes": 6236,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13965925322",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13965925322/zip",
+      "expired": false,
+      "created_at": "2026-11-12T16:54:29Z",
+      "expires_at": "2027-02-10T16:52:21Z",
+      "updated_at": "2026-11-12T16:54:29Z",
+      "digest": "sha256:35cad8c5ae261e01c47862e1fd86946dc384bc37e374c69924f4ac7d3ff94fb3",
+      "workflow_run": {
+        "id": 43263360196,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+      }
+    },
+    {
+      "id": 13965026253,
+      "name": "uno7-webgpu-presentation",
+      "size_in_bytes": 1656,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13965026253",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13965026253/zip",
+      "expired": false,
+      "created_at": "2026-11-12T16:53:36Z",
+      "expires_at": "2026-11-26T16:53:35Z",
+      "updated_at": "2026-11-12T16:53:36Z",
+      "digest": "sha256:41998aad95af640b92a8e983ae126ed8e47ab1a1b433fed4ece8c57aa76906d8",
+      "workflow_run": {
+        "id": 43263360196,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+      }
+    },
+    {
+      "id": 13964809774,
+      "name": "uno7-webgpu-Debug-publish",
+      "size_in_bytes": 58856045,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13964809774",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13964809774/zip",
+      "expired": false,
+      "created_at": "2026-11-12T17:07:56Z",
+      "expires_at": "2026-11-19T17:07:52Z",
+      "updated_at": "2026-11-12T17:07:56Z",
+      "digest": "sha256:10eb8dffa27d772ff2d4880d17459769c36d6d1e13f1734c8d3940bb572d9a93",
+      "workflow_run": {
+        "id": 43263360196,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+      }
+    },
+    {
+      "id": 13964789765,
+      "name": "uno7-webgpu-Debug-browser-evidence",
+      "size_in_bytes": 19443119,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13964789765",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/13964789765/zip",
+      "expired": false,
+      "created_at": "2026-11-12T17:07:52Z",
+      "expires_at": "2026-11-26T17:07:49Z",
+      "updated_at": "2026-11-12T17:07:52Z",
+      "digest": "sha256:ad2b072239ac87cf82da03eca4115c17f70e602e5c4236ef29df46314313f994",
+      "workflow_run": {
+        "id": 43263360196,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+      }
+    }
+  ],
+  "limitations": [
+    "This record audits API responses and terminal logs; original detailed browser reports/images are preserved separately.",
+    "A passing integration suite does not establish a paired browser speedup, hardware-GPU throughput, display latency or mobile thermals."
+  ]
+}

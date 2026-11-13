@@ -1,0 +1,197 @@
+name: WebGPU performance comparison
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'build/**'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'tests/browser/**'
+      - 'tests/PixelMap.Rendering.Performance/**'
+      - 'tests/PixelMap.Rendering.Tests/**'
+      - '.github/workflows/webgpu-performance.yml'
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: 'Baseline commit/ref to compare with this workflow revision'
+        required: true
+        default: 'a9a284263da76a201114381467bf45aa4823a2d6'
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_MULTILEVEL_LOOKUP: '0'
+
+concurrency:
+  group: webgpu-performance-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Frozen native CPU comparison
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline }}
+          path: baseline
+      - uses: actions/setup-dotnet@v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/pixelmap-dotnet
+        with:
+          dotnet-version: '10.0.403'
+      - name: Verify the isolated native compiler
+        working-directory: candidate
+        run: |
+          test "$(dotnet --version)" = '10.0.403'
+          dotnet --info
+      - name: Install the explicit benchmark font
+        run: sudo apt-get install -y fonts-dejavu-core
+      - name: Build both revisions before serial ABBA replay
+        run: python3 candidate/tests/PixelMap.Rendering.Performance/compare.py baseline candidate "${{ runner.temp }}/native-performance"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: webgpu-native-performance-evidence
+          path: ${{ runner.temp }}/native-performance
+          retention-days: 14
+          if-no-files-found: error
+
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify observer and comparison contracts without a browser
+        run: node tests/browser/webgpu-performance-checks.cjs
+
+  publish:
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [baseline, candidate]
+    steps:
+      - name: Freeze the candidate harness for both packages
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: harness
+      - name: Check out the measured application source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.variant == 'baseline' && (github.event.pull_request.base.sha || inputs.baseline) || (github.event.pull_request.head.sha || github.sha) }}
+          path: source
+      - uses: actions/setup-dotnet@v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/pixelmap-dotnet
+        with:
+          dotnet-version: '10.0.403'
+      - name: Verify the isolated browser compiler
+        working-directory: source
+        run: |
+          test "$(dotnet --version)" = '10.0.403'
+          dotnet --info
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the browser compiler
+        working-directory: source
+        run: dotnet workload install wasm-tools --skip-manifest-update
+      - name: Publish the exact source as Release AOT
+        working-directory: source
+        run: dotnet publish src/PixelMap.App -c Release -f net10.0-browserwasm -p:WasmShellMonoRuntimeExecutionMode=InterpreterAndAOT -p:WasmShellEmccLinkOptimization=true -o "${{ runner.temp }}/atlas"
+      - name: Verify package integrity and record source identity
+        run: |
+          node harness/tests/packaging/package-identity.cjs "${{ runner.temp }}/atlas/wwwroot"
+          git -C source rev-parse HEAD > "${{ runner.temp }}/atlas/source-sha.txt"
+          dotnet --version > "${{ runner.temp }}/atlas/sdk-version.txt"
+          dotnet --info > "${{ runner.temp }}/atlas/dotnet-info.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: webgpu-performance-${{ matrix.variant }}-package
+          path: ${{ runner.temp }}/atlas
+          retention-days: 7
+          if-no-files-found: error
+
+  compare:
+    name: Paired Release AOT rendering comparison
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Use one frozen harness for baseline and candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/browser/package-lock.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: webgpu-performance-baseline-package
+          path: ${{ runner.temp }}/baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: webgpu-performance-candidate-package
+          path: ${{ runner.temp }}/candidate
+      - name: Install the pinned headed Chromium environment
+        run: |
+          npm ci --prefix tests/browser
+          (cd tests/browser && npx playwright install --with-deps chromium)
+          sudo apt-get install -y xvfb xauth libvulkan1 mesa-vulkan-drivers
+      - name: Verify independent opaque WebGPU presentation
+        env:
+          PIXELMAP_SHOTS: ${{ runner.temp }}/performance-evidence/preflight
+        run: xvfb-run -a -s '-screen 0 1600x1200x24' node tests/browser/webgpu.cjs --preflight-only
+      - name: Measure identical native-input traces in ABBA order
+        run: |
+          set -euo pipefail
+          mkdir -p "${{ runner.temp }}/paired-preview"
+          ln -s "${{ runner.temp }}/baseline/wwwroot" "${{ runner.temp }}/paired-preview/baseline"
+          ln -s "${{ runner.temp }}/candidate/wwwroot" "${{ runner.temp }}/paired-preview/candidate"
+          read -r PERF_BASELINE_REVISION < "${{ runner.temp }}/baseline/source-sha.txt"
+          read -r PERF_CANDIDATE_REVISION < "${{ runner.temp }}/candidate/source-sha.txt"
+          read -r PERF_BASELINE_SDK_VERSION < "${{ runner.temp }}/baseline/sdk-version.txt"
+          read -r PERF_CANDIDATE_SDK_VERSION < "${{ runner.temp }}/candidate/sdk-version.txt"
+          test "$PERF_BASELINE_SDK_VERSION" = '10.0.403'
+          test "$PERF_CANDIDATE_SDK_VERSION" = "$PERF_BASELINE_SDK_VERSION"
+          export PERF_BASELINE_REVISION PERF_CANDIDATE_REVISION PERF_BASELINE_SDK_VERSION PERF_CANDIDATE_SDK_VERSION
+          python3 -m http.server 8100 --bind 127.0.0.1 --directory "${{ runner.temp }}/paired-preview" > "${{ runner.temp }}/performance-evidence/server.log" 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8100/baseline/ > /dev/null && curl --fail --silent http://127.0.0.1:8100/candidate/ > /dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              cat "${{ runner.temp }}/performance-evidence/server.log"
+              exit 1
+            fi
+            sleep 1
+          done
+          xvfb-run -a -s '-screen 0 1600x1200x24' node tests/browser/webgpu-performance.cjs http://127.0.0.1:8100/baseline/ http://127.0.0.1:8100/candidate/ "${{ runner.temp }}/performance-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: webgpu-performance-evidence
+          path: ${{ runner.temp }}/performance-evidence
+          retention-days: 14
+          if-no-files-found: error

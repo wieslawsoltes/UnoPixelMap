@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/wieslawsoltes/UnoPixelMap",
+  "pullRequest": "https://github.com/wieslawsoltes/UnoPixelMap/pull/2",
+  "workflow": {
+    "id": 43405625411,
+    "name": "WebGPU performance comparison",
+    "status": "completed",
+    "conclusion": "success",
+    "run_number": 16,
+    "jobs_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/jobs",
+    "logs_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/logs",
+    "workflow_id": 416173014,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411"
+  },
+  "pairedJob": {
+    "id": 131824792372,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/job/131824792372",
+    "name": "Paired Release AOT rendering comparison",
+    "conclusion": "success"
+  },
+  "jobs": [
+    {
+      "id": 131819284919,
+      "name": "Frozen native CPU comparison",
+      "status": "completed",
+      "conclusion": "success",
+      "failedOrIncompleteSteps": []
+    },
+    {
+      "id": 131819285477,
+      "name": "contract",
+      "status": "completed",
+      "conclusion": "success",
+      "failedOrIncompleteSteps": []
+    },
+    {
+      "id": 131819374080,
+      "name": "publish (baseline)",
+      "status": "completed",
+      "conclusion": "success",
+      "failedOrIncompleteSteps": []
+    },
+    {
+      "id": 131819374096,
+      "name": "publish (candidate)",
+      "status": "completed",
+      "conclusion": "success",
+      "failedOrIncompleteSteps": []
+    },
+    {
+      "id": 131824792372,
+      "name": "Paired Release AOT rendering comparison",
+      "status": "completed",
+      "conclusion": "success",
+      "failedOrIncompleteSteps": []
+    }
+  ],
+  "originalBrowserArtifact": {
+    "id": 14029477869,
+    "name": "webgpu-performance-evidence",
+    "size_in_bytes": 12609838,
+    "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14029477869",
+    "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14029477869/zip",
+    "expired": false,
+    "created_at": "2026-11-13T10:43:42Z",
+    "expires_at": "2026-11-27T10:43:40Z",
+    "updated_at": "2026-11-13T10:43:42Z",
+    "digest": "sha256:a1df72700e7a4232883d97723b3e2037eb67a3c0d4ec9743c7929b53cd7dd877",
+    "workflow_run": {
+      "id": 43405625411,
+      "repository_id": 1443492055,
+      "head_repository_id": 1443492055,
+      "head_branch": "perf/webgpu-frame-throughput",
+      "head_sha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    },
+    "retainedAs": [
+      "browser-original.zip.part-01",
+      "browser-original.zip.part-02"
+    ],
+    "downloadedZipBytes": 12609838,
+    "downloadedZipSha256": "a1df72700e7a4232883d97723b3e2037eb67a3c0d4ec9743c7929b53cd7dd877",
+    "downloadedBytesMatchApiDigest": true,
+    "retainedParts": [
+      {
+        "path": "browser-original.zip.part-01",
+        "bytes": 8388608,
+        "sha256": "38a08b2d09f0788f7f19dd52bfbb4562201c1db28caa4f71a2366fce28091632",
+        "gitBlobSha": "2c20a10f1ea61e1dfb6b38c2d60f55c5abe59b3a"
+      },
+      {
+        "path": "browser-original.zip.part-02",
+        "bytes": 4221230,
+        "sha256": "8f0e397324038e5504455001e1a41ffc93f9fba25e01c03935d24d37222d8fbe",
+        "gitBlobSha": "b007260e7ce04dbd5bccf66bec36da76602c5135"
+      }
+    ],
+    "reconstructedFileName": "browser-original.zip",
+    "splitOffsetBytes": 8388608,
+    "concatenationVerifiedByteIdentical": true
+  },
+  "relatedPackageArtifacts": [
+    {
+      "id": 14027881860,
+      "name": "webgpu-performance-baseline-package",
+      "size_in_bytes": 97178334,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14027881860",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14027881860/zip",
+      "expired": false,
+      "created_at": "2026-11-13T10:09:59Z",
+      "expires_at": "2026-11-20T10:09:55Z",
+      "updated_at": "2026-11-13T10:09:59Z",
+      "digest": "sha256:9e77c102698334138da9e41a57ca112dff4d92be8563d1a23b50b3abfacf8c12",
+      "workflow_run": {
+        "id": 43405625411,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+      }
+    },
+    {
+      "id": 14027249350,
+      "name": "webgpu-performance-candidate-package",
+      "size_in_bytes": 97074513,
+      "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14027249350",
+      "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14027249350/zip",
+      "expired": false,
+      "created_at": "2026-11-13T10:12:01Z",
+      "expires_at": "2026-11-20T10:11:56Z",
+      "updated_at": "2026-11-13T10:12:01Z",
+      "digest": "sha256:9da61bb698aa2ef4b5fc7d2e1b0d3c77a32e9837114d51c0aea422cdfb80ecae",
+      "workflow_run": {
+        "id": 43405625411,
+        "repository_id": 1443492055,
+        "head_repository_id": 1443492055,
+        "head_branch": "perf/webgpu-frame-throughput",
+        "head_sha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+      }
+    }
+  ],
+  "provenance": {
+    "candidateCommit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+    "candidateTree": "35584c004b091eedc72198bf15afe8a7f5215dfa",
+    "candidateSrcTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+    "baselineCommit": "a9a284263da76a201114381467bf45aa4823a2d6",
+    "baselineTree": "e4787159a5c29c1fbd149af7315eca7ed0b8b82d",
+    "baselineSrcTree": "28ab03003b550f18f1cbf8eb24c6fb8e7ae8c302",
+    "originalProductionHead": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56",
+    "originalProductionSrcTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+    "frozenHarnessFiles": [
+      {
+        "path": "harness/webgpu-performance.cjs",
+        "sourcePath": "tests/browser/webgpu-performance.cjs",
+        "sourceCommit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+        "sourceBlobSha": "7baad42f62b95bc8c8a4e71047562d62dde55aa2",
+        "bytes": 32345,
+        "sha256": "ecaabf9d241875906bc4b7e8f42a7194e8afed64b429da5b0c3a08ec51eb03fc",
+        "reportRecorded": true
+      },
+      {
+        "path": "harness/webgpu-performance-probe.cjs",
+        "sourcePath": "tests/browser/webgpu-performance-probe.cjs",
+        "sourceCommit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+        "sourceBlobSha": "5fe3b07318479d9c21f3d7751e81f727ba9b769b",
+        "bytes": 15818,
+        "sha256": "1d345944d949180ece03bc5002dd956703fa7ddd87cf9f24c7adf32d37ddc7f9",
+        "reportRecorded": true
+      },
+      {
+        "path": "harness/explore.cjs",
+        "sourcePath": "tests/browser/explore.cjs",
+        "sourceCommit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+        "sourceBlobSha": "6a29857955a1357a6e7551984f6ec59000838d9a",
+        "bytes": 62207,
+        "sha256": "da380beec9e027680bc11bfd9c3f180f37551883fd4c78f8ec92936855d57b34",
+        "reportRecorded": true
+      },
+      {
+        "path": "harness/gpu.cjs",
+        "sourcePath": "tests/browser/gpu.cjs",
+        "sourceCommit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+        "sourceBlobSha": "b325d300c1c8f55b4c3d8430113a3290e40e08d3",
+        "bytes": 5555,
+        "sha256": "cc5e514c6a697a8bb170a92476a4de112b04ef74a0ad861cc39aa58571c4853a",
+        "reportRecorded": true
+      },
+      {
+        "path": "harness/package.json",
+        "sourcePath": "tests/browser/package.json",
+        "sourceCommit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+        "sourceBlobSha": "c8617aa54ff976fa6a48b115f23806724af6a50e",
+        "bytes": 269,
+        "sha256": "9205efc3e6d3b30a827404c9ff9f102bfd300f7a2f45eb2f30355fa61d1d6359",
+        "reportRecorded": false
+      },
+      {
+        "path": "harness/package-lock.json",
+        "sourcePath": "tests/browser/package-lock.json",
+        "sourceCommit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+        "sourceBlobSha": "a92dc083e37c23b037e185b5d166399728abba78",
+        "bytes": 1544,
+        "sha256": "847ef7a309c654cd2bffd65c0ceecbcffbf268dae0134e1b59f0b0cddcd820be",
+        "reportRecorded": false
+      }
+    ]
+  },
+  "checkoutAndToolchainLogLines": [
+    "2026-11-13T10:12:14.1368110Z HEAD is now at f159983 Preserve final WebGPU integration reports and original captures",
+    "2026-11-13T10:12:14.1448770Z f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+    "2026-11-13T10:12:14.5905686Z node: v22.23.4",
+    "2026-11-13T10:12:18.2174027Z SHA256 digest of downloaded artifact is 9e77c102698334138da9e41a57ca112dff4d92be8563d1a23b50b3abfacf8c12",
+    "2026-11-13T10:12:21.0626936Z SHA256 digest of downloaded artifact is 9da61bb698aa2ef4b5fc7d2e1b0d3c77a32e9837114d51c0aea422cdfb80ecae",
+    "2026-11-13T10:43:41.8891811Z SHA256 digest of uploaded artifact zip is a1df72700e7a4232883d97723b3e2037eb67a3c0d4ec9743c7929b53cd7dd877"
+  ],
+  "preservation": {
+    "archive": "The original artifact ZIP is retained as two consecutive byte ranges split at offset 8,388,608. Concatenating them in numbered order reconstructs all 12,609,838 original bytes and all 54 archive members without rewriting or recompression. The split accommodates repository upload request-size limits.",
+    "report": "report.json and the four representative PNGs are exact original archive members.",
+    "harness": "The four report-recorded harness files and package.json/package-lock.json are frozen from exact candidate commit f159983c68a72bd4fc8d27d592ba3721bf4689c3. All four recorded SHA-256 values match report.harness.",
+    "integration": "integration-validation.json is preserved unchanged from the independently recorded successful exact-head integration run 43405625433.",
+    "packages": "Published application package archives are identified by original artifact metadata but are not duplicated here. The original evidence and frozen comparison function support offline result comparison, not a fresh browser execution without those applications."
+  },
+  "independentAudit": {
+    "path": "audit.json",
+    "originalScratchFileName": "browser-f159983-independent-audit.json",
+    "bytes": 75348,
+    "sha256": "8282f19a08a6c4e9aae1d5d490326e1fb41b5e88e7d9c0e31cc8557db5fc20a3",
+    "passed": true,
+    "copiedWithoutModification": true,
+    "scope": "Independent recomputation of original raw-step metrics and original PNG comparisons; derived audit, not an original GitHub archive member."
+  }
+}

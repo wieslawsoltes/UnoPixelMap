@@ -59,8 +59,6 @@ async function tap(page, locator, touch = false) {
 }
 
 async function waitForSettledFocus(page, locator, timeout = 25000) {
-    const target = await locator.elementHandle();
-    assert.ok(target, "The keyboard target has an accessibility element");
     const deadline = Date.now() + timeout;
     const timeoutError = () => new Error("The keyboard target did not keep focus for two animation frames within " + timeout + " ms");
     const remaining = () => {
@@ -68,29 +66,34 @@ async function waitForSettledFocus(page, locator, timeout = 25000) {
         if (value <= 0) throw timeoutError();
         return value;
     };
-    try {
-        for (;;) {
-            // Playwright's poller tests the immediate return value for truthiness.
-            // An async predicate returns a truthy Promise even when it resolves
-            // false, so await the animation barrier separately and retry a loss.
-            await page.waitForFunction(element => element.isConnected && document.activeElement === element,
-                target, {timeout: remaining()});
+    for (;;) {
+        // Closing a managed popup can restore its former focus after our first
+        // focus request. Reacquire the public target after such a loss instead
+        // of waiting for focus that no remaining application action will return.
+        // Resolve its peer afresh, since popup/layout updates may replace it.
+        await locator.focus({timeout: remaining()});
+        const target = await locator.elementHandle({timeout: remaining()});
+        assert.ok(target, "The keyboard target has an accessibility element");
+        try {
             let timer;
             const expired = new Promise((_, reject) => { timer = setTimeout(() => reject(timeoutError()), remaining()); });
             try {
                 const settled = await Promise.race([page.evaluate(async element => {
-                    if (!element.isConnected || document.activeElement !== element) return false;
+                    // Await the promise directly: an async waitForFunction
+                    // predicate can make a truthy Promise pass its poller.
+                    let focused = element.isConnected && document.activeElement === element;
                     for (let frame = 0; frame < 2; frame++) {
                         await new Promise(requestAnimationFrame);
-                        if (!element.isConnected || document.activeElement !== element) return false;
+                        focused = focused && element.isConnected && document.activeElement === element;
+                        if (!focused) return false;
                     }
                     return true;
                 }, target), expired]);
                 if (settled) return;
             } finally { clearTimeout(timer); }
+        } finally {
+            await target.dispose();
         }
-    } finally {
-        await target.dispose();
     }
 }
 

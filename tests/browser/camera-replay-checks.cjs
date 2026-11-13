@@ -294,56 +294,55 @@ async function focusChecks() {
         require: name => ["playwright", "pngjs", "./gpu.cjs"].includes(name) ? {} : require(name)
     }, {filename: "explore.cjs"});
     const {action, waitForSettledFocus} = uiModule.exports;
-    let disposed = 0, frames = 0, polls = 0, losses = 0, keys = 0;
+    let acquired = 0, disposed = 0, frames = 0, stableFrames = 0, losses = 0, reacquisitions = 0, keys = 0;
     const target = {isConnected: true, dispose: async () => { disposed++; }};
     const document = {activeElement: null};
     const sandbox = vm.createContext({document, Promise,
         requestAnimationFrame: callback => setImmediate(() => {
             // A closing popup reclaims focus during the first attempted barrier.
-            if (++frames === 1) document.activeElement = null;
+            if (++frames === 1) { document.activeElement = null; losses++; }
+            stableFrames = document.activeElement === target ? stableFrames + 1 : 0;
             callback();
         })});
     const invoke = (callback, argument) => vm.runInContext("(" + callback.toString() + ")", sandbox)(argument);
     const locator = {or() { return this; }, waitFor: async () => {},
-        focus: async () => { document.activeElement = target; }, elementHandle: async () => target,
+        focus: async options => {
+            if (options) assert.ok(options.timeout > 0 && options.timeout <= 25000);
+            if (losses && document.activeElement !== target) reacquisitions++;
+            document.activeElement = target;
+        },
+        elementHandle: async () => { acquired++; return target; },
         getAttribute: async () => "button"};
     const page = {
         getByRole: () => locator,
-        waitForFunction: async (callback, argument, options) => {
-            polls++;
-            assert.ok(options.timeout > 0 && options.timeout <= 25000);
-            let value = invoke(callback, argument);
-            assert.equal(typeof value, "boolean", "The focus poller receives a synchronous Boolean predicate");
-            if (!value) {
-                losses++;
-                await new Promise(setImmediate);
-                document.activeElement = target;
-                value = invoke(callback, argument);
-            }
-            assert.equal(value, true);
-        },
         evaluate: async (callback, argument) => invoke(callback, argument),
         keyboard: {press: async key => {
             keys++;
             assert.equal(key, "Enter");
             assert.equal(document.activeElement, target);
-            assert.equal(frames, 3, "Keyboard activation waits for two new frames after focus is reacquired");
+            assert.ok(stableFrames >= 2, "Keyboard activation waits for two actual stable frames after focus is reacquired");
         }}
     };
     await action(page, "Fixture button");
-    assert.deepEqual({polls, losses, keys, disposed}, {polls: 2, losses: 1, keys: 1, disposed: 1},
-        "An actual exported action retries lost focus before its one keyboard activation and releases the handle");
+    assert.equal(losses, 1, "The closing popup actually steals focus during the animation barrier");
+    assert.ok(reacquisitions > 0, "The real helper reacquires focus; the fixture does not restore it on the helper's behalf");
+    assert.equal(keys, 1, "The exported action issues exactly one native keyboard activation after recovery");
+    assert.equal(disposed, acquired, "Every acquired handle is released after focus recovery");
 
     const failure = new Error("The browser detached the keyboard target");
-    const failing = {...page, waitForFunction: async () => { throw failure; }};
+    const acquiredBeforeFailure = acquired;
+    const failing = {...page, evaluate: async () => { throw failure; }};
     await assert.rejects(waitForSettledFocus(failing, locator, 50), error => error === failure);
-    assert.equal(disposed, 2, "The target handle is disposed when focus polling fails");
+    assert.ok(acquired > acquiredBeforeFailure, "The failed browser evaluation occurs with an acquired target");
+    assert.equal(disposed, acquired, "The target handle is disposed when browser evaluation fails");
 
     // A hidden or stalled page might never produce another animation frame.
     // The overall deadline must still release the handle and reject the wait.
+    const acquiredBeforeStall = acquired;
     const stalled = {...page, evaluate: async () => new Promise(() => {})};
     await assert.rejects(waitForSettledFocus(stalled, locator, 20), /did not keep focus/);
-    assert.equal(disposed, 3, "The target handle is disposed when the animation barrier times out");
+    assert.ok(acquired > acquiredBeforeStall, "The stalled animation barrier owns a target handle");
+    assert.equal(disposed, acquired, "The target handle is disposed when the animation barrier times out");
     assert.equal(keys, 1, "Failed focus waits cannot issue another keyboard activation");
 }
 

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- The existing renderer grants this test assembly access to its immutable
+         frame data. The same harness can therefore inspect the unmodified base. -->
+    <AssemblyName>PixelMap.Rendering.Tests</AssemblyName>
+    <RendererSourceRoot Condition="'$(RendererSourceRoot)' == ''">../..</RendererSourceRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RendererSourceRoot)/src/PixelMap.Rendering/PixelMap.Rendering.csproj" />
+    <Compile Include="../PixelMap.Rendering.Tests/TestLabelFont.cs" Link="TestLabelFont.cs" />
+    <Compile Include="../PixelMap.Rendering.Tests/TerrainArtworkInvalidationChecks.cs" Link="TerrainArtworkInvalidationChecks.cs" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.151.1" />
+  </ItemGroup>
+</Project>

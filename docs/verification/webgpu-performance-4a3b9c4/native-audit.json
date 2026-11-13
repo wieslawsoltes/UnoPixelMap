@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "scope": "Recomputation of the final-source native benchmark from the original archive; no GPU execution, browser throughput or display measurement.",
+  "archive": "native-ci.zip",
+  "archiveSha256": "f22296923ad4bdc56c34b85e647ad84fcf58806fae17540398adb17ba3eca8a9",
+  "comparison": "native-ci-comparison.json",
+  "comparisonSha256": "263a743911031c9e8478dedcbd80f258b890d624a06881f982646199cb54256d",
+  "sourceManifest": "native-ci-manifest.json",
+  "sourceManifestSha256": "80b2739ae7e6d76306b8a0aa0d3a0bf2c26073b3ad3d0a3f3d56d02d8d9aa62a",
+  "sources": {
+    "baseline": {
+      "commit": "a9a284263da76a201114381467bf45aa4823a2d6",
+      "tree": "e4787159a5c29c1fbd149af7315eca7ed0b8b82d",
+      "uncommitted": ""
+    },
+    "candidate": {
+      "commit": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56",
+      "tree": "353460159fc607c7d4c3765a08259f5e0f33781f",
+      "uncommitted": ""
+    }
+  },
+  "sdkVersion": "10.0.403",
+  "runtime": ".NET 10.0.15",
+  "order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "warmupSamplesPerWorkloadAndRun": 32,
+  "measuredSamplesPerWorkloadAndRun": 32,
+  "pooledSamplesPerVariantAndWorkload": 64,
+  "movingWorkloads": 9,
+  "sourceStreamingWorkloads": 8,
+  "rawMovingSamples": 1152,
+  "rawStreamingSamples": 1024,
+  "identityChecks": 10944,
+  "identityFailures": [],
+  "recomputedComparisonMatchesOriginal": true,
+  "frozenHarnessHashesMatchSource": true,
+  "driverSha256": "8605b1afe75b3e408ebead2e89625f95adce4e4b185ff0cb734a6ce6050a8aa4",
+  "independentlyRecomputedTableDistributions": 118,
+  "distributionMethod": "Pool baseline runs 1 and 4, candidate runs 2 and 3. Sum phases within each raw sample before aggregation. Median averages the middle two sorted samples; p95 linearly interpolates at (n-1)*0.95. No sum of phase medians.",
+  "retainedNegativeControl": {
+    "workload": "source-priority-control-pixel",
+    "metric": "PrepareMs",
+    "baseline": {
+      "samples": 64,
+      "median": 0.641,
+      "p95": 0.67304
+    },
+    "candidate": {
+      "samples": 64,
+      "median": 0.66005,
+      "p95": 0.709075
+    },
+    "medianSpeedup": 0.9711385501098402,
+    "medianReductionPercent": -2.9719188767550753
+  },
+  "archiveMembers": {
+    "1-baseline/frames.log": {
+      "bytes": 720,
+      "sha256": "6f4ad35d7b85c8f5b3aaee5bf0692f463a5b2861bd43a2005f14dae84c443755"
+    },
+    "1-baseline/frames.json": {
+      "bytes": 337536,
+      "sha256": "2219b72a82b082a9d78822558743c22307fd6971830419910101e8255eaeaf16"
+    },
+    "1-baseline/streaming.log": {
+      "bytes": 1109,
+      "sha256": "3d139bce56038a00faa4cbb1c85995b4ea60a7e7b241d3b4e9a6dce4cb6bde44"
+    },
+    "1-baseline/terrain-streaming.json": {
+      "bytes": 85377,
+      "sha256": "8324a83778fd76b40c6e5a3751d3c3e4e9cc98a8c072409afe59a20dcf2e3251"
+    },
+    "2-candidate/frames.json": {
+      "bytes": 337498,
+      "sha256": "5651d522f6aa337119cf044c8d6abc779097d7d247a59b76c00af665760ffbde"
+    },
+    "2-candidate/streaming.log": {
+      "bytes": 1074,
+      "sha256": "f6cae04fd1cc3bfa00133a30b81072c898eaf4ce766bb24035c62f0d2bf7053d"
+    },
+    "2-candidate/frames.log": {
+      "bytes": 712,
+      "sha256": "b4601820184be4a0711f69b7a03ecf039e2bd75fddd53108c3475c2732a99932"
+    },
+    "2-candidate/terrain-streaming.json": {
+      "bytes": 83766,
+      "sha256": "af77449b58adf8bad10e67f0688e25a5b07311d47a10aed2c4160deb354142d8"
+    },
+    "3-candidate/frames.json": {
+      "bytes": 337542,
+      "sha256": "e4623f9eeef3312af2673e27ef5b8ccd3e4a131142c464bd92c9815c4c460000"
+    },
+    "3-candidate/frames.log": {
+      "bytes": 713,
+      "sha256": "c67dbc056d5863801ba32dfeb2265466f56ef55f8f54b887ba0ef6d91d4938bb"
+    },
+    "3-candidate/streaming.log": {
+      "bytes": 1074,
+      "sha256": "e180acd6aaaacc9e27825d50c0bce285b61b65a430f619ee9cad5cc5276ed204"
+    },
+    "3-candidate/terrain-streaming.json": {
+      "bytes": 83760,
+      "sha256": "f35da58d99a46e618c61dc209f8993200a67a8b5f414a8f0a0e80cec4a2e3adb"
+    },
+    "4-baseline/frames.json": {
+      "bytes": 337532,
+      "sha256": "92964fe674030d55b7ef23f28e457d37d90115dd17f9a29a0695c90dc12009ed"
+    },
+    "4-baseline/frames.log": {
+      "bytes": 720,
+      "sha256": "e7c6cba1b047254a8cd8a608a524f0e36d4b7534d105a274dceeb3d364995205"
+    },
+    "4-baseline/streaming.log": {
+      "bytes": 1109,
+      "sha256": "4f664c63efb4ed01bd19c1d66d864c76a897ffe0eb3fac00fdc211aa6c8fd48d"
+    },
+    "4-baseline/terrain-streaming.json": {
+      "bytes": 85382,
+      "sha256": "54bd706187f889e2c716871a6f108929853f77227b780d16704ab6959bd16aba"
+    },
+    "build-baseline.log": {
+      "bytes": 24863,
+      "sha256": "047cd199985e7dde55907a6468c4ce0d9332fb29ca4970d5b8be843cc9079dee"
+    },
+    "build-candidate.log": {
+      "bytes": 25035,
+      "sha256": "708c9055eb4ebc1d0f057b938cb8bd4f5eb451a22f64d3a5aa9bc40d9301806f"
+    },
+    "comparison.json": {
+      "bytes": 63942,
+      "sha256": "263a743911031c9e8478dedcbd80f258b890d624a06881f982646199cb54256d"
+    },
+    "dotnet-info.txt": {
+      "bytes": 1561,
+      "sha256": "7622e4976baa5139dc0c224f85fc6b78cc7eb50c6cdab624fa6071a76301ac78"
+    },
+    "manifest.json": {
+      "bytes": 1766,
+      "sha256": "80b2739ae7e6d76306b8a0aa0d3a0bf2c26073b3ad3d0a3f3d56d02d8d9aa62a"
+    }
+  },
+  "passed": true
+}

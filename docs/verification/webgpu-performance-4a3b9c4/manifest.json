@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "scope": "Final-source native CPU evidence plus completed integration job provenance and the preserved, incomplete paired browser attempt. No completed paired browser speedup is claimed.",
+  "baseline": {
+    "commit": "a9a284263da76a201114381467bf45aa4823a2d6",
+    "tree": "e4787159a5c29c1fbd149af7315eca7ed0b8b82d"
+  },
+  "candidate": {
+    "commit": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56",
+    "tree": "353460159fc607c7d4c3765a08259f5e0f33781f",
+    "productionSourceTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a"
+  },
+  "nativeCI": {
+    "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360230",
+    "job": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360230/job/131340439087",
+    "jobId": 131340439087,
+    "jobConclusion": "success",
+    "parentRunConclusion": "failure",
+    "artifactId": 13965755893,
+    "artifactName": "webgpu-native-performance-evidence",
+    "archive": "native-ci.zip",
+    "archiveSha256": "f22296923ad4bdc56c34b85e647ad84fcf58806fae17540398adb17ba3eca8a9",
+    "sdkVersion": "10.0.403",
+    "runtime": ".NET 10.0.15",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "warmupSamples": 32,
+    "measuredSamplesPerWorkloadAndRun": 32,
+    "pooledSamplesPerVariantAndWorkload": 64,
+    "identityChecks": 10944,
+    "identityFailures": 0,
+    "driver": "compare-native.py",
+    "driverSha256": "8605b1afe75b3e408ebead2e89625f95adce4e4b185ff0cb734a6ce6050a8aa4",
+    "comparisonRecomputedFromRawSamples": true,
+    "comparisonMatchesOriginal": true
+  },
+  "integrationCI": {
+    "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196",
+    "runConclusion": "success",
+    "checkout": "d407757af166a61c6dd38d4008c4abfe37870d30",
+    "checkoutTree": "353460159fc607c7d4c3765a08259f5e0f33781f",
+    "sameTreeAsNativeCandidate": true,
+    "successfulJobs": 4,
+    "debugScenarios": 34,
+    "releaseScenarios": 34,
+    "statusRecord": "integration-status.json",
+    "detailedEvidence": "../webgpu-performance-4a3b9c4-integration/"
+  },
+  "incompleteBrowserComparison": {
+    "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360230",
+    "job": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360230/job/131348103432",
+    "jobId": 131348103432,
+    "jobConclusion": "failure",
+    "artifactId": 13965088573,
+    "artifactName": "webgpu-performance-evidence",
+    "archive": "browser-comparison-failed.zip",
+    "archiveSha256": "b5fe5609c0ce87e816d02e38981b43280ef933a72e995ae3c9da60cb63686993",
+    "completedRuns": 1,
+    "completedBaselineRuns": 1,
+    "completedCandidateRuns": 0,
+    "pairedComparisons": 0,
+    "failure": "Candidate pixel-pan repetition 1 timed out in sceneProjection while opening Rendering quality and waiting for settled focus. The failure capture shows the submenu closed.",
+    "qualification": "No paired performance result. Original baseline-only samples remain evidence of the incomplete attempt."
+  },
+  "historicalCheckpoint": {
+    "candidate": "16048b7981ba2b08f57f437dc833457a886df56d",
+    "ciCheckout": "4dbb962e4c3de1bcc3f441e06f27e84d385be96b",
+    "productionSourceTree": "e83f1bad72867fc565b20214ff07389082a95782",
+    "evidence": "../webgpu-performance-16048b7/manifest.json",
+    "scope": "Earlier independent runs retain their original preparation, picking-inclusive and negative local Pixel-walking results. They are not pooled with this final-source run."
+  },
+  "files": {
+    "README.md": {
+      "bytes": 5179,
+      "sha256": "3adb1b457c7cdbfdc6e15666b4477e7dac8b96f24d255ce0de5a561811eb0382"
+    },
+    "browser-comparison-failed-report.json": {
+      "bytes": 87312,
+      "sha256": "39ff77f6b573c6aecdee4e1da5e25b80091a9a2bb35aeac7f76372ca4faac11f"
+    },
+    "browser-comparison-failed.zip": {
+      "bytes": 867606,
+      "sha256": "b5fe5609c0ce87e816d02e38981b43280ef933a72e995ae3c9da60cb63686993"
+    },
+    "browser-comparison-failure.json": {
+      "bytes": 5232,
+      "sha256": "07cbba22eb903f3cba98f25c2a0cc01d2e8ff354d6e4fdafeb4a88397ff79e47"
+    },
+    "browser-comparison-failure.png": {
+      "bytes": 390508,
+      "sha256": "6948b771f2ba5e8c0bf0cdd58625be6e8c793e7ab690b27e773d1e3b1ac79c97"
+    },
+    "compare-native.py": {
+      "bytes": 11962,
+      "sha256": "8605b1afe75b3e408ebead2e89625f95adce4e4b185ff0cb734a6ce6050a8aa4"
+    },
+    "dotnet-info.txt": {
+      "bytes": 1561,
+      "sha256": "7622e4976baa5139dc0c224f85fc6b78cc7eb50c6cdab624fa6071a76301ac78"
+    },
+    "integration-status.json": {
+      "bytes": 36513,
+      "sha256": "81d0b8e2dac8277b09c7b94a401bee6501153badcdd5841103c545a0b042fab3"
+    },
+    "native-artifact.json": {
+      "bytes": 770,
+      "sha256": "21b75a92e53a3261df5c312323b1303e3a35dea0a619dbf6d370943dc1a891ab"
+    },
+    "native-audit.json": {
+      "bytes": 5297,
+      "sha256": "e3e2ea3df65f2f15db8b5f62694a93a10dfddded84f6a702cb9b4ec731762467"
+    },
+    "native-ci-comparison.json": {
+      "bytes": 63942,
+      "sha256": "263a743911031c9e8478dedcbd80f258b890d624a06881f982646199cb54256d"
+    },
+    "native-ci-manifest.json": {
+      "bytes": 1766,
+      "sha256": "80b2739ae7e6d76306b8a0aa0d3a0bf2c26073b3ad3d0a3f3d56d02d8d9aa62a"
+    },
+    "native-ci.zip": {
+      "bytes": 285397,
+      "sha256": "f22296923ad4bdc56c34b85e647ad84fcf58806fae17540398adb17ba3eca8a9"
+    }
+  }
+}

@@ -12,6 +12,7 @@ public sealed partial class PixelMapRenderer
     private SKPicture? gpuLabelPicture;
     private GpuSceneDepth? activeGpuDepth;
     private bool gpuSceneLegacyOverlay = true;
+    private readonly HashSet<TileId> terrainTextureChanges = [];
 
     private sealed class GpuBuildingCache(GpuBuildingMesh mesh)
     {
@@ -75,11 +76,22 @@ public sealed partial class PixelMapRenderer
             // retain their authored ground shadows for the established map appearance.
             bool shadows = camera.Pitch >= 1 && (prepareLegacyOverlay || !MapRendering.Smooth(renderStyle));
             var textureStyle = (style, pixelSize, shadows, renderStyle);
-            if (terrainTextureStyle != textureStyle || !SameTerrainSources(tiles, terrainTextureTiles, static tile => tile.Id) ||
-                !SameTerrainSources(imagery, terrainTextureImagery, static tile => tile.Id))
+            if (terrainTextureStyle != textureStyle)
             {
                 reliefSurface.ClearTextures();
                 terrainTextureStyle = textureStyle;
+            }
+            else
+            {
+                terrainTextureChanges.Clear();
+                if (!CollectTerrainSourceChanges(tiles, terrainTextureTiles, static tile => tile.Id, terrainTextureChanges) ||
+                    !CollectTerrainSourceChanges(imagery, terrainTextureImagery, static tile => tile.Id, terrainTextureChanges))
+                {
+                    // Duplicate IDs make painter order significant. Keep their
+                    // uncommon update path conservative rather than infer coverage.
+                    reliefSurface.ClearTextures();
+                }
+                else reliefSurface.InvalidateTextures(terrainTextureChanges);
             }
             terrainTextureTiles.Clear(); terrainTextureTiles.AddRange(tiles);
             terrainTextureImagery.Clear(); if (imagery is not null) terrainTextureImagery.AddRange(imagery);
@@ -200,24 +212,26 @@ public sealed partial class PixelMapRenderer
         }
     }
 
-    private static bool SameTerrainSources<T>(IReadOnlyList<T>? sources, List<T> previous,
-        Func<T, TileId> getId) where T : class
+    private static bool CollectTerrainSourceChanges<T>(IReadOnlyList<T>? sources, List<T> previous,
+        Func<T, TileId> getId, HashSet<TileId> changed) where T : class
     {
         if (SameTiles(sources, previous)) return true;
-        if (sources is null || sources.Count != previous.Count) return false;
         // Tile request priority follows the moving camera. That ordering does not
         // change camera-independent artwork clipped to unique source tile bounds.
         // Duplicate IDs can overlap in drawing order and require rebaking.
-        var ids = new HashSet<TileId>();
-        var remaining = new HashSet<T>(previous.Count, ReferenceEqualityComparer.Instance);
+        var remaining = new Dictionary<TileId, T>(previous.Count);
         foreach (var source in previous)
-        {
-            if (!ids.Add(getId(source))) return false;
-            remaining.Add(source);
-        }
-        foreach (var source in sources)
-            if (!remaining.Remove(source)) return false;
-        return remaining.Count == 0;
+            if (!remaining.TryAdd(getId(source), source)) return false;
+        var ids = new HashSet<TileId>();
+        if (sources is not null)
+            foreach (var source in sources)
+            {
+                var id = getId(source);
+                if (!ids.Add(id)) return false;
+                if (!remaining.Remove(id, out var old) || !ReferenceEquals(source, old)) changed.Add(id);
+            }
+        foreach (var id in remaining.Keys) changed.Add(id);
+        return true;
     }
 
     private GpuBuildingMesh PrepareGpuBuildings(TileGeometry tile, TerrainOptions options)
