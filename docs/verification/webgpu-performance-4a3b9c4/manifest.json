@@ -104,12 +104,12 @@
       "sha256": "7622e4976baa5139dc0c224f85fc6b78cc7eb50c6cdab624fa6071a76301ac78"
     },
     "integration-status.json": {
-      "bytes": 36514,
-      "sha256": "47d14538bd8906b56e5736e98cc348f6d98dd95da8cb3ad369ae4f8051b5ca6f"
+      "bytes": 36513,
+      "sha256": "81d0b8e2dac8277b09c7b94a401bee6501153badcdd5841103c545a0b042fab3"
     },
     "native-artifact.json": {
-      "bytes": 771,
-      "sha256": "d0086e7b60e75a6982f2e8fc3fb68b52be5bd8cd861450c56f23dac88bddf228"
+      "bytes": 770,
+      "sha256": "21b75a92e53a3261df5c312323b1303e3a35dea0a619dbf6d370943dc1a891ab"
     },
     "native-audit.json": {
       "bytes": 5297,

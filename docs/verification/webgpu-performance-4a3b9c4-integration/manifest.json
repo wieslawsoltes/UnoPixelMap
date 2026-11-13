@@ -1,0 +1,721 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Lossless retained JSON evidence and four selected Release screenshots for final-source browser integration.",
+  "provenance": {
+    "repository": "https://github.com/wieslawsoltes/UnoPixelMap",
+    "pullRequest": "https://github.com/wieslawsoltes/UnoPixelMap/pull/2",
+    "workflowRun": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196",
+    "runId": 43263360196,
+    "runAttempt": 1,
+    "runNumber": 42,
+    "productionHeadCommit": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56",
+    "integrationCheckoutCommit": "d407757af166a61c6dd38d4008c4abfe37870d30",
+    "integrationCheckoutParents": [
+      "a9a284263da76a201114381467bf45aa4823a2d6",
+      "4a3b9c412ab7bb114795a6d4e5281e97508f4d56"
+    ],
+    "headAndIntegrationCheckoutTree": "353460159fc607c7d4c3765a08259f5e0f33781f",
+    "productionSrcTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+    "followingHarnessOnlyCommit": "cc1cc040a518cff8bbf310bfadaa2a0ef7ffab99",
+    "followingHarnessOnlyCommitSrcTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+    "treeEqualityVerifiedFromGitObjects": true
+  },
+  "originalArchives": {
+    "debug": {
+      "artifactId": 13964789765,
+      "jobId": 131341092771,
+      "bytes": 19443119,
+      "sha256": "ad2b072239ac87cf82da03eca4115c17f70e602e5c4236ef29df46314313f994",
+      "originalFileName": "webgpu-integration-debug.zip",
+      "artifactUrl": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/artifacts/13964789765",
+      "jobUrl": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/job/131341092771",
+      "originalMemberCount": 78,
+      "retainedJsonMemberCount": 43,
+      "originalPngCount": 34
+    },
+    "release": {
+      "artifactId": 13966911809,
+      "jobId": 131341093449,
+      "bytes": 19403982,
+      "sha256": "b0053e29461646e84e052f0052431b4cb21d9578e5de6cfa80e69c962f17dba5",
+      "originalFileName": "webgpu-integration-release.zip",
+      "artifactUrl": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/artifacts/13966911809",
+      "jobUrl": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196/job/131341093449",
+      "originalMemberCount": 78,
+      "retainedJsonMemberCount": 43,
+      "originalPngCount": 34
+    }
+  },
+  "retainedJsonArchive": {
+    "path": "integration-reports.zip",
+    "bytes": 521080,
+    "sha256": "d2842a0beee4f5e2e63f00dc9657637edbd701fc2e4ad9a0955e006acf7884ac",
+    "memberCount": 86,
+    "members": [
+      {
+        "path": "debug/webgpu-evidence/desktop-camera-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/desktop-camera-gpu.json",
+        "bytes": 28208,
+        "sha256": "08dacbb582172f87853884dd59bb92d92ae394a0860874895547e299cc48803e"
+      },
+      {
+        "path": "debug/webgpu-evidence/desktop-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/desktop-gpu.json",
+        "bytes": 310560,
+        "sha256": "100be9cc875fe50257a6674d55ab9b8beece08d2b09ccdd9ddc15aa1dfc16d43"
+      },
+      {
+        "path": "debug/webgpu-evidence/desktop-pixel-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/desktop-pixel-gpu.json",
+        "bytes": 26845,
+        "sha256": "df9df7106a3cf03df666f8b9333eed5dfb93a6181efd8637b6a3afd898e9213d"
+      },
+      {
+        "path": "debug/webgpu-evidence/device-loss-before-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/device-loss-before-gpu.json",
+        "bytes": 27654,
+        "sha256": "ed4e2edd0b7d715d9cfb2f8a412cea70b95921548ff96f2a2410a0cb5468dd04"
+      },
+      {
+        "path": "debug/webgpu-evidence/earth-imagery-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/earth-imagery-gpu.json",
+        "bytes": 237958,
+        "sha256": "05d70af3134ca2f9bdb25eec6efb795a5c28f42c10524f243f115299ba3310ab"
+      },
+      {
+        "path": "debug/webgpu-evidence/elevation-layer-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/elevation-layer-gpu.json",
+        "bytes": 232860,
+        "sha256": "19b35f443d1b52423949da7333063b8cbf4db5d65b839ff98b813d4dfe794b38"
+      },
+      {
+        "path": "debug/webgpu-evidence/facade-fixture.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/facade-fixture.json",
+        "bytes": 366186,
+        "sha256": "85672470e34f7ebc1eb588a531f0fc7021eb09ada2ab52f91d33229e06016771"
+      },
+      {
+        "path": "debug/webgpu-evidence/free-roam-walk-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/free-roam-walk-gpu.json",
+        "bytes": 305696,
+        "sha256": "eb3a645730cad3e7515d8882113edb2a9f7ba559cb205b5161aeece818e7f8cf"
+      },
+      {
+        "path": "debug/webgpu-evidence/free-roam-walk-ultra-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/free-roam-walk-ultra-gpu.json",
+        "bytes": 246794,
+        "sha256": "5c57fc91360b5100b02f55926669b3c6b9aa99324631e0f7afa4dc7f209ee7f6"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-bike-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-bike-gpu.json",
+        "bytes": 29309,
+        "sha256": "e3bed8e67be4140275f449df9fbeecb2f80abbb6c73f3a593817acff65a51f9d"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-bike-ready-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-bike-ready-gpu.json",
+        "bytes": 26921,
+        "sha256": "665596030024f12723293796b4f1d7f668c8fe9c62f925f16638c2ee8820065b"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-boat-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-boat-gpu.json",
+        "bytes": 29501,
+        "sha256": "4b3ce38048e729dda5a811c284b4b58ed6b00493bbab246e6384ee9c9b660ff7"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-boat-ready-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-boat-ready-gpu.json",
+        "bytes": 27236,
+        "sha256": "53a86e25ac50c7d8b829df68b08f9c7d84a03faf168631fb24edaa7188a179dd"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-drive-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-drive-gpu.json",
+        "bytes": 29352,
+        "sha256": "a31ee2b7f8d7483f80ff80a6dff4d9ea0c05e6cafc2ae2769eccbd50cad87aef"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-drive-ready-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-drive-ready-gpu.json",
+        "bytes": 26858,
+        "sha256": "7ac63059a25a1ce06e1825d0ff9610dc008f10317fefeae04508077c54d84b5d"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-flight-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-flight-gpu.json",
+        "bytes": 30618,
+        "sha256": "318948332dd21dcc578cce44870ee030dc69d50760bc8dcd17d6e7dd8515bd08"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-flight-ready-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-flight-ready-gpu.json",
+        "bytes": 29287,
+        "sha256": "c82dc900669f6d8c3f89fa06b3f0fe7e303b06b6c308ac93adf006c81afab0fb"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-train-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-train-gpu.json",
+        "bytes": 29418,
+        "sha256": "fd9a0486baf633fd73e14a7934f67ce458ccae9b28535f5371bbb570748fad23"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-train-ready-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-train-ready-gpu.json",
+        "bytes": 27324,
+        "sha256": "d5693f68967f9d40465fb2153b6956a18da780a6c612880d1536a367acd70345"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-walk-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-walk-gpu.json",
+        "bytes": 29275,
+        "sha256": "a30441740a17cefd75d166c7f09caac319bde03634048a3f4505be93a7e45f08"
+      },
+      {
+        "path": "debug/webgpu-evidence/journey-walk-ready-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/journey-walk-ready-gpu.json",
+        "bytes": 26907,
+        "sha256": "c0abf130bb14d42e22cbcaf48f9e017ad12b7728c13dd451a6d689d9635df039"
+      },
+      {
+        "path": "debug/webgpu-evidence/lighting-day-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/lighting-day-gpu.json",
+        "bytes": 245510,
+        "sha256": "705193330dbfc967123a3f285c11936acbb39d2eb439a81ef0ef9c93ae3dd7fb"
+      },
+      {
+        "path": "debug/webgpu-evidence/lighting-dusk-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/lighting-dusk-gpu.json",
+        "bytes": 177000,
+        "sha256": "8c9ba54057542310307afa4ad0a4738d0467bb137c6d204a1d9401ba15919331"
+      },
+      {
+        "path": "debug/webgpu-evidence/lighting-night-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/lighting-night-gpu.json",
+        "bytes": 204726,
+        "sha256": "575859c635e06236ffa9ad9ed69e6bb2ab7d60e3473da6e288f2852d1a711a63"
+      },
+      {
+        "path": "debug/webgpu-evidence/mobile-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/mobile-gpu.json",
+        "bytes": 112434,
+        "sha256": "9e1f7f99bfcac9448e33bad39e826643002021397f082932b47e68e617ad85d2"
+      },
+      {
+        "path": "debug/webgpu-evidence/mobile-normal-high-dpi-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/mobile-normal-high-dpi-gpu.json",
+        "bytes": 112434,
+        "sha256": "9e1f7f99bfcac9448e33bad39e826643002021397f082932b47e68e617ad85d2"
+      },
+      {
+        "path": "debug/webgpu-evidence/mobile-normal-initial-high-dpi-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/mobile-normal-initial-high-dpi-gpu.json",
+        "bytes": 84436,
+        "sha256": "c3459d1d5abff3704bb4f17db6522bf3c9fc754b9158f65ecd2ef45d58e8d8e7"
+      },
+      {
+        "path": "debug/webgpu-evidence/mobile-pinch-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/mobile-pinch-gpu.json",
+        "bytes": 47277,
+        "sha256": "1ee1b50fd89e058f20dc2442082cb403ae3d79022184381427fd30dd952acd8c"
+      },
+      {
+        "path": "debug/webgpu-evidence/mobile-pixel-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/mobile-pixel-gpu.json",
+        "bytes": 26329,
+        "sha256": "0e4b120ed28635c78f6808789a194776a069b90e91861ecc52fa6d49765fe67b"
+      },
+      {
+        "path": "debug/webgpu-evidence/photograph-normal-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/photograph-normal-gpu.json",
+        "bytes": 266417,
+        "sha256": "fe83adb1f9e40a7930884c766c9bfcdb6b8bacb6f4694a1644602a2918512467"
+      },
+      {
+        "path": "debug/webgpu-evidence/photograph-pixel-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/photograph-pixel-gpu.json",
+        "bytes": 215097,
+        "sha256": "5016956d6972ef87b3e4074bd222f383dcdc63ba8e279dcf5c213d45a452bdc1"
+      },
+      {
+        "path": "debug/webgpu-evidence/presentation.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/presentation.json",
+        "bytes": 1078,
+        "sha256": "6f2a8d39fc8a85273200fdbad35f4497c54d7fda54f41495ffce1fd260de4ce0"
+      },
+      {
+        "path": "debug/webgpu-evidence/quality-balanced-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/quality-balanced-gpu.json",
+        "bytes": 125436,
+        "sha256": "dbb30060a0d97528a599637410181f68bca839c881eb5bc3e57956c0d1d96ddf"
+      },
+      {
+        "path": "debug/webgpu-evidence/quality-high-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/quality-high-gpu.json",
+        "bytes": 122080,
+        "sha256": "faa01ef2febe6ca46b13590ebba888050401c5aeb8e178c37cc7ed577c865e0d"
+      },
+      {
+        "path": "debug/webgpu-evidence/quality-ultra-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/quality-ultra-gpu.json",
+        "bytes": 153948,
+        "sha256": "6265126050f76c85b7e0885680b69dd078fdb93da21cf46f391e0c8e7e081ee7"
+      },
+      {
+        "path": "debug/webgpu-evidence/report.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/report.json",
+        "bytes": 36336,
+        "sha256": "03620d463ed0eb6a8138018d1e86f6694876cd7ca96f688b47563a094f726df8"
+      },
+      {
+        "path": "debug/webgpu-evidence/resized-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/resized-gpu.json",
+        "bytes": 310560,
+        "sha256": "100be9cc875fe50257a6674d55ab9b8beece08d2b09ccdd9ddc15aa1dfc16d43"
+      },
+      {
+        "path": "debug/webgpu-evidence/shader-fixtures.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/shader-fixtures.json",
+        "bytes": 4137,
+        "sha256": "8ee90688a0ea797a2c6b38a4d09cfb91e6293efaf0efb521a50331cfc1339cb6"
+      },
+      {
+        "path": "debug/webgpu-evidence/style-minecraft-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/style-minecraft-gpu.json",
+        "bytes": 101907,
+        "sha256": "7fccd14ef34ebfb61036fb5ab1b991e9beaa8554318540e9098d0cff33c3519c"
+      },
+      {
+        "path": "debug/webgpu-evidence/style-normal-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/style-normal-gpu.json",
+        "bytes": 100395,
+        "sha256": "7f783bda1f888031e4567add49559cc365e1ca54bfdc31ea05c6b72182494506"
+      },
+      {
+        "path": "debug/webgpu-evidence/style-pixel-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/style-pixel-gpu.json",
+        "bytes": 109106,
+        "sha256": "6a69dd912b1b2e3c1fe10be32f828b64b90fe023a9c41a2d1507e9f16fddfa27"
+      },
+      {
+        "path": "debug/webgpu-evidence/style-roblox-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/style-roblox-gpu.json",
+        "bytes": 153385,
+        "sha256": "cc91a995669e141755989f109f63fbcfce1e5c6bfcb4c72821483beda2511207"
+      },
+      {
+        "path": "debug/webgpu-evidence/terrain-relief-gpu.json",
+        "configuration": "debug",
+        "sourceMember": "webgpu-evidence/terrain-relief-gpu.json",
+        "bytes": 245629,
+        "sha256": "597b0b4ccc5970256e69153d9f30af85831c5989050bf05d70c35de662698938"
+      },
+      {
+        "path": "release/webgpu-evidence/desktop-camera-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/desktop-camera-gpu.json",
+        "bytes": 29064,
+        "sha256": "8376832542dd454f1758862cef89fea15d848c476bdba5dc9e056cfcf8088107"
+      },
+      {
+        "path": "release/webgpu-evidence/desktop-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/desktop-gpu.json",
+        "bytes": 273212,
+        "sha256": "cb1aa417545670c246290ed456ea90f403c05609c1ac4f26f07bd2eb33dfb572"
+      },
+      {
+        "path": "release/webgpu-evidence/desktop-pixel-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/desktop-pixel-gpu.json",
+        "bytes": 27664,
+        "sha256": "a80c22f22816e5c39a638d3c058e7496aac5131757951bf7dc01d7ffcdd88ac1"
+      },
+      {
+        "path": "release/webgpu-evidence/device-loss-before-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/device-loss-before-gpu.json",
+        "bytes": 27664,
+        "sha256": "e6bfb48142e843163226a357e33bd32e23b78be51c7b3ca45dedc60171f8a09b"
+      },
+      {
+        "path": "release/webgpu-evidence/earth-imagery-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/earth-imagery-gpu.json",
+        "bytes": 231240,
+        "sha256": "6359715b94af9e758544bb850e0fd347bccac85391f8555189a23d78ec0a4da2"
+      },
+      {
+        "path": "release/webgpu-evidence/elevation-layer-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/elevation-layer-gpu.json",
+        "bytes": 225970,
+        "sha256": "a54bd558c7f33fbff11308e3584cbcc4ca0c64d59588a828f3ef2efda95d1bfa"
+      },
+      {
+        "path": "release/webgpu-evidence/facade-fixture.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/facade-fixture.json",
+        "bytes": 366186,
+        "sha256": "85672470e34f7ebc1eb588a531f0fc7021eb09ada2ab52f91d33229e06016771"
+      },
+      {
+        "path": "release/webgpu-evidence/free-roam-walk-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/free-roam-walk-gpu.json",
+        "bytes": 201048,
+        "sha256": "1c0f5ae36f21e7bf3c551858ad841849167db544bf4651629560ae45a211ff16"
+      },
+      {
+        "path": "release/webgpu-evidence/free-roam-walk-ultra-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/free-roam-walk-ultra-gpu.json",
+        "bytes": 171355,
+        "sha256": "fae36ea9fd13ea7b123c43b3d5a35b08a313fc5aad8b14333455e9920e55b4dc"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-bike-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-bike-gpu.json",
+        "bytes": 29296,
+        "sha256": "1a9b0ac546cc96c5c608964e46744c4ee87e20d6b9ce475e98f0f87e832f3dac"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-bike-ready-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-bike-ready-gpu.json",
+        "bytes": 26907,
+        "sha256": "e9d935ca8dd161fd40476c5bf33fc5443f809fefa8f727f66ff4cd4d71620b88"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-boat-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-boat-gpu.json",
+        "bytes": 29501,
+        "sha256": "54f1e1a3df5ce294fb876bb63e29ffe14a5a91062367be3509f011f46f23deaf"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-boat-ready-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-boat-ready-gpu.json",
+        "bytes": 27236,
+        "sha256": "87d008f1e087a942b764283cb844f9e2ae2a6203bb88618630c003a0e52fee39"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-drive-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-drive-gpu.json",
+        "bytes": 29352,
+        "sha256": "a5e0531a30d9b236e3a38b6ff6a163d739d3b361253caba52a32e54796060a63"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-drive-ready-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-drive-ready-gpu.json",
+        "bytes": 26858,
+        "sha256": "54fedf98a920f5aaa0c432d68c318bcc5b085f8d7441df967fe1833ba2fa6330"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-flight-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-flight-gpu.json",
+        "bytes": 30486,
+        "sha256": "dcfa0fbf9c0457819a94fbf18da999dcba46a4f111462c0b1d2b51db8d8c2f3c"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-flight-ready-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-flight-ready-gpu.json",
+        "bytes": 29139,
+        "sha256": "5ef61fe962a44f2c5bd4c93744cc8ac6217127a1198174032bc0e756ac3354a0"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-train-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-train-gpu.json",
+        "bytes": 29953,
+        "sha256": "0da06d0ce1ae05226d76bbfd730d03d023d177953b7327400bd10ac56f572ace"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-train-ready-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-train-ready-gpu.json",
+        "bytes": 29175,
+        "sha256": "2a0e670d250ea39fd2c43c8c03a98fcb9e2b4137f31fa5140529a3771dd6ea3d"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-walk-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-walk-gpu.json",
+        "bytes": 29275,
+        "sha256": "320c348ebbb4cbaae116e53e10e8d11ed04826988f3151ff30a6f14d0454aa93"
+      },
+      {
+        "path": "release/webgpu-evidence/journey-walk-ready-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/journey-walk-ready-gpu.json",
+        "bytes": 26907,
+        "sha256": "73fdeb263899ddd1497b05f956f1112d3cd2d5bf809eecf5f797cbe07e13910d"
+      },
+      {
+        "path": "release/webgpu-evidence/lighting-day-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/lighting-day-gpu.json",
+        "bytes": 231238,
+        "sha256": "ff1906319fd7f471b96402201220b3e1478df44eb3a5f0c99bcd6cbdc9dfa4e8"
+      },
+      {
+        "path": "release/webgpu-evidence/lighting-dusk-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/lighting-dusk-gpu.json",
+        "bytes": 170282,
+        "sha256": "b6449be17a4707e899afd471f7e567a61609b6c2c5c19472ddb01ddfeaf54f41"
+      },
+      {
+        "path": "release/webgpu-evidence/lighting-night-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/lighting-night-gpu.json",
+        "bytes": 198008,
+        "sha256": "664ed83613b3e52e6490cc35551915d48aeb52f4ae2cc45747d1c6d1ee27d8de"
+      },
+      {
+        "path": "release/webgpu-evidence/mobile-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/mobile-gpu.json",
+        "bytes": 112434,
+        "sha256": "cbffb37ace9b88255e603fa471855c734082db5bd623bab192ff3f9d1f407723"
+      },
+      {
+        "path": "release/webgpu-evidence/mobile-normal-high-dpi-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/mobile-normal-high-dpi-gpu.json",
+        "bytes": 112434,
+        "sha256": "cbffb37ace9b88255e603fa471855c734082db5bd623bab192ff3f9d1f407723"
+      },
+      {
+        "path": "release/webgpu-evidence/mobile-normal-initial-high-dpi-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/mobile-normal-initial-high-dpi-gpu.json",
+        "bytes": 84434,
+        "sha256": "333e30c1e9247e78e42875ff06bec08d46908503a82215787e87efdab0f4b7dc"
+      },
+      {
+        "path": "release/webgpu-evidence/mobile-pinch-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/mobile-pinch-gpu.json",
+        "bytes": 47277,
+        "sha256": "4ea5039d51fc3fc501a46df786d9a6daa50dab14a560868a7ab6aafd47d56711"
+      },
+      {
+        "path": "release/webgpu-evidence/mobile-pixel-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/mobile-pixel-gpu.json",
+        "bytes": 21097,
+        "sha256": "124d8473eb6f6d1b92dad6da9bf8ad45e699acd617fc1225628cf2e23705d36b"
+      },
+      {
+        "path": "release/webgpu-evidence/photograph-normal-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/photograph-normal-gpu.json",
+        "bytes": 252635,
+        "sha256": "8ca28a9699a6a744143d5d0c116b165cb79a5610db1d2afca7b120f38f378a3b"
+      },
+      {
+        "path": "release/webgpu-evidence/photograph-pixel-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/photograph-pixel-gpu.json",
+        "bytes": 208847,
+        "sha256": "78ad654662e169467cf0ffe914819cb00d9f879304825b6f998c7af470590b84"
+      },
+      {
+        "path": "release/webgpu-evidence/presentation.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/presentation.json",
+        "bytes": 1078,
+        "sha256": "6f2a8d39fc8a85273200fdbad35f4497c54d7fda54f41495ffce1fd260de4ce0"
+      },
+      {
+        "path": "release/webgpu-evidence/quality-balanced-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/quality-balanced-gpu.json",
+        "bytes": 118862,
+        "sha256": "c89e0e9a0c7e9f11a10075bf5c9537679d68a552d0f45400c20958703b30602a"
+      },
+      {
+        "path": "release/webgpu-evidence/quality-high-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/quality-high-gpu.json",
+        "bytes": 122916,
+        "sha256": "699819d26fc7877917eeb24b2aed9cb884000951f34b9c3581518e96b7b268eb"
+      },
+      {
+        "path": "release/webgpu-evidence/quality-ultra-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/quality-ultra-gpu.json",
+        "bytes": 147374,
+        "sha256": "8c1e0b284c9889b8301ff31f32b21232be23eea38b0f3f6ce450ace97a26433e"
+      },
+      {
+        "path": "release/webgpu-evidence/report.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/report.json",
+        "bytes": 36302,
+        "sha256": "d94f2016c2827507644e513aae388da0b7432b922f9a78a4604d85f806288412"
+      },
+      {
+        "path": "release/webgpu-evidence/resized-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/resized-gpu.json",
+        "bytes": 273212,
+        "sha256": "cb1aa417545670c246290ed456ea90f403c05609c1ac4f26f07bd2eb33dfb572"
+      },
+      {
+        "path": "release/webgpu-evidence/shader-fixtures.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/shader-fixtures.json",
+        "bytes": 4137,
+        "sha256": "8ee90688a0ea797a2c6b38a4d09cfb91e6293efaf0efb521a50331cfc1339cb6"
+      },
+      {
+        "path": "release/webgpu-evidence/style-minecraft-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/style-minecraft-gpu.json",
+        "bytes": 102743,
+        "sha256": "0beb98b74ec7725d38b7d9ac484463e46d6ede17bc2b2242fc9a7468ff16e072"
+      },
+      {
+        "path": "release/webgpu-evidence/style-normal-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/style-normal-gpu.json",
+        "bytes": 101231,
+        "sha256": "e6ee9bb6c4871c51a0920fd8596c8d3f29e13b720c00d6260741f1a6d32abc85"
+      },
+      {
+        "path": "release/webgpu-evidence/style-pixel-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/style-pixel-gpu.json",
+        "bytes": 110086,
+        "sha256": "e3f3eaa8f0b87a2be288042cf7e43bb0f21d4f6ab50e6b5f117a136684916fab"
+      },
+      {
+        "path": "release/webgpu-evidence/style-roblox-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/style-roblox-gpu.json",
+        "bytes": 154365,
+        "sha256": "c14228f19ad9a64baafc15d1bddcb1e66ea7b1a48622ff12fb34e6cfebc9a5ad"
+      },
+      {
+        "path": "release/webgpu-evidence/terrain-relief-gpu.json",
+        "configuration": "release",
+        "sourceMember": "webgpu-evidence/terrain-relief-gpu.json",
+        "bytes": 238604,
+        "sha256": "fb4f83a788af2340769db5349a24584549eb5047e76c8c241b1815b9daf19ebe"
+      }
+    ],
+    "repackMethod": {
+      "order": "lexicographic member paths",
+      "compression": "deflate level 9",
+      "zipTimestamp": "1980-01-01T00:00:00",
+      "unixPermissions": "100644",
+      "payloads": "unaltered bytes from verified original artifact archives",
+      "deterministicRebuildVerified": true
+    }
+  },
+  "selectedScreenshots": [
+    {
+      "path": "style-normal.png",
+      "configuration": "release",
+      "sourceMember": "webgpu-evidence/style-normal.png",
+      "bytes": 1124250,
+      "sha256": "456ce3c3890780e27092ffa355e17ae205297cb662d68b81168335cce240f804",
+      "width": 1200,
+      "height": 800,
+      "transformation": "none; exact original bytes"
+    },
+    {
+      "path": "terrain-relief.png",
+      "configuration": "release",
+      "sourceMember": "webgpu-evidence/terrain-relief.png",
+      "bytes": 969957,
+      "sha256": "c5f75cd600271108f2d6dfb8fdcc9718f2c9ff79d7447ef45df564d804997a1b",
+      "width": 1200,
+      "height": 800,
+      "transformation": "none; exact original bytes"
+    },
+    {
+      "path": "free-roam-walk-ultra.png",
+      "configuration": "release",
+      "sourceMember": "webgpu-evidence/free-roam-walk-ultra.png",
+      "bytes": 208134,
+      "sha256": "fdcab54a50c95b3d82ca556330aedb9bd60c44be483b7b30b42b10387fb94a24",
+      "width": 1200,
+      "height": 800,
+      "transformation": "none; exact original bytes"
+    },
+    {
+      "path": "mobile-normal-high-dpi.png",
+      "configuration": "release",
+      "sourceMember": "webgpu-evidence/mobile-normal-high-dpi.png",
+      "bytes": 786653,
+      "sha256": "002bc9e4625c9aa6f1ad87e22474d4a1d9df0232f83613324f243a6ec06644b4",
+      "width": 780,
+      "height": 1688,
+      "transformation": "none; exact original bytes"
+    }
+  ],
+  "derivedAudit": {
+    "path": "audit.json",
+    "bytes": 8697,
+    "sha256": "af65ecc5fb0c08fb73886cb483b3cad9f5e1c20b0231f333b9e52c7961e842f0"
+  },
+  "retentionScope": "All 43 JSON members from each original archive are retained. Four of the 34 Release PNGs are also retained as standalone files. Other PNGs and the server log are omitted. The repacked archive is a documented subset, not a byte-for-byte copy of the original ZIPs.",
+  "conclusionsNotEstablished": [
+    "baseline/candidate browser latency improvement",
+    "hardware GPU performance",
+    "baseline/candidate screenshot pixel identity",
+    "every intermediate camera frame identity"
+  ]
+}

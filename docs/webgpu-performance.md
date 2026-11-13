@@ -360,9 +360,14 @@ checks the public quality/share result. Keyboard focus acquisition is bounded an
 reacquires the current native peer until two stable frames are observed. Contract
 regressions cover delayed, restored and replaced focus and dismissals that never
 execute the command. The timed input sequence and endpoint camera, scene and image
-gates remain unchanged. Its new [paired performance run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43404475087)
-and [integration run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43404475049)
-are pending; the earlier incomplete attempt remains in the evidence.
+gates remain unchanged. The initial rerun passed observer contracts and presentation,
+but the existing camera-replay fixture still asserted the old helper's polling and
+single-handle counts. Follow-up [`a9ef50f`](https://github.com/wieslawsoltes/UnoPixelMap/commit/a9ef50f)
+reproduces actual animation-frame focus theft, requires the real helper to recover,
+and checks one keyboard activation plus balanced handle ownership on success,
+failure and timeout. All five local Node contract suites pass. Fresh integration
+and paired performance validation of these harness changes are required; the
+earlier incomplete attempt remains in the evidence.
 
 SwiftShader Vulkan results do not establish physical-GPU FPS, display latency or
 mobile thermals.
