@@ -7,25 +7,34 @@ physical scene resolution, 4× MSAA in High/Ultra, shadows, HDR bloom, terrain m
 anisotropic filtering, map styles and native-density labels are preserved.
 
 **Measured application baseline:** `a9a284263da76a201114381467bf45aa4823a2d6`.
-**Measured optimization checkpoint:** `16048b7981ba2b08f57f437dc833457a886df56d`.
-The timing tables below describe these committed source trees. The later CI
-checkout `4dbb962` has the same production `src` tree as `16048b7`. Terrain-only
-picking and retained GPU interaction were improved after that checkpoint; their
-implementation and exact regression results are documented below. Updated native
-and browser measurements for the final source are pending. Migration architecture
-and its existing quality limits remain in [the migration guide](uno7-webgpu-migration.md).
+**Final measured application source:** `4a3b9c412ab7bb114795a6d4e5281e97508f4d56`.
+The final native comparison measures **19.8–53.3% lower preparation/overlay time**
+and **22.4–56.0% lower preparation/overlay time including twelve terrain picks**
+across the nine moving workloads. All **10,944 identity comparisons pass**.
+Debug and Release browser integration also pass on this source tree. The paired
+browser performance attempt stopped at a focus timeout before completing its
+first candidate case, so it establishes no paired browser speedup.
 
-## Checkpoint results: native CPU frame preparation
+The earlier `16048b7` optimization checkpoint and its `4dbb962` CI checkout remain
+preserved as separate evidence, including their deferred-picking penalty. The final
+tables below include the subsequent terrain-only picking and retained-view
+ownership fixes. Migration architecture and its existing quality limits remain
+in [the migration guide](uno7-webgpu-migration.md).
 
-This preserved table comes from the [paired CI run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43254794602)
+## Final source: native CPU frame preparation
+
+This table comes from the [successful native comparison job](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360230/job/131340439087)
 on an AMD EPYC 9V74 runner, using isolated .NET SDK 10.0.403 and runtime 10.0.15.
-The candidate checkout is `4dbb962`, whose production `src` tree is identical to
-`16048b7`; its later changes improve the benchmark and toolchain provenance.
+Its clean candidate checkout is `4a3b9c4`, full tree
+`353460159fc607c7d4c3765a08259f5e0f33781f`; the production `src` tree is
+`cf568d7832d23566d87b188f23f8afb18bab1d2a`.
 One frozen harness was compiled against both revisions;
 all compilation finished before measurements. Baseline/candidate/candidate/baseline
 (ABBA) order, an explicit hashed font, 32 warm-up poses and 32 measured poses per
 workload/run keep the work comparable. Tiered compilation is disabled for both
-native hosts. Each table entry pools 64 measured samples per variant.
+native hosts. Each table entry pools 64 measured samples per variant. Recomputing
+the complete comparison from the original raw samples reproduces the archived
+comparison exactly; the five frozen harness files and driver hashes also match.
 
 Times are **CPU elapsed milliseconds for `PrepareGpuFrame` plus activation and
 `PrepareWebGpuOverlay`**, not GPU duration or display FPS. Sparse picking is timed
@@ -35,15 +44,15 @@ timing. All **10,944 identity comparisons passed**, including repeated runs.
 
 | Moving workload | Baseline median, ms | Optimized median, ms | Time reduction | Baseline → optimized p95, ms |
 |---|---:|---:|---:|---:|
-| pan-pixel | 13.436 | 8.977 | 33.2% | 14.081 → 10.376 |
-| walk-pixel | 4.446 | 2.276 | 48.8% | 5.141 → 2.688 |
-| orbit-pixel | 13.980 | 9.144 | 34.6% | 14.668 → 11.038 |
-| pan-normal | 14.372 | 10.194 | 29.1% | 14.801 → 10.769 |
-| walk-normal | 5.020 | 2.422 | 51.7% | 5.699 → 3.097 |
-| orbit-normal | 14.539 | 9.915 | 31.8% | 16.619 → 11.354 |
-| pan-roblox | 14.768 | 11.238 | 23.9% | 15.942 → 12.022 |
-| walk-roblox | 6.598 | 2.901 | 56.0% | 7.464 → 3.543 |
-| orbit-roblox | 15.173 | 11.087 | 26.9% | 16.156 → 12.824 |
+| pan-pixel | 13.241 | 9.348 | 29.4% | 13.939 → 10.786 |
+| walk-pixel | 4.418 | 2.409 | 45.5% | 5.042 → 2.789 |
+| orbit-pixel | 13.832 | 9.349 | 32.4% | 14.517 → 11.365 |
+| pan-normal | 14.255 | 10.648 | 25.3% | 14.732 → 11.523 |
+| walk-normal | 4.733 | 2.213 | 53.3% | 5.129 → 2.931 |
+| orbit-normal | 14.411 | 10.331 | 28.3% | 15.254 → 12.110 |
+| pan-roblox | 14.572 | 11.686 | 19.8% | 15.108 → 12.493 |
+| walk-roblox | 6.509 | 3.226 | 50.4% | 7.021 → 3.782 |
+| orbit-roblox | 14.537 | 11.471 | 21.1% | 15.545 → 13.149 |
 
 The nine cases use bundled Manhattan data, a 1200 × 700 logical viewport and
 identical deterministic pan, orbit and first-person walking cameras. Smooth styles
@@ -51,15 +60,41 @@ retain their existing physical/art resolution rules. Calling-thread CPU time and
 managed allocations are preserved alongside wall time; unavailable thread timing
 is null instead of zero on unsupported platforms.
 
-An independent local ABBA run also passed all 10,944 identity comparisons and
-measured 18–48% lower preparation/overlay time. The isolated-SDK checkpoint CI run measured
-24–56% lower time. These are separate machines/runs, not a combined sample pool.
-The source, font, harness and renderer hashes are retained for each.
+### Picking-inclusive final results
 
-### Checkpoint picking cost and the subsequent fix
+The benchmark performs twelve sparse screen-space terrain picks after each
+prepared frame. These totals sum preparation, overlay and picking **within each
+raw sample** before calculating the median and linearly interpolated p95. Adding
+phase medians would produce a different and invalid combined distribution.
 
-The benchmark also performs twelve sparse screen-space terrain picks after each
-prepared frame. At the `16048b7` / `4dbb962` checkpoint, labels requested less depth
+| Moving workload | Combined median, baseline → final ms | Time reduction | Combined p95, baseline → final ms | Twelve picks alone, baseline → final median ms |
+|---|---:|---:|---:|---:|
+| pan-pixel | 13.697 → 9.461 | 30.9% | 14.479 → 10.920 | 0.472 → 0.108 |
+| walk-pixel | 5.262 → 2.780 | 47.2% | 5.520 → 3.037 | 0.795 → 0.315 |
+| orbit-pixel | 14.333 → 9.457 | 34.0% | 15.022 → 11.392 | 0.504 → 0.090 |
+| pan-normal | 14.950 → 10.772 | 27.9% | 15.514 → 11.690 | 0.719 → 0.127 |
+| walk-normal | 5.840 → 2.571 | 56.0% | 6.324 → 3.220 | 1.132 → 0.300 |
+| orbit-normal | 15.269 → 10.441 | 31.6% | 16.002 → 12.147 | 0.778 → 0.113 |
+| pan-roblox | 15.417 → 11.962 | 22.4% | 16.019 → 12.864 | 0.812 → 0.261 |
+| walk-roblox | 7.748 → 3.980 | 48.6% | 8.287 → 4.425 | 1.257 → 0.717 |
+| orbit-roblox | 15.504 → 11.711 | 24.5% | 16.364 → 13.378 | 0.848 → 0.207 |
+
+All nine final workloads improve against their paired baseline when the twelve
+picks are included. Calling-thread CPU time, managed allocations, individual
+phases and all raw samples remain in the
+[original comparison](verification/webgpu-performance-4a3b9c4/native-ci-comparison.json)
+and [unaltered archive](verification/webgpu-performance-4a3b9c4/native-ci.zip).
+
+### Historical checkpoint: deferred-picking cost
+
+The [earlier isolated-SDK CI run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43254794602)
+used checkout `4dbb962`, whose production `src` tree matches checkpoint `16048b7`.
+It measured 24–56% lower preparation/overlay time; an independent local ABBA run
+measured 18–48% lower time. Both passed 10,944 identity comparisons. Those runs
+remain separate from the final-source measurements above, with their own source,
+font, harness and renderer hashes.
+
+At the `16048b7` / `4dbb962` checkpoint, labels requested less depth
 geometry, but a later terrain pick still demanded the combined terrain/model
 sample. Picking consequently became the first consumer of some building geometry.
 These checkpoint walking results expose that cost shift:
@@ -77,8 +112,9 @@ faster preparation/overlay phase. The other local walking totals and all checkpo
 CI totals improved. Frequent-picking applications therefore must use the combined
 results rather than applying the preparation-only percentage to their whole frame.
 The subsequent terrain-only demand change removes the redundant building
-preparation from these queries. The table above remains evidence of the earlier
-checkpoint; final-source measurements will establish the resulting timing change.
+preparation from these queries. The final-source picking-inclusive table measures
+the resulting behavior against its own paired baseline; this historical table and
+the local regression remain preserved in the checkpoint evidence.
 
 The application does not issue twelve screen-space picks on every walking frame.
 Its movement contacts and terrain-following camera use geographic height sampling.
@@ -99,23 +135,23 @@ retain camera unprojection. Geographic movement-height sampling is unchanged.
 These UI callbacks are outside the renderer callback's stopwatch; the paired
 browser protocol includes input handling and main-thread work beyond that scope.
 
-## Checkpoint results: source streaming and artwork
+## Final source: source streaming and artwork
 
 These fixed-camera workloads replace one deterministic vector or imagery source
 at a time over nine real bundled city tiles. They deliberately isolate source
 invalidation from network requests and decoding outside the renderer. Every
 presented terrain texture is hashed and compared against the baseline.
 
-| Source update | Baseline median, ms | Optimized median, ms | Speedup | Rebaked visible textures/frame |
-|---|---:|---:|---:|---:|
-| distant-vector-stream-pixel | 11.814 | 0.650 | 18.17× | 63 → 0 |
-| local-vector-stream-pixel | 10.132 | 0.907 | 11.18× | 63 → 1 |
-| local-imagery-stream-pixel | 395.295 | 2.479 | 159.45× | 63 → 1 |
-| source-priority-control-pixel | 0.655 | 0.625 | 1.05× | 0 → 0 |
-| distant-vector-stream-normal | 10.048 | 0.664 | 15.12× | 64 → 0 |
-| local-vector-stream-normal | 10.529 | 0.823 | 12.79× | 64 → 1 |
-| local-imagery-stream-normal | 263.391 | 1.150 | 229.07× | 64 → 1 |
-| source-priority-control-normal | 0.658 | 0.651 | 1.01× | 0 → 0 |
+| Source update | Baseline median, ms | Optimized median, ms | Speedup | Baseline → optimized p95, ms | Rebaked visible textures/frame |
+|---|---:|---:|---:|---:|---:|
+| distant-vector-stream-pixel | 13.180 | 0.683 | 19.29× | 17.771 → 0.736 | 63 → 0 |
+| local-vector-stream-pixel | 9.933 | 0.958 | 10.37× | 14.719 → 1.059 | 63 → 1 |
+| local-imagery-stream-pixel | 391.099 | 2.495 | 156.74× | 399.512 → 2.601 | 63 → 1 |
+| source-priority-control-pixel | 0.641 | 0.660 | 0.97× | 0.673 → 0.709 | 0 → 0 |
+| distant-vector-stream-normal | 10.019 | 0.662 | 15.14× | 14.979 → 0.693 | 64 → 0 |
+| local-vector-stream-normal | 10.084 | 0.841 | 12.00× | 15.102 → 0.906 | 64 → 1 |
+| local-imagery-stream-normal | 261.993 | 1.158 | 226.26× | 267.568 → 1.268 | 64 → 1 |
+| source-priority-control-normal | 0.705 | 0.650 | 1.09× | 0.755 → 0.678 | 0 → 0 |
 
 A distant update now retains all visible artwork. A local vector or imagery
 replacement rebakes one patch instead of 63–64 in these scenes. Base texture data
@@ -126,8 +162,11 @@ upload. The actual WebGPU host keeps unchanged texture identities and array laye
 
 Managed allocations for local imagery updates fell from roughly 16.6–16.8 MB to
 281 kB per frame in the same CI run. The source-priority controls rebake no textures
-in either implementation; their medians remain within roughly 1–5%. The large
-imagery speedups describe these source-churn cases, not every moving frame.
+in either implementation. The Pixel control is **3.0% slower** (0.641 → 0.660 ms),
+while the Normal control is 7.9% faster (0.705 → 0.650 ms); both results are retained.
+The large imagery speedups describe these source-churn cases, not every moving
+frame. Streaming uses a 960 × 640 logical viewport, with 32 warm-up and 32 measured
+updates per workload/run, pooling 64 measured samples per variant.
 
 ## Implementation
 
@@ -242,7 +281,8 @@ is still overwritten before upload.
 
 Render-pipeline counts refer to a fixed integration sequence, not all workloads. The
 163 baseline creations came from the preserved migration trace whose application
-source matches the merged baseline; the new Debug trace reaches 25. These API/work
+source matches the merged baseline; the final Debug and Release desktop traces
+each reach 25, with no GPU errors or readbacks. These API/work
 counts must not be presented as a measured GPU-time or FPS ratio.
 
 ### Backlit shader work
@@ -253,11 +293,14 @@ skips those operations. Ambient light, emission, fog and positive-grazing/front-
 calculations remain. The shadow operation uses explicit-level comparison sampling.
 
 The GPU fixture compiles the production function beside the frozen original from
-`a9a2842`. **11,232 cases / 33,696 color channels matched exactly** in the preserved
-Debug run. That fixture reduced comparison-sample calls from **29,970 to 16,092**
+`a9a2842`. **11,232 cases / 33,696 color channels matched exactly** in both final
+Debug and Release runs. That fixture reduced comparison-sample calls from **29,970 to 16,092**
 (46.3%); this is a shader fixture's executed call count, not hardware instructions,
-GPU duration or a full-frame speedup. The recorded shader blob is identical in the
-measured optimized application.
+GPU duration or a full-frame speedup. The
+[original final-source fixture reports](verification/webgpu-performance-4a3b9c4-integration/)
+retain zero maximum channel error, 5,184 backlit cases and 1,158 omitted-shadow
+cases. The recorded production shader blob `4c19169b9522a0a40a19b6053a550d699717a265`
+is identical in the measured optimized application and the preserved checkpoint.
 
 ## Browser validation and measurement
 
@@ -267,6 +310,32 @@ walking, resize/high DPI, unsupported adapters and shared-device loss. The expan
 checks also verify copy coverage, pipeline reuse, unused-shadow removal and the
 frozen-original lighting fixture.
 
+The [completed integration run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360196)
+passes all four jobs for `4a3b9c4`. Its PR checkout is synthetic merge
+`d407757af166a61c6dd38d4008c4abfe37870d30`, whose tree
+`353460159fc607c7d4c3765a08259f5e0f33781f` equals the measured application head's
+tree. This records the actual compiled source, rather than treating the workflow's
+head field as proof of its checkout.
+
+| Integration job | Result | Recorded coverage |
+|---|---|---|
+| WebGPU presentation preflight | Passed | Independent CSS/GPU colors and completed WebGPU queue; no GPU errors or loss |
+| Native regression | Passed | Data, rendering, overlays, retained GLES, routing, simulation, input, camera replay and WebGPU observer lifecycle |
+| Debug browser / Interpreter | Passed | 34 scenarios; immutable package identity; 89 boot resources and 210 compressed representations |
+| Release browser / InterpreterAndAOT | Passed | 34 scenarios; immutable package identity; 73 boot resources and 254 compressed representations |
+
+Both browser jobs exported 558 production-WGSL façade reference cases, 108 GPU
+continuity pairs and the actual RG8 room mip chain before executing the integration
+suite. The final deliberate device-destruction case verifies the recovery message
+and that the managed scene stops submitting work; its expected console diagnostic
+does not indicate an unexpected loss in an earlier scenario. The
+[API and terminal-log record](verification/webgpu-performance-4a3b9c4/integration-status.json)
+preserves source identity, job conclusions, exact package identities and original
+artifact digests. These checks establish correctness and resource behavior; they
+do not measure a paired browser performance improvement.
+The [original integration reports and captures](verification/webgpu-performance-4a3b9c4-integration/)
+preserve the final source's numerical shader/resource observations and browser images.
+
 The new [paired Release AOT protocol](../tests/browser/WEBGPU_PERFORMANCE.md)
 builds both applications and replays trusted native inputs with one frozen harness
 on one runner. It separates CPU render/command recording, input-to-submit,
@@ -275,13 +344,39 @@ Capture/query instrumentation is outside timed windows. Exact camera/projection,
 scene extent, quality and geometry gates prevent comparing different work. Original
 PNGs and quantified image differences are retained.
 
-**Release AOT browser comparison: validation in progress.** This section will be
-updated with the completed comparison and any measured limitations. SwiftShader
-Vulkan results do not establish physical-GPU FPS, display latency or mobile thermals.
+**Release AOT browser comparison: no completed paired result.** The comparison job
+in [run 43263360230](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360230/job/131348103432)
+failed after baseline `pixel-pan-1` completed. Candidate repetition 1 timed out in
+`sceneProjection` while opening the Rendering quality submenu and waiting for
+settled focus. Its failure capture shows that submenu closed. The
+[original failed-attempt archive](verification/webgpu-performance-4a3b9c4/browser-comparison-failed.zip)
+is preserved; a baseline-only sample cannot supply a paired speedup. Native,
+observer-contract and both package-publication jobs succeeded in that run, while
+the failed comparison remains unqualified.
+
+Harness follow-up [`cc1cc04`](https://github.com/wieslawsoltes/UnoPixelMap/commit/cc1cc04)
+activates menu items with native pointer input after two layout frames, then
+checks the public quality/share result. Keyboard focus acquisition is bounded and
+reacquires the current native peer until two stable frames are observed. Contract
+regressions cover delayed, restored and replaced focus and dismissals that never
+execute the command. The timed input sequence and endpoint camera, scene and image
+gates remain unchanged. Its new [paired performance run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43404475087)
+and [integration run](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43404475049)
+are pending; the earlier incomplete attempt remains in the evidence.
+
+SwiftShader Vulkan results do not establish physical-GPU FPS, display latency or
+mobile thermals.
 
 ## Reproduction and permanent evidence
 
 - [Native benchmark source and protocol](../tests/PixelMap.Rendering.Performance/README.md).
+- [Final-source native comparison](verification/webgpu-performance-4a3b9c4/native-ci-comparison.json),
+  [original raw CI archive](verification/webgpu-performance-4a3b9c4/native-ci.zip)
+  and [source/toolchain manifest](verification/webgpu-performance-4a3b9c4/native-ci-manifest.json).
+- [Final-source recomputation audit](verification/webgpu-performance-4a3b9c4/native-audit.json)
+  and [evidence manifest with hashes](verification/webgpu-performance-4a3b9c4/manifest.json).
+- [Final-source integration job and package record](verification/webgpu-performance-4a3b9c4/integration-status.json).
+- [Unqualified paired browser attempt](verification/webgpu-performance-4a3b9c4/browser-comparison-failed.zip).
 - [Isolated-SDK checkpoint CI comparison](verification/webgpu-performance-16048b7/native-ci-sdk-comparison.json)
   and [original raw CI archive](verification/webgpu-performance-16048b7/native-ci-sdk.zip).
 - [Picking-inclusive totals derived from raw samples](verification/webgpu-performance-16048b7/native-picking-inclusive.json).
