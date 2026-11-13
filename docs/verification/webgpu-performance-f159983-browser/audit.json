@@ -1,0 +1,2681 @@
+{
+  "schema": 1,
+  "scope": "Independent recovery of the original completed browser comparison; no application or benchmark was rerun.",
+  "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411",
+  "job": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/job/131824792372",
+  "artifactId": 14029477869,
+  "archive": "webgpu-performance-f159983.zip",
+  "archiveBytes": 12609838,
+  "archiveSha256": "a1df72700e7a4232883d97723b3e2037eb67a3c0d4ec9743c7929b53cd7dd877",
+  "originalMemberCount": 54,
+  "sourceRevisions": {
+    "baseline": "a9a284263da76a201114381467bf45aa4823a2d6",
+    "candidate": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+  },
+  "sourceHarness": {
+    "webgpu-performance.cjs": "ecaabf9d241875906bc4b7e8f42a7194e8afed64b429da5b0c3a08ec51eb03fc",
+    "webgpu-performance-probe.cjs": "1d345944d949180ece03bc5002dd956703fa7ddd87cf9f24c7adf32d37ddc7f9",
+    "explore.cjs": "da380beec9e027680bc11bfd9c3f180f37551883fd4c78f8ec92936855d57b34",
+    "gpu.cjs": "cc5e514c6a697a8bb170a92476a4de112b04ef74a0ad861cc39aa58571c4853a"
+  },
+  "allHarnessFilesMatchCandidateCommit": true,
+  "sourceReportSha256": "b15a12c084456aa62098e273acae3b28a54006c3981bef7a58543eec0d9cdaed",
+  "environment": {
+    "dotnetSdk": {
+      "baseline": "10.0.403",
+      "candidate": "10.0.403"
+    },
+    "viewport": {
+      "width": 1200,
+      "height": 800
+    },
+    "deviceScaleFactor": 1,
+    "cpu": "AMD EPYC 9V45 96-Core Processor",
+    "availableParallelism": 4,
+    "browser": "156.0.8078.4",
+    "browserArgs": [
+      "--disable-dev-shm-usage",
+      "--disable-gpu-watchdog",
+      "--enable-features=CDPScreenshotNewSurface,Vulkan",
+      "--use-angle=vulkan",
+      "--use-vulkan=swiftshader",
+      "--use-webgpu-adapter=swiftshader",
+      "--disable-vulkan-surface",
+      "--enable-unsafe-webgpu",
+      "--enable-unsafe-swiftshader"
+    ],
+    "renderer": "Uno shared WebGPU / SwiftShader Vulkan software adapter"
+  },
+  "protocol": {
+    "order": [
+      [
+        "baseline",
+        1
+      ],
+      [
+        "candidate",
+        1
+      ],
+      [
+        "candidate",
+        2
+      ],
+      [
+        "baseline",
+        2
+      ]
+    ],
+    "repetitions": 2,
+    "stepsPerSegment": 2,
+    "movingMilliseconds": 6000,
+    "runs": 16,
+    "scenarios": 4,
+    "stepsPerRun": 8,
+    "stepsPerVariantAndScenario": 16,
+    "median": "upper middle sorted sample at floor(n/2)",
+    "p95": "nearest rank ceil(n * .95); with 16 samples this is the maximum observed sample"
+  },
+  "counts": {
+    "derivedStepFields": 2176,
+    "derivedSummaryFields": 208,
+    "imagePairs": 16,
+    "inputSteps": 128,
+    "mapSubmissions": 152,
+    "managedFrames": 152,
+    "endpointSceneFields": 240,
+    "endpointProjectionPairs": 16,
+    "healthSnapshots": 16,
+    "pngFiles": 32,
+    "movingWindows": 4
+  },
+  "completeComparisonsRecomputed": true,
+  "floatingComparisonTolerance": {
+    "relative": 1e-12,
+    "absolute": 1e-09
+  },
+  "visual": {
+    "pairs": 16,
+    "tolerance": {
+      "significantPixelFraction": 0.01,
+      "meanAbsoluteChannelError": 0.25
+    },
+    "maximumSignificantPixelFraction": 1.2201073694485115e-06,
+    "maximumMeanAbsoluteChannelError": 7.686676427525622e-05,
+    "maximumChannelError": 3,
+    "allOriginalPngByteHashesMatch": true,
+    "allPngsOpaque": true,
+    "pixelIdentityClaimed": false
+  },
+  "health": {
+    "healthyFinalSnapshots": 16,
+    "sharedDevicesPerRun": 1,
+    "gpuErrors": 0,
+    "deviceLosses": 0,
+    "liveManagedFailures": 0,
+    "frameFailures": 0,
+    "independentPresentationPreflightPassed": true
+  },
+  "endpointProjectionEqualityScope": "Full uniform, terrain-transform and eye payload equality is verified only for the untimed before/after SceneProjection captures.",
+  "additionalTimedStepSceneMetadata": {
+    "pairedSteps": 64,
+    "fields": [
+      "style",
+      "quality",
+      "width",
+      "height",
+      "physicalWidth",
+      "physicalHeight",
+      "pixelSize",
+      "renderWidth",
+      "renderHeight",
+      "patches",
+      "triangles",
+      "imageryCount",
+      "relief",
+      "elevation",
+      "zoom"
+    ],
+    "mismatches": [],
+    "scope": "Only the lastDiagnostic metadata/count fields for each paired serialized step are compared. This does not verify full submitted matrices, terrain-transform words or geometry hashes for intermediate timed frames."
+  },
+  "metrics": [
+    {
+      "scenario": "pixel-pan",
+      "metric": "renderCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 7.5,
+        "median": 10.4,
+        "p95": 23,
+        "maximum": 23,
+        "mean": 12.4499875
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 7.7,
+        "median": 10.5,
+        "p95": 20.3,
+        "maximum": 20.3,
+        "mean": 11.91874375
+      },
+      "elapsedChangePercent": {
+        "median": 0.9615384615384581,
+        "p95": -11.739130434782608
+      }
+    },
+    {
+      "scenario": "pixel-pan",
+      "metric": "submissionCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 0.5,
+        "median": 0.6,
+        "p95": 2,
+        "maximum": 2,
+        "mean": 0.7937375
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 0.4,
+        "median": 0.6,
+        "p95": 1.1,
+        "maximum": 1.1,
+        "mean": 0.6499937499999999
+      },
+      "elapsedChangePercent": {
+        "median": 0.0,
+        "p95": -44.99999999999999
+      }
+    },
+    {
+      "scenario": "pixel-pan",
+      "metric": "inputToFirstSubmitMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 9.599999999991269,
+        "median": 12,
+        "p95": 15.69999999999709,
+        "maximum": 15.69999999999709,
+        "mean": 12.112499999997453
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 9,
+        "median": 11.60000000000582,
+        "p95": 14.10000000000582,
+        "maximum": 14.10000000000582,
+        "mean": 11.381249999998545
+      },
+      "elapsedChangePercent": {
+        "median": -3.333333333284827,
+        "p95": -10.191082802494044
+      }
+    },
+    {
+      "scenario": "pixel-pan",
+      "metric": "inputToFirstQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 1860.2999999999884,
+        "median": 1928.2000000000116,
+        "p95": 2031.6000000000058,
+        "maximum": 2031.6000000000058,
+        "mean": 1923.0312499999964
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 1797.1000000000058,
+        "median": 1871.2000000000116,
+        "p95": 1944.8000000000175,
+        "maximum": 1944.8000000000175,
+        "mean": 1877.181249999996
+      },
+      "elapsedChangePercent": {
+        "median": -2.95612488331084,
+        "p95": -4.272494585547748
+      }
+    },
+    {
+      "scenario": "pixel-pan",
+      "metric": "inputToLastQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 1860.2999999999884,
+        "median": 1951.6000000000058,
+        "p95": 3903.5,
+        "maximum": 3903.5,
+        "mean": 2400.825
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 1797.1000000000058,
+        "median": 1896.5,
+        "p95": 3836.5999999999767,
+        "maximum": 3836.5999999999767,
+        "mean": 2345.656249999998
+      },
+      "elapsedChangePercent": {
+        "median": -2.823324451732201,
+        "p95": -1.7138465479703657
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "metric": "renderCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 8.7999,
+        "median": 12.7,
+        "p95": 26.599899999999998,
+        "maximum": 26.599899999999998,
+        "mean": 14.699956250000001
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 8.6999,
+        "median": 11.1,
+        "p95": 22.6,
+        "maximum": 22.6,
+        "mean": 13.618699999999999
+      },
+      "elapsedChangePercent": {
+        "median": -12.598425196850393,
+        "p95": -15.037274576220206
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "metric": "submissionCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 0.6999,
+        "median": 0.9,
+        "p95": 3.4,
+        "maximum": 3.4,
+        "mean": 1.19370625
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 0.5,
+        "median": 0.9,
+        "p95": 5.6999,
+        "maximum": 5.6999,
+        "mean": 1.3562
+      },
+      "elapsedChangePercent": {
+        "median": 0.0,
+        "p95": 67.64411764705885
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "metric": "inputToFirstSubmitMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 11,
+        "median": 14.400000000023283,
+        "p95": 17.79999999998836,
+        "maximum": 17.79999999998836,
+        "mean": 14.262500000000728
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 11,
+        "median": 13,
+        "p95": 19.300000000046566,
+        "maximum": 19.300000000046566,
+        "mean": 13.143750000010186
+      },
+      "elapsedChangePercent": {
+        "median": -9.722222222368194,
+        "p95": 8.426966292467352
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "metric": "inputToFirstQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 3886.9000000000233,
+        "median": 4011.29999999993,
+        "p95": 4091.7999999999884,
+        "maximum": 4091.7999999999884,
+        "mean": 4007.168749999997
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 3745.29999999993,
+        "median": 3982,
+        "p95": 4057.100000000093,
+        "maximum": 4057.100000000093,
+        "mean": 3933.2625000000116
+      },
+      "elapsedChangePercent": {
+        "median": -0.7304365168381954,
+        "p95": -0.8480375384890548
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "metric": "inputToLastQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 3886.9000000000233,
+        "median": 4041.2999999999884,
+        "p95": 8192.099999999977,
+        "maximum": 8192.099999999977,
+        "mean": 5016.274999999998
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 3745.29999999993,
+        "median": 4018.4000000000233,
+        "p95": 8098.5,
+        "maximum": 8098.5,
+        "mean": 4922.662500000013
+      },
+      "elapsedChangePercent": {
+        "median": -0.5666493455067756,
+        "p95": -1.142564177683092
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "metric": "renderCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 9,
+        "median": 12.5,
+        "p95": 17.6,
+        "maximum": 17.6,
+        "mean": 12.581250000000002
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 8.1,
+        "median": 10.8,
+        "p95": 15.5,
+        "maximum": 15.5,
+        "mean": 10.7124875
+      },
+      "elapsedChangePercent": {
+        "median": -13.59999999999999,
+        "p95": -11.931818181818187
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "metric": "submissionCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 0.7,
+        "median": 0.9,
+        "p95": 1.5,
+        "maximum": 1.5,
+        "mean": 0.9062499999999999
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 0.6,
+        "median": 0.7,
+        "p95": 3.8,
+        "maximum": 3.8,
+        "mean": 0.9687250000000001
+      },
+      "elapsedChangePercent": {
+        "median": -22.222222222222232,
+        "p95": 153.33333333333331
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "metric": "inputToFirstSubmitMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 11.5,
+        "median": 14.400000000023283,
+        "p95": 21.800000000046566,
+        "maximum": 21.800000000046566,
+        "mean": 14.862499999995634
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 11.199999999953434,
+        "median": 12.800000000046566,
+        "p95": 17.399999999906868,
+        "maximum": 17.399999999906868,
+        "mean": 12.837500000023283
+      },
+      "elapsedChangePercent": {
+        "median": -11.11111111093146,
+        "p95": -20.18348623912981
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "metric": "inputToFirstQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 3869.1999999999534,
+        "median": 4017.1999999999534,
+        "p95": 4116,
+        "maximum": 4116,
+        "mean": 4001.881250000006
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 3732.5,
+        "median": 3836.399999999907,
+        "p95": 3899.6999999999534,
+        "maximum": 3899.6999999999534,
+        "mean": 3823.0625000000437
+      },
+      "elapsedChangePercent": {
+        "median": -4.5006472169682565,
+        "p95": -5.2551020408174605
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "metric": "inputToLastQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 3869.1999999999534,
+        "median": 4017.1999999999534,
+        "p95": 4116,
+        "maximum": 4116,
+        "mean": 4001.881250000006
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 3732.5,
+        "median": 3836.399999999907,
+        "p95": 3899.6999999999534,
+        "maximum": 3899.6999999999534,
+        "mean": 3823.0625000000437
+      },
+      "elapsedChangePercent": {
+        "median": -4.5006472169682565,
+        "p95": -5.2551020408174605
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "metric": "renderCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 13.4,
+        "median": 18.8,
+        "p95": 29.700000000000003,
+        "maximum": 29.700000000000003,
+        "mean": 19.07499375
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 12.5999,
+        "median": 18.3,
+        "p95": 33.4,
+        "maximum": 33.4,
+        "mean": 19.63748125
+      },
+      "elapsedChangePercent": {
+        "median": -2.659574468085102,
+        "p95": 12.457912457912435
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "metric": "submissionCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 1.1,
+        "median": 4,
+        "p95": 9.1,
+        "maximum": 9.1,
+        "mean": 3.91874375
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 1.1,
+        "median": 3.5999,
+        "p95": 7,
+        "maximum": 7,
+        "mean": 3.3624937500000005
+      },
+      "elapsedChangePercent": {
+        "median": -10.002500000000003,
+        "p95": -23.076923076923073
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "metric": "inputToFirstSubmitMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 15,
+        "median": 18.300000000046566,
+        "p95": 24.899999999906868,
+        "maximum": 24.899999999906868,
+        "mean": 18.812499999985448
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 14.699999999953434,
+        "median": 19.5,
+        "p95": 25.800000000046566,
+        "maximum": 25.800000000046566,
+        "mean": 18.95625000000291
+      },
+      "elapsedChangePercent": {
+        "median": 6.557377048909174,
+        "p95": 3.6144578318998644
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "metric": "inputToFirstQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 2890.4000000001397,
+        "median": 3096.399999999907,
+        "p95": 3315.899999999907,
+        "maximum": 3315.899999999907,
+        "mean": 3079.462499999965
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 2758.8000000000466,
+        "median": 2900.4000000001397,
+        "p95": 3129.5,
+        "maximum": 3129.5,
+        "mean": 2928.287500000006
+      },
+      "elapsedChangePercent": {
+        "median": -6.32993153338629,
+        "p95": -5.621399921587267
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "metric": "inputToLastQueueCompletionMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 2890.4000000001397,
+        "median": 3204.399999999907,
+        "p95": 6115.699999999953,
+        "maximum": 6115.699999999953,
+        "mean": 3824.599999999962
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 2758.8000000000466,
+        "median": 3077.8000000000466,
+        "p95": 5765,
+        "maximum": 5765,
+        "mean": 3632.6124999999884
+      },
+      "elapsedChangePercent": {
+        "median": -3.950817625760328,
+        "p95": -5.734421243683574
+      }
+    }
+  ],
+  "negativeMedianOrP95Results": [
+    {
+      "scenario": "pixel-pan",
+      "metric": "renderCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 7.5,
+        "median": 10.4,
+        "p95": 23,
+        "maximum": 23,
+        "mean": 12.4499875
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 7.7,
+        "median": 10.5,
+        "p95": 20.3,
+        "maximum": 20.3,
+        "mean": 11.91874375
+      },
+      "elapsedChangePercent": {
+        "median": 0.9615384615384581,
+        "p95": -11.739130434782608
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "metric": "submissionCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 0.6999,
+        "median": 0.9,
+        "p95": 3.4,
+        "maximum": 3.4,
+        "mean": 1.19370625
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 0.5,
+        "median": 0.9,
+        "p95": 5.6999,
+        "maximum": 5.6999,
+        "mean": 1.3562
+      },
+      "elapsedChangePercent": {
+        "median": 0.0,
+        "p95": 67.64411764705885
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "metric": "inputToFirstSubmitMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 11,
+        "median": 14.400000000023283,
+        "p95": 17.79999999998836,
+        "maximum": 17.79999999998836,
+        "mean": 14.262500000000728
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 11,
+        "median": 13,
+        "p95": 19.300000000046566,
+        "maximum": 19.300000000046566,
+        "mean": 13.143750000010186
+      },
+      "elapsedChangePercent": {
+        "median": -9.722222222368194,
+        "p95": 8.426966292467352
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "metric": "submissionCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 0.7,
+        "median": 0.9,
+        "p95": 1.5,
+        "maximum": 1.5,
+        "mean": 0.9062499999999999
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 0.6,
+        "median": 0.7,
+        "p95": 3.8,
+        "maximum": 3.8,
+        "mean": 0.9687250000000001
+      },
+      "elapsedChangePercent": {
+        "median": -22.222222222222232,
+        "p95": 153.33333333333331
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "metric": "renderCpuMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 13.4,
+        "median": 18.8,
+        "p95": 29.700000000000003,
+        "maximum": 29.700000000000003,
+        "mean": 19.07499375
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 12.5999,
+        "median": 18.3,
+        "p95": 33.4,
+        "maximum": 33.4,
+        "mean": 19.63748125
+      },
+      "elapsedChangePercent": {
+        "median": -2.659574468085102,
+        "p95": 12.457912457912435
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "metric": "inputToFirstSubmitMilliseconds",
+      "baseline": {
+        "samples": 16,
+        "minimum": 15,
+        "median": 18.300000000046566,
+        "p95": 24.899999999906868,
+        "maximum": 24.899999999906868,
+        "mean": 18.812499999985448
+      },
+      "candidate": {
+        "samples": 16,
+        "minimum": 14.699999999953434,
+        "median": 19.5,
+        "p95": 25.800000000046566,
+        "maximum": 25.800000000046566,
+        "mean": 18.95625000000291
+      },
+      "elapsedChangePercent": {
+        "median": 6.557377048909174,
+        "p95": 3.6144578318998644
+      }
+    }
+  ],
+  "pairedRepetitions": [
+    {
+      "scenario": "pixel-pan",
+      "repetition": 1,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 7.5,
+            "median": 10.4,
+            "p95": 23,
+            "maximum": 23,
+            "mean": 13.112475
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 8.8,
+            "median": 11.2,
+            "p95": 18.2,
+            "maximum": 18.2,
+            "mean": 11.9624875
+          },
+          "medianElapsedChangePercent": 7.692307692307687
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 0.5,
+            "median": 0.7999,
+            "p95": 2,
+            "maximum": 2,
+            "mean": 0.9374750000000001
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 0.5,
+            "median": 0.6,
+            "p95": 1.1,
+            "maximum": 1.1,
+            "mean": 0.7124874999999999
+          },
+          "medianElapsedChangePercent": -24.99062382797851
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 9.599999999991269,
+            "median": 12.39999999999418,
+            "p95": 15.69999999999709,
+            "maximum": 15.69999999999709,
+            "mean": 12.424999999999272
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 9,
+            "median": 11.099999999976717,
+            "p95": 14.10000000000582,
+            "maximum": 14.10000000000582,
+            "mean": 11.349999999998545
+          },
+          "medianElapsedChangePercent": -10.483870967887675
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 1926.199999999997,
+            "median": 1959.0999999999913,
+            "p95": 2031.6000000000058,
+            "maximum": 2031.6000000000058,
+            "mean": 1962.9375
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 1830.5999999999767,
+            "median": 1866.7999999999884,
+            "p95": 1896.5,
+            "maximum": 1896.5,
+            "mean": 1867.1249999999964
+          },
+          "medianElapsedChangePercent": -4.711347047113645
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 1926.199999999997,
+            "median": 1976.800000000003,
+            "p95": 3903.5,
+            "maximum": 3903.5,
+            "mean": 2446.862500000001
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 1830.5999999999767,
+            "median": 1871.2000000000116,
+            "p95": 3798.899999999994,
+            "maximum": 3798.899999999994,
+            "mean": 2331.8749999999964
+          },
+          "medianElapsedChangePercent": -5.341966815054189
+        }
+      }
+    },
+    {
+      "scenario": "pixel-pan",
+      "repetition": 2,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 8.6,
+            "median": 10.8,
+            "p95": 17.6,
+            "maximum": 17.6,
+            "mean": 11.787500000000001
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 7.7,
+            "median": 10.4,
+            "p95": 20.3,
+            "maximum": 20.3,
+            "mean": 11.874999999999998
+          },
+          "medianElapsedChangePercent": -3.703703703703709
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 0.5,
+            "median": 0.6,
+            "p95": 1,
+            "maximum": 1,
+            "mean": 0.65
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 0.4,
+            "median": 0.5,
+            "p95": 1,
+            "maximum": 1,
+            "mean": 0.5875
+          },
+          "medianElapsedChangePercent": -16.666666666666664
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 9.600000000034925,
+            "median": 12,
+            "p95": 13.399999999965075,
+            "maximum": 13.399999999965075,
+            "mean": 11.799999999995634
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 9.89999999999418,
+            "median": 11.900000000023283,
+            "p95": 12.39999999999418,
+            "maximum": 12.39999999999418,
+            "mean": 11.412499999998545
+          },
+          "medianElapsedChangePercent": -0.8333333331393078
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 1860.2999999999884,
+            "median": 1879.2000000000116,
+            "p95": 1929.7999999999884,
+            "maximum": 1929.7999999999884,
+            "mean": 1883.1249999999927
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 1797.1000000000058,
+            "median": 1906.7999999999884,
+            "p95": 1944.8000000000175,
+            "maximum": 1944.8000000000175,
+            "mean": 1887.2374999999956
+          },
+          "medianElapsedChangePercent": 1.4687100893985061
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 1860.2999999999884,
+            "median": 1891,
+            "p95": 3822.2000000000116,
+            "maximum": 3822.2000000000116,
+            "mean": 2354.7874999999985
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 1797.1000000000058,
+            "median": 1911,
+            "p95": 3836.5999999999767,
+            "maximum": 3836.5999999999767,
+            "mean": 2359.4375
+          },
+          "medianElapsedChangePercent": 1.057641459545211
+        }
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "repetition": 1,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 8.7999,
+            "median": 12.8999,
+            "p95": 26.599899999999998,
+            "maximum": 26.599899999999998,
+            "mean": 14.8874375
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 9,
+            "median": 10.6999,
+            "p95": 22,
+            "maximum": 22,
+            "mean": 13.024962499999999
+          },
+          "medianElapsedChangePercent": -17.054395770509856
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 0.6999,
+            "median": 0.9,
+            "p95": 2.1,
+            "maximum": 2.1,
+            "mean": 1.08745
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 0.7,
+            "median": 1,
+            "p95": 2.0999,
+            "maximum": 2.0999,
+            "mean": 1.249975
+          },
+          "medianElapsedChangePercent": 11.111111111111116
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 11,
+            "median": 14.5,
+            "p95": 17.79999999998836,
+            "maximum": 17.79999999998836,
+            "mean": 14.187499999992724
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 11.199999999953434,
+            "median": 12.900000000023283,
+            "p95": 13.79999999993015,
+            "maximum": 13.79999999993015,
+            "mean": 12.625000000014552
+          },
+          "medianElapsedChangePercent": -11.034482758460118
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3968.0999999999767,
+            "median": 4053,
+            "p95": 4091.7999999999884,
+            "maximum": 4091.7999999999884,
+            "mean": 4042.637499999997
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3982,
+            "median": 4031,
+            "p95": 4057.100000000093,
+            "maximum": 4057.100000000093,
+            "mean": 4027.5250000000233
+          },
+          "medianElapsedChangePercent": -0.5428077966938116
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3968.0999999999767,
+            "median": 4069.2999999999884,
+            "p95": 8192.099999999977,
+            "maximum": 8192.099999999977,
+            "mean": 5055.94999999999
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3982,
+            "median": 4054.20000000007,
+            "p95": 8098.5,
+            "maximum": 8098.5,
+            "mean": 5027.437500000029
+          },
+          "medianElapsedChangePercent": -0.3710711916034337
+        }
+      }
+    },
+    {
+      "scenario": "normal-pan",
+      "repetition": 2,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 10.2999,
+            "median": 12.7,
+            "p95": 22.1,
+            "maximum": 22.1,
+            "mean": 14.512474999999998
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 8.6999,
+            "median": 11.4,
+            "p95": 22.6,
+            "maximum": 22.6,
+            "mean": 14.2124375
+          },
+          "medianElapsedChangePercent": -10.236220472440937
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 0.6999,
+            "median": 1.2,
+            "p95": 3.4,
+            "maximum": 3.4,
+            "mean": 1.2999625
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 0.5,
+            "median": 0.7999,
+            "p95": 5.6999,
+            "maximum": 5.6999,
+            "mean": 1.462425
+          },
+          "medianElapsedChangePercent": -33.34166666666666
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 12.29999999993015,
+            "median": 14.400000000023283,
+            "p95": 17.400000000023283,
+            "maximum": 17.400000000023283,
+            "mean": 14.337500000008731
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 11,
+            "median": 13.099999999976717,
+            "p95": 19.300000000046566,
+            "maximum": 19.300000000046566,
+            "mean": 13.66250000000582
+          },
+          "medianElapsedChangePercent": -9.027777778086554
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3886.9000000000233,
+            "median": 3985.0999999999767,
+            "p95": 4022.8000000000466,
+            "maximum": 4022.8000000000466,
+            "mean": 3971.699999999997
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3745.29999999993,
+            "median": 3830.0999999999767,
+            "p95": 3917,
+            "maximum": 3917,
+            "mean": 3839.0
+          },
+          "medianElapsedChangePercent": -3.8894883440817263
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3886.9000000000233,
+            "median": 3985.0999999999767,
+            "p95": 8066.100000000093,
+            "maximum": 8066.100000000093,
+            "mean": 4976.600000000006
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3745.29999999993,
+            "median": 3881.4000000000233,
+            "p95": 7868,
+            "maximum": 7868,
+            "mean": 4817.887499999997
+          },
+          "medianElapsedChangePercent": -2.6021931695554446
+        }
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "repetition": 1,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 9,
+            "median": 12.2,
+            "p95": 16.9,
+            "maximum": 16.9,
+            "mean": 11.900000000000002
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 8.1,
+            "median": 10.8,
+            "p95": 11.9,
+            "maximum": 11.9,
+            "mean": 10.387500000000001
+          },
+          "medianElapsedChangePercent": -11.475409836065564
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 0.8,
+            "median": 0.9,
+            "p95": 1.5,
+            "maximum": 1.5,
+            "mean": 0.9500000000000002
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 0.6,
+            "median": 0.7,
+            "p95": 0.8,
+            "maximum": 0.8,
+            "mean": 0.712475
+          },
+          "medianElapsedChangePercent": -22.222222222222232
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 12.099999999976717,
+            "median": 14.400000000023283,
+            "p95": 18.899999999906868,
+            "maximum": 18.899999999906868,
+            "mean": 14.26249999999709
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 11.5,
+            "median": 13.100000000093132,
+            "p95": 13.800000000046566,
+            "maximum": 13.800000000046566,
+            "mean": 12.712500000023283
+          },
+          "medianElapsedChangePercent": -9.027777777278112
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3948.4000000000233,
+            "median": 4040.29999999993,
+            "p95": 4101,
+            "maximum": 4101,
+            "mean": 4024.999999999971
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3732.5,
+            "median": 3785.600000000093,
+            "p95": 3859.100000000093,
+            "maximum": 3859.100000000093,
+            "mean": 3793.225000000093
+          },
+          "medianElapsedChangePercent": -6.303987327669757
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3948.4000000000233,
+            "median": 4040.29999999993,
+            "p95": 4101,
+            "maximum": 4101,
+            "mean": 4024.999999999971
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3732.5,
+            "median": 3785.600000000093,
+            "p95": 3859.100000000093,
+            "maximum": 3859.100000000093,
+            "mean": 3793.225000000093
+          },
+          "medianElapsedChangePercent": -6.303987327669757
+        }
+      }
+    },
+    {
+      "scenario": "normal-orbit",
+      "repetition": 2,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 9.7,
+            "median": 13,
+            "p95": 17.6,
+            "maximum": 17.6,
+            "mean": 13.2625
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 9.2999,
+            "median": 10.9,
+            "p95": 15.5,
+            "maximum": 15.5,
+            "mean": 11.037474999999999
+          },
+          "medianElapsedChangePercent": -16.153846153846153
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 0.7,
+            "median": 0.9,
+            "p95": 1.2,
+            "maximum": 1.2,
+            "mean": 0.8624999999999999
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 0.6,
+            "median": 0.7999,
+            "p95": 3.8,
+            "maximum": 3.8,
+            "mean": 1.2249750000000001
+          },
+          "medianElapsedChangePercent": -11.122222222222222
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 11.5,
+            "median": 15,
+            "p95": 21.800000000046566,
+            "maximum": 21.800000000046566,
+            "mean": 15.46249999999418
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 11.199999999953434,
+            "median": 12.800000000046566,
+            "p95": 17.399999999906868,
+            "maximum": 17.399999999906868,
+            "mean": 12.962500000023283
+          },
+          "medianElapsedChangePercent": -14.666666666356221
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3869.1999999999534,
+            "median": 3995.3000000000466,
+            "p95": 4116,
+            "maximum": 4116,
+            "mean": 3978.7625000000407
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3780.1999999999534,
+            "median": 3859.100000000093,
+            "p95": 3899.6999999999534,
+            "maximum": 3899.6999999999534,
+            "mean": 3852.899999999994
+          },
+          "medianElapsedChangePercent": -3.409005581557123
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 3869.1999999999534,
+            "median": 3995.3000000000466,
+            "p95": 4116,
+            "maximum": 4116,
+            "mean": 3978.7625000000407
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 3780.1999999999534,
+            "median": 3859.100000000093,
+            "p95": 3899.6999999999534,
+            "maximum": 3899.6999999999534,
+            "mean": 3852.899999999994
+          },
+          "medianElapsedChangePercent": -3.409005581557123
+        }
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "repetition": 1,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 13.4,
+            "median": 18.8,
+            "p95": 29.700000000000003,
+            "maximum": 29.700000000000003,
+            "mean": 19.6
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 13.5,
+            "median": 18.3,
+            "p95": 33.4,
+            "maximum": 33.4,
+            "mean": 20.05
+          },
+          "medianElapsedChangePercent": -2.659574468085102
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 1.1,
+            "median": 4.5,
+            "p95": 9.1,
+            "maximum": 9.1,
+            "mean": 4.1125
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 1.1,
+            "median": 4,
+            "p95": 7,
+            "maximum": 7,
+            "mean": 3.3
+          },
+          "medianElapsedChangePercent": -11.111111111111116
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 15.300000000046566,
+            "median": 20.699999999953434,
+            "p95": 24.899999999906868,
+            "maximum": 24.899999999906868,
+            "mean": 19.449999999982538
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 15.5,
+            "median": 19.899999999906868,
+            "p95": 23.300000000046566,
+            "maximum": 23.300000000046566,
+            "mean": 19.287499999976717
+          },
+          "medianElapsedChangePercent": -3.8647342997505607
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 2973.8000000000466,
+            "median": 3131.7999999998137,
+            "p95": 3315.899999999907,
+            "maximum": 3315.899999999907,
+            "mean": 3139.1624999999476
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 2758.8000000000466,
+            "median": 2900.4000000001397,
+            "p95": 3129.5,
+            "maximum": 3129.5,
+            "mean": 2934.8875000000116
+          },
+          "medianElapsedChangePercent": -7.388722140612036
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 2973.8000000000466,
+            "median": 3279,
+            "p95": 6115.699999999953,
+            "maximum": 6115.699999999953,
+            "mean": 3897.1749999999593
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 2758.8000000000466,
+            "median": 3105.5,
+            "p95": 5759,
+            "maximum": 5759,
+            "mean": 3635.0499999999884
+          },
+          "medianElapsedChangePercent": -5.291247331503513
+        }
+      }
+    },
+    {
+      "scenario": "normal-walk-look",
+      "repetition": 2,
+      "metrics": {
+        "renderCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 13.4,
+            "median": 19.7,
+            "p95": 25,
+            "maximum": 25,
+            "mean": 18.5499875
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 12.5999,
+            "median": 21.3999,
+            "p95": 27.1999,
+            "maximum": 27.1999,
+            "mean": 19.224962499999997
+          },
+          "medianElapsedChangePercent": 8.628934010152278
+        },
+        "submissionCpuMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 1.3,
+            "median": 4,
+            "p95": 7.1,
+            "maximum": 7.1,
+            "mean": 3.7249875
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 1.5,
+            "median": 3.5999,
+            "p95": 6.2,
+            "maximum": 6.2,
+            "mean": 3.4249875
+          },
+          "medianElapsedChangePercent": -10.002500000000003
+        },
+        "inputToFirstSubmitMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 15,
+            "median": 18.300000000046566,
+            "p95": 22.100000000093132,
+            "maximum": 22.100000000093132,
+            "mean": 18.17499999998836
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 14.699999999953434,
+            "median": 17.9000000001397,
+            "p95": 25.800000000046566,
+            "maximum": 25.800000000046566,
+            "mean": 18.625000000029104
+          },
+          "medianElapsedChangePercent": -2.18579234921229
+        },
+        "inputToFirstQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 2890.4000000001397,
+            "median": 3020.399999999907,
+            "p95": 3204.399999999907,
+            "maximum": 3204.399999999907,
+            "mean": 3019.7624999999825
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 2760.399999999907,
+            "median": 2906.0999999998603,
+            "p95": 3083.600000000093,
+            "maximum": 3083.600000000093,
+            "mean": 2921.6875
+          },
+          "medianElapsedChangePercent": -3.784266984507023
+        },
+        "inputToLastQueueCompletionMilliseconds": {
+          "baseline": {
+            "samples": 8,
+            "minimum": 2890.4000000001397,
+            "median": 3109.0999999998603,
+            "p95": 5988.899999999907,
+            "maximum": 5988.899999999907,
+            "mean": 3752.024999999965
+          },
+          "candidate": {
+            "samples": 8,
+            "minimum": 2760.399999999907,
+            "median": 3077.8000000000466,
+            "p95": 5765,
+            "maximum": 5765,
+            "mean": 3630.1749999999884
+          },
+          "medianElapsedChangePercent": -1.006722202560717
+        }
+      }
+    }
+  ],
+  "movingWindows": [
+    {
+      "variant": "baseline",
+      "repetition": 1,
+      "mapSubmits": 4,
+      "durationMilliseconds": 6008.300000000047,
+      "beforeHud": {
+        "speed": 5.4,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00883,
+        "distance": 1
+      },
+      "afterHud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.7069,
+        "longitude": -74.00891,
+        "distance": 10
+      },
+      "queueBoundaries": {
+        "startQueuePrefixMilliseconds": 5500.600000000093,
+        "endQueueDrainMilliseconds": 11464.300000000047
+      },
+      "submittedMapFramesPerSecond": 0.6657457184228432,
+      "submittedFrameIntervalsMilliseconds": {
+        "samples": 3,
+        "minimum": 15.399999999906868,
+        "median": 64.29999999981374,
+        "p95": 3293.600000000093,
+        "maximum": 3293.600000000093,
+        "mean": 1124.4333333332713
+      },
+      "rafIntervalsMilliseconds": {
+        "samples": 3,
+        "minimum": 16.699999999982538,
+        "median": 16.69999999999709,
+        "p95": 3299.8000000000175,
+        "maximum": 3299.8000000000175,
+        "mean": 1111.0666666666657
+      },
+      "renderCpuMilliseconds": {
+        "samples": 4,
+        "minimum": 12.3,
+        "median": 16.8,
+        "p95": 28.3,
+        "maximum": 28.3,
+        "mean": 17.45
+      },
+      "textureUploadBytes": 3976088,
+      "bufferUploadBytes": 668180
+    },
+    {
+      "variant": "candidate",
+      "repetition": 1,
+      "mapSubmits": 4,
+      "durationMilliseconds": 6005.399999999907,
+      "beforeHud": {
+        "speed": 5.4,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00883,
+        "distance": 1
+      },
+      "afterHud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.7069,
+        "longitude": -74.00891,
+        "distance": 10
+      },
+      "queueBoundaries": {
+        "startQueuePrefixMilliseconds": 4975.899999999907,
+        "endQueueDrainMilliseconds": 10026.300000000047
+      },
+      "submittedMapFramesPerSecond": 0.666067206181114,
+      "submittedFrameIntervalsMilliseconds": {
+        "samples": 3,
+        "minimum": 14.899999999906868,
+        "median": 54.0,
+        "p95": 3057.2000000001863,
+        "maximum": 3057.2000000001863,
+        "mean": 1042.0333333333645
+      },
+      "rafIntervalsMilliseconds": {
+        "samples": 3,
+        "minimum": 16.70000000001164,
+        "median": 33.30000000000291,
+        "p95": 3049.899999999994,
+        "maximum": 3049.899999999994,
+        "mean": 1033.300000000003
+      },
+      "renderCpuMilliseconds": {
+        "samples": 4,
+        "minimum": 11.6,
+        "median": 20.2,
+        "p95": 24.8,
+        "maximum": 24.8,
+        "mean": 17.699975
+      },
+      "textureUploadBytes": 4762520,
+      "bufferUploadBytes": 623552
+    },
+    {
+      "variant": "candidate",
+      "repetition": 2,
+      "mapSubmits": 4,
+      "durationMilliseconds": 6005.100000000093,
+      "beforeHud": {
+        "speed": 5.4,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00883,
+        "distance": 1
+      },
+      "afterHud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.7069,
+        "longitude": -74.00891,
+        "distance": 10
+      },
+      "queueBoundaries": {
+        "startQueuePrefixMilliseconds": 5063.699999999953,
+        "endQueueDrainMilliseconds": 10141.5
+      },
+      "submittedMapFramesPerSecond": 0.6661004812575874,
+      "submittedFrameIntervalsMilliseconds": {
+        "samples": 3,
+        "minimum": 32.0999999998603,
+        "median": 49.699999999953434,
+        "p95": 3086.9000000001397,
+        "maximum": 3086.9000000001397,
+        "mean": 1056.233333333318
+      },
+      "rafIntervalsMilliseconds": {
+        "samples": 3,
+        "minimum": 16.69999999999709,
+        "median": 33.30000000000291,
+        "p95": 3099.800000000003,
+        "maximum": 3099.800000000003,
+        "mean": 1049.9333333333343
+      },
+      "renderCpuMilliseconds": {
+        "samples": 4,
+        "minimum": 12.4,
+        "median": 17.7999,
+        "p95": 22.4,
+        "maximum": 22.4,
+        "mean": 16.324975000000002
+      },
+      "textureUploadBytes": 4762520,
+      "bufferUploadBytes": 623552
+    },
+    {
+      "variant": "baseline",
+      "repetition": 2,
+      "mapSubmits": 2,
+      "durationMilliseconds": 6003.399999999907,
+      "beforeHud": {
+        "speed": 5.4,
+        "altitude": 43.6,
+        "clearance": 0,
+        "latitude": 40.70685,
+        "longitude": -74.00883,
+        "distance": 1
+      },
+      "afterHud": {
+        "speed": 5.4,
+        "altitude": 43.7,
+        "clearance": 0,
+        "latitude": 40.7069,
+        "longitude": -74.00891,
+        "distance": 10
+      },
+      "queueBoundaries": {
+        "startQueuePrefixMilliseconds": 8118,
+        "endQueueDrainMilliseconds": 8006.5
+      },
+      "submittedMapFramesPerSecond": 0.3331445514208667,
+      "submittedFrameIntervalsMilliseconds": {
+        "samples": 1,
+        "minimum": 32.89999999990687,
+        "median": 32.89999999990687,
+        "p95": 32.89999999990687,
+        "maximum": 32.89999999990687,
+        "mean": 32.89999999990687
+      },
+      "rafIntervalsMilliseconds": {
+        "samples": 1,
+        "minimum": 16.60000000000582,
+        "median": 16.60000000000582,
+        "p95": 16.60000000000582,
+        "maximum": 16.60000000000582,
+        "mean": 16.60000000000582
+      },
+      "renderCpuMilliseconds": {
+        "samples": 2,
+        "minimum": 13.7,
+        "median": 33.2,
+        "p95": 33.2,
+        "maximum": 33.2,
+        "mean": 23.450000000000003
+      },
+      "textureUploadBytes": 3447176,
+      "bufferUploadBytes": 334520
+    }
+  ],
+  "reportedCdpTotals": [
+    {
+      "run": "pixel-pan-baseline-1",
+      "mainThreadTaskMilliseconds": 261.33099999999996,
+      "cdpMetricTimestampIntervalMilliseconds": 22697.867000000002
+    },
+    {
+      "run": "pixel-pan-candidate-1",
+      "mainThreadTaskMilliseconds": 216.94899999999996,
+      "cdpMetricTimestampIntervalMilliseconds": 21781.50199999999
+    },
+    {
+      "run": "pixel-pan-candidate-2",
+      "mainThreadTaskMilliseconds": 214.8199999999999,
+      "cdpMetricTimestampIntervalMilliseconds": 22015.161999999975
+    },
+    {
+      "run": "pixel-pan-baseline-2",
+      "mainThreadTaskMilliseconds": 231.85200000000006,
+      "cdpMetricTimestampIntervalMilliseconds": 21965.097000000016
+    },
+    {
+      "run": "normal-pan-baseline-1",
+      "mainThreadTaskMilliseconds": 235.37699999999995,
+      "cdpMetricTimestampIntervalMilliseconds": 43596.616999999984
+    },
+    {
+      "run": "normal-pan-candidate-1",
+      "mainThreadTaskMilliseconds": 222.92599999999996,
+      "cdpMetricTimestampIntervalMilliseconds": 43347.755000000005
+    },
+    {
+      "run": "normal-pan-candidate-2",
+      "mainThreadTaskMilliseconds": 203.18400000000003,
+      "cdpMetricTimestampIntervalMilliseconds": 41665.281999999934
+    },
+    {
+      "run": "normal-pan-baseline-2",
+      "mainThreadTaskMilliseconds": 232.4059999999999,
+      "cdpMetricTimestampIntervalMilliseconds": 42964.81399999993
+    },
+    {
+      "run": "normal-orbit-baseline-1",
+      "mainThreadTaskMilliseconds": 186.28899999999993,
+      "cdpMetricTimestampIntervalMilliseconds": 35348.302999999985
+    },
+    {
+      "run": "normal-orbit-candidate-1",
+      "mainThreadTaskMilliseconds": 176.8280000000001,
+      "cdpMetricTimestampIntervalMilliseconds": 33481.75700000001
+    },
+    {
+      "run": "normal-orbit-candidate-2",
+      "mainThreadTaskMilliseconds": 177.09399999999997,
+      "cdpMetricTimestampIntervalMilliseconds": 33948.93000000002
+    },
+    {
+      "run": "normal-orbit-baseline-2",
+      "mainThreadTaskMilliseconds": 196.40599999999986,
+      "cdpMetricTimestampIntervalMilliseconds": 34948.182999999975
+    },
+    {
+      "run": "normal-walk-look-baseline-1",
+      "mainThreadTaskMilliseconds": 264.15,
+      "cdpMetricTimestampIntervalMilliseconds": 34281.598999999915
+    },
+    {
+      "run": "normal-walk-look-candidate-1",
+      "mainThreadTaskMilliseconds": 382.3230000000001,
+      "cdpMetricTimestampIntervalMilliseconds": 32215.442000000166
+    },
+    {
+      "run": "normal-walk-look-candidate-2",
+      "mainThreadTaskMilliseconds": 388.41400000000004,
+      "cdpMetricTimestampIntervalMilliseconds": 32163.91799999997
+    },
+    {
+      "run": "normal-walk-look-baseline-2",
+      "mainThreadTaskMilliseconds": 359.28400000000005,
+      "cdpMetricTimestampIntervalMilliseconds": 33164.01999999994
+    }
+  ],
+  "limitations": [
+    "SwiftShader Vulkan software-adapter results do not establish hardware-GPU or display FPS, physical display latency or mobile thermals.",
+    "Serialized steps include a queue-completion and quiet-time barrier; their queue callback latency is not a GPU timestamp or sustained throughput.",
+    "Full camera/projection/terrain-transform payload parity is captured only at untimed before/after endpoints. Matching timed-step diagnostic metadata/counts does not establish equality of every intermediate submitted matrix or geometry payload.",
+    "No scenario is entirely free of texture uploads/resource allocation. The three map cases have 12/16 warm steps per variant; paused walking/look has 0/16.",
+    "The four moving windows have only 2\u20134 actual map submissions and multi-second initial/final queue backlog. Report them individually rather than asserting a robust large throughput gain.",
+    "CDP main-thread totals are retained as reported. Original before/after CDP metric snapshots are absent, so those totals cannot be independently rederived.",
+    "Page-error absence is a successful source-harness assertion; the original per-page exception event list is not retained in raw records."
+  ],
+  "originalMembers": {
+    "normal-orbit-baseline-1-after.png": {
+      "bytes": 630721,
+      "sha256": "2fdc57d26fce41168e2192f0547776f52650e37b8db5641f39e86d8ea7bed09d"
+    },
+    "normal-orbit-baseline-1-before.png": {
+      "bytes": 514892,
+      "sha256": "4332a9da530617cec64d44d4fbf135bbd8a4fdb5e9d8e4b81836af5e13c30200"
+    },
+    "normal-orbit-baseline-1-raw.json": {
+      "bytes": 86362,
+      "sha256": "96437b2949928357dd6f58047846c1d4240182dccf579ed31e741efe1ed783da"
+    },
+    "normal-orbit-baseline-2-after.png": {
+      "bytes": 630723,
+      "sha256": "f96da9d5275df8ff83e8ed0905d035730c0a7d7ad050c9051909f2be280c23e2"
+    },
+    "normal-orbit-baseline-2-before.png": {
+      "bytes": 514872,
+      "sha256": "9444eba2df157680cd2da7803637d920e520fa1fd87a44fcde9e1f25175456c0"
+    },
+    "normal-orbit-baseline-2-raw.json": {
+      "bytes": 86454,
+      "sha256": "9fe3e751c181569746e9763cefb17f28506d4a4026cf0913635e3aab2ea1cb29"
+    },
+    "normal-orbit-candidate-1-after.png": {
+      "bytes": 630721,
+      "sha256": "50973f7dc7ed051a3213eec06ef64f6bedd98af981a12ca90fc78c2296f70ce6"
+    },
+    "normal-orbit-candidate-1-before.png": {
+      "bytes": 514890,
+      "sha256": "255cc162d748dfad81fd088cf325fc76fdf0686168e21336eb2ee11b65ef620b"
+    },
+    "normal-orbit-candidate-1-raw.json": {
+      "bytes": 88233,
+      "sha256": "c703f9b97b8b0100fc1cd2350335be542e1764a59858d7177f03e9fa358f717d"
+    },
+    "normal-orbit-candidate-2-after.png": {
+      "bytes": 630715,
+      "sha256": "37c87636fdddd99ee13414b5becb0a085fff40aba561cf5c6de08d8b75f70426"
+    },
+    "normal-orbit-candidate-2-before.png": {
+      "bytes": 514871,
+      "sha256": "148816269c9df063e167f35cf8325d622ab68a31f8dd76101051849d78d6e9c5"
+    },
+    "normal-orbit-candidate-2-raw.json": {
+      "bytes": 88334,
+      "sha256": "e0f0d2d98c76e44882ea70b219b4a473868bfcf52b65597426d0387510031034"
+    },
+    "normal-pan-baseline-1-after.png": {
+      "bytes": 625512,
+      "sha256": "bf5e1e47bcc83c2b81cfe4322f3969917d63df01d41d7b4548096f58ece84a37"
+    },
+    "normal-pan-baseline-1-before.png": {
+      "bytes": 512280,
+      "sha256": "af07cc6766ba54f8b5c6f4ca3c87942175b39f5c29f23a84f694d4967ac4400a"
+    },
+    "normal-pan-baseline-1-raw.json": {
+      "bytes": 88734,
+      "sha256": "dbe2cd57721118506991f6e10d018913a00a0c3709ef4e1d3fdd3a8195ff3c1c"
+    },
+    "normal-pan-baseline-2-after.png": {
+      "bytes": 625514,
+      "sha256": "8b1e3e518637d5794b14b65050afa03dfc1a456cf916883544d90a54318c49cb"
+    },
+    "normal-pan-baseline-2-before.png": {
+      "bytes": 512302,
+      "sha256": "160bbeebdb18be7d53222206a0ae741221181723fe29fd27798fa791300f70fd"
+    },
+    "normal-pan-baseline-2-raw.json": {
+      "bytes": 88765,
+      "sha256": "56e7ccaacb3472704b5ddfb99b603567770654e7fe889dfc3b834f52cec4be03"
+    },
+    "normal-pan-candidate-1-after.png": {
+      "bytes": 625508,
+      "sha256": "5cbfc5bccf07b60f94e41e09fdf9b95fdeed343cb693ac35b370629e039dbb06"
+    },
+    "normal-pan-candidate-1-before.png": {
+      "bytes": 512279,
+      "sha256": "87f1f57bb7903434f1ac25bdcda7b2df35f28450b6dfbb0f70f076f9cdd1ff1b"
+    },
+    "normal-pan-candidate-1-raw.json": {
+      "bytes": 90769,
+      "sha256": "00028f41d310cc4828fe9c2fb167dc30df6a63ac22cd0e2ef2d19369b5fe0005"
+    },
+    "normal-pan-candidate-2-after.png": {
+      "bytes": 625512,
+      "sha256": "fda8f82d83d769d0a1e48aa7d1ecd5aa23e3041ef5b0d67853b7e8e88df94793"
+    },
+    "normal-pan-candidate-2-before.png": {
+      "bytes": 512309,
+      "sha256": "249b36f2c3f88a498ef92d8efb064edabcca1252f63fffba4aedfcbfd2f66a01"
+    },
+    "normal-pan-candidate-2-raw.json": {
+      "bytes": 90570,
+      "sha256": "a97705407a53e98dfa67da57c9b486bc903787333fa5b66b3f1c656636b35fa5"
+    },
+    "normal-walk-look-baseline-1-after.png": {
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153"
+    },
+    "normal-walk-look-baseline-1-before.png": {
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153"
+    },
+    "normal-walk-look-baseline-1-raw.json": {
+      "bytes": 94165,
+      "sha256": "a9d18b5b3c51e1367c35a5a7aaf577000612a277139f7a417e641de354dd1d2e"
+    },
+    "normal-walk-look-baseline-2-after.png": {
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153"
+    },
+    "normal-walk-look-baseline-2-before.png": {
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153"
+    },
+    "normal-walk-look-baseline-2-raw.json": {
+      "bytes": 92174,
+      "sha256": "e1a2050424749dc1ec1db27d12ed504e066bc332fc523c59fa182db758260f15"
+    },
+    "normal-walk-look-candidate-1-after.png": {
+      "bytes": 171856,
+      "sha256": "1ef441b2847c08ad6ebf69dd366ba0407194ce57a0e817eda6feaf6eb500bc44"
+    },
+    "normal-walk-look-candidate-1-before.png": {
+      "bytes": 171856,
+      "sha256": "1ef441b2847c08ad6ebf69dd366ba0407194ce57a0e817eda6feaf6eb500bc44"
+    },
+    "normal-walk-look-candidate-1-raw.json": {
+      "bytes": 96275,
+      "sha256": "446aaed08cd81e00d13c59d75019b4b46e15a34f894d9cd1fc0ecba716f04d34"
+    },
+    "normal-walk-look-candidate-2-after.png": {
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153"
+    },
+    "normal-walk-look-candidate-2-before.png": {
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153"
+    },
+    "normal-walk-look-candidate-2-raw.json": {
+      "bytes": 96466,
+      "sha256": "5ae5934084d893dd7c894cfe1844f684d67e9749c6205dba0cb35e814a59c384"
+    },
+    "pixel-pan-baseline-1-after.png": {
+      "bytes": 240697,
+      "sha256": "c368806646bb16d6eda5b23c26990a1d6aa94b11a51283e5ca9567743f302e32"
+    },
+    "pixel-pan-baseline-1-before.png": {
+      "bytes": 218088,
+      "sha256": "072acc0cf9738634bb02244a2535b2058991ecd4fdd1973a1242d8ee3d0aef2b"
+    },
+    "pixel-pan-baseline-1-raw.json": {
+      "bytes": 87983,
+      "sha256": "4635fbeb5b30eb4b089de10ecec2e0edc8e520bdd3e57a9d40ff1190de6cfca9"
+    },
+    "pixel-pan-baseline-2-after.png": {
+      "bytes": 240697,
+      "sha256": "c368806646bb16d6eda5b23c26990a1d6aa94b11a51283e5ca9567743f302e32"
+    },
+    "pixel-pan-baseline-2-before.png": {
+      "bytes": 218088,
+      "sha256": "072acc0cf9738634bb02244a2535b2058991ecd4fdd1973a1242d8ee3d0aef2b"
+    },
+    "pixel-pan-baseline-2-raw.json": {
+      "bytes": 88051,
+      "sha256": "928ea076a3f74120c83dbc3747e0479feeeb96d2284788cd0a0fd36d58b3e0ec"
+    },
+    "pixel-pan-candidate-1-after.png": {
+      "bytes": 240698,
+      "sha256": "cb2e2acff0fa73c41fa883038c39f042b13411a63103b3be1d4ad4ab895df775"
+    },
+    "pixel-pan-candidate-1-before.png": {
+      "bytes": 218083,
+      "sha256": "03b55066b17678a64a58ae14a940076e6c849ebab377e16838b9e742ee752535"
+    },
+    "pixel-pan-candidate-1-raw.json": {
+      "bytes": 90095,
+      "sha256": "178ae7373e9ef277ae0ff5ee7206b5938676cea77574eea542d968167459c0f8"
+    },
+    "pixel-pan-candidate-2-after.png": {
+      "bytes": 240698,
+      "sha256": "cb2e2acff0fa73c41fa883038c39f042b13411a63103b3be1d4ad4ab895df775"
+    },
+    "pixel-pan-candidate-2-before.png": {
+      "bytes": 218083,
+      "sha256": "03b55066b17678a64a58ae14a940076e6c849ebab377e16838b9e742ee752535"
+    },
+    "pixel-pan-candidate-2-raw.json": {
+      "bytes": 90026,
+      "sha256": "eb61b1a263c22dc71787349678ba6d70591ab2c3847093675eabc644d004b112"
+    },
+    "preflight/presentation-canvas.png": {
+      "bytes": 390,
+      "sha256": "dc7ce5f9ce1a041eed05f264f9759f714d510daf3c4cfa240abec42c464ee372"
+    },
+    "preflight/presentation-page.png": {
+      "bytes": 802,
+      "sha256": "232ec9cbe72eb6daec35057ef8db2bf0476fd07f1fb402508ad4aeacd985e9e1"
+    },
+    "preflight/presentation.json": {
+      "bytes": 1078,
+      "sha256": "6f2a8d39fc8a85273200fdbad35f4497c54d7fda54f41495ffce1fd260de4ce0"
+    },
+    "preflight/report.json": {
+      "bytes": 1442,
+      "sha256": "8e1a3bef5152a5445daa7a12e4161dc9b121e15485e89471d81cb6d7ef4585a2"
+    },
+    "report.json": {
+      "bytes": 1383147,
+      "sha256": "b15a12c084456aa62098e273acae3b28a54006c3981bef7a58543eec0d9cdaed"
+    },
+    "server.log": {
+      "bytes": 289043,
+      "sha256": "5b2fff596b08e3a556067eaa943bc217ded833c10138f2f7cc8d9107339eb983"
+    }
+  },
+  "pngs": {
+    "pixel-pan-baseline-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 218088,
+      "sha256": "072acc0cf9738634bb02244a2535b2058991ecd4fdd1973a1242d8ee3d0aef2b",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "pixel-pan-baseline-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 240697,
+      "sha256": "c368806646bb16d6eda5b23c26990a1d6aa94b11a51283e5ca9567743f302e32",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "pixel-pan-candidate-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 218083,
+      "sha256": "03b55066b17678a64a58ae14a940076e6c849ebab377e16838b9e742ee752535",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "pixel-pan-candidate-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 240698,
+      "sha256": "cb2e2acff0fa73c41fa883038c39f042b13411a63103b3be1d4ad4ab895df775",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "pixel-pan-candidate-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 218083,
+      "sha256": "03b55066b17678a64a58ae14a940076e6c849ebab377e16838b9e742ee752535",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "pixel-pan-candidate-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 240698,
+      "sha256": "cb2e2acff0fa73c41fa883038c39f042b13411a63103b3be1d4ad4ab895df775",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "pixel-pan-baseline-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 218088,
+      "sha256": "072acc0cf9738634bb02244a2535b2058991ecd4fdd1973a1242d8ee3d0aef2b",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "pixel-pan-baseline-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 240697,
+      "sha256": "c368806646bb16d6eda5b23c26990a1d6aa94b11a51283e5ca9567743f302e32",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-baseline-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 512280,
+      "sha256": "af07cc6766ba54f8b5c6f4ca3c87942175b39f5c29f23a84f694d4967ac4400a",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-baseline-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 625512,
+      "sha256": "bf5e1e47bcc83c2b81cfe4322f3969917d63df01d41d7b4548096f58ece84a37",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-candidate-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 512279,
+      "sha256": "87f1f57bb7903434f1ac25bdcda7b2df35f28450b6dfbb0f70f076f9cdd1ff1b",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-candidate-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 625508,
+      "sha256": "5cbfc5bccf07b60f94e41e09fdf9b95fdeed343cb693ac35b370629e039dbb06",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-candidate-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 512309,
+      "sha256": "249b36f2c3f88a498ef92d8efb064edabcca1252f63fffba4aedfcbfd2f66a01",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-candidate-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 625512,
+      "sha256": "fda8f82d83d769d0a1e48aa7d1ecd5aa23e3041ef5b0d67853b7e8e88df94793",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-baseline-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 512302,
+      "sha256": "160bbeebdb18be7d53222206a0ae741221181723fe29fd27798fa791300f70fd",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-pan-baseline-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 625514,
+      "sha256": "8b1e3e518637d5794b14b65050afa03dfc1a456cf916883544d90a54318c49cb",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-baseline-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 514892,
+      "sha256": "4332a9da530617cec64d44d4fbf135bbd8a4fdb5e9d8e4b81836af5e13c30200",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-baseline-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 630721,
+      "sha256": "2fdc57d26fce41168e2192f0547776f52650e37b8db5641f39e86d8ea7bed09d",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-candidate-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 514890,
+      "sha256": "255cc162d748dfad81fd088cf325fc76fdf0686168e21336eb2ee11b65ef620b",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-candidate-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 630721,
+      "sha256": "50973f7dc7ed051a3213eec06ef64f6bedd98af981a12ca90fc78c2296f70ce6",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-candidate-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 514871,
+      "sha256": "148816269c9df063e167f35cf8325d622ab68a31f8dd76101051849d78d6e9c5",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-candidate-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 630715,
+      "sha256": "37c87636fdddd99ee13414b5becb0a085fff40aba561cf5c6de08d8b75f70426",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-baseline-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 514872,
+      "sha256": "9444eba2df157680cd2da7803637d920e520fa1fd87a44fcde9e1f25175456c0",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        25,
+        23
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-orbit-baseline-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 630723,
+      "sha256": "f96da9d5275df8ff83e8ed0905d035730c0a7d7ad050c9051909f2be280c23e2",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        0,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        255,
+        255,
+        255
+      ]
+    },
+    "normal-walk-look-baseline-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    },
+    "normal-walk-look-baseline-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    },
+    "normal-walk-look-candidate-1-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171856,
+      "sha256": "1ef441b2847c08ad6ebf69dd366ba0407194ce57a0e817eda6feaf6eb500bc44",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    },
+    "normal-walk-look-candidate-1-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171856,
+      "sha256": "1ef441b2847c08ad6ebf69dd366ba0407194ce57a0e817eda6feaf6eb500bc44",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    },
+    "normal-walk-look-candidate-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    },
+    "normal-walk-look-candidate-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    },
+    "normal-walk-look-baseline-2-before.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    },
+    "normal-walk-look-baseline-2-after.png": {
+      "width": 1200,
+      "height": 683,
+      "bytes": 171858,
+      "sha256": "8a42631a87a26570817af1dd35806a010778da41858918d25f71646a05489153",
+      "alphaMinimum": 255,
+      "alphaMaximum": 255,
+      "rgbMinimum": [
+        25,
+        27,
+        26
+      ],
+      "rgbMaximum": [
+        253,
+        252,
+        249
+      ]
+    }
+  },
+  "passed": true
+}

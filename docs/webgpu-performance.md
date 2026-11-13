@@ -7,13 +7,19 @@ physical scene resolution, 4× MSAA in High/Ultra, shadows, HDR bloom, terrain m
 anisotropic filtering, map styles and native-density labels are preserved.
 
 **Measured application baseline:** `a9a284263da76a201114381467bf45aa4823a2d6`.
-**Final measured application source:** `4a3b9c412ab7bb114795a6d4e5281e97508f4d56`.
+**Optimized production source:** `4a3b9c412ab7bb114795a6d4e5281e97508f4d56`.
+**Current validated harness revision:** `f159983c68a72bd4fc8d27d592ba3721bf4689c3`,
+whose production `src` tree is unchanged.
 The final native comparison measures **19.8–53.3% lower preparation/overlay time**
 and **22.4–56.0% lower preparation/overlay time including twelve terrain picks**
 across the nine moving workloads. All **10,944 identity comparisons pass**.
-Debug and Release browser integration also pass on this source tree. The paired
-browser performance attempt stopped at a focus timeout before completing its
-first candidate case, so it establishes no paired browser speedup.
+An independent native runner reproduces **23.6–55.6% lower picking-inclusive CPU
+cost**, again passing all 10,944 comparisons. Debug and Release integration each
+pass all 34 scenarios. The complete paired Release AOT browser replay now passes
+all four cases and 16 image comparisons. Its timings are mixed: Normal pan/orbit
+render CPU medians improve 12.6%/13.6%, while Pixel pan CPU median is 1.0% slower
+and paused walking-look input latency median is 6.6% slower. Native CPU gains must
+not be presented as a uniform browser or physical-GPU FPS improvement.
 
 The earlier `16048b7` optimization checkpoint and its `4dbb962` CI checkout remain
 preserved as separate evidence, including their deferred-picking penalty. The final
@@ -84,6 +90,36 @@ picks are included. Calling-thread CPU time, managed allocations, individual
 phases and all raw samples remain in the
 [original comparison](verification/webgpu-performance-4a3b9c4/native-ci-comparison.json)
 and [unaltered archive](verification/webgpu-performance-4a3b9c4/native-ci.zip).
+
+### Independent replication at the current harness revision
+
+The [native job at `f159983`](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/job/131819284919)
+repeats the frozen ABBA comparison on an **AMD EPYC 7763** runner, using the same
+isolated SDK/runtime versions. This head includes the browser menu/focus harness
+corrections; its production `src` tree remains
+`cf568d7832d23566d87b188f23f8afb18bab1d2a`, identical to `4a3b9c4`.
+The complete comparison recomputes exactly from the original raw samples, and all
+**10,944 identity comparisons pass again**. Preparation plus overlay is
+**21.8–53.9% lower**; including all twelve terrain picks is **23.6–55.6% lower**.
+
+| Moving workload | Combined median, baseline → optimized ms | Time reduction | Combined p95, baseline → optimized ms |
+|---|---:|---:|---:|
+| pan-pixel | 15.841 → 10.618 | 33.0% | 16.704 → 12.145 |
+| walk-pixel | 6.008 → 3.135 | 47.8% | 6.562 → 3.667 |
+| orbit-pixel | 16.530 → 10.853 | 34.3% | 17.298 → 12.937 |
+| pan-normal | 16.901 → 11.798 | 30.2% | 17.743 → 12.402 |
+| walk-normal | 6.658 → 2.954 | 55.6% | 7.141 → 3.615 |
+| orbit-normal | 17.022 → 11.529 | 32.3% | 17.977 → 13.097 |
+| pan-roblox | 17.255 → 13.189 | 23.6% | 18.002 → 13.998 |
+| walk-roblox | 8.627 → 4.535 | 47.4% | 9.266 → 5.048 |
+| orbit-roblox | 17.485 → 12.997 | 25.7% | 18.280 → 14.811 |
+
+The no-rebake source-priority controls are effectively unchanged in this run:
+Pixel is 0.202% slower (0.74255 → 0.74405 ms), and Normal is 0.203% faster
+(0.76250 → 0.76095 ms). The [independent replication bundle](verification/webgpu-performance-f159983-native/)
+preserves those controls, the original archive, frozen driver, complete comparison,
+source/toolchain identity and recomputation audit. Its samples remain separate
+from the earlier EPYC 9V74 run; neither runner's CPU timings establish browser FPS.
 
 ### Historical checkpoint: deferred-picking cost
 
@@ -336,6 +372,18 @@ do not measure a paired browser performance improvement.
 The [original integration reports and captures](verification/webgpu-performance-4a3b9c4-integration/)
 preserve the final source's numerical shader/resource observations and browser images.
 
+The [current integration run at `f159983`](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433)
+also passes all four jobs and all 61 recorded steps, including **34 scenarios in
+each of Debug and Release AOT**. Both browser logs identify actual synthetic merge
+checkout `6f0bff0a45db4464044a03bfba52abd8605bebc0`; its full tree
+`35584c004b091eedc72198bf15afe8a7f5215dfa` equals the published `f159983` tree.
+This validates the menu/focus harness corrections alongside the unchanged
+production renderer. The [checkout and validation record](verification/webgpu-performance-f159983-browser/integration-validation.json)
+retains the exact terminal log lines, job conclusions, package identities and
+harness hashes. Its current artifact digests are explicitly identified as
+API-reported; the unchanged source's original integration images remain in the
+earlier preserved archive.
+
 The new [paired Release AOT protocol](../tests/browser/WEBGPU_PERFORMANCE.md)
 builds both applications and replays trusted native inputs with one frozen harness
 on one runner. It separates CPU render/command recording, input-to-submit,
@@ -344,7 +392,79 @@ Capture/query instrumentation is outside timed windows. Exact camera/projection,
 scene extent, quality and geometry gates prevent comparing different work. Original
 PNGs and quantified image differences are retained.
 
-**Release AOT browser comparison: no completed paired result.** The comparison job
+### Completed Release AOT comparison
+
+The [successful paired job at `f159983`](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/job/131824792372)
+completes **16 runs in ABBA order**, four cases, **128 trusted measured inputs** and
+152 observed map submissions. Both packages use isolated .NET SDK 10.0.403 and
+Release `InterpreterAndAOT`; the browser is Chromium 156.0.8078.4 on an AMD EPYC
+9V45 runner with four available processors and the SwiftShader Vulkan adapter.
+The recorded four harness hashes match the exact `f159983` Git objects.
+
+Each table cell is **reported median / p95, in milliseconds**, pooling sixteen
+measured inputs per variant/case. The frozen browser harness reports the upper
+middle sample for its median and nearest-rank p95. With sixteen samples, that
+p95 is the maximum observed sample. These conventions differ from the native
+harness's interpolated quantiles; the original values are preserved.
+“Render CPU” is the sum of managed render/command-recording elapsed time for all
+frames attributed to one input. It is not OS thread-CPU accounting or GPU duration.
+Input-to-first-submit ends at the first attributed submission, so it need not
+exceed the summed elapsed time of every frame caused by that input.
+
+| Workload | Input → first submit, baseline | Input → first submit, optimized | Render CPU, baseline | Render CPU, optimized |
+|---|---:|---:|---:|---:|
+| Pixel pan | 12.0 / 15.7 | 11.6 / 14.1 | 10.4 / 23.0 | 10.5 / 20.3 |
+| Normal pan | 14.4 / 17.8 | 13.0 / 19.3 | 12.7 / 26.6 | 11.1 / 22.6 |
+| Normal orbit | 14.4 / 21.8 | 12.8 / 17.4 | 12.5 / 17.6 | 10.8 / 15.5 |
+| Normal paused walking look | 18.3 / 24.9 | 19.5 / 25.8 | 18.8 / 29.7 | 18.3 / 33.4 |
+
+Normal pan and orbit render CPU medians fall **12.6% and 13.6%**. Pixel pan CPU
+median is **0.96% slower**, although its p95 improves. Paused walking-look input
+latency median is **6.56% slower**, and its render CPU p95 rises from 29.7 to
+33.4 ms. Normal pan input p95 also rises, from 17.8 to 19.3 ms. These negative
+results remain part of the successful correctness-qualified comparison; this
+short run establishes no universal browser latency improvement.
+Submission CPU p95 also rises for Normal pan (3.4 → 5.7 ms) and Normal orbit
+(1.5 → 3.8 ms), despite their lower total render medians. These reported p95s are
+the observed maxima of sixteen inputs, not estimates from a large tail sample.
+
+| Workload | Input → first queue-completion callback, baseline median / p95 ms | Optimized median / p95 ms |
+|---|---:|---:|
+| Pixel pan | 1928.2 / 2031.6 | 1871.2 / 1944.8 |
+| Normal pan | 4011.3 / 4091.8 | 3982.0 / 4057.1 |
+| Normal orbit | 4017.2 / 4116.0 | 3836.4 / 3899.7 |
+| Normal paused walking look | 3096.4 / 3315.9 | 2900.4 / 3129.5 |
+
+Queue-completion callback latency includes queued work and callback scheduling;
+it is not a GPU timestamp or display time. Every map case has twelve of sixteen
+inputs without texture uploads or resource allocations; walking-look has none.
+The full distributions therefore include streaming work. The separate six-second
+held-key phase records only two to four map submissions per run, with multi-second
+queue-prefix and drain latencies. Its raw submission rates and trajectories are
+retained, but these small, scheduling-dependent samples do not establish a stable
+throughput improvement or physical-GPU FPS.
+
+All endpoint checks for camera/projection, physical simulation, geometry counts,
+scene extent, style and High quality pass. All **16 before/after image pairs** pass the
+unchanged tolerance: at most 1% of pixels differing by more than 2/255 and mean
+RGB error at most 0.25/255. Across these pairs, at most one pixel differs by more
+than 2/255, maximum channel error is 3/255, and mean absolute RGB-channel error is at most
+0.000076867/255. This is quantified visual parity, not a claim of exact pixel
+identity. Every context records one shared GPU device, zero GPU errors, zero
+device losses and no live managed failure. Intermediate browser poses are not
+individually compared by the endpoint gate; the separate native replay performs
+its own all-pose identity checks.
+
+The [permanent browser evidence](verification/webgpu-performance-f159983-browser/)
+preserves the original artifact as two byte-exact parts, all sixteen raw runs and
+thirty-two original case PNGs inside the reconstructed archive, the original
+report, frozen harness, representative captures, source/runner identity,
+verification records and file hashes. Concatenating the two parts reproduces the
+original artifact SHA-256; splitting only accommodates the publication size limit.
+
+### Earlier harness failures and correction
+
+The earlier comparison job
 in [run 43263360230](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43263360230/job/131348103432)
 failed after baseline `pixel-pan-1` completed. Candidate repetition 1 timed out in
 `sceneProjection` while opening the Rendering quality submenu and waiting for
@@ -365,9 +485,9 @@ but the existing camera-replay fixture still asserted the old helper's polling a
 single-handle counts. Follow-up [`a9ef50f`](https://github.com/wieslawsoltes/UnoPixelMap/commit/a9ef50f)
 reproduces actual animation-frame focus theft, requires the real helper to recover,
 and checks one keyboard activation plus balanced handle ownership on success,
-failure and timeout. All five local Node contract suites pass. Fresh integration
-and paired performance validation of these harness changes are required; the
-earlier incomplete attempt remains in the evidence.
+failure and timeout. All five local Node contract suites, the complete current
+integration run and the full paired Release AOT replay now pass. The earlier
+incomplete attempt remains in the evidence.
 
 SwiftShader Vulkan results do not establish physical-GPU FPS, display latency or
 mobile thermals.
@@ -375,6 +495,10 @@ mobile thermals.
 ## Reproduction and permanent evidence
 
 - [Native benchmark source and protocol](../tests/PixelMap.Rendering.Performance/README.md).
+- [Independent native replication at `f159983`](verification/webgpu-performance-f159983-native/),
+  including its original samples, frozen comparison driver and verified hashes.
+- [Current harness integration validation](verification/webgpu-performance-f159983-browser/integration-validation.json).
+- [Completed paired browser comparison, original samples and captures](verification/webgpu-performance-f159983-browser/).
 - [Final-source native comparison](verification/webgpu-performance-4a3b9c4/native-ci-comparison.json),
   [original raw CI archive](verification/webgpu-performance-4a3b9c4/native-ci.zip)
   and [source/toolchain manifest](verification/webgpu-performance-4a3b9c4/native-ci-manifest.json).
