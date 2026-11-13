@@ -45,54 +45,137 @@ function fixture() {
             metaKey: Boolean(input.modifiers & 4), shiftKey: Boolean(input.modifiers & 8)})};
 }
 async function menuFocusChecks() {
-    // Run the real menu and focus helpers without installing or launching a
-    // browser. Only explore's unused browser/image imports are substituted.
-    const uiModule = {exports: {}};
-    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "explore.cjs"), "utf8"), {
-        module: uiModule, URL, Promise, setTimeout, clearTimeout, process: {argv: [], env: {}},
-        require: name => ["playwright", "pngjs", "./gpu.cjs"].includes(name) ? {} : require(name)
-    }, {filename: "explore.cjs"});
-    const performanceModule = {exports: {}};
-    vm.runInNewContext(fs.readFileSync(path.join(__dirname, "webgpu-performance.cjs"), "utf8"), {
-        module: performanceModule,
-        require: name => name === "./explore.cjs" ? uiModule.exports : require(name)
-    }, {filename: "webgpu-performance.cjs"});
-    let frames = 0, focusedAt = 0, disposed = 0, rootOpen = false, submenuOpen = false;
-    const keys = [], document = {activeElement: null};
-    const sandbox = vm.createContext({document, Promise,
-        requestAnimationFrame: callback => setImmediate(() => { frames++; callback(); })});
-    const invoke = (callback, argument) => vm.runInContext("(" + callback.toString() + ")", sandbox)(argument);
-    const targets = new Map();
-    for (const name of ["Map appearance", "Rendering quality", "High quality"]) {
-        const element = {name, isConnected: true, dispose: async () => { disposed++; }};
-        targets.set(name, {or() { return this; },
-            waitFor: async ({state}) => {
-                const visible = name === "Map appearance" || (name === "Rendering quality" ? rootOpen : submenuOpen);
-                assert.equal(visible, state === "visible", name + " has the requested popup state");
+    const {menu} = require("./webgpu-performance.cjs");
+    const run = async ({name = "High quality", submenu = "Rendering quality", initialQuality = "Balanced",
+        activate = true, offscreen = false} = {}) => {
+        let rootOpen = false, submenuOpen = false, shareOpen = false, frames = 0, pendingQuality = null;
+        const clicks = [], reads = [], keys = [], previousFocus = {name: "Previous popup owner"};
+        const document = {activeElement: previousFocus};
+        const status = {quality: initialQuality};
+        const sandbox = vm.createContext({document, Promise, PixelAtlasWebGpu: status,
+            requestAnimationFrame: callback => setImmediate(() => {
+                frames++;
+                // Repeated delayed managed focus restoration must not redirect
+                // a native pointer command or require a keyboard focus barrier.
+                document.activeElement = previousFocus;
+                if (pendingQuality && frames >= pendingQuality.frame) {
+                    status.quality = pendingQuality.quality;
+                    pendingQuality = null;
+                }
+                callback();
+            })});
+        const invoke = (callback, argument) => vm.runInContext("(" + callback.toString() + ")", sandbox)(argument);
+        const geometry = new Map([
+            ["Map appearance", {x: 1100, y: 12, width: 80, height: 36}],
+            ["Rendering quality", {x: 960, y: 88, width: 220, height: 32}],
+            ["High quality", {x: 740, y: 120, width: 220, height: 32}],
+            ["Balanced quality", {x: 740, y: 88, width: 220, height: 32}],
+            ["Share this view", {x: 960, y: 494, width: 220, height: 32}]
+        ]);
+        if (offscreen) geometry.get(name).x = 1300;
+        const visible = target => target === "Map appearance" ||
+            (target === "Shareable map link" ? shareOpen :
+                ["High quality", "Balanced quality"].includes(target) ? submenuOpen : rootOpen);
+        const targets = new Map([...geometry.keys(), "Shareable map link"].map(target => [target, {
+            or() { return this; },
+            waitFor: async ({state}) => assert.equal(visible(target), state === "visible", target + " has the requested popup state"),
+            boundingBox: async () => { reads.push({target, frames}); return geometry.get(target); },
+            focus: async () => assert.fail("Menu setup must use native pointer input, independent of transient DOM focus")
+        }]));
+        const page = {
+            getByRole: (_, {name}) => targets.get(name),
+            viewportSize: () => ({width: 1200, height: 800}),
+            mouse: {
+                click: async (x, y) => {
+                    const hit = [...geometry].find(([target, r]) => visible(target) &&
+                        x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height)?.[0];
+                    assert.ok(hit, "Native input hits a visible painted command");
+                    clicks.push(hit);
+                    if (hit === "Map appearance") rootOpen = true;
+                    else if (hit === "Rendering quality") submenuOpen = true;
+                    else {
+                        rootOpen = submenuOpen = false;
+                        // Closure can happen even when activation fails; the
+                        // public resulting quality/panel must be checked too.
+                        if (activate && hit === "Share this view") shareOpen = true;
+                        else if (activate) pendingQuality = {quality: hit.split(" ")[0], frame: frames + 3};
+                    }
+                    document.activeElement = previousFocus;
+                },
+                move: async () => {}
             },
-            boundingBox: async () => ({x: 10, y: 10, width: 80, height: 30}),
-            focus: async () => { document.activeElement = element; focusedAt = frames; },
-            elementHandle: async () => element});
-    }
-    const page = {
-        getByRole: (_, {name}) => targets.get(name),
-        mouse: {click: async () => { rootOpen = true; }, move: async () => {}},
-        waitForFunction: async (callback, argument) => assert.equal(invoke(callback, argument), true),
-        evaluate: async (callback, argument) => invoke(callback, argument),
-        keyboard: {press: async key => {
-            assert.ok(frames - focusedAt >= 2, "Native menu input cannot precede managed focus settling");
-            keys.push(key);
-            assert.equal(document.activeElement.name, key === "ArrowRight" ? "Rendering quality" : "High quality");
-            if (key === "ArrowRight") submenuOpen = true;
-            else { assert.equal(key, "Enter"); rootOpen = submenuOpen = false; }
-        }}
+            evaluate: async (callback, argument) => invoke(callback, argument),
+            waitForFunction: async (callback, argument) => {
+                for (let attempt = 0; attempt < 8; attempt++) {
+                    if (invoke(callback, argument)) return;
+                    await invoke(() => new Promise(requestAnimationFrame));
+                }
+                throw new Error("The command's public result did not appear");
+            },
+            keyboard: {press: async key => { keys.push(key); assert.fail("Untimed menu commands do not send keyboard input"); }}
+        };
+        const result = menu(page, name, submenu);
+        if (!activate || offscreen) await assert.rejects(result, offscreen ? /intersects the viewport/ : /public result|requested popup state/);
+        else await result;
+        assert.deepEqual(keys, [], "Delayed popup focus cannot capture an unintended menu key");
+        assert.deepEqual(clicks, offscreen ? ["Map appearance", "Rendering quality"] :
+            submenu ? ["Map appearance", submenu, name] : ["Map appearance", name],
+            "Each command is dispatched once without blind activation retries");
+        assert.ok(reads.every((read, index) => read.frames >= (index + 1) * 2),
+            "Popup input coordinates are sampled after the native layout barrier");
+        if (activate && !offscreen && submenu) assert.equal(status.quality, name.split(" ")[0]);
     };
-    await performanceModule.exports.menu(page, "High quality", "Rendering quality");
-    assert.deepEqual(keys, ["ArrowRight", "Enter"], "One native activation follows each completed focus barrier");
-    assert.equal(disposed, 2, "Both focus barriers release their target handles");
+    await run();
+    await run({initialQuality: "High"});
+    await run({name: "Balanced quality", initialQuality: "High"});
+    await run({name: "Share this view", submenu: null});
+    await run({activate: false});
+    await run({name: "Share this view", submenu: null, activate: false});
+    await run({offscreen: true});
 }
+async function focusReacquisitionChecks() {
+    // Execute the real helper without browser/image dependencies. A fake clock
+    // and animation queue reproduce delayed focus theft and replaced DOM peers.
+    const run = async alwaysLose => {
+        let clock = 0, frames = 0, focuses = 0, disposed = 0, generation = 0;
+        const document = {activeElement: null}, owner = {};
+        const peer = () => ({generation: generation++, isConnected: true, dispose: async () => { disposed++; }});
+        let target = peer();
+        const pageScope = vm.createContext({document, Promise,
+            requestAnimationFrame: callback => setImmediate(() => {
+                frames++; clock += 5;
+                if (alwaysLose || [1, 3, 5].includes(frames)) document.activeElement = owner;
+                if (frames === 3) { target.isConnected = false; target = peer(); }
+                callback();
+            })});
+        const uiModule = {exports: {}};
+        vm.runInNewContext(fs.readFileSync(path.join(__dirname, "explore.cjs"), "utf8"), {
+            module: uiModule, URL, Promise, setTimeout, clearTimeout, Date: {now: () => clock}, process: {argv: [], env: {}},
+            require: name => ["playwright", "pngjs", "./gpu.cjs"].includes(name) ? {} : require(name)
+        }, {filename: "explore.cjs"});
+        const locator = {
+            focus: async () => { focuses++; document.activeElement = target; },
+            elementHandle: async () => target
+        };
+        const page = {evaluate: async (callback, argument) =>
+            vm.runInContext("(" + callback.toString() + ")", pageScope)(argument)};
+        const result = uiModule.exports.waitForSettledFocus(page, locator, 80);
+        if (alwaysLose) await assert.rejects(result, /did not keep focus for two animation frames/);
+        else {
+            await result;
+            assert.equal(document.activeElement, target, "The current replacement peer owns stable keyboard focus");
+            assert.equal(frames, 7, "Every delayed restoration is followed by two actual stable animation frames");
+            assert.equal(focuses, 4, "Three focus losses cause bounded reacquisition before keyboard input");
+        }
+        assert.equal(disposed, focuses, "Every acquired peer is released on success and timeout");
+    };
+    await run(false);
+    await run(true);
+}
+
 async function main() {
     await menuFocusChecks();
+    await focusReacquisitionChecks();
     const f = fixture(), device = await f.adapter.requestDevice(), state = f.state;
     const mapEncoder = device.createCommandEncoder({label: "PixelMap frame"});
     const command = mapEncoder.finish();
