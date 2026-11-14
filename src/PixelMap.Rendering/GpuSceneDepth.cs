@@ -11,7 +11,7 @@ namespace PixelMap.Rendering;
 /// preparation bins conservative terrain/model bounds; a queried cell prepares only
 /// its contributing geometry. Exact clipped primitives are retained for later queries,
 /// leaving unqueried vertices and all fragment rendering to GL.</summary>
-internal sealed class GpuSceneDepth
+internal sealed partial class GpuSceneDepth
 {
     private const int CellSize = 16;
     private const int MaximumCellsPerProxy = 64;
@@ -165,11 +165,81 @@ internal sealed class GpuSceneDepth
     {
         altitude = inverse = physicalHeight = 0;
         if ((uint)x >= (uint)width || (uint)y >= (uint)height) return false;
-        var sample = Sample(x, y);
-        if (sample.TerrainTriangle < 0) return false;
-        ref var triangle = ref CollectionsMarshal.AsSpan(triangles)[sample.TerrainTriangle];
+        int terrain = samples.TryGetValue(y * width + x, out var sample)
+            ? sample.TerrainTriangle : SampleTerrain(x, y);
+        if (terrain < 0) return false;
+        ref var triangle = ref CollectionsMarshal.AsSpan(triangles)[terrain];
         triangle.Evaluate(x + .5f, y + .5f, out altitude, out inverse, out physicalHeight);
         return float.IsFinite(altitude) && inverse > 0;
+    }
+
+    private int SampleTerrain(int x, int y)
+    {
+        // The selected terrain triangle is independent of model/rim depth. A
+        // terrain pick must not project buildings solely to populate a complete
+        // occlusion sample. Reuse full cached hits above, but never publish this
+        // partial result to samples or mark a cell complete for CoversAt.
+        float sx = x + .5f, sy = y + .5f;
+        int cell = (y >> cellShift) * columns + (x >> cellShift);
+        if (!preparedCells[cell])
+        {
+            if (hasCoarseIndex)
+            {
+                if (pendingCells[cell] is { } local) PrepareTerrainGroups(CollectionsMarshal.AsSpan(local), sx, sy);
+                PrepareTerrainGroups(CollectionsMarshal.AsSpan(largeProxies), sx, sy);
+            }
+            else
+            {
+                // Terrain groups are indexed before every model. Coarse budget
+                // exhaustion can leave later terrain absent from both lists.
+                for (int index = 0; index < groups.Count; index++)
+                {
+                    if (groups[index].Model >= 0) break;
+                    if (groups[index].Contains(sx, sy)) PrepareGroup(index);
+                }
+            }
+        }
+        var hit = new HitAccumulator();
+        if (hasExactIndex)
+        {
+            var prepared = CollectionsMarshal.AsSpan(triangles);
+            if (cells[cell] is { } candidates)
+                foreach (int primitive in CollectionsMarshal.AsSpan(candidates))
+                    if (primitive >= 0 && prepared[primitive].Terrain)
+                        hit.AddTriangle(ref prepared[primitive], primitive, sx, sy, perspective);
+        }
+        else if (hasCoarseIndex)
+        {
+            if (pendingCells[cell] is { } local) SampleTerrainGroups(CollectionsMarshal.AsSpan(local), x, y, sx, sy, ref hit);
+            SampleTerrainGroups(CollectionsMarshal.AsSpan(largeProxies), x, y, sx, sy, ref hit);
+        }
+        else
+        {
+            for (int index = 0; index < groups.Count; index++)
+            {
+                if (groups[index].Model >= 0) break;
+                SampleGroup(index, x, y, sx, sy, ref hit);
+            }
+        }
+        return hit.Result(perspective).TerrainTriangle;
+    }
+
+    private void PrepareTerrainGroups(ReadOnlySpan<int> indices, float sx, float sy)
+    {
+        foreach (int index in indices)
+        {
+            if (groups[index].Model >= 0) break;
+            if (groups[index].Contains(sx, sy)) PrepareGroup(index);
+        }
+    }
+
+    private void SampleTerrainGroups(ReadOnlySpan<int> indices, int x, int y, float sx, float sy, ref HitAccumulator hit)
+    {
+        foreach (int index in indices)
+        {
+            if (groups[index].Model >= 0) break;
+            SampleGroup(index, x, y, sx, sy, ref hit);
+        }
     }
 
     private PixelHit Sample(int x, int y)
@@ -428,6 +498,12 @@ internal sealed class GpuSceneDepth
         var transform = draw.Transform;
         var source = mesh.Vertices;
         var range = mesh.Ranges[group.Model];
+        if (range.VertexCount >= GpuBuildingDepthChunks.MinimumVertices &&
+            (group.Screen.Left <= 0 || group.Screen.Top <= 0 || group.Screen.Right >= width || group.Screen.Bottom >= height))
+        {
+            AddChunkedBuilding(draw, group, range);
+            return;
+        }
         var projected = storage.ProjectedVertices;
         if (projected.Length < range.VertexCount)
             storage.ProjectedVertices = projected = new Vertex[range.VertexCount];
@@ -789,6 +865,8 @@ internal sealed class GpuSceneDepth
         internal int IndexCapacityBytes;
         // Indexed primitives retain value copies, so model scratch can span tiles and frames.
         internal Vertex[] ProjectedVertices = [];
+        internal int[] ProjectedVertexStamps = [];
+        internal int ProjectionStamp;
     }
 
     private record struct Vertex(H Screen, float Height = 0, int ClipCode = -1)

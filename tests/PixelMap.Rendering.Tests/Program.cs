@@ -2,6 +2,18 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--terrain-artwork", StringComparer.Ordinal))
+{
+    await TerrainArtworkInvalidationChecks.RunAsync();
+    return;
+}
+
+if (args.Contains("--terrain-streaming-cost", StringComparer.Ordinal))
+{
+    await TerrainArtworkInvalidationChecks.RunBenchmarkAsync(args);
+    return;
+}
+
 if (args.Contains("--webgpu-bloom", StringComparer.Ordinal))
 {
     WebGpuBloomChecks.Run();
@@ -24,6 +36,24 @@ if (args.Contains("--webgpu-overlay", StringComparer.Ordinal))
 if (args.Contains("--gpu-building-mesh", StringComparer.Ordinal))
 {
     await GpuBuildingMeshChecks.RunAsync();
+    return;
+}
+
+if (args.Contains("--depth-building-chunks", StringComparer.Ordinal))
+{
+    GpuBuildingDepthChunkChecks.Run();
+    return;
+}
+
+if (args.Contains("--terrain-picking", StringComparer.Ordinal))
+{
+    GpuTerrainPickingChecks.Run();
+    return;
+}
+
+if (args.Contains("--gpu-retained-interaction", StringComparer.Ordinal))
+{
+    GpuRetainedInteractionChecks.Run();
     return;
 }
 
@@ -126,6 +156,7 @@ if (args.Contains("--styles", StringComparer.Ordinal))
 }
 
 WebGpuFacadeChecks.Run();
+await TerrainArtworkInvalidationChecks.RunAsync();
 
 const int width = 256, height = 256;
 var id = new TileId(14, 8192, 8192);
@@ -212,6 +243,9 @@ PerspectiveChecks.Run();
 TerrainCameraChecks.Run();
 TerrainRenderingChecks.Run();
 GpuDepthChecks.Run();
+GpuBuildingDepthChunkChecks.Run();
+GpuTerrainPickingChecks.Run();
+GpuRetainedInteractionChecks.Run();
 GpuDepthMemoryChecks.RunPressureChecks();
 await TerrainTextureCacheChecks.RunAsync();
 GpuBuildingSelectionChecks.Run();

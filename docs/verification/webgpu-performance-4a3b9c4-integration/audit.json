@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 1,
+  "configurations": {
+    "debug": {
+      "report": "debug/webgpu-evidence/report.json",
+      "passed": true,
+      "scenarioCount": 34,
+      "scenarioNames": [
+        "webgpu-presentation",
+        "numerical-webgpu-shaders",
+        "desktop-pixel",
+        "desktop-camera",
+        "style-normal",
+        "style-minecraft",
+        "style-roblox",
+        "style-pixel",
+        "quality-balanced",
+        "quality-ultra",
+        "quality-high",
+        "lighting-dusk",
+        "lighting-night",
+        "lighting-day",
+        "earth-imagery",
+        "photograph-normal",
+        "photograph-pixel",
+        "terrain-relief",
+        "elevation-layer",
+        "free-roam-walk",
+        "free-roam-walk-ultra",
+        "resized",
+        "journey-drive",
+        "journey-bike",
+        "journey-walk",
+        "journey-boat",
+        "journey-train",
+        "journey-flight",
+        "mobile-pixel",
+        "mobile-normal-initial-high-dpi",
+        "mobile-pinch",
+        "mobile-normal-high-dpi",
+        "webgpu-unavailable",
+        "device-loss"
+      ],
+      "browser": "156.0.8078.4",
+      "browserLaunch": {
+        "channel": "chromium",
+        "headless": false,
+        "gpu": "ANGLE Vulkan; SwiftShader Vulkan compositor and WebGPU",
+        "gpuWatchdog": "disabled for software CI",
+        "enabledFeatures": [
+          "CDPScreenshotNewSurface",
+          "Vulkan"
+        ]
+      },
+      "timingMeaning": "CPU preparation/submission only; software GPU timings are not hardware FPS benchmarks.",
+      "gpuTraceHealth": {
+        "traceCount": 39,
+        "allRecordedErrorsZero": true,
+        "allRecordedRenderGraphErrorsZero": true,
+        "allRecordedReadbacksZero": true,
+        "allRecordedLossesZero": true,
+        "allRecordedWebGlContextsZero": true,
+        "scope": "39 retained GPU snapshots, including the before-loss snapshot; the suite separately injects device loss."
+      },
+      "desktopPipelineCount": 25,
+      "desktopPipelineTrace": "debug/webgpu-evidence/desktop-gpu.json",
+      "contiguousTerrainMipBatch": {
+        "trace": "debug/webgpu-evidence/style-normal-gpu.json",
+        "submission": 15,
+        "dirtyLayers": 96,
+        "dirtyLayerRange": [
+          0,
+          95
+        ],
+        "computeDispatches": 8,
+        "copyCommands": 8,
+        "destinationMips": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "computeThenCopyAtEachMip": true,
+        "copyExtentLayers": 96,
+        "scope": "Full contiguous 96-layer batch in the last retained style-normal frame. Sparse dirty batches can have multiple contiguous runs and therefore more copies per mip."
+      },
+      "qualityFrames": {
+        "high": {
+          "trace": "debug/webgpu-evidence/quality-high-gpu.json",
+          "submission": 22,
+          "sceneColorSamples": 4,
+          "sunShadowPasses": 2,
+          "bloomDownPasses": 5,
+          "bloomUpPasses": 4,
+          "terrainViewFormat": "rgba8unorm-srgb",
+          "terrainMipLevels": 9,
+          "terrainMaxAnisotropy": 8
+        },
+        "ultra": {
+          "trace": "debug/webgpu-evidence/quality-ultra-gpu.json",
+          "submission": 21,
+          "sceneColorSamples": 4,
+          "sunShadowPasses": 4,
+          "bloomDownPasses": 6,
+          "bloomUpPasses": 5,
+          "terrainViewFormat": "rgba8unorm-srgb",
+          "terrainMipLevels": 9,
+          "terrainMaxAnisotropy": 8
+        }
+      },
+      "lightingFixture": {
+        "cases": 11232,
+        "comparedChannels": 33696,
+        "maximumAbsoluteError": 0,
+        "backlitCases": 5184,
+        "omittedShadowCases": 1158,
+        "originalComparisons": 29970,
+        "optimizedComparisons": 16092,
+        "comparisonReduction": 0.4630630630630631,
+        "referenceCommit": "a9a284263da76a201114381467bf45aa4823a2d6",
+        "referenceSha256": "e91c58f9d99f336af9cc837f2deae1282fdc83097adffc3b38d779a85b1046d5",
+        "description": "Production lighting versus the frozen original on the same device; counters instrument comparison calls only. They do not measure GPU duration or full-frame speedup."
+      },
+      "scope": "Derived audit of original JSON reports and bounded recent-frame traces. No baseline/candidate latency or screenshot identity claim."
+    },
+    "release": {
+      "report": "release/webgpu-evidence/report.json",
+      "passed": true,
+      "scenarioCount": 34,
+      "scenarioNames": [
+        "webgpu-presentation",
+        "numerical-webgpu-shaders",
+        "desktop-pixel",
+        "desktop-camera",
+        "style-normal",
+        "style-minecraft",
+        "style-roblox",
+        "style-pixel",
+        "quality-balanced",
+        "quality-ultra",
+        "quality-high",
+        "lighting-dusk",
+        "lighting-night",
+        "lighting-day",
+        "earth-imagery",
+        "photograph-normal",
+        "photograph-pixel",
+        "terrain-relief",
+        "elevation-layer",
+        "free-roam-walk",
+        "free-roam-walk-ultra",
+        "resized",
+        "journey-drive",
+        "journey-bike",
+        "journey-walk",
+        "journey-boat",
+        "journey-train",
+        "journey-flight",
+        "mobile-pixel",
+        "mobile-normal-initial-high-dpi",
+        "mobile-pinch",
+        "mobile-normal-high-dpi",
+        "webgpu-unavailable",
+        "device-loss"
+      ],
+      "browser": "156.0.8078.4",
+      "browserLaunch": {
+        "channel": "chromium",
+        "headless": false,
+        "gpu": "ANGLE Vulkan; SwiftShader Vulkan compositor and WebGPU",
+        "gpuWatchdog": "disabled for software CI",
+        "enabledFeatures": [
+          "CDPScreenshotNewSurface",
+          "Vulkan"
+        ]
+      },
+      "timingMeaning": "CPU preparation/submission only; software GPU timings are not hardware FPS benchmarks.",
+      "gpuTraceHealth": {
+        "traceCount": 39,
+        "allRecordedErrorsZero": true,
+        "allRecordedRenderGraphErrorsZero": true,
+        "allRecordedReadbacksZero": true,
+        "allRecordedLossesZero": true,
+        "allRecordedWebGlContextsZero": true,
+        "scope": "39 retained GPU snapshots, including the before-loss snapshot; the suite separately injects device loss."
+      },
+      "desktopPipelineCount": 25,
+      "desktopPipelineTrace": "release/webgpu-evidence/desktop-gpu.json",
+      "contiguousTerrainMipBatch": {
+        "trace": "release/webgpu-evidence/style-normal-gpu.json",
+        "submission": 15,
+        "dirtyLayers": 96,
+        "dirtyLayerRange": [
+          0,
+          95
+        ],
+        "computeDispatches": 8,
+        "copyCommands": 8,
+        "destinationMips": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "computeThenCopyAtEachMip": true,
+        "copyExtentLayers": 96,
+        "scope": "Full contiguous 96-layer batch in the last retained style-normal frame. Sparse dirty batches can have multiple contiguous runs and therefore more copies per mip."
+      },
+      "qualityFrames": {
+        "high": {
+          "trace": "release/webgpu-evidence/quality-high-gpu.json",
+          "submission": 22,
+          "sceneColorSamples": 4,
+          "sunShadowPasses": 2,
+          "bloomDownPasses": 5,
+          "bloomUpPasses": 4,
+          "terrainViewFormat": "rgba8unorm-srgb",
+          "terrainMipLevels": 9,
+          "terrainMaxAnisotropy": 8
+        },
+        "ultra": {
+          "trace": "release/webgpu-evidence/quality-ultra-gpu.json",
+          "submission": 21,
+          "sceneColorSamples": 4,
+          "sunShadowPasses": 4,
+          "bloomDownPasses": 6,
+          "bloomUpPasses": 5,
+          "terrainViewFormat": "rgba8unorm-srgb",
+          "terrainMipLevels": 9,
+          "terrainMaxAnisotropy": 8
+        }
+      },
+      "lightingFixture": {
+        "cases": 11232,
+        "comparedChannels": 33696,
+        "maximumAbsoluteError": 0,
+        "backlitCases": 5184,
+        "omittedShadowCases": 1158,
+        "originalComparisons": 29970,
+        "optimizedComparisons": 16092,
+        "comparisonReduction": 0.4630630630630631,
+        "referenceCommit": "a9a284263da76a201114381467bf45aa4823a2d6",
+        "referenceSha256": "e91c58f9d99f336af9cc837f2deae1282fdc83097adffc3b38d779a85b1046d5",
+        "description": "Production lighting versus the frozen original on the same device; counters instrument comparison calls only. They do not measure GPU duration or full-frame speedup."
+      },
+      "scope": "Derived audit of original JSON reports and bounded recent-frame traces. No baseline/candidate latency or screenshot identity claim."
+    }
+  }
+}

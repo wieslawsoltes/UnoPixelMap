@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  DOTNET_MULTILEVEL_LOOKUP: '0'
+
 jobs:
   presentation:
     name: WebGPU presentation preflight
@@ -52,8 +55,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/pixelmap-dotnet
         with:
           dotnet-version: '10.0.403'
+      - name: Verify the isolated .NET compiler
+        run: |
+          test "$(dotnet --version)" = '10.0.403'
+          dotnet --info
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -108,8 +117,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/pixelmap-dotnet
         with:
           dotnet-version: '10.0.403'
+      - name: Verify the isolated .NET compiler
+        run: |
+          test "$(dotnet --version)" = '10.0.403'
+          dotnet --info
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

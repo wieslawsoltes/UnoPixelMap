@@ -24,7 +24,7 @@ public sealed partial class PixelMapRenderer
     {
         if (x < 0 || x >= width || y < 0 || y >= height) return null;
         int pixelSize = lastView.PixelSize > 0 ? lastView.PixelSize : 2;
-        bool aligned = lastPicture is not null && lastView.Camera == camera && lastView.Width == width &&
+        bool aligned = HasRetainedView && lastView.Camera == camera && lastView.Width == width &&
             lastView.Height == height && SameTiles(tiles, lastTiles);
         PrepareVisible(width, height, pixelSize, camera, tiles);
         TerrainHit? groundHit = null;

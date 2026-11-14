@@ -396,11 +396,11 @@
         reportWebGpu(frames, preparations, width, height, physicalWidth, physicalHeight,
             pixelSize, patches, triangles, draws, uploadBytes, residentBytes,
             frameMilliseconds, submissionMilliseconds, style, quality, renderWidth, renderHeight,
-            attachmentBytes, imageryCount, relief, elevation, zoom) {
+            attachmentBytes, imageryCount, relief, elevation, zoom, preparationMilliseconds = 0, overlayMilliseconds = 0) {
             Object.assign(graphics, { frames, preparations, width, height, physicalWidth, physicalHeight,
                 pixelSize, patches, triangles, draws, uploadBytes, residentBytes,
                 frameMilliseconds, submissionMilliseconds, style, quality, renderWidth, renderHeight,
-                attachmentBytes, imageryCount, relief, elevation, zoom, failure: null });
+                attachmentBytes, imageryCount, relief, elevation, zoom, preparationMilliseconds, overlayMilliseconds, failure: null });
         },
 
         failWebGpu

@@ -1,0 +1,2003 @@
+{
+  "frames": {
+    "pan-pixel": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.4627,
+          "p95": 1.686035
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.42325,
+          "p95": 1.7133099999999994
+        },
+        "medianSpeedup": 1.0277182504830493,
+        "medianReductionPercent": 2.697067067751413
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.4660455000000638,
+          "p95": 1.6896220000000084
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.4270020000001296,
+          "p95": 1.7169867999999378
+        },
+        "medianSpeedup": 1.0273605082543198,
+        "medianReductionPercent": 2.6631847374404494
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 12.4012,
+          "p95": 14.283329999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 8.5903,
+          "p95": 11.588709999999995
+        },
+        "medianSpeedup": 1.4436282784070407,
+        "medianReductionPercent": 30.730090636390027
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 12.404776499999798,
+          "p95": 14.28703414999993
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 8.59200399999986,
+          "p95": 11.550441500000233
+        },
+        "medianSpeedup": 1.4437582314905812,
+        "medianReductionPercent": 30.736325640369255
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.4685,
+          "p95": 0.7068749999999999
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.5442,
+          "p95": 0.7515299999999998
+        },
+        "medianSpeedup": 0.8608967291436972,
+        "medianReductionPercent": -16.157950907150486
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.46893599999998514,
+          "p95": 0.7081816000000571
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.5454190000001518,
+          "p95": 0.7534219999998184
+        },
+        "medianSpeedup": 0.8597720284769227,
+        "medianReductionPercent": -16.30990156442862
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 13.85605,
+          "p95": 15.80613
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 9.93535,
+          "p95": 13.608365
+        },
+        "medianSpeedup": 1.3946212262275612,
+        "medianReductionPercent": 28.295942927457684
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 13.862369499999659,
+          "p95": 15.813608050000072
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 9.941181000000142,
+          "p95": 13.614793350000351
+        },
+        "medianSpeedup": 1.3944389001668374,
+        "medianReductionPercent": 28.286567458756696
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      }
+    },
+    "walk-pixel": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.51685,
+          "p95": 2.122865
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.66085,
+          "p95": 4.288529999999999
+        },
+        "medianSpeedup": 0.9132974079537587,
+        "medianReductionPercent": -9.493357945742819
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.5284029999997983,
+          "p95": 2.1900022999999686
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.665080499999931,
+          "p95": 4.1149222499995615
+        },
+        "medianSpeedup": 0.9179153800671269,
+        "medianReductionPercent": -8.942504038538956
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 670172.0,
+          "p95": 698031.6
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 670172.0,
+          "p95": 698031.6
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 3.30655,
+          "p95": 4.395734999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.48875,
+          "p95": 2.24796
+        },
+        "medianSpeedup": 2.221024349286314,
+        "medianReductionPercent": 54.975729990473454
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 3.280743000000257,
+          "p95": 4.398495450000016
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.4899359999999433,
+          "p95": 2.249770900000249
+        },
+        "medianSpeedup": 2.20193551937827,
+        "medianReductionPercent": 54.58540946365422
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.7899,
+          "p95": 1.1779149999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.22565,
+          "p95": 5.308649999999998
+        },
+        "medianSpeedup": 0.24488087672252107,
+        "medianReductionPercent": -308.3618179516394
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.7905279999999948,
+          "p95": 1.1338509999994584
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.228661000000102,
+          "p95": 5.314499650000152
+        },
+        "medianSpeedup": 0.24484701243022103,
+        "medianReductionPercent": -308.41829764412176
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 4.80865,
+          "p95": 6.116714999999999
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.1774999999999998,
+          "p95": 6.0359349999999985
+        },
+        "medianSpeedup": 1.5133438237608183,
+        "medianReductionPercent": 33.92116290434946
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 4.813752499999737,
+          "p95": 6.123727000000234
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.1831085000001167,
+          "p95": 5.931810249999534
+        },
+        "medianSpeedup": 1.5122803699589757,
+        "medianReductionPercent": 33.87469546886154
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 670252.0,
+          "p95": 698111.6
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 670252.0,
+          "p95": 698111.6
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      }
+    },
+    "orbit-pixel": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.49165,
+          "p95": 1.70718
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.4994999999999998,
+          "p95": 1.8830749999999994
+        },
+        "medianSpeedup": 0.9947649216405469,
+        "medianReductionPercent": -0.5262628632722199
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.4951485000001412,
+          "p95": 1.71075055000033
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.5033610000004956,
+          "p95": 1.88687115000016
+        },
+        "medianSpeedup": 0.9945372402235048,
+        "medianReductionPercent": -0.5492765434572888
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 13.3265,
+          "p95": 14.769139999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 8.9301,
+          "p95": 11.667129999999997
+        },
+        "medianSpeedup": 1.4923125160972441,
+        "medianReductionPercent": 32.98990732750535
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 13.33058549999987,
+          "p95": 14.773095899999587
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 8.93373100000008,
+          "p95": 11.271126050000339
+        },
+        "medianSpeedup": 1.4921632966114327,
+        "medianReductionPercent": 32.983206176501646
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.52125,
+          "p95": 0.7295799999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.6947000000000001,
+          "p95": 1.3987299999999996
+        },
+        "medianSpeedup": 0.7503238808118611,
+        "medianReductionPercent": -33.27577937649882
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.5221094999997149,
+          "p95": 0.7312055999999756
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.6956075000002784,
+          "p95": 1.4001443000006017
+        },
+        "medianSpeedup": 0.750580607597684,
+        "medianReductionPercent": -33.23019404945864
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.799,
+          "p95": 16.323475
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 10.509150000000002,
+          "p95": 12.865794999999999
+        },
+        "medianSpeedup": 1.408201424472959,
+        "medianReductionPercent": 28.987431583215074
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.801312500000222,
+          "p95": 16.330667149999453
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 10.511129500000152,
+          "p95": 12.75843100000111
+        },
+        "medianSpeedup": 1.4081562309740365,
+        "medianReductionPercent": 28.985152499144963
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      }
+    },
+    "pan-normal": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.64415,
+          "p95": 2.418275
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.7406000000000001,
+          "p95": 2.1519
+        },
+        "medianSpeedup": 0.9445880730782488,
+        "medianReductionPercent": -5.866253079098627
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.6474699999998847,
+          "p95": 2.4262489499991715
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.7486350000008315,
+          "p95": 2.1559716999995544
+        },
+        "medianSpeedup": 0.9421463026870109,
+        "medianReductionPercent": -6.140627750487337
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.080549999999999,
+          "p95": 20.895474999999987
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 11.05165,
+          "p95": 14.346115
+        },
+        "medianSpeedup": 1.2740676731528775,
+        "medianReductionPercent": 21.511233581074595
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.085720999999467,
+          "p95": 20.902532650000182
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 11.05583999999908,
+          "p95": 14.351396549999478
+        },
+        "medianSpeedup": 1.274052536939811,
+        "medianReductionPercent": 21.510301105640963
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.7280500000000001,
+          "p95": 1.2122449999999996
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.84315,
+          "p95": 1.2557649999999998
+        },
+        "medianSpeedup": 0.8634881100634527,
+        "medianReductionPercent": -15.80935375317627
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.7290265000001455,
+          "p95": 1.2146470500008941
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.8445934999990641,
+          "p95": 1.2590079500004319
+        },
+        "medianSpeedup": 0.8631684946674978,
+        "medianReductionPercent": -15.852235823923477
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 15.68405,
+          "p95": 22.786814999999986
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 12.81535,
+          "p95": 16.117194999999995
+        },
+        "medianSpeedup": 1.223848743889164,
+        "medianReductionPercent": 18.290556329519468
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 15.693075499999395,
+          "p95": 22.800374600000385
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 12.845410500000071,
+          "p95": 16.127388949998927
+        },
+        "medianSpeedup": 1.2216873489562134,
+        "medianReductionPercent": 18.14599693985691
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      }
+    },
+    "walk-normal": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.1254999999999997,
+          "p95": 3.8517899999999985
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.7841,
+          "p95": 2.833134999999998
+        },
+        "medianSpeedup": 1.191356986715991,
+        "medianReductionPercent": 16.06210303458009
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.129715500000202,
+          "p95": 3.593390700000236
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.7963300000001254,
+          "p95": 2.838444450000314
+        },
+        "medianSpeedup": 1.1855925692940905,
+        "medianReductionPercent": 15.65399228206984
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 670052.0,
+          "p95": 699384.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 670052.0,
+          "p95": 699384.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 3.82565,
+          "p95": 6.50158499999999
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.34055,
+          "p95": 2.750719999999993
+        },
+        "medianSpeedup": 2.853791354294879,
+        "medianReductionPercent": 64.95889587390377
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 3.80692850000014,
+          "p95": 4.881688399999984
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.3416554999994332,
+          "p95": 2.748810299999689
+        },
+        "medianSpeedup": 2.8374858523680246,
+        "medianReductionPercent": 64.75753353393992
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.28185,
+          "p95": 1.8908349999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.4523,
+          "p95": 4.930584999999999
+        },
+        "medianSpeedup": 0.37130318917822897,
+        "medianReductionPercent": -169.3216835043102
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.28331899999921,
+          "p95": 1.8883070499990027
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.4546964999999545,
+          "p95": 4.93315225000042
+        },
+        "medianSpeedup": 0.3714708368735798,
+        "medianReductionPercent": -169.20013652116745
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 6.09985,
+          "p95": 9.172809999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.20585,
+          "p95": 4.829449999999997
+        },
+        "medianSpeedup": 1.9027247063961197,
+        "medianReductionPercent": 47.44378960138364
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 6.104207500000484,
+          "p95": 8.296148550001176
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.2112505000004603,
+          "p95": 4.83449885000227
+        },
+        "medianSpeedup": 1.9008817593020568,
+        "medianReductionPercent": 47.39283518785681
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 670132.0,
+          "p95": 699464.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 670132.0,
+          "p95": 699464.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      }
+    },
+    "orbit-normal": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.6402,
+          "p95": 2.847829999999994
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.69845,
+          "p95": 2.0284299999999997
+        },
+        "medianSpeedup": 0.9657040242574112,
+        "medianReductionPercent": -3.5513961711986397
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.6428130000003875,
+          "p95": 2.851955199999514
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.701715499999409,
+          "p95": 2.0331609999987443
+        },
+        "medianSpeedup": 0.9653863997836054,
+        "medianReductionPercent": -3.5854659050669646
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14128.0,
+          "p95": 14128.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 13.5909,
+          "p95": 15.996849999999995
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 9.7772,
+          "p95": 12.456244999999997
+        },
+        "medianSpeedup": 1.3900605490324427,
+        "medianReductionPercent": 28.06068766601181
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 13.595143499999722,
+          "p95": 16.000590649999317
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 9.773412499999722,
+          "p95": 12.44272955000033
+        },
+        "medianSpeedup": 1.3910334287026265,
+        "medianReductionPercent": 28.11100154992905
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.74815,
+          "p95": 1.299985
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.8623000000000001,
+          "p95": 1.360955
+        },
+        "medianSpeedup": 0.8676214774440449,
+        "medianReductionPercent": -15.257635500902245
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.7493375000003653,
+          "p95": 1.3014518999994833
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.8635515000005398,
+          "p95": 1.3626558499991006
+        },
+        "medianSpeedup": 0.8677392141637145,
+        "medianReductionPercent": -15.241997097451932
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 15.18375,
+          "p95": 17.904564999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 11.525300000000001,
+          "p95": 13.876935
+        },
+        "medianSpeedup": 1.3174277459155075,
+        "medianReductionPercent": 24.09450893224664
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 15.191571999999724,
+          "p95": 17.914664999998237
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 11.532052000000476,
+          "p95": 13.87761615000063
+        },
+        "medianSpeedup": 1.317334677297596,
+        "medianReductionPercent": 24.08914627136226
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 14208.0,
+          "p95": 14208.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      }
+    },
+    "pan-roblox": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.1372999999999998,
+          "p95": 2.764525
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 2.1298500000000002,
+          "p95": 2.8700099999999984
+        },
+        "medianSpeedup": 1.0034978989130687,
+        "medianReductionPercent": 0.3485706264913402
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.140886999999566,
+          "p95": 2.768422100002135
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 2.134206999999151,
+          "p95": 2.8743765999995943
+        },
+        "medianSpeedup": 1.0031299681804144,
+        "medianReductionPercent": 0.31202020472899106
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 71808.0,
+          "p95": 74752.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 71824.0,
+          "p95": 74978.8
+        },
+        "medianSpeedup": 0.9997772332368011,
+        "medianReductionPercent": -0.02228163992870069
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.00465,
+          "p95": 17.635934999999996
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 11.1242,
+          "p95": 12.615089999999999
+        },
+        "medianSpeedup": 1.2589354740116143,
+        "medianReductionPercent": 20.56781140549746
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.006363500000589,
+          "p95": 17.642202849999737
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 11.137140999999247,
+          "p95": 12.62072510000098
+        },
+        "medianSpeedup": 1.2576264860076332,
+        "medianReductionPercent": 20.485135203018412
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.8745,
+          "p95": 1.4150399999999996
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.8562000000000001,
+          "p95": 1.2755649999999998
+        },
+        "medianSpeedup": 1.0213735108619482,
+        "medianReductionPercent": 2.0926243567752967
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.876690500001132,
+          "p95": 1.4175031000007943
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.8573325000006662,
+          "p95": 1.2768171499997152
+        },
+        "medianSpeedup": 1.022579337655403,
+        "medianReductionPercent": 2.2080768527137917
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 16.22025,
+          "p95": 21.192899999999987
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 13.30115,
+          "p95": 14.658719999999999
+        },
+        "medianSpeedup": 1.2194622269503013,
+        "medianReductionPercent": 17.99664000246606
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 16.228476000000228,
+          "p95": 21.203832599999245
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 13.309880499999963,
+          "p95": 14.66695514999901
+        },
+        "medianSpeedup": 1.2192803684451017,
+        "medianReductionPercent": 17.984409010434643
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 71888.0,
+          "p95": 74832.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 71904.0,
+          "p95": 75058.8
+        },
+        "medianSpeedup": 0.9997774810858923,
+        "medianReductionPercent": -0.022256843979517882
+      }
+    },
+    "walk-roblox": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.1496,
+          "p95": 2.9399399999999996
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 2.02215,
+          "p95": 2.911294999999999
+        },
+        "medianSpeedup": 1.0630269762381623,
+        "medianReductionPercent": 5.9290100483811
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.1536004999998113,
+          "p95": 2.9438670000017733
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 2.0257204999998066,
+          "p95": 2.916148599999905
+        },
+        "medianSpeedup": 1.0631281561301358,
+        "medianReductionPercent": 5.937962960169063
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 643836.0,
+          "p95": 724977.6
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 643836.0,
+          "p95": 725007.2
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 5.089,
+          "p95": 8.575279999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.8045499999999999,
+          "p95": 2.3309599999999993
+        },
+        "medianSpeedup": 2.820093652157048,
+        "medianReductionPercent": 64.54018471212419
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 5.091374999998152,
+          "p95": 8.57788775000008
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.806000499998845,
+          "p95": 2.332944850002968
+        },
+        "medianSpeedup": 2.819143737779368,
+        "medianReductionPercent": 64.52823647836782
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.27885,
+          "p95": 1.9004899999999993
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.8615500000000003,
+          "p95": 6.08631
+        },
+        "medianSpeedup": 0.3311753052530719,
+        "medianReductionPercent": -201.95488133870273
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 1.2799994999986666,
+          "p95": 1.9023648500002301
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.863498000000618,
+          "p95": 6.0894387499996805
+        },
+        "medianSpeedup": 0.3313058528821451,
+        "medianReductionPercent": -201.83589915501082
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 7.32715,
+          "p95": 11.796694999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.8047000000000004,
+          "p95": 6.3995149999999885
+        },
+        "medianSpeedup": 1.9258154387993793,
+        "medianReductionPercent": 48.07394416655861
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 7.332800499998484,
+          "p95": 11.804762200000729
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 3.8089115000002494,
+          "p95": 6.4072299000008455
+        },
+        "medianSpeedup": 1.925169566160307,
+        "medianReductionPercent": 48.05652356148191
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 643916.0,
+          "p95": 725057.6
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 643916.0,
+          "p95": 725087.2
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      }
+    },
+    "orbit-roblox": {
+      "Preparation.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.1544999999999996,
+          "p95": 5.2484049999999876
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 2.1574,
+          "p95": 3.2518249999999984
+        },
+        "medianSpeedup": 0.9986557893761007,
+        "medianReductionPercent": -0.13460199582271404
+      },
+      "Preparation.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 2.1582774999988033,
+          "p95": 5.25598934999997
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 2.162012999999206,
+          "p95": 3.257580100002632
+        },
+        "medianSpeedup": 0.9982722120540422,
+        "medianReductionPercent": -0.173077836395219
+      },
+      "Preparation.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 68864.0,
+          "p95": 102832.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 68880.0,
+          "p95": 102864.0
+        },
+        "medianSpeedup": 0.9997677119628339,
+        "medianReductionPercent": -0.023234200743504907
+      },
+      "Overlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.53605,
+          "p95": 20.866914999999988
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 10.68835,
+          "p95": 14.667899999999992
+        },
+        "medianSpeedup": 1.3599900826600926,
+        "medianReductionPercent": 26.47005204302406
+      },
+      "Overlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 14.522308999998131,
+          "p95": 20.87218160000119
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 10.67526050000015,
+          "p95": 14.674246000001578
+        },
+        "medianSpeedup": 1.3603704565333958,
+        "medianReductionPercent": 26.4906117890652
+      },
+      "Overlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 80.0,
+          "p95": 80.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "Picking.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.96715,
+          "p95": 1.6069899999999993
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.0575,
+          "p95": 1.6693199999999992
+        },
+        "medianSpeedup": 0.914562647754137,
+        "medianReductionPercent": -9.34188078374607
+      },
+      "Picking.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.968517499999507,
+          "p95": 1.6088252499986986
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.0587654999999359,
+          "p95": 1.671016449999842
+        },
+        "medianSpeedup": 0.9147611062124386,
+        "medianReductionPercent": -9.318158938839494
+      },
+      "Picking.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 48.0,
+          "p95": 48.0
+        },
+        "medianSpeedup": 1.0,
+        "medianReductionPercent": 0.0
+      },
+      "PreparationAndOverlay.WallMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 16.767400000000002,
+          "p95": 24.90429999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 12.8045,
+          "p95": 18.62043999999999
+        },
+        "medianSpeedup": 1.3094927564528096,
+        "medianReductionPercent": 23.634552763099826
+      },
+      "PreparationAndOverlay.ThreadCpuMilliseconds": {
+        "baseline": {
+          "samples": 64,
+          "median": 16.7756174999995,
+          "p95": 24.915387699998774
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 12.808766000001924,
+          "p95": 18.630422300000273
+        },
+        "medianSpeedup": 1.3096981785752804,
+        "medianReductionPercent": 23.646530448120274
+      },
+      "PreparationAndOverlay.AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 68944.0,
+          "p95": 102912.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 68960.0,
+          "p95": 102944.0
+        },
+        "medianSpeedup": 0.9997679814385151,
+        "medianReductionPercent": -0.023207240659095518
+      }
+    }
+  },
+  "streaming": {
+    "distant-vector-stream-pixel": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 13.4346,
+          "p95": 54.16213999999999
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.8345,
+          "p95": 1.09367
+        },
+        "medianSpeedup": 16.098981426003593,
+        "medianReductionPercent": 93.78842689771187
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16550616.0,
+          "p95": 16551591.6
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 20136.0,
+          "p95": 20136.0
+        },
+        "medianSpeedup": 821.9415971394517,
+        "medianReductionPercent": 99.87833685465242
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 63.0,
+          "p95": 63.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": 100.0
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16515072.0,
+          "p95": 16515072.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": 100.0
+      }
+    },
+    "local-vector-stream-pixel": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 12.9176,
+          "p95": 41.429564999999975
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.1302,
+          "p95": 1.8902049999999995
+        },
+        "medianSpeedup": 11.429481507697751,
+        "medianReductionPercent": 91.25069672384963
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16551064.0,
+          "p95": 16551312.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 283024.0,
+          "p95": 283024.0
+        },
+        "medianSpeedup": 58.479365707501834,
+        "medianReductionPercent": 98.2899951326392
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 63.0,
+          "p95": 63.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.0,
+          "p95": 1.0
+        },
+        "medianSpeedup": 63.0,
+        "medianReductionPercent": 98.41269841269842
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16515072.0,
+          "p95": 16515072.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 262144.0,
+          "p95": 262144.0
+        },
+        "medianSpeedup": 63.0,
+        "medianReductionPercent": 98.41269841269842
+      }
+    },
+    "local-imagery-stream-pixel": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 479.2459,
+          "p95": 582.33343
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 2.77365,
+          "p95": 3.09585
+        },
+        "medianSpeedup": 172.78528293043462,
+        "medianReductionPercent": 99.42124700493004
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16589528.0,
+          "p95": 16597340.4
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 280816.0,
+          "p95": 280816.0
+        },
+        "medianSpeedup": 59.07614950715059,
+        "medianReductionPercent": 98.30726950157955
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 63.0,
+          "p95": 63.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.0,
+          "p95": 1.0
+        },
+        "medianSpeedup": 63.0,
+        "medianReductionPercent": 98.41269841269842
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16515072.0,
+          "p95": 16515072.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 262144.0,
+          "p95": 262144.0
+        },
+        "medianSpeedup": 63.0,
+        "medianReductionPercent": 98.41269841269842
+      }
+    },
+    "source-priority-control-pixel": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.75785,
+          "p95": 0.9251899999999998
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.7208,
+          "p95": 0.9577049999999999
+        },
+        "medianSpeedup": 1.0514012208657049,
+        "medianReductionPercent": 4.888830243451869
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 15216.0,
+          "p95": 15216.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 15432.0,
+          "p95": 15432.0
+        },
+        "medianSpeedup": 0.9860031104199067,
+        "medianReductionPercent": -1.4195583596214423
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": null
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": null
+      }
+    },
+    "distant-vector-stream-normal": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 11.4102,
+          "p95": 18.09790499999999
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.8547,
+          "p95": 1.0992499999999998
+        },
+        "medianSpeedup": 13.34994734994735,
+        "medianReductionPercent": 92.50933375400957
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16813152.0,
+          "p95": 16813400.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 20280.0,
+          "p95": 20280.0
+        },
+        "medianSpeedup": 829.0508875739645,
+        "medianReductionPercent": 99.87938014240281
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 64.0,
+          "p95": 64.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": 100.0
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16777216.0,
+          "p95": 16777216.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": 100.0
+      }
+    },
+    "local-vector-stream-normal": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 11.88875,
+          "p95": 16.005709999999997
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.04905,
+          "p95": 1.3043799999999999
+        },
+        "medianSpeedup": 11.33287259901816,
+        "medianReductionPercent": 91.17611187046577
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16813520.0,
+          "p95": 16813768.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 283088.0,
+          "p95": 283088.0
+        },
+        "medianSpeedup": 59.39326287232239,
+        "medianReductionPercent": 98.31630735265429
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 64.0,
+          "p95": 64.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.0,
+          "p95": 1.0
+        },
+        "medianSpeedup": 64.0,
+        "medianReductionPercent": 98.4375
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16777216.0,
+          "p95": 16777216.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 262144.0,
+          "p95": 262144.0
+        },
+        "medianSpeedup": 64.0,
+        "medianReductionPercent": 98.4375
+      }
+    },
+    "local-imagery-stream-normal": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 312.44925,
+          "p95": 386.97738
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.4284,
+          "p95": 2.1983199999999994
+        },
+        "medianSpeedup": 218.74072388686645,
+        "medianReductionPercent": 99.54283775685171
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16840208.0,
+          "p95": 16847912.4
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 280880.0,
+          "p95": 280880.0
+        },
+        "medianSpeedup": 59.95516946738821,
+        "medianReductionPercent": 98.3320871096129
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 64.0,
+          "p95": 64.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 1.0,
+          "p95": 1.0
+        },
+        "medianSpeedup": 64.0,
+        "medianReductionPercent": 98.4375
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 16777216.0,
+          "p95": 16777216.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 262144.0,
+          "p95": 262144.0
+        },
+        "medianSpeedup": 64.0,
+        "medianReductionPercent": 98.4375
+      }
+    },
+    "source-priority-control-normal": {
+      "PrepareMs": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.84375,
+          "p95": 1.3890449999999999
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.7502,
+          "p95": 0.8928749999999999
+        },
+        "medianSpeedup": 1.1247000799786724,
+        "medianReductionPercent": 11.087407407407412
+      },
+      "AllocatedBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 15312.0,
+          "p95": 15312.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 15528.0,
+          "p95": 15528.0
+        },
+        "medianSpeedup": 0.9860896445131375,
+        "medianReductionPercent": -1.4106583072100332
+      },
+      "RebakedTextures": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": null
+      },
+      "RebakedBaseBytes": {
+        "baseline": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "candidate": {
+          "samples": 64,
+          "median": 0.0,
+          "p95": 0.0
+        },
+        "medianSpeedup": null,
+        "medianReductionPercent": null
+      }
+    }
+  },
+  "identityChecks": 10944,
+  "identityFailures": [],
+  "passed": true
+}

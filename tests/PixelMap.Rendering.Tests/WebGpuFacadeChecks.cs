@@ -56,6 +56,7 @@ internal static class WebGpuFacadeChecks
         {
             width = inputs.Count / 20, height = 1, strideFloats = 20,
             wgsl = WebGpuMapShaders.ColorSpace + WebGpuFacadeShading.Wgsl + FixtureShader,
+            lightingCommon = WebGpuMapShaders.Common,
             mips = PixelWindowFilter.Levels.Select(level => new
                 { width = level.Width, height = level.Height, base64 = Convert.ToBase64String(level.Pixels) }),
             inputs, expected, continuity,

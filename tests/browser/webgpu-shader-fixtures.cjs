@@ -3,6 +3,7 @@
 const assert = require("node:assert/strict");
 const { readFile, writeFile } = require("node:fs/promises");
 const { join } = require("node:path");
+const { buildLightingFixture, executeLightingFixture, verifyLighting } = require("./webgpu-lighting-fixtures.cjs");
 
 function rawStrings(source) {
     return Object.fromEntries([...source.matchAll(/(?:const|readonly) string (\w+)\s*=\s*"""\r?\n([\s\S]*?)\r?\n\s*""";/g)]
@@ -23,12 +24,15 @@ async function runShaderFixtures(browser, base, output) {
     assert.ok(mip, "The production terrain reduction shader is present");
     const facadePath = process.env.PIXELMAP_FACADE_FIXTURE || join(output, "facade-fixture.json");
     const facade = JSON.parse(await readFile(facadePath, "utf8"));
+    const lighting = buildLightingFixture(facade.lightingCommon,
+        await readFile(join(__dirname, "fixtures/webgpu-lighting-a9a2842.wgsl"), "utf8"));
     const context = await browser.newContext();
     try {
         const page = await context.newPage(), url = new URL("__shader-fixtures.html", base).href;
         await page.route(url, route => route.fulfill({ contentType: "text/html", body: "<!doctype html><title>WebGPU numerical shader fixtures</title>" }));
         await page.goto(url);
-        const evaluation = page.evaluate(async ({ bloom, mip, facade }) => {
+        await page.addScriptTag({ content: "globalThis.executeLightingFixture = " + executeLightingFixture.toString() + ";" });
+        const evaluation = page.evaluate(async ({ bloom, mip, facade, lighting }) => {
             const adapter = await navigator.gpu.requestAdapter();
             if (!adapter) throw new Error("No GPU adapter for numerical fixtures");
             const device = await adapter.requestDevice(), errors = [], resources = [];
@@ -235,7 +239,8 @@ async function runShaderFixtures(browser, base, output) {
                 bloomResults.push(await bloomCase("HDR impulse Ultra odd extent", 65, 49, 6, [64, 16, 4], true));
                 // Terrain and facade fixtures use the same helpers/device but
                 // are independent of the live application's no-readback path.
-                const fixtureResult = { bloom: bloomResults, facade: await facadeCases(), terrain: await terrainCases() };
+                const fixtureResult = { bloom: bloomResults, facade: await facadeCases(), terrain: await terrainCases(),
+                    lighting: await globalThis.executeLightingFixture(device, texture, buffer, module, lighting) };
                 const scopeError = await device.popErrorScope();
                 if (scopeError) errors.push(scopeError.message);
                 await device.queue.onSubmittedWorkDone();
@@ -245,15 +250,17 @@ async function runShaderFixtures(browser, base, output) {
                 for (const resource of resources) resource.destroy();
                 device.destroy();
             }
-        }, { bloom, mip, facade });
+        }, { bloom, mip, facade, lighting });
         let timer;
         const result = await Promise.race([evaluation, new Promise((_, reject) => {
             timer = setTimeout(() => reject(new Error("Numerical WebGPU shader fixtures exceeded their 120-second GPU/readback deadline")), 120000);
         })]).finally(() => clearTimeout(timer));
         const summary = verifyBloom(result.bloom), facadeSummary = verifyFacade(result.facade, facade), terrainSummary = verifyTerrain(result.terrain);
+        const lightingSummary = verifyLighting(result.lighting, lighting);
         await writeFile(join(output, "shader-fixtures.json"), JSON.stringify({ passed: true, bloom: summary,
-            facade: facadeSummary, terrain: terrainSummary }, null, 2));
-        return { name: "numerical-webgpu-shaders", bloom: summary.length, facade: facadeSummary, terrain: terrainSummary };
+            facade: facadeSummary, terrain: terrainSummary, lighting: lightingSummary }, null, 2));
+        return { name: "numerical-webgpu-shaders", bloom: summary.length, facade: facadeSummary, terrain: terrainSummary,
+            lighting: lightingSummary };
     } finally { await context.close(); }
 }
 

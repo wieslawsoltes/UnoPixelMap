@@ -6,7 +6,7 @@ using SkiaSharp;
 
 /// <summary>Compare deferred label occlusion with the original eager layout,
 /// including unstable-sort ties that must keep their original visible winner.</summary>
-internal static class LabelPreparationChecks
+internal static partial class LabelPreparationChecks
 {
     private const int Width = 900, Height = 600;
     private const BindingFlags Members = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -75,6 +75,7 @@ internal static class LabelPreparationChecks
         }
         Console.WriteLine($"Passed {cases} exact eager/deferred label images, {ties} ambiguous-sort tie fallbacks; " +
             $"{reduced} crowded views reduced depth queries from {eagerQueries} to {deferredQueries}.");
+        RunTieSelectionChecks();
     }
 
     internal static async Task RunCityAsync()
@@ -136,6 +137,7 @@ internal static class LabelPreparationChecks
         }
         Assert(nonempty >= 8, "The Manhattan label fixtures did not render enough visible text.");
         Console.WriteLine($"Passed {cases} real-city exact label images, including {nonempty} with visible glyphs.");
+        RunRetainedCityChecks(tiles);
     }
 
     private static MapTile Labels(MapCamera camera, int pixels, bool ambiguous)
@@ -173,7 +175,8 @@ internal static class LabelPreparationChecks
 
     // The pre-optimization implementation is an independent compatibility oracle.
     // It deliberately queries all eligible labels before sorting and collision tests.
-    private static void LegacyDraw(PixelMapRenderer renderer, SKCanvas canvas, double zoom, int pixels, PixelPalette colors)
+    private static void LegacyDraw(PixelMapRenderer renderer, SKCanvas? canvas, double zoom, int pixels, PixelPalette colors,
+        WebGpuSceneOverlay? overlay = null)
     {
         var visible = Field<List<(TileGeometry Tile, TileTransform Transform, float Scale)>>(renderer, "visible");
         var buildings = Field<BuildingRasterizer>(renderer, "buildings");
@@ -230,10 +233,15 @@ internal static class LabelPreparationChecks
             if (bounds.Left < 1 || bounds.Right > Width - 1 || bounds.Top < 1 || bounds.Bottom > Height - 1) continue;
             if (occupied.Any(prior => bounds.IntersectsWith(prior))) continue;
             names.Add(label.Text); occupied.Add(bounds);
+            if (overlay is not null)
+            {
+                overlay.AddLabel(label.Text, size, x, y, colors, font.Typeface);
+                continue;
+            }
             if (label.Glyphs is null) { font.Size = size; label.Glyphs = SKTextBlob.Create(label.Text, font); }
             if (label.Glyphs is not { } glyphs) continue;
             paint.Style = SKPaintStyle.Stroke; paint.StrokeWidth = 2.8f; paint.Color = new(colors.LabelHalo);
-            canvas.DrawText(glyphs, x, y, paint);
+            canvas!.DrawText(glyphs, x, y, paint);
             paint.Style = SKPaintStyle.Fill; paint.Color = new(colors.Label);
             canvas.DrawText(glyphs, x, y, paint);
         }

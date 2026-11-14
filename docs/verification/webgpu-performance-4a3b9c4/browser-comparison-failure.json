@@ -1,0 +1,223 @@
+{
+  "variant": "candidate",
+  "repetition": 1,
+  "scenario": {
+    "name": "pixel-pan",
+    "style": "Pixel",
+    "motion": "pan"
+  },
+  "trace": [
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": 12,
+      "deltaY": 1,
+      "modifiers": 0
+    },
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": 12,
+      "deltaY": 1,
+      "modifiers": 0
+    },
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": 1,
+      "deltaY": 12,
+      "modifiers": 0
+    },
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": 1,
+      "deltaY": 12,
+      "modifiers": 0
+    },
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": -12,
+      "deltaY": -1,
+      "modifiers": 0
+    },
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": -12,
+      "deltaY": -1,
+      "modifiers": 0
+    },
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": -1,
+      "deltaY": -12,
+      "modifiers": 0
+    },
+    {
+      "x": 600,
+      "y": 401,
+      "deltaX": -1,
+      "deltaY": -12,
+      "modifiers": 0
+    }
+  ],
+  "rawSteps": [],
+  "steps": [],
+  "blockedProviders": {
+    "tiles.openfreemap.org": 17,
+    "s3.amazonaws.com": 120
+  },
+  "bounds": {
+    "x": 0,
+    "y": 60,
+    "width": 1200,
+    "height": 683
+  },
+  "traceSha256": "fd13ab5b5fb319d66d1cb2a32c3d008e8498c0b670fa80889a18d3734890d8ef",
+  "beforePose": "#v5/40.706842062/-74.008809166/17.000000/-51.0000/55.0000/Day/Map/Perspective/0.000/Relief/1.00/Pixel/Orbit/0.00/43.640/0.00",
+  "failure": "page.waitForFunction: Timeout 24385ms exceeded.\n    at waitForSettledFocus (/home/runner/work/UnoPixelMap/UnoPixelMap/tests/browser/explore.cjs:76:24)\n    at async menu (/home/runner/work/UnoPixelMap/UnoPixelMap/tests/browser/webgpu-performance.cjs:131:9)\n    at async sceneProjection (/home/runner/work/UnoPixelMap/UnoPixelMap/tests/browser/webgpu-performance.cjs:194:5)\n    at async measure (/home/runner/work/UnoPixelMap/UnoPixelMap/tests/browser/webgpu-performance.cjs:273:40)\n    at async main (/home/runner/work/UnoPixelMap/UnoPixelMap/tests/browser/webgpu-performance.cjs:432:34)",
+  "gpu": {
+    "adapters": [
+      {
+        "vendor": "google",
+        "architecture": "swiftshader",
+        "device": "",
+        "description": "",
+        "isFallbackAdapter": true,
+        "features": [
+          "core-features-and-limits",
+          "timestamp-query"
+        ]
+      }
+    ],
+    "errors": [],
+    "losses": [],
+    "deviceCount": 1,
+    "mapSubmits": 13,
+    "diagnostic": {
+      "backend": "WebGPU",
+      "frames": 13,
+      "preparations": 13,
+      "width": 1200,
+      "height": 683,
+      "physicalWidth": 1200,
+      "physicalHeight": 683,
+      "pixelSize": 2,
+      "patches": 64,
+      "triangles": 481954,
+      "draws": 22,
+      "uploadBytes": 103224,
+      "residentBytes": 88269374,
+      "frameMilliseconds": 16,
+      "submissionMilliseconds": 0.7,
+      "style": "Pixel",
+      "quality": "High",
+      "renderWidth": 600,
+      "renderHeight": 342,
+      "attachmentBytes": 2462400,
+      "imageryCount": 0,
+      "relief": true,
+      "elevation": false,
+      "zoom": 17,
+      "preparationMilliseconds": 7,
+      "overlayMilliseconds": 8.3,
+      "failure": null
+    },
+    "liveFailure": null
+  },
+  "pending": null,
+  "lastCompleted": {
+    "mode": "step",
+    "startedAt": 51454.600000000006,
+    "startMapSubmits": 12,
+    "inputs": [
+      {
+        "at": 51483.80000000002,
+        "type": "wheel",
+        "x": 600,
+        "y": 401,
+        "deltaX": -1,
+        "deltaY": -12,
+        "deltaMode": 0,
+        "modifiers": 0
+      }
+    ],
+    "submissions": [
+      {
+        "submittedAt": 51502.19999999998,
+        "submitCallMilliseconds": 0.1000000000349246,
+        "queueCompletedAt": 54847.100000000006
+      }
+    ],
+    "frames": [
+      {
+        "at": 51502.399999999994,
+        "backend": "WebGPU",
+        "frames": 13,
+        "preparations": 13,
+        "width": 1200,
+        "height": 683,
+        "physicalWidth": 1200,
+        "physicalHeight": 683,
+        "pixelSize": 2,
+        "patches": 64,
+        "triangles": 481954,
+        "draws": 22,
+        "uploadBytes": 103224,
+        "residentBytes": 88269374,
+        "frameMilliseconds": 16,
+        "submissionMilliseconds": 0.7,
+        "style": "Pixel",
+        "quality": "High",
+        "renderWidth": 600,
+        "renderHeight": 342,
+        "attachmentBytes": 2462400,
+        "imageryCount": 0,
+        "relief": true,
+        "elevation": false,
+        "zoom": 17,
+        "preparationMilliseconds": 7,
+        "overlayMilliseconds": 8.3,
+        "failure": null
+      }
+    ],
+    "raf": [
+      51466.5,
+      51483.1,
+      51499.8,
+      51516.4,
+      54849.7,
+      54866.3,
+      54916.4,
+      54933,
+      54949.7,
+      54966.3,
+      54983,
+      54999.7,
+      55016.3,
+      55033,
+      55049.7,
+      55066.3,
+      55083,
+      55099.7,
+      55116.3,
+      55133,
+      55149.7,
+      55166.3,
+      55183,
+      55199.7
+    ],
+    "longTasks": [],
+    "lastQueueCompletedAt": 54847.100000000006,
+    "bufferUploadBytes": 100912,
+    "textureUploadBytes": 2312,
+    "bufferAllocations": 0,
+    "textureAllocations": 0,
+    "finishedAt": 55200.80000000002,
+    "durationMilliseconds": 3746.2000000000116,
+    "mapSubmits": 1
+  }
+}

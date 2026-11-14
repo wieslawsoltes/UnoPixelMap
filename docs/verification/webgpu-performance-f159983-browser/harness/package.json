@@ -1,0 +1,13 @@
+{
+  "name": "unopixelmap-browser-checks",
+  "private": true,
+  "scripts": {
+    "test": "node webgpu.cjs",
+    "test:input": "node input-adapter.cjs",
+    "test:audio": "node audio.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1",
+    "pngjs": "7.0.0"
+  }
+}

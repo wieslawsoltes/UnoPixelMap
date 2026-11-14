@@ -1,0 +1,49 @@
+.NET SDK:
+ Version:           10.0.403
+ Commit:            5a2162bea6
+ Workload version:  10.0.400-manifests.a00bebb6
+ MSBuild version:   18.9.15+5a2162bea
+
+Runtime Environment:
+ OS Name:     ubuntu
+ OS Version:  26.04
+ OS Platform: Linux
+ RID:         linux-x64
+ Base Path:   /home/runner/work/_temp/pixelmap-dotnet/sdk/10.0.403/
+
+.NET workloads installed:
+There are no installed workloads to display.
+Configured to use workload sets when installing new manifests.
+No workload sets are installed. Run "dotnet workload restore" to install a workload set.
+
+Host:
+  Version:      10.0.15
+  Architecture: x64
+  Commit:       8e0f8ed231
+
+.NET SDKs installed:
+  10.0.403 [/home/runner/work/_temp/pixelmap-dotnet/sdk]
+
+.NET runtimes installed:
+  Microsoft.AspNetCore.App 10.0.14 [/home/runner/work/_temp/pixelmap-dotnet/shared/Microsoft.AspNetCore.App]
+  Microsoft.NETCore.App 10.0.14 [/home/runner/work/_temp/pixelmap-dotnet/shared/Microsoft.NETCore.App]
+  Microsoft.NETCore.App 10.0.15 [/home/runner/work/_temp/pixelmap-dotnet/shared/Microsoft.NETCore.App]
+
+Other architectures found:
+  None
+
+Environment variables:
+  DOTNET_MULTILEVEL_LOOKUP                 [0]
+  DOTNET_NOLOGO                            [1]
+  DOTNET_ROOT                              [/home/runner/work/_temp/pixelmap-dotnet]
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE        [1]
+  DOTNET_TieredCompilation                 [0]
+
+global.json file:
+  /home/runner/work/UnoPixelMap/UnoPixelMap/candidate/global.json
+
+Learn more:
+  https://aka.ms/dotnet/info
+
+Download .NET:
+  https://aka.ms/dotnet/download

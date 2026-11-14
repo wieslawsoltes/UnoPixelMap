@@ -1,0 +1,1212 @@
+{
+  "scope": "Sum preparation, overlay and twelve sparse picking probes for each raw sample before aggregating ABBA medians and p95. No GPU/browser/display timing.",
+  "driverSha256": "8605b1afe75b3e408ebead2e89625f95adce4e4b185ff0cb734a6ce6050a8aa4",
+  "datasets": {
+    "native-ci-sdk": {
+      "archive": "native-ci-sdk.zip",
+      "archiveSha256": "64eee1952b209275956182f5a0519ffffd2cb63ab0100ba3a9be6f8cb31bc568",
+      "frames": {
+        "pan-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 13.921299999999999,
+              "p95": 14.65417
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 9.5018,
+              "p95": 10.822519999999995
+            },
+            "medianSpeedup": 1.4651223978614578,
+            "medianReductionPercent": 31.746316795126894
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 13.926255000000197,
+              "p95": 14.661352849999524
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 9.506534999999872,
+              "p95": 10.82702495000022
+            },
+            "medianSpeedup": 1.4649138724046546,
+            "medianReductionPercent": 31.73660111781855
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "walk-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 5.16545,
+              "p95": 5.584365
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 5.0944,
+              "p95": 5.25791
+            },
+            "medianSpeedup": 1.0139466865577889,
+            "medianReductionPercent": 1.3754851949007274
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 5.170023499999843,
+              "p95": 5.5843043499999565
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 5.094716500000004,
+              "p95": 5.261931350000259
+            },
+            "medianSpeedup": 1.0147813916632729,
+            "medianReductionPercent": 1.4566084660899703
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 670300.0,
+              "p95": 698159.6
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 670300.0,
+              "p95": 698159.6
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 14.448450000000001,
+              "p95": 15.157110000000001
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 9.91775,
+              "p95": 11.471485
+            },
+            "medianSpeedup": 1.4568274054094932,
+            "medianReductionPercent": 31.357688887043256
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 14.453125999999884,
+              "p95": 15.163572499999372
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 9.922174000000268,
+              "p95": 11.475589350000108
+            },
+            "medianSpeedup": 1.4566491174211915,
+            "medianReductionPercent": 31.349287344479336
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "pan-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.1185,
+              "p95": 15.600089999999998
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 10.93545,
+              "p95": 11.439680000000001
+            },
+            "medianSpeedup": 1.3825219812627738,
+            "medianReductionPercent": 27.668419486060124
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.123654500001066,
+              "p95": 15.601872449997245
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 10.94003099999918,
+              "p95": 11.444686949999959
+            },
+            "medianSpeedup": 1.3824142271628115,
+            "medianReductionPercent": 27.662781505631393
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "walk-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 6.094099999999999,
+              "p95": 6.885215
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 5.5915,
+              "p95": 5.9016649999999995
+            },
+            "medianSpeedup": 1.089886434767057,
+            "medianReductionPercent": 8.247321179501476
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 6.099669000001086,
+              "p95": 6.7645570499999845
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 5.595766999999796,
+              "p95": 5.905955049999011
+            },
+            "medianSpeedup": 1.0900505685818063,
+            "medianReductionPercent": 8.261136792852197
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 670180.0,
+              "p95": 699512.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 670180.0,
+              "p95": 699512.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.3701,
+              "p95": 18.305844999999998
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 10.7403,
+              "p95": 12.005029999999998
+            },
+            "medianSpeedup": 1.4310680334813741,
+            "medianReductionPercent": 30.122120220427984
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.375639999999294,
+              "p95": 18.312044700000932
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 10.74471050000011,
+              "p95": 12.01011135000035
+            },
+            "medianSpeedup": 1.4309962097163191,
+            "medianReductionPercent": 30.118612948790403
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "pan-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.58165,
+              "p95": 16.899825
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 12.06175,
+              "p95": 12.795264999999999
+            },
+            "medianSpeedup": 1.2918233258026406,
+            "medianReductionPercent": 22.590033789746265
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.587084499999037,
+              "p95": 16.906222500000148
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 12.063108000002103,
+              "p95": 12.798719700001401
+            },
+            "medianSpeedup": 1.2921284050508641,
+            "medianReductionPercent": 22.608310745971462
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 71936.0,
+              "p95": 74880.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 71952.0,
+              "p95": 74896.0
+            },
+            "medianSpeedup": 0.9997776295307983,
+            "medianReductionPercent": -0.022241992882565675
+          }
+        },
+        "walk-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 7.7393,
+              "p95": 8.685785
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.4695,
+              "p95": 6.730580000000001
+            },
+            "medianSpeedup": 1.1962748280392612,
+            "medianReductionPercent": 16.407168606979962
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 7.744840499999555,
+              "p95": 8.638676950000809
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.4737209999993865,
+              "p95": 6.73515049999869
+            },
+            "medianSpeedup": 1.196350676836442,
+            "medianReductionPercent": 16.412468403968305
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 643964.0,
+              "p95": 725105.6
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 643964.0,
+              "p95": 725135.2
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.0771,
+              "p95": 16.91911
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 11.98995,
+              "p95": 13.579509999999999
+            },
+            "medianSpeedup": 1.3408813214400395,
+            "medianReductionPercent": 25.422184349167452
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.083088999997926,
+              "p95": 16.925716400000965
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 11.991077500000756,
+              "p95": 13.583993299998383
+            },
+            "medianSpeedup": 1.341254695418065,
+            "medianReductionPercent": 25.442945071047596
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 68992.0,
+              "p95": 102960.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 69008.0,
+              "p95": 102992.0
+            },
+            "medianSpeedup": 0.9997681428240204,
+            "medianReductionPercent": -0.023191094619656738
+          }
+        }
+      }
+    },
+    "native-ci-earlier": {
+      "archive": "native-ci.zip",
+      "archiveSha256": "e7ccb205b5451b70d0b1e0f3d765419d612ae77b650bf53e3c7373ddb1c01f70",
+      "frames": {
+        "pan-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.2665,
+              "p95": 17.529385
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 11.54365,
+              "p95": 13.002649999999996
+            },
+            "medianSpeedup": 1.4091296946806253,
+            "medianReductionPercent": 29.034211416100586
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.273010499999828,
+              "p95": 17.536057849999928
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 11.548306499999626,
+              "p95": 13.007779850000174
+            },
+            "medianSpeedup": 1.4091252687136728,
+            "medianReductionPercent": 29.033988517369004
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "walk-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 6.5456,
+              "p95": 7.070525
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.2615,
+              "p95": 6.6665149999999995
+            },
+            "medianSpeedup": 1.0453725145731854,
+            "medianReductionPercent": 4.340320215106342
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 6.550135500000579,
+              "p95": 7.077050649999182
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.266105999999581,
+              "p95": 6.671877350000591
+            },
+            "medianSpeedup": 1.0453279117846102,
+            "medianReductionPercent": 4.336238540423665
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 670300.0,
+              "p95": 698159.6
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 670300.0,
+              "p95": 698159.6
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.900399999999998,
+              "p95": 18.176624999999998
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 12.09515,
+              "p95": 13.784019999999998
+            },
+            "medianSpeedup": 1.397287342447179,
+            "medianReductionPercent": 28.432758987952933
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.90602699999954,
+              "p95": 18.182797600000505
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 12.100060500000836,
+              "p95": 13.789120600001024
+            },
+            "medianSpeedup": 1.3971853281228115,
+            "medianReductionPercent": 28.42753356538964
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "pan-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.4467,
+              "p95": 18.66527
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 13.259049999999998,
+              "p95": 13.897929999999999
+            },
+            "medianSpeedup": 1.3158333364758412,
+            "medianReductionPercent": 24.00253343039086
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.452546999999868,
+              "p95": 18.672923700001046
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 13.264818500000729,
+              "p95": 13.903614799999833
+            },
+            "medianSpeedup": 1.3157019072668736,
+            "medianReductionPercent": 23.994941827110793
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "walk-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 7.2537,
+              "p95": 7.731775
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.93995,
+              "p95": 7.391905
+            },
+            "medianSpeedup": 1.045209259432705,
+            "medianReductionPercent": 4.325378772212806
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 7.2586679999994885,
+              "p95": 7.735665600001448
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.9445509999986825,
+              "p95": 7.397505150000233
+            },
+            "medianSpeedup": 1.0452321539579543,
+            "medianReductionPercent": 4.327474407161591
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 670180.0,
+              "p95": 699512.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 670180.0,
+              "p95": 699512.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.91075,
+              "p95": 18.840265000000002
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 13.20665,
+              "p95": 14.892299999999997
+            },
+            "medianSpeedup": 1.3561917670264603,
+            "medianReductionPercent": 26.264115126390575
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.917544000000817,
+              "p95": 18.848436200000016
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 13.212249999999585,
+              "p95": 14.899317700000571
+            },
+            "medianSpeedup": 1.356131166152728,
+            "medianReductionPercent": 26.260820121334806
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "pan-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.91905,
+              "p95": 19.02505
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.8935,
+              "p95": 15.99466
+            },
+            "medianSpeedup": 1.2031456675731023,
+            "medianReductionPercent": 16.884544660570732
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.92496800000299,
+              "p95": 19.031415850002123
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.898982999998225,
+              "p95": 16.00065229999709
+            },
+            "medianSpeedup": 1.203100104215511,
+            "medianReductionPercent": 16.88139694310339
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 71936.0,
+              "p95": 74880.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 71952.0,
+              "p95": 74896.0
+            },
+            "medianSpeedup": 0.9997776295307983,
+            "medianReductionPercent": -0.022241992882565675
+          }
+        },
+        "walk-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 9.299150000000001,
+              "p95": 9.857215
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 8.0848,
+              "p95": 8.393935
+            },
+            "medianSpeedup": 1.150201612903226,
+            "medianReductionPercent": 13.058720420683622
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 9.30538549999801,
+              "p95": 9.862547349999659
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 8.090388500002518,
+              "p95": 8.399277999998048
+            },
+            "medianSpeedup": 1.1501778313853672,
+            "medianReductionPercent": 13.05692278945082
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 643964.0,
+              "p95": 725105.6
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 643964.0,
+              "p95": 725135.2
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 18.409950000000002,
+              "p95": 19.37892
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.6231,
+              "p95": 16.468355
+            },
+            "medianSpeedup": 1.2589635576587728,
+            "medianReductionPercent": 20.569583295989403
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 18.41572350000024,
+              "p95": 19.385568150002108
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.626679500001046,
+              "p95": 16.474188199998025
+            },
+            "medianSpeedup": 1.2590501829208005,
+            "medianReductionPercent": 20.575048273282036
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 68992.0,
+              "p95": 102960.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 69008.0,
+              "p95": 102992.0
+            },
+            "medianSpeedup": 0.9997681428240204,
+            "medianReductionPercent": -0.023191094619656738
+          }
+        }
+      }
+    },
+    "native-local": {
+      "archive": "native-local.zip",
+      "archiveSha256": "8f75dadde7dd24a941a72a6119c889cea77f973a8c27beb52c04255fa44a0675",
+      "frames": {
+        "pan-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 14.395700000000001,
+              "p95": 16.316264999999998
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 10.501750000000001,
+              "p95": 14.067029999999999
+            },
+            "medianSpeedup": 1.3707905825219606,
+            "medianReductionPercent": 27.049396694846372
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 14.403582499999857,
+              "p95": 16.325060500000188
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 10.508652999999867,
+              "p95": 14.074036400000509
+            },
+            "medianSpeedup": 1.3706402238231712,
+            "medianReductionPercent": 27.04139404207271
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "walk-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 5.68685,
+              "p95": 6.90931
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.4049,
+              "p95": 11.176419999999991
+            },
+            "medianSpeedup": 0.8878905213196147,
+            "medianReductionPercent": -12.626497973394768
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 5.694104000000152,
+              "p95": 6.92953169999987
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.412044000000378,
+              "p95": 11.0775962000001
+            },
+            "medianSpeedup": 0.8880325836815556,
+            "medianReductionPercent": -12.608480631899365
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 670300.0,
+              "p95": 698159.6
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 670300.0,
+              "p95": 698159.6
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-pixel": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.3382,
+              "p95": 17.680164999999995
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 11.35405,
+              "p95": 13.39959
+            },
+            "medianSpeedup": 1.3509012202694193,
+            "medianReductionPercent": 25.975342608650298
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.346251999999822,
+              "p95": 17.690853650000186
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 11.350542499999847,
+              "p95": 13.379220500000201
+            },
+            "medianSpeedup": 1.3520280638568622,
+            "medianReductionPercent": 26.037038229269417
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "pan-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.488500000000002,
+              "p95": 23.71343499999999
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 13.6299,
+              "p95": 16.981049999999996
+            },
+            "medianSpeedup": 1.209730078723982,
+            "medianReductionPercent": 17.336931800952193
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 16.49985849999939,
+              "p95": 23.729225850000685
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 13.63921399999981,
+              "p95": 16.992609699998045
+            },
+            "medianSpeedup": 1.2097367560916354,
+            "medianReductionPercent": 17.33738807517462
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "walk-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 7.40545,
+              "p95": 11.379984999999998
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.5394,
+              "p95": 11.178954999999991
+            },
+            "medianSpeedup": 1.1324356974645993,
+            "medianReductionPercent": 11.694765341741565
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 7.388508500000171,
+              "p95": 10.118767550000209
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 6.547480500000347,
+              "p95": 11.185989849999705
+            },
+            "medianSpeedup": 1.1284506307425854,
+            "medianReductionPercent": 11.382919840990969
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 670180.0,
+              "p95": 699512.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 670180.0,
+              "p95": 699512.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-normal": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.95295,
+              "p95": 18.996949999999995
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 12.364899999999999,
+              "p95": 14.881555
+            },
+            "medianSpeedup": 1.2901802683402213,
+            "medianReductionPercent": 22.49145142434472
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 15.961003500000515,
+              "p95": 19.008343399997823
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 12.349175000000287,
+              "p95": 14.887252000000535
+            },
+            "medianSpeedup": 1.292475286810669,
+            "medianReductionPercent": 22.629081561194518
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14256.0,
+              "p95": 14256.0
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "pan-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.112099999999998,
+              "p95": 22.29736499999999
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.34375,
+              "p95": 15.900954999999996
+            },
+            "medianSpeedup": 1.1930004357298474,
+            "medianReductionPercent": 16.177733884210575
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.12058949999664,
+              "p95": 22.309926899998924
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.374319000000469,
+              "p95": 15.910632599998552
+            },
+            "medianSpeedup": 1.1910539553210195,
+            "medianReductionPercent": 16.04074731186511
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 71936.0,
+              "p95": 74880.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 71952.0,
+              "p95": 75106.8
+            },
+            "medianSpeedup": 0.9997776295307983,
+            "medianReductionPercent": -0.022241992882565675
+          }
+        },
+        "walk-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 8.4835,
+              "p95": 13.194074999999998
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 7.6385000000000005,
+              "p95": 12.625849999999994
+            },
+            "medianSpeedup": 1.1106238135759636,
+            "medianReductionPercent": 9.960511581304877
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 8.490624999998545,
+              "p95": 13.203845800000996
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 7.645920000000842,
+              "p95": 12.636877699999962
+            },
+            "medianSpeedup": 1.110477875781804,
+            "medianReductionPercent": 9.94867868970597
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 643964.0,
+              "p95": 725105.6
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 643964.0,
+              "p95": 725135.2
+            },
+            "medianSpeedup": 1.0,
+            "medianReductionPercent": 0.0
+          }
+        },
+        "orbit-roblox": {
+          "PreparationOverlayAndPicking.WallMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.687150000000003,
+              "p95": 27.558284999999977
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.046299999999999,
+              "p95": 19.88348
+            },
+            "medianSpeedup": 1.2592034913108794,
+            "medianReductionPercent": 20.584718284178084
+          },
+          "PreparationOverlayAndPicking.ThreadCpuMilliseconds": {
+            "baseline": {
+              "samples": 64,
+              "median": 17.697359499999948,
+              "p95": 27.572300250001874
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 14.056657000000996,
+              "p95": 19.89681025000045
+            },
+            "medianSpeedup": 1.259002015913079,
+            "medianReductionPercent": 20.572009626627985
+          },
+          "PreparationOverlayAndPicking.AllocatedBytes": {
+            "baseline": {
+              "samples": 64,
+              "median": 68992.0,
+              "p95": 102960.0
+            },
+            "candidate": {
+              "samples": 64,
+              "median": 69008.0,
+              "p95": 102992.0
+            },
+            "medianSpeedup": 0.9997681428240204,
+            "medianReductionPercent": -0.023191094619656738
+          }
+        }
+      }
+    }
+  }
+}

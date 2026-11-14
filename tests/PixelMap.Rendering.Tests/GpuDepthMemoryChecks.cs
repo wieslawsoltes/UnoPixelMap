@@ -35,6 +35,11 @@ internal static class GpuDepthMemoryChecks
             // A right-hand pixel prepares only the ordinary background. The folded
             // left patch then generates enough real clipped triangle memberships
             // to exceed the production budget after this answer has been cached.
+            // A terrain-only pick intentionally does not create a full occlusion
+            // sample; establish and verify that precondition through visibility.
+            frame.Depth.CoversAt(1900.25f, 500.75f, 0);
+            Assert(((IDictionary)Field(frame.Depth, "samples")).Contains(500 * width + 1900),
+                "The pressure transition did not begin with a complete cached pixel.");
             frame.Depth.TryTerrain(1900, 500, out float beforeZ, out float beforeW, out float beforePhysical);
             Assert(DepthPreparationBenchmark.IndexCapacityBytes(frame.Depth) < IndexBudget,
                 "The pressure fixture did not begin on the indexed path.");

@@ -1,0 +1,19 @@
+{
+  "id": 14027586572,
+  "name": "webgpu-native-performance-evidence",
+  "size_in_bytes": 285496,
+  "url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14027586572",
+  "archive_download_url": "https://api.github.com/repos/wieslawsoltes/UnoPixelMap/actions/artifacts/14027586572/zip",
+  "expired": false,
+  "created_at": "2026-11-13T10:04:35Z",
+  "expires_at": "2026-11-27T10:04:34Z",
+  "updated_at": "2026-11-13T10:04:35Z",
+  "digest": "sha256:e4121c50b06b4049c8458b5516969b80cb9fe36bb3865f4429036ea4062c60ff",
+  "workflow_run": {
+    "id": 43405625411,
+    "repository_id": 1443492055,
+    "head_repository_id": 1443492055,
+    "head_branch": "perf/webgpu-frame-throughput",
+    "head_sha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+  }
+}

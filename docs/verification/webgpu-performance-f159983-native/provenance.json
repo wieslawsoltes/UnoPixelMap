@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "run": {
+    "id": 43405625411,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411",
+    "jobId": 131819284919,
+    "jobUrl": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/job/131819284919",
+    "jobName": "Frozen native CPU comparison",
+    "jobConclusion": "success",
+    "parentWorkflowConclusion": "Not asserted by this native evidence bundle."
+  },
+  "artifact": {
+    "id": 14027586572,
+    "name": "webgpu-native-performance-evidence",
+    "createdAtUtc": "2026-11-13T10:04:35Z",
+    "expiresAtUtc": "2026-11-27T10:04:34Z",
+    "originalArchive": "native-original.zip",
+    "bytes": 285496,
+    "sha256": "e4121c50b06b4049c8458b5516969b80cb9fe36bb3865f4429036ea4062c60ff",
+    "githubDigest": "sha256:e4121c50b06b4049c8458b5516969b80cb9fe36bb3865f4429036ea4062c60ff"
+  },
+  "sources": {
+    "baseline": {
+      "commit": "a9a284263da76a201114381467bf45aa4823a2d6",
+      "tree": "e4787159a5c29c1fbd149af7315eca7ed0b8b82d",
+      "uncommitted": ""
+    },
+    "candidate": {
+      "commit": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+      "tree": "35584c004b091eedc72198bf15afe8a7f5215dfa",
+      "uncommitted": ""
+    }
+  },
+  "productionSourceTrees": {
+    "baseline": "28ab03003b550f18f1cbf8eb24c6fb8e7ae8c302",
+    "candidate": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+    "earlierMeasuredHead": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56",
+    "earlierMeasuredHeadSrcTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+    "candidateMatchesEarlierProductionSrc": true
+  },
+  "runner": {
+    "cpuModels": [
+      "AMD EPYC 7763 64-Core Processor"
+    ],
+    "processorsAvailable": 4,
+    "affinity": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "platform": "Linux-7.0.0-1019-azure-x86_64-with-glibc2.43",
+    "operatingSystem": "Ubuntu 26.04.1 LTS",
+    "architecture": "x86_64",
+    "sdkVersion": "10.0.403",
+    "runtime": ".NET 10.0.15",
+    "tieredCompilation": false,
+    "dotnetInfo": "dotnet-info.txt"
+  },
+  "protocol": {
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "warmupSamplesPerWorkloadAndRun": 32,
+    "measuredSamplesPerWorkloadAndRun": 32,
+    "pooledSamplesPerVariantAndWorkload": 64,
+    "movingWorkloads": 9,
+    "sourceStreamingWorkloads": 8,
+    "rawMeasuredSamples": 2176,
+    "movingViewport": {
+      "width": 1200,
+      "height": 700
+    },
+    "streamingViewport": {
+      "width": 960,
+      "height": 640
+    },
+    "font": "DejaVu Sans; 6253 glyphs; SHA256 b4c632e3cdf9acc7f28758fb5a323c8524d7fc6660d46904d9b6cbe2809c419c",
+    "fontSha256": "b4c632e3cdf9acc7f28758fb5a323c8524d7fc6660d46904d9b6cbe2809c419c",
+    "driver": "compare-native.py",
+    "driverSha256": "8605b1afe75b3e408ebead2e89625f95adce4e4b185ff0cb734a6ce6050a8aa4",
+    "frozenHarnessFiles": {
+      "tests/PixelMap.Rendering.Performance/PixelMap.Rendering.Performance.csproj": "50904c16db5ea7af7aa14c73f0062aa01ab8327d92ece6c111044a13153986b2",
+      "tests/PixelMap.Rendering.Performance/Program.cs": "38fc439d4673cee8d6c352a169496e7b758b7975be94aaea0ccdc41639e4934d",
+      "tests/PixelMap.Rendering.Performance/WebGpuFrameBenchmark.cs": "10debb8441cc358da3027b1a84f6d61979d4c2a7b077517ede1ccf1172a13e80",
+      "tests/PixelMap.Rendering.Tests/TestLabelFont.cs": "792555194fb0272d8ba3ac8e48dfc2e8b08e8dec8a3ba153b7c2ae4f62638979",
+      "tests/PixelMap.Rendering.Tests/TerrainArtworkInvalidationChecks.cs": "8e42f7c4dbc56decf2143be8ac621b73d51567c513e7d549c9f21ffc3fc369ef"
+    }
+  },
+  "independence": {
+    "earlierEvidence": "../webgpu-performance-4a3b9c4/",
+    "earlierCpu": "AMD EPYC 9V74 80-Core Processor",
+    "policy": "Retain this EPYC 7763 replication independently. Do not pool samples or subtract timings across runner generations."
+  },
+  "scope": "Native CPU preparation/overlay/picking and source invalidation; no device, GPU timing, browser or display FPS."
+}

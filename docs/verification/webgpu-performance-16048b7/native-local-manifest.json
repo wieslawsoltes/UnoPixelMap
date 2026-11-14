@@ -1,0 +1,50 @@
+{
+  "scope": "Native CPU preparation/overlay/picking and source invalidation; no device, GPU timing, browser or display FPS.",
+  "order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "warmupFrames": 32,
+  "measuredFramesPerRun": 32,
+  "tieredCompilation": false,
+  "fontSha256": "57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "architecture": "x86_64",
+  "processor": "",
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "sources": {
+    "baseline": {
+      "commit": "a9a284263da76a201114381467bf45aa4823a2d6",
+      "tree": "e4787159a5c29c1fbd149af7315eca7ed0b8b82d",
+      "uncommitted": ""
+    },
+    "candidate": {
+      "commit": "16048b7981ba2b08f57f437dc833457a886df56d",
+      "tree": "aae194122c6f3770937782d0fa0321d4791a489a",
+      "uncommitted": ""
+    }
+  },
+  "frozenHarnessFiles": {
+    "tests/PixelMap.Rendering.Performance/PixelMap.Rendering.Performance.csproj": "50904c16db5ea7af7aa14c73f0062aa01ab8327d92ece6c111044a13153986b2",
+    "tests/PixelMap.Rendering.Performance/Program.cs": "38fc439d4673cee8d6c352a169496e7b758b7975be94aaea0ccdc41639e4934d",
+    "tests/PixelMap.Rendering.Performance/WebGpuFrameBenchmark.cs": "10debb8441cc358da3027b1a84f6d61979d4c2a7b077517ede1ccf1172a13e80",
+    "tests/PixelMap.Rendering.Tests/TestLabelFont.cs": "792555194fb0272d8ba3ac8e48dfc2e8b08e8dec8a3ba153b7c2ae4f62638979",
+    "tests/PixelMap.Rendering.Tests/TerrainArtworkInvalidationChecks.cs": "8e42f7c4dbc56decf2143be8ac621b73d51567c513e7d549c9f21ffc3fc369ef"
+  },
+  "driverSha256": "1ba4a61104665e5c5aaaf951f646c59fa8539ad0e083439ba2026a9d3ad8c8be",
+  "cpuModels": [
+    "AMD EPYC 9V74 80-Core Processor"
+  ]
+}

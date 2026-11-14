@@ -100,27 +100,37 @@ function installRenderGraphProbe() {
             for (let next = index + 1; next < submitted.length && submitted[next].kind === "copy"; next++) {
                 copies.push(submitted[next]); consumed.add(next);
             }
-            check(copies.length === count && dirty.length === count, "each dirty layer must have exactly one immediately following copy");
+            check(copies.length > 0 && copies.length <= count && dirty.length === count,
+                "dirty layers must have immediately following, bounded array copies");
             const versions = [];
-            for (let i = 0; i < copies.length; i++) {
-                const copy = copies[i], layer = dirty[i];
+            let copiedLayers = 0;
+            for (const copy of copies) {
                 check(copy.source?.textureId === scratch.id && copy.destination?.textureId === artwork.id,
                     "copy must move this reduction's scratch into its artwork array");
                 check(copy.source?.mip === 0 && copy.destination?.mip === level,
                     "copy must read scratch mip zero and write this reduction's destination mip");
-                check(copy.source?.layer === layer && copy.destination?.layer === layer,
-                    "copy source/destination layers must follow the uploaded dirty table exactly");
+                check(copy.source?.layer === copy.destination?.layer,
+                    "copy source/destination must retain physical layer identity");
                 check(copy.source?.origin?.[0] === 0 && copy.source?.origin?.[1] === 0 &&
                     copy.destination?.origin?.[0] === 0 && copy.destination?.origin?.[1] === 0,
                     "copy must begin at the origin of both mip rectangles");
-                check(copy.extent?.[0] === width && copy.extent?.[1] === height && copy.extent?.[2] === 1,
-                    "copy must cover the full destination mip and exactly one layer");
-                const version = artwork.uploads[`0:${layer}`];
-                check(Number.isInteger(version) && version > 0, "source layer must have an observed base upload");
-                check(level === 1 || artwork.copiedVersions[`${level - 1}:${layer}`] === version,
-                    "previous mip must already contain the latest base upload before reduction");
-                versions.push(version);
+                const depth = copy.extent?.[2];
+                check(copy.extent?.[0] === width && copy.extent?.[1] === height &&
+                    Number.isInteger(depth) && depth > 0 && depth <= artwork.layers,
+                    "copy must cover the full destination mip and a bounded nonempty layer run");
+                if (!Number.isInteger(depth) || depth <= 0 || depth > artwork.layers) continue;
+                for (let offset = 0; offset < depth; offset++) {
+                    const layer = copy.destination?.layer + offset;
+                    check(layer === dirty[copiedLayers++],
+                        "every copied layer must follow the dirty table exactly, without holes, duplicates or omissions");
+                    const version = artwork.uploads[`0:${layer}`];
+                    check(Number.isInteger(version) && version > 0, "source layer must have an observed base upload");
+                    check(level === 1 || artwork.copiedVersions[`${level - 1}:${layer}`] === version,
+                        "previous mip must already contain the latest base upload before reduction");
+                    versions.push(version);
+                }
             }
+            check(copiedLayers === count, "array copies must cover exactly the dispatched dirty layers");
             // An incomplete, stale or incorrectly ordered batch cannot make the
             // resident mip chain appear current in a later retained frame.
             if (valid) for (let i = 0; i < dirty.length; i++)

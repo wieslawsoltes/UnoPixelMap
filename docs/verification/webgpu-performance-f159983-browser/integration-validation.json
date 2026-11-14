@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "observedAtUtc": "2026-11-13 10:22:03 UTC",
+  "repository": "https://github.com/wieslawsoltes/UnoPixelMap",
+  "pullRequest": 2,
+  "workflow": {
+    "id": 415184912,
+    "name": "Uno 7 · WebGPU migration",
+    "runId": 43405625433,
+    "runNumber": 44,
+    "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "provenance": {
+    "pullRequestHead": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+    "actualIntegrationCheckout": "6f0bff0a45db4464044a03bfba52abd8605bebc0",
+    "checkoutParents": [
+      "a9a284263da76a201114381467bf45aa4823a2d6",
+      "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    ],
+    "checkoutTree": "35584c004b091eedc72198bf15afe8a7f5215dfa",
+    "headTree": "35584c004b091eedc72198bf15afe8a7f5215dfa",
+    "checkoutAndHeadTreesEqual": true,
+    "srcTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+    "originalProductionHead": "4a3b9c412ab7bb114795a6d4e5281e97508f4d56",
+    "srcUnchangedFromOriginalProductionHead": true,
+    "verification": "Actual checkout SHA taken from both browser job logs; commit/tree/parents and harness bytes verified from local Git objects. Artifact API metadata independently identifies the exact PR head."
+  },
+  "jobs": [
+    {
+      "id": 131819164063,
+      "name": "regression",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/job/131819164063",
+      "completedSuccessfulStepCount": 18,
+      "failedOrIncompleteSteps": []
+    },
+    {
+      "id": 131819164366,
+      "name": "WebGPU presentation preflight",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/job/131819164366",
+      "completedSuccessfulStepCount": 9,
+      "failedOrIncompleteSteps": []
+    },
+    {
+      "id": 131819408062,
+      "name": "WebGPU browser (Release)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/job/131819408062",
+      "completedSuccessfulStepCount": 17,
+      "failedOrIncompleteSteps": []
+    },
+    {
+      "id": 131819408410,
+      "name": "WebGPU browser (Debug)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/job/131819408410",
+      "completedSuccessfulStepCount": 17,
+      "failedOrIncompleteSteps": []
+    }
+  ],
+  "configurations": {
+    "debug": {
+      "jobId": 131819408410,
+      "scenarioCount": 34,
+      "conclusion": "success",
+      "evidenceSource": "Downloaded complete GitHub Actions job log; exact extracted terminal and checkout lines below.",
+      "checkout": [
+        "2026-11-13T10:00:39.8981896Z HEAD is now at 6f0bff0 Merge f159983c68a72bd4fc8d27d592ba3721bf4689c3 into a9a284263da76a201114381467bf45aa4823a2d6",
+        "2026-11-13T10:00:39.9052764Z 6f0bff0a45db4464044a03bfba52abd8605bebc0"
+      ],
+      "terminal": [
+        "2026-11-13T10:11:56.7649162Z WebGPU integration passed: 34 scenarios"
+      ],
+      "packageIdentity": [
+        "2026-11-13T10:03:43.8417116Z Package identity checks passed: root and legacy configuration layouts, deterministic/repeatable/incremental publishing, runtime/adapters/assets/config identity, references, gzip/Brotli reuse, mismatched/missing config preflight and read-only retry.",
+        "2026-11-13T10:03:46.5039138Z Published artifact: package_dc7d03ef6db89c3c6a30e7a0b37ce0a722c7cb2f8a4aefe7082358f5ce955b87; 89 boot resources and 210 compressed representations verified; two passes preserve all artifact bytes."
+      ]
+    },
+    "release": {
+      "jobId": 131819408062,
+      "scenarioCount": 34,
+      "conclusion": "success",
+      "evidenceSource": "Downloaded complete GitHub Actions job log; exact extracted terminal and checkout lines below.",
+      "checkout": [
+        "2026-11-13T10:00:31.2572071Z HEAD is now at 6f0bff0 Merge f159983c68a72bd4fc8d27d592ba3721bf4689c3 into a9a284263da76a201114381467bf45aa4823a2d6",
+        "2026-11-13T10:00:31.2644538Z 6f0bff0a45db4464044a03bfba52abd8605bebc0"
+      ],
+      "terminal": [
+        "2026-11-13T10:20:19.1744673Z WebGPU integration passed: 34 scenarios"
+      ],
+      "packageIdentity": [
+        "2026-11-13T10:12:19.8624706Z Package identity checks passed: root and legacy configuration layouts, deterministic/repeatable/incremental publishing, runtime/adapters/assets/config identity, references, gzip/Brotli reuse, mismatched/missing config preflight and read-only retry.",
+        "2026-11-13T10:12:23.4819190Z Published artifact: package_e5e831a1fb68b51c587e0316de863ed05b2ea3919014d65cf69ba65bbaa20925; 73 boot resources and 254 compressed representations verified; two passes preserve all artifact bytes."
+      ]
+    }
+  },
+  "artifacts": [
+    {
+      "id": 14028646293,
+      "name": "uno7-webgpu-Release-browser-evidence",
+      "bytes": 19401359,
+      "digest": "sha256:bd5d93eebeb22ccb24962b6751f44a522d539daf1ec350e7f2512f742997f5ef",
+      "createdAt": "2026-11-13T10:20:21Z",
+      "expiresAt": "2026-11-27T10:20:19Z",
+      "expired": false,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/artifacts/14028646293",
+      "headSha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    },
+    {
+      "id": 14028501672,
+      "name": "uno7-webgpu-Release-publish",
+      "bytes": 97020063,
+      "digest": "sha256:13194d2efb82cf358d87e9efa2019d88a48290a7c38e55c213958caf0e91bbb8",
+      "createdAt": "2026-11-13T10:20:26Z",
+      "expiresAt": "2026-11-20T10:20:21Z",
+      "expired": false,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/artifacts/14028501672",
+      "headSha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    },
+    {
+      "id": 14027128757,
+      "name": "uno7-webgpu-Debug-browser-evidence",
+      "bytes": 19399303,
+      "digest": "sha256:1f84ad681bb2dd4e1806af9e919264cb5743a044e44c77d7a5170d62bacec6e5",
+      "createdAt": "2026-11-13T10:11:59Z",
+      "expiresAt": "2026-11-27T10:11:57Z",
+      "expired": false,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/artifacts/14027128757",
+      "headSha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    },
+    {
+      "id": 14026813244,
+      "name": "uno7-reference-rendering",
+      "bytes": 6236,
+      "digest": "sha256:4440ae4e08f580bc9416884e4e9cae71489bf2e2b4581d25985cf89451fa4104",
+      "createdAt": "2026-11-13T10:01:48Z",
+      "expiresAt": "2027-02-11T09:59:29Z",
+      "expired": false,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/artifacts/14026813244",
+      "headSha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    },
+    {
+      "id": 14026664920,
+      "name": "uno7-webgpu-Debug-publish",
+      "bytes": 58855148,
+      "digest": "sha256:427eda6ca149aeea133821eb2fd82c87f2d1f76b245e1c92f335d5bcbff3c729",
+      "createdAt": "2026-11-13T10:12:02Z",
+      "expiresAt": "2026-11-20T10:11:59Z",
+      "expired": false,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/artifacts/14026664920",
+      "headSha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    },
+    {
+      "id": 14026559027,
+      "name": "uno7-webgpu-presentation",
+      "bytes": 1656,
+      "digest": "sha256:5278f9c48eb43de12a5a82959c849bc42ec2bbe721fdf938f420d5efc332400a",
+      "createdAt": "2026-11-13T10:00:02Z",
+      "expiresAt": "2026-11-27T10:00:01Z",
+      "expired": false,
+      "url": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433/artifacts/14026559027",
+      "headSha": "f159983c68a72bd4fc8d27d592ba3721bf4689c3"
+    }
+  ],
+  "harnessFiles": {
+    "scope": "Hashes derived from the actual integration checkout Git objects; CI logs do not print individual harness hashes. Performance harness files are recorded for source provenance only, not as integration performance execution.",
+    "commit": "6f0bff0a45db4464044a03bfba52abd8605bebc0",
+    "files": [
+      {
+        "path": ".github/workflows/uno7-webgpu.yml",
+        "gitBlobSha": "bfd5c791b5f6a9e77a089f442ef53f8765e8c9c7",
+        "sha256": "4db6d6322857734f7c432b1dedb75aa97b6e80e6038b68ead1995f87206d6ac2",
+        "bytes": 7110
+      },
+      {
+        "path": "tests/browser/webgpu.cjs",
+        "gitBlobSha": "14cbe3cefad04d65d67aa4c43d23007657f2d99a",
+        "sha256": "a8f998547c4b80acb121b8102c52920e9fbbad18a71116c51af59a6ace35c058",
+        "bytes": 70790
+      },
+      {
+        "path": "tests/browser/explore.cjs",
+        "gitBlobSha": "6a29857955a1357a6e7551984f6ec59000838d9a",
+        "sha256": "da380beec9e027680bc11bfd9c3f180f37551883fd4c78f8ec92936855d57b34",
+        "bytes": 62207
+      },
+      {
+        "path": "tests/browser/camera-replay.cjs",
+        "gitBlobSha": "d1c50b22eb386d201a4a5c66f5be394a520f2c5c",
+        "sha256": "9e3d2987136fc38d10680f8b5654050fad23006bc5c453efcd84f44bb8c4e833",
+        "bytes": 11236
+      },
+      {
+        "path": "tests/browser/camera-replay-contract.cjs",
+        "gitBlobSha": "de5aa6ed7b89848ce4dac76164a8d714ce00d790",
+        "sha256": "69430f8b256d1e088adcb8174c18a2540f7d452eba964c02e49644e7647a3a48",
+        "bytes": 7706
+      },
+      {
+        "path": "tests/browser/camera-replay-probe.cjs",
+        "gitBlobSha": "3ff3a7ce137254e0ddd4a6c4111abb32e7e36e2c",
+        "sha256": "7894b2fd47410abfcd5c83fc7464a45f4a09d8f05bfb368c7037d7cdd268b4bd",
+        "bytes": 9517
+      },
+      {
+        "path": "tests/browser/camera-replay-checks.cjs",
+        "gitBlobSha": "aa5711f965ffa104e11bc572089d63b2b6607c8b",
+        "sha256": "bba1384a1310548ee06bb45850c11650c17dc9e49b719ab829184f8c627582dc",
+        "bytes": 19690
+      },
+      {
+        "path": "tests/browser/webgpu-rendergraph-probe.cjs",
+        "gitBlobSha": "f1180d3c897d1f2ab43273ddc09268c57d3d3027",
+        "sha256": "e96a3478f5c1c4ce57dca5df3712d0980e6615ec40bed7e37ba509d38016a0e2",
+        "bytes": 20511
+      },
+      {
+        "path": "tests/browser/webgpu-shader-fixtures.cjs",
+        "gitBlobSha": "f95afb25e8503c6ece7398d118fd613793e2f950",
+        "sha256": "2ad3f043b6dda79a1cd079c46d641840f48013838503d3b9f7bec3c51c461e46",
+        "bytes": 30016
+      },
+      {
+        "path": "tests/browser/webgpu-lighting-fixtures.cjs",
+        "gitBlobSha": "06f86858e347418e6f4ce3d1a4b96fb9f96529fb",
+        "sha256": "82081620347fccd86384c7e4e169783487feea7dcb369dcb40a5938f713cb5c4",
+        "bytes": 10977
+      },
+      {
+        "path": "tests/browser/package-lock.json",
+        "gitBlobSha": "a92dc083e37c23b037e185b5d166399728abba78",
+        "sha256": "847ef7a309c654cd2bffd65c0ceecbcffbf268dae0134e1b59f0b0cddcd820be",
+        "bytes": 1544
+      },
+      {
+        "path": "tests/browser/webgpu-performance.cjs",
+        "gitBlobSha": "7baad42f62b95bc8c8a4e71047562d62dde55aa2",
+        "sha256": "ecaabf9d241875906bc4b7e8f42a7194e8afed64b429da5b0c3a08ec51eb03fc",
+        "bytes": 32345
+      },
+      {
+        "path": "tests/browser/webgpu-performance-checks.cjs",
+        "gitBlobSha": "8569d8d177be0eb74ea714bd8c6cf91d3d50c820",
+        "sha256": "bf59860eb2f154bb630df3c14d278dbde846faea6caca4eb056c6d303531a7f6",
+        "bytes": 22553
+      }
+    ]
+  },
+  "scope": {
+    "verified": "Current-head integration, both34scenario terminal results, all4jobs and all recorded steps successful, source/tree provenance, package identity checks and emitted artifact metadata.",
+    "archiveBytesReaudited": false,
+    "reason": "Production src tree is unchanged; prior final-source integration reports and screenshots remain preserved in the repository. This validation avoids duplicating their complete artifact QA.",
+    "digestSource": "Artifact hashes above are the GitHub API digest values, not freshly downloaded/rehashed ZIP bytes.",
+    "performanceConclusion": "No paired browser latency, hardware FPS or screenshot pixel-identity conclusion is made by this integration validation."
+  }
+}

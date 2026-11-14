@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "scope": "Independent exact-head native CPU replication; no browser result is implied.",
+  "candidate": "f159983c68a72bd4fc8d27d592ba3721bf4689c3",
+  "candidateTree": "35584c004b091eedc72198bf15afe8a7f5215dfa",
+  "productionSourceTree": "cf568d7832d23566d87b188f23f8afb18bab1d2a",
+  "baseline": "a9a284263da76a201114381467bf45aa4823a2d6",
+  "run": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411",
+  "job": "https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625411/job/131819284919",
+  "jobConclusion": "success",
+  "artifactId": 14027586572,
+  "archive": "native-original.zip",
+  "archiveSha256": "e4121c50b06b4049c8458b5516969b80cb9fe36bb3865f4429036ea4062c60ff",
+  "cpu": "AMD EPYC 7763 64-Core Processor",
+  "sdkVersion": "10.0.403",
+  "runtime": ".NET 10.0.15",
+  "identityChecks": 10944,
+  "identityFailures": 0,
+  "recomputedComparisonEqualsOriginal": true,
+  "comparisonDerivedFromPerSamplePhaseSums": true,
+  "earlierIndependentEvidence": "../webgpu-performance-4a3b9c4/",
+  "files": {
+    "README.md": {
+      "bytes": 5130,
+      "sha256": "31b2a8c337c16935c220620a9da09d391270353bb356ea186c534b9b18377a3a"
+    },
+    "artifact.json": {
+      "bytes": 770,
+      "sha256": "897d970c6cb6871d34e4b8002f13917d043ad7d96489a1c2d8e69342fe3f1631"
+    },
+    "audit.json": {
+      "bytes": 6151,
+      "sha256": "337bc77da4241effb80d5ab8d5cb2de0335110869898a675e1f09e79e6b63a50"
+    },
+    "compare-native.py": {
+      "bytes": 11962,
+      "sha256": "8605b1afe75b3e408ebead2e89625f95adce4e4b185ff0cb734a6ce6050a8aa4"
+    },
+    "comparison.json": {
+      "bytes": 63888,
+      "sha256": "c7f1acbed97dde267e36960295bd9650e215baaef493e0a7830c655e2368cad8"
+    },
+    "dotnet-info.txt": {
+      "bytes": 1561,
+      "sha256": "7622e4976baa5139dc0c224f85fc6b78cc7eb50c6cdab624fa6071a76301ac78"
+    },
+    "native-original.zip": {
+      "bytes": 285496,
+      "sha256": "e4121c50b06b4049c8458b5516969b80cb9fe36bb3865f4429036ea4062c60ff"
+    },
+    "provenance.json": {
+      "bytes": 3923,
+      "sha256": "826ff96d3d19d2a66c9ca83a7f27e499e24fe9295a5ed4f487ef1eac27597d3d"
+    },
+    "run-manifest.json": {
+      "bytes": 1766,
+      "sha256": "3fa45d1c86c7ed5c29cb094ac305233cd94d444869d24003a66ab4c346f6665d"
+    }
+  },
+  "archiveMembers": {
+    "1-baseline/frames.json": {
+      "bytes": 337481,
+      "sha256": "fd791c19fb901511b4c0fee2f9d963daf54f645549df423a67f0411c2f5c10c3"
+    },
+    "1-baseline/frames.log": {
+      "bytes": 720,
+      "sha256": "91676c52225c80460c6e504c1422204de9bdbdf6748d9431ae680cd75f332a27"
+    },
+    "1-baseline/streaming.log": {
+      "bytes": 1110,
+      "sha256": "afebe5e1a6a66d7365866d06a8e53303e9fb0ae0257c16290fcefd199e14f34f"
+    },
+    "1-baseline/terrain-streaming.json": {
+      "bytes": 85416,
+      "sha256": "181a582d0c26daa0b6c062744579c7aaae28ad550fb0079d1c27f76f22c03d27"
+    },
+    "2-candidate/frames.json": {
+      "bytes": 337678,
+      "sha256": "3c23c7c92d684dc0173dc065ba13750b43e98d765dfa648211798c50cd94d199"
+    },
+    "2-candidate/frames.log": {
+      "bytes": 717,
+      "sha256": "3d8015108c19a6b92ccedb62fd2ddf3994ebe001b14b90cea2025ccc8d540714"
+    },
+    "2-candidate/streaming.log": {
+      "bytes": 1074,
+      "sha256": "fe1a2711b8f23861f3568a3a8ce07b467cf977122152b8fb10344cd6537f22b4"
+    },
+    "2-candidate/terrain-streaming.json": {
+      "bytes": 83758,
+      "sha256": "f2eec1685c86d1d4387264721efffb7d698c3a82c055754682837570d7b977ef"
+    },
+    "3-candidate/frames.json": {
+      "bytes": 337632,
+      "sha256": "e7713da776ca12285a726e3131685eaead31ba666e740afa6a07d4d7377ed6a5"
+    },
+    "3-candidate/frames.log": {
+      "bytes": 717,
+      "sha256": "165ad2d9b3a4d8628fb10903e7a193b873b6c6626fe49e3dd19a00dc0b25f756"
+    },
+    "3-candidate/streaming.log": {
+      "bytes": 1074,
+      "sha256": "0638fe107a9590bc7d165dec9506487c2c4645e9f46fd814760db3e7f81becb8"
+    },
+    "3-candidate/terrain-streaming.json": {
+      "bytes": 83765,
+      "sha256": "12e39d4ec3aa633dba4e8f1e0eb0954cf957ea23fc5e47c9645e74facbb306e9"
+    },
+    "4-baseline/frames.json": {
+      "bytes": 337568,
+      "sha256": "d74bbe3a5a1583d8b06bc1f6facc79675d341a7b96522850db984296cfca2a97"
+    },
+    "4-baseline/frames.log": {
+      "bytes": 720,
+      "sha256": "66bc6d3a1f1a787d67b981dd11a2a47811d3c820068edc48c357e30f09c4a43c"
+    },
+    "4-baseline/streaming.log": {
+      "bytes": 1110,
+      "sha256": "820fe56ecdfbbc570f50c3b6381f657d66548dc3735ddd42bf970a09a615087a"
+    },
+    "4-baseline/terrain-streaming.json": {
+      "bytes": 85420,
+      "sha256": "e49a9f03cd470ad87b4ca29715814fdea08f7856970e85578b458ba0f2d9962e"
+    },
+    "build-baseline.log": {
+      "bytes": 24863,
+      "sha256": "148faff313ab52ab1f74fbe6911f15f2cb3d5384dfb8a39c7db118a29cc2fa43"
+    },
+    "build-candidate.log": {
+      "bytes": 25035,
+      "sha256": "47ccbc8856fe943ef979f10fac56cae4e5c71f108bf671d2419a420617d0b992"
+    },
+    "comparison.json": {
+      "bytes": 63888,
+      "sha256": "c7f1acbed97dde267e36960295bd9650e215baaef493e0a7830c655e2368cad8"
+    },
+    "dotnet-info.txt": {
+      "bytes": 1561,
+      "sha256": "7622e4976baa5139dc0c224f85fc6b78cc7eb50c6cdab624fa6071a76301ac78"
+    },
+    "manifest.json": {
+      "bytes": 1766,
+      "sha256": "3fa45d1c86c7ed5c29cb094ac305233cd94d444869d24003a66ab4c346f6665d"
+    }
+  }
+}
