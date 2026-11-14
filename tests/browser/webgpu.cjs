@@ -10,6 +10,7 @@ const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
 const { installRenderGraphProbe } = require("./webgpu-rendergraph-probe.cjs");
 const { runShaderFixtures } = require("./webgpu-shader-fixtures.cjs");
+const { menu } = require("./native-menu.cjs");
 
 function parseArguments(args) {
     const addresses = args.filter(value => value !== "--preflight-only");
@@ -196,27 +197,6 @@ async function click(page, name, touch = false) {
     assert.ok(bounds?.width && bounds?.height, name + " has a usable hit target");
     const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
     if (touch) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
-}
-
-function menuItem(page, name) {
-    return page.getByRole("menuitem", { name, exact: true })
-        .or(page.getByRole("menuitemcheckbox", { name, exact: true }));
-}
-
-async function menu(page, name, submenu) {
-    await click(page, "Map appearance");
-    if (submenu) {
-        const parent = menuItem(page, submenu);
-        await parent.waitFor({ state: "visible" });
-        await parent.focus();
-        await page.keyboard.press("ArrowRight");
-    }
-    const item = menuItem(page, name);
-    await item.waitFor({ state: "visible" });
-    await item.focus();
-    await page.keyboard.press("Enter");
-    await item.waitFor({ state: "hidden" });
-    await page.mouse.move(page.viewportSize().width / 2, 20);
 }
 
 async function awaitFrame(page, predicate, argument) {
