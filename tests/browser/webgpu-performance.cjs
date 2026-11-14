@@ -16,7 +16,9 @@ const mapExtent = {width: 1200, height: 700};
 // The original and redesigned UI have different sidebar/control positions. The
 // complete captures remain evidence; this fixed, unobscured map region retains
 // strict pixel comparison for unchanged styles independently of that UI chrome.
-const comparisonRegion = {x: 400, y: 96, width: 688, height: 480};
+// This shared map region also clears the raised touch actions in the redesigned
+// paused walking HUD. captureMap verifies every visible control stays outside it.
+const comparisonRegion = {x: 400, y: 96, width: 688, height: 440};
 const camera = style => `v5/40.706846/-74.008817/17/-51/55/Day/Map/Perspective/0/Relief/1.00/${style}/Orbit/0/0/0`;
 const cases = [
     {name: "pixel-pan", style: "Pixel", motion: "pan"},
@@ -460,6 +462,27 @@ function compare(report, output, PNG) {
                         scenario.name + ": visual parity tolerance exceeded: " + JSON.stringify(difference));
             }
         }
+        // An intentional revision-to-revision palette change never permits
+        // nondeterministic artwork within either revision. Keep both complete
+        // repeated captures and apply the same numeric tolerance to their ROI.
+        const repeatability = [];
+        for (const runs of [baseline, candidate]) {
+            const first = runs.find(run => run.repetition === 1);
+            for (const run of runs.filter(run => run.repetition !== 1)) {
+                assert.equal(first.traceSha256, run.traceSha256, scenario.name + ": repeated native input matches");
+                for (const phase of ["before", "after"]) {
+                    assert.deepEqual(first[phase + "SceneProjection"], run[phase + "SceneProjection"],
+                        scenario.name + ": repeated physical camera matches");
+                    const firstImage = first[phase + "Image"].comparison, repeatedImage = run[phase + "Image"].comparison;
+                    const difference = imageDifference(PNG.sync.read(fs.readFileSync(path.join(output, firstImage.filename))),
+                        PNG.sync.read(fs.readFileSync(path.join(output, repeatedImage.filename))));
+                    repeatability.push({variant: run.variant, repetition: run.repetition, phase,
+                        reference: firstImage.filename, repeated: repeatedImage.filename, ...difference});
+                    assert.ok(difference.significantPixelFraction <= .01 && difference.meanAbsoluteChannelError <= .25,
+                        scenario.name + ": repeated artwork tolerance exceeded: " + JSON.stringify(difference));
+                }
+            }
+        }
         const baselineSummary = summarizeSteps(baseline.flatMap(run => run.steps));
         const candidateSummary = summarizeSteps(candidate.flatMap(run => run.steps));
         const ratios = {};
@@ -467,7 +490,7 @@ function compare(report, output, PNG) {
             ratios[key] = baselineSummary[key].median > 0 ? candidateSummary[key].median / baselineSummary[key].median : null;
         groups.push({scenario: scenario.name, artworkTransition: artworkChanged ? artworkTransition : null,
             baseline: baselineSummary, candidate: candidateSummary,
-            candidateOverBaselineMedian: ratios, visual,
+            candidateOverBaselineMedian: ratios, visual, repeatability,
             warmClassification: {baselineStepsWithoutTextureUploadOrResourceAllocation: baselineSummary.warmSteps,
                 candidateStepsWithoutTextureUploadOrResourceAllocation: candidateSummary.warmSteps,
                 allStepsWarm: baselineSummary.streamingSteps === 0 && candidateSummary.streamingSteps === 0}});

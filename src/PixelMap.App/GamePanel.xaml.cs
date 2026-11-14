@@ -20,6 +20,8 @@ public sealed partial class GamePanel : UserControl
     private bool _shown, _syncing;
     private long _lookTimestamp, _lastTelemetry, _lastPadPointer;
     private SessionViewState? _displayedSession;
+    private Thickness _safeInsets;
+    private double _keyboardBottom;
     private readonly record struct SessionViewState(JourneyState State, TravelMode Mode, JourneyCameraRig Rig,
         bool FreeRoam, bool FreeFlight, bool Follow, bool Muted);
     private enum PadAction { JumpBrake, Boost, Climb, Descend }
@@ -77,18 +79,31 @@ public sealed partial class GamePanel : UserControl
         ReleaseInput();
     }
 
+    public void SetViewportInsets(Thickness insets, double keyboardBottom)
+    {
+        if (_safeInsets.Equals(insets) && _keyboardBottom.Equals(keyboardBottom)) return;
+        _safeInsets = insets;
+        _keyboardBottom = keyboardBottom;
+        LayoutControls();
+    }
+
     private void LayoutControls()
     {
-        double inset = ActualWidth < 600 ? 8 : 16;
+        if (ActualWidth <= 0 || ActualHeight <= 0) return;
+        bool narrow = ActualWidth < 720;
+        double inset = narrow ? 12 : 16;
         bool compact = ActualWidth >= 600 && ActualHeight < 360;
         bool compactHud = compact && Setup.Visibility != Visibility.Visible;
-        SettingsCard.HorizontalAlignment = compact && !compactHud ? HorizontalAlignment.Center : HorizontalAlignment.Left;
-        SettingsCard.Margin = new Thickness(inset, compactHud ? 6 : inset, inset, inset);
-        SettingsCard.Padding = new Thickness(12, compactHud ? 3 : 9, 12, compactHud ? 3 : 9);
-        SettingsContent.Spacing = compactHud ? 3 : 7;
-        SettingsCard.Width = Math.Max(180, Math.Min(326, ActualWidth - 2 * inset));
-        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - 2 * inset - (compact ? 64 : 0));
-        TouchPad.Margin = new Thickness(inset, 0, inset, 8);
+        bool bottomSetup = narrow && Setup.Visibility == Visibility.Visible;
+        SettingsCard.HorizontalAlignment = bottomSetup ? HorizontalAlignment.Center : HorizontalAlignment.Left;
+        SettingsCard.VerticalAlignment = bottomSetup ? VerticalAlignment.Bottom : VerticalAlignment.Top;
+        SettingsCard.Margin = new Thickness(inset + _safeInsets.Left, inset + _safeInsets.Top,
+            inset + _safeInsets.Right, Math.Max(inset, _safeInsets.Bottom) + _keyboardBottom);
+        SettingsCard.Padding = new Thickness(16, compactHud ? 8 : 14, 16, compactHud ? 8 : 14);
+        SettingsContent.Spacing = compactHud ? 5 : 10;
+        SettingsCard.Width = Math.Max(180, Math.Min(360, ActualWidth - 2 * inset - _safeInsets.Left - _safeInsets.Right));
+        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - _keyboardBottom - _safeInsets.Top - _safeInsets.Bottom - 2 * inset - (compact ? 64 : 0));
+        TouchPad.Margin = new Thickness(inset + _safeInsets.Left, 0, inset + _safeInsets.Right, Math.Max(36, _safeInsets.Bottom + 16));
         PadActions.Orientation = compact ? Orientation.Horizontal : Orientation.Vertical;
         FlightActions.Orientation = ActualWidth < 370 ? Orientation.Vertical : Orientation.Horizontal;
     }
@@ -196,7 +211,7 @@ public sealed partial class GamePanel : UserControl
     {
         Setup.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
         SettingsToggle.Content = expanded ? "−" : "Settings";
-        SettingsToggle.Width = expanded ? 34 : 76;
+        SettingsToggle.Width = expanded ? 44 : 90;
         AutomationProperties.SetName(SettingsToggle, expanded ? "Collapse game settings" : "Expand game settings");
         LayoutControls();
     }

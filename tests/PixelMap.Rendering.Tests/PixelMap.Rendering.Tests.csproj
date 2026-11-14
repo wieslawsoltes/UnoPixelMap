@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/PixelMap.App/MapViewLink.cs" Link="MapViewLink.cs" />
+    <Compile Include="../../src/PixelMap.App/MapChromeLayout.cs" Link="MapChromeLayout.cs" />
     <Compile Include="../../src/PixelMap.Rendering/GlMapRenderer.cs" Link="Reference/GlMapRenderer.cs" />
     <Compile Include="../../src/PixelMap.Rendering/GlMapShaders.cs" Link="Reference/GlMapShaders.cs" />
     <ProjectReference Include="../../src/PixelMap.Rendering/PixelMap.Rendering.csproj" />

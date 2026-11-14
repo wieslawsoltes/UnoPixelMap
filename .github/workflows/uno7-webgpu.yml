@@ -85,6 +85,7 @@ jobs:
         run: |
           node tests/browser/audio.cjs
           node tests/browser/input-adapter.cjs
+          node tests/browser/viewport-adapter.cjs
           node tests/browser/camera-replay-checks.cjs
           node tests/browser/webgpu-lifecycle.cjs
       - uses: actions/upload-artifact@v4
@@ -137,7 +138,9 @@ jobs:
       - name: Verify immutable bootstrap and runtime package identity
         run: node tests/packaging/package-identity.cjs "${{ runner.temp }}/atlas/wwwroot"
       - name: Export independent facade references and production WGSL
-        run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-facade-output="${{ runner.temp }}/webgpu-evidence/facade-fixture.json"
+        run: |
+          dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-facade-output="${{ runner.temp }}/webgpu-evidence/facade-fixture.json"
+          dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-pixel-art-output="${{ runner.temp }}/webgpu-evidence/pixel-art-fixture.json"
       - name: Install the pinned Chromium browser
         run: |
           npm ci --prefix tests/browser

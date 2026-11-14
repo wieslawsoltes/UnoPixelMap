@@ -86,7 +86,9 @@ jobs:
           mkdir -p "${{ runner.temp }}/atlas/wwwroot"
           tar -xf "${{ runner.temp }}/pages/artifact.tar" -C "${{ runner.temp }}/atlas/wwwroot"
       - name: Export independent facade references and production WGSL
-        run: dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-facade-output="${{ runner.temp }}/screens/facade-fixture.json"
+        run: |
+          dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-facade-output="${{ runner.temp }}/screens/facade-fixture.json"
+          dotnet run --project tests/PixelMap.Rendering.Tests -c Release -- --webgpu-pixel-art-output="${{ runner.temp }}/screens/pixel-art-fixture.json"
       - name: Exercise the published map in Chromium
         run: |
           npm ci --prefix tests/browser

@@ -2,6 +2,12 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--map-chrome", StringComparer.Ordinal))
+{
+    MapChromeLayoutChecks.Run();
+    return;
+}
+
 if (args.Contains("--pixel-artwork", StringComparer.Ordinal))
 {
     PixelArtworkChecks.Run();
@@ -182,6 +188,7 @@ if (args.Contains("--styles", StringComparer.Ordinal))
 }
 
 WebGpuFacadeChecks.Run();
+MapChromeLayoutChecks.Run();
 PixelArtworkChecks.Run();
 WebGpuPixelArtChecks.Run();
 await TerrainArtworkInvalidationChecks.RunAsync();

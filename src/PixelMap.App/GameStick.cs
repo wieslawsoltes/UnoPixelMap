@@ -25,19 +25,19 @@ public sealed class GameStick : UserControl
         root.Children.Add(new Ellipse
         {
             Width = 106, Height = 106,
-            Fill = new SolidColorBrush(ColorHelper.FromArgb(220, 20, 47, 50)),
-            Stroke = new SolidColorBrush(ColorHelper.FromArgb(230, 137, 185, 161)), StrokeThickness = 1
+            Fill = new SolidColorBrush(ColorHelper.FromArgb(230, 255, 255, 255)),
+            Stroke = new SolidColorBrush(ColorHelper.FromArgb(75, 60, 60, 67)), StrokeThickness = 1
         });
         root.Children.Add(new Ellipse
         {
             Width = 62, Height = 62,
-            Stroke = new SolidColorBrush(ColorHelper.FromArgb(100, 137, 185, 161)), StrokeThickness = 1
+            Stroke = new SolidColorBrush(ColorHelper.FromArgb(60, 0, 122, 255)), StrokeThickness = 1
         });
         root.Children.Add(new Ellipse
         {
             Width = 42, Height = 42, RenderTransform = _offset,
-            Fill = new SolidColorBrush(ColorHelper.FromArgb(245, 171, 218, 181)),
-            Stroke = new SolidColorBrush(ColorHelper.FromArgb(255, 236, 242, 212)), StrokeThickness = 2
+            Fill = new SolidColorBrush(ColorHelper.FromArgb(245, 0, 122, 255)),
+            Stroke = new SolidColorBrush(ColorHelper.FromArgb(255, 255, 255, 255)), StrokeThickness = 2
         });
         Content = root;
         PointerPressed += Pressed;

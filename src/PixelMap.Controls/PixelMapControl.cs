@@ -65,18 +65,18 @@ public sealed partial class PixelMapControl : UserControl
         var dispatcher = DispatcherQueue;
         var layers = new Grid { Background = Brush(170, 187, 161) };
         _surface = new(isActive => dispatcher.TryEnqueue(() => SetGpuRenderingActive(isActive)), FramePresented);
-        _pinLabel = new TextBlock { FontSize = 12, Foreground = Brush(255, 247, 220), TextTrimming = TextTrimming.CharacterEllipsis };
+        _pinLabel = new TextBlock { FontSize = 14, Foreground = Brush(28, 28, 30), TextTrimming = TextTrimming.CharacterEllipsis };
         _pin = new Border
         {
             Child = _pinLabel,
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            Background = Brush(27, 50, 52),
-            BorderBrush = Brush(246, 192, 105),
-            BorderThickness = new(2),
-            CornerRadius = new(4),
-            Padding = new(8, 3, 8, 3),
-            MaxWidth = 230,
+            Background = Brush(255, 255, 255),
+            BorderBrush = Brush(0, 122, 255),
+            BorderThickness = new(1),
+            CornerRadius = new(12),
+            Padding = new(12, 8, 12, 8),
+            MaxWidth = 260,
             IsHitTestVisible = false,
             RenderTransform = _pinPosition,
             Visibility = Visibility.Collapsed
@@ -159,6 +159,9 @@ public sealed partial class PixelMapControl : UserControl
     public string StatusText => $"{_layerStatus} · {(_surface.Failure is not null ? "WebGPU unavailable" : IsGpuRenderingActive ? "WebGPU active" : "Starting WebGPU")}";
     public event EventHandler? CameraChanged;
     public event EventHandler? StatusChanged;
+    public event EventHandler? SelectionChanged;
+    public MapSelection? Selection => _marker is { } marker
+        ? new MapSelection(marker.Latitude, marker.Longitude, _pinLabel.Text) : null;
     private int _frameUpdateQueued;
 
     private void FramePresented()
@@ -182,15 +185,19 @@ public sealed partial class PixelMapControl : UserControl
 
     public void SetMarker(double latitude, double longitude, string label)
     {
+        bool changed = _marker != (latitude, longitude) || _pinLabel.Text != label;
         _marker = (latitude, longitude);
         _pinLabel.Text = label;
         PositionMarker();
+        if (changed) SelectionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ClearMarker()
     {
+        bool changed = _marker.HasValue;
         _marker = null;
         _pin.Visibility = Visibility.Collapsed;
+        if (changed) SelectionChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void PositionMarker()

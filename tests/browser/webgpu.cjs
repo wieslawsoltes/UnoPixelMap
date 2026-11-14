@@ -10,7 +10,9 @@ const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
 const { installRenderGraphProbe } = require("./webgpu-rendergraph-probe.cjs");
 const { runShaderFixtures } = require("./webgpu-shader-fixtures.cjs");
+const { runPixelArtFixtures } = require("./webgpu-pixel-art-fixtures.cjs");
 const { menu } = require("./native-menu.cjs");
+const { waitForSettledFocus } = require("./explore.cjs");
 
 function parseArguments(args) {
     const addresses = args.filter(value => value !== "--preflight-only");
@@ -192,7 +194,10 @@ function installProbe() {
 async function click(page, name, touch = false) {
     const control = page.getByRole("button", { name, exact: true, disabled: false })
         .or(page.getByRole("checkbox", { name, exact: true, disabled: false }));
+    if (["Map layer", "Earth imagery layer", "Elevation layer"].includes(name) && !await control.isVisible())
+        await click(page, "Choose map layers", touch);
     await control.waitFor({ state: "visible" });
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     const bounds = await control.boundingBox();
     assert.ok(bounds?.width && bounds?.height, name + " has a usable hit target");
     const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
@@ -394,7 +399,10 @@ function verifyRenderGraph(evidence, diagnostic, name) {
     assert.notEqual(maximumLevels, undefined, name + ": bloom quality is recognized");
     const scene = live.findLast(texture => texture.label === "PixelMap scene color");
     assert.ok(scene, name + ": scene color has an independently observed allocation");
+    assert.equal(scene.format, diagnostic.style === "Pixel" ? "rgba8unorm" : "rgba16float",
+        name + ": Pixel stores authored palette bytes while continuous and block styles retain HDR targets");
     const photo = live.filter(texture => texture.label === "PixelMap photograph");
+    for (const texture of photo) assert.equal(texture.format, scene.format, name + ": photograph preserves scene representation");
     const boundTexture = (pass, binding) => pass.inputs.find(view => view.group === 0 && view.binding === binding && view.textureId !== undefined);
     const expectTexture = (view, textureId, description) => {
         assert.ok(view, name + ": " + description + " has a bound texture view");
@@ -490,6 +498,9 @@ function verifyRenderGraph(evidence, diagnostic, name) {
         sum + texture.width * texture.height * texture.layers * texture.samples *
             (texture.format === "rgba16float" ? 8 : 4), 0);
     assert.ok(attachmentBytes <= 256 * 1024 * 1024, name + ": observed attachments stay inside the 256 MiB budget");
+    if (diagnostic.style === "Pixel")
+        assert.equal(attachmentBytes, scene.width * scene.height * (photo.length ? 12 : 8),
+            name + ": exact Pixel color/depth/optional-photo budget retains the unchanged art extent");
     const artwork = live.find(texture => texture.label === "PixelMap terrain artwork");
     assert.ok(artwork, name + ": terrain artwork exists");
     assert.equal(artwork.mips, 9, name + ": terrain has a complete 256-to-1 mip chain");
@@ -684,10 +695,105 @@ async function presentationPreflight(browser) {
     }
 }
 
+async function publicCameraLink(page) {
+    await menu(page, "Share this view");
+    const field = page.getByRole("textbox", {name: "Shareable map link", exact: true});
+    const value = await field.inputValue();
+    await click(page, "Close panel");
+    await field.waitFor({state: "hidden"});
+    return value;
+}
+
+async function captureInterface(page, name, details) {
+    await assertGraphicsHealthy(page, name);
+    await page.screenshot({path: join(output, name + ".png"), timeout: 30000});
+    report.scenarios.push({name, ...details});
+}
+
+async function desktopInterface(page) {
+    const map = page.getByRole("group", {name: "Interactive world map", exact: true});
+    const bounds = await map.boundingBox(), size = page.viewportSize();
+    assert.deepEqual(bounds, {x: 0, y: 0, ...size}, "The desktop map fills the entire viewport");
+    const search = page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true});
+    const searchBounds = await search.boundingBox();
+    assert.ok(searchBounds.x < 80 && searchBounds.y < 130 && searchBounds.height >= 44,
+        "Desktop search occupies a usable floating sidebar");
+    await click(page, "Hide search panel");
+    await search.waitFor({state: "hidden"});
+    assert.deepEqual(await map.boundingBox(), bounds, "Hiding the sidebar preserves map extent and projection");
+    await menu(page, "Share this view");
+    await click(page, "Close panel");
+    await search.waitFor({state: "hidden"});
+    await click(page, "Show search panel");
+    await search.waitFor({state: "visible"});
+    const before = await publicCameraLink(page);
+    await page.mouse.move(searchBounds.x + 80, searchBounds.y + 180);
+    await page.mouse.wheel(0, 160);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    assert.equal(await publicCameraLink(page), before, "Scrolling the sidebar never pans or zooms the map");
+    await captureInterface(page, "desktop-adaptive-sidebar", {mapBounds: bounds, searchBounds, cameraPreserved: true});
+    await click(page, "Choose map layers");
+    for (const name of ["Map layer", "Earth imagery layer", "Elevation layer"]) {
+        const target = page.getByRole("button", {name, exact: true}).or(page.getByRole("checkbox", {name, exact: true}));
+        const rect = await target.boundingBox();
+        assert.ok(rect?.width >= 44 && rect?.height >= 44, name + ": layer cards meet touch target size");
+    }
+    await captureInterface(page, "desktop-layer-picker", {layerChoices: ["Map", "Earth", "Elevation"]});
+    await click(page, "Map layer");
+    await page.getByRole("button", {name: "Map layer", exact: true}).waitFor({state: "hidden"});
+}
+
+async function waitForSheetTop(page, handle, minimum, maximum) {
+    const element = await handle.elementHandle();
+    assert.ok(element, "The sheet handle has a live accessibility element");
+    try {
+        await page.waitForFunction(({element, minimum, maximum}) => {
+            if (!element.isConnected) return false;
+            const top = element.getBoundingClientRect().top;
+            return top >= minimum && top <= maximum;
+        }, {element, minimum, maximum}, {polling: "raf", timeout: 25000});
+    } finally { await element.dispose(); }
+}
+
+async function mobileInterface(page, cdp) {
+    const map = page.getByRole("group", {name: "Interactive world map", exact: true});
+    const bounds = await map.boundingBox(), size = page.viewportSize();
+    assert.deepEqual(bounds, {x: 0, y: 0, ...size}, "The mobile map extends behind the bottom sheet");
+    const handle = page.getByRole("button", {name: /^(Expand|Collapse) search sheet$/});
+    const collapsed = await handle.boundingBox();
+    assert.ok(collapsed.y > size.height * .7 && collapsed.height >= 44, "The initial sheet is compact with a real touch handle");
+    await waitForSettledFocus(page, handle); await page.keyboard.press("End");
+    await page.getByRole("button", {name: "Collapse search sheet", exact: true}).waitFor({state: "visible"});
+    await waitForSheetTop(page, handle, 0, size.height * .2 - 1);
+    const expanded = await handle.boundingBox();
+    assert.ok(expanded.y < size.height * .2, "The sheet expands through its accessible keyboard action");
+    assert.deepEqual(await map.boundingBox(), bounds, "Sheet expansion never resizes the physical map");
+    await captureInterface(page, "mobile-expanded-sheet", {collapsed, expanded, mapBounds: bounds});
+    await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
+    await waitForSheetTop(page, handle, collapsed.y - 1, collapsed.y + 1);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const start = await handle.boundingBox(), x = start.x + start.width / 2, y = start.y + start.height / 2;
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{x, y, id: 0}]});
+    for (let step = 1; step <= 6; step++)
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{x, y: y - step * 50, id: 0}]});
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
+    await waitForSheetTop(page, handle, 0, start.y - 101);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const dragged = await handle.boundingBox();
+    assert.ok(dragged.y < start.y - 100, "Native touch drag opens the sheet and snaps to a higher detent");
+    assert.deepEqual(await map.boundingBox(), bounds, "Dragging chrome preserves the map viewport");
+    await captureInterface(page, "mobile-dragged-sheet", {collapsed: start, dragged, mapBounds: bounds});
+    await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
+    await waitForSheetTop(page, handle, collapsed.y - 1, collapsed.y + 1);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    assert.ok(Math.abs((await handle.boundingBox()).y - collapsed.y) <= 1, "The sheet returns to its compact detent");
+}
+
 async function desktop(browser) {
     const { context, page } = await open(browser);
     try {
         const first = await capture(page, "desktop-pixel");
+        await desktopInterface(page);
         assert.ok(await page.evaluate(() => PixelAtlasWebGpu.triangles > 0), "The opening city contains 3D building geometry");
         const initialPipelines = await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines);
         assert.equal(initialPipelines.length, 8, "Pixel startup compiles only its six scene and two presentation pipelines");
@@ -712,8 +818,13 @@ async function desktop(browser) {
             previous = image;
             const pipelines = await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines.length);
             if (style === "Normal") smoothPipelines = pipelines;
+            else if (style === "Minecraft") {
+                assert.equal(pipelines, smoothPipelines + 6,
+                    "The first HDR 1x style creates exactly its six scene pipelines, distinct from encoded Pixel and HDR 4x");
+                smoothPipelines = pipelines;
+            }
             else assert.equal(pipelines, smoothPipelines,
-                style + ": switching between warmed sample-count variants reuses all compiled pipelines");
+                style + ": switching between warmed color-format/sample-count variants reuses all compiled pipelines");
         }
         await menu(page, "Normal rendering");
         let lightingImage, ultraPipelines;
@@ -926,6 +1037,8 @@ async function mobile(browser) {
             return pixels;
         };
         const before = await capture(page, "mobile-pixel");
+        const cdp = await context.newCDPSession(page);
+        await mobileInterface(page, cdp);
         // The initial camera includes the Financial District label. Keep a
         // continuous, native-density view of that label before the pinch zooms in.
         await menu(page, "Normal rendering");
@@ -936,7 +1049,6 @@ async function mobile(browser) {
         const beforePinch = await page.evaluate(() => ({
             frames: PixelAtlasWebGpu.frames, zoom: PixelAtlasWebGpu.zoom
         }));
-        const cdp = await context.newCDPSession(page);
         await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 135, y: 410, id: 0 }, { x: 245, y: 410, id: 1 }] });
         for (let step = 1; step <= 6; step++)
             await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: 135 - step * 5, y: 410, id: 0 }, { x: 245 + step * 5, y: 410, id: 1 }] });
@@ -1032,6 +1144,8 @@ async function deviceLoss(browser) {
             report.failures = [];
             for (const [name, run] of [["shader-fixtures", async instance =>
                 report.scenarios.push(await runShaderFixtures(instance, base, output))],
+                ["pixel-art-fixtures", async instance =>
+                    report.scenarios.push(await runPixelArtFixtures(instance, base, output))],
                 ["desktop", desktop], ["journeys", journeys],
                 ["mobile", mobile], ["unavailable", unavailable], ["device-loss", deviceLoss]]) {
                 try { await run(browser); }
