@@ -95,7 +95,7 @@ public sealed partial class PixelMapRenderer
             }
             terrainTextureTiles.Clear(); terrainTextureTiles.AddRange(tiles);
             terrainTextureImagery.Clear(); if (imagery is not null) terrainTextureImagery.AddRange(imagery);
-            var colors = style switch { PixelStyle.Dusk => PixelPalette.Dusk, PixelStyle.Night => PixelPalette.Night, _ => PixelPalette.Day };
+            var colors = PixelPalette.For(style, renderStyle);
             if (palette != colors)
             {
                 ReleasePatterns();

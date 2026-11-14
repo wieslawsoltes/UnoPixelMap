@@ -103,7 +103,7 @@ public sealed partial class PixelMapRenderer
         }
         lastPicture?.Dispose();
         lastPicture = null;
-        var colors = style switch { PixelStyle.Dusk => PixelPalette.Dusk, PixelStyle.Night => PixelPalette.Night, _ => PixelPalette.Day };
+        var colors = PixelPalette.For(style, renderStyle);
         if (palette != colors)
         {
             ReleasePatterns();

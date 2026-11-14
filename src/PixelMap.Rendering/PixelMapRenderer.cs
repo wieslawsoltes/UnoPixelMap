@@ -16,7 +16,7 @@ public sealed partial class PixelMapRenderer : IDisposable
     private readonly List<(TileGeometry Tile, TileTransform Transform, float Scale)> visible = [];
     private readonly List<(Building Model, TileTransform Transform)> perspectiveModels = [];
     private readonly List<(int Index, float Near)> perspectiveOrder = [];
-    private readonly Dictionary<(Ink, int), SKShader> shaders = [];
+    private readonly Dictionary<(Ink, TerrainPatternPlacement), SKShader> shaders = [];
     private readonly Dictionary<Ink, TerrainPattern> patterns = [];
     private readonly Dictionary<(Ink, float), SKPathEffect> dashes = [];
     private readonly List<LabelCandidate> candidates = [];
@@ -138,7 +138,7 @@ public sealed partial class PixelMapRenderer : IDisposable
         }
         lastPicture?.Dispose();
         lastPicture = null;
-        var colors = style switch { PixelStyle.Dusk => PixelPalette.Dusk, PixelStyle.Night => PixelPalette.Night, _ => PixelPalette.Day };
+        var colors = PixelPalette.For(style, renderStyle);
         if (palette != colors)
         {
             ReleasePatterns();
@@ -441,6 +441,12 @@ public sealed partial class PixelMapRenderer : IDisposable
         bool shadows, bool overlay, PixelPalette colors, SKRect clip)
     {
         float roadScale = (float)Math.Clamp(Math.Pow(2, (zoom - 14) * .37), .36, 5) / pixelSize;
+        bool decorated = !MapRendering.Smooth(renderStyle) && zoom >= 12;
+        // Resolve placement once per cache patch, never once per material batch.
+        // Pixel motifs use a fixed geographic grid; legacy block artwork retains
+        // its original resolution-dependent scale and palette exactly.
+        var placement = decorated ? colors.IsPixelArt ? TerrainPatternPlacement.Pixel(tile.Source.Id)
+            : new TerrainPatternPlacement((int)Math.Clamp(Math.Round(Math.Log2(1 / scale)), -5, 8)) : default;
         clip.Inflate(32 / scale, 32 / scale);
         foreach (var (key, path, bounds) in tile.Batches)
         {
@@ -461,14 +467,21 @@ public sealed partial class PixelMapRenderer : IDisposable
                 }
                 paint.PathEffect = dash;
             }
-            if (!MapRendering.Smooth(renderStyle) && zoom >= 12 && key.Ink is Ink.Water or Ink.Grass or Ink.Forest or Ink.Park)
+            if (decorated && key.Ink is Ink.Water or Ink.Grass or Ink.Forest or Ink.Park)
             {
-                int exponent = (int)Math.Clamp(Math.Round(Math.Log2(1 / scale)), -5, 8);
-                if (!shaders.TryGetValue((key.Ink, exponent), out var shader))
+                if (!shaders.TryGetValue((key.Ink, placement), out var shader))
                 {
+                    // Deep synthetic/vector sources can have many geographic
+                    // phases. Bound their native shader handles independently of
+                    // the terrain-image LRU; already-baked blocks own their pixels.
+                    if (shaders.Count >= 512)
+                    {
+                        foreach (var cached in shaders.Values) cached.Dispose();
+                        shaders.Clear();
+                    }
                     if (!patterns.TryGetValue(key.Ink, out var pattern))
                         patterns[key.Ink] = pattern = new(key.Ink, colors);
-                    shaders[(key.Ink, exponent)] = shader = pattern.AtScale(MathF.Pow(2, exponent));
+                    shaders[(key.Ink, placement)] = shader = pattern.At(placement);
                 }
                 paint.Color = SKColors.White;
                 paint.Shader = shader;
