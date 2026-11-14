@@ -5,11 +5,12 @@ namespace PixelMap.Rendering;
 
 public sealed unsafe partial class WebGpuMapRenderer
 {
-    // Pipeline objects depend on sample count or target format, never on the
-    // current style, shadow texture extent, camera or attachment allocation.
-    // Keep the two scene variants and each encountered presentation format for
-    // the device lifetime instead of recompiling every Pixel/Normal transition.
-    private readonly ScenePipelines?[] scenePipelineCache = new ScenePipelines?[2];
+    // Pixel uses encoded RGBA8; other modes retain HDR RGBA16F with 1x/4x MSAA.
+    // Pipeline objects depend on those formats and samples, never the camera,
+    // shadow texture extent or attachment allocation. Keep all three scene
+    // variants and each presentation format for the device lifetime instead of
+    // recompiling every Pixel/Normal transition.
+    private readonly ScenePipelines?[] scenePipelineCache = new ScenePipelines?[3];
     private readonly Dictionary<TextureFormat, PresentationPipelines> presentationPipelineCache = [];
 
     private sealed class ScenePipelines
@@ -22,15 +23,15 @@ public sealed unsafe partial class WebGpuMapRenderer
         internal RenderPipeline* Resolve, Labels;
     }
 
-    private void EnsurePipelines(TextureFormat targetFormat, int samples, bool smooth)
+    private void EnsurePipelines(TextureFormat targetFormat, TextureFormat sceneFormat, int samples, bool smooth)
     {
-        if (pipelineTargetFormat == targetFormat && pipelineSamples == samples && terrainPipeline != null)
+        if (pipelineTargetFormat == targetFormat && pipelineSceneFormat == sceneFormat && pipelineSamples == samples && terrainPipeline != null)
         {
             if (smooth) EnsureShadowPipelines(shadowCascadeCount);
             return;
         }
-        int index = samples switch { 1 => 0, 4 => 1, _ => throw new ArgumentOutOfRangeException(nameof(samples)) };
-        var scene = scenePipelineCache[index] ??= CreateScenePipelines(samples);
+        int index = WebGpuPixelArt.PipelineIndex(sceneFormat, samples);
+        var scene = scenePipelineCache[index] ??= CreateScenePipelines(sceneFormat, samples);
         if (!presentationPipelineCache.TryGetValue(targetFormat, out var presentation))
         {
             presentation = CreatePresentationPipelines(targetFormat);
@@ -44,6 +45,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         overlayWorldPipeline = scene.World; overlayOccludedPipeline = scene.Occluded;
         resolvePipeline = presentation.Resolve; overlayScreenPipeline = presentation.Labels;
         pipelineTargetFormat = targetFormat;
+        pipelineSceneFormat = sceneFormat;
         pipelineSamples = samples;
     }
 
@@ -71,7 +73,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         return new() { ArrayStride = 48, StepMode = VertexStepMode.Vertex, AttributeCount = 4, Attributes = attributes };
     }
 
-    private ScenePipelines CreateScenePipelines(int samples)
+    private ScenePipelines CreateScenePipelines(TextureFormat format, int samples)
     {
         var tileAttributes = stackalloc VertexAttribute[5];
         var tile = TerrainVertexLayout(tileAttributes);
@@ -86,17 +88,17 @@ public sealed unsafe partial class WebGpuMapRenderer
         var result = new ScenePipelines();
         try
         {
-            result.Background = CreatePipeline("sky", backgroundModule, backgroundLayout, null, TextureFormat.Rgba16float,
+            result.Background = CreatePipeline("sky", backgroundModule, backgroundLayout, null, format,
                 samples, depth: true, depthWrite: false, compare: CompareFunction.Always);
-            result.Terrain = CreatePipeline("terrain", terrainModule, sceneLayout, &tile, TextureFormat.Rgba16float,
+            result.Terrain = CreatePipeline("terrain", terrainModule, sceneLayout, &tile, format,
                 samples, depth: true, depthWrite: true);
-            result.Buildings = CreatePipeline("buildings", buildingModule, buildingLayout, &building, TextureFormat.Rgba16float,
+            result.Buildings = CreatePipeline("buildings", buildingModule, buildingLayout, &building, format,
                 samples, depth: true, depthWrite: true, cull: CullMode.Back);
-            result.Rim = CreatePipeline("roof edges", rimModule, buildingLayout, &edge, TextureFormat.Rgba16float,
+            result.Rim = CreatePipeline("roof edges", rimModule, buildingLayout, &edge, format,
                 samples, depth: true, depthWrite: false, topology: PrimitiveTopology.TriangleStrip);
-            result.World = CreatePipeline("world overlays", overlayModule, overlayPipelineLayout, &overlay, TextureFormat.Rgba16float,
+            result.World = CreatePipeline("world overlays", overlayModule, overlayPipelineLayout, &overlay, format,
                 samples, depth: true, depthWrite: false, blend: true);
-            result.Occluded = CreatePipeline("occluded route silhouettes", overlayModule, overlayPipelineLayout, &overlay, TextureFormat.Rgba16float,
+            result.Occluded = CreatePipeline("occluded route silhouettes", overlayModule, overlayPipelineLayout, &overlay, format,
                 samples, depth: true, depthWrite: false, blend: true, compare: CompareFunction.Greater);
             return result;
         }
@@ -207,6 +209,7 @@ public sealed unsafe partial class WebGpuMapRenderer
             shadowTerrainPipelines[i] = shadowBuildingPipelines[i] = 0;
         }
         pipelineSamples = 0;
+        pipelineSceneFormat = TextureFormat.Undefined;
     }
 
     private void ReleaseScenePipelines(ScenePipelines scene)

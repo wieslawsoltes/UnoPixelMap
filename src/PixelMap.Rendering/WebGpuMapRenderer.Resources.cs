@@ -13,7 +13,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         {
             long bytes = (long)(uniforms.Length + instances.Length + resolveValues.Length) * sizeof(float) +
                 (long)(GpuTerrainMesh.Indices.Length + TerrainBlockMesh.CubeIndices.Length + TerrainBlockMesh.BeveledIndices.Length) * sizeof(ushort) +
-                7L * PixelPalette.Day.Materials.Length * 4 + (long)bitmapWidth * bitmapHeight * 4;
+                (long)WebGpuPixelArt.PaletteWidth * PixelPalette.Day.Materials.Length * 4 + (long)bitmapWidth * bitmapHeight * 4;
             foreach (var level in PixelWindowFilter.Levels) bytes += (long)level.Width * level.Height * 2;
             return bytes;
         }
@@ -45,7 +45,8 @@ public sealed unsafe partial class WebGpuMapRenderer
         terrainHeights = CreateTexture(GpuTerrainMesh.Side, GpuTerrainMesh.Side, TextureFormat.RG32float,
             TextureUsage.TextureBinding | TextureUsage.CopyDst, layers: heightLayerCapacity);
         terrainHeightView = CreateView(terrainHeights, TextureFormat.RG32float, TextureViewDimension.Dimension2DArray, layers: heightLayerCapacity);
-        paletteTexture = CreateTexture(7, PixelPalette.Day.Materials.Length, TextureFormat.Rgba8Unorm, TextureUsage.TextureBinding | TextureUsage.CopyDst);
+        paletteTexture = CreateTexture(WebGpuPixelArt.PaletteWidth, PixelPalette.Day.Materials.Length,
+            TextureFormat.Rgba8Unorm, TextureUsage.TextureBinding | TextureUsage.CopyDst);
         paletteView = CreateView(paletteTexture, TextureFormat.Rgba8Unorm);
         roomTexture = CreateTexture(256, 16, TextureFormat.RG8Unorm, TextureUsage.TextureBinding | TextureUsage.CopyDst,
             mipLevels: PixelWindowFilter.Levels.Length);
@@ -219,35 +220,36 @@ public sealed unsafe partial class WebGpuMapRenderer
         }
     }
 
-    private void EnsureAttachments(WebGpuAttachmentPlan plan)
+    private void EnsureAttachments(WebGpuAttachmentPlan plan, TextureFormat format)
     {
         int width = plan.Width, height = plan.Height, samples = plan.Samples;
-        if (attachmentWidth == width && attachmentHeight == height && attachmentSamples == samples &&
+        if (attachmentWidth == width && attachmentHeight == height && attachmentSamples == samples && attachmentFormat == format &&
             (photographTexture != null) == plan.Photograph && bloomLevelCount == plan.BloomLevels) return;
         ReleaseAttachments();
         try
         {
-            sceneTexture = CreateTexture(width, height, TextureFormat.Rgba16float,
+            sceneTexture = CreateTexture(width, height, format,
                 TextureUsage.RenderAttachment | TextureUsage.TextureBinding | TextureUsage.CopySrc, name: "PixelMap scene color");
-            sceneView = CreateView(sceneTexture, TextureFormat.Rgba16float);
+            sceneView = CreateView(sceneTexture, format);
             if (plan.Photograph)
             {
-                photographTexture = CreateTexture(width, height, TextureFormat.Rgba16float,
+                photographTexture = CreateTexture(width, height, format,
                     TextureUsage.TextureBinding | TextureUsage.CopyDst, name: "PixelMap photograph");
-                photographView = CreateView(photographTexture, TextureFormat.Rgba16float);
+                photographView = CreateView(photographTexture, format);
             }
             depthTexture = CreateTexture(width, height, TextureFormat.Depth24Plus, TextureUsage.RenderAttachment,
                 samples: samples, name: "PixelMap scene depth");
             depthView = CreateView(depthTexture, TextureFormat.Depth24Plus);
             if (samples > 1)
             {
-                multisampleTexture = CreateTexture(width, height, TextureFormat.Rgba16float, TextureUsage.RenderAttachment,
+                multisampleTexture = CreateTexture(width, height, format, TextureUsage.RenderAttachment,
                     samples: samples, name: "PixelMap scene multisample");
-                multisampleView = CreateView(multisampleTexture, TextureFormat.Rgba16float);
+                multisampleView = CreateView(multisampleTexture, format);
             }
             attachmentWidth = width;
             attachmentHeight = height;
             attachmentSamples = samples;
+            attachmentFormat = format;
             CreateBloomAttachments(plan.BloomLevels);
             AttachmentBytes = plan.TotalBytes;
             RebuildResolveGroup();
@@ -263,6 +265,7 @@ public sealed unsafe partial class WebGpuMapRenderer
         Release(ref depthView); Release(ref depthTexture);
         Release(ref photographView); Release(ref photographTexture);
         attachmentWidth = attachmentHeight = attachmentSamples = 0;
+        attachmentFormat = TextureFormat.Undefined;
         AttachmentBytes = 0;
     }
     private void RebuildResolveGroup()
@@ -442,12 +445,11 @@ public sealed unsafe partial class WebGpuMapRenderer
     private void UploadPalette(PixelPalette palette)
     {
         if (ReferenceEquals(uploadedPalette, palette)) return;
-        Span<uint> colors = stackalloc uint[palette.Materials.Length * 7];
-        int i = 0;
-        foreach (var m in palette.Materials)
-        { colors[i++] = m.Roof; colors[i++] = m.LightWall; colors[i++] = m.DarkWall; colors[i++] = m.Rim; colors[i++] = m.Trim; colors[i++] = m.Glass; colors[i++] = m.Lamp; }
+        Span<uint> colors = stackalloc uint[palette.Materials.Length * WebGpuPixelArt.PaletteWidth];
+        WebGpuPixelArt.WritePalette(palette.Materials, colors);
         fixed (uint* p = colors)
-            WriteTexture(paletteTexture, p, (nuint)colors.Length * sizeof(uint), 7, palette.Materials.Length, 7 * 4);
+            WriteTexture(paletteTexture, p, (nuint)colors.Length * sizeof(uint), WebGpuPixelArt.PaletteWidth,
+                palette.Materials.Length, WebGpuPixelArt.PaletteWidth * 4);
         uploadedPalette = palette;
     }
     private void UploadBitmapOverlay(SKBitmap bitmap)
