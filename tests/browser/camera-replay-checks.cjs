@@ -290,7 +290,7 @@ async function focusChecks() {
     const uiModule = {exports: {}};
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, "explore.cjs"), "utf8"), {
         module: uiModule, URL, Promise, setTimeout, clearTimeout,
-        process: {argv: [], env: {}},
+        process: {argv: ["node", "webgpu.cjs", "--preflight-only"], env: {}},
         require: name => ["playwright", "pngjs", "./gpu.cjs"].includes(name) ? {} : require(name)
     }, {filename: "explore.cjs"});
     const {action, waitForSettledFocus} = uiModule.exports;

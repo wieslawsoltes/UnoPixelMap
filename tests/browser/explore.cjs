@@ -5,7 +5,9 @@ const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
 const {activateMenuItem, setGpuRendering} = require("./gpu.cjs");
 
-const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
+// Shared input helpers are imported by preflight-only commands too. Parse the
+// caller's site URL only in open(), when a browser page is actually requested.
+const base = process.argv[2] || "http://127.0.0.1:8000/";
 const evidence = process.env.PIXELMAP_SHOTS;
 const mountainView = "v4/45.875/10.85/12.3/-25/58/Day/Elevation/Perspective/0/Relief/1.00";
 // The bundled Pine Street road center gives movement checks room before a wall.
