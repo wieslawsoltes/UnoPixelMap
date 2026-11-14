@@ -130,10 +130,14 @@ jobs:
           if-no-files-found: error
 
   compare:
-    name: Paired Release AOT rendering comparison
+    name: Paired Release AOT rendering comparison (${{ matrix.scenario }})
     needs: publish
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [pixel-pan, normal-pan, normal-orbit, normal-walk-look]
     steps:
       - name: Use one frozen harness for baseline and candidate
         uses: actions/checkout@v4
@@ -162,6 +166,10 @@ jobs:
           PIXELMAP_SHOTS: ${{ runner.temp }}/performance-evidence/preflight
         run: xvfb-run -a -s '-screen 0 1600x1200x24' node tests/browser/webgpu.cjs --preflight-only
       - name: Measure identical native-input traces in ABBA order
+        env:
+          PERF_CASES: ${{ matrix.scenario }}
+          PERF_REPETITIONS: '2'
+          PERF_STEPS_PER_SEGMENT: '2'
         run: |
           set -euo pipefail
           mkdir -p "${{ runner.temp }}/paired-preview"
@@ -191,7 +199,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: webgpu-performance-evidence
+          name: webgpu-performance-${{ matrix.scenario }}-evidence
           path: ${{ runner.temp }}/performance-evidence
           retention-days: 14
           if-no-files-found: error

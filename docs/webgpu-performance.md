@@ -8,18 +8,23 @@ anisotropic filtering, map styles and native-density labels are preserved.
 
 **Measured application baseline:** `a9a284263da76a201114381467bf45aa4823a2d6`.
 **Optimized production source:** `4a3b9c412ab7bb114795a6d4e5281e97508f4d56`.
-**Current validated harness revision:** `f159983c68a72bd4fc8d27d592ba3721bf4689c3`,
+**Preserved measured replay/harness revision:** `f159983c68a72bd4fc8d27d592ba3721bf4689c3`,
 whose production `src` tree is unchanged.
 The final native comparison measures **19.8–53.3% lower preparation/overlay time**
 and **22.4–56.0% lower preparation/overlay time including twelve terrain picks**
 across the nine moving workloads. All **10,944 identity comparisons pass**.
 An independent native runner reproduces **23.6–55.6% lower picking-inclusive CPU
-cost**, again passing all 10,944 comparisons. Debug and Release integration each
-pass all 34 scenarios. The complete paired Release AOT browser replay now passes
-all four cases and 16 image comparisons. Its timings are mixed: Normal pan/orbit
+cost**, again passing all 10,944 comparisons. The preserved Debug and Release
+integration runs each pass all 34 scenarios. The complete paired Release AOT
+browser replay at `f159983` passes all four cases and 16 image comparisons. Its
+timings are mixed: Normal pan/orbit
 render CPU medians improve 12.6%/13.6%, while Pixel pan CPU median is 1.0% slower
 and paused walking-look input latency median is 6.6% slower. Native CPU gains must
 not be presented as a uniform browser or physical-GPU FPS improvement.
+Later `67f1858` CI exposed two harness failures documented below. The corrected
+protocol preserves zero-work timing windows and isolates each complete ABBA case
+on its own runner; [PR #2 checks](https://github.com/wieslawsoltes/UnoPixelMap/pull/2/checks)
+record validation of the current revision.
 
 The earlier `16048b7` optimization checkpoint and its `4dbb962` CI checkout remain
 preserved as separate evidence, including their deferred-picking penalty. The final
@@ -372,7 +377,7 @@ do not measure a paired browser performance improvement.
 The [original integration reports and captures](verification/webgpu-performance-4a3b9c4-integration/)
 preserve the final source's numerical shader/resource observations and browser images.
 
-The [current integration run at `f159983`](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433)
+The [preserved integration run at `f159983`](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43405625433)
 also passes all four jobs and all 61 recorded steps, including **34 scenarios in
 each of Debug and Release AOT**. Both browser logs identify actual synthetic merge
 checkout `6f0bff0a45db4464044a03bfba52abd8605bebc0`; its full tree
@@ -380,13 +385,16 @@ checkout `6f0bff0a45db4464044a03bfba52abd8605bebc0`; its full tree
 This validates the menu/focus harness corrections alongside the unchanged
 production renderer. The [checkout and validation record](verification/webgpu-performance-f159983-browser/integration-validation.json)
 retains the exact terminal log lines, job conclusions, package identities and
-harness hashes. Its current artifact digests are explicitly identified as
+harness hashes. Its artifact digests are explicitly identified as
 API-reported; the unchanged source's original integration images remain in the
 earlier preserved archive.
 
-The new [paired Release AOT protocol](../tests/browser/WEBGPU_PERFORMANCE.md)
-builds both applications and replays trusted native inputs with one frozen harness
-on one runner. It separates CPU render/command recording, input-to-submit,
+The [paired Release AOT protocol](../tests/browser/WEBGPU_PERFORMANCE.md)
+builds both applications once and replays trusted native inputs with one frozen
+harness. CI runs each of the four cases as a complete ABBA sequence on its own
+runner/browser, with the same two fixed packages and a separate evidence artifact.
+Each case compares baseline and candidate within that runner; samples from
+different case runners must not be pooled. It separates CPU render/command recording, input-to-submit,
 queue-completion callback latency and a separate continuous-input submission rate.
 Capture/query instrumentation is outside timed windows. Exact camera/projection,
 scene extent, quality and geometry gates prevent comparing different work. Original
@@ -485,9 +493,59 @@ but the existing camera-replay fixture still asserted the old helper's polling a
 single-handle counts. Follow-up [`a9ef50f`](https://github.com/wieslawsoltes/UnoPixelMap/commit/a9ef50f)
 reproduces actual animation-frame focus theft, requires the real helper to recover,
 and checks one keyboard activation plus balanced handle ownership on success,
-failure and timeout. All five local Node contract suites, the complete current
-integration run and the full paired Release AOT replay now pass. The earlier
-incomplete attempt remains in the evidence.
+failure and timeout. At `f159983`, all five local Node contract suites, the
+complete integration run and the full paired Release AOT replay passed. The
+earlier incomplete attempt remains in the evidence.
+
+### `67f1858` CI failures and the corrected protocol
+
+The [Release integration job at `67f1858`](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43413712152/job/131846706555)
+still used an immediate menu-item `focus()` followed by Enter. It timed out after
+30 seconds waiting for Terrain relief to become hidden; the failure accessibility
+snapshot retains that item in the open appearance popup. The artifact does not
+record which element received Enter. The integration and performance drivers now
+share native pointer menu activation, while retaining dismissal checks and the
+existing scene-state, quality, camera and image assertions. Debug integration,
+native regression and presentation had passed in that run.
+
+The [paired performance job at the same revision](https://github.com/wieslawsoltes/UnoPixelMap/actions/runs/43413712332/job/131853188838)
+completed all twelve map runs and their three ABBA comparisons before the first
+walking baseline failed. Its eight serialized walking inputs completed, but the
+subsequent 6,008 ms moving window recorded **zero map submissions, managed frames
+and rAF callbacks**. The recorded rate is zero and cadence/CPU distributions are
+empty. HUD distance advanced from 1 to 10 m; one shared device, no GPU errors or
+losses, and no managed failure were recorded. HUD movement does not establish
+render submissions within that window. The old requirement for a positive timed
+submission count rejected this observation. Native comparison, observer contracts
+and both fixed AOT package builds succeeded in that workflow.
+
+Protocol `webgpu-native-input-abba-v2` keeps the original fixed window and its raw
+events, duration, zero rate and empty distributions. After every moving window,
+the native movement key stays held while a separate timer-polled check waits up
+to 120 seconds for a subsequent map submission and diagnostic with healthy GPU
+state. Its `moving.continuation` result is outside the closed capture and cannot
+add samples, extend the duration or raise the measured rate. No extra queue wait
+is inserted; the original start/end queue-prefix observations remain. Failure to
+resume rendering, device loss, GPU errors and live managed failure still fail the
+run. The explicit `moving.windowStatus` distinguishes observed submissions from
+a zero-submission window. The shared menu helper is included in the frozen
+harness hashes.
+
+The failed serial job had already spent about 46 minutes on twelve completed map
+runs and its first walking attempt. To preserve all four cases within the job
+budget, the browser CI matrix now assigns `pixel-pan`, `normal-pan`,
+`normal-orbit` and `normal-walk-look` to separate runners. Each gets the full
+ABBA sequence, eight measured inputs per run, the same two already-built AOT
+packages, and its own 60-minute timeout. `fail-fast: false` keeps the other cases
+running after a failure, and `webgpu-performance-<case>-evidence` artifacts retain
+each result independently. Comparisons remain within one case and one machine;
+there is no cross-case pooling or reduced repetition count. The native comparison
+and package/toolchain checks are unchanged.
+
+These failures and corrections leave the preserved `f159983` raw measurements,
+negative results, image pairs and original protocol intact. The
+[current PR checks](https://github.com/wieslawsoltes/UnoPixelMap/pull/2/checks)
+provide the current validation status without relabeling historical evidence.
 
 SwiftShader Vulkan results do not establish physical-GPU FPS, display latency or
 mobile thermals.
@@ -497,7 +555,7 @@ mobile thermals.
 - [Native benchmark source and protocol](../tests/PixelMap.Rendering.Performance/README.md).
 - [Independent native replication at `f159983`](verification/webgpu-performance-f159983-native/),
   including its original samples, frozen comparison driver and verified hashes.
-- [Current harness integration validation](verification/webgpu-performance-f159983-browser/integration-validation.json).
+- [Preserved `f159983` integration validation](verification/webgpu-performance-f159983-browser/integration-validation.json).
 - [Completed paired browser comparison, original samples and captures](verification/webgpu-performance-f159983-browser/).
 - [Final-source native comparison](verification/webgpu-performance-4a3b9c4/native-ci-comparison.json),
   [original raw CI archive](verification/webgpu-performance-4a3b9c4/native-ci.zip)
