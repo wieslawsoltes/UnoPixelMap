@@ -9,6 +9,7 @@ on:
       - 'global.json'
       - 'Directory.Build.props'
       - 'tests/browser/**'
+      - 'tests/pixel-art-transition.json'
       - 'tests/PixelMap.Rendering.Performance/**'
       - 'tests/PixelMap.Rendering.Tests/**'
       - '.github/workflows/webgpu-performance.yml'
@@ -76,7 +77,9 @@ jobs:
         with:
           node-version: '22'
       - name: Verify observer and comparison contracts without a browser
-        run: node tests/browser/webgpu-performance-checks.cjs
+        run: |
+          node tests/browser/webgpu-performance-checks.cjs
+          python3 tests/PixelMap.Rendering.Performance/compare_checks.py
 
   publish:
     needs: contract

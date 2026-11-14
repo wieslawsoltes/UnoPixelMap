@@ -3,7 +3,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const {installPerformanceProbe} = require("./webgpu-performance-probe.cjs");
-const {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps,
+const {distribution, makeTrace, mapRelativeTrace, intentionalPixelChange, fitMapExtent,
+    checkStep, checkHealth, imageDifference, summarizeSteps,
     summarizeMovingWindow, movingContinuation} = require("./webgpu-performance.cjs");
 
 function fixture() {
@@ -448,6 +449,29 @@ async function main() {
     assert.equal(trace.reduce((sum, item) => sum + item.deltaY, 0), 0);
     assert.ok(trace.every(item => Number.isInteger(item.x) && Number.isInteger(item.y)), "Trusted wheel coordinates use integral CSS pixels");
     assert.throws(() => makeTrace({motion: "pan"}, {x: 0, y: 0, width: 1, height: 1}, 0));
+    const oldBounds = {x: 0, y: 59, width: 1200, height: 700};
+    const newBounds = {x: 0, y: 0, width: 1200, height: 700};
+    assert.deepEqual(mapRelativeTrace(makeTrace({motion: "orbit"}, oldBounds, 2), oldBounds),
+        mapRelativeTrace(makeTrace({motion: "orbit"}, newBounds, 2), newBounds),
+        "Matching map-relative input preserves its anchor despite redesigned UI origins");
+    const declared = {revisions: {baseline: "d014060af60b0b961b0b5e52f39359525da2435b"}};
+    assert.equal(intentionalPixelChange(declared, {style: "Pixel"}), true);
+    assert.equal(intentionalPixelChange(declared, {style: "Normal"}), false);
+    assert.equal(intentionalPixelChange({revisions: {baseline: "0".repeat(40)}}, {style: "Pixel"}), false,
+        "Future baselines retain strict Pixel image parity");
+    for (const chromeHeight of [0, 117]) {
+        let size = {width: 1200, height: 800}, resizes = 0;
+        const map = {boundingBox: async () => ({x: 0, y: chromeHeight / 3, width: size.width, height: size.height - chromeHeight})};
+        const page = {evaluate: async () => {}, viewportSize: () => size,
+            setViewportSize: async next => { size = next; resizes++; }};
+        const bounds = await fitMapExtent(page, map);
+        assert.equal(bounds.width, 1200); assert.equal(bounds.height, 700);
+        assert.equal(resizes, 1, "Canvas calibration uses the public viewport once");
+        assert.equal(size.height, 700 + chromeHeight);
+    }
+    await assert.rejects(fitMapExtent({evaluate: async () => {}, viewportSize: () => ({width: 1200, height: 800}),
+        setViewportSize: async () => {}}, {boundingBox: async () => ({x: 0, y: 0, width: 1200, height: 600})}),
+        /could not reach/, "A canvas that ignores resize fails instead of comparing unlike extents");
     assert.deepEqual(distribution([4, 1, 3, 2]), {samples: 4, minimum: 1, median: 3, p95: 4, maximum: 4, mean: 2.5});
     const left = {width: 2, height: 1, data: Uint8Array.from([0, 0, 0, 255, 10, 10, 10, 255])};
     const right = {width: 2, height: 1, data: Uint8Array.from([0, 0, 0, 255, 14, 10, 10, 255])};

@@ -25,6 +25,15 @@ HARNESS_FILES = (
 FRAME_IDENTITIES = ("Index", "TerrainPatches", "BuildingTriangles", "Labels", "OverlayTriangles",
                     "GeometryHash", "ArtworkHash", "OverlayHash", "AtlasHash", "PickingHash")
 STREAM_IDENTITIES = ("Frame", "TerrainPatches", "TextureHash")
+TRANSITION_PATH = Path(__file__).resolve().parents[1] / "pixel-art-transition.json"
+
+
+def artwork_policy(baseline_revision):
+    """The one declared redesign never grants later PRs a blanket Pixel waiver."""
+    transition = json.loads(TRANSITION_PATH.read_text())
+    if transition["schema"] != 1 or transition["changedStyles"] != ["Pixel"]:
+        raise ValueError("Unsupported artwork transition policy")
+    return transition if baseline_revision == transition["baselineRevision"] else None
 
 
 def sha256(path):
@@ -61,8 +70,9 @@ def compare_metric(before, after):
             "medianReductionPercent": 100 * (1 - b["median"] / a["median"]) if a and b and a["median"] > 0 else None}
 
 
-def compare(runs):
+def compare(runs, transition=None):
     checks, failures, output = 0, [], {"frames": {}, "streaming": {}}
+    artwork_changes = []
     for kind, collection, identity in (("frames", "Results", FRAME_IDENTITIES),
                                        ("streaming", "Reports", STREAM_IDENTITIES)):
         reference = runs[0][kind]
@@ -78,11 +88,28 @@ def compare(runs):
                 failures.append(f"{kind} run {run_index}: workload order/set changed")
         for ordinal, name in enumerate(names):
             workloads = [r[kind][collection][ordinal] for r in runs]
+            style_field = "Style" if kind == "frames" else "RenderStyle"
+            pixel = workloads[0][style_field] in (0, "Pixel")
+            artwork_field = "ArtworkHash" if kind == "frames" else "TextureHash"
             for run_index, workload in enumerate(workloads[1:], 1):
+                if workload[style_field] != workloads[0][style_field]:
+                    failures.append(f"{name} run {run_index}: rendering style changed")
                 if len(workload["Samples"]) != len(workloads[0]["Samples"]):
                     failures.append(f"{name} run {run_index}: sample count changed")
                 for sample_index, (original, current) in enumerate(zip(workloads[0]["Samples"], workload["Samples"])):
                     for field in identity:
+                        if transition and pixel and field == artwork_field and run_index in (1, 2):
+                            artwork_changes.append({"workload": name, "run": run_index, "sample": sample_index,
+                                                    "field": field, "baseline": original[field],
+                                                    "candidate": current[field], "changed": original[field] != current[field]})
+                            # Both candidate repetitions must still reproduce the
+                            # exact new artwork. Baseline repeat is checked below.
+                            if run_index == 2:
+                                checks += 1
+                                if (sample_index >= len(workloads[1]["Samples"]) or
+                                        current[field] != workloads[1]["Samples"][sample_index][field]):
+                                    failures.append(f"{name} run {run_index} sample {sample_index}: candidate artwork is nondeterministic")
+                            continue
                         checks += 1
                         if original[field] != current[field]:
                             failures.append(f"{name} run {run_index} sample {sample_index}: {field} differs")
@@ -105,7 +132,8 @@ def compare(runs):
                 for unit in ("PrepareMs", "AllocatedBytes", "RebakedTextures", "RebakedBaseBytes"):
                     metrics[unit] = compare_metric([s[unit] for s in before], [s[unit] for s in after])
             output[kind][name] = metrics
-    output.update(identityChecks=checks, identityFailures=failures, passed=not failures)
+    output.update(identityChecks=checks, identityFailures=failures, passed=not failures,
+                  artworkTransition=transition, artworkComparisons=artwork_changes)
     return output
 
 
@@ -147,7 +175,10 @@ def main():
                     for variant, root in roots.items()},
         "frozenHarnessFiles": {name: hashlib.sha256(data).hexdigest() for name, data in frozen_sources.items()},
         "driverSha256": sha256(Path(__file__)),
+        "artworkPolicySha256": sha256(TRANSITION_PATH),
     }
+    transition = artwork_policy(manifest["sources"]["baseline"]["commit"])
+    manifest["artworkTransition"] = transition
     if Path("/proc/cpuinfo").exists():
         manifest["cpuModels"] = sorted({line.split(":", 1)[1].strip() for line in Path("/proc/cpuinfo").read_text().splitlines()
                                        if line.startswith("model name")})
@@ -189,7 +220,7 @@ def main():
                 destination / "streaming.log", environment)
             runs.append({"frames": json.loads((destination / "frames.json").read_text()),
                          "streaming": json.loads((destination / "terrain-streaming.json").read_text())})
-    comparison = compare(runs)
+    comparison = compare(runs, transition)
     (output / "comparison.json").write_text(json.dumps(comparison, indent=2) + "\n")
     print(f"Identity checks: {comparison['identityChecks']}; failures: {len(comparison['identityFailures'])}", flush=True)
     for kind, key in (("frames", "PreparationAndOverlay.WallMilliseconds"), ("streaming", "PrepareMs")):

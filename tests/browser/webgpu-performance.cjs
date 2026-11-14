@@ -9,8 +9,14 @@ const os = require("node:os");
 const {createHash} = require("node:crypto");
 const {installPerformanceProbe} = require("./webgpu-performance-probe.cjs");
 const {click, menu} = require("./native-menu.cjs");
+const artworkTransition = require("../pixel-art-transition.json");
 
 const viewport = {width: 1200, height: 800};
+const mapExtent = {width: 1200, height: 700};
+// The original and redesigned UI have different sidebar/control positions. The
+// complete captures remain evidence; this fixed, unobscured map region retains
+// strict pixel comparison for unchanged styles independently of that UI chrome.
+const comparisonRegion = {x: 400, y: 96, width: 688, height: 480};
 const camera = style => `v5/40.706846/-74.008817/17/-51/55/Day/Map/Perspective/0/Relief/1.00/${style}/Orbit/0/0/0`;
 const cases = [
     {name: "pixel-pan", style: "Pixel", motion: "pan"},
@@ -40,6 +46,29 @@ function makeTrace(scenario, bounds, count) {
             [[-10, 0, 0], [1, -5, 0], [10, 0, 0], [-1, 5, 0]];
     return segments.flatMap(([deltaX, deltaY, modifiers]) => Array.from({length: count}, () =>
         ({...point, deltaX, deltaY, modifiers})));
+}
+function mapRelativeTrace(trace, bounds) {
+    return trace.map(({x, y, ...input}) => ({x: x - bounds.x, y: y - bounds.y, ...input}));
+}
+function intentionalPixelChange(report, scenario) {
+    assert.equal(artworkTransition.schema, 1);
+    assert.deepEqual(artworkTransition.changedStyles, ["Pixel"]);
+    return scenario.style === "Pixel" && report.revisions?.baseline === artworkTransition.baselineRevision;
+}
+async function fitMapExtent(page, map) {
+    for (let attempt = 0; attempt < 4; attempt++) {
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        const bounds = await map.boundingBox();
+        assert.ok(bounds?.width > 0 && bounds?.height > 0, "The map has a measurable viewport");
+        if (bounds.width === mapExtent.width && bounds.height === mapExtent.height) return bounds;
+        const size = page.viewportSize();
+        const next = {width: Math.round(size.width + mapExtent.width - bounds.width),
+            height: Math.round(size.height + mapExtent.height - bounds.height)};
+        assert.ok(next.width >= mapExtent.width && next.width <= 1800 && next.height >= mapExtent.height && next.height <= 1200,
+            "Matching the canvas must stay within a bounded desktop viewport");
+        await page.setViewportSize(next);
+    }
+    throw new Error("The baseline/candidate map could not reach the fixed comparison extent");
 }
 function checkStep(raw, input) {
     assert.equal(raw.mode, "step");
@@ -232,11 +261,34 @@ async function movingContinuation(page, raw, timeout = 120000) {
 }
 async function captureMap(page, output, name, bounds) {
     await settle(page);
+    const region = {x: bounds.x + comparisonRegion.x, y: bounds.y + comparisonRegion.y,
+        width: comparisonRegion.width, height: comparisonRegion.height};
+    // A new panel position must not silently contaminate the map comparison.
+    // This inspects public semantic peers, without hiding or restyling the UI.
+    for (const role of ["button", "textbox", "combobox", "slider", "checkbox"]) {
+        for (const target of await page.getByRole(role).all()) {
+            if (!await target.isVisible()) continue;
+            const rect = await target.boundingBox();
+            if (!rect || rect.width <= 0 || rect.height <= 0) continue;
+            assert.ok(rect.x + rect.width <= region.x || rect.x >= region.x + region.width ||
+                rect.y + rect.height <= region.y || rect.y >= region.y + region.height,
+                "The fixed comparison region is unobscured by visible " + role + " controls");
+        }
+    }
     const filename = name + ".png";
     const bytes = await page.screenshot({path: path.join(output, filename), clip: {
         x: Math.floor(bounds.x), y: Math.floor(bounds.y), width: Math.floor(bounds.width), height: Math.floor(bounds.height)
     }, timeout: 30000});
-    return {filename, sha256: digest(bytes), bytes: bytes.length};
+    const {PNG} = require("pngjs"), source = PNG.sync.read(bytes);
+    assert.equal(source.width, mapExtent.width); assert.equal(source.height, mapExtent.height);
+    const cropped = new PNG({width: comparisonRegion.width, height: comparisonRegion.height});
+    PNG.bitblt(source, cropped, comparisonRegion.x, comparisonRegion.y,
+        comparisonRegion.width, comparisonRegion.height, 0, 0);
+    const comparisonBytes = PNG.sync.write(cropped), comparisonName = name + "-comparison.png";
+    fs.writeFileSync(path.join(output, comparisonName), comparisonBytes);
+    return {filename, sha256: digest(bytes), bytes: bytes.length,
+        comparison: {filename: comparisonName, sha256: digest(comparisonBytes), bytes: comparisonBytes.length,
+            region: comparisonRegion}};
 }
 async function measure(browser, variant, repetition, scenario, base, output, stepsPerSegment, movingMs) {
     const context = await browser.newContext({viewport, deviceScaleFactor: 1, serviceWorkers: "block"});
@@ -261,6 +313,9 @@ async function measure(browser, variant, repetition, scenario, base, output, ste
         const accessibility = page.getByRole("button", {name: "Enable accessibility", exact: true});
         if (await accessibility.count()) await accessibility.evaluate(element => element.click());
         await page.getByRole("button", {name: "Map appearance", exact: true}).waitFor({state: "visible"});
+        const map = page.getByRole("group", {name: "Interactive world map", exact: true});
+        await fitMapExtent(page, map);
+        result.browserViewport = page.viewportSize();
         await menu(page, "High quality", "Rendering quality");
         const ui = require("./explore.cjs");
         if (scenario.walk) {
@@ -273,15 +328,15 @@ async function measure(browser, variant, repetition, scenario, base, output, ste
             await page.getByRole("button", {name: "Resume free roam", exact: true}).waitFor({state: "visible"});
         }
         await settle(page);
-        const map = page.getByRole("group", {name: "Interactive world map", exact: true});
         const bounds = await map.boundingBox();
-        assert.ok(bounds?.width > 500 && bounds?.height > 300, "Map viewport is established");
+        assert.deepEqual({width: bounds?.width, height: bounds?.height}, mapExtent, "The fixed map viewport remains established");
         result.bounds = bounds;
         await map.focus(); await ui.waitForSettledFocus(page, map);
         const cdp = await context.newCDPSession(page);
         await cdp.send("Performance.enable", {timeDomain: "threadTicks"});
         result.trace = makeTrace(scenario, bounds, stepsPerSegment);
-        result.traceSha256 = hashObject(result.trace);
+        result.mapTrace = mapRelativeTrace(result.trace, bounds);
+        result.traceSha256 = hashObject(result.mapTrace);
         // One closed warm-up traversal visits every measured camera segment.
         for (const input of result.trace) await step(page, cdp, input);
         await settle(page);
@@ -370,11 +425,17 @@ function compare(report, output, PNG) {
         const samples = report.runs.filter(run => run.scenario.name === scenario.name);
         const baseline = samples.filter(run => run.variant === "baseline"), candidate = samples.filter(run => run.variant === "candidate");
         assert.equal(baseline.length, report.repetitions); assert.equal(candidate.length, report.repetitions);
+        const artworkChanged = intentionalPixelChange(report, scenario);
         const visual = [];
         for (let repeat = 1; repeat <= report.repetitions; repeat++) {
             const a = baseline.find(run => run.repetition === repeat), b = candidate.find(run => run.repetition === repeat);
             assert.equal(a.traceSha256, b.traceSha256, scenario.name + ": native input traces match");
-            assert.deepEqual(a.bounds, b.bounds, scenario.name + ": logical viewport matches");
+            for (const run of [a, b]) {
+                assert.deepEqual(run.mapTrace, mapRelativeTrace(run.trace, run.bounds), "Recorded input coordinates match their map origin");
+                assert.equal(run.traceSha256, hashObject(run.mapTrace), "Recorded map-relative trace hash matches");
+                assert.deepEqual({width: run.bounds.width, height: run.bounds.height}, mapExtent, "Matched logical map extent");
+            }
+            assert.deepEqual(a.mapTrace, b.mapTrace, scenario.name + ": identical map-relative native input");
             assert.equal(a.beforePose, b.beforePose, scenario.name + ": initial public physical camera matches");
             assert.equal(a.afterPose, b.afterPose, scenario.name + ": final public physical camera matches");
             for (const phase of ["before", "after"]) {
@@ -386,13 +447,17 @@ function compare(report, output, PNG) {
                 for (const key of ["style", "quality", "width", "height", "physicalWidth", "physicalHeight", "pixelSize", "renderWidth", "renderHeight", "patches", "triangles", "imageryCount", "relief", "elevation", "zoom"])
                     assert.equal(left[key], right[key], `${scenario.name}: ${phase} scene ${key} matches`);
                 const ai = a[phase + "Image"], bi = b[phase + "Image"];
-                const difference = imageDifference(PNG.sync.read(fs.readFileSync(path.join(output, ai.filename))),
-                    PNG.sync.read(fs.readFileSync(path.join(output, bi.filename))));
-                visual.push({repetition: repeat, phase, baseline: ai, candidate: bi, ...difference});
+                assert.deepEqual(ai.comparison.region, comparisonRegion);
+                assert.deepEqual(bi.comparison.region, comparisonRegion);
+                const difference = imageDifference(PNG.sync.read(fs.readFileSync(path.join(output, ai.comparison.filename))),
+                    PNG.sync.read(fs.readFileSync(path.join(output, bi.comparison.filename))));
+                visual.push({repetition: repeat, phase, baseline: ai, candidate: bi,
+                    policy: artworkChanged ? artworkTransition.id : "unchanged-style-parity", ...difference});
                 // Small shader-rounding edges are quantified, not silently called
                 // exact. Larger changes require investigation before acceptance.
-                assert.ok(difference.significantPixelFraction <= .01 && difference.meanAbsoluteChannelError <= .25,
-                    scenario.name + ": visual parity tolerance exceeded: " + JSON.stringify(difference));
+                if (!artworkChanged)
+                    assert.ok(difference.significantPixelFraction <= .01 && difference.meanAbsoluteChannelError <= .25,
+                        scenario.name + ": visual parity tolerance exceeded: " + JSON.stringify(difference));
             }
         }
         const baselineSummary = summarizeSteps(baseline.flatMap(run => run.steps));
@@ -400,7 +465,8 @@ function compare(report, output, PNG) {
         const ratios = {};
         for (const key of ["renderCpuMilliseconds", "submissionCpuMilliseconds", "inputToFirstSubmitMilliseconds", "inputToFirstQueueCompletionMilliseconds", "inputToLastQueueCompletionMilliseconds"])
             ratios[key] = baselineSummary[key].median > 0 ? candidateSummary[key].median / baselineSummary[key].median : null;
-        groups.push({scenario: scenario.name, baseline: baselineSummary, candidate: candidateSummary,
+        groups.push({scenario: scenario.name, artworkTransition: artworkChanged ? artworkTransition : null,
+            baseline: baselineSummary, candidate: candidateSummary,
             candidateOverBaselineMedian: ratios, visual,
             warmClassification: {baselineStepsWithoutTextureUploadOrResourceAllocation: baselineSummary.warmSteps,
                 candidateStepsWithoutTextureUploadOrResourceAllocation: candidateSummary.warmSteps,
@@ -419,24 +485,25 @@ async function main() {
     const selected = names ? cases.filter(item => names.includes(item.name)) : cases;
     assert.ok(selected.length && (!names || names.every(name => selected.some(item => item.name === name))), "Every selected case exists");
     fs.mkdirSync(output, {recursive: true});
-    const report = {schema: 1, protocol: "webgpu-native-input-abba-v2", capturedAtUtc: new Date().toISOString(),
+    const report = {schema: 1, protocol: "webgpu-native-input-abba-v3", capturedAtUtc: new Date().toISOString(),
         revisions: {baseline: process.env.PERF_BASELINE_REVISION || null, candidate: process.env.PERF_CANDIDATE_REVISION || null},
         dotnetSdk: {baseline: process.env.PERF_BASELINE_SDK_VERSION || null, candidate: process.env.PERF_CANDIDATE_SDK_VERSION || null},
-        viewport, deviceScaleFactor: 1, repetitions, stepsPerSegment: steps, movingMilliseconds: movingMs,
+        viewport, mapExtent, comparisonRegion, artworkTransition, deviceScaleFactor: 1,
+        repetitions, stepsPerSegment: steps, movingMilliseconds: movingMs,
         cpu: os.cpus()[0]?.model, availableParallelism: os.availableParallelism(), browserArgs,
         renderer: "Uno shared WebGPU / SwiftShader Vulkan software adapter", scenarios: selected,
-        harness: Object.fromEntries(["webgpu-performance.cjs", "webgpu-performance-probe.cjs", "native-menu.cjs", "explore.cjs", "gpu.cjs"]
+        harness: Object.fromEntries(["webgpu-performance.cjs", "webgpu-performance-probe.cjs", "native-menu.cjs", "explore.cjs", "gpu.cjs", "../pixel-art-transition.json"]
             .map(name => [name, digest(fs.readFileSync(path.join(__dirname, name)))])),
         notes: ["The identical head harness observes both Release AOT packages on one runner and browser in ABBA order.",
-            "Native wheel inputs use the same closed trajectory, bundled data and fixed quality. Free-roam camera replay is paused.",
+            "Browser viewport height is calibrated through public resize to the same 1200x700 logical map extent. The original screen origins and browser sizes are recorded; native inputs follow identical map-relative coordinates and a closed trajectory. Free-roam camera replay is paused.",
             "Input-to-submit measures event/CPU latency. Queue-completion callback latency includes prior queue work and callback scheduling; it is not a GPU timestamp or display time.",
             "CPU frame/submission diagnostics exclude GPU execution. Phase timings exist only in the candidate and are never invented for the baseline.",
             "Serialized steps measure latency, not sustained FPS. The separate held-key phase reports submissions/s, rAF and start/end queue-prefix completion latency, with trajectory and upload data; it does not assert identical world positions.",
             "The moving window retains zero submissions and empty CPU samples explicitly. Every variant then requires a bounded new map submission and diagnostic with the native key still held, outside the closed window; a stalled renderer still fails. This continuation never changes the fixed duration, measured rate or queue-prefix boundary observations.",
             "No full graph, per-draw wrapper, screenshot or GPU image readback runs in the timing windows. Lightweight queue/upload/diagnostic hooks remain and are identical for both variants.",
             "Untimed Balanced-to-High transitions upload the unchanged camera for projection/terrain-transform comparison; no projection payload is copied during measurement. Walking retains its paused session and compares physical HUD telemetry instead of opening Share, which exits free roam.",
-            "Screenshot parity is checked outside timing at the same submitted physical projection, extent, style, quality and scene geometry counts. Map cases also compare public v5 links. Different scene coverage fails comparison.",
-            "Shader-rounding tolerance is explicit: <=1% pixels differ by more than 2/255 and mean RGB error <=0.25/255. Original PNGs and numerical differences are retained.",
+            "Complete map screenshots are retained outside timing. An explicit fixed region free of semantic UI controls is compared at the same submitted physical projection, extent, style, quality and scene geometry counts. This region does not claim whole-image UI parity. Map cases also compare public v5 links. Different scene coverage fails comparison.",
+            "Unchanged-style shader-rounding tolerance remains <=1% pixels differing by more than 2/255 and mean RGB error <=0.25/255. Only Pixel comparisons against the exact declared pre-redesign baseline use intentional artwork comparison; every difference is retained, while all geometric/camera/health gates and dedicated pixel-art shader quality fixtures still apply. Later baselines automatically restore strict Pixel parity.",
             "SwiftShader results establish software-adapter behavior, not physical-GPU FPS or hardware speedup."], runs: []};
     const save = () => fs.writeFileSync(path.join(output, "report.json"), JSON.stringify(report, null, 2) + "\n");
     const {chromium} = require("playwright"), {PNG} = require("pngjs");
@@ -462,4 +529,5 @@ async function main() {
     finally { save(); await browser.close(); }
 }
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
-module.exports = {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps, summarizeMovingWindow, movingContinuation, compare, menu};
+module.exports = {distribution, makeTrace, mapRelativeTrace, intentionalPixelChange, fitMapExtent,
+    checkStep, checkHealth, imageDifference, summarizeSteps, summarizeMovingWindow, movingContinuation, compare, menu};
