@@ -3,7 +3,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const {installPerformanceProbe} = require("./webgpu-performance-probe.cjs");
-const {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps} = require("./webgpu-performance.cjs");
+const {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps,
+    summarizeMovingWindow, movingContinuation} = require("./webgpu-performance.cjs");
 
 function fixture() {
     let clock = 0;
@@ -173,9 +174,120 @@ async function focusReacquisitionChecks() {
     await run(true);
 }
 
+async function movingWindowChecks() {
+    const f = fixture(), device = await f.adapter.requestDevice(), state = f.state;
+    const command = device.createCommandEncoder({label: "PixelMap frame"}).finish();
+    const other = device.createCommandEncoder({label: "Uno UI"}).finish();
+    const buffer = device.createBuffer({label: "PixelMap moving buffer"});
+    const texture = device.createTexture({label: "PixelMap moving texture", format: "r8unorm"});
+    const clone = value => JSON.parse(JSON.stringify(value));
+    const report = frames => f.sandbox.PixelAtlasInput.reportWebGpu({frames,
+        frameMilliseconds: 2, submissionMilliseconds: 1, uploadBytes: 0});
+    f.tick(10); device.queue.submit([command]); report(1);
+    f.tick(100); state.begin("throughput");
+    assert.throws(() => state.renderProgressAfter(1, 100), /outside measurement/);
+    f.tick(6100);
+    const raw = state.finish(), original = JSON.stringify(raw);
+    const moving = summarizeMovingWindow(clone(raw), 6000, {distance: 1}, {distance: 10});
+    assert.equal(moving.windowStatus, "zero-submission-window");
+    assert.equal(moving.submittedMapFramesPerSecond, 0, "A slow six-second window remains an actual measured zero");
+    assert.deepEqual(moving.renderCpuMilliseconds, {samples: 0}, "No CPU timing is invented for an absent frame");
+    assert.deepEqual(moving.submittedFrameIntervalsMilliseconds, {samples: 0});
+    assert.deepEqual(moving.rafIntervalsMilliseconds, {samples: 0});
+    assert.equal(moving.raw.durationMilliseconds, 6000);
+    assert.throws(() => summarizeMovingWindow(clone(raw), 6001, {distance: 1}, {distance: 10}), /not shortened/);
+    assert.throws(() => summarizeMovingWindow(clone(raw), 6000, {distance: 1}, {distance: 1}), /walking advances/);
+    const mismatched = clone(raw); mismatched.mapSubmits = 1;
+    assert.throws(() => summarizeMovingWindow(mismatched, 6000, {distance: 1}, {distance: 10}), /timed map submission/);
+
+    // Use the real probe and the real page predicate with a deterministic timer
+    // scheduler. No rAF is delivered during the six-second measurement. A later
+    // submit alone still cannot satisfy the successful-render diagnostic gate.
+    const boundaries = state.boundaries, startBoundary = boundaries.start, endBoundary = boundaries.end;
+    const queueWaiters = [...f.queueWaiters];
+    let polls = 0, disposed = 0;
+    const page = {
+        waitForFunction: async (callback, argument, options) => {
+            assert.deepEqual(options, {polling: 50, timeout: 500}, "Liveness uses bounded timer polling even when rAF is stalled");
+            for (let elapsed = 0; elapsed <= options.timeout; elapsed += options.polling) {
+                polls++;
+                f.tick(raw.finishedAt + elapsed);
+                if (elapsed === 50) device.queue.submit([other]);
+                if (elapsed === 100) {
+                    device.queue.submit([command]);
+                    device.queue.writeBuffer(buffer, 0, new Uint8Array(8));
+                    device.queue.writeTexture({texture}, new Uint8Array(4), {bytesPerRow: 4}, {width: 4, height: 1});
+                    f.wheel({x: 1, y: 1, deltaX: 1, deltaY: 1, modifiers: 0});
+                    for (const callback of f.frames.splice(0)) callback(raw.finishedAt + elapsed);
+                }
+                if (elapsed === 200) report(2);
+                const value = vm.runInNewContext("(" + callback.toString() + ")", f.sandbox)(argument);
+                if (value) return {jsonValue: async () => clone(value), dispose: async () => { disposed++; }};
+            }
+            throw new Error("Post-window renderer observation timed out");
+        }
+    };
+    const continuation = await movingContinuation(page, clone(raw), 500);
+    assert.equal(polls, 5, "Neither the old frame, unrelated compositor work nor a submit without diagnostics establishes liveness");
+    assert.equal(disposed, 1);
+    assert.equal(continuation.mapSubmitsAfterWindow, 1);
+    assert.equal(continuation.lastMapSubmitAt, 6200);
+    assert.equal(continuation.lastDiagnosticAt, 6300);
+    assert.equal(continuation.observedAfterWindowMilliseconds, 200);
+    assert.equal(JSON.stringify(raw), original,
+        "Post-window submit, diagnostic, upload, wheel and rAF callbacks cannot modify any captured work or duration");
+    assert.equal(state.active, null, "Continuation never reopens or retries the measurement");
+    assert.equal(state.lastCompleted, raw);
+    assert.equal(state.boundaries, boundaries);
+    assert.equal(state.boundaries.start, startBoundary);
+    assert.equal(state.boundaries.end, endBoundary, "Continuation cannot move either queue-prefix boundary");
+    assert.deepEqual(f.queueWaiters, queueWaiters, "Continuation installs no completion wait or per-frame fence");
+    f.tick(6500); f.queueWaiters.shift()();
+    await startBoundary;
+    f.tick(6600); f.queueWaiters.shift()();
+    assert.deepEqual(clone(await state.throughputBoundaries()), {
+        startQueuePrefixMilliseconds: 6400, endQueueDrainMilliseconds: 500
+    }, "The retained queue observations remain anchored to begin and finish, before continuation");
+
+    const stalled = fixture(), stalledDevice = await stalled.adapter.requestDevice();
+    stalled.tick(100); stalled.state.begin("throughput");
+    stalled.tick(6100); const stalledRaw = clone(stalled.state.finish());
+    let stalledPolls = 0;
+    const stalledPage = {
+        waitForFunction: async (callback, argument, options) => {
+            assert.deepEqual(options, {polling: 50, timeout: 250});
+            for (let elapsed = 0; elapsed <= options.timeout; elapsed += options.polling) {
+                stalledPolls++;
+                stalled.tick(stalledRaw.finishedAt + elapsed);
+                // Even fresh diagnostics without actual map submissions are not
+                // evidence that the renderer is making forward progress.
+                stalled.sandbox.PixelAtlasInput.reportWebGpu({frames: 0, frameMilliseconds: 2});
+                const value = vm.runInNewContext("(" + callback.toString() + ")", stalled.sandbox)(argument);
+                assert.equal(value, null);
+            }
+            throw new Error("Post-window renderer observation timed out");
+        }
+    };
+    await assert.rejects(movingContinuation(stalledPage, stalledRaw, 250), /observation timed out/);
+    assert.equal(stalledPolls, 6, "A permanently stalled renderer fails at the separate bounded deadline");
+    assert.equal(stalled.state.active, null);
+    assert.equal(stalled.state.mapSubmits, 0);
+    assert.equal(stalled.queueWaiters.length, 2, "A timeout cannot extend or refence the closed sample");
+    const unhealthyPage = {waitForFunction: async (callback, argument) => {
+        const command = stalledDevice.createCommandEncoder({label: "PixelMap frame"}).finish();
+        stalledDevice.queue.submit([command]);
+        stalled.sandbox.PixelAtlasInput.reportWebGpu({frames: 1, frameMilliseconds: 2});
+        stalled.sandbox.PixelAtlasInput.failWebGpu("Managed rendering failed after the last successful frame");
+        return vm.runInNewContext("(" + callback.toString() + ")", stalled.sandbox)(argument);
+    }};
+    await assert.rejects(movingContinuation(unhealthyPage, stalledRaw), /WebGPU failed while checking post-window movement/,
+        "A fresh frame cannot hide a subsequent live managed failure");
+}
+
 async function main() {
     await menuFocusChecks();
     await focusReacquisitionChecks();
+    await movingWindowChecks();
     const f = fixture(), device = await f.adapter.requestDevice(), state = f.state;
     const mapEncoder = device.createCommandEncoder({label: "PixelMap frame"});
     const command = mapEncoder.finish();

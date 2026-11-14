@@ -232,6 +232,18 @@ function installPerformanceProbe() {
             await Promise.all([state.boundaries.start, state.boundaries.end]);
         return {startQueuePrefixMilliseconds, endQueueDrainMilliseconds};
     };
+    // Observe continued CPU submission/diagnostics after a closed throughput
+    // window. This adds no queue wait or captured sample, and cannot turn an
+    // earlier zero-work window into a nonzero throughput measurement.
+    state.renderProgressAfter = (version, finishedAt) => {
+        if (state.active) throw new Error("Continuation observation must run outside measurement");
+        if (!Number.isSafeInteger(version) || version < 0 || !Number.isFinite(finishedAt))
+            throw new Error("Continuation observation requires a valid closed-window boundary");
+        if (state.mapSubmits <= version || state.lastMapSubmitAt < finishedAt ||
+            state.lastDiagnosticAt < state.lastMapSubmitAt) return null;
+        return {mapSubmits: state.mapSubmits, lastMapSubmitAt: state.lastMapSubmitAt,
+            lastDiagnosticAt: state.lastDiagnosticAt, observedAt: now()};
+    };
     state.beginSceneCapture = () => {
         if (state.active || state.sceneCapture) throw new Error("Camera payload capture must run outside measurement");
         if (state.sceneBufferCounts.uniform !== 1 || state.sceneBufferCounts.terrain !== 1)

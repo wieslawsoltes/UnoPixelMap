@@ -8,6 +8,7 @@ const path = require("node:path");
 const os = require("node:os");
 const {createHash} = require("node:crypto");
 const {installPerformanceProbe} = require("./webgpu-performance-probe.cjs");
+const {click, menu} = require("./native-menu.cjs");
 
 const viewport = {width: 1200, height: 800};
 const camera = style => `v5/40.706846/-74.008817/17/-51/55/Day/Map/Perspective/0/Relief/1.00/${style}/Orbit/0/0/0`;
@@ -111,44 +112,6 @@ function summarizeSteps(steps) {
     }
     return summary;
 }
-async function clickTarget(page, target, name) {
-    await target.waitFor({state: "visible"});
-    // A semantic peer can appear before Uno paints the corresponding popup.
-    // Let its layout reach the native hit-test surface before reading the rect.
-    // This barrier is outside every measured input/rendering window.
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    const bounds = await target.boundingBox();
-    assert.ok(bounds?.width > 0 && bounds?.height > 0, name + " has a native input target");
-    const size = page.viewportSize();
-    const left = Math.max(0, bounds.x), right = Math.min(size.width, bounds.x + bounds.width);
-    const top = Math.max(0, bounds.y), bottom = Math.min(size.height, bounds.y + bounds.height);
-    assert.ok(right > left && bottom > top, name + " intersects the viewport");
-    await page.mouse.click((left + right) / 2, (top + bottom) / 2);
-}
-async function click(page, name) {
-    const target = page.getByRole("button", {name, exact: true, disabled: false})
-        .or(page.getByRole("checkbox", {name, exact: true, disabled: false}));
-    await clickTarget(page, target, name);
-}
-async function menu(page, name, submenu) {
-    await click(page, "Map appearance");
-    const item = text => page.getByRole("menuitem", {name: text, exact: true})
-        .or(page.getByRole("menuitemcheckbox", {name: text, exact: true}));
-    // Popup opening/closure can restore an earlier DOM focus after a peer has
-    // already gained focus. Native pointer activation addresses the painted row
-    // directly, so setup does not wait for or send a key to that transient peer.
-    if (submenu) await clickTarget(page, item(submenu), submenu);
-    const command = item(name);
-    await clickTarget(page, command, name);
-    await command.waitFor({state: "hidden"});
-    await page.mouse.move(viewport.width / 2, 20);
-    // A dismissed popup alone is not proof that its command ran. Verify the
-    // public effect as well, including when selecting the already-active preset.
-    const quality = /^(Balanced|High|Ultra) quality$/.exec(name)?.[1];
-    if (quality) await page.waitForFunction(expected => globalThis.PixelAtlasWebGpu?.quality === expected, quality);
-    else if (name === "Share this view")
-        await page.getByRole("textbox", {name: "Shareable map link", exact: true}).waitFor({state: "visible"});
-}
 function checkHealth(state) {
     assert.equal(state.deviceCount, 1, "The application uses Uno's one shared device");
     assert.deepEqual(state.errors, [], "No WebGPU validation or shader errors");
@@ -221,6 +184,51 @@ async function step(page, cdp, input) {
         const raw = await capture.jsonValue();
         return {raw, result: checkStep(raw, input)};
     } finally { await capture.dispose(); }
+}
+function summarizeMovingWindow(raw, requestedMilliseconds, beforeHud, afterHud) {
+    assert.equal(raw.mode, "throughput");
+    assert.ok(Number.isFinite(requestedMilliseconds) && requestedMilliseconds > 0);
+    assert.ok(Number.isFinite(raw.startedAt) && Number.isFinite(raw.finishedAt));
+    assert.equal(raw.durationMilliseconds, raw.finishedAt - raw.startedAt);
+    assert.ok(raw.durationMilliseconds >= requestedMilliseconds, "The fixed moving window is not shortened");
+    assert.ok(Number.isSafeInteger(raw.startMapSubmits) && raw.startMapSubmits >= 0);
+    assert.ok(Number.isSafeInteger(raw.mapSubmits) && raw.mapSubmits >= 0);
+    assert.equal(raw.mapSubmits, raw.submissions.length, "Every timed map submission is retained, including a measured zero");
+    assert.deepEqual(raw.inputs, [], "The held-key phase does not contain unrelated wheel input");
+    assert.equal(raw.frames.length === 0, raw.mapSubmits === 0, "Timed frame diagnostics agree with observed map work");
+    for (const submission of raw.submissions)
+        assert.ok(submission.submittedAt >= raw.startedAt && submission.submittedAt <= raw.finishedAt,
+            "Submissions outside the fixed window cannot contaminate its throughput");
+    for (const frame of raw.frames) {
+        assert.ok(frame.at >= raw.startedAt && frame.at <= raw.finishedAt);
+        assert.ok(Number.isFinite(frame.frameMilliseconds) && frame.frameMilliseconds >= 0);
+    }
+    assert.ok(Number.isFinite(beforeHud.distance) && Number.isFinite(afterHud.distance) && afterHud.distance > beforeHud.distance,
+        "Native held-key walking advances during the timed workload");
+    const intervals = raw.submissions.slice(1).map((value, index) => value.submittedAt - raw.submissions[index].submittedAt);
+    const raf = raw.raf.slice(1).map((value, index) => value - raw.raf[index]);
+    return {beforeHud, afterHud, raw, requestedMilliseconds,
+        windowStatus: raw.mapSubmits ? "submissions-observed" : "zero-submission-window",
+        submittedMapFramesPerSecond: raw.mapSubmits * 1000 / raw.durationMilliseconds,
+        submittedFrameIntervalsMilliseconds: distribution(intervals), rafIntervalsMilliseconds: distribution(raf),
+        renderCpuMilliseconds: distribution(raw.frames.map(frame => frame.frameMilliseconds)),
+        textureUploadBytes: raw.textureUploadBytes, bufferUploadBytes: raw.bufferUploadBytes};
+}
+async function movingContinuation(page, raw, timeout = 120000) {
+    const version = raw.startMapSubmits + raw.mapSubmits;
+    const progress = await page.waitForFunction(({version, finishedAt}) => {
+        const state = __pixelAtlasWebGpuPerformance;
+        if (state.errors.length || state.losses.length || globalThis.PixelAtlasWebGpu?.failure)
+            throw new Error("WebGPU failed while checking post-window movement");
+        return state.renderProgressAfter(version, finishedAt);
+    }, {version, finishedAt: raw.finishedAt}, {polling: 50, timeout});
+    try {
+        const value = await progress.jsonValue();
+        assert.ok(value.mapSubmits > version && value.lastMapSubmitAt >= raw.finishedAt &&
+            value.lastDiagnosticAt >= value.lastMapSubmitAt, "Continued rendering is observed after the closed window");
+        return {...value, mapSubmitsAfterWindow: value.mapSubmits - version,
+            observedAfterWindowMilliseconds: value.observedAt - raw.finishedAt};
+    } finally { await progress.dispose(); }
 }
 async function captureMap(page, output, name, bounds) {
     await settle(page);
@@ -315,14 +323,16 @@ async function measure(browser, variant, repetition, scenario, base, output, ste
                 await page.waitForTimeout(movingMs);
                 const raw = await page.evaluate(() => __pixelAtlasWebGpuPerformance.finish());
                 const afterHud = await ui.telemetry(page);
-                const intervals = raw.submissions.slice(1).map((value, index) => value.submittedAt - raw.submissions[index].submittedAt);
-                const raf = raw.raf.slice(1).map((value, index) => value - raw.raf[index]);
-                result.moving = {beforeHud, afterHud, raw, submittedMapFramesPerSecond: raw.mapSubmits * 1000 / raw.durationMilliseconds,
-                    submittedFrameIntervalsMilliseconds: distribution(intervals), rafIntervalsMilliseconds: distribution(raf),
-                    renderCpuMilliseconds: distribution(raw.frames.map(frame => frame.frameMilliseconds)),
-                    textureUploadBytes: raw.textureUploadBytes, bufferUploadBytes: raw.bufferUploadBytes};
-                assert.ok(raw.mapSubmits > 0, "The moving workload submits real map frames");
-                assert.ok(afterHud.distance > beforeHud.distance, "Native held-key walking advances during the timed workload");
+                result.moving = summarizeMovingWindow(raw, movingMs, beforeHud, afterHud);
+                await healthy(page);
+                // A software GPU may take longer than this entire fixed window
+                // to present a frame and schedule rAF. Keep its zero samples and
+                // zero rate; do not extend/retry timing until a frame appears.
+                // All variants must independently render again with W still
+                // held. This bounded liveness gate runs after finish(), leaving
+                // the captured work and both queue-prefix boundaries untouched.
+                result.moving.continuation = await movingContinuation(page, raw);
+                await healthy(page);
             } finally { await page.keyboard.up("w"); }
             await click(page, "Pause free roam");
             result.moving.queueBoundaries = await page.evaluate(async () => {
@@ -339,7 +349,9 @@ async function measure(browser, variant, repetition, scenario, base, output, ste
         const {rawSteps, ...compact} = result;
         if (compact.moving) compact.moving = {...compact.moving, raw: undefined};
         console.log("WEBGPU_PERF", JSON.stringify({case: scenario.name, variant, repetition, ...result.summary,
-            movingSubmissionsPerSecond: result.moving?.submittedMapFramesPerSecond}));
+            movingSubmissionsPerSecond: result.moving?.submittedMapFramesPerSecond,
+            movingWindowStatus: result.moving?.windowStatus,
+            movingContinuationMilliseconds: result.moving?.continuation?.observedAfterWindowMilliseconds}));
         return compact;
     } catch (error) {
         result.failure = error.stack || String(error);
@@ -407,19 +419,20 @@ async function main() {
     const selected = names ? cases.filter(item => names.includes(item.name)) : cases;
     assert.ok(selected.length && (!names || names.every(name => selected.some(item => item.name === name))), "Every selected case exists");
     fs.mkdirSync(output, {recursive: true});
-    const report = {schema: 1, protocol: "webgpu-native-input-abba-v1", capturedAtUtc: new Date().toISOString(),
+    const report = {schema: 1, protocol: "webgpu-native-input-abba-v2", capturedAtUtc: new Date().toISOString(),
         revisions: {baseline: process.env.PERF_BASELINE_REVISION || null, candidate: process.env.PERF_CANDIDATE_REVISION || null},
         dotnetSdk: {baseline: process.env.PERF_BASELINE_SDK_VERSION || null, candidate: process.env.PERF_CANDIDATE_SDK_VERSION || null},
         viewport, deviceScaleFactor: 1, repetitions, stepsPerSegment: steps, movingMilliseconds: movingMs,
         cpu: os.cpus()[0]?.model, availableParallelism: os.availableParallelism(), browserArgs,
         renderer: "Uno shared WebGPU / SwiftShader Vulkan software adapter", scenarios: selected,
-        harness: Object.fromEntries(["webgpu-performance.cjs", "webgpu-performance-probe.cjs", "explore.cjs", "gpu.cjs"]
+        harness: Object.fromEntries(["webgpu-performance.cjs", "webgpu-performance-probe.cjs", "native-menu.cjs", "explore.cjs", "gpu.cjs"]
             .map(name => [name, digest(fs.readFileSync(path.join(__dirname, name)))])),
         notes: ["The identical head harness observes both Release AOT packages on one runner and browser in ABBA order.",
             "Native wheel inputs use the same closed trajectory, bundled data and fixed quality. Free-roam camera replay is paused.",
             "Input-to-submit measures event/CPU latency. Queue-completion callback latency includes prior queue work and callback scheduling; it is not a GPU timestamp or display time.",
             "CPU frame/submission diagnostics exclude GPU execution. Phase timings exist only in the candidate and are never invented for the baseline.",
             "Serialized steps measure latency, not sustained FPS. The separate held-key phase reports submissions/s, rAF and start/end queue-prefix completion latency, with trajectory and upload data; it does not assert identical world positions.",
+            "The moving window retains zero submissions and empty CPU samples explicitly. Every variant then requires a bounded new map submission and diagnostic with the native key still held, outside the closed window; a stalled renderer still fails. This continuation never changes the fixed duration, measured rate or queue-prefix boundary observations.",
             "No full graph, per-draw wrapper, screenshot or GPU image readback runs in the timing windows. Lightweight queue/upload/diagnostic hooks remain and are identical for both variants.",
             "Untimed Balanced-to-High transitions upload the unchanged camera for projection/terrain-transform comparison; no projection payload is copied during measurement. Walking retains its paused session and compares physical HUD telemetry instead of opening Share, which exits free roam.",
             "Screenshot parity is checked outside timing at the same submitted physical projection, extent, style, quality and scene geometry counts. Map cases also compare public v5 links. Different scene coverage fails comparison.",
@@ -449,4 +462,4 @@ async function main() {
     finally { save(); await browser.close(); }
 }
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
-module.exports = {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps, compare, menu};
+module.exports = {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps, summarizeMovingWindow, movingContinuation, compare, menu};
