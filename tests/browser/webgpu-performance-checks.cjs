@@ -135,6 +135,55 @@ async function menuFocusChecks() {
     await run({name: "Share this view", submenu: null, activate: false});
     await run({offscreen: true});
 }
+async function menuGroupingChecks() {
+    const {menu} = require("./native-menu.cjs");
+    // One frozen harness must activate both the baseline's flat commands and
+    // the candidate's compact groups through their actual visible menu rows.
+    for (const grouped of [false, true]) {
+        for (const [name, group] of [["Normal rendering", "Rendering style"],
+            ["After dark", "Lighting"], ["Perspective lens", "Camera"]]) {
+            let rootOpen = false, groupOpen = false, activated = false;
+            const clicks = [];
+            const bounds = new Map([
+                ["Map appearance", {x: 1100, y: 12, width: 44, height: 44}],
+                [group, {x: 940, y: 68, width: 220, height: 44}],
+                [name, {x: grouped ? 720 : 940, y: 112, width: 220, height: 44}]
+            ]);
+            const visible = target => target === "Map appearance" ||
+                (target === group ? grouped && rootOpen : rootOpen && (!grouped || groupOpen));
+            const target = texts => ({
+                texts,
+                or(other) { return target([...new Set([...texts, ...other.texts])]); },
+                first() { return target([texts.find(visible) ?? texts[0]]); },
+                isVisible: async () => texts.some(visible),
+                waitFor: async ({state}) => assert.equal(texts.some(visible), state === "visible", texts.join(" or ") + " is reachable"),
+                boundingBox: async () => bounds.get(texts.find(visible) ?? texts[0])
+            });
+            const scope = vm.createContext({Promise, requestAnimationFrame: callback => setImmediate(callback)});
+            const page = {
+                getByRole: (_, {name: text}) => target([text]),
+                viewportSize: () => ({width: 1200, height: 700}),
+                evaluate: async callback => vm.runInContext("(" + callback.toString() + ")", scope)(),
+                mouse: {
+                    click: async (x, y) => {
+                        const hit = [...bounds].find(([text, r]) => visible(text) &&
+                            x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height)?.[0];
+                        assert.ok(hit, "A native pointer reaches a visible menu row");
+                        clicks.push(hit);
+                        if (hit === "Map appearance") rootOpen = true;
+                        else if (hit === group) groupOpen = true;
+                        else { activated = true; rootOpen = groupOpen = false; }
+                    },
+                    move: async () => {}
+                }
+            };
+            await menu(page, name);
+            assert.equal(activated, true, name + " executes through the visible menu");
+            assert.deepEqual(clicks, grouped ? ["Map appearance", group, name] : ["Map appearance", name],
+                "Public submenu discovery preserves both application revisions without retries");
+        }
+    }
+}
 async function focusReacquisitionChecks() {
     // Execute the real helper without browser/image dependencies. A fake clock
     // and animation queue reproduce delayed focus theft and replaced DOM peers.
@@ -287,6 +336,7 @@ async function movingWindowChecks() {
 
 async function main() {
     await menuFocusChecks();
+    await menuGroupingChecks();
     await focusReacquisitionChecks();
     await movingWindowChecks();
     const f = fixture(), device = await f.adapter.requestDevice(), state = f.state;

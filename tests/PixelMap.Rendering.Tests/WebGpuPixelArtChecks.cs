@@ -260,16 +260,16 @@ internal static class WebGpuPixelArtChecks
     private static void Assert(bool value, string message) { if (!value) throw new InvalidOperationException(message); }
 
     private const string FixtureShader = """
-        struct Probe {a:vec4f,b:vec4f,meta:vec4f,}
+        struct Probe {a:vec4f,b:vec4f,kindAndSeed:vec4f,}
         @group(0) @binding(0) var<storage,read> probes:array<Probe>;
         @vertex fn vs(@builtin(vertex_index) id:u32)->@builtin(position) vec4f {
             let p=vec2f(f32((id<<1u)&2u),f32(id&2u));return vec4f(p*2.0-1.0,0.0,1.0);
         }
         @fragment fn fs(@builtin(position) position:vec4f)->@location(0) vec4f {
-            let p=probes[u32(position.x)];let kind=u32(p.meta.x+0.5);
+            let p=probes[u32(position.x)];let kind=u32(p.kindAndSeed.x+0.5);
             if(kind==0u){return vec4f(f32(pixelWallBand(p.a.xyz,p.b.xyz)),0.0,0.0,1.0);}
             if(kind==1u){return pixelFacadeCell(p.a.xy,p.a.zw,p.b.xy);}
-            if(kind==2u){return vec4f(f32(pixelRoofPart(p.a.xy,p.a.zw,u32(p.meta.y+0.5))),0.0,0.0,1.0);}
+            if(kind==2u){return vec4f(f32(pixelRoofPart(p.a.xy,p.a.zw,u32(p.kindAndSeed.y+0.5))),0.0,0.0,1.0);}
             if(kind==3u){return vec4f(pixelTerrainColor(p.a.xyz,p.a.w),1.0);}
             if(kind==4u){return vec4f(f32(pixelEdgePart(p.a.xy,p.b.xyz)),select(0.0,1.0,pixelEdgeVisible(p.a.z)),0.0,1.0);}
             return vec4f(pixelSkyColor(p.a.xyz,p.b.xyz,p.a.w),1.0);

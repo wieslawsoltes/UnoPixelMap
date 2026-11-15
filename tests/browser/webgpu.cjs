@@ -204,6 +204,93 @@ async function click(page, name, touch = false) {
     if (touch) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
 }
 
+function namedControl(page, name) {
+    return page.getByRole("button", {name, exact: true, disabled: false})
+        .or(page.getByRole("checkbox", {name, exact: true, disabled: false}));
+}
+
+async function readPeers(locator) {
+    return locator.evaluateAll(elements => elements.map(element => {
+        const {x, y, width, height} = element.getBoundingClientRect();
+        return {id: element.id, name: element.getAttribute("aria-label"), role: element.getAttribute("role"),
+            tag: element.tagName, connected: element.isConnected, rect: {x, y, width, height}};
+    }));
+}
+
+async function pointerReceipt(page, target, point) {
+    const peers = await readPeers(target);
+    const hit = point ? await page.evaluate(({x, y}) => {
+        const element = document.elementFromPoint(x, y);
+        if (!element) return null;
+        const rect = element.getBoundingClientRect();
+        return {id: element.id, name: element.getAttribute("aria-label"), role: element.getAttribute("role"),
+            tag: element.tagName, rect: {x: rect.x, y: rect.y, width: rect.width, height: rect.height}};
+    }, point) : null;
+    return {peers, elementFromPoint: hit, clickPoint: point};
+}
+
+async function verifyLayerPointerDismissal(page, name, {timeout = 30000, diagnosticTimeout = 10000} = {}) {
+    const target = namedControl(page, name);
+    const receipt = {name, pointer: {attempted: false, passed: false}, keyboard: {attempted: false, key: "Space"}};
+    try {
+        await target.waitFor({state: "visible", timeout});
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        const peers = await readPeers(target), size = page.viewportSize();
+        assert.equal(peers.length, 1, name + ": one live native pointer target exists");
+        receipt.pointer.sampledPeer = peers[0];
+        receipt.pointer.viewport = size;
+        const rect = peers[0].rect;
+        assert.ok(rect.width >= 44 && rect.height >= 44, name + ": layer cards retain their touch target size");
+        const left = Math.max(0, rect.x), right = Math.min(size.width, rect.x + rect.width);
+        const top = Math.max(0, rect.y), bottom = Math.min(size.height, rect.y + rect.height);
+        assert.ok(right > left && bottom > top, name + ": layer card intersects the viewport");
+        const point = {x: (left + right) / 2, y: (top + bottom) / 2};
+        receipt.pointer.before = await pointerReceipt(page, target, point);
+        receipt.pointer.attempted = true;
+        await page.mouse.click(point.x, point.y);
+        await target.waitFor({state: "hidden", timeout});
+        receipt.pointer.after = await pointerReceipt(page, target, point);
+        receipt.pointer.passed = true;
+        return receipt;
+    } catch (pointerFailure) {
+        receipt.pointer.failure = pointerFailure.stack || String(pointerFailure);
+        receipt.pointer.after = await pointerReceipt(page, target, receipt.pointer.before?.clickPoint)
+            .catch(error => ({snapshotError: String(error)}));
+        // Keep a missed native hit as a failing UI contract. Keyboard activation
+        // is an independent diagnostic, never a retry that turns the miss green.
+        try {
+            if (await target.isVisible()) {
+                receipt.keyboard.attempted = true;
+                await waitForSettledFocus(page, target, diagnosticTimeout);
+                await page.keyboard.press("Space");
+                await target.waitFor({state: "hidden", timeout: diagnosticTimeout});
+                receipt.keyboard.passed = true;
+            } else receipt.keyboard.skipped = "The layer peer was already hidden before the diagnostic";
+        } catch (error) {
+            receipt.keyboard.passed = false;
+            receipt.keyboard.failure = error.stack || String(error);
+        }
+        receipt.keyboard.after = await pointerReceipt(page, target, receipt.pointer.before?.clickPoint)
+            .catch(error => ({snapshotError: String(error)}));
+        const error = new Error(name + ": native pointer activation did not dismiss the layer picker; " +
+            "the independent keyboard diagnostic " + (receipt.keyboard.passed ? "succeeded" : "did not succeed"), {cause: pointerFailure});
+        error.interfaceEvidence = receipt;
+        throw error;
+    }
+}
+
+async function selectLayerKeyboard(page, name) {
+    const target = namedControl(page, name);
+    if (!await target.isVisible()) {
+        await waitForSettledFocus(page, namedControl(page, "Choose map layers"));
+        await page.keyboard.press("Space");
+    }
+    await target.waitFor({state: "visible"});
+    await waitForSettledFocus(page, target);
+    await page.keyboard.press("Space");
+    await target.waitFor({state: "hidden"});
+}
+
 async function awaitFrame(page, predicate, argument) {
     await page.waitForFunction(({ predicate, argument }) => {
         const state = globalThis.PixelAtlasWebGpu;
@@ -253,7 +340,8 @@ async function assertGraphicsHealthy(page, name) {
 async function saveFailure(page, name, error) {
     // Capture without awaiting shader promises or queue completion: a failed
     // device must not prevent the original diagnostic from reaching artifacts.
-    const evidence = { name, failure: error.stack || String(error), url: page.url() };
+    const evidence = { name, failure: error.stack || String(error), url: page.url(),
+        interfaceEvidence: error.interfaceEvidence };
     try { evidence.snapshot = await graphicsSnapshot(page); }
     catch (failure) { evidence.snapshotError = String(failure); }
     try {
@@ -739,20 +827,45 @@ async function desktopInterface(page) {
         assert.ok(rect?.width >= 44 && rect?.height >= 44, name + ": layer cards meet touch target size");
     }
     await captureInterface(page, "desktop-layer-picker", {layerChoices: ["Map", "Earth", "Elevation"]});
-    await click(page, "Map layer");
-    await page.getByRole("button", {name: "Map layer", exact: true}).waitFor({state: "hidden"});
+    const activation = await verifyLayerPointerDismissal(page, "Map layer");
+    await captureInterface(page, "desktop-layer-pointer-dismissal", {activation});
 }
 
-async function waitForSheetTop(page, handle, minimum, maximum) {
-    const element = await handle.elementHandle();
-    assert.ok(element, "The sheet handle has a live accessibility element");
-    try {
-        await page.waitForFunction(({element, minimum, maximum}) => {
-            if (!element.isConnected) return false;
-            const top = element.getBoundingClientRect().top;
-            return top >= minimum && top <= maximum;
-        }, {element, minimum, maximum}, {polling: "raf", timeout: 25000});
-    } finally { await element.dispose(); }
+async function waitForSheetTop(page, ranges, description, {timeout = 25000, pollInterval = 50} = {}) {
+    const deadline = Date.now() + timeout, samples = [];
+    let last = null, pendingFailure = null;
+    const matches = (rect, range) => rect && rect.width > 0 && rect.height > 0 &&
+        rect.y >= range[0] && rect.y <= range[1];
+    while (Date.now() < deadline) {
+        // Resolve both peers again on every poll. Uno can replace the semantic
+        // element when its name or layout changes; a pinned ElementHandle would
+        // keep polling the disconnected predecessor for the entire deadline.
+        const peers = page.getByRole("group", {name: "Search and directions", exact: true})
+            .or(page.getByRole("button", {name: /^(Expand|Collapse) search sheet$/}));
+        let timer;
+        try {
+            last = await Promise.race([readPeers(peers), new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error("Timed out reading live sheet geometry")), Math.max(1, deadline - Date.now()));
+            })]);
+        } catch (error) { pendingFailure = String(error); break; }
+        finally { clearTimeout(timer); }
+        samples.push({elapsedMs: timeout - Math.max(0, deadline - Date.now()), peers: last});
+        if (samples.length > 12) samples.shift();
+        const groups = last.filter(peer => peer.connected && peer.name === "Search and directions");
+        const handles = last.filter(peer => peer.connected && /^(Expand|Collapse) search sheet$/.test(peer.name || ""));
+        if (groups.length === 1 && handles.length === 1) {
+            const sheet = groups[0].rect, handle = handles[0].rect;
+            if (matches(handle, ranges.handle) && matches(sheet, ranges.sheet) &&
+                handle.x >= sheet.x && handle.y >= sheet.y &&
+                handle.x + handle.width <= sheet.x + sheet.width && handle.y + handle.height <= sheet.y + sheet.height)
+                return {handle: handles[0], sheet: groups[0]};
+        }
+        const remaining = deadline - Date.now();
+        if (remaining > 0) await new Promise(resolve => setTimeout(resolve, Math.min(pollInterval, remaining)));
+    }
+    const error = new Error(description + ": live sheet and handle geometry did not reach their required bounds within " + timeout + " ms");
+    error.interfaceEvidence = {description, ranges, timeout, lastPeers: last, samples, pendingFailure};
+    throw error;
 }
 
 async function mobileInterface(page, cdp) {
@@ -760,40 +873,63 @@ async function mobileInterface(page, cdp) {
     const bounds = await map.boundingBox(), size = page.viewportSize();
     assert.deepEqual(bounds, {x: 0, y: 0, ...size}, "The mobile map extends behind the bottom sheet");
     const handle = page.getByRole("button", {name: /^(Expand|Collapse) search sheet$/});
-    const collapsed = await handle.boundingBox();
+    const compact = await waitForSheetTop(page,
+        {handle: [size.height * .7, size.height], sheet: [size.height * .7, size.height]}, "The initial compact sheet");
+    const collapsed = compact.handle.rect;
     assert.ok(collapsed.y > size.height * .7 && collapsed.height >= 44, "The initial sheet is compact with a real touch handle");
     await waitForSettledFocus(page, handle); await page.keyboard.press("End");
     await page.getByRole("button", {name: "Collapse search sheet", exact: true}).waitFor({state: "visible"});
-    await waitForSheetTop(page, handle, 0, size.height * .2 - 1);
-    const expanded = await handle.boundingBox();
+    const expansion = await waitForSheetTop(page,
+        {handle: [0, size.height * .2 - 1], sheet: [0, size.height * .2 - 1]}, "End expands the sheet");
+    const expanded = expansion.handle.rect;
     assert.ok(expanded.y < size.height * .2, "The sheet expands through its accessible keyboard action");
     assert.deepEqual(await map.boundingBox(), bounds, "Sheet expansion never resizes the physical map");
-    await captureInterface(page, "mobile-expanded-sheet", {collapsed, expanded, mapBounds: bounds});
+    await captureInterface(page, "mobile-expanded-sheet", {collapsed, expanded, peers: expansion, mapBounds: bounds});
     await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
-    await waitForSheetTop(page, handle, collapsed.y - 1, collapsed.y + 1);
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    const start = await handle.boundingBox(), x = start.x + start.width / 2, y = start.y + start.height / 2;
+    const compactRanges = {handle: [collapsed.y - 1, collapsed.y + 1], sheet: [compact.sheet.rect.y - 1, compact.sheet.rect.y + 1]};
+    const beforeDrag = await waitForSheetTop(page, compactRanges, "Home restores the compact sheet before dragging");
+    const start = beforeDrag.handle.rect, x = start.x + start.width / 2, y = start.y + start.height / 2;
     await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{x, y, id: 0}]});
     for (let step = 1; step <= 6; step++)
         await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{x, y: y - step * 50, id: 0}]});
     await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
-    await waitForSheetTop(page, handle, 0, start.y - 101);
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    const dragged = await handle.boundingBox();
+    const dragging = await waitForSheetTop(page,
+        {handle: [0, start.y - 101], sheet: [0, beforeDrag.sheet.rect.y - 101]}, "Native touch drag opens the sheet");
+    const dragged = dragging.handle.rect;
     assert.ok(dragged.y < start.y - 100, "Native touch drag opens the sheet and snaps to a higher detent");
     assert.deepEqual(await map.boundingBox(), bounds, "Dragging chrome preserves the map viewport");
-    await captureInterface(page, "mobile-dragged-sheet", {collapsed: start, dragged, mapBounds: bounds});
+    await captureInterface(page, "mobile-dragged-sheet", {collapsed: start, dragged, peers: dragging, mapBounds: bounds});
     await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
-    await waitForSheetTop(page, handle, collapsed.y - 1, collapsed.y + 1);
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    assert.ok(Math.abs((await handle.boundingBox()).y - collapsed.y) <= 1, "The sheet returns to its compact detent");
+    const restored = await waitForSheetTop(page, compactRanges, "Home restores the compact sheet after dragging");
+    assert.ok(Math.abs(restored.handle.rect.y - collapsed.y) <= 1, "The sheet returns to its compact detent");
+}
+
+async function desktopUi(browser) {
+    const {context, page} = await open(browser);
+    try {
+        await verifyGpu(page, "desktop-interface-initial");
+        await desktopInterface(page);
+    } catch (error) {
+        await saveFailure(page, "desktop-interface", error);
+        throw error;
+    } finally { await context.close(); }
+}
+
+async function mobileUi(browser) {
+    const {context, page} = await open(browser, "", {mobile: true, density: 2});
+    try {
+        await verifyGpu(page, "mobile-interface-initial");
+        await mobileInterface(page, await context.newCDPSession(page));
+    } catch (error) {
+        await saveFailure(page, "mobile-interface", error);
+        throw error;
+    } finally { await context.close(); }
 }
 
 async function desktop(browser) {
     const { context, page } = await open(browser);
     try {
         const first = await capture(page, "desktop-pixel");
-        await desktopInterface(page);
         assert.ok(await page.evaluate(() => PixelAtlasWebGpu.triangles > 0), "The opening city contains 3D building geometry");
         const initialPipelines = await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines);
         assert.equal(initialPipelines.length, 8, "Pixel startup compiles only its six scene and two presentation pipelines");
@@ -853,7 +989,7 @@ async function desktop(browser) {
             assert.ok(difference(lightingImage, image) > .01, "Changing the lighting palette changes the rendered city");
             lightingImage = image;
         }
-        await click(page, "Earth imagery layer");
+        await selectLayerKeyboard(page, "Earth imagery layer");
         await awaitFrame(page, s => s.imageryCount > 0);
         await capture(page, "earth-imagery");
         // The photograph continuation is only active below 30 degrees. Exercise
@@ -879,10 +1015,10 @@ async function desktop(browser) {
         await menu(page, "Terrain relief");
         await awaitFrame(page, s => s.relief);
         await capture(page, "terrain-relief");
-        await click(page, "Elevation layer");
+        await selectLayerKeyboard(page, "Elevation layer");
         await awaitFrame(page, s => s.elevation);
         await capture(page, "elevation-layer");
-        await click(page, "Map layer");
+        await selectLayerKeyboard(page, "Map layer");
 
         await click(page, "Open free roam game");
         await click(page, "Start free roam at map center");
@@ -1038,7 +1174,6 @@ async function mobile(browser) {
         };
         const before = await capture(page, "mobile-pixel");
         const cdp = await context.newCDPSession(page);
-        await mobileInterface(page, cdp);
         // The initial camera includes the Financial District label. Keep a
         // continuous, native-density view of that label before the pinch zooms in.
         await menu(page, "Normal rendering");
@@ -1111,7 +1246,22 @@ async function deviceLoss(browser) {
     } finally { await context.close(); }
 }
 
-(async () => {
+async function runIndependentSuites(browser, suites) {
+    const failures = [];
+    report.failures = [];
+    for (const [name, run] of suites) {
+        try { await run(browser); }
+        catch (error) {
+            failures.push(error);
+            report.failures.push({name, failure: error.stack || String(error)});
+            console.error(name + " suite failed:", error);
+        }
+    }
+    if (failures.length) throw new AggregateError(failures,
+        report.failures.map(failure => failure.name).join(", ") + " browser suites failed");
+}
+
+async function run() {
     await mkdir(output, { recursive: true });
     const executablePath = process.env.CHROMIUM_PATH || undefined;
     const channel = executablePath ? undefined : "chromium";
@@ -1140,23 +1290,13 @@ async function deviceLoss(browser) {
         if (!preflightOnly) {
             // Each suite owns and closes its browser contexts. Preserve every
             // failure while letting independent input/recovery checks finish.
-            const failures = [];
-            report.failures = [];
-            for (const [name, run] of [["shader-fixtures", async instance =>
+            await runIndependentSuites(browser, [["shader-fixtures", async instance =>
                 report.scenarios.push(await runShaderFixtures(instance, base, output))],
                 ["pixel-art-fixtures", async instance =>
                     report.scenarios.push(await runPixelArtFixtures(instance, base, output))],
-                ["desktop", desktop], ["journeys", journeys],
-                ["mobile", mobile], ["unavailable", unavailable], ["device-loss", deviceLoss]]) {
-                try { await run(browser); }
-                catch (error) {
-                    failures.push(error);
-                    report.failures.push({ name, failure: error.stack || String(error) });
-                    console.error(name + " suite failed:", error);
-                }
-            }
-            if (failures.length) throw new AggregateError(failures,
-                report.failures.map(failure => failure.name).join(", ") + " browser suites failed");
+                ["desktop", desktop], ["desktop-interface", desktopUi], ["journeys", journeys],
+                ["mobile", mobile], ["mobile-interface", mobileUi],
+                ["unavailable", unavailable], ["device-loss", deviceLoss]]);
         }
         assert.deepEqual(report.errors, [], "No application exceptions occurred");
         report.passed = true;
@@ -1169,4 +1309,9 @@ async function deviceLoss(browser) {
         await writeFile(join(output, "report.json"), JSON.stringify(report, null, 2));
         await browser.close();
     }
-})().catch(error => { console.error(error); process.exitCode = 1; });
+}
+
+module.exports = {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites};
+
+if (require.main === module)
+    run().catch(error => { console.error(error); process.exitCode = 1; });

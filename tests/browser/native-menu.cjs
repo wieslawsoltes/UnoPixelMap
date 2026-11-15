@@ -25,6 +25,21 @@ async function menu(page, name, submenu) {
     await click(page, "Map appearance");
     const item = text => page.getByRole("menuitem", {name: text, exact: true})
         .or(page.getByRole("menuitemcheckbox", {name: text, exact: true}));
+    // The redesigned compact menu groups appearance choices. A frozen benchmark
+    // harness also runs against the earlier flat menu, so discover the public
+    // group before opening it; never infer application layout from a revision.
+    if (!submenu) {
+        const group = /^(Pixel art|Normal|Minecraft|Roblox) rendering$/.test(name) ? "Rendering style" :
+            ["Daylight", "Golden hour", "After dark"].includes(name) ? "Lighting" :
+            /^(Perspective lens|Camera angles and orbit|Rotate (left|right) 45 degrees|Switch to .+ view)$/.test(name) ? "Camera" : null;
+        if (group) {
+            const groupTarget = item(group);
+            // Wait for the popup's public rows before deciding which layout is
+            // present. An immediate visibility query can race peer creation.
+            await groupTarget.or(item(name)).first().waitFor({state: "visible"});
+            if (await groupTarget.isVisible()) submenu = group;
+        }
+    }
     // Popup opening/closure can restore an earlier DOM focus after a peer has
     // already gained focus. Native pointer activation addresses the painted row
     // directly, so setup does not wait for or send a key to that transient peer.

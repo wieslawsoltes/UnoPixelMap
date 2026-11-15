@@ -3,7 +3,8 @@ const {mkdir, writeFile} = require("node:fs/promises");
 const {join} = require("node:path");
 const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
-const {activateMenuItem, setGpuRendering} = require("./gpu.cjs");
+const {setGpuRendering} = require("./gpu.cjs");
+const {menu} = require("./native-menu.cjs");
 
 // Shared input helpers are imported by preflight-only commands too. Parse the
 // caller's site URL only in open(), when a browser page is actually requested.
@@ -112,20 +113,19 @@ async function action(page, name, touch = false) {
     }
 }
 
-async function menu(page, name) {
-    await action(page, "Map appearance");
-    const item = page.getByRole("menuitem", {name, exact: true})
-        .or(page.getByRole("menuitemcheckbox", {name, exact: true}));
-    await activateMenuItem(page, item);
-    await page.mouse.move(page.viewportSize().width / 2, 15);
-}
-
 async function choose(page, name, index, touch = false, selectedIndex = 0) {
     const selector = page.getByRole("combobox", {name, exact: true});
     const anchor = touch ? await controlBounds(selector) : null;
     const existingScrollers = await page.locator('[elementtype="ScrollContentPresenter"]')
         .evaluateAll(elements => elements.map(element => element.id));
-    await tap(page, selector, touch);
+    if (touch) await tap(page, selector, true);
+    else {
+        // Uno's ComboBox peer routes Alt+Down to its managed expand action.
+        // Native keyboard opening avoids stale portal-relative pointer bounds.
+        await selector.waitFor({state: "visible"});
+        await waitForSettledFocus(page, selector);
+        await page.keyboard.press("Alt+ArrowDown");
+    }
     await page.waitForFunction(name => document.querySelector('[aria-label="' + name + '"]')?.getAttribute("aria-expanded") === "true", name);
     if (!touch) {
         // Leave focus inside the native popup. Focusing its external ComboBox

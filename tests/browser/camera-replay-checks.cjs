@@ -293,7 +293,7 @@ async function focusChecks() {
         process: {argv: ["node", "webgpu.cjs", "--preflight-only"], env: {}},
         require: name => ["playwright", "pngjs", "./gpu.cjs"].includes(name) ? {} : require(name)
     }, {filename: "explore.cjs"});
-    const {action, waitForSettledFocus} = uiModule.exports;
+    const {action, choose, waitForSettledFocus} = uiModule.exports;
     let acquired = 0, disposed = 0, frames = 0, stableFrames = 0, losses = 0, reacquisitions = 0, keys = 0;
     const target = {isConnected: true, dispose: async () => { disposed++; }};
     const document = {activeElement: null};
@@ -344,8 +344,86 @@ async function focusChecks() {
     assert.ok(acquired > acquiredBeforeStall, "The stalled animation barrier owns a target handle");
     assert.equal(disposed, acquired, "The target handle is disposed when the animation barrier times out");
     assert.equal(keys, 1, "Failed focus waits cannot issue another keyboard activation");
+    await desktopChoiceChecks(choose);
+}
+
+async function desktopChoiceChecks(choose) {
+    let expanded = false, selected = 4, stableFrames = 0, acquired = 0, disposed = 0;
+    const keys = [], observedStates = [];
+    const rejectPointer = () => assert.fail("Desktop picker setup must not read or click stale portal coordinates");
+    const target = {isConnected: true, getBoundingClientRect: rejectPointer, click: rejectPointer,
+        getAttribute: name => name === "aria-expanded" ? String(expanded) : null,
+        dispose: async () => { disposed++; }};
+    const popup = {getAttribute: name => name === "elementtype" ? "ScrollContentPresenter" : null};
+    const document = {activeElement: null, querySelector: query => {
+        assert.equal(query, '[aria-label="Free roam camera"]');
+        return target;
+    }};
+    const sandbox = vm.createContext({document, Promise,
+        requestAnimationFrame: callback => setImmediate(() => {
+            stableFrames = document.activeElement === target ? stableFrames + 1 : 0;
+            callback();
+        })});
+    const invoke = (callback, argument) => vm.runInContext("(" + callback.toString() + ")", sandbox)(argument);
+    const selector = {
+        waitFor: async options => assert.equal(options.state, "visible"),
+        focus: async () => {
+            assert.equal(expanded, false, "Selection keys must keep native popup focus while it is open");
+            document.activeElement = target;
+            stableFrames = 0;
+        },
+        elementHandle: async () => { acquired++; return target; },
+        evaluate: rejectPointer, boundingBox: rejectPointer
+    };
+    const page = {
+        getByRole: (role, options) => {
+            assert.equal(role, "combobox");
+            assert.equal(options.name, "Free roam camera");
+            assert.equal(options.exact, true);
+            return selector;
+        },
+        locator: query => {
+            assert.equal(query, '[elementtype="ScrollContentPresenter"]');
+            return {evaluateAll: async callback => invoke(callback,
+                [{id: "stale-portal", getBoundingClientRect: rejectPointer}])};
+        },
+        evaluate: async (callback, argument) => invoke(callback, argument),
+        waitForFunction: async (callback, argument) => {
+            assert.equal(invoke(callback, argument), true, "The real expanded/closed and popup-focus predicates must hold");
+            observedStates.push(argument ? expanded ? "expanded" : "closed" : "popup-focus");
+        },
+        waitForTimeout: async milliseconds => assert.equal(milliseconds, 75),
+        mouse: {click: rejectPointer}, touchscreen: {tap: rejectPointer},
+        keyboard: {press: async key => {
+            keys.push(key);
+            if (key === "Alt+ArrowDown") {
+                assert.equal(document.activeElement, target);
+                assert.ok(stableFrames >= 2, "Native Alt+Down follows two settled focus frames");
+                expanded = true;
+                document.activeElement = popup;
+                return;
+            }
+            assert.equal(expanded, true);
+            assert.equal(document.activeElement, popup);
+            if (key === "Home") selected = 0;
+            else if (key === "ArrowDown") selected++;
+            else {
+                assert.equal(key, "Enter");
+                expanded = false;
+                document.activeElement = null;
+            }
+        }}
+    };
+    await choose(page, "Free roam camera", 2);
+    assert.deepEqual(keys, ["Alt+ArrowDown", "Home", "ArrowDown", "ArrowDown", "Enter"]);
+    assert.deepEqual(observedStates, ["expanded", "popup-focus", "closed"]);
+    assert.equal(selected, 2, "Home/Down/Enter still select the requested option");
+    assert.equal(document.activeElement, target, "The closed picker reacquires the ComboBox focus");
+    assert.ok(stableFrames >= 2, "Closing also waits for two stable focus frames");
+    assert.equal(acquired, 2, "Opening and closing each acquire a fresh keyboard target");
+    assert.equal(disposed, acquired);
 }
 
 focusChecks().then(() => {
-    console.log("Camera replay checks passed: native input contract, projection state, terrain-instance ranges, context isolation, complete fence/animation barriers, exact sequence comparison and focus-loss recovery.");
+    console.log("Camera replay checks passed: native input contract, projection state, terrain-instance ranges, context isolation, complete fence/animation barriers, exact sequence comparison, focus-loss recovery and native keyboard picker opening.");
 }).catch(error => { console.error(error); process.exitCode = 1; });

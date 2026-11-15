@@ -3,7 +3,8 @@ const { mkdir, writeFile, readFile } = require("node:fs/promises");
 const path = require("node:path");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
-const { activateMenuItem, setGpuRendering } = require("./gpu.cjs");
+const { setGpuRendering } = require("./gpu.cjs");
+const { menu } = require("./native-menu.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
 const shots = process.env.PIXELMAP_SHOTS;
@@ -81,10 +82,6 @@ async function openDemo(browser, mode, phone = false) {
 async function activate(page, role, name, touch = false) {
     const locator = page.getByRole(role, { name, exact: true });
     await locator.waitFor({state: "visible"});
-    if (role === "menuitem" || role === "menuitemcheckbox") {
-        await activateMenuItem(page, locator);
-        return;
-    }
     const b = await locator.boundingBox();
     assert.ok(b && b.width > 0 && b.height > 0, "Visible " + name);
     const viewport = page.viewportSize();
@@ -167,13 +164,7 @@ async function checkLens(page) {
     await page.waitForTimeout(700);
     const clip = { x: 430, y: 180, width: 530, height: 450 };
     const before = PNG.sync.read(await page.screenshot({ clip }));
-    await click(page, "Map appearance");
-    const item = page.getByRole("menuitemcheckbox", {name: "Perspective lens", exact: true})
-        .or(page.getByRole("menuitem", {name: "Perspective lens", exact: true}))
-        .or(page.getByRole("checkbox", {name: "Perspective lens", exact: true}));
-    await item.waitFor({state: "visible"});
-    await activate(page, await item.getAttribute("role"), "Perspective lens");
-    await item.waitFor({state: "hidden"});
+    await menu(page, "Perspective lens");
     const deadline = Date.now() + 9000;
     do {
         await page.waitForTimeout(250);
@@ -250,8 +241,7 @@ async function checkPausedFollow(page) {
 }
 
 async function checkShare(page) {
-    await click(page, "Map appearance");
-    await activate(page, "menuitem", "Share this view");
+    await menu(page, "Share this view");
     await activate(page, "textbox", "Shareable map link");
     await see(page, /textbox "Shareable map link": .*#v5\//);
     const shared = await page.getByRole("textbox", {name: "Shareable map link", exact: true}).inputValue();

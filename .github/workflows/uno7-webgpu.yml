@@ -87,6 +87,7 @@ jobs:
           node tests/browser/input-adapter.cjs
           node tests/browser/viewport-adapter.cjs
           node tests/browser/camera-replay-checks.cjs
+          node tests/browser/webgpu-interface-checks.cjs
           node tests/browser/webgpu-lifecycle.cjs
       - uses: actions/upload-artifact@v4
         if: always()
