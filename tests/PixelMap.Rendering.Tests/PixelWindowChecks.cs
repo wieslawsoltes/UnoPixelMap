@@ -37,7 +37,7 @@ internal static partial class PixelWindowChecks
         {
             Context = context.Description,
             RendererSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(typeof(GlMapRenderer).Assembly.Location))).ToLowerInvariant(),
-            Reference = "Box average of 4x4 art samples from the unchanged Normal façade shader; central-left 64x72 art-pixel wall crop, excluding sky and geometric silhouettes. Timings measure warm GL submission plus completion, excluding preparation and readback.",
+            Reference = "Box average of 16x16 art samples from sixteen stratified subpixel projections of the unchanged Normal façade shader, supplied with the measured Pixel frame's exact authored palette; central-left 64x72 art-pixel wall crop, excluding sky and geometric silhouettes. Normal production palettes remain unchanged. Timings measure warm GL submission plus completion, excluding preparation and readback.",
             Width, Height, PixelSize, Phases = 16, Results = results
         }, new JsonSerializerOptions { WriteIndented = true }));
         Console.WriteLine($"Pixel-window quality evidence: {output}");
@@ -142,9 +142,9 @@ internal static partial class PixelWindowChecks
                 var eye = Center.Move(90, phase * 3.8 / phases).Move(180 + bearing, distance);
                 var camera = MapCamera.FromEye(eye.Latitude, eye.Longitude, 300, bearing, 90, Width, Height, viewDistanceMeters: 6000);
                 using var frame = scene.PrepareGpuFrame(Width, Height, camera, Tiles, palette, PixelSize);
-                using var referenceFrame = referenceScene.PrepareGpuFrame(Width, Height, camera, Tiles, palette, 1,
+                using var referenceLayout = referenceScene.PrepareGpuFrame(Width, Height, camera, Tiles, palette, 1,
                     null, null, MapRenderStyle.Normal);
-                byte[] reference = Downsample(Capture(gl, renderer, referenceFrame));
+                byte[] reference = CaptureReference(gl, renderer, referenceLayout, frame.Palette);
                 // Retain source meshes and finish preceding work before timing the
                 // moving view. The measured draw still submits its normal commands.
                 Capture(gl, renderer, frame);
@@ -221,19 +221,44 @@ internal static partial class PixelWindowChecks
         return topDown;
     }
 
-    private static byte[] Downsample(ReadOnlySpan<byte> source)
+    private static byte[] CaptureReference(GL gl, GlMapRenderer renderer, GpuMapFrame layout, PixelPalette palette)
     {
-        var bytes = new byte[ArtWidth * ArtHeight * 4];
-        for (int y = 0; y < ArtHeight; y++)
-        for (int x = 0; x < ArtWidth; x++)
-        for (int channel = 0; channel < 4; channel++)
+        // Pixel and Normal deliberately have different production palettes. The
+        // supersampling oracle must use the measured colors while preserving the
+        // unchanged Normal shader, geometry and physical camera.
+        // Sixteen shifted native-resolution projections sample a regular 16x16
+        // grid per art pixel without allocating a 3072x2304 reference target.
+        // Translate changes X/Y by an exact subpixel multiple of homogeneous W;
+        // it never moves the eye or changes depth, world positions or the lens.
+        const int subpixels = 4;
+        var sums = new int[ArtWidth * ArtHeight * 4];
+        for (int sampleY = 0; sampleY < subpixels; sampleY++)
+        for (int sampleX = 0; sampleX < subpixels; sampleX++)
         {
-            int sum = 0;
+            float dx = (sampleX + .5f) / subpixels - .5f;
+            float dy = (sampleY + .5f) / subpixels - .5f;
+            var terrain = layout.Terrain.Select(draw => draw with { Transform = draw.Transform.Translate(dx, dy) }).ToArray();
+            var buildings = layout.Buildings.Select(draw => draw with { Transform = draw.Transform.Translate(dx, dy) }).ToArray();
+            using var sample = new GpuMapFrame(layout.Width, layout.Height, layout.PixelSize, layout.Camera,
+                layout.TerrainOptions, palette, layout.PixelsPerMeter, terrain, buildings)
+            {
+                MinimumAltitude = layout.MinimumAltitude,
+                MaximumAltitude = layout.MaximumAltitude,
+                PreservePhotograph = layout.PreservePhotograph
+            };
+            byte[] source = Capture(gl, renderer, sample);
+            for (int y = 0; y < ArtHeight; y++)
+            for (int x = 0; x < ArtWidth; x++)
+            for (int channel = 0; channel < 4; channel++)
             for (int row = 0; row < PixelSize; row++)
             for (int column = 0; column < PixelSize; column++)
-                sum += source[((y * PixelSize + row) * Width + x * PixelSize + column) * 4 + channel];
-            bytes[(y * ArtWidth + x) * 4 + channel] = (byte)((sum + PixelSize * PixelSize / 2) / (PixelSize * PixelSize));
+                sums[(y * ArtWidth + x) * 4 + channel] +=
+                    source[((y * PixelSize + row) * Width + x * PixelSize + column) * 4 + channel];
         }
+        // Round once after all 256 samples, not after each stratified pass.
+        int count = PixelSize * PixelSize * subpixels * subpixels;
+        var bytes = new byte[sums.Length];
+        for (int i = 0; i < sums.Length; i++) bytes[i] = (byte)((sums[i] + count / 2) / count);
         return bytes;
     }
 

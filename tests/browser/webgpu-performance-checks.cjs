@@ -3,7 +3,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const {installPerformanceProbe} = require("./webgpu-performance-probe.cjs");
-const {distribution, makeTrace, checkStep, checkHealth, imageDifference, summarizeSteps,
+const {distribution, makeTrace, mapRelativeTrace, intentionalPixelChange, fitMapExtent,
+    checkStep, checkHealth, imageDifference, summarizeSteps,
     summarizeMovingWindow, movingContinuation} = require("./webgpu-performance.cjs");
 
 function fixture() {
@@ -133,6 +134,55 @@ async function menuFocusChecks() {
     await run({activate: false});
     await run({name: "Share this view", submenu: null, activate: false});
     await run({offscreen: true});
+}
+async function menuGroupingChecks() {
+    const {menu} = require("./native-menu.cjs");
+    // One frozen harness must activate both the baseline's flat commands and
+    // the candidate's compact groups through their actual visible menu rows.
+    for (const grouped of [false, true]) {
+        for (const [name, group] of [["Normal rendering", "Rendering style"],
+            ["After dark", "Lighting"], ["Perspective lens", "Camera"]]) {
+            let rootOpen = false, groupOpen = false, activated = false;
+            const clicks = [];
+            const bounds = new Map([
+                ["Map appearance", {x: 1100, y: 12, width: 44, height: 44}],
+                [group, {x: 940, y: 68, width: 220, height: 44}],
+                [name, {x: grouped ? 720 : 940, y: 112, width: 220, height: 44}]
+            ]);
+            const visible = target => target === "Map appearance" ||
+                (target === group ? grouped && rootOpen : rootOpen && (!grouped || groupOpen));
+            const target = texts => ({
+                texts,
+                or(other) { return target([...new Set([...texts, ...other.texts])]); },
+                first() { return target([texts.find(visible) ?? texts[0]]); },
+                isVisible: async () => texts.some(visible),
+                waitFor: async ({state}) => assert.equal(texts.some(visible), state === "visible", texts.join(" or ") + " is reachable"),
+                boundingBox: async () => bounds.get(texts.find(visible) ?? texts[0])
+            });
+            const scope = vm.createContext({Promise, requestAnimationFrame: callback => setImmediate(callback)});
+            const page = {
+                getByRole: (_, {name: text}) => target([text]),
+                viewportSize: () => ({width: 1200, height: 700}),
+                evaluate: async callback => vm.runInContext("(" + callback.toString() + ")", scope)(),
+                mouse: {
+                    click: async (x, y) => {
+                        const hit = [...bounds].find(([text, r]) => visible(text) &&
+                            x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height)?.[0];
+                        assert.ok(hit, "A native pointer reaches a visible menu row");
+                        clicks.push(hit);
+                        if (hit === "Map appearance") rootOpen = true;
+                        else if (hit === group) groupOpen = true;
+                        else { activated = true; rootOpen = groupOpen = false; }
+                    },
+                    move: async () => {}
+                }
+            };
+            await menu(page, name);
+            assert.equal(activated, true, name + " executes through the visible menu");
+            assert.deepEqual(clicks, grouped ? ["Map appearance", group, name] : ["Map appearance", name],
+                "Public submenu discovery preserves both application revisions without retries");
+        }
+    }
 }
 async function focusReacquisitionChecks() {
     // Execute the real helper without browser/image dependencies. A fake clock
@@ -286,6 +336,7 @@ async function movingWindowChecks() {
 
 async function main() {
     await menuFocusChecks();
+    await menuGroupingChecks();
     await focusReacquisitionChecks();
     await movingWindowChecks();
     const f = fixture(), device = await f.adapter.requestDevice(), state = f.state;
@@ -448,6 +499,29 @@ async function main() {
     assert.equal(trace.reduce((sum, item) => sum + item.deltaY, 0), 0);
     assert.ok(trace.every(item => Number.isInteger(item.x) && Number.isInteger(item.y)), "Trusted wheel coordinates use integral CSS pixels");
     assert.throws(() => makeTrace({motion: "pan"}, {x: 0, y: 0, width: 1, height: 1}, 0));
+    const oldBounds = {x: 0, y: 59, width: 1200, height: 700};
+    const newBounds = {x: 0, y: 0, width: 1200, height: 700};
+    assert.deepEqual(mapRelativeTrace(makeTrace({motion: "orbit"}, oldBounds, 2), oldBounds),
+        mapRelativeTrace(makeTrace({motion: "orbit"}, newBounds, 2), newBounds),
+        "Matching map-relative input preserves its anchor despite redesigned UI origins");
+    const declared = {revisions: {baseline: "d014060af60b0b961b0b5e52f39359525da2435b"}};
+    assert.equal(intentionalPixelChange(declared, {style: "Pixel"}), true);
+    assert.equal(intentionalPixelChange(declared, {style: "Normal"}), false);
+    assert.equal(intentionalPixelChange({revisions: {baseline: "0".repeat(40)}}, {style: "Pixel"}), false,
+        "Future baselines retain strict Pixel image parity");
+    for (const chromeHeight of [0, 117]) {
+        let size = {width: 1200, height: 800}, resizes = 0;
+        const map = {boundingBox: async () => ({x: 0, y: chromeHeight / 3, width: size.width, height: size.height - chromeHeight})};
+        const page = {evaluate: async () => {}, viewportSize: () => size,
+            setViewportSize: async next => { size = next; resizes++; }};
+        const bounds = await fitMapExtent(page, map);
+        assert.equal(bounds.width, 1200); assert.equal(bounds.height, 700);
+        assert.equal(resizes, 1, "Canvas calibration uses the public viewport once");
+        assert.equal(size.height, 700 + chromeHeight);
+    }
+    await assert.rejects(fitMapExtent({evaluate: async () => {}, viewportSize: () => ({width: 1200, height: 800}),
+        setViewportSize: async () => {}}, {boundingBox: async () => ({x: 0, y: 0, width: 1200, height: 600})}),
+        /could not reach/, "A canvas that ignores resize fails instead of comparing unlike extents");
     assert.deepEqual(distribution([4, 1, 3, 2]), {samples: 4, minimum: 1, median: 3, p95: 4, maximum: 4, mean: 2.5});
     const left = {width: 2, height: 1, data: Uint8Array.from([0, 0, 0, 255, 10, 10, 10, 255])};
     const right = {width: 2, height: 1, data: Uint8Array.from([0, 0, 0, 255, 14, 10, 10, 255])};

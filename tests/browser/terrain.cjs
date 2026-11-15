@@ -3,7 +3,8 @@ const {mkdir, writeFile} = require("node:fs/promises");
 const {join} = require("node:path");
 const {chromium} = require("playwright");
 const {PNG} = require("pngjs");
-const {activateMenuItem, enableGpuRendering, setGpuRendering} = require("./gpu.cjs");
+const {enableGpuRendering, setGpuRendering} = require("./gpu.cjs");
+const {menu} = require("./native-menu.cjs");
 const {installProbe} = require("./performance.cjs");
 
 const base = new URL(process.argv[2] || "http://127.0.0.1:8000/");
@@ -130,12 +131,9 @@ async function action(page, name, touch = false) {
     await tap(page, locator, touch);
 }
 
-async function menu(page, name) {
-    await action(page, "Map appearance");
-    const item = page.getByRole("menuitem", {name, exact: true})
-        .or(page.getByRole("menuitemcheckbox", {name, exact: true}));
-    await activateMenuItem(page, item);
-    await page.mouse.move(page.viewportSize().width / 2, 20);
+async function selectLayer(page, name, touch = false) {
+    await action(page, "Choose map layers", touch);
+    await action(page, name, touch);
 }
 
 function installTerrainPresentationProbe({forceDetachedGpu}) {
@@ -472,16 +470,16 @@ async function run() {
         await page.getByRole("button", {name: "Switch to 3D perspective", exact: true}).waitFor({state: "visible"});
         const overhead = await frameWhere(page, frame => hasElevationTerrain(frame) && changed(restored, frame) > .20,
             "terrain-elevation-overhead");
-        await action(page, "Map layer");
+        await selectLayer(page, "Map layer");
         const map = await frameWhere(page, frame => hasTerrain(frame) && changed(overhead, frame) > .15,
             "terrain-vector-overhead");
-        await action(page, "Earth imagery layer");
+        await selectLayer(page, "Earth imagery layer");
         await see(page, /Contains modified Copernicus Sentinel data/);
         const earth = await frameWhere(page, frame => hasEarthTerrain(frame) && changed(map, frame) > .20,
             "terrain-earth-overhead");
         await action(page, "Switch to 3D perspective");
         await frameWhere(page, frame => hasEarthTerrain(frame) && changed(earth, frame) > .20, "terrain-earth-perspective");
-        await action(page, "Elevation layer");
+        await selectLayer(page, "Elevation layer");
         const beforeOrbit = await frameWhere(page, hasElevationTerrain, "terrain-before-orbit");
         await page.mouse.move(690, 360);
         await page.mouse.down({button: "right"});
@@ -522,12 +520,16 @@ async function run() {
         await phone.getByRole("button", {name: "Switch to 3D perspective", exact: true}).waitFor({state: "visible"});
         const phoneOverhead = await frameWhere(phone, frame => hasElevationTerrain(frame) && changed(portrait, frame) > .20,
             "terrain-phone-overhead");
-        await action(phone, "Earth imagery layer", true);
+        await selectLayer(phone, "Earth imagery layer", true);
         await see(phone, /Contains modified Copernicus Sentinel data/);
         const phoneEarth = await frameWhere(phone, frame => hasEarthTerrain(frame) && changed(phoneOverhead, frame) > .20,
             "terrain-phone-earth");
-        await action(phone, "Elevation layer", true);
+        await selectLayer(phone, "Elevation layer", true);
+        // Layer cards live in a dismissed flyout. Inspect the selected card in
+        // its public chooser, then reselect it to close before comparing pixels.
+        await action(phone, "Choose map layers", true);
         await see(phone, /button "Elevation layer" \[pressed\]/);
+        await action(phone, "Elevation layer", true);
         await frameWhere(phone, frame => hasElevationTerrain(frame) && changed(phoneEarth, frame) > .20 &&
             changed(phoneOverhead, frame) < .02, "terrain-phone-elevation");
         const fits = await phone.evaluate(() => document.documentElement.scrollWidth <= innerWidth);

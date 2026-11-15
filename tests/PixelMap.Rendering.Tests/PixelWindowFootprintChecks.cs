@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Runtime.InteropServices;
 using PixelMap.Data;
 using PixelMap.Rendering;
 using PixelMap.Routing;
@@ -80,7 +81,13 @@ internal static class PixelWindowFootprintChecks
         p.Origin, p.Inverse, p.U, p.Z, p.Iw, p.Uw, p.Zw, p.Width, p.Height, p.Bay,
         (double)p.PixelsPerMeter * p.Floor, p.MinimumWeight, p.Near);
 
-    private static void CheckNearbyImages()
+    internal static void WriteFixtures(string directory)
+    {
+        Directory.CreateDirectory(directory);
+        CheckNearbyImages(directory);
+    }
+
+    private static void CheckNearbyImages(string? captureDirectory = null)
     {
         const int width = 768, height = 576, phases = 16;
         var tile = new TileId(14, 8192, 8192);
@@ -89,6 +96,18 @@ internal static class PixelWindowFootprintChecks
         MapTile[] tiles = [new(tile, [new("building", "", "", "", 701, 4096, GeometryType.Polygon,
             [new TilePoint[] { new(600, 2046), new(3496, 2046), new(3496, 2050), new(600, 2050) }],
             1000, 0, false, 0, 0, "")])];
+        using var geometry = new TileGeometry(tiles[0]);
+        var building = geometry.Buildings[0];
+        int slot = (int)(building.Seed % (uint)PixelPalette.PixelNight.Materials.Length);
+        var currentMaterial = PixelPalette.PixelNight.Materials[slot];
+        var originalMaterial = PixelPalette.Night.Materials[slot];
+        var originalColors = new Dictionary<uint, uint>();
+        AddColor(currentMaterial.Glass, originalMaterial.Glass);
+        AddColor(currentMaterial.Lamp, originalMaterial.Lamp);
+        foreach (var edge in building.Vertices)
+            AddColor(PixelPalette.Mix(currentMaterial.DarkWall, currentMaterial.LightWall, edge.PerspectiveLight),
+                PixelPalette.Mix(originalMaterial.DarkWall, originalMaterial.LightWall, edge.PerspectiveLight));
+        var originalPixels = new uint[width * height];
         foreach (int pixelSize in new[] { 4, 1 })
         {
             using var renderer = new PixelMapRenderer();
@@ -102,11 +121,87 @@ internal static class PixelWindowFootprintChecks
                     null, false, false, null, MapRenderStyle.Pixel);
                 canvas.Flush();
                 string actual = Convert.ToHexStringLower(SHA256.HashData(bitmap.GetPixelSpan()));
-                Assert(actual == (pixelSize == 4 ? Nearby : Native)[phase],
-                    $"The resolved fast path changed the original complete nearby image at pixel size {pixelSize}, phase {phase}.");
+                if (captureDirectory is not null)
+                {
+                    Console.WriteLine($"Nearby/{pixelSize}/{phase} {actual}");
+                    if ((phase & 3) == 0)
+                    {
+                        using var image = SKImage.FromBitmap(bitmap);
+                        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+                        using var output = File.Create(Path.Combine(captureDirectory, $"pixel-nearby-{pixelSize}-{phase}.png"));
+                        png.SaveTo(output);
+                    }
+                }
+                else
+                {
+                    Assert(actual == (pixelSize == 4 ? AuthoredNearby : AuthoredNative)[phase],
+                        $"The resolved fast path changed the authored complete nearby image at pixel size {pixelSize}, phase {phase}.");
+                    // This close fixture is entirely an unfiltered wall. Restore
+                    // its three semantic colors and require the original images
+                    // too: every window edge, lamp choice and raster pixel stays
+                    // identical, rather than accepting a refreshed hash alone.
+                    var currentPixels = MemoryMarshal.Cast<byte, uint>(bitmap.GetPixelSpan());
+                    for (int i = 0; i < currentPixels.Length; i++)
+                        Assert(originalColors.TryGetValue(currentPixels[i], out originalPixels[i]),
+                            "The resolved wall acquired an unexpected filtered or non-material pixel.");
+                    string original = Convert.ToHexStringLower(SHA256.HashData(MemoryMarshal.AsBytes(originalPixels.AsSpan())));
+                    Assert(original == (pixelSize == 4 ? Nearby : Native)[phase],
+                        $"The palette substitution changed the original nearby raster at pixel size {pixelSize}, phase {phase}.");
+                }
             }
         }
+
+        void AddColor(uint current, uint original)
+        {
+            // Material values are ARGB; the fixture's bitmap is RGBA on disk.
+            static uint Rgba(uint color) => (color & 0xff00ff00u) | ((color & 255) << 16) | ((color >> 16) & 255);
+            uint key = Rgba(current), value = Rgba(original);
+            Assert(!originalColors.TryGetValue(key, out uint previous) || previous == value,
+                "The authored material cannot ambiguously alias two legacy wall colors.");
+            originalColors[key] = value;
+        }
     }
+
+    // Pixel-only authored Night palette, inspected with --pixel-artwork-output.
+    private static readonly string[] AuthoredNearby =
+    [
+        "37fccc9d1be9e45c6c160dda61bb6ed16f8f5abe341924b4c0678f4a2fc794a0",
+        "4730ee6c3de6059c7544a2c3ed6489f4294736c352707bcdc688029afd795aa7",
+        "f9da677ef932c9509e648007cbef6474573de7ed8fcd0aa08df783e3f9f84966",
+        "0c89ac00e9cdf2369f8139ad3522ae891a64a23a871fc364034991601b32f69f",
+        "6a3d8cf067afef559a95e21f3d89f132644a90d08c2107af6fb48c88a4ab9e1d",
+        "0e1326e89a14a5076b8d290608ebedeb837a90bdd278b90730db6dba300c1b64",
+        "3641e97772c00527b774bf2faaa773c042989735290433023be423fd9b639434",
+        "7ea9116b8ec03e433db6befaf6bf3dc06da533ee6e324a9f33f423331290cc20",
+        "b88302934a521d78a9a0fe13e883c5ef0702ae32b4ca1067df7be906ebd1a9f8",
+        "1b1b66cead74289ea7c829b8694c81be0d2c99474a3ea42809975d13a0c8f391",
+        "08380d248c271a119c6497c7c9a1ff61e38483adfecf5f1e999106dfc9366934",
+        "e4b6787e938835eb0b2ea3d26b9dd6666a2d51dcd77b7f71da294f1606fcef2a",
+        "9ca5ddb35acb27b26804e12645a355b29b53b94339bc11f4f07cac10ee6d6f6a",
+        "3869a343c6efe0752667bf3044e782f08863dadba923a0df69c467c2429a1dd3",
+        "a1bebd3dbda29a7d830a4a240915afb12fb78900fb8ccd02aeb646a865bd45d9",
+        "d98e889d1075b498e715b785877f8ffb35461eb6ebc0c7a6b8a15065608ba4bb"
+    ];
+
+    private static readonly string[] AuthoredNative =
+    [
+        "09a3941dadcc0d895d5ad21a1bee2f60fb2916099753fcf8c2ce554fc08634c9",
+        "0a141d282e289d2665624d5f41645ff65edb82b13f0e8f486af48d64dad5d525",
+        "35849911a137c719cdf701e0d6a8e0629e090392e8262a2f1b809997ea0abdd5",
+        "a8c5d05de3a1514e49fa48b2c989941ad56470a84863e9f441eaccc67d6ac410",
+        "6b45a7651deb9b79c702ac5669699f4eb29062db586cb49b8e2dd2bbc100e46b",
+        "5a345143121f817257fe71b53b76bdfe937852ac00f003147fd46572aef4ef15",
+        "01507697a3a766a57ee2b15ccfcd0f1e27d08cf49c62d2049bcc63093a9e0ede",
+        "00be250142428cba2878e9e9bf2d9fa0ce09725da0f6062caf65628bd80318bd",
+        "ba514de10d92321883652f93d7930c5af77623fd6b5c0974f9097de150b1e62e",
+        "6607ba570dde573e355d5c84b9d9c6db832737d07058670a88125249421642c1",
+        "e71719a75aa0be04c3859f802d0f3ce32be379ca1d6df7f76dea91d13b75fa7e",
+        "322d3ad73707d18ef2d33efd5bf6915ed0ce8e4f7ea8cc01aad444da241c40c7",
+        "24fd5b78a29066038667801bec3e00ec7bdc08c09ac32ef98360a5b0b4b78b24",
+        "b0395f3f715c058e62de97a450966f6af0d1b53a6f24db5b1bfc37973d49867e",
+        "5c31d1a0f7c18c29a2efab460dd1f710e84ecde0b1489cd1186750f7d2ba5702",
+        "2e640216f218a7f43c2be0ed491395d42aa9c030f96f4c684b13b8dfa0879414"
+    ];
 
     // Original ab765d2 CPU controls, also reproduced exactly by fa2cfa7. See
     // docs/verification/pixel-window-cpu-provenance-fa2cfa7.json for full provenance.

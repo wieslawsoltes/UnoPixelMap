@@ -23,6 +23,7 @@ internal static class TerrainTextureCopyChecks
 
     private static async Task RunChecksAsync()
     {
+        CheckGpuPixelCopy();
         using var http = new HttpClient(new OfflineHandler());
         var source = new VectorTileSource(http);
         var real = await source.GetTileAsync(new(14, 4823, 6160));
@@ -79,6 +80,61 @@ internal static class TerrainTextureCopyChecks
         CheckCoverage();
         CheckGroundPlay(real);
         Console.WriteLine($"Passed {checkedTextures:N0} exact terrain copies against Skia across patch zoom 0–22, all render styles, day/night, shadow and pixel-size changes, edge subpixels, BGRA channels and padded strides; mixed/partial/photographic coverage remains composited.");
+    }
+
+    internal static void CheckGpuPixelCopy()
+    {
+        var random = new Random(71237);
+        int checks = 0;
+        int[] lengths = [.. Enumerable.Range(0, 18), 31, 32, 33, 63, 64, 65, 255, 256, 257,
+            1023, 1024, 1025, 65535, 65536, 65537];
+        foreach (int length in lengths)
+        foreach (int sourceOffset in new[] { 0, 1, 3, 15 })
+        foreach (int targetOffset in new[] { 0, 2, 7, 13 })
+        foreach (int alphaMode in new[] { 0, 1, 2 })
+        {
+            var sourceBytes = new byte[length * sizeof(uint) + 32];
+            var targetBytes = new byte[length * sizeof(uint) + 32];
+            random.NextBytes(sourceBytes);
+            targetBytes.AsSpan().Fill(0xa5);
+            var source = MemoryMarshal.Cast<byte, uint>(sourceBytes.AsSpan(sourceOffset, length * sizeof(uint)));
+            var target = MemoryMarshal.Cast<byte, uint>(targetBytes.AsSpan(targetOffset, length * sizeof(uint)));
+            if (alphaMode != 1)
+                for (int i = 0; i < length; i++) source[i] |= 0xff000000;
+            if (alphaMode == 2 && length != 0) source[^1] &= 0xfeffffff;
+            byte[] unchanged = (byte[])sourceBytes.Clone();
+            bool expectedOpaque = true;
+            for (int i = 0; i < length; i++) expectedOpaque &= source[i] / 0x01000000u == 255;
+            bool opaque = TerrainTexturePixels.CopyRgb(source, target);
+            Assert(opaque == expectedOpaque, $"GPU texel opacity differs at length {length}, alpha mode {alphaMode}.");
+            for (int i = 0; i < length; i++)
+                if (target[i] != source[i] % 0x01000000u)
+                    throw new InvalidOperationException($"GPU RGB bytes differ at length {length}, pixel {i}, offsets {sourceOffset}/{targetOffset}.");
+            Assert(sourceBytes.AsSpan().SequenceEqual(unchanged), "The GPU texel copy modified its source.");
+            Assert(targetBytes.AsSpan(0, targetOffset).IndexOfAnyExcept((byte)0xa5) < 0 &&
+                targetBytes.AsSpan(targetOffset + length * sizeof(uint)).IndexOfAnyExcept((byte)0xa5) < 0,
+                "The GPU texel copy wrote outside its destination slice.");
+            checks++;
+        }
+        // A single missing alpha bit in any vector lane or scalar tail must
+        // prevent bitmap reconstruction, even when every other texel is opaque.
+        foreach (int index in new[] { 0, 1, 2, 3, 8 })
+        for (int bit = 24; bit < 32; bit++)
+        {
+            uint[] source = Enumerable.Repeat(0xff397ab1u, 9).ToArray();
+            source[index] ^= 1u << bit;
+            var target = new uint[source.Length];
+            Assert(!TerrainTexturePixels.CopyRgb(source, target) && target.All(pixel => pixel == 0x397ab1u),
+                $"GPU opacity reduction missed alpha bit {bit} in pixel {index}.");
+            checks++;
+        }
+        uint[] shortTarget = [0xa5a5a5a5u, 0xa5a5a5a5u];
+        bool rejected = false;
+        try { TerrainTexturePixels.CopyRgb([0xff000000u, 0xff000001u, 0xff000002u], shortTarget); }
+        catch (ArgumentException) { rejected = true; }
+        Assert(rejected && shortTarget.All(pixel => pixel == 0xa5a5a5a5u),
+            "An undersized destination was accepted or modified before rejection.");
+        Console.WriteLine($"Passed {checks:N0} exact GPU RGB/opacity copies across random colors, every short vector tail, byte-misaligned spans, single alpha-bit defects and untouched buffer guards; Vector128 accelerated={System.Runtime.Intrinsics.Vector128.IsHardwareAccelerated}.");
     }
 
     private static void Reference(TerrainCache cache, SKBitmap bitmap, TileId patch, TileGeometry tile, int pixels,

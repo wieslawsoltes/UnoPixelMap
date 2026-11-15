@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#142f32">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#f5f5f7">
     <meta name="description" content="Explore the world in pixel art. Orbit real city geometry, plan a route, and drive, sail or fly through the atlas.">
     <title>Pixel Atlas · UnoPixelMap</title>
     <link rel="icon" href="favicon.ico">
@@ -56,29 +56,99 @@
             }
         }, {once: true});
     </script>
+    <script>
+        // Native XAML uses these event-driven metrics; no backdrop filters or
+        // permanent polling are needed for safe areas and the software keyboard.
+        globalThis.PixelAtlasViewport = (() => {
+            const subscribers = new Map();
+            let probe, frame = 0, listening = false;
+            function read() {
+                if (!probe && document.body) {
+                    probe = document.createElement("div");
+                    probe.setAttribute("aria-hidden", "true");
+                    probe.style.cssText = "position:fixed;visibility:hidden;pointer-events:none;width:0;height:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)";
+                    document.body.append(probe);
+                }
+                const style = probe ? getComputedStyle(probe) : null;
+                const number = name => Math.max(0, parseFloat(style?.[name]) || 0);
+                const visual = window.visualViewport;
+                return [window.innerHeight, visual?.height || window.innerHeight, visual?.offsetTop || 0,
+                    number("paddingTop"), number("paddingRight"), number("paddingBottom"), number("paddingLeft")];
+            }
+            function changed() {
+                if (frame || !subscribers.size) return;
+                frame = requestAnimationFrame(() => {
+                    frame = 0;
+                    for (const notify of subscribers.values()) notify();
+                });
+            }
+            return {
+                read,
+                attach(id, notify) {
+                    subscribers.set(id, notify);
+                    if (!listening) {
+                        listening = true;
+                        window.addEventListener("resize", changed, {passive: true});
+                        window.visualViewport?.addEventListener("resize", changed, {passive: true});
+                        window.visualViewport?.addEventListener("scroll", changed, {passive: true});
+                    }
+                    changed();
+                },
+                detach(id) {
+                    subscribers.delete(id);
+                    if (subscribers.size || !listening) return;
+                    listening = false;
+                    window.removeEventListener("resize", changed);
+                    window.visualViewport?.removeEventListener("resize", changed);
+                    window.visualViewport?.removeEventListener("scroll", changed);
+                    if (frame) cancelAnimationFrame(frame);
+                    frame = 0;
+                    probe?.remove(); probe = null;
+                },
+                locate(id, found, failed) {
+                    const owner = subscribers.get(id);
+                    if (!owner) return;
+                    // A location result can arrive after native XAML has unloaded
+                    // and reloaded. Only the requesting attachment may consume it.
+                    const active = () => subscribers.get(id) === owner;
+                    if (!navigator.geolocation) { failed("This browser does not provide location access."); return; }
+                    navigator.geolocation.getCurrentPosition(position => {
+                        if (active()) found(position.coords.latitude, position.coords.longitude);
+                    }, error => {
+                        if (!active()) return;
+                        failed(error.code === 1 ? "Location access is off. Allow location for this site in your browser, then try again."
+                            : error.code === 3 ? "Your location could not be found in time. Try again outdoors or search for a place."
+                            : "Your location is unavailable. Try again or search for a place.");
+                    }, {enableHighAccuracy: false, timeout: 12000, maximumAge: 60000});
+                }
+            };
+        })();
+    </script>
     <script src="./require.js"></script>
     <script type="module" src="./uno-bootstrap.js"></script>
     $(ADDITIONAL_CSS)
     $(ADDITIONAL_HEAD)
     <style>
+        html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; background: #dce5e3; }
+        button, input, select, textarea { font: inherit; }
         /* The canvas paints over the splash as soon as its first frame is ready. */
-        #uno-body { isolation: isolate; }
+        #uno-body { isolation: isolate; width: 100%; height: 100%; }
         #uno-body > .uno-loader { z-index: -1; pointer-events: none; }
         #uno-canvas { touch-action: none; overscroll-behavior: none; }
         #pixelmap-graphics-error {
             position: fixed; inset: 0; z-index: 2147483647; box-sizing: border-box;
             display: grid; align-content: center; justify-items: start; gap: 1rem;
-            padding: clamp(1.5rem, 6vw, 5rem); background: #142f32; color: #f5f1e8;
+            padding: clamp(1.5rem, 6vw, 5rem); background: #f5f5f7; color: #1c1c1e;
             font: 1rem/1.6 system-ui, sans-serif;
         }
         #pixelmap-graphics-error[hidden] { display: none; }
         #pixelmap-graphics-error h1 { margin: 0; font-size: clamp(1.5rem, 4vw, 2.5rem); }
         #pixelmap-graphics-error p { max-width: 44rem; margin: 0; }
         #pixelmap-graphics-retry {
-            border: 0; border-radius: .5rem; padding: .65rem 1.25rem;
-            background: #f6c069; color: #142f32; font: inherit; font-weight: 600; cursor: pointer;
+            border: 0; border-radius: .75rem; min-height: 44px; padding: .65rem 1.25rem;
+            background: #007aff; color: #fff; font: inherit; font-weight: 600; cursor: pointer;
         }
-        #pixelmap-graphics-retry:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+        #pixelmap-graphics-retry:focus-visible { outline: 3px solid #007aff; outline-offset: 4px; }
     </style>
 </head>
 <body>

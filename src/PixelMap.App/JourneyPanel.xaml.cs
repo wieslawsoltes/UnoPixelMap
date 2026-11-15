@@ -26,8 +26,8 @@ public sealed partial class JourneyPanel : UserControl
 
     private readonly List<Waypoint> _stops = [new(), new()];
     private readonly List<RouteStep> _directions = [];
-    private readonly SolidColorBrush _selected = new(ColorHelper.FromArgb(255, 215, 235, 215));
-    private readonly SolidColorBrush _neutral = new(ColorHelper.FromArgb(255, 241, 242, 229));
+    private readonly SolidColorBrush _selected = new(ColorHelper.FromArgb(255, 224, 239, 255));
+    private readonly SolidColorBrush _neutral = new(ColorHelper.FromArgb(255, 241, 242, 246));
     private readonly Dictionary<uint, PadAction> _pressed = [];
     // Uno's generated named-element references are weak. Retain the inactive pane.
     private readonly StackPanel _planningPane;
@@ -167,18 +167,18 @@ public sealed partial class JourneyPanel : UserControl
             var button = new Button
             {
                 Tag = i,
-                Content = new TextBlock { Text = $"{role}   ·   {title}", TextTrimming = TextTrimming.CharacterEllipsis, FontSize = 13 },
+                Content = new TextBlock { Text = $"{role}   ·   {title}", TextTrimming = TextTrimming.CharacterEllipsis, FontSize = 14 },
                 Background = i == _index ? _selected : _neutral,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 HorizontalContentAlignment = HorizontalAlignment.Left,
-                MinHeight = 34, Padding = new Thickness(9, 4, 9, 4), CornerRadius = new CornerRadius(4)
+                MinHeight = 48, Padding = new Thickness(12, 10, 12, 10), CornerRadius = new CornerRadius(11)
             };
             AutomationProperties.SetName(button, $"Set {role}: {title}");
             button.Click += OnSelectStop;
             StopRows.Children.Add(button);
         }
         RemoveStop.Visibility = _index > 0 && _index < _stops.Count - 1 ? Visibility.Visible : Visibility.Collapsed;
-        SetText(StopTitle, "SET " + Role(_index).ToUpperInvariant());
+        SetText(StopTitle, "Set " + Role(_index).ToLowerInvariant());
         UpdatePlanEnabled();
     }
 
@@ -302,8 +302,8 @@ public sealed partial class JourneyPanel : UserControl
                 string label = $"{place.Name} · {place.Detail}";
                 var button = new Button
                 {
-                    Content = new TextBlock { Text = label, TextWrapping = TextWrapping.Wrap, FontSize = 12 },
-                    Tag = place, Padding = new Thickness(7, 4, 7, 4), HorizontalAlignment = HorizontalAlignment.Stretch,
+                    Content = new TextBlock { Text = label, TextWrapping = TextWrapping.Wrap, FontSize = 13 },
+                    Tag = place, MinHeight = 48, Padding = new Thickness(12, 9, 12, 9), HorizontalAlignment = HorizontalAlignment.Stretch,
                     HorizontalContentAlignment = HorizontalAlignment.Left, Background = _neutral
                 };
                 AutomationProperties.SetName(button, label);
@@ -511,8 +511,8 @@ public sealed partial class JourneyPanel : UserControl
             var step = _directions[_visibleSteps];
             var button = new Button
             {
-                Content = new TextBlock { Text = $"{_visibleSteps + 1}. {step.Instruction} · {Distance(step.DistanceMeters)}", TextWrapping = TextWrapping.Wrap, FontSize = 12 },
-                Padding = new Thickness(6, 3, 6, 3), HorizontalAlignment = HorizontalAlignment.Stretch,
+                Content = new TextBlock { Text = $"{_visibleSteps + 1}. {step.Instruction} · {Distance(step.DistanceMeters)}", TextWrapping = TextWrapping.Wrap, FontSize = 13 },
+                MinHeight = 48, Padding = new Thickness(12, 9, 12, 9), HorizontalAlignment = HorizontalAlignment.Stretch,
                 HorizontalContentAlignment = HorizontalAlignment.Left, Background = _neutral
             };
             button.Click += (_, _) => GoTo(step.Point);

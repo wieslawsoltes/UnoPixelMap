@@ -4,255 +4,293 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:maps="using:PixelMap.Controls"
     xmlns:local="using:PixelMap.App"
-    RequestedTheme="Light"
-    Background="#142C30">
+    RequestedTheme="Light" Background="#DCE5E3">
     <Page.Resources>
-        <Style x:Key="HeaderAction" TargetType="Button">
-            <Setter Property="MinHeight" Value="36" />
-            <Setter Property="Padding" Value="12,4" />
-            <Setter Property="Background" Value="#244446" />
-            <Setter Property="BorderBrush" Value="#45605E" />
-            <Setter Property="Foreground" Value="#F6F4E8" />
-            <Setter Property="CornerRadius" Value="5" />
-        </Style>
-        <Style x:Key="MapAction" TargetType="Button">
-            <Setter Property="Width" Value="44" />
-            <Setter Property="Height" Value="44" />
+        <Style x:Key="MapAction" TargetType="Button" BasedOn="{StaticResource AtlasIconButton}" />
+        <Style x:Key="LayerPickerPresenter" TargetType="FlyoutPresenter" BasedOn="{StaticResource DefaultFlyoutPresenterStyle}">
             <Setter Property="Padding" Value="0" />
-            <Setter Property="FontSize" Value="20" />
-            <Setter Property="Background" Value="#FFFBEE" />
-            <Setter Property="Foreground" Value="#193938" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style x:Key="ExploreAction" TargetType="Button">
+            <Setter Property="MinHeight" Value="64" /><Setter Property="Padding" Value="12,10" />
+            <Setter Property="CornerRadius" Value="13" /><Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{StaticResource AtlasGroupedBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource AtlasInkBrush}" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         </Style>
     </Page.Resources>
+    <Grid x:Name="MapArea" Background="#DCE5E3" AutomationProperties.Name="Map explorer">
+        <maps:PixelMapControl x:Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                              AutomationProperties.Name="Interactive world map" />
 
-    <Grid RowDefinitions="Auto,*,Auto">
-        <Grid x:Name="Header" Padding="16,9" Background="#142F32" ColumnDefinitions="*,Auto"
-              AutomationProperties.Name="Map toolbar">
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <Viewbox Width="35" Height="35" AutomationProperties.Name="Pixel Atlas">
-                    <Canvas Width="32" Height="32">
-                        <Path Fill="#91E3BA" Data="M0,10 L16,2 L32,10 L16,18 Z" />
-                        <Path Fill="#47B59C" Data="M0,11 L15,19 L15,27 L0,19 Z" />
-                        <Path Fill="#E4B778" Data="M17,19 L32,11 L32,19 L17,27 Z" />
-                        <Path Fill="#F7F4D9" Data="M9,8 L17,4 L25,8 L17,12 Z" />
-                    </Canvas>
-                </Viewbox>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Pixel Atlas" Foreground="#FCF9EB" FontSize="21" FontWeight="SemiBold" />
-                    <TextBlock x:Name="BrandCaption" Text="UNO  /  OPEN MAP EXPLORER" Foreground="#A4D9C8"
-                               FontSize="9" CharacterSpacing="125" FontWeight="SemiBold" />
+        <!-- One compact surface becomes a bottom sheet; the map keeps its full viewport. -->
+        <Border x:Name="SidebarSurface" Width="360" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16"
+                Padding="16,6,16,16" CornerRadius="22" Background="{StaticResource AtlasSurfaceBrush}"
+                BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1"
+                AutomationProperties.Name="Search and directions"
+                Tapped="OnChromeTapped" DoubleTapped="OnChromeDoubleTapped" PointerWheelChanged="OnChromeWheel">
+            <Grid RowDefinitions="Auto,Auto,*">
+                <Grid Height="44" ColumnDefinitions="*,44" AutomationProperties.Name="Map toolbar">
+                    <StackPanel x:Name="BrandPanel" Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+                        <Viewbox Width="25" Height="25" AutomationProperties.Name="Pixel Atlas">
+                            <Canvas Width="32" Height="32">
+                                <Path Fill="#73B8FF" Data="M0,10 L16,2 L32,10 L16,18 Z" />
+                                <Path Fill="#007AFF" Data="M0,11 L15,19 L15,27 L0,19 Z" />
+                                <Path Fill="#3B99FF" Data="M17,19 L32,11 L32,19 L17,27 Z" />
+                                <Path Fill="#E9F4FF" Data="M9,8 L17,4 L25,8 L17,12 Z" />
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Pixel Atlas" FontSize="19" FontWeight="SemiBold" Foreground="{StaticResource AtlasInkBrush}" />
+                    </StackPanel>
+                    <Button x:Name="SheetHandle" Grid.ColumnSpan="2" HorizontalAlignment="Center" Width="120" Height="44"
+                            Style="{StaticResource AtlasIconButton}" Visibility="Collapsed" Click="OnSheetToggle"
+                            KeyDown="OnSheetKey" AutomationProperties.Name="Expand search sheet">
+                        <ToolTipService.ToolTip><ToolTip Content="Drag or use arrow keys to resize the search sheet" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                        <Border Width="36" Height="5" CornerRadius="3" Background="#C7C7CC" />
+                    </Button>
+                    <Button x:Name="SidebarCloseButton" Grid.Column="1" Content="×" FontSize="24"
+                            Style="{StaticResource AtlasIconButton}" Foreground="#8E8E93" Click="OnHideSidebar"
+                            AutomationProperties.Name="Hide search panel">
+                        <ToolTipService.ToolTip><ToolTip Content="Hide search panel" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
+                </Grid>
+                <StackPanel x:Name="SearchOverlay" Grid.Row="1" Margin="0,6,0,12">
+                    <Border Background="{StaticResource AtlasGroupedBrush}" CornerRadius="12" Padding="2">
+                        <Grid ColumnDefinitions="*,44">
+                            <TextBox x:Name="SearchBox" PlaceholderText="Search places or coordinates" MaxLength="200" FontSize="16"
+                                     Background="Transparent" BorderThickness="0" Padding="12,10" MinHeight="44"
+                                     AutomationProperties.Name="Search places or latitude and longitude" KeyDown="OnSearchKey"
+                                     TextChanged="OnQueryEdited" GotFocus="OnSearchFocused" />
+                            <Button x:Name="SearchButton" Grid.Column="1" Style="{StaticResource AtlasIconButton}" Click="OnSearch"
+                                    AutomationProperties.Name="Search map">
+                                <ToolTipService.ToolTip><ToolTip Content="Search" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                                <Path Stroke="#8E8E93" StrokeThickness="1.8" Data="M13,7 A6,6 0 1 1 1,7 A6,6 0 1 1 13,7 M11.5,11.5 L18,18" />
+                            </Button>
+                        </Grid>
+                    </Border>
                 </StackPanel>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
-                        AutomationProperties.Name="Map commands">
-                <Button x:Name="GameButton" Content="Play" Style="{StaticResource HeaderAction}"
-                        AutomationProperties.Name="Open free roam game" Click="OnGame" />
-                <Button x:Name="GuideButton" Content="City guide" Style="{StaticResource HeaderAction}"
-                        AutomationProperties.Name="Browse city guide" Click="OnGuide" />
-                <Button x:Name="ViewButton" Style="{StaticResource HeaderAction}" AutomationProperties.Name="Map appearance">
+                <Grid x:Name="SidebarContent" Grid.Row="2" AutomationProperties.AutomationId="MapSidebarContent">
+                    <ScrollViewer x:Name="HomeScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  AutomationProperties.AutomationId="MapHomeContent">
+                        <StackPanel x:Name="HomePane" Spacing="12">
+                            <Border x:Name="PlaceCard" Padding="0,4,0,0">
+                                <StackPanel Spacing="5">
+                                    <TextBlock x:Name="PlaceEyebrow" Text="Explore the map" Foreground="{StaticResource AtlasSecondaryBrush}" FontSize="13" />
+                                    <TextBlock x:Name="Destination" Text="Lower Manhattan" FontSize="25" FontWeight="SemiBold"
+                                               Foreground="{StaticResource AtlasInkBrush}" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="DestinationDetail" Text="New York City, United States" FontSize="14"
+                                               Foreground="{StaticResource AtlasSecondaryBrush}" TextWrapping="Wrap" />
+                                    <TextBlock x:Name="MobileStatus" FontSize="11" Foreground="{StaticResource AtlasSecondaryBrush}"
+                                               TextWrapping="Wrap" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
+                                </StackPanel>
+                            </Border>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <Button Style="{StaticResource AtlasPrimaryButton}" Click="OnJourneys" AutomationProperties.Name="Open route planner">
+                                    <StackPanel Orientation="Horizontal" Spacing="7">
+                                        <Path Width="18" Height="18" Stretch="Uniform" Stroke="White" StrokeThickness="1.8"
+                                              Data="M3,18 L3,8 Q3,4 7,4 L17,4 M13,0 L18,4 L13,8 M7,18 L14,18 Q18,18 18,14 L18,11" />
+                                        <TextBlock Text="Directions" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Grid.Column="1" Content="Share" Click="OnShare" HorizontalAlignment="Stretch" FontSize="15" FontWeight="SemiBold"
+                                        AutomationProperties.Name="Share current view" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                <Button x:Name="GuideButton" Style="{StaticResource ExploreAction}" Click="OnGuide" AutomationProperties.Name="Browse city guide">
+                                    <StackPanel Spacing="7"><Path Stroke="#007AFF" StrokeThickness="1.7" Width="22" Height="20" Stretch="Uniform" Data="M1,2 L7,0 L14,3 L21,0 L21,17 L14,20 L7,17 L1,20 Z M7,0 L7,17 M14,3 L14,20" /><TextBlock Text="City guides" FontWeight="SemiBold" FontSize="14" /></StackPanel>
+                                </Button>
+                                <Button x:Name="GameButton" Grid.Column="1" Style="{StaticResource ExploreAction}" Click="OnGame" AutomationProperties.Name="Open free roam game">
+                                    <StackPanel Spacing="7"><Path Stroke="#007AFF" StrokeThickness="1.7" Width="22" Height="20" Stretch="Uniform" Data="M8,4 A2,2 0 1 1 12,4 A2,2 0 1 1 8,4 M10,8 L7,13 L2,15 M10,8 L15,11 L19,10 M8,12 L11,16 L10,22 M8,12 L5,17 L1,20" /><TextBlock Text="Free roam" FontWeight="SemiBold" FontSize="14" /></StackPanel>
+                                </Button>
+                            </Grid>
+                            <StackPanel Spacing="9">
+                                <TextBlock Text="Explore cities" Foreground="{StaticResource AtlasSecondaryBrush}" FontSize="13" FontWeight="SemiBold" />
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                                    <Button Tag="0" Click="OnFeaturedPlace" Style="{StaticResource ExploreAction}" AutomationProperties.Name="Explore Lower Manhattan"><StackPanel Spacing="5"><TextBlock Text="NY" FontSize="20" Foreground="#007AFF" FontWeight="SemiBold" /><TextBlock Text="New York" FontSize="12" /></StackPanel></Button>
+                                    <Button Grid.Column="1" Tag="4" Click="OnFeaturedPlace" Style="{StaticResource ExploreAction}" AutomationProperties.Name="Explore Paris"><StackPanel Spacing="5"><TextBlock Text="PA" FontSize="20" Foreground="#AF52DE" FontWeight="SemiBold" /><TextBlock Text="Paris" FontSize="12" /></StackPanel></Button>
+                                    <Button Grid.Column="2" Tag="2" Click="OnFeaturedPlace" Style="{StaticResource ExploreAction}" AutomationProperties.Name="Explore Tokyo"><StackPanel Spacing="5"><TextBlock Text="TY" FontSize="20" Foreground="#FF9500" FontWeight="SemiBold" /><TextBlock Text="Tokyo" FontSize="12" /></StackPanel></Button>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid x:Name="Drawer" RowDefinitions="Auto,*,Auto" AutomationProperties.AutomationId="MapDetailPanel">
+                        <Grid ColumnDefinitions="*,44" Margin="0,0,0,8" AutomationProperties.AutomationId="MapDetailHeading">
+                            <TextBlock x:Name="DrawerHeading" FontSize="23" FontWeight="SemiBold" Foreground="{StaticResource AtlasInkBrush}"
+                                       VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <Button Grid.Column="1" Content="×" Style="{StaticResource AtlasIconButton}" Foreground="#8E8E93"
+                                    Click="OnCloseDrawer" AutomationProperties.Name="Close panel" />
+                        </Grid>
+                        <ScrollViewer x:Name="ResultScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel x:Name="Rows" Spacing="6" AutomationProperties.AutomationId="MapDetailActions" />
+                        </ScrollViewer>
+                        <TextBlock x:Name="DrawerNote" Grid.Row="2" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12"
+                                   Foreground="{StaticResource AtlasSecondaryBrush}" AutomationProperties.LiveSetting="Polite" />
+                    </Grid>
+                </Grid>
+                <local:JourneyPanel x:Name="JourneyPanel" Grid.Row="1" Grid.RowSpan="2" Visibility="Collapsed"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                <Button x:Name="JourneyPeek" Grid.Row="1" Visibility="Collapsed" Content="Directions · Expand for route"
+                        HorizontalAlignment="Stretch" Click="OnSheetToggle" AutomationProperties.Name="Expand directions sheet" />
+            </Grid>
+        </Border>
+
+        <Button x:Name="OpenSidebarButton" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16"
+                Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1"
+                CornerRadius="15" Padding="14,10" Click="OnShowSidebar" AutomationProperties.Name="Show search panel">
+            <StackPanel Orientation="Horizontal" Spacing="9"><Path Stroke="#007AFF" StrokeThickness="1.8" Data="M13,7 A6,6 0 1 1 1,7 A6,6 0 1 1 13,7 M11.5,11.5 L18,18" /><TextBlock Text="Search" VerticalAlignment="Center" FontSize="15" /></StackPanel>
+        </Button>
+
+        <StackPanel x:Name="SceneDock" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16" Spacing="10"
+                    AutomationProperties.Name="Map layers and location">
+            <Border Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" CornerRadius="15" Padding="2"
+                    AutomationProperties.Name="Map appearance controls">
+                <StackPanel x:Name="LayerStack" AutomationProperties.AutomationId="MapAppearanceActions">
+                    <Button x:Name="LayersButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Choose map layers">
+                        <!-- Native tooltip popups must not intercept the next neighboring action.
+                             Place these hints beside the rail, including after keyboard focus returns. -->
+                        <ToolTipService.ToolTip><ToolTip Content="Map layers" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                        <Path Stroke="#007AFF" StrokeThickness="1.7" Width="23" Height="23" Stretch="Uniform" Data="M1,7 L12,1 L23,7 L12,13 Z M1,12 L12,18 L23,12 M1,17 L12,23 L23,17" />
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedRight" FlyoutPresenterStyle="{StaticResource LayerPickerPresenter}">
+                                <!-- Keep padding on semantic layout containers so their children follow
+                                     the popup's arranged offsets in the native accessibility tree. -->
+                                <Border Padding="{StaticResource FlyoutContentPadding}"
+                                        BorderThickness="{ThemeResource FlyoutBorderThemeThickness}" CornerRadius="{ThemeResource OverlayCornerRadius}"
+                                        Background="{ThemeResource FlyoutPresenterBackground}" BorderBrush="{ThemeResource FlyoutBorderThemeBrush}"
+                                        AutomationProperties.Name="Map layer picker">
+                                <StackPanel Width="278" Spacing="14" AutomationProperties.Name="Map layers and projection">
+                                    <TextBlock Text="Choose a map" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource AtlasInkBrush}" />
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6" AutomationProperties.Name="Map layer choices">
+                                        <ToggleButton x:Name="MapLayerButton" IsChecked="True" MinHeight="72" HorizontalAlignment="Stretch" Click="OnMapLayer" AutomationProperties.Name="Map layer"><StackPanel Spacing="6"><Path Width="24" Height="24" Stretch="Uniform" Fill="#5AC8A8" Data="M0,7 L8,2 L16,7 L8,12 Z M0,10 L8,15 L16,10 L16,13 L8,18 L0,13 Z" /><TextBlock Text="Map" FontSize="13" /></StackPanel></ToggleButton>
+                                        <ToggleButton x:Name="EarthLayerButton" Grid.Column="1" MinHeight="72" HorizontalAlignment="Stretch" Click="OnEarthLayer" AutomationProperties.Name="Earth imagery layer"><StackPanel Spacing="6"><Grid Width="24" Height="24"><Ellipse Fill="#55A7DC" /><Path Fill="#B4D7A1" Data="M5,4 L13,2 L17,6 L11,10 L13,14 L7,16 L3,10 Z M17,14 L23,12 L23,18 L19,23 L15,21 Z" /></Grid><TextBlock Text="Earth" FontSize="13" /></StackPanel></ToggleButton>
+                                        <ToggleButton x:Name="ElevationLayerButton" Grid.Column="2" MinHeight="72" HorizontalAlignment="Stretch" Click="OnElevationLayer" AutomationProperties.Name="Elevation layer"><StackPanel Spacing="6"><Path Width="24" Height="24" Stretch="Uniform" Fill="#A9AA86" Data="M0,13 L6,1 L10,8 L12,5 L17,13 Z M4,6 L6,3 L8,6 L6,5 Z" /><TextBlock Text="Elevation" FontSize="12" /></StackPanel></ToggleButton>
+                                    </Grid>
+                                    <Border x:Name="ElevationLegend" Visibility="Collapsed" Padding="10" CornerRadius="10" Background="{StaticResource AtlasGroupedBrush}">
+                                        <StackPanel Spacing="6"><TextBlock x:Name="ElevationReadout" Foreground="{StaticResource AtlasInkBrush}" FontSize="12" /><Grid ColumnDefinitions="*,*,*,*,*,*,*" Height="7"><Border Background="#426A83" /><Border Grid.Column="1" Background="#719C78" /><Border Grid.Column="2" Background="#A6B47C" /><Border Grid.Column="3" Background="#C2AC80" /><Border Grid.Column="4" Background="#A79691" /><Border Grid.Column="5" Background="#D9D9D0" /><Border Grid.Column="6" Background="#F0EEE5" /></Grid><TextBlock Text="−500       0       1500      3000      6000 m" FontSize="10" Foreground="{StaticResource AtlasSecondaryBrush}" /></StackPanel>
+                                    </Border>
+                                    <TextBlock Text="For pixel art, lighting and rendering quality, open Map appearance." FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource AtlasSecondaryBrush}" />
+                                </StackPanel>
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                    <Border x:Name="LayerDivider" Height="1" Margin="8,0" Background="{StaticResource AtlasSeparatorBrush}" />
+                    <Button x:Name="ViewButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Map appearance">
+                    <ToolTipService.ToolTip><ToolTip Content="Map appearance" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
-                            <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
+                            <MenuFlyoutSubItem Text="Rendering style">
+                                <ToggleMenuFlyoutItem x:Name="PixelStyleItem" Text="Pixel art rendering" Tag="Pixel" IsChecked="True" Click="OnRenderStyle" />
+                                <ToggleMenuFlyoutItem x:Name="NormalStyleItem" Text="Normal rendering" Tag="Normal" Click="OnRenderStyle" />
+                                <ToggleMenuFlyoutItem x:Name="MinecraftStyleItem" Text="Minecraft rendering" Tag="Minecraft" Click="OnRenderStyle" />
+                                <ToggleMenuFlyoutItem x:Name="RobloxStyleItem" Text="Roblox rendering" Tag="Roblox" Click="OnRenderStyle" />
+                            </MenuFlyoutSubItem>
                             <MenuFlyoutSubItem Text="Rendering quality">
                                 <ToggleMenuFlyoutItem x:Name="BalancedQualityItem" Text="Balanced quality" Tag="Balanced" Click="OnRenderingQuality" />
                                 <ToggleMenuFlyoutItem x:Name="HighQualityItem" Text="High quality" Tag="High" IsChecked="True" Click="OnRenderingQuality" />
                                 <ToggleMenuFlyoutItem x:Name="UltraQualityItem" Text="Ultra quality" Tag="Ultra" Click="OnRenderingQuality" />
                             </MenuFlyoutSubItem>
-                            <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief"
-                                                 ToolTipService.ToolTip="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." />
-                            <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
-                            <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
-                            <MenuFlyoutSeparator />
-                            <ToggleMenuFlyoutItem x:Name="PixelStyleItem" Text="Pixel art rendering" Tag="Pixel" IsChecked="True" Click="OnRenderStyle" />
-                            <ToggleMenuFlyoutItem x:Name="NormalStyleItem" Text="Normal rendering" Tag="Normal" Click="OnRenderStyle" />
-                            <ToggleMenuFlyoutItem x:Name="MinecraftStyleItem" Text="Minecraft rendering" Tag="Minecraft" Click="OnRenderStyle" />
-                            <ToggleMenuFlyoutItem x:Name="RobloxStyleItem" Text="Roblox rendering" Tag="Roblox" Click="OnRenderStyle" />
-                            <MenuFlyoutSeparator />
-                            <ToggleMenuFlyoutItem x:Name="DayItem" Text="Daylight" Tag="Day" IsChecked="True" Click="OnPalette" />
-                            <ToggleMenuFlyoutItem x:Name="DuskItem" Text="Golden hour" Tag="Dusk" Click="OnPalette" />
-                            <ToggleMenuFlyoutItem x:Name="NightItem" Text="After dark" Tag="Night" Click="OnPalette" />
+                            <MenuFlyoutSubItem Text="Lighting">
+                                <ToggleMenuFlyoutItem x:Name="DayItem" Text="Daylight" Tag="Day" IsChecked="True" Click="OnPalette" />
+                                <ToggleMenuFlyoutItem x:Name="DuskItem" Text="Golden hour" Tag="Dusk" Click="OnPalette" />
+                                <ToggleMenuFlyoutItem x:Name="NightItem" Text="After dark" Tag="Night" Click="OnPalette" />
+                            </MenuFlyoutSubItem>
+                            <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief">
+                                <ToolTipService.ToolTip><ToolTip Content="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                            </ToggleMenuFlyoutItem>
+                            <MenuFlyoutSubItem Text="Camera">
+                                <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
+                                <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
+                                <MenuFlyoutItem Text="Rotate left 45 degrees" Click="OnRotateLeft" />
+                                <MenuFlyoutItem Text="Rotate right 45 degrees" Click="OnRotateRight" />
+                                <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
+                            </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem Text="City guide" Click="OnGuide" />
                             <MenuFlyoutItem Text="Share this view" Click="OnShare" />
                             <MenuFlyoutItem Text="Map controls" Click="OnHelp" />
                         </MenuFlyout>
                     </Button.Flyout>
-                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                        <TextBlock Text="View" />
-                        <Path Width="8" Height="4" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center"
-                              Fill="#F6F4E8" Data="M0,0 L8,0 L4,4 Z" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Grid>
-
-        <Grid Grid.Row="1" x:Name="MapArea" Background="#A7C6BD" AutomationProperties.Name="Map explorer">
-            <maps:PixelMapControl x:Name="Map" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                  AutomationProperties.Name="Interactive world map" />
-            <StackPanel x:Name="SceneDock" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Spacing="6"
-                        AutomationProperties.Name="Map layers and location">
-                <Border x:Name="ElevationLegend" Visibility="Collapsed" Padding="10,7" CornerRadius="4"
-                        HorizontalAlignment="Left" Background="#F9142F32" BorderBrush="#679789" BorderThickness="1" IsHitTestVisible="False">
-                    <StackPanel Spacing="4">
-                        <TextBlock x:Name="ElevationReadout" Foreground="#FCF9EB" FontSize="11" />
-                        <Grid ColumnDefinitions="*,*,*,*,*,*,*" Width="245" Height="7">
-                            <Border Background="#426A83" /><Border Grid.Column="1" Background="#719C78" />
-                            <Border Grid.Column="2" Background="#A6B47C" /><Border Grid.Column="3" Background="#C2AC80" />
-                            <Border Grid.Column="4" Background="#A79691" /><Border Grid.Column="5" Background="#D9D9D0" />
-                            <Border Grid.Column="6" Background="#F0EEE5" />
-                        </Grid>
-                        <TextBlock Text="−500       0        1500       3000       6000 m" Foreground="#C4D8C9" FontSize="10" />
-                    </StackPanel>
-                </Border>
-                <Border HorizontalAlignment="Left" Padding="3" Background="#FAFFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6"
-                        AutomationProperties.Name="Map layers and projection">
-                    <StackPanel Orientation="Horizontal" Spacing="3">
-                        <ToggleButton x:Name="MapLayerButton" IsChecked="True" MinWidth="66" Height="36" Padding="9,2" CornerRadius="3"
-                                      Click="OnMapLayer" AutomationProperties.Name="Map layer" ToolTipService.ToolTip="Pixel map">
-                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                <Path Width="13" Height="13" Stretch="Uniform" Fill="#55987C" Data="M0,7 L8,2 L16,7 L8,12 Z M0,10 L8,15 L16,10 L16,13 L8,18 L0,13 Z" />
-                                <TextBlock Text="Map" FontSize="13" />
-                            </StackPanel>
-                        </ToggleButton>
-                        <ToggleButton x:Name="EarthLayerButton" MinWidth="68" Height="36" Padding="9,2" CornerRadius="3"
-                                      Click="OnEarthLayer" AutomationProperties.Name="Earth imagery layer" ToolTipService.ToolTip="Natural-color satellite imagery">
-                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                <Grid Width="13" Height="13"><Ellipse Fill="#658DA4" /><Path Fill="#A7CB8A" Data="M3,2 L7,1 L9,3 L6,5 L7,7 L4,8 L2,5 Z M9,7 L12,6 L12,9 L10,12 L8,11 Z" /></Grid>
-                                <TextBlock Text="Earth" FontSize="13" />
-                            </StackPanel>
-                        </ToggleButton>
-                        <ToggleButton x:Name="ElevationLayerButton" MinWidth="84" Height="36" Padding="8,2" CornerRadius="3"
-                                      Click="OnElevationLayer" AutomationProperties.Name="Elevation layer" ToolTipService.ToolTip="Pixel-art altitude colors and shaded terrain">
-                            <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                                <Path Width="13" Height="13" Stretch="Uniform" Fill="#8B9B71" Data="M0,13 L6,1 L10,8 L12,5 L17,13 Z M4,6 L6,3 L8,6 L6,5 Z" />
-                                <TextBlock Text="Elevation" FontSize="12" />
-                            </StackPanel>
-                        </ToggleButton>
-                        <Border Width="1" Margin="1,4" Background="#C6CFBE" />
-                        <Button x:Name="ProjectionShortcut" Content="3D" MinWidth="40" Height="36" Padding="7,2"
-                                Click="OnProjection" AutomationProperties.Name="Switch to 2D overhead"
-                                ToolTipService.ToolTip="Toggle overhead or isometric projection" />
-                    </StackPanel>
-                </Border>
-                <Border x:Name="PlaceCard" HorizontalAlignment="Left"
-                        Padding="12,8" Background="#F9142F32" BorderBrush="#679789" BorderThickness="1"
-                        CornerRadius="4" IsHitTestVisible="False" MaxWidth="335">
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="DESTINATION" Foreground="#A4D9C8" FontSize="9" CharacterSpacing="135" FontWeight="SemiBold" />
-                        <TextBlock x:Name="Destination" Text="Lower Manhattan" Foreground="#FCF9EB" FontSize="16"
-                                   FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                        <TextBlock x:Name="MobileStatus" Foreground="#B3CFC1" FontSize="10" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-            <Border x:Name="MapTools" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16"
-                    Background="#FFFBEE" BorderBrush="#667666" BorderThickness="1" Padding="2" CornerRadius="6">
-                <StackPanel x:Name="ToolStack" Spacing="1">
-                    <Button Style="{StaticResource MapAction}" Click="OnNorth" ToolTipService.ToolTip="Reset bearing to north"
-                            AutomationProperties.Name="Reset bearing to north">
-                        <Grid Width="20" Height="24" RenderTransformOrigin="0.5,0.5">
-                            <Grid.RenderTransform><RotateTransform x:Name="CompassTransform" /></Grid.RenderTransform>
-                            <Path Fill="#B5523D" Data="M10,1 L16,13 L10,11 L4,13 Z" />
-                            <Path Fill="#83988D" Data="M10,23 L4,13 L10,15 L16,13 Z" />
-                        </Grid>
-                    </Button>
-                    <Button Content="+" Style="{StaticResource MapAction}" Click="OnZoomIn" ToolTipService.ToolTip="Zoom in"
-                            AutomationProperties.Name="Zoom in" />
-                    <Button Content="−" Style="{StaticResource MapAction}" Click="OnZoomOut" ToolTipService.ToolTip="Zoom out"
-                            AutomationProperties.Name="Zoom out" />
-                    <Border x:Name="ToolDivider" Background="#D7DBCB" Height="1" Margin="7,1" />
-                    <Button Style="{StaticResource MapAction}" Click="OnRotateLeft" ToolTipService.ToolTip="Rotate left 45°"
-                            AutomationProperties.Name="Rotate left 45 degrees">
-                        <Path Stroke="#193938" StrokeThickness="1.8" Data="M7,6 L1,6 L1,0 M1,6 Q4,1 10,2 Q18,3 17,11 Q16,17 10,17" />
-                    </Button>
-                    <Button Style="{StaticResource MapAction}" Click="OnRotateRight" ToolTipService.ToolTip="Rotate right 45°"
-                            AutomationProperties.Name="Rotate right 45 degrees">
-                        <Path Stroke="#193938" StrokeThickness="1.8" Data="M11,6 L17,6 L17,0 M17,6 Q14,1 8,2 Q0,3 1,11 Q2,17 8,17" />
+                        <Path Stroke="#007AFF" StrokeThickness="1.8" Width="23" Height="23" Stretch="Uniform" Data="M2,5 L22,5 M2,12 L22,12 M2,19 L22,19 M8,2 L8,8 M17,9 L17,15 M10,16 L10,22" />
                     </Button>
                 </StackPanel>
             </Border>
-            <StackPanel x:Name="SearchOverlay" HorizontalAlignment="Left" VerticalAlignment="Top"
-                        Width="344" Margin="16" Spacing="6">
-                <Border Padding="4" Background="#FFFBEE" BorderBrush="#667666" BorderThickness="1" CornerRadius="6">
-                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="3">
-                        <TextBox x:Name="SearchBox" PlaceholderText="Search places or coordinates" MaxLength="200" FontSize="16"
-                                 Background="Transparent" BorderThickness="0" Padding="8,6" MinHeight="38"
-                                 AutomationProperties.Name="Search places or latitude and longitude" KeyDown="OnSearchKey" TextChanged="OnQueryEdited" />
-                        <Button x:Name="SearchButton" Grid.Column="1" Width="42" Height="38" Padding="0"
-                                Background="#21564C" BorderBrush="#21564C" CornerRadius="3" Click="OnSearch"
-                                AutomationProperties.Name="Search map" ToolTipService.ToolTip="Search">
-                            <Path Stroke="#FFFBEE" StrokeThickness="2" Data="M12.5,6.8 A5.7,5.7 0 1 1 1.1,6.8 A5.7,5.7 0 1 1 12.5,6.8 M11.3,11.3 L17.5,17.5" />
-                        </Button>
-                        <Button Grid.Column="2" Width="67" Height="38" Padding="0" Background="#DBE9D9" BorderBrush="#B5CCB7" CornerRadius="3"
-                                Click="OnJourneys" AutomationProperties.Name="Open route planner" ToolTipService.ToolTip="Directions and journeys">
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <Path VerticalAlignment="Center" Stroke="#205749" StrokeThickness="1.8" Data="M2,16 L2,6 Q2,2 6,2 L14,2 M11,0 L15,2 L11,5 M5,16 L12,16 Q16,16 16,12 L16,9" />
-                                <TextBlock VerticalAlignment="Center" Text="Route" FontSize="12" FontWeight="SemiBold" Foreground="#205749" />
-                            </StackPanel>
-                        </Button>
-                    </Grid>
-                </Border>
-
-                <Border x:Name="Drawer" Visibility="Collapsed" Background="#FFFBEE" BorderBrush="#667666"
-                        BorderThickness="1" CornerRadius="6" Padding="12,10">
-                    <StackPanel Spacing="7">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="DrawerHeading" VerticalAlignment="Center" Foreground="#245A4F"
-                                       FontSize="12" CharacterSpacing="60" FontWeight="SemiBold" />
-                            <Button Grid.Column="1" Content="×" Width="34" Height="34" Padding="0" FontSize="18"
-                                    Background="Transparent" BorderThickness="0" Click="OnCloseDrawer"
-                                    AutomationProperties.Name="Close panel" />
-                        </Grid>
-                        <ScrollViewer x:Name="ResultScroll" MaxHeight="280" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <StackPanel x:Name="Rows" Spacing="3" />
-                        </ScrollViewer>
-                        <TextBlock x:Name="DrawerNote" TextWrapping="Wrap" FontSize="12" Foreground="#49665E"
-                                   AutomationProperties.LiveSetting="Polite" />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-            <local:GamePanel x:Name="GamePanel" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-            <local:JourneyPanel x:Name="JourneyPanel" Visibility="Collapsed" HorizontalAlignment="Left" VerticalAlignment="Top"
-                                Width="348" Margin="16" />
-            <Border x:Name="PickBanner" Visibility="Collapsed" Background="#193C3C" HorizontalAlignment="Left" VerticalAlignment="Top"
-                    Padding="10,6" Margin="16" BorderBrush="#8CC2A7" BorderThickness="1" CornerRadius="5">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="6">
-                    <TextBlock x:Name="PickText" VerticalAlignment="Center" Foreground="#FFFBEE" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
-                    <Button Grid.Column="1" Content="Cancel" Click="OnCancelPick" Padding="8,3" AutomationProperties.Name="Cancel map selection" />
-                </Grid>
+            <Border x:Name="MapTools" Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" Padding="2" CornerRadius="15"
+                    AutomationProperties.Name="Map navigation controls">
+                <StackPanel x:Name="ToolStack" Spacing="0" AutomationProperties.AutomationId="MapNavigationActions">
+                    <Button x:Name="LocateButton" Style="{StaticResource MapAction}" Click="OnLocate" AutomationProperties.Name="Show current location">
+                        <ToolTipService.ToolTip><ToolTip Content="My location" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                        <Path Stroke="#007AFF" StrokeThickness="1.8" Width="21" Height="21" Stretch="Uniform" Data="M2,10 L22,2 L14,22 L10,14 Z" />
+                    </Button>
+                    <Border Height="1" Margin="8,0" Background="{StaticResource AtlasSeparatorBrush}" />
+                    <Button Style="{StaticResource MapAction}" Click="OnNorth" AutomationProperties.Name="Reset bearing to north">
+                        <ToolTipService.ToolTip><ToolTip Content="Reset bearing to north" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                        <Grid Width="20" Height="25" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform x:Name="CompassTransform" /></Grid.RenderTransform><Path Fill="#FF453A" Data="M10,1 L16,13 L10,11 L4,13 Z" /><Path Fill="#A3A3AA" Data="M10,23 L4,13 L10,15 L16,13 Z" /></Grid>
+                    </Button>
+                    <Button x:Name="ProjectionShortcut" Content="3D" Style="{StaticResource MapAction}" FontSize="14" FontWeight="SemiBold" Click="OnProjection" AutomationProperties.Name="Switch to 2D overhead">
+                        <ToolTipService.ToolTip><ToolTip Content="Switch between 2D and 3D" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
+                    <Border x:Name="ToolDivider" Height="1" Margin="8,0" Background="{StaticResource AtlasSeparatorBrush}" />
+                    <Button x:Name="ZoomInButton" Content="+" Style="{StaticResource MapAction}" Click="OnZoomIn" AutomationProperties.Name="Zoom in">
+                        <ToolTipService.ToolTip><ToolTip Content="Zoom in" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
+                    <Button x:Name="ZoomOutButton" Content="−" Style="{StaticResource MapAction}" Click="OnZoomOut" AutomationProperties.Name="Zoom out">
+                        <ToolTipService.ToolTip><ToolTip Content="Zoom out" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
+                </StackPanel>
             </Border>
-        </Grid>
+        </StackPanel>
 
-        <Grid x:Name="Footer" Grid.Row="2" Padding="12,5" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto,Auto" Background="#F7F5E8">
-            <TextBlock x:Name="Status" VerticalAlignment="Center" Margin="0,0,12,0" Foreground="#395950"
-                       FontSize="11" TextTrimming="CharacterEllipsis" />
-            <StackPanel x:Name="ScaleBar" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0" Spacing="5">
-                <Border x:Name="ScaleRule" Height="5" Width="45" BorderThickness="1,0,1,1" BorderBrush="#47665A" />
-                <TextBlock x:Name="ScaleLabel" VerticalAlignment="Center" FontSize="10" Foreground="#395950" />
+        <local:GamePanel x:Name="GamePanel" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <Border x:Name="PickBanner" Visibility="Collapsed" Background="{StaticResource AtlasSurfaceBrush}" HorizontalAlignment="Left" VerticalAlignment="Top"
+                Padding="12,8" Margin="16" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" CornerRadius="16">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock x:Name="PickText" VerticalAlignment="Center" Foreground="{StaticResource AtlasInkBrush}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" /><Button Grid.Column="1" Content="Cancel" Click="OnCancelPick" AutomationProperties.Name="Cancel map selection" /></Grid>
+        </Border>
+        <StackPanel x:Name="ScaleBar" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="16,0,16,60" Spacing="2" IsHitTestVisible="False">
+            <TextBlock x:Name="ScaleLabel" FontSize="10" Foreground="#3A3A3C" HorizontalAlignment="Center" />
+            <Grid x:Name="ScaleRule" Width="70" Height="5"><Border Height="1" Background="#3A3A3C" VerticalAlignment="Bottom" /><Border Width="1" Background="#3A3A3C" HorizontalAlignment="Left" /><Border Width="1" Background="#3A3A3C" HorizontalAlignment="Right" /></Grid>
+        </StackPanel>
+        <Border x:Name="Footer" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="7,4" Margin="392,0,16,8"
+                CornerRadius="7" Background="#DCFFFFFF" MaxWidth="610" AutomationProperties.Name="Map attribution">
+            <StackPanel Spacing="2">
+                <TextBlock FontSize="10" Foreground="#636366" TextWrapping="Wrap" Text="OpenFreeMap · OpenMapTiles · © OpenStreetMap" />
+                <TextBlock x:Name="EarthCredits" Visibility="Collapsed" TextWrapping="Wrap" FontSize="10" Foreground="#636366"
+                           Text="EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · EOX::Maps · CC BY 4.0" />
+                <TextBlock x:Name="ElevationCredits" Visibility="Collapsed" TextWrapping="Wrap" FontSize="10" Foreground="#636366" Text="Terrain Tiles / Mapzen · Elevation data sources in Map information" />
             </StackPanel>
-            <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="11" Foreground="#395950">
-                <Hyperlink NavigateUri="https://openfreemap.org" Foreground="#30594D">OpenFreeMap</Hyperlink>
-                <Run Text=" · " /><Hyperlink NavigateUri="https://openmaptiles.org" Foreground="#30594D">OpenMapTiles</Hyperlink>
-                <Run Text=" · " /><Hyperlink NavigateUri="https://www.openstreetmap.org/copyright" Foreground="#30594D">© OpenStreetMap</Hyperlink>
-            </TextBlock>
-            <Grid Grid.Row="1" Grid.ColumnSpan="3" Margin="0,2,0,0">
-                <!-- Reserve the wrapped credit height so map controls retain their position when layers change. -->
-                <TextBlock Text="EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · EOX::Maps · CC BY 4.0"
-                           TextWrapping="Wrap" FontSize="10" Opacity="0" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
-                <TextBlock x:Name="EarthCredits" Visibility="Collapsed" TextWrapping="Wrap" FontSize="10" Foreground="#395950">
-                    <Hyperlink NavigateUri="https://cloudless.eox.at/" Foreground="#30594D">EOxCloudless</Hyperlink>
-                    <Run Text=" by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017) · " />
-                    <Hyperlink NavigateUri="https://maps.eox.at/" Foreground="#30594D">EOX::Maps</Hyperlink>
-                    <Run Text=" · " /><Hyperlink NavigateUri="https://creativecommons.org/licenses/by/4.0/" Foreground="#30594D">CC BY 4.0</Hyperlink>
-                </TextBlock>
-            </Grid>
-            <TextBlock x:Name="ElevationCredits" Grid.Row="2" Grid.ColumnSpan="3" Visibility="Collapsed"
-                       TextWrapping="Wrap" FontSize="10" Foreground="#395950" Margin="0,2,0,0">
-                <Hyperlink NavigateUri="https://registry.opendata.aws/terrain-tiles/" Foreground="#30594D">Terrain Tiles / Mapzen</Hyperlink>
-                <Run Text=" · " /><Hyperlink NavigateUri="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" Foreground="#30594D">Elevation data sources and attribution</Hyperlink>
-            </TextBlock>
-        </Grid>
+        </Border>
+        <Button x:Name="MapInfoButton" Style="{StaticResource AtlasIconButton}" Content="i" FontSize="16" FontWeight="SemiBold"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="12" Background="{StaticResource AtlasSurfaceBrush}"
+                AutomationProperties.Name="Map information">
+            <ToolTipService.ToolTip><ToolTip Content="Map information" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+            <Button.Flyout>
+                <Flyout Placement="TopEdgeAlignedRight">
+                    <ScrollViewer MaxHeight="460" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Width="270" Spacing="10">
+                            <TextBlock Text="Map information" FontSize="20" FontWeight="SemiBold" />
+                            <TextBlock x:Name="Status" TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource AtlasSecondaryBrush}" />
+                            <Button Content="Map controls" Click="OnHelp" />
+                            <TextBlock Text="Map data" FontSize="14" FontWeight="SemiBold" Margin="0,4,0,0" />
+                            <StackPanel>
+                                <HyperlinkButton Content="© OpenStreetMap contributors" NavigateUri="https://www.openstreetmap.org/copyright" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                                <HyperlinkButton Content="OpenFreeMap" NavigateUri="https://openfreemap.org" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                                <HyperlinkButton Content="OpenMapTiles" NavigateUri="https://openmaptiles.org" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                            </StackPanel>
+                            <StackPanel x:Name="EarthSourceLinks" Visibility="Collapsed">
+                                <HyperlinkButton Content="EOxCloudless imagery" NavigateUri="https://cloudless.eox.at/" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                                <HyperlinkButton Content="EOX::Maps" NavigateUri="https://maps.eox.at/" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                                <HyperlinkButton Content="Creative Commons BY 4.0" NavigateUri="https://creativecommons.org/licenses/by/4.0/" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                            </StackPanel>
+                            <StackPanel x:Name="ElevationSourceLinks" Visibility="Collapsed">
+                                <HyperlinkButton Content="Terrain Tiles / Mapzen" NavigateUri="https://registry.opendata.aws/terrain-tiles/" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                                <HyperlinkButton Content="Elevation data sources" NavigateUri="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" MinHeight="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Flyout>
+            </Button.Flyout>
+        </Button>
     </Grid>
 </Page>

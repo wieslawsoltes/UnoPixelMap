@@ -1,0 +1,7 @@
+{
+  "schema": 1,
+  "id": "pixel-art-materials-v1",
+  "baselineRevision": "d014060af60b0b961b0b5e52f39359525da2435b",
+  "changedStyles": ["Pixel"],
+  "reason": "Intentional Pixel palette, terrain artwork and facade redesign; geometry, camera, picking, labels and other rendering styles remain protected."
+}

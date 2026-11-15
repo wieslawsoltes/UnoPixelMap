@@ -53,7 +53,7 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     private TextureView* sceneView, multisampleView, depthView, photographView, shadowView, bitmapOverlayView;
     private readonly nint[] shadowLayerViews = new nint[WebGpuShadowCascades.MaximumCount];
     private int attachmentWidth, attachmentHeight, attachmentSamples, shadowSize, shadowCascadeCount, bitmapWidth, bitmapHeight;
-    private TextureFormat pipelineTargetFormat;
+    private TextureFormat pipelineTargetFormat, pipelineSceneFormat, attachmentFormat;
     private int pipelineSamples;
     private long meshBytes;
     private readonly WebGpuScenePreparation scenePreparation = new();
@@ -151,8 +151,9 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
             var attachments = RasterSize(frame, targetWidth, targetHeight, smooth, samples, photograph);
             int width = attachments.Width, height = attachments.Height;
             EnsureShadow(smooth ? Math.Min(maximumTextureSize, options.ShadowSize) : 1, smooth ? options.ShadowCascades : 1);
-            EnsureAttachments(attachments);
-            EnsurePipelines(targetFormat, samples, smooth);
+            var sceneFormat = WebGpuPixelArt.SceneFormat(frame.RenderStyle);
+            EnsureAttachments(attachments, sceneFormat);
+            EnsurePipelines(targetFormat, sceneFormat, samples, smooth);
             UploadPalette(frame.Palette);
             // A new immutable map frame or projection budget replaces the scene
             // streams. Animated overlays keep the same instances, uniforms and draws.
@@ -240,7 +241,9 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
     {
         if (!smooth)
         {
-            var plan = WebGpuBloomLayout.Plan(frame.ArtWidth, frame.ArtHeight, 1, photograph, 0);
+            var plan = frame.RenderStyle == MapRenderStyle.Pixel
+                ? WebGpuPixelArt.Attachments(frame.ArtWidth, frame.ArtHeight, photograph)
+                : WebGpuBloomLayout.Plan(frame.ArtWidth, frame.ArtHeight, 1, photograph, 0);
             if (plan.TotalBytes > AttachmentBudget || frame.ArtWidth > maximumTextureSize || frame.ArtHeight > maximumTextureSize)
                 throw new NotSupportedException("The logical pixel grid exceeds the map surface budget.");
             return plan;
@@ -323,6 +326,11 @@ public sealed unsafe partial class WebGpuMapRenderer : IDisposable
         PixelStyle palette = frame.Palette.Style;
         uint sky = palette == PixelStyle.Night ? 0xff273849 : palette == PixelStyle.Dusk ? 0xffba969a : 0xff9bc1c8;
         uint horizon = palette == PixelStyle.Night ? 0xff405264 : palette == PixelStyle.Dusk ? 0xffd2aaa1 : 0xffc6d6cd;
+        if (frame.RenderStyle == MapRenderStyle.Pixel)
+        {
+            sky = palette == PixelStyle.Night ? 0xff172b40 : palette == PixelStyle.Dusk ? 0xff9c869e : 0xff9fbfd1;
+            horizon = palette == PixelStyle.Night ? 0xff415b70 : palette == PixelStyle.Dusk ? 0xffd9b49e : 0xffd4ddce;
+        }
         float horizonRow = 0;
         if (frame.Camera.Perspective && frame.Camera.Pitch > 0)
             horizonRow = (float)((frame.Height * .5 + (MapCamera.Focal(frame.Height) * Math.Cos(frame.Camera.PitchRadians) *

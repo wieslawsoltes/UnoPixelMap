@@ -13,7 +13,7 @@ internal static class WebGpuMapShaders
         }
         """;
 
-    internal const string Common = ColorSpace + """
+    internal const string Common = ColorSpace + WebGpuPixelArtShading.Wgsl + """
         struct Frame {
             screenX: vec4f, screenY: vec4f, screenW: vec4f,
             view: vec4f, ground: vec4f, lens: vec4f, world: vec4f,
@@ -153,8 +153,9 @@ internal static class WebGpuMapShaders
             let row=p.y*f.view.y/f.post.y;
             var color=f.groundColor.rgb;
             if(row<f.sky.w){
-                color=select(select(f.sky.rgb,f.horizon.rgb,row>=max(0.0,f.sky.w-7.0)),
-                    mix(f.sky.rgb,f.horizon.rgb,smoothstep(0.0,max(1.0,f.sky.w),row)),smoothStyle());
+                if(style()==0u){color=pixelSkyColor(f.sky.rgb,f.horizon.rgb,row/max(1.0,f.sky.w));}
+                else{color=select(select(f.sky.rgb,f.horizon.rgb,row>=max(0.0,f.sky.w-7.0)),
+                    mix(f.sky.rgb,f.horizon.rgb,smoothstep(0.0,max(1.0,f.sky.w),row)),smoothStyle());}
             }
             if(smoothStyle()) { color=toLinear(color); }
             return vec4f(color,0.0);
@@ -301,7 +302,8 @@ internal static class WebGpuMapShaders
                 // effects deliberately operate on their encoded art colors.
                 if(f.horizon.w>0.5||style()==3u){linearAlbedo=toLinear(color/255.0);}
                 color=lightingLinear(linearAlbedo,v.world,normal,select(0.86,0.38,style()==3u),0.0,vec3f(0.0));
-            }else{color=clamp(floor(color*shade),vec3f(0.0),vec3f(255.0))/255.0;}
+            }else if(style()==0u){color=pixelTerrainColor(color/255.0,v.heightLight.y);}
+            else{color=clamp(floor(color*shade),vec3f(0.0),vec3f(255.0))/255.0;}
             return vec4f(color,sampleColor.a);
         }
         """;
@@ -343,12 +345,17 @@ internal static class WebGpuMapShaders
             let span=-dot(f.screenX.xy,v.edge);
             let worldLength=v.surface.x*length(f.screenX.xy);
             o.facade=vec2f(along*length(v.edge)/edgeLength*f.world.z,height);
-            if(style()!=0u&&face!=0u){o.facade=v.position*f.world.z;}
+            if(face!=0u){o.facade=v.position*f.world.z;}
             o.wall=vec4f(endpointX,span,worldLength,select(v.surface.y,v.surface.z,perspective()));
             o.building=vec2f(model.w-bounds.z,model.w);
             o.model=vec3u(u32(model.y+0.5),u32(model.z+0.5),face);
             o.world=worldPosition(v.position,foundation+height,f.world.xyz);
             o.normal=select(normalize(vec3f(v.edge.y,v.edge.x,0.000001)),vec3f(0.0,0.0,select(-1.0,1.0,face==1u)),face!=0u);
+            if(style()==0u){
+                // Pixel needs only the physical façade span and its flat
+                // world-light ramp index; neither depends on camera bearing.
+                o.wall=vec4f(0.0,0.0,length(v.edge)*f.world.z,f32(pixelWallBand(o.normal,f.sun.xyz)));
+            }
             return o;
         }
         @vertex fn vs(v:Input)->BuildingVertex {return makeVertex(v);}
@@ -361,15 +368,26 @@ internal static class WebGpuMapShaders
         @vertex fn shadow1_vs(v:Input)->@builtin(position) vec4f {return buildingShadow(v,1u);}
         @vertex fn shadow2_vs(v:Input)->@builtin(position) vec4f {return buildingShadow(v,2u);}
         @vertex fn shadow3_vs(v:Input)->@builtin(position) vec4f {return buildingShadow(v,3u);}
-        fn windowCoverage(room:vec2f,footprint:vec2f)->vec2f {
-            let start=vec2f(0.17,0.23); let duty=vec2f(0.76,0.75)-start;
-            let width=max(footprint,vec2f(0.0001));
-            let a=room-width*0.5; let b=room+width*0.5; let first=floor(a); let last=floor(b);
-            return clamp(((last-first)*duty+clamp(b-last-start,vec2f(0.0),duty)-clamp(a-first-start,vec2f(0.0),duty))/width,vec2f(0.0),vec2f(1.0));
-        }
         @fragment fn fs(v:BuildingVertex,@builtin(front_facing) front:bool)->@location(0) vec4f {
             let footprint=abs(dpdx(v.facade))+abs(dpdy(v.facade));
             let face=v.model.z; let seed=v.model.x; let mat=v.model.y;
+            if(style()==0u){
+                var part=7;
+                if(face==1u){part=pixelRoofPart(v.facade,footprint,seed);}
+                else if(face==0u){
+                    if(!front){discard;}
+                    let band=i32(v.wall.w+0.5);
+                    part=7+band;
+                    let roomMeters=vec2f(3.2+f32((seed>>2u)&3u)*0.6,3.2+f32(seed&3u)*0.22);
+                    let room=vec2f(v.facade.x,v.facade.y-(v.building.y-v.building.x))/roomMeters;
+                    let cell=pixelFacadeCell(room,footprint/roomMeters,vec2f(v.wall.z,v.building.x)/roomMeters);
+                    if(cell.x>1.5){part=11+band;}
+                    else if(cell.x>0.5){part=select(5,6,lamp(seed,i32(cell.y),i32(cell.z)));}
+                }
+                // One final lookup, plus one integer room lookup only inside
+                // a readable window cluster. Unresolved walls sample no lamps.
+                return vec4f(material(mat,part),1.0);
+            }
             var color=material(mat,select(2,0,face==1u));
             var filteredAlbedo=vec3f(0.0);
             var roughness=0.82; var metal=0.0; var emission=vec3f(0.0);
@@ -397,35 +415,6 @@ internal static class WebGpuMapShaders
                     let surface=normalFacade(v.facade/roomMeters,footprint/roomMeters,seed,
                         wall,material(mat,5),material(mat,6),f.misc.z>0.5);
                     filteredAlbedo=surface.albedo;roughness=surface.roughness;metal=surface.metallic;emission=surface.emission;
-                }else{
-                    let floorMeters=3.2+f32(seed&3u)*0.22;
-                    let bayMeters=3.2+f32((seed>>2u)&3u)*0.6;
-                    if(perspective()||style()==1u){
-                        let room=v.facade/vec2f(bayMeters,floorMeters);let within=fract(room);
-                        let span=max(footprint.x/bayMeters,footprint.y/floorMeters);
-                        let glass=within.y>0.23&&within.y<0.75&&within.x>0.17&&within.x<0.76;
-                        let lit=lamp(seed,i32(floor(room.x)),i32(floor(room.y)));
-                        let window=material(mat,select(5,6,lit));
-                        if(span>0.2){
-                            let axes=windowCoverage(room,footprint/vec2f(bayMeters,floorMeters));let coverage=axes.x*axes.y;
-                            let lod=clamp(log2(max(1.0,span)),0.0,8.0);
-                            let lamps=textureSampleLevel(rooms,roomSampler,(room+vec2f(f32(seed),0.0))/vec2f(256.0,16.0),lod).g;
-                            color=mix(wall,mix(material(mat,5),material(mat,6),lamps),coverage);
-                        }else if(glass){color=window;}
-                    }else{
-                        if(v.wall.y<0.01||v.building.x*f.ground.z*f.lens.x<0.35){discard;}
-                        let floorPixels=max(0.01,f.ground.z*f.lens.x*floorMeters);
-                        let bayPixels=f.ground.z*bayMeters*v.wall.y/max(0.01,v.wall.z);
-                        let along=v.position.x*f.view.x/f.post.x-v.wall.x;
-                        let column=i32(along/max(0.01,bayPixels)); let windowX=along-f32(column)*bayPixels;
-                        let rise=v.facade.y*f.ground.z*f.lens.x;let story=i32(rise/floorPixels);let within=rise-f32(story)*floorPixels;
-                        let ribbon=(seed&8u)!=0u&&v.building.y*f.ground.z*f.lens.x>9.0*floorPixels;
-                        let pilasters=(seed&32u)!=0u&&v.building.y*f.ground.z*f.lens.x>7.0*floorPixels;
-                        if(pilasters&&bayPixels>1.9&&(column&3)==0&&windowX<0.9){color=mixBytes(wall*255.0,material(mat,3)*255.0,0.32)/255.0;}
-                        let glass=floorPixels>=1.65&&bayPixels>=1.45&&v.building.x*f.ground.z*f.lens.x>floorPixels*1.6&&
-                            windowX>bayPixels*select(0.19,0.05,ribbon)&&windowX<bayPixels*select(0.68,0.95,ribbon);
-                        if(glass&&within>=floorPixels*0.22&&within<floorPixels*0.75){color=material(mat,select(5,6,lamp(seed,column,story)));}
-                    }
                 }
             }
             if(smoothStyle()){
@@ -453,6 +442,7 @@ internal static class WebGpuMapShaders
             if(a.z<f.lens.w){a=mix(a,b,(f.lens.w-a.z)/(b.z-a.z));}
             if(b.z<f.lens.w){b=mix(b,a,(f.lens.w-b.z)/(a.z-b.z));}
             let p=a.xy/a.z;let q=b.xy/b.z;
+            if(style()==0u&&!pixelEdgeVisible(length(q-p))){o.position=vec4f(2,2,2,1);return o;}
             let delta=q-p;let direction=normalize(delta+vec2f(0.000001,0.0));let normal=vec2f(-direction.y,direction.x);
             let endpoint=index<2u;let positive=index==1u||index==3u;
             let point=select(p-direction*0.5,q+direction*0.5,endpoint)+normal*select(-0.5,0.5,positive);
@@ -460,6 +450,7 @@ internal static class WebGpuMapShaders
             let ndc=clipPosition(s);let bias=select(0.0000001,abs(f.view.w)*0.0000005,perspective());
             o.position=vec4f((point.x*2.0/f.view.x-1.0)*s.z,(1.0-point.y*2.0/f.view.y)*s.z,ndc.z-bias*s.z,s.z);
             o.color=material(u32(model.z+0.5),select(4,3,delta.x>=0.0));
+            if(style()==0u){o.color=material(u32(model.z+0.5),pixelEdgePart(v.b.xy-v.a.xy,f.sun.xyz));}
             if(smoothStyle()){o.color=toLinear(o.color);}
             return o;
         }

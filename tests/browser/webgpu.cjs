@@ -10,7 +10,9 @@ const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
 const { installRenderGraphProbe } = require("./webgpu-rendergraph-probe.cjs");
 const { runShaderFixtures } = require("./webgpu-shader-fixtures.cjs");
+const { runPixelArtFixtures } = require("./webgpu-pixel-art-fixtures.cjs");
 const { menu } = require("./native-menu.cjs");
+const { waitForSettledFocus } = require("./explore.cjs");
 
 function parseArguments(args) {
     const addresses = args.filter(value => value !== "--preflight-only");
@@ -192,11 +194,147 @@ function installProbe() {
 async function click(page, name, touch = false) {
     const control = page.getByRole("button", { name, exact: true, disabled: false })
         .or(page.getByRole("checkbox", { name, exact: true, disabled: false }));
+    if (["Map layer", "Earth imagery layer", "Elevation layer"].includes(name) && !await control.isVisible())
+        await click(page, "Choose map layers", touch);
     await control.waitFor({ state: "visible" });
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     const bounds = await control.boundingBox();
     assert.ok(bounds?.width && bounds?.height, name + " has a usable hit target");
     const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
     if (touch) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
+    return {name, bounds, point: {x, y}, input: touch ? "touch" : "mouse"};
+}
+
+function namedControl(page, name) {
+    return page.getByRole("button", {name, exact: true, disabled: false})
+        .or(page.getByRole("checkbox", {name, exact: true, disabled: false}));
+}
+
+async function readPeers(locator, includeAncestors = false) {
+    return locator.evaluateAll((elements, includeAncestors) => {
+        const describe = element => {
+            const {x, y, width, height} = element.getBoundingClientRect();
+            return {id: element.id, name: element.getAttribute("aria-label"), role: element.getAttribute("role"),
+                tag: element.tagName, elementtype: element.getAttribute("elementtype"), connected: element.isConnected,
+                inline: {left: element.style?.left || "", top: element.style?.top || ""}, rect: {x, y, width, height}};
+        };
+        return elements.map(element => {
+            const peer = describe(element);
+            if (includeAncestors) {
+                peer.ancestors = [];
+                for (let parent = element.parentElement; parent; parent = parent.parentElement)
+                    peer.ancestors.push(describe(parent));
+            }
+            return peer;
+        });
+    }, includeAncestors);
+}
+
+async function pointerReceipt(page, target, point) {
+    const peers = await readPeers(target, true);
+    const hit = point ? await page.evaluate(({x, y}) => {
+        const element = document.elementFromPoint(x, y);
+        if (!element) return null;
+        const rect = element.getBoundingClientRect();
+        return {id: element.id, name: element.getAttribute("aria-label"), role: element.getAttribute("role"),
+            tag: element.tagName, rect: {x: rect.x, y: rect.y, width: rect.width, height: rect.height}};
+    }, point) : null;
+    return {peers, elementFromPoint: hit, clickPoint: point};
+}
+
+async function verifyLayerPointerDismissal(page, name, {timeout = 30000, diagnosticTimeout = 10000} = {}) {
+    const target = namedControl(page, name);
+    const receipt = {name, pointer: {attempted: false, passed: false}, keyboard: {attempted: false, key: "Space"}};
+    try {
+        await target.waitFor({state: "visible", timeout});
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        const peers = await readPeers(target), size = page.viewportSize();
+        assert.equal(peers.length, 1, name + ": one live native pointer target exists");
+        receipt.pointer.sampledPeer = peers[0];
+        receipt.pointer.viewport = size;
+        const rect = peers[0].rect;
+        assert.ok(rect.width >= 44 && rect.height >= 44, name + ": layer cards retain their touch target size");
+        const left = Math.max(0, rect.x), right = Math.min(size.width, rect.x + rect.width);
+        const top = Math.max(0, rect.y), bottom = Math.min(size.height, rect.y + rect.height);
+        assert.ok(right > left && bottom > top, name + ": layer card intersects the viewport");
+        const point = {x: (left + right) / 2, y: (top + bottom) / 2};
+        receipt.pointer.before = await pointerReceipt(page, target, point);
+        receipt.pointer.attempted = true;
+        await page.mouse.click(point.x, point.y);
+        await target.waitFor({state: "hidden", timeout});
+        receipt.pointer.after = await pointerReceipt(page, target, point);
+        receipt.pointer.passed = true;
+        return receipt;
+    } catch (pointerFailure) {
+        receipt.pointer.failure = pointerFailure.stack || String(pointerFailure);
+        receipt.pointer.after = await pointerReceipt(page, target, receipt.pointer.before?.clickPoint)
+            .catch(error => ({snapshotError: String(error)}));
+        // Keep a missed native hit as a failing UI contract. Keyboard activation
+        // is an independent diagnostic, never a retry that turns the miss green.
+        try {
+            if (await target.isVisible()) {
+                receipt.keyboard.attempted = true;
+                await waitForSettledFocus(page, target, diagnosticTimeout);
+                await page.keyboard.press("Space");
+                await target.waitFor({state: "hidden", timeout: diagnosticTimeout});
+                receipt.keyboard.passed = true;
+            } else receipt.keyboard.skipped = "The layer peer was already hidden before the diagnostic";
+        } catch (error) {
+            receipt.keyboard.passed = false;
+            receipt.keyboard.failure = error.stack || String(error);
+        }
+        receipt.keyboard.after = await pointerReceipt(page, target, receipt.pointer.before?.clickPoint)
+            .catch(error => ({snapshotError: String(error)}));
+        const error = new Error(name + ": native pointer activation did not dismiss the layer picker; " +
+            "the independent keyboard diagnostic " + (receipt.keyboard.passed ? "succeeded" : "did not succeed"), {cause: pointerFailure});
+        error.interfaceEvidence = receipt;
+        throw error;
+    }
+}
+
+async function selectLayerKeyboard(page, name) {
+    const target = namedControl(page, name);
+    if (!await target.isVisible()) {
+        await waitForSettledFocus(page, namedControl(page, "Choose map layers"));
+        await page.keyboard.press("Space");
+    }
+    await target.waitFor({state: "visible"});
+    await waitForSettledFocus(page, target);
+    await page.keyboard.press("Space");
+    await target.waitFor({state: "hidden"});
+}
+
+async function verifyCameraHomeRoundTrip(page, {timeout = 30000} = {}) {
+    const deadline = Date.now() + timeout;
+    const homeNames = ["Open route planner", "Share current view", "Browse city guide", "Open free roam game",
+        "Explore Lower Manhattan", "Explore Paris", "Explore Tokyo"];
+    const cameraNames = ["North-up plan", "Isometric · 55°", "Low skyline · 70°", "Horizon · 88°", "Bird’s-eye · 30°",
+        "Camera Left", "Camera Right", "Camera Tilt -", "Camera Tilt +"];
+    const close = namedControl(page, "Close panel");
+    const home = homeNames.map(name => namedControl(page, name)).reduce((all, target) => all.or(target));
+    const camera = cameraNames.map(name => namedControl(page, name)).reduce((all, target) => all.or(target));
+    const wait = (target, state) => target.waitFor({state, timeout: Math.max(1, deadline - Date.now())});
+    const receipt = {passed: false, expectedHomeActions: homeNames, expectedAbsentCameraActions: cameraNames};
+    try {
+        await wait(close, "visible");
+        receipt.before = await readPeers(close, true);
+        receipt.pointer = await click(page, "Close panel");
+        await wait(close, "hidden");
+        for (const name of cameraNames) await wait(namedControl(page, name), "hidden");
+        await wait(page.getByLabel("Terrain vertical exaggeration", {exact: true}), "hidden");
+        for (const name of homeNames) await wait(namedControl(page, name), "visible");
+        receipt.homePeers = await readPeers(home, true);
+        receipt.cameraPeers = await readPeers(camera);
+        receipt.passed = true;
+        return receipt;
+    } catch (cause) {
+        receipt.failure = cause.stack || String(cause);
+        receipt.homePeers = await readPeers(home, true).catch(error => ({snapshotError: String(error)}));
+        receipt.cameraPeers = await readPeers(camera, true).catch(error => ({snapshotError: String(error)}));
+        const error = new Error("Closing Camera with one native pointer click must restore every Home action and remove Camera controls", {cause});
+        error.interfaceEvidence = {cameraHomeRoundTrip: receipt};
+        throw error;
+    }
 }
 
 async function awaitFrame(page, predicate, argument) {
@@ -248,7 +386,8 @@ async function assertGraphicsHealthy(page, name) {
 async function saveFailure(page, name, error) {
     // Capture without awaiting shader promises or queue completion: a failed
     // device must not prevent the original diagnostic from reaching artifacts.
-    const evidence = { name, failure: error.stack || String(error), url: page.url() };
+    const evidence = { name, failure: error.stack || String(error), url: page.url(),
+        interfaceEvidence: error.interfaceEvidence };
     try { evidence.snapshot = await graphicsSnapshot(page); }
     catch (failure) { evidence.snapshotError = String(failure); }
     try {
@@ -394,7 +533,10 @@ function verifyRenderGraph(evidence, diagnostic, name) {
     assert.notEqual(maximumLevels, undefined, name + ": bloom quality is recognized");
     const scene = live.findLast(texture => texture.label === "PixelMap scene color");
     assert.ok(scene, name + ": scene color has an independently observed allocation");
+    assert.equal(scene.format, diagnostic.style === "Pixel" ? "rgba8unorm" : "rgba16float",
+        name + ": Pixel stores authored palette bytes while continuous and block styles retain HDR targets");
     const photo = live.filter(texture => texture.label === "PixelMap photograph");
+    for (const texture of photo) assert.equal(texture.format, scene.format, name + ": photograph preserves scene representation");
     const boundTexture = (pass, binding) => pass.inputs.find(view => view.group === 0 && view.binding === binding && view.textureId !== undefined);
     const expectTexture = (view, textureId, description) => {
         assert.ok(view, name + ": " + description + " has a bound texture view");
@@ -490,6 +632,9 @@ function verifyRenderGraph(evidence, diagnostic, name) {
         sum + texture.width * texture.height * texture.layers * texture.samples *
             (texture.format === "rgba16float" ? 8 : 4), 0);
     assert.ok(attachmentBytes <= 256 * 1024 * 1024, name + ": observed attachments stay inside the 256 MiB budget");
+    if (diagnostic.style === "Pixel")
+        assert.equal(attachmentBytes, scene.width * scene.height * (photo.length ? 12 : 8),
+            name + ": exact Pixel color/depth/optional-photo budget retains the unchanged art extent");
     const artwork = live.find(texture => texture.label === "PixelMap terrain artwork");
     assert.ok(artwork, name + ": terrain artwork exists");
     assert.equal(artwork.mips, 9, name + ": terrain has a complete 256-to-1 mip chain");
@@ -684,6 +829,275 @@ async function presentationPreflight(browser) {
     }
 }
 
+async function publicCameraLink(page) {
+    await menu(page, "Share this view");
+    const field = page.getByRole("textbox", {name: "Shareable map link", exact: true});
+    const value = await field.inputValue();
+    await click(page, "Close panel");
+    await field.waitFor({state: "hidden"});
+    return value;
+}
+
+async function captureInterface(page, name, details) {
+    await assertGraphicsHealthy(page, name + " before screenshot");
+    // Semantic layout can lead Skia's queued canvas presentation. Use the same
+    // completion fence as rendering captures before recording interface pixels.
+    await verifyGpu(page, name);
+    const presentedDetails = typeof details === "function" ? await details() : details;
+    await page.screenshot({path: join(output, name + ".png"), timeout: 30000});
+    await assertGraphicsHealthy(page, name + " after screenshot");
+    report.scenarios.push({name, ...presentedDetails});
+}
+
+async function desktopInterface(page) {
+    const map = page.getByRole("group", {name: "Interactive world map", exact: true});
+    const bounds = await map.boundingBox(), size = page.viewportSize();
+    assert.deepEqual(bounds, {x: 0, y: 0, ...size}, "The desktop map fills the entire viewport");
+    const search = page.getByRole("textbox", {name: "Search places or latitude and longitude", exact: true});
+    const searchBounds = await search.boundingBox();
+    assert.ok(searchBounds.x < 80 && searchBounds.y < 130 && searchBounds.height >= 44,
+        "Desktop search occupies a usable floating sidebar");
+    await click(page, "Hide search panel");
+    await search.waitFor({state: "hidden"});
+    assert.deepEqual(await map.boundingBox(), bounds, "Hiding the sidebar preserves map extent and projection");
+    await menu(page, "Share this view");
+    await click(page, "Close panel");
+    await search.waitFor({state: "hidden"});
+    await click(page, "Show search panel");
+    await search.waitFor({state: "visible"});
+    const before = await publicCameraLink(page);
+    await page.mouse.move(searchBounds.x + 80, searchBounds.y + 180);
+    await page.mouse.wheel(0, 160);
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    assert.equal(await publicCameraLink(page), before, "Scrolling the sidebar never pans or zooms the map");
+    await captureInterface(page, "desktop-adaptive-sidebar", {mapBounds: bounds, searchBounds, cameraPreserved: true});
+    await click(page, "Choose map layers");
+    for (const name of ["Map layer", "Earth imagery layer", "Elevation layer"]) {
+        const target = page.getByRole("button", {name, exact: true}).or(page.getByRole("checkbox", {name, exact: true}));
+        const rect = await target.boundingBox();
+        assert.ok(rect?.width >= 44 && rect?.height >= 44, name + ": layer cards meet touch target size");
+    }
+    await captureInterface(page, "desktop-layer-picker", {layerChoices: ["Map", "Earth", "Elevation"]});
+    const activation = await verifyLayerPointerDismissal(page, "Map layer");
+    await captureInterface(page, "desktop-layer-pointer-dismissal", {activation});
+}
+
+async function waitForSheetTop(page, ranges, description, {timeout = 25000, pollInterval = 50, stableForMs = 0} = {}) {
+    const deadline = Date.now() + timeout, samples = [];
+    let last = null, pendingFailure = null;
+    let stablePeers = null, stableSince = 0;
+    const matches = (rect, range) => rect && rect.width > 0 && rect.height > 0 &&
+        rect.y >= range[0] && rect.y <= range[1];
+    while (Date.now() < deadline) {
+        // Resolve both peers again on every poll. Uno can replace the semantic
+        // element when its name or layout changes; a pinned ElementHandle would
+        // keep polling the disconnected predecessor for the entire deadline.
+        const peers = page.getByRole("group", {name: "Search and directions", exact: true})
+            .or(page.getByRole("button", {name: /^(Expand|Collapse) search sheet$/}));
+        let timer;
+        try {
+            last = await Promise.race([readPeers(peers), new Promise((_, reject) => {
+                timer = setTimeout(() => reject(new Error("Timed out reading live sheet geometry")), Math.max(1, deadline - Date.now()));
+            })]);
+        } catch (error) { pendingFailure = String(error); break; }
+        finally { clearTimeout(timer); }
+        samples.push({elapsedMs: timeout - Math.max(0, deadline - Date.now()), peers: last});
+        if (samples.length > 12) samples.shift();
+        const groups = last.filter(peer => peer.connected && peer.name === "Search and directions");
+        const handles = last.filter(peer => peer.connected && /^(Expand|Collapse) search sheet$/.test(peer.name || ""));
+        let matchingPeers = null;
+        if (groups.length === 1 && handles.length === 1) {
+            const sheet = groups[0].rect, handle = handles[0].rect;
+            if (matches(handle, ranges.handle) && matches(sheet, ranges.sheet) &&
+                handle.x >= sheet.x && handle.y >= sheet.y &&
+                handle.x + handle.width <= sheet.x + sheet.width && handle.y + handle.height <= sheet.y + sheet.height) {
+                matchingPeers = JSON.stringify([handles[0].id, handle, groups[0].id, sheet]);
+                if (matchingPeers !== stablePeers) stableSince = Date.now();
+                const observedStableMs = Date.now() - stableSince;
+                if (observedStableMs >= stableForMs)
+                    return {handle: handles[0], sheet: groups[0], stableForMs, observedStableMs};
+            }
+        }
+        stablePeers = matchingPeers;
+        const remaining = deadline - Date.now();
+        if (remaining > 0) await new Promise(resolve => setTimeout(resolve, Math.min(pollInterval, remaining)));
+    }
+    const error = new Error(description + ": live sheet and handle geometry did not reach their required bounds within " + timeout + " ms");
+    error.interfaceEvidence = {description, ranges, timeout, stableForMs, lastPeers: last, samples, pendingFailure};
+    throw error;
+}
+
+async function mobileInterface(page, cdp) {
+    const map = page.getByRole("group", {name: "Interactive world map", exact: true});
+    const bounds = await map.boundingBox(), size = page.viewportSize();
+    assert.deepEqual(bounds, {x: 0, y: 0, ...size}, "The mobile map extends behind the bottom sheet");
+    const handle = page.getByRole("button", {name: /^(Expand|Collapse) search sheet$/});
+    const compact = await waitForSheetTop(page,
+        {handle: [size.height * .7, size.height], sheet: [size.height * .7, size.height]}, "The initial compact sheet");
+    const collapsed = compact.handle.rect;
+    assert.ok(collapsed.y > size.height * .7 && collapsed.height >= 44, "The initial sheet is compact with a real touch handle");
+    await waitForSettledFocus(page, handle); await page.keyboard.press("End");
+    await page.getByRole("button", {name: "Collapse search sheet", exact: true}).waitFor({state: "visible"});
+    const expansion = await waitForSheetTop(page,
+        {handle: [0, size.height * .2 - 1], sheet: [0, size.height * .2 - 1]}, "End expands the sheet");
+    const expanded = expansion.handle.rect;
+    assert.ok(expanded.y < size.height * .2, "The sheet expands through its accessible keyboard action");
+    assert.deepEqual(await map.boundingBox(), bounds, "Sheet expansion never resizes the physical map");
+    await captureInterface(page, "mobile-expanded-sheet", {collapsed, expanded, peers: expansion, mapBounds: bounds});
+    await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
+    const compactRanges = {handle: [collapsed.y - 1, collapsed.y + 1], sheet: [compact.sheet.rect.y - 1, compact.sheet.rect.y + 1]};
+    const beforeDrag = await waitForSheetTop(page, compactRanges, "Home restores the compact sheet before dragging");
+    const start = beforeDrag.handle.rect, x = start.x + start.width / 2, y = start.y + start.height / 2;
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchStart", touchPoints: [{x, y, id: 0}]});
+    for (let step = 1; step <= 6; step++)
+        await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{x, y: y - step * 50, id: 0}]});
+    await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
+    // This fixed viewport has no keyboard or safe-area inset. Its public middle
+    // detent occupies 49% of the viewport; the raw 300-pixel drag is not a snap.
+    const middleHeight = size.height * .49, middleTop = size.height - middleHeight;
+    const middleHandleTop = middleTop + compact.handle.rect.y - compact.sheet.rect.y;
+    const dragging = await waitForSheetTop(page,
+        {handle: [middleHandleTop - 1, middleHandleTop + 1], sheet: [middleTop - 1, middleTop + 1]},
+        "Native touch release settles at the middle detent", {stableForMs: 150});
+    const dragged = dragging.handle.rect;
+    assert.ok(dragged.y < start.y - 100, "Native touch drag opens the sheet and snaps to a higher detent");
+    assert.ok(Math.abs(dragging.sheet.rect.height - middleHeight) <= 1, "The released sheet retains the middle detent height");
+    assert.deepEqual(await map.boundingBox(), bounds, "Dragging chrome preserves the map viewport");
+    await captureInterface(page, "mobile-dragged-sheet", async () => {
+        const presentedPeers = await readPeers(page.getByRole("group", {name: "Search and directions", exact: true}).or(handle));
+        const sheets = presentedPeers.filter(peer => peer.connected && peer.name === "Search and directions");
+        const handles = presentedPeers.filter(peer => peer.connected && /^(Expand|Collapse) search sheet$/.test(peer.name || ""));
+        assert.equal(sheets.length, 1, "The presented sheet has one live semantic peer");
+        assert.equal(handles.length, 1, "The presented sheet has one live handle peer");
+        assert.deepEqual(sheets[0].rect, dragging.sheet.rect, "Presentation preserves the verified snapped sheet bounds");
+        assert.deepEqual(handles[0].rect, dragged, "Presentation preserves the verified snapped handle bounds");
+        return {collapsed: start, dragged: handles[0].rect,
+            peers: {...dragging, sheet: sheets[0], handle: handles[0]}, geometryAfterPresentation: true, mapBounds: bounds,
+            expectedDetent: {height: middleHeight, sheetTop: middleTop, handleTop: middleHandleTop}};
+    });
+    await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
+    const restored = await waitForSheetTop(page, compactRanges, "Home restores the compact sheet after dragging");
+    assert.ok(Math.abs(restored.handle.rect.y - collapsed.y) <= 1, "The sheet returns to its compact detent");
+}
+
+async function desktopUi(browser) {
+    const {context, page} = await open(browser);
+    try {
+        await verifyGpu(page, "desktop-interface-initial");
+        await desktopInterface(page);
+    } catch (error) {
+        await saveFailure(page, "desktop-interface", error);
+        throw error;
+    } finally { await context.close(); }
+}
+
+async function mobileUi(browser) {
+    const {context, page} = await open(browser, "", {mobile: true, density: 2});
+    try {
+        await verifyGpu(page, "mobile-interface-initial");
+        await mobileInterface(page, await context.newCDPSession(page));
+    } catch (error) {
+        await saveFailure(page, "mobile-interface", error);
+        throw error;
+    } finally { await context.close(); }
+}
+
+function assertMobileGameClearance(viewport, chrome, touchControls) {
+    const evidence = {viewport, chrome, touchControls};
+    try {
+        const one = name => {
+            const peers = chrome.filter(peer => peer.connected && peer.name === name);
+            assert.equal(peers.length, 1, name + ": one live mobile chrome peer exists");
+            return peers[0];
+        };
+        const dock = one("Map layers and location"), settings = one("Free roam settings"), attribution = one("Map attribution");
+        const controls = Object.values(touchControls).flat();
+        for (const peer of [dock, settings, attribution, ...controls]) {
+            const rect = peer.rect;
+            assert.ok(peer.connected && rect.width > 0 && rect.height > 0 && rect.x >= 0 && rect.y >= 0 &&
+                rect.x + rect.width <= viewport.width && rect.y + rect.height <= viewport.height,
+                peer.name + ": visible mobile chrome remains inside the viewport");
+        }
+        const overlaps = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width &&
+            a.y < b.y + b.height && b.y < a.y + a.height;
+        assert.ok(!overlaps(dock.rect, settings.rect), "The map rail does not overlap free-roam settings");
+        assert.ok(!overlaps(attribution.rect, settings.rect), "Map attribution does not overlap free-roam settings");
+        for (const peer of controls)
+            assert.ok(!overlaps(attribution.rect, peer.rect), "Map attribution does not overlap " + peer.name);
+        return {viewport, peers: chrome, visibleTouchPeers: controls.length, passed: true};
+    } catch (error) {
+        error.interfaceEvidence = {gameChromeClearance: evidence};
+        throw error;
+    }
+}
+
+async function mobileFreeRoamUi(browser) {
+    const {context, page} = await open(browser, "", {mobile: true, density: 2});
+    try {
+        await verifyGpu(page, "mobile-free-roam-interface-initial");
+        const size = page.viewportSize();
+        const sheetHandle = page.getByRole("button", {name: /^(Expand|Collapse) search sheet$/});
+        await waitForSettledFocus(page, sheetHandle);
+        await page.keyboard.press("End");
+        await waitForSheetTop(page, {handle: [0, size.height * .2 - 1], sheet: [0, size.height * .2 - 1]},
+            "The mobile free-roam entry is exposed by expanding the search sheet");
+        await click(page, "Open free roam game", true);
+        await click(page, "Start free roam at map center", true);
+        const timeout = 30000;
+        const pad = page.getByRole("group", {name: "Free roam touch controls", exact: true});
+        const controls = [
+            ["movement", page.getByLabel("Free roam movement stick", {exact: true})],
+            ["look", page.getByLabel("Free roam look stick", {exact: true})],
+            ["jump", namedControl(page, "Free roam jump or brake")],
+            ["boost", namedControl(page, "Free roam boost")]
+        ];
+        const touchState = async state => {
+            await pad.waitFor({state, timeout});
+            for (const [, control] of controls) await control.waitFor({state, timeout});
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            const peers = {pad: await readPeers(pad)};
+            for (const [name, control] of controls) {
+                peers[name] = await readPeers(control);
+                if (state === "visible") {
+                    assert.equal(peers[name].length, 1, name + ": a single accessible touch control is exposed");
+                    const rect = peers[name][0].rect;
+                    assert.ok(rect.width >= 44 && rect.height >= 44, name + ": free-roam controls retain touch target size");
+                    assert.ok(rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= size.width && rect.y + rect.height <= size.height,
+                        name + ": free-roam touch control stays inside the mobile viewport");
+                }
+            }
+            return peers;
+        };
+        await namedControl(page, "Pause free roam").waitFor({state: "visible", timeout});
+        await namedControl(page, "Expand game settings").waitFor({state: "visible", timeout});
+        const runningControls = await touchState("visible");
+        await click(page, "Expand game settings", true);
+        await namedControl(page, "Collapse game settings").waitFor({state: "visible", timeout});
+        const settings = page.getByRole("group", {name: "Free roam settings", exact: true});
+        const chrome = page.getByRole("group", {name: /^(Map layers and location|Free roam settings|Map attribution)$/});
+        await captureInterface(page, "mobile-free-roam-settings-expanded", async () => {
+            const touchControls = await touchState("hidden");
+            const clearance = assertMobileGameClearance(size, await readPeers(chrome), touchControls);
+            return {runningControls, touchControls, settings: await readPeers(settings), touchControlsHidden: true, clearance};
+        });
+        await click(page, "Collapse game settings", true);
+        await namedControl(page, "Expand game settings").waitFor({state: "visible", timeout});
+        await captureInterface(page, "mobile-free-roam-settings-collapsed", async () => {
+            const touchControls = await touchState("visible");
+            const clearance = assertMobileGameClearance(size, await readPeers(chrome), touchControls);
+            return {touchControls, settings: await readPeers(settings), touchControlsRestored: true, clearance};
+        });
+        await click(page, "Pause free roam", true);
+        await namedControl(page, "Resume free roam").waitFor({state: "visible", timeout});
+        await click(page, "Exit free roam", true);
+        await pad.waitFor({state: "hidden", timeout});
+        await verifyGpu(page, "mobile-free-roam-interface");
+    } catch (error) {
+        await saveFailure(page, "mobile-free-roam-interface", error);
+        throw error;
+    } finally { await context.close(); }
+}
+
 async function desktop(browser) {
     const { context, page } = await open(browser);
     try {
@@ -712,8 +1126,25 @@ async function desktop(browser) {
             previous = image;
             const pipelines = await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines.length);
             if (style === "Normal") smoothPipelines = pipelines;
+            else if (style === "Minecraft") {
+                assert.equal(pipelines, smoothPipelines + 6,
+                    "The first HDR 1x style creates exactly its six scene pipelines, distinct from encoded Pixel and HDR 4x");
+                smoothPipelines = pipelines;
+            }
             else assert.equal(pipelines, smoothPipelines,
-                style + ": switching between warmed sample-count variants reuses all compiled pipelines");
+                style + ": switching between warmed color-format/sample-count variants reuses all compiled pipelines");
+        }
+        // Review the authored Pixel palettes before returning to HDR quality
+        // coverage. These captures use the same city and camera as style-pixel.
+        for (const [command, palette] of [["Golden hour", "dusk"], ["After dark", "night"], ["Daylight", "day"]]) {
+            const frames = await page.evaluate(() => PixelAtlasWebGpu.frames);
+            await menu(page, command);
+            await awaitFrame(page, (s, previous) => s.style === "Pixel" && s.frames > previous, frames);
+            const image = await capture(page, "pixel-lighting-" + palette);
+            assert.ok(difference(previous, image) > .01, "Changing the Pixel palette changes the rendered city");
+            previous = image;
+            assert.equal(await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines.length), smoothPipelines,
+                "Pixel palette changes reuse the established scene and presentation pipelines");
         }
         await menu(page, "Normal rendering");
         let lightingImage, ultraPipelines;
@@ -742,15 +1173,26 @@ async function desktop(browser) {
             assert.ok(difference(lightingImage, image) > .01, "Changing the lighting palette changes the rendered city");
             lightingImage = image;
         }
-        await click(page, "Earth imagery layer");
+        await selectLayerKeyboard(page, "Earth imagery layer");
         await awaitFrame(page, s => s.imageryCount > 0);
         await capture(page, "earth-imagery");
         // The photograph continuation is only active below 30 degrees. Exercise
         // it through the real camera UI in both HDR and art styles, then verify
         // that leaving it retires the otherwise unused full-size attachment.
-        await menu(page, "Camera angles and orbit");
+        const appearanceControls = namedControl(page, "Map appearance").or(namedControl(page, "Choose map layers"));
+        const appearanceTransition = {before: await readPeers(appearanceControls, true)};
+        try { await menu(page, "Camera angles and orbit"); }
+        catch (error) {
+            appearanceTransition.failure = error.stack || String(error);
+            error.interfaceEvidence = {appearanceTransition, ...error.interfaceEvidence};
+            throw error;
+        } finally {
+            appearanceTransition.after = await readPeers(appearanceControls, true)
+                .catch(error => ({snapshotError: String(error)}));
+            await writeFile(join(output, "earth-appearance-transition.json"), JSON.stringify(appearanceTransition, null, 2));
+        }
         await click(page, "North-up plan");
-        await click(page, "Close panel");
+        report.scenarios.push({name: "desktop-camera-home-plan", transition: await verifyCameraHomeRoundTrip(page)});
         await awaitFrame(page, s => s.imageryCount > 0 &&
             globalThis.__pixelAtlasGpuProbe.renderGraph.textures.some(texture =>
                 texture.label === "PixelMap photograph" && !texture.destroyed));
@@ -762,16 +1204,16 @@ async function desktop(browser) {
         await awaitFrame(page, s => s.style === "Normal");
         await menu(page, "Camera angles and orbit");
         await click(page, "Isometric · 55°");
-        await click(page, "Close panel");
+        report.scenarios.push({name: "desktop-camera-home-isometric", transition: await verifyCameraHomeRoundTrip(page)});
         await awaitFrame(page, () => !globalThis.__pixelAtlasGpuProbe.renderGraph.textures.some(texture =>
             texture.label === "PixelMap photograph" && !texture.destroyed));
         await menu(page, "Terrain relief");
         await awaitFrame(page, s => s.relief);
         await capture(page, "terrain-relief");
-        await click(page, "Elevation layer");
+        await selectLayerKeyboard(page, "Elevation layer");
         await awaitFrame(page, s => s.elevation);
         await capture(page, "elevation-layer");
-        await click(page, "Map layer");
+        await selectLayerKeyboard(page, "Map layer");
 
         await click(page, "Open free roam game");
         await click(page, "Start free roam at map center");
@@ -926,6 +1368,7 @@ async function mobile(browser) {
             return pixels;
         };
         const before = await capture(page, "mobile-pixel");
+        const cdp = await context.newCDPSession(page);
         // The initial camera includes the Financial District label. Keep a
         // continuous, native-density view of that label before the pinch zooms in.
         await menu(page, "Normal rendering");
@@ -936,7 +1379,6 @@ async function mobile(browser) {
         const beforePinch = await page.evaluate(() => ({
             frames: PixelAtlasWebGpu.frames, zoom: PixelAtlasWebGpu.zoom
         }));
-        const cdp = await context.newCDPSession(page);
         await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: 135, y: 410, id: 0 }, { x: 245, y: 410, id: 1 }] });
         for (let step = 1; step <= 6; step++)
             await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: 135 - step * 5, y: 410, id: 0 }, { x: 245 + step * 5, y: 410, id: 1 }] });
@@ -999,7 +1441,22 @@ async function deviceLoss(browser) {
     } finally { await context.close(); }
 }
 
-(async () => {
+async function runIndependentSuites(browser, suites) {
+    const failures = [];
+    report.failures = [];
+    for (const [name, run] of suites) {
+        try { await run(browser); }
+        catch (error) {
+            failures.push(error);
+            report.failures.push({name, failure: error.stack || String(error)});
+            console.error(name + " suite failed:", error);
+        }
+    }
+    if (failures.length) throw new AggregateError(failures,
+        report.failures.map(failure => failure.name).join(", ") + " browser suites failed");
+}
+
+async function run() {
     await mkdir(output, { recursive: true });
     const executablePath = process.env.CHROMIUM_PATH || undefined;
     const channel = executablePath ? undefined : "chromium";
@@ -1028,21 +1485,14 @@ async function deviceLoss(browser) {
         if (!preflightOnly) {
             // Each suite owns and closes its browser contexts. Preserve every
             // failure while letting independent input/recovery checks finish.
-            const failures = [];
-            report.failures = [];
-            for (const [name, run] of [["shader-fixtures", async instance =>
+            await runIndependentSuites(browser, [["shader-fixtures", async instance =>
                 report.scenarios.push(await runShaderFixtures(instance, base, output))],
-                ["desktop", desktop], ["journeys", journeys],
-                ["mobile", mobile], ["unavailable", unavailable], ["device-loss", deviceLoss]]) {
-                try { await run(browser); }
-                catch (error) {
-                    failures.push(error);
-                    report.failures.push({ name, failure: error.stack || String(error) });
-                    console.error(name + " suite failed:", error);
-                }
-            }
-            if (failures.length) throw new AggregateError(failures,
-                report.failures.map(failure => failure.name).join(", ") + " browser suites failed");
+                ["pixel-art-fixtures", async instance =>
+                    report.scenarios.push(await runPixelArtFixtures(instance, base, output))],
+                ["desktop", desktop], ["desktop-interface", desktopUi], ["journeys", journeys],
+                ["mobile", mobile], ["mobile-interface", mobileUi],
+                ["mobile-free-roam-interface", mobileFreeRoamUi],
+                ["unavailable", unavailable], ["device-loss", deviceLoss]]);
         }
         assert.deepEqual(report.errors, [], "No application exceptions occurred");
         report.passed = true;
@@ -1055,4 +1505,10 @@ async function deviceLoss(browser) {
         await writeFile(join(output, "report.json"), JSON.stringify(report, null, 2));
         await browser.close();
     }
-})().catch(error => { console.error(error); process.exitCode = 1; });
+}
+
+module.exports = {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites,
+    captureInterface, assertMobileGameClearance, verifyCameraHomeRoundTrip};
+
+if (require.main === module)
+    run().catch(error => { console.error(error); process.exitCode = 1; });

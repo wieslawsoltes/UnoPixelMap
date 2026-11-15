@@ -6,19 +6,19 @@
     AutomationProperties.Name="Free roam game">
     <UserControl.Resources>
         <Style x:Key="GameAction" TargetType="Button">
-            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="MinHeight" Value="44" />
             <Setter Property="Padding" Value="10,4" />
-            <Setter Property="Background" Value="#E5ECD9" />
-            <Setter Property="Foreground" Value="#193938" />
-            <Setter Property="BorderBrush" Value="#AFBFAB" />
-            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="#F1F2F6" />
+            <Setter Property="Foreground" Value="#007AFF" />
+            <Setter Property="BorderBrush" Value="#1F3C3C43" />
+            <Setter Property="CornerRadius" Value="11" />
         </Style>
         <Style x:Key="TouchAction" TargetType="Button" BasedOn="{StaticResource GameAction}">
             <Setter Property="MinWidth" Value="48" />
-            <Setter Property="MinHeight" Value="42" />
-            <Setter Property="Background" Value="#ED193D3B" />
-            <Setter Property="Foreground" Value="#F8F4DE" />
-            <Setter Property="BorderBrush" Value="#7EAA94" />
+            <Setter Property="MinHeight" Value="48" />
+            <Setter Property="Background" Value="#F2FFFFFF" />
+            <Setter Property="Foreground" Value="#007AFF" />
+            <Setter Property="BorderBrush" Value="#1F3C3C43" />
             <Setter Property="Padding" Value="7,3" />
             <Setter Property="FontSize" Value="12" />
         </Style>
@@ -31,28 +31,28 @@
             <Border Width="14" Height="2" Background="#FFFFF8E7" VerticalAlignment="Center" />
             <Border Width="2" Height="14" Background="#FFFFF8E7" HorizontalAlignment="Center" />
         </Grid>
-        <Border x:Name="SettingsCard" Width="326" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16"
-                Padding="12,9" Background="#F7FFFBEE" BorderBrush="#708F7D" BorderThickness="1" CornerRadius="7"
+        <Border x:Name="SettingsCard" Width="360" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16"
+                Padding="16,12" Background="#F7FFFFFF" BorderBrush="#1F3C3C43" BorderThickness="1" CornerRadius="20"
                 AutomationProperties.Name="Free roam settings">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                           AutomationProperties.Name="Free roam settings content">
-            <StackPanel x:Name="SettingsContent" Spacing="7">
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
-                    <StackPanel VerticalAlignment="Center">
+            <StackPanel x:Name="SettingsContent" Spacing="10" AutomationProperties.AutomationId="FreeRoamSettingsLayout">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" AutomationProperties.Name="Free roam settings toolbar">
+                    <StackPanel VerticalAlignment="Center" AutomationProperties.AutomationId="FreeRoamSettingsHeading">
                         <Border AutomationProperties.Name="Free roam">
-                            <TextBlock x:Name="Title" Text="Free roam" FontSize="17" FontWeight="SemiBold" Foreground="#193938"
+                            <TextBlock x:Name="Title" Text="Free roam" FontSize="22" FontWeight="SemiBold" Foreground="#1C1C1E"
                                        AutomationProperties.AccessibilityView="Raw" />
                         </Border>
-                        <TextBlock Text="EXPLORE THE WORLD" FontSize="9" CharacterSpacing="100" Foreground="#466D5C" />
+                        <TextBlock Text="Choose how you explore" FontSize="12" Foreground="#636366" />
                     </StackPanel>
                     <Button x:Name="SettingsToggle" Grid.Column="1" Content="−" Style="{StaticResource GameAction}"
-                            Width="34" Padding="0" Click="OnToggleSettings" AutomationProperties.Name="Collapse game settings" />
-                    <Button Grid.Column="2" Content="×" Style="{StaticResource GameAction}" Width="34" Padding="0"
+                            Width="44" Padding="0" Click="OnToggleSettings" AutomationProperties.Name="Collapse game settings" />
+                    <Button Grid.Column="2" Content="×" Style="{StaticResource GameAction}" Width="44" Padding="0"
                             Click="OnClose" AutomationProperties.Name="Exit free roam" />
                 </Grid>
-                <StackPanel x:Name="Setup" Spacing="7">
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <ComboBox x:Name="ModeChoice" Header="Move as" SelectedIndex="0" HorizontalAlignment="Stretch"
+                <StackPanel x:Name="Setup" Spacing="10" AutomationProperties.Name="Free roam setup">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8" AutomationProperties.Name="Movement and camera">
+                        <ComboBox x:Name="ModeChoice" Header="Move as" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnModeChanged" AutomationProperties.Name="Free roam vehicle">
                             <ComboBoxItem Tag="Walk" Content="Walk" />
                             <ComboBoxItem Tag="Drive" Content="Car" />
@@ -62,7 +62,7 @@
                             <ComboBoxItem Tag="Train" Content="Train" />
                             <ComboBoxItem Tag="FreeFlight" Content="Free flight" />
                         </ComboBox>
-                        <ComboBox x:Name="CameraChoice" Grid.Column="1" Header="Camera" SelectedIndex="1" HorizontalAlignment="Stretch"
+                        <ComboBox x:Name="CameraChoice" Grid.Column="1" Header="Camera" SelectedIndex="1" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnCameraChanged" AutomationProperties.Name="Free roam camera">
                             <ComboBoxItem Tag="Chase" Content="Third person" />
                             <ComboBoxItem Tag="FirstPerson" Content="First person" />
@@ -71,15 +71,15 @@
                             <ComboBoxItem Tag="NorthUp" Content="North up" />
                         </ComboBox>
                     </Grid>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <ComboBox x:Name="StyleChoice" Header="Graphics" SelectedIndex="0" HorizontalAlignment="Stretch"
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8" AutomationProperties.Name="World appearance">
+                        <ComboBox x:Name="StyleChoice" Header="Graphics" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnStyleChanged" AutomationProperties.Name="Game rendering style">
                             <ComboBoxItem Tag="Pixel" Content="Pixel art" />
                             <ComboBoxItem Tag="Normal" Content="Normal" />
                             <ComboBoxItem Tag="Minecraft" Content="Minecraft" />
                             <ComboBoxItem Tag="Roblox" Content="Roblox" />
                         </ComboBox>
-                        <ComboBox x:Name="LayerChoice" Grid.Column="1" Header="World layer" SelectedIndex="0" HorizontalAlignment="Stretch"
+                        <ComboBox x:Name="LayerChoice" Grid.Column="1" Header="World layer" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnLayerChanged" AutomationProperties.Name="Game map layer">
                             <ComboBoxItem Tag="Map" Content="Map" />
                             <ComboBoxItem Tag="Earth" Content="Earth" />
@@ -89,13 +89,13 @@
                     <ToggleSwitch x:Name="Relief" Header="Terrain relief" IsOn="True" Toggled="OnReliefChanged"
                                   AutomationProperties.Name="Game terrain relief" />
                     <Button x:Name="StartButton" Content="Start walking here" Style="{StaticResource GameAction}" Click="OnStart"
-                            HorizontalAlignment="Stretch" Background="#245D4D" Foreground="#FFFBEE" BorderBrush="#245D4D"
+                            HorizontalAlignment="Stretch" Background="#007AFF" Foreground="#FFFFFF" BorderBrush="#007AFF" MinHeight="48" FontSize="15"
                             AutomationProperties.Name="Start free roam at map center" />
-                    <TextBlock x:Name="ControlsHint" Foreground="#496557" FontSize="11" TextWrapping="Wrap"
+                    <TextBlock x:Name="ControlsHint" Foreground="#636366" FontSize="12" TextWrapping="Wrap"
                                Text="WASD moves · drag to look · Space jumps · Shift runs. Use both sticks on touch." />
                 </StackPanel>
-                <Border x:Name="TelemetryBox" Visibility="Collapsed" Background="#E7EDDA" Padding="8,5" CornerRadius="4">
-                    <TextBlock x:Name="Telemetry" Foreground="#294C42" FontSize="11" TextWrapping="Wrap"
+                <Border x:Name="TelemetryBox" Visibility="Collapsed" Background="#F1F2F6" Padding="10,8" CornerRadius="12">
+                    <TextBlock x:Name="Telemetry" Foreground="#3A3A3C" FontSize="12" TextWrapping="Wrap"
                                AutomationProperties.AccessibilityView="Raw" />
                 </Border>
                 <Grid x:Name="Transport" Visibility="Collapsed" ColumnDefinitions="*,*,Auto" ColumnSpacing="5"
@@ -104,7 +104,7 @@
                             AutomationProperties.Name="Pause free roam" />
                     <Button Grid.Column="1" Content="Respawn" Style="{StaticResource GameAction}" Click="OnRespawn"
                             AutomationProperties.Name="Respawn free roam vehicle" />
-                    <ToggleButton x:Name="Sound" Grid.Column="2" Content="Sound" MinHeight="38" Padding="8,3" CornerRadius="4"
+                    <ToggleButton x:Name="Sound" Grid.Column="2" Content="Sound" MinHeight="44" Padding="8,3" CornerRadius="4"
                                   Click="OnSound" AutomationProperties.Name="Free roam sound" />
                 </Grid>
             </StackPanel>
@@ -113,7 +113,7 @@
         <Grid x:Name="TouchPad" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="16,0,16,12"
               ColumnDefinitions="Auto,*,Auto" ColumnSpacing="5" AutomationProperties.Name="Free roam touch controls">
             <StackPanel Spacing="2" VerticalAlignment="Bottom" AutomationProperties.Name="Free roam movement controls">
-                <TextBlock Text="MOVE" Foreground="#FFFAE4" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                <TextBlock Text="MOVE" Foreground="#1C1C1E" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
                 <local:GameStick x:Name="MoveStick" AutomationProperties.Name="Free roam movement stick" />
             </StackPanel>
             <StackPanel x:Name="PadActions" Grid.Column="1" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Bottom"
@@ -129,7 +129,7 @@
                         AutomationProperties.Name="Free roam boost" />
             </StackPanel>
             <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Bottom" AutomationProperties.Name="Free roam look controls">
-                <TextBlock Text="LOOK" Foreground="#FFFAE4" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                <TextBlock Text="LOOK" Foreground="#1C1C1E" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center" />
                 <local:GameStick x:Name="LookStick" AutomationProperties.Name="Free roam look stick" />
             </StackPanel>
         </Grid>

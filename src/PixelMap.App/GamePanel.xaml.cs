@@ -8,6 +8,7 @@ using PixelMap.Controls;
 using PixelMap.Rendering;
 using PixelMap.Routing;
 using PixelMap.Simulation;
+using Windows.Foundation;
 
 namespace PixelMap.App;
 
@@ -20,11 +21,28 @@ public sealed partial class GamePanel : UserControl
     private bool _shown, _syncing;
     private long _lookTimestamp, _lastTelemetry, _lastPadPointer;
     private SessionViewState? _displayedSession;
+    private Thickness _safeInsets;
+    private double _keyboardBottom, _bottomObstruction, _topObstruction;
     private readonly record struct SessionViewState(JourneyState State, TravelMode Mode, JourneyCameraRig Rig,
         bool FreeRoam, bool FreeFlight, bool Follow, bool Muted);
     private enum PadAction { JumpBrake, Boost, Climb, Descend }
 
     public event EventHandler? CloseRequested;
+    public event EventHandler? ChromeBoundsChanged;
+
+    public bool IsSettingsAtBottom => SettingsCard.VerticalAlignment == VerticalAlignment.Bottom;
+    public Rect SettingsBounds
+    {
+        get
+        {
+            if (!_shown || SettingsCard.ActualWidth <= 0 || SettingsCard.ActualHeight <= 0) return Rect.Empty;
+            var margin = SettingsCard.Margin;
+            double left = SettingsCard.HorizontalAlignment == HorizontalAlignment.Center
+                ? (ActualWidth - SettingsCard.ActualWidth + margin.Left - margin.Right) / 2 : margin.Left;
+            double top = IsSettingsAtBottom ? ActualHeight - margin.Bottom - SettingsCard.ActualHeight : margin.Top;
+            return new Rect(left, top, SettingsCard.ActualWidth, SettingsCard.ActualHeight);
+        }
+    }
 
     public GamePanel()
     {
@@ -43,6 +61,7 @@ public sealed partial class GamePanel : UserControl
         BindPad(Climb, PadAction.Climb);
         BindPad(Descend, PadAction.Descend);
         SizeChanged += (_, _) => LayoutControls();
+        SettingsCard.SizeChanged += (_, _) => ChromeBoundsChanged?.Invoke(this, EventArgs.Empty);
         Unloaded += (_, _) => ReleaseInput();
     }
 
@@ -77,20 +96,39 @@ public sealed partial class GamePanel : UserControl
         ReleaseInput();
     }
 
+    public void SetViewportInsets(Thickness insets, double keyboardBottom, double bottomObstruction = 0, double topObstruction = 0)
+    {
+        if (_safeInsets.Equals(insets) && _keyboardBottom.Equals(keyboardBottom) &&
+            _bottomObstruction.Equals(bottomObstruction) && _topObstruction.Equals(topObstruction)) return;
+        _safeInsets = insets;
+        _keyboardBottom = keyboardBottom;
+        _bottomObstruction = bottomObstruction;
+        _topObstruction = topObstruction;
+        LayoutControls();
+    }
+
     private void LayoutControls()
     {
-        double inset = ActualWidth < 600 ? 8 : 16;
+        if (ActualWidth <= 0 || ActualHeight <= 0) return;
+        bool narrow = ActualWidth < 720;
+        double inset = narrow ? 12 : 16;
         bool compact = ActualWidth >= 600 && ActualHeight < 360;
         bool compactHud = compact && Setup.Visibility != Visibility.Visible;
-        SettingsCard.HorizontalAlignment = compact && !compactHud ? HorizontalAlignment.Center : HorizontalAlignment.Left;
-        SettingsCard.Margin = new Thickness(inset, compactHud ? 6 : inset, inset, inset);
-        SettingsCard.Padding = new Thickness(12, compactHud ? 3 : 9, 12, compactHud ? 3 : 9);
-        SettingsContent.Spacing = compactHud ? 3 : 7;
-        SettingsCard.Width = Math.Max(180, Math.Min(326, ActualWidth - 2 * inset));
-        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - 2 * inset - (compact ? 64 : 0));
-        TouchPad.Margin = new Thickness(inset, 0, inset, 8);
+        bool bottomSetup = narrow && Setup.Visibility == Visibility.Visible;
+        SettingsCard.HorizontalAlignment = bottomSetup ? HorizontalAlignment.Center : HorizontalAlignment.Left;
+        SettingsCard.VerticalAlignment = bottomSetup ? VerticalAlignment.Bottom : VerticalAlignment.Top;
+        double top = bottomSetup ? Math.Max(inset + _safeInsets.Top, _topObstruction) : inset + _safeInsets.Top;
+        double bottom = Math.Max(Math.Max(inset, _safeInsets.Bottom), _bottomObstruction) + _keyboardBottom;
+        SettingsCard.Margin = new Thickness(inset + _safeInsets.Left, top, inset + _safeInsets.Right, bottom);
+        SettingsCard.Padding = new Thickness(16, compactHud ? 8 : 14, 16, compactHud ? 8 : 14);
+        SettingsContent.Spacing = compactHud ? 5 : 10;
+        SettingsCard.Width = Math.Max(180, Math.Min(360, ActualWidth - 2 * inset - _safeInsets.Left - _safeInsets.Right));
+        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - top - bottom - (compact ? 64 : 0));
+        TouchPad.Margin = new Thickness(inset + _safeInsets.Left, 0, inset + _safeInsets.Right,
+            Math.Max(Math.Max(36, _safeInsets.Bottom + 16), _bottomObstruction) + _keyboardBottom);
         PadActions.Orientation = compact ? Orientation.Horizontal : Orientation.Vertical;
         FlightActions.Orientation = ActualWidth < 370 ? Orientation.Vertical : Orientation.Horizontal;
+        ChromeBoundsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private string SelectedMode => (ModeChoice.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Walk";
@@ -195,10 +233,24 @@ public sealed partial class GamePanel : UserControl
     private void SetExpanded(bool expanded)
     {
         Setup.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        if (expanded) ReleaseInput();
         SettingsToggle.Content = expanded ? "−" : "Settings";
-        SettingsToggle.Width = expanded ? 34 : 76;
+        SettingsToggle.Width = expanded ? 44 : 90;
         AutomationProperties.SetName(SettingsToggle, expanded ? "Collapse game settings" : "Expand game settings");
+        UpdateTouchPadState();
         LayoutControls();
+    }
+
+    private bool CanUseTouchPad => _shown && Setup.Visibility != Visibility.Visible &&
+        _map?.Journey.IsFreeRoaming == true && _map.Journey.Active;
+
+    private void UpdateTouchPadState()
+    {
+        bool visible = _shown && _map?.Journey.IsFreeRoaming == true && Setup.Visibility != Visibility.Visible;
+        bool paused = _map?.Journey.State == JourneyState.Paused;
+        TouchPad.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        TouchPad.IsHitTestVisible = visible && !paused;
+        TouchPad.Opacity = paused ? .45 : 1;
     }
 
     private void OnPause(object sender, RoutedEventArgs e)
@@ -261,10 +313,8 @@ public sealed partial class GamePanel : UserControl
         }
         if (force || transition)
         {
-            TouchPad.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+            UpdateTouchPadState();
             Transport.Visibility = TelemetryBox.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
-            TouchPad.IsHitTestVisible = active && !paused;
-            TouchPad.Opacity = paused ? .45 : 1;
             string title = !active ? "Free roam" : paused ? "Game paused" : session.IsFreeFlying ? "Free flight"
                 : session.Vehicle.Mode switch { TravelMode.Walk => "Walking", TravelMode.Drive => "Driving", TravelMode.Bike => "Cycling", TravelMode.Boat => "Sailing", TravelMode.Train => "Train", _ => "Flying" };
             SetText(Title, title);
@@ -302,7 +352,7 @@ public sealed partial class GamePanel : UserControl
     {
         button.AddHandler(PointerPressedEvent, new PointerEventHandler((_, e) =>
         {
-            if (_map?.Journey.IsFreeRoaming != true || !_map.Journey.Active) return;
+            if (!CanUseTouchPad) return;
             _lastPadPointer = Environment.TickCount64;
             _pressed[e.Pointer.PointerId] = action;
             button.CapturePointer(e.Pointer);
@@ -323,7 +373,7 @@ public sealed partial class GamePanel : UserControl
         button.Click += (_, _) =>
         {
             // Keyboard and assistive activation provide a finite input pulse.
-            if (_map?.Journey.IsFreeRoaming != true || !_map.Journey.Active || Environment.TickCount64 - _lastPadPointer < 250) return;
+            if (!CanUseTouchPad || Environment.TickCount64 - _lastPadPointer < 250) return;
             _pressed[uint.MaxValue] = action;
             SendInput();
             _pulseClock.Stop();
@@ -334,6 +384,7 @@ public sealed partial class GamePanel : UserControl
     private void SendInput()
     {
         if (_map is null) return;
+        if (!CanUseTouchPad) { _map.SetFreeRoamInput(default); return; }
         bool held(PadAction action) => _pressed.ContainsValue(action);
         bool walking = _map.Journey.Vehicle.Mode == TravelMode.Walk && !_map.Journey.IsFreeFlying;
         bool strafe = walking || _map.Journey.IsFreeFlying;
@@ -349,7 +400,7 @@ public sealed partial class GamePanel : UserControl
 
     private void UpdateLookClock()
     {
-        bool moving = Math.Abs(LookStick.Value.X) + Math.Abs(LookStick.Value.Y) > 0;
+        bool moving = CanUseTouchPad && Math.Abs(LookStick.Value.X) + Math.Abs(LookStick.Value.Y) > 0;
         if (moving && !_lookClock.IsEnabled)
         {
             _lookTimestamp = Stopwatch.GetTimestamp();
@@ -363,8 +414,8 @@ public sealed partial class GamePanel : UserControl
         long now = Stopwatch.GetTimestamp();
         double dt = Math.Clamp(Stopwatch.GetElapsedTime(_lookTimestamp, now).TotalSeconds, 0, .1);
         _lookTimestamp = now;
-        if (_map?.Journey.IsFreeRoaming == true && _map.Journey.Active)
-            _map.LookFreeRoam(LookStick.Value.X * 120 * dt, -LookStick.Value.Y * 90 * dt);
+        if (CanUseTouchPad)
+            _map!.LookFreeRoam(LookStick.Value.X * 120 * dt, -LookStick.Value.Y * 90 * dt);
         else ReleaseInput();
     }
 
@@ -372,9 +423,13 @@ public sealed partial class GamePanel : UserControl
     {
         _lookClock.Stop();
         _pulseClock.Stop();
+        _pressed.Clear();
+        JumpBrake.ReleasePointerCaptures();
+        Boost.ReleasePointerCaptures();
+        Climb.ReleasePointerCaptures();
+        Descend.ReleasePointerCaptures();
         MoveStick.Reset();
         LookStick.Reset();
-        _pressed.Clear();
         _map?.SetFreeRoamInput(default);
     }
 }

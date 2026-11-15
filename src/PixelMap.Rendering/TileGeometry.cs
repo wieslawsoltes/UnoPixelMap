@@ -6,10 +6,16 @@ namespace PixelMap.Rendering;
 internal enum Ink
 {
     Urban, Industry, Sand, Ice, Grass, Forest, Park, Water, Stream, Boundary,
-    Tunnel, RoadEdge, Path, Local, Street, Arterial, Highway, Rail, Runway, Shadow, Ferry
+    Tunnel, RoadEdge, Path, Local, Street, Arterial, Highway, Rail, Runway, Shadow, Ferry, Shore
 }
 
 internal readonly record struct BatchKey(int Order, Ink Ink, float Width, int Bucket = 0);
+internal readonly record struct GroundPaint(BatchKey First, BatchKey Second = default, int Count = 1)
+{
+    internal GroundPaint InBucket(int bucket) => Count == 2
+        ? new(First with { Bucket = bucket }, Second with { Bucket = bucket }, 2)
+        : new(First with { Bucket = bucket });
+}
 internal readonly record struct GroundBatch(BatchKey Key, SKPath Path, SKRect Bounds);
 internal readonly record struct ShadowSource(TileGeometry Tile, float X, float Y);
 internal sealed class Building(MapFeature feature, SKRect bounds, float unit, float top, float bottom, uint seed,
@@ -106,6 +112,7 @@ internal sealed class TileGeometry : IDisposable
     public readonly MapRenderStyle RenderStyle;
     public readonly GroundBatch[] Batches;
     public readonly GroundBatch[] Shadows;
+    private readonly SKPath[] ownedPaths;
     public readonly SKRect ShadowBounds;
     public readonly List<ShadowSource> ShadowSources = [];
     public readonly List<Building> Buildings = [];
@@ -117,7 +124,11 @@ internal sealed class TileGeometry : IDisposable
     {
         Source = tile;
         RenderStyle = renderStyle;
-        var paths = new Dictionary<BatchKey, SKPath>();
+        // A road casing and its centerline use exactly the same contours. Retain
+        // and append those contours once, then replay their distinct paints. The
+        // complete operation pair is the key, so incompatible paint cohorts can
+        // never acquire each other's feature geometry.
+        var paths = new Dictionary<GroundPaint, SKPath>();
         int n = 1 << tile.Id.Z;
         var centerLatitude = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * (tile.Id.Y + .5) / n)));
         float metersToTile = (float)(Extent * n / (MapCamera.EarthCircumference * Math.Cos(centerLatitude)));
@@ -141,7 +152,7 @@ internal sealed class TileGeometry : IDisposable
                                            ^ (tile.Id.Y * 4096L + (int)bounds.MidY) * 19349663));
                 seed = (seed ^ (seed >> 16)) * 0x7feb352d;
                 Buildings.Add(new(renderedFeature, bounds, unit, top, bottom, seed ^ (seed >> 15), feature));
-                AddShadow(PathFor(new(900, Ink.Shadow, 0, Bucket(bounds))), renderedFeature, unit, top * metersToTile);
+                AddShadow(PathFor(new(new(900, Ink.Shadow, 0, Bucket(bounds)))), renderedFeature, unit, top * metersToTile);
                 continue;
             }
 
@@ -162,16 +173,21 @@ internal sealed class TileGeometry : IDisposable
                 Labels.Add(new(feature.Name, new(point.X * unit, point.Y * unit), priority, feature.Layer == "transportation_name"));
                 continue;
             }
-            var operations = PaintOperations(feature);
-            int bucket = -1;
-            foreach (var key in operations)
-            {
-                if (bucket < 0) bucket = Bucket(Bounds(feature, unit));
-                Append(PathFor(key with { Bucket = bucket }), feature, unit);
-            }
+            var operations = PaintOperations(feature, renderStyle);
+            if (operations.Count == 0) continue;
+            Append(PathFor(operations.InBucket(Bucket(Bounds(feature, unit)))), feature, unit);
         }
-        var batches = paths.OrderBy(p => p.Key.Order).ThenBy(p => p.Key.Width)
-            .Select(p => new GroundBatch(p.Key, p.Value, p.Value.Bounds)).ToArray();
+        ownedPaths = paths.Values.ToArray();
+        var paints = new List<GroundBatch>(paths.Count * 2);
+        foreach (var (operations, path) in paths)
+        {
+            var bounds = path.Bounds;
+            paints.Add(new(operations.First, path, bounds));
+            if (operations.Count == 2) paints.Add(new(operations.Second, path, bounds));
+        }
+        // Keep stable order for equal order/width cohorts, including antialiased
+        // legacy styles. Geometry sharing does not reorder any paint operation.
+        var batches = paints.OrderBy(p => p.Key.Order).ThenBy(p => p.Key.Width).ToArray();
         Batches = batches.Where(b => b.Key.Ink != Ink.Shadow).ToArray();
         Shadows = batches.Where(b => b.Key.Ink == Ink.Shadow).ToArray();
         if (Shadows.Length != 0)
@@ -181,7 +197,7 @@ internal sealed class TileGeometry : IDisposable
             ShadowBounds = bounds;
         }
 
-        SKPath PathFor(BatchKey key)
+        SKPath PathFor(GroundPaint key)
         {
             if (!paths.TryGetValue(key, out var path)) paths.Add(key, path = new SKPath());
             return path;
@@ -205,14 +221,16 @@ internal sealed class TileGeometry : IDisposable
         return new(left * unit, top * unit, right * unit, bottom * unit);
     }
 
-    private static IEnumerable<BatchKey> PaintOperations(MapFeature f)
+    // At most two immutable paints; returning a value removes one iterator
+    // allocation per non-building feature without dropping any cartographic layer.
+    internal static GroundPaint PaintOperations(MapFeature f, MapRenderStyle renderStyle)
     {
         switch (f.Layer)
         {
             case "landcover":
             case "landuse":
             case "park":
-                if (f.Type != GeometryType.Polygon) yield break;
+                if (f.Type != GeometryType.Polygon) return default;
                 var ink = f.Class switch
                 {
                     "wood" or "forest" or "orchard" => Ink.Forest,
@@ -223,20 +241,21 @@ internal sealed class TileGeometry : IDisposable
                     "industrial" or "railway" or "quarry" => Ink.Industry,
                     _ => f.Layer == "park" ? Ink.Park : Ink.Urban
                 };
-                yield return new(ink == Ink.Urban ? 0 : 2 + (int)ink, ink, 0);
-                break;
+                return new(new(ink == Ink.Urban ? 0 : 2 + (int)ink, ink, 0));
             case "water" when f.Type == GeometryType.Polygon:
-                yield return new(20, Ink.Water, 0); break;
+                return renderStyle == MapRenderStyle.Pixel
+                    ? new(new(19, Ink.Shore, 1.5f), new(20, Ink.Water, 0), 2)
+                    : new(new(20, Ink.Water, 0));
             case "waterway" when f.Type == GeometryType.LineString:
-                yield return new(21, Ink.Stream, f.Class == "river" ? 4 : 1.5f); break;
+                return new(new(21, Ink.Stream, f.Class == "river" ? 4 : 1.5f));
             case "boundary" when f.Type == GeometryType.LineString:
-                yield return new(24, Ink.Boundary, .8f); break;
+                return new(new(24, Ink.Boundary, .8f));
             case "aeroway":
-                yield return new(35, Ink.Runway, f.Type == GeometryType.Polygon ? 0 : 4); break;
+                return new(new(35, Ink.Runway, f.Type == GeometryType.Polygon ? 0 : 4));
             case "transportation":
-                if (f.Type == GeometryType.Polygon) { yield return new(31, Ink.Local, 0); break; }
-                if (f.Type != GeometryType.LineString || f.Class == "aerialway") yield break;
-                if (f.Class == "ferry") { yield return new(22, Ink.Ferry, 1); break; }
+                if (f.Type == GeometryType.Polygon) return new(new(31, Ink.Local, 0));
+                if (f.Type != GeometryType.LineString || f.Class == "aerialway") return default;
+                if (f.Class == "ferry") return new(new(22, Ink.Ferry, 1));
                 var (road, width) = f.Class switch
                 {
                     "motorway" or "trunk" => (Ink.Highway, 6f),
@@ -248,13 +267,16 @@ internal sealed class TileGeometry : IDisposable
                     _ => (Ink.Local, 2.4f)
                 };
                 int level = Math.Clamp(f.Level, -6, 6);
-                if (f.Brunnel == "tunnel") { yield return new(32, Ink.Tunnel, Math.Min(width, 1.5f)); break; }
+                if (f.Brunnel == "tunnel") return new(new(32, Ink.Tunnel, Math.Min(width, 1.5f)));
                 if (f.Brunnel == "bridge") level = Math.Max(1, level);
                 int deck = 160 + level * 16;
+                var foreground = new BatchKey(deck + (int)road - (int)Ink.Path + 2, road, width);
                 if (road is not Ink.Path and not Ink.Rail)
-                    yield return new(deck, Ink.RoadEdge, width + 1.45f);
-                yield return new(deck + (int)road - (int)Ink.Path + 2, road, width);
-                break;
+                    return new(new(deck, Ink.RoadEdge, width + (renderStyle == MapRenderStyle.Pixel
+                        ? road == Ink.Highway ? 2.25f : 1.8f : 1.45f)), foreground, 2);
+                return new(foreground);
+            default:
+                return default;
         }
     }
 
@@ -295,8 +317,7 @@ internal sealed class TileGeometry : IDisposable
 
     public void Dispose()
     {
-        foreach (var batch in Batches) batch.Path.Dispose();
-        foreach (var shadow in Shadows) shadow.Path.Dispose();
+        foreach (var path in ownedPaths) path.Dispose();
         foreach (var label in Labels) label.Glyphs?.Dispose();
         ShadowSources.Clear();
     }

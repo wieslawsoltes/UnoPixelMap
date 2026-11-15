@@ -2,6 +2,38 @@ using PixelMap.Data;
 using PixelMap.Rendering;
 using SkiaSharp;
 
+if (args.Contains("--map-chrome", StringComparer.Ordinal))
+{
+    MapChromeLayoutChecks.Run();
+    return;
+}
+
+if (args.Contains("--pixel-artwork", StringComparer.Ordinal))
+{
+    PixelArtworkChecks.Run();
+    return;
+}
+
+var pixelArtworkOutput = args.FirstOrDefault(value => value.StartsWith("--pixel-artwork-output=", StringComparison.Ordinal));
+if (pixelArtworkOutput is not null)
+{
+    PixelArtworkChecks.WriteFixtures(pixelArtworkOutput["--pixel-artwork-output=".Length..]);
+    return;
+}
+
+if (args.Contains("--webgpu-pixel-art", StringComparer.Ordinal))
+{
+    WebGpuPixelArtChecks.Run();
+    return;
+}
+
+var pixelArtOutput = args.FirstOrDefault(value => value.StartsWith("--webgpu-pixel-art-output=", StringComparison.Ordinal));
+if (pixelArtOutput is not null)
+{
+    WebGpuPixelArtChecks.WriteFixture(pixelArtOutput["--webgpu-pixel-art-output=".Length..]);
+    return;
+}
+
 if (args.Contains("--terrain-artwork", StringComparer.Ordinal))
 {
     await TerrainArtworkInvalidationChecks.RunAsync();
@@ -156,6 +188,10 @@ if (args.Contains("--styles", StringComparer.Ordinal))
 }
 
 WebGpuFacadeChecks.Run();
+MapChromeLayoutChecks.Run();
+PixelArtworkChecks.Run();
+WebGpuPixelArtChecks.Run();
+TerrainTextureCopyChecks.CheckGpuPixelCopy();
 await TerrainArtworkInvalidationChecks.RunAsync();
 
 const int width = 256, height = 256;

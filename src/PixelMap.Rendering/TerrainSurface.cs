@@ -375,12 +375,7 @@ internal sealed class TerrainSurface : IDisposable
     {
         var pixels = new ReadOnlySpan<uint>((void*)source.Bitmap.GetPixels(), TextureSize * TextureSize);
         var texels = new uint[pixels.Length];
-        opaque = true;
-        for (int i = 0; i < pixels.Length; i++)
-        {
-            texels[i] = pixels[i] & 0xffffff;
-            opaque &= (pixels[i] & 0xff000000) == 0xff000000;
-        }
+        opaque = TerrainTexturePixels.CopyRgb(pixels, texels);
         foreach (var area in source.EarthAreas)
         {
             int left = Math.Clamp((int)MathF.Floor(area.Left - .5f), 0, TextureSize);
