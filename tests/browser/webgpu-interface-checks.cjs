@@ -25,7 +25,7 @@ const integrationContext = vm.createContext({module: moduleUnderTest, require: r
     URL, Date, Promise, setTimeout, clearTimeout});
 vm.runInContext(source, integrationContext, {filename: "webgpu.cjs"});
 const {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites,
-    captureInterface, assertMobileGameClearance} = moduleUnderTest.exports;
+    captureInterface, assertMobileGameClearance, verifyCameraHomeRoundTrip} = moduleUnderTest.exports;
 
 function peer(name, id, rect, connected = true, attributes = {}) {
     const group = name === "Search and directions";
@@ -301,11 +301,66 @@ async function interfacePresentationChecks() {
     }
 }
 
+async function cameraHomeChecks() {
+    const home = ["Open route planner", "Share current view", "Browse city guide", "Open free roam game",
+        "Explore Lower Manhattan", "Explore Paris", "Explore Tokyo"];
+    function fixture({restoreHome = true, cameraRemains = false} = {}) {
+        let open = true;
+        const clicks = [];
+        const visible = name => home.includes(name) ? !open && restoreHome :
+            name === "Close panel" ? open : open || cameraRemains;
+        const element = name => peer(name, name, name === "Close panel"
+            ? {x: 315, y: 135, width: 44, height: 44} : {x: 32, y: 200, width: 150, height: 44});
+        const locator = names => ({
+            names,
+            or(other) { return locator([...new Set([...names, ...other.names])]); },
+            waitFor: async ({state}) => {
+                assert.equal(names.length, 1);
+                if (visible(names[0]) !== (state === "visible")) throw new Error(names[0] + " did not become " + state);
+            },
+            boundingBox: async () => element(names[0]).getBoundingClientRect(),
+            evaluateAll: async (fn, argument) => fn(names.filter(visible).map(element), argument)
+        });
+        const context = vm.createContext({requestAnimationFrame: callback => setImmediate(callback), Promise});
+        return {clicks, page: {
+            getByRole: (_role, {name}) => locator([name]),
+            getByLabel: name => locator([name]),
+            evaluate: async fn => vm.runInContext("(" + fn.toString() + ")", context)(),
+            mouse: {click: async (x, y) => { clicks.push({x, y}); open = false; }},
+            keyboard: {press: unavailable}, touchscreen: {tap: unavailable}
+        }};
+    }
+    const success = fixture();
+    const receipt = await verifyCameraHomeRoundTrip(success.page);
+    assert.equal(receipt.passed, true);
+    assert.deepEqual(success.clicks, [{x: 337, y: 157}], "The roundtrip retains exactly one native Close-panel pointer input");
+    assert.equal(receipt.pointer.point.y, 157);
+    assert.deepEqual(Array.from(receipt.homePeers, value => value.name), home);
+    assert.equal(receipt.cameraPeers.length, 0);
+
+    const missingHome = fixture({restoreHome: false});
+    await assert.rejects(verifyCameraHomeRoundTrip(missingHome.page, {timeout: 25}), error => {
+        assert.match(error.interfaceEvidence.cameraHomeRoundTrip.failure, /Open route planner did not become visible/);
+        assert.equal(error.interfaceEvidence.cameraHomeRoundTrip.homePeers.length, 0);
+        assert.equal(error.interfaceEvidence.cameraHomeRoundTrip.pointer.input, "mouse");
+        return true;
+    });
+    assert.equal(missingHome.clicks.length, 1, "Missing Home semantics cannot trigger a pointer or keyboard fallback");
+    const staleCamera = fixture({cameraRemains: true});
+    await assert.rejects(verifyCameraHomeRoundTrip(staleCamera.page), error => {
+        assert.match(error.interfaceEvidence.cameraHomeRoundTrip.failure, /North-up plan did not become hidden/);
+        assert.equal(error.interfaceEvidence.cameraHomeRoundTrip.cameraPeers.length, 9);
+        return true;
+    });
+    assert.equal(staleCamera.clicks.length, 1);
+}
+
 (async () => {
     await sheetChecks();
     await layerChecks();
     gameChromeChecks();
     await interfacePresentationChecks();
+    await cameraHomeChecks();
     await independenceChecks();
-    console.log("WebGPU interface contracts passed: settled sheet geometry, completed GPU presentation, unobscured mobile game controls, pointer receipts, independent keyboard diagnostics and rendering-suite continuation.");
+    console.log("WebGPU interface contracts passed: settled sheet geometry, completed GPU presentation, unobscured mobile game controls, native Camera/Home roundtrips, pointer receipts and independent rendering suites.");
 })().catch(error => { console.error(error); process.exitCode = 1; });

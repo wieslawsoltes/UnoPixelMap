@@ -202,6 +202,7 @@ async function click(page, name, touch = false) {
     assert.ok(bounds?.width && bounds?.height, name + " has a usable hit target");
     const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
     if (touch) await page.touchscreen.tap(x, y); else await page.mouse.click(x, y);
+    return {name, bounds, point: {x, y}, input: touch ? "touch" : "mouse"};
 }
 
 function namedControl(page, name) {
@@ -301,6 +302,39 @@ async function selectLayerKeyboard(page, name) {
     await waitForSettledFocus(page, target);
     await page.keyboard.press("Space");
     await target.waitFor({state: "hidden"});
+}
+
+async function verifyCameraHomeRoundTrip(page, {timeout = 30000} = {}) {
+    const deadline = Date.now() + timeout;
+    const homeNames = ["Open route planner", "Share current view", "Browse city guide", "Open free roam game",
+        "Explore Lower Manhattan", "Explore Paris", "Explore Tokyo"];
+    const cameraNames = ["North-up plan", "Isometric · 55°", "Low skyline · 70°", "Horizon · 88°", "Bird’s-eye · 30°",
+        "Camera Left", "Camera Right", "Camera Tilt -", "Camera Tilt +"];
+    const close = namedControl(page, "Close panel");
+    const home = homeNames.map(name => namedControl(page, name)).reduce((all, target) => all.or(target));
+    const camera = cameraNames.map(name => namedControl(page, name)).reduce((all, target) => all.or(target));
+    const wait = (target, state) => target.waitFor({state, timeout: Math.max(1, deadline - Date.now())});
+    const receipt = {passed: false, expectedHomeActions: homeNames, expectedAbsentCameraActions: cameraNames};
+    try {
+        await wait(close, "visible");
+        receipt.before = await readPeers(close, true);
+        receipt.pointer = await click(page, "Close panel");
+        await wait(close, "hidden");
+        for (const name of cameraNames) await wait(namedControl(page, name), "hidden");
+        await wait(page.getByLabel("Terrain vertical exaggeration", {exact: true}), "hidden");
+        for (const name of homeNames) await wait(namedControl(page, name), "visible");
+        receipt.homePeers = await readPeers(home, true);
+        receipt.cameraPeers = await readPeers(camera);
+        receipt.passed = true;
+        return receipt;
+    } catch (cause) {
+        receipt.failure = cause.stack || String(cause);
+        receipt.homePeers = await readPeers(home, true).catch(error => ({snapshotError: String(error)}));
+        receipt.cameraPeers = await readPeers(camera, true).catch(error => ({snapshotError: String(error)}));
+        const error = new Error("Closing Camera with one native pointer click must restore every Home action and remove Camera controls", {cause});
+        error.interfaceEvidence = {cameraHomeRoundTrip: receipt};
+        throw error;
+    }
 }
 
 async function awaitFrame(page, predicate, argument) {
@@ -1158,7 +1192,7 @@ async function desktop(browser) {
             await writeFile(join(output, "earth-appearance-transition.json"), JSON.stringify(appearanceTransition, null, 2));
         }
         await click(page, "North-up plan");
-        await click(page, "Close panel");
+        report.scenarios.push({name: "desktop-camera-home-plan", transition: await verifyCameraHomeRoundTrip(page)});
         await awaitFrame(page, s => s.imageryCount > 0 &&
             globalThis.__pixelAtlasGpuProbe.renderGraph.textures.some(texture =>
                 texture.label === "PixelMap photograph" && !texture.destroyed));
@@ -1170,7 +1204,7 @@ async function desktop(browser) {
         await awaitFrame(page, s => s.style === "Normal");
         await menu(page, "Camera angles and orbit");
         await click(page, "Isometric · 55°");
-        await click(page, "Close panel");
+        report.scenarios.push({name: "desktop-camera-home-isometric", transition: await verifyCameraHomeRoundTrip(page)});
         await awaitFrame(page, () => !globalThis.__pixelAtlasGpuProbe.renderGraph.textures.some(texture =>
             texture.label === "PixelMap photograph" && !texture.destroyed));
         await menu(page, "Terrain relief");
@@ -1474,7 +1508,7 @@ async function run() {
 }
 
 module.exports = {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites,
-    captureInterface, assertMobileGameClearance};
+    captureInterface, assertMobileGameClearance, verifyCameraHomeRoundTrip};
 
 if (require.main === module)
     run().catch(error => { console.error(error); process.exitCode = 1; });

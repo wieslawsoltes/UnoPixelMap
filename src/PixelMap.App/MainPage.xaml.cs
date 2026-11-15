@@ -41,6 +41,8 @@ public sealed partial class MainPage : Page
     private readonly SolidColorBrush _muted = new(ColorHelper.FromArgb(255, 99, 99, 102));
     private readonly SolidColorBrush _rowFill = new(ColorHelper.FromArgb(255, 241, 242, 246));
     private readonly DispatcherTimer _readoutClock = new() { Interval = TimeSpan.FromMilliseconds(100) };
+    private readonly ScrollViewer _homeView;
+    private readonly Grid _detailView;
     private CancellationTokenSource? _request;
     private PanelKind _panel;
     private long _lastReadout;
@@ -59,6 +61,9 @@ public sealed partial class MainPage : Page
     public MainPage()
     {
         InitializeComponent();
+        _homeView = HomeScroll;
+        _detailView = Drawer;
+        UpdateSidebarContent();
         if (OperatingSystem.IsBrowser()) Map.AttachAudioDevice(new PixelMap.Audio.BrowserAudioDevice());
         JourneyPanel.Attach(Map, _geocoder, new RoutePlanner(RoutingHttp, Map.VectorTiles));
         GamePanel.Attach(Map);
@@ -157,7 +162,7 @@ public sealed partial class MainPage : Page
             bool expanded = !_narrow || _sheetDetent > 0 || _sheetPointer.HasValue && _sheetDragged;
             SearchOverlay.Visibility = _journeysOpen ? Visibility.Collapsed : Visibility.Visible;
             SidebarContent.Visibility = expanded && !_journeysOpen ? Visibility.Visible : Visibility.Collapsed;
-            HomeScroll.Visibility = _panel == PanelKind.Closed ? Visibility.Visible : Visibility.Collapsed;
+            UpdateSidebarContent();
             JourneyPanel.Visibility = _journeysOpen && !picking && expanded ? Visibility.Visible : Visibility.Collapsed;
             JourneyPeek.Visibility = _journeysOpen && !picking && !expanded ? Visibility.Visible : Visibility.Collapsed;
             JourneyPanel.MaxHeight = Math.Max(80, SidebarSurface.Height - 62 - _safeBottom);
@@ -209,6 +214,19 @@ public sealed partial class MainPage : Page
 
     private double[] SheetHeights(double availableHeight) =>
         MapChromeLayout.SheetHeights(availableHeight, _safeTop, _safeBottom);
+
+    private void UpdateSidebarContent()
+    {
+        // Keep one active view in the visual tree, retaining each instance's scroll
+        // and data state. Attach only after the containing surfaces are visible so
+        // their normal load/unload lifecycle also exposes the complete accessible view.
+        UIElement? content = SidebarSurface.Visibility == Visibility.Visible && SidebarContent.Visibility == Visibility.Visible
+            ? _panel == PanelKind.Closed ? _homeView : _detailView : null;
+        if (SidebarContent.Children.Count == (content is null ? 0 : 1) &&
+            (content is null || ReferenceEquals(SidebarContent.Children[0], content))) return;
+        SidebarContent.Children.Clear();
+        if (content is not null) SidebarContent.Children.Add(content);
+    }
 
     private void SetSheetDetent(int detent)
     {
@@ -824,7 +842,6 @@ public sealed partial class MainPage : Page
         Rows.Children.Clear();
         DrawerHeading.Text = heading;
         DrawerNote.Text = note;
-        Drawer.Visibility = Visibility.Visible;
         LayoutChrome(ActualWidth, ActualHeight);
     }
 
@@ -834,7 +851,6 @@ public sealed partial class MainPage : Page
     {
         CancelRequest();
         _panel = PanelKind.Closed;
-        Drawer.Visibility = Visibility.Collapsed;
         Rows.Children.Clear();
         if (_restoreHiddenAfterDrawer) _sidebarHidden = true;
         _restoreHiddenAfterDrawer = false;

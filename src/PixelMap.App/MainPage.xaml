@@ -71,8 +71,9 @@
                         </Grid>
                     </Border>
                 </StackPanel>
-                <Grid x:Name="SidebarContent" Grid.Row="2">
-                    <ScrollViewer x:Name="HomeScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Grid x:Name="SidebarContent" Grid.Row="2" AutomationProperties.AutomationId="MapSidebarContent">
+                    <ScrollViewer x:Name="HomeScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  AutomationProperties.AutomationId="MapHomeContent">
                         <StackPanel x:Name="HomePane" Spacing="12">
                             <Border x:Name="PlaceCard" Padding="0,4,0,0">
                                 <StackPanel Spacing="5">
@@ -114,15 +115,15 @@
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
-                    <Grid x:Name="Drawer" Visibility="Collapsed" RowDefinitions="Auto,*,Auto">
-                        <Grid ColumnDefinitions="*,44" Margin="0,0,0,8">
+                    <Grid x:Name="Drawer" RowDefinitions="Auto,*,Auto" AutomationProperties.AutomationId="MapDetailPanel">
+                        <Grid ColumnDefinitions="*,44" Margin="0,0,0,8" AutomationProperties.AutomationId="MapDetailHeading">
                             <TextBlock x:Name="DrawerHeading" FontSize="23" FontWeight="SemiBold" Foreground="{StaticResource AtlasInkBrush}"
                                        VerticalAlignment="Center" TextWrapping="Wrap" />
                             <Button Grid.Column="1" Content="×" Style="{StaticResource AtlasIconButton}" Foreground="#8E8E93"
                                     Click="OnCloseDrawer" AutomationProperties.Name="Close panel" />
                         </Grid>
                         <ScrollViewer x:Name="ResultScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <StackPanel x:Name="Rows" Spacing="6" />
+                            <StackPanel x:Name="Rows" Spacing="6" AutomationProperties.AutomationId="MapDetailActions" />
                         </ScrollViewer>
                         <TextBlock x:Name="DrawerNote" Grid.Row="2" Margin="0,12,0,0" TextWrapping="Wrap" FontSize="12"
                                    Foreground="{StaticResource AtlasSecondaryBrush}" AutomationProperties.LiveSetting="Polite" />
