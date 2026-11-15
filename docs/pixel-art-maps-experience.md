@@ -78,6 +78,13 @@ paths from 334 to 285 and retained contour points from 7,848 to 7,488. Across
 73,872 classifications, measured managed allocations fall from 5,318,784 bytes
 to zero. This is the isolated classification cost, not total frame allocation.
 
+New terrain textures use a portable `Vector128<uint>` copy to clear the GPU
+payload's alpha flag and reduce source opacity four texels at a time. Unaligned
+loads, scalar tails and a scalar fallback preserve the exact RGB bytes and the
+all-opaque decision. Photograph coverage flags are applied afterward by the
+unchanged area logic. This reduces conversion work without changing artwork,
+texture identity, allocation counts or photographic classification.
+
 ### Implemented interface
 
 Desktop uses a hideable 360px floating sidebar; mobile uses a full-width bottom
@@ -101,6 +108,13 @@ parity over 4,617 feature combinations. Nearby CPU images retain both 32 new
 palette goldens and all 32 historical hashes after exact semantic-color
 substitution. Existing depth, picking, packed geometry, terrain-copy and
 lifecycle suites remain enabled.
+
+The texture conversion has 1,624 independent random, vector-tail, byte-alignment
+and alpha-bit checks, including untouched source/destination guards. The existing
+768 Skia texture-copy comparisons continue to cover styles, zooms, shadows and
+partial/photographic coverage. Accelerated and forced-scalar native runs retain
+the same texture hashes; raw timing comparisons distinguish this primitive from
+complete texture-streaming and frame costs.
 
 The independent WebGPU fixture executes the production Pixel WGSL helpers and
 resolve. It checks connected clusters, unresolved surfaces, every encoded gray,

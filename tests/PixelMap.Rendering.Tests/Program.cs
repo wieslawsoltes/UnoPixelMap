@@ -191,6 +191,7 @@ WebGpuFacadeChecks.Run();
 MapChromeLayoutChecks.Run();
 PixelArtworkChecks.Run();
 WebGpuPixelArtChecks.Run();
+TerrainTextureCopyChecks.CheckGpuPixelCopy();
 await TerrainArtworkInvalidationChecks.RunAsync();
 
 const int width = 256, height = 256;
