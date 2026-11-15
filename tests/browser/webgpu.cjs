@@ -209,16 +209,28 @@ function namedControl(page, name) {
         .or(page.getByRole("checkbox", {name, exact: true, disabled: false}));
 }
 
-async function readPeers(locator) {
-    return locator.evaluateAll(elements => elements.map(element => {
-        const {x, y, width, height} = element.getBoundingClientRect();
-        return {id: element.id, name: element.getAttribute("aria-label"), role: element.getAttribute("role"),
-            tag: element.tagName, connected: element.isConnected, rect: {x, y, width, height}};
-    }));
+async function readPeers(locator, includeAncestors = false) {
+    return locator.evaluateAll((elements, includeAncestors) => {
+        const describe = element => {
+            const {x, y, width, height} = element.getBoundingClientRect();
+            return {id: element.id, name: element.getAttribute("aria-label"), role: element.getAttribute("role"),
+                tag: element.tagName, elementtype: element.getAttribute("elementtype"), connected: element.isConnected,
+                inline: {left: element.style?.left || "", top: element.style?.top || ""}, rect: {x, y, width, height}};
+        };
+        return elements.map(element => {
+            const peer = describe(element);
+            if (includeAncestors) {
+                peer.ancestors = [];
+                for (let parent = element.parentElement; parent; parent = parent.parentElement)
+                    peer.ancestors.push(describe(parent));
+            }
+            return peer;
+        });
+    }, includeAncestors);
 }
 
 async function pointerReceipt(page, target, point) {
-    const peers = await readPeers(target);
+    const peers = await readPeers(target, true);
     const hit = point ? await page.evaluate(({x, y}) => {
         const element = document.elementFromPoint(x, y);
         if (!element) return null;
@@ -831,9 +843,10 @@ async function desktopInterface(page) {
     await captureInterface(page, "desktop-layer-pointer-dismissal", {activation});
 }
 
-async function waitForSheetTop(page, ranges, description, {timeout = 25000, pollInterval = 50} = {}) {
+async function waitForSheetTop(page, ranges, description, {timeout = 25000, pollInterval = 50, stableForMs = 0} = {}) {
     const deadline = Date.now() + timeout, samples = [];
     let last = null, pendingFailure = null;
+    let stablePeers = null, stableSince = 0;
     const matches = (rect, range) => rect && rect.width > 0 && rect.height > 0 &&
         rect.y >= range[0] && rect.y <= range[1];
     while (Date.now() < deadline) {
@@ -853,18 +866,25 @@ async function waitForSheetTop(page, ranges, description, {timeout = 25000, poll
         if (samples.length > 12) samples.shift();
         const groups = last.filter(peer => peer.connected && peer.name === "Search and directions");
         const handles = last.filter(peer => peer.connected && /^(Expand|Collapse) search sheet$/.test(peer.name || ""));
+        let matchingPeers = null;
         if (groups.length === 1 && handles.length === 1) {
             const sheet = groups[0].rect, handle = handles[0].rect;
             if (matches(handle, ranges.handle) && matches(sheet, ranges.sheet) &&
                 handle.x >= sheet.x && handle.y >= sheet.y &&
-                handle.x + handle.width <= sheet.x + sheet.width && handle.y + handle.height <= sheet.y + sheet.height)
-                return {handle: handles[0], sheet: groups[0]};
+                handle.x + handle.width <= sheet.x + sheet.width && handle.y + handle.height <= sheet.y + sheet.height) {
+                matchingPeers = JSON.stringify([handles[0].id, handle, groups[0].id, sheet]);
+                if (matchingPeers !== stablePeers) stableSince = Date.now();
+                const observedStableMs = Date.now() - stableSince;
+                if (observedStableMs >= stableForMs)
+                    return {handle: handles[0], sheet: groups[0], stableForMs, observedStableMs};
+            }
         }
+        stablePeers = matchingPeers;
         const remaining = deadline - Date.now();
         if (remaining > 0) await new Promise(resolve => setTimeout(resolve, Math.min(pollInterval, remaining)));
     }
     const error = new Error(description + ": live sheet and handle geometry did not reach their required bounds within " + timeout + " ms");
-    error.interfaceEvidence = {description, ranges, timeout, lastPeers: last, samples, pendingFailure};
+    error.interfaceEvidence = {description, ranges, timeout, stableForMs, lastPeers: last, samples, pendingFailure};
     throw error;
 }
 
@@ -893,12 +913,19 @@ async function mobileInterface(page, cdp) {
     for (let step = 1; step <= 6; step++)
         await cdp.send("Input.dispatchTouchEvent", {type: "touchMove", touchPoints: [{x, y: y - step * 50, id: 0}]});
     await cdp.send("Input.dispatchTouchEvent", {type: "touchEnd", touchPoints: []});
+    // This fixed viewport has no keyboard or safe-area inset. Its public middle
+    // detent occupies 49% of the viewport; the raw 300-pixel drag is not a snap.
+    const middleHeight = size.height * .49, middleTop = size.height - middleHeight;
+    const middleHandleTop = middleTop + compact.handle.rect.y - compact.sheet.rect.y;
     const dragging = await waitForSheetTop(page,
-        {handle: [0, start.y - 101], sheet: [0, beforeDrag.sheet.rect.y - 101]}, "Native touch drag opens the sheet");
+        {handle: [middleHandleTop - 1, middleHandleTop + 1], sheet: [middleTop - 1, middleTop + 1]},
+        "Native touch release settles at the middle detent", {stableForMs: 150});
     const dragged = dragging.handle.rect;
     assert.ok(dragged.y < start.y - 100, "Native touch drag opens the sheet and snaps to a higher detent");
+    assert.ok(Math.abs(dragging.sheet.rect.height - middleHeight) <= 1, "The released sheet retains the middle detent height");
     assert.deepEqual(await map.boundingBox(), bounds, "Dragging chrome preserves the map viewport");
-    await captureInterface(page, "mobile-dragged-sheet", {collapsed: start, dragged, peers: dragging, mapBounds: bounds});
+    await captureInterface(page, "mobile-dragged-sheet", {collapsed: start, dragged, peers: dragging, mapBounds: bounds,
+        expectedDetent: {height: middleHeight, sheetTop: middleTop, handleTop: middleHandleTop}});
     await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
     const restored = await waitForSheetTop(page, compactRanges, "Home restores the compact sheet after dragging");
     assert.ok(Math.abs(restored.handle.rect.y - collapsed.y) <= 1, "The sheet returns to its compact detent");
@@ -1026,6 +1053,18 @@ async function desktop(browser) {
             else assert.equal(pipelines, smoothPipelines,
                 style + ": switching between warmed color-format/sample-count variants reuses all compiled pipelines");
         }
+        // Review the authored Pixel palettes before returning to HDR quality
+        // coverage. These captures use the same city and camera as style-pixel.
+        for (const [command, palette] of [["Golden hour", "dusk"], ["After dark", "night"], ["Daylight", "day"]]) {
+            const frames = await page.evaluate(() => PixelAtlasWebGpu.frames);
+            await menu(page, command);
+            await awaitFrame(page, (s, previous) => s.style === "Pixel" && s.frames > previous, frames);
+            const image = await capture(page, "pixel-lighting-" + palette);
+            assert.ok(difference(previous, image) > .01, "Changing the Pixel palette changes the rendered city");
+            previous = image;
+            assert.equal(await page.evaluate(() => globalThis.__pixelAtlasGpuProbe.pipelines.length), smoothPipelines,
+                "Pixel palette changes reuse the established scene and presentation pipelines");
+        }
         await menu(page, "Normal rendering");
         let lightingImage, ultraPipelines;
         for (const quality of ["Balanced", "Ultra", "High"]) {
@@ -1059,7 +1098,18 @@ async function desktop(browser) {
         // The photograph continuation is only active below 30 degrees. Exercise
         // it through the real camera UI in both HDR and art styles, then verify
         // that leaving it retires the otherwise unused full-size attachment.
-        await menu(page, "Camera angles and orbit");
+        const appearanceControls = namedControl(page, "Map appearance").or(namedControl(page, "Choose map layers"));
+        const appearanceTransition = {before: await readPeers(appearanceControls, true)};
+        try { await menu(page, "Camera angles and orbit"); }
+        catch (error) {
+            appearanceTransition.failure = error.stack || String(error);
+            error.interfaceEvidence = {appearanceTransition, ...error.interfaceEvidence};
+            throw error;
+        } finally {
+            appearanceTransition.after = await readPeers(appearanceControls, true)
+                .catch(error => ({snapshotError: String(error)}));
+            await writeFile(join(output, "earth-appearance-transition.json"), JSON.stringify(appearanceTransition, null, 2));
+        }
         await click(page, "North-up plan");
         await click(page, "Close panel");
         await awaitFrame(page, s => s.imageryCount > 0 &&

@@ -14,12 +14,14 @@ async function clickTarget(page, target, name) {
     const left = Math.max(0, bounds.x), right = Math.min(size.width, bounds.x + bounds.width);
     const top = Math.max(0, bounds.y), bottom = Math.min(size.height, bounds.y + bounds.height);
     assert.ok(right > left && bottom > top, name + " intersects the viewport");
-    await page.mouse.click((left + right) / 2, (top + bottom) / 2);
+    const point = {x: (left + right) / 2, y: (top + bottom) / 2};
+    await page.mouse.click(point.x, point.y);
+    return {name, bounds, viewport: size, point};
 }
 async function click(page, name) {
     const target = page.getByRole("button", {name, exact: true, disabled: false})
         .or(page.getByRole("checkbox", {name, exact: true, disabled: false}));
-    await clickTarget(page, target, name);
+    return clickTarget(page, target, name);
 }
 async function menu(page, name, submenu) {
     await click(page, "Map appearance");

@@ -25,10 +25,10 @@ vm.runInNewContext(source, {module: moduleUnderTest, require: requireStub,
     URL, Date, Promise, setTimeout, clearTimeout}, {filename: "webgpu.cjs"});
 const {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites} = moduleUnderTest.exports;
 
-function peer(name, id, rect, connected = true) {
+function peer(name, id, rect, connected = true, attributes = {}) {
     const group = name === "Search and directions";
     return {id, tagName: group ? "DIV" : "BUTTON", isConnected: connected,
-        getAttribute: key => key === "aria-label" ? name : key === "role" ? group ? "group" : "button" : null,
+        getAttribute: key => attributes[key] ?? (key === "aria-label" ? name : key === "role" ? group ? "group" : "button" : null),
         getBoundingClientRect: () => rect};
 }
 const sheet = (y, id = "sheet") => peer("Search and directions", id, {x: 0, y, width: 390, height: 844 - y});
@@ -75,24 +75,61 @@ async function sheetChecks() {
         assert.match(error.interfaceEvidence.pendingFailure, /Timed out reading live sheet geometry/);
         return true;
     });
+
+    const middleRanges = {handle: [430.44, 432.44], sheet: [429.44, 431.44]};
+    let settlingReads = 0;
+    const releaseFrames = [
+        [sheet(408), handle(409)],
+        [sheet(430, "first-sheet"), handle(431, "first-handle")],
+        [sheet(408), handle(409)],
+        [sheet(430, "settled-sheet"), handle(431, "settled-handle")]
+    ];
+    const settling = {getByRole: () => ({or: () => ({evaluateAll: async fn =>
+        fn(releaseFrames[Math.min(settlingReads++, releaseFrames.length - 1)])})})};
+    const settled = await waitForSheetTop(settling, middleRanges, "Touch release snaps", {timeout: 1000, pollInterval: 1, stableForMs: 12});
+    assert.equal(settled.handle.id, "settled-handle", "A transient in-range peer cannot satisfy the settled detent contract");
+    assert.equal(settled.sheet.id, "settled-sheet");
+    assert.ok(settled.observedStableMs >= 12, "The same connected peers and bounds remain stable before capture");
+    assert.ok(settlingReads > releaseFrames.length);
+
+    const retainedDrag = {getByRole: () => ({or: () => ({evaluateAll: async fn => fn([sheet(408), handle(409)])})})};
+    await assert.rejects(waitForSheetTop(retainedDrag, middleRanges, "Retained drag", {timeout: 25, pollInterval: 1, stableForMs: 12}),
+        error => error.interfaceEvidence.lastPeers[0].rect.y === 408 && error.interfaceEvidence.stableForMs === 12);
+    let movingPeer = 0;
+    const unsettled = {getByRole: () => ({or: () => ({evaluateAll: async fn => {
+        const offset = movingPeer++ % 2;
+        return fn([sheet(430 + offset), handle(431 + offset)]);
+    }})})};
+    await assert.rejects(waitForSheetTop(unsettled, middleRanges, "Unsettled detent", {timeout: 25, pollInterval: 1, stableForMs: 12}),
+        error => error.interfaceEvidence.stableForMs === 12 && error.interfaceEvidence.samples.length > 1);
 }
 
 function layerFixture({pointerWorks = true, keyboardWorks = true, initiallyOpen = true} = {}) {
     let open = initiallyOpen, focused = null;
     const clicks = [], keys = [], focus = [], waits = [];
     const card = peer("Map layer", "layer-map", {x: 880, y: 100, width: 80, height: 72});
+    const choices = peer("Map layer choices", "layer-choices", {x: 880, y: 100, width: 272, height: 72}, true,
+        {role: "group", elementtype: "Grid"});
+    choices.tagName = "DIV";
+    choices.style = {left: "17px", top: "60px"};
+    const presenter = peer("Layers", "layer-presenter", {x: 863, y: 40, width: 306, height: 150}, true,
+        {role: "group", elementtype: "FlyoutPresenter"});
+    presenter.tagName = "DIV";
+    presenter.style = {left: "863px", top: "40px"};
+    card.parentElement = choices;
+    choices.parentElement = presenter;
     const chooser = peer("Choose map layers", "layer-chooser", {x: 1130, y: 16, width: 44, height: 44});
     const canvas = {id: "uno-canvas", tagName: "CANVAS", getAttribute: () => null,
         getBoundingClientRect: () => ({x: 0, y: 0, width: 1200, height: 800})};
     const context = vm.createContext({document: {elementFromPoint: () => canvas},
         requestAnimationFrame: callback => setImmediate(callback), Promise});
-    const invoke = (fn, argument) => vm.runInContext("(" + fn.toString() + ")", context)(argument);
+    const invoke = (fn, ...args) => vm.runInContext("(" + fn.toString() + ")", context)(...args);
     const controls = new Map([card, chooser].map(element => {
         const name = element.getAttribute("aria-label");
         const visible = () => name === "Choose map layers" || open;
         const control = {
             or() { return this; },
-            evaluateAll: async fn => invoke(fn, visible() ? [element] : []),
+            evaluateAll: async (fn, argument) => invoke(fn, visible() ? [element] : [], argument),
             isVisible: async () => visible(),
             focus: async () => { focused = name; focus.push(name); },
             waitFor: async ({state, timeout}) => {
@@ -124,6 +161,16 @@ async function layerChecks() {
     assert.deepEqual(success.clicks, [{x: 920, y: 136}]);
     assert.deepEqual(success.keys, [], "A successful native click does not send an extra activation key");
     assert.equal(receipt.pointer.before.peers[0].id, "layer-map");
+    const ancestors = receipt.pointer.before.peers[0].ancestors;
+    assert.deepEqual(Array.from(ancestors, value => value.id), ["layer-choices", "layer-presenter"]);
+    assert.equal(ancestors[0].name, "Map layer choices");
+    assert.equal(ancestors[0].tag, "DIV");
+    assert.equal(ancestors[0].role, "group");
+    assert.equal(ancestors[0].elementtype, "Grid");
+    assert.equal(ancestors[0].inline.left, "17px");
+    assert.equal(ancestors[0].inline.top, "60px");
+    assert.equal(ancestors[0].rect.x, 880);
+    assert.equal(ancestors[1].rect.y, 40);
     assert.equal(receipt.pointer.before.elementFromPoint.id, "uno-canvas");
     assert.equal(receipt.pointer.before.clickPoint.y, 136);
     assert.equal(receipt.pointer.after.peers.length, 0);

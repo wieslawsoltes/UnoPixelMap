@@ -7,6 +7,11 @@
     RequestedTheme="Light" Background="#DCE5E3">
     <Page.Resources>
         <Style x:Key="MapAction" TargetType="Button" BasedOn="{StaticResource AtlasIconButton}" />
+        <Style x:Key="LayerPickerPresenter" TargetType="FlyoutPresenter" BasedOn="{StaticResource DefaultFlyoutPresenterStyle}">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
         <Style x:Key="ExploreAction" TargetType="Button">
             <Setter Property="MinHeight" Value="64" /><Setter Property="Padding" Value="12,10" />
             <Setter Property="CornerRadius" Value="13" /><Setter Property="BorderThickness" Value="0" />
@@ -135,15 +140,22 @@
 
         <StackPanel x:Name="SceneDock" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="16" Spacing="10"
                     AutomationProperties.Name="Map layers and location">
-            <Border Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" CornerRadius="15" Padding="2">
-                <StackPanel x:Name="LayerStack">
+            <Border Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" CornerRadius="15" Padding="2"
+                    AutomationProperties.Name="Map appearance controls">
+                <StackPanel x:Name="LayerStack" AutomationProperties.AutomationId="MapAppearanceActions">
                     <Button x:Name="LayersButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Choose map layers" ToolTipService.ToolTip="Map layers">
                         <Path Stroke="#007AFF" StrokeThickness="1.7" Width="23" Height="23" Stretch="Uniform" Data="M1,7 L12,1 L23,7 L12,13 Z M1,12 L12,18 L23,12 M1,17 L12,23 L23,17" />
                         <Button.Flyout>
-                            <Flyout Placement="BottomEdgeAlignedRight">
+                            <Flyout Placement="BottomEdgeAlignedRight" FlyoutPresenterStyle="{StaticResource LayerPickerPresenter}">
+                                <!-- Keep padding on semantic layout containers so their children follow
+                                     the popup's arranged offsets in the native accessibility tree. -->
+                                <Border Padding="{StaticResource FlyoutContentPadding}"
+                                        BorderThickness="{ThemeResource FlyoutBorderThemeThickness}" CornerRadius="{ThemeResource OverlayCornerRadius}"
+                                        Background="{ThemeResource FlyoutPresenterBackground}" BorderBrush="{ThemeResource FlyoutBorderThemeBrush}"
+                                        AutomationProperties.Name="Map layer picker">
                                 <StackPanel Width="278" Spacing="14" AutomationProperties.Name="Map layers and projection">
                                     <TextBlock Text="Choose a map" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource AtlasInkBrush}" />
-                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6" AutomationProperties.Name="Map layer choices">
                                         <ToggleButton x:Name="MapLayerButton" IsChecked="True" MinHeight="72" HorizontalAlignment="Stretch" Click="OnMapLayer" AutomationProperties.Name="Map layer"><StackPanel Spacing="6"><Path Width="24" Height="24" Stretch="Uniform" Fill="#5AC8A8" Data="M0,7 L8,2 L16,7 L8,12 Z M0,10 L8,15 L16,10 L16,13 L8,18 L0,13 Z" /><TextBlock Text="Map" FontSize="13" /></StackPanel></ToggleButton>
                                         <ToggleButton x:Name="EarthLayerButton" Grid.Column="1" MinHeight="72" HorizontalAlignment="Stretch" Click="OnEarthLayer" AutomationProperties.Name="Earth imagery layer"><StackPanel Spacing="6"><Grid Width="24" Height="24"><Ellipse Fill="#55A7DC" /><Path Fill="#B4D7A1" Data="M5,4 L13,2 L17,6 L11,10 L13,14 L7,16 L3,10 Z M17,14 L23,12 L23,18 L19,23 L15,21 Z" /></Grid><TextBlock Text="Earth" FontSize="13" /></StackPanel></ToggleButton>
                                         <ToggleButton x:Name="ElevationLayerButton" Grid.Column="2" MinHeight="72" HorizontalAlignment="Stretch" Click="OnElevationLayer" AutomationProperties.Name="Elevation layer"><StackPanel Spacing="6"><Path Width="24" Height="24" Stretch="Uniform" Fill="#A9AA86" Data="M0,13 L6,1 L10,8 L12,5 L17,13 Z M4,6 L6,3 L8,6 L6,5 Z" /><TextBlock Text="Elevation" FontSize="12" /></StackPanel></ToggleButton>
@@ -153,6 +165,7 @@
                                     </Border>
                                     <TextBlock Text="For pixel art, lighting and rendering quality, open Map appearance." FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource AtlasSecondaryBrush}" />
                                 </StackPanel>
+                                </Border>
                             </Flyout>
                         </Button.Flyout>
                     </Button>
@@ -195,8 +208,9 @@
                     </Button>
                 </StackPanel>
             </Border>
-            <Border x:Name="MapTools" Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" Padding="2" CornerRadius="15">
-                <StackPanel x:Name="ToolStack" Spacing="0">
+            <Border x:Name="MapTools" Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" Padding="2" CornerRadius="15"
+                    AutomationProperties.Name="Map navigation controls">
+                <StackPanel x:Name="ToolStack" Spacing="0" AutomationProperties.AutomationId="MapNavigationActions">
                     <Button x:Name="LocateButton" Style="{StaticResource MapAction}" Click="OnLocate" AutomationProperties.Name="Show current location" ToolTipService.ToolTip="My location"><Path Stroke="#007AFF" StrokeThickness="1.8" Width="21" Height="21" Stretch="Uniform" Data="M2,10 L22,2 L14,22 L10,14 Z" /></Button>
                     <Border Height="1" Margin="8,0" Background="{StaticResource AtlasSeparatorBrush}" />
                     <Button Style="{StaticResource MapAction}" Click="OnNorth" ToolTipService.ToolTip="Reset bearing to north" AutomationProperties.Name="Reset bearing to north">

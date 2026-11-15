@@ -36,9 +36,9 @@
                 AutomationProperties.Name="Free roam settings">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                           AutomationProperties.Name="Free roam settings content">
-            <StackPanel x:Name="SettingsContent" Spacing="10">
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
-                    <StackPanel VerticalAlignment="Center">
+            <StackPanel x:Name="SettingsContent" Spacing="10" AutomationProperties.AutomationId="FreeRoamSettingsLayout">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" AutomationProperties.Name="Free roam settings toolbar">
+                    <StackPanel VerticalAlignment="Center" AutomationProperties.AutomationId="FreeRoamSettingsHeading">
                         <Border AutomationProperties.Name="Free roam">
                             <TextBlock x:Name="Title" Text="Free roam" FontSize="22" FontWeight="SemiBold" Foreground="#1C1C1E"
                                        AutomationProperties.AccessibilityView="Raw" />
@@ -50,8 +50,8 @@
                     <Button Grid.Column="2" Content="×" Style="{StaticResource GameAction}" Width="44" Padding="0"
                             Click="OnClose" AutomationProperties.Name="Exit free roam" />
                 </Grid>
-                <StackPanel x:Name="Setup" Spacing="10">
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <StackPanel x:Name="Setup" Spacing="10" AutomationProperties.Name="Free roam setup">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8" AutomationProperties.Name="Movement and camera">
                         <ComboBox x:Name="ModeChoice" Header="Move as" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnModeChanged" AutomationProperties.Name="Free roam vehicle">
                             <ComboBoxItem Tag="Walk" Content="Walk" />
@@ -71,7 +71,7 @@
                             <ComboBoxItem Tag="NorthUp" Content="North up" />
                         </ComboBox>
                     </Grid>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8" AutomationProperties.Name="World appearance">
                         <ComboBox x:Name="StyleChoice" Header="Graphics" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnStyleChanged" AutomationProperties.Name="Game rendering style">
                             <ComboBoxItem Tag="Pixel" Content="Pixel art" />

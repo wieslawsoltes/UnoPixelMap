@@ -323,8 +323,22 @@ async function measure(browser, variant, repetition, scenario, base, output, ste
         if (scenario.walk) {
             await click(page, "Open free roam game");
             await ui.choose(page, "Free roam camera", 1);
-            await click(page, "Start free roam at map center");
-            await page.getByRole("button", {name: "Pause free roam", exact: true}).waitFor({state: "visible"});
+            const start = page.getByRole("button", {name: "Start free roam at map center", exact: true});
+            const pause = page.getByRole("button", {name: "Pause free roam", exact: true});
+            result.startControlBefore = await start.evaluate(element => {
+                const chain = [];
+                for (let current = element; current; current = current.parentElement) {
+                    const {x, y, width, height} = current.getBoundingClientRect();
+                    chain.push({id: current.id, name: current.getAttribute("aria-label"),
+                        role: current.getAttribute("role"), tag: current.tagName,
+                        inline: {left: current.style?.left || "", top: current.style?.top || ""},
+                        rect: {x, y, width, height}});
+                }
+                return chain;
+            });
+            result.startActivation = await click(page, "Start free roam at map center");
+            try { await pause.waitFor({state: "visible"}); }
+            finally { result.startControlAfter = {startVisible: await start.isVisible(), pauseVisible: await pause.isVisible()}; }
             await page.waitForTimeout(1500);
             await click(page, "Pause free roam");
             await page.getByRole("button", {name: "Resume free roam", exact: true}).waitFor({state: "visible"});
