@@ -46,13 +46,15 @@
                     </StackPanel>
                     <Button x:Name="SheetHandle" Grid.ColumnSpan="2" HorizontalAlignment="Center" Width="120" Height="44"
                             Style="{StaticResource AtlasIconButton}" Visibility="Collapsed" Click="OnSheetToggle"
-                            KeyDown="OnSheetKey" AutomationProperties.Name="Expand search sheet"
-                            ToolTipService.ToolTip="Drag or use arrow keys to resize the search sheet">
+                            KeyDown="OnSheetKey" AutomationProperties.Name="Expand search sheet">
+                        <ToolTipService.ToolTip><ToolTip Content="Drag or use arrow keys to resize the search sheet" IsHitTestVisible="False" /></ToolTipService.ToolTip>
                         <Border Width="36" Height="5" CornerRadius="3" Background="#C7C7CC" />
                     </Button>
                     <Button x:Name="SidebarCloseButton" Grid.Column="1" Content="×" FontSize="24"
                             Style="{StaticResource AtlasIconButton}" Foreground="#8E8E93" Click="OnHideSidebar"
-                            AutomationProperties.Name="Hide search panel" ToolTipService.ToolTip="Hide search panel" />
+                            AutomationProperties.Name="Hide search panel">
+                        <ToolTipService.ToolTip><ToolTip Content="Hide search panel" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
                 </Grid>
                 <StackPanel x:Name="SearchOverlay" Grid.Row="1" Margin="0,6,0,12">
                     <Border Background="{StaticResource AtlasGroupedBrush}" CornerRadius="12" Padding="2">
@@ -62,7 +64,8 @@
                                      AutomationProperties.Name="Search places or latitude and longitude" KeyDown="OnSearchKey"
                                      TextChanged="OnQueryEdited" GotFocus="OnSearchFocused" />
                             <Button x:Name="SearchButton" Grid.Column="1" Style="{StaticResource AtlasIconButton}" Click="OnSearch"
-                                    AutomationProperties.Name="Search map" ToolTipService.ToolTip="Search">
+                                    AutomationProperties.Name="Search map">
+                                <ToolTipService.ToolTip><ToolTip Content="Search" IsHitTestVisible="False" /></ToolTipService.ToolTip>
                                 <Path Stroke="#8E8E93" StrokeThickness="1.8" Data="M13,7 A6,6 0 1 1 1,7 A6,6 0 1 1 13,7 M11.5,11.5 L18,18" />
                             </Button>
                         </Grid>
@@ -143,7 +146,10 @@
             <Border Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" CornerRadius="15" Padding="2"
                     AutomationProperties.Name="Map appearance controls">
                 <StackPanel x:Name="LayerStack" AutomationProperties.AutomationId="MapAppearanceActions">
-                    <Button x:Name="LayersButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Choose map layers" ToolTipService.ToolTip="Map layers">
+                    <Button x:Name="LayersButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Choose map layers">
+                        <!-- Native tooltip popups must not intercept the next neighboring action.
+                             Place these hints beside the rail, including after keyboard focus returns. -->
+                        <ToolTipService.ToolTip><ToolTip Content="Map layers" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
                         <Path Stroke="#007AFF" StrokeThickness="1.7" Width="23" Height="23" Stretch="Uniform" Data="M1,7 L12,1 L23,7 L12,13 Z M1,12 L12,18 L23,12 M1,17 L12,23 L23,17" />
                         <Button.Flyout>
                             <Flyout Placement="BottomEdgeAlignedRight" FlyoutPresenterStyle="{StaticResource LayerPickerPresenter}">
@@ -170,7 +176,8 @@
                         </Button.Flyout>
                     </Button>
                     <Border x:Name="LayerDivider" Height="1" Margin="8,0" Background="{StaticResource AtlasSeparatorBrush}" />
-                    <Button x:Name="ViewButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Map appearance" ToolTipService.ToolTip="Map appearance">
+                    <Button x:Name="ViewButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Map appearance">
+                    <ToolTipService.ToolTip><ToolTip Content="Map appearance" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
                             <MenuFlyoutSubItem Text="Rendering style">
@@ -189,8 +196,9 @@
                                 <ToggleMenuFlyoutItem x:Name="DuskItem" Text="Golden hour" Tag="Dusk" Click="OnPalette" />
                                 <ToggleMenuFlyoutItem x:Name="NightItem" Text="After dark" Tag="Night" Click="OnPalette" />
                             </MenuFlyoutSubItem>
-                            <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief"
-                                                 ToolTipService.ToolTip="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." />
+                            <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief">
+                                <ToolTipService.ToolTip><ToolTip Content="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                            </ToggleMenuFlyoutItem>
                             <MenuFlyoutSubItem Text="Camera">
                                 <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
                                 <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
@@ -211,15 +219,25 @@
             <Border x:Name="MapTools" Background="{StaticResource AtlasSurfaceBrush}" BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1" Padding="2" CornerRadius="15"
                     AutomationProperties.Name="Map navigation controls">
                 <StackPanel x:Name="ToolStack" Spacing="0" AutomationProperties.AutomationId="MapNavigationActions">
-                    <Button x:Name="LocateButton" Style="{StaticResource MapAction}" Click="OnLocate" AutomationProperties.Name="Show current location" ToolTipService.ToolTip="My location"><Path Stroke="#007AFF" StrokeThickness="1.8" Width="21" Height="21" Stretch="Uniform" Data="M2,10 L22,2 L14,22 L10,14 Z" /></Button>
+                    <Button x:Name="LocateButton" Style="{StaticResource MapAction}" Click="OnLocate" AutomationProperties.Name="Show current location">
+                        <ToolTipService.ToolTip><ToolTip Content="My location" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                        <Path Stroke="#007AFF" StrokeThickness="1.8" Width="21" Height="21" Stretch="Uniform" Data="M2,10 L22,2 L14,22 L10,14 Z" />
+                    </Button>
                     <Border Height="1" Margin="8,0" Background="{StaticResource AtlasSeparatorBrush}" />
-                    <Button Style="{StaticResource MapAction}" Click="OnNorth" ToolTipService.ToolTip="Reset bearing to north" AutomationProperties.Name="Reset bearing to north">
+                    <Button Style="{StaticResource MapAction}" Click="OnNorth" AutomationProperties.Name="Reset bearing to north">
+                        <ToolTipService.ToolTip><ToolTip Content="Reset bearing to north" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
                         <Grid Width="20" Height="25" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform x:Name="CompassTransform" /></Grid.RenderTransform><Path Fill="#FF453A" Data="M10,1 L16,13 L10,11 L4,13 Z" /><Path Fill="#A3A3AA" Data="M10,23 L4,13 L10,15 L16,13 Z" /></Grid>
                     </Button>
-                    <Button x:Name="ProjectionShortcut" Content="3D" Style="{StaticResource MapAction}" FontSize="14" FontWeight="SemiBold" Click="OnProjection" AutomationProperties.Name="Switch to 2D overhead" ToolTipService.ToolTip="Switch between 2D and 3D" />
+                    <Button x:Name="ProjectionShortcut" Content="3D" Style="{StaticResource MapAction}" FontSize="14" FontWeight="SemiBold" Click="OnProjection" AutomationProperties.Name="Switch to 2D overhead">
+                        <ToolTipService.ToolTip><ToolTip Content="Switch between 2D and 3D" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
                     <Border x:Name="ToolDivider" Height="1" Margin="8,0" Background="{StaticResource AtlasSeparatorBrush}" />
-                    <Button x:Name="ZoomInButton" Content="+" Style="{StaticResource MapAction}" Click="OnZoomIn" AutomationProperties.Name="Zoom in" ToolTipService.ToolTip="Zoom in" />
-                    <Button x:Name="ZoomOutButton" Content="−" Style="{StaticResource MapAction}" Click="OnZoomOut" AutomationProperties.Name="Zoom out" ToolTipService.ToolTip="Zoom out" />
+                    <Button x:Name="ZoomInButton" Content="+" Style="{StaticResource MapAction}" Click="OnZoomIn" AutomationProperties.Name="Zoom in">
+                        <ToolTipService.ToolTip><ToolTip Content="Zoom in" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
+                    <Button x:Name="ZoomOutButton" Content="−" Style="{StaticResource MapAction}" Click="OnZoomOut" AutomationProperties.Name="Zoom out">
+                        <ToolTipService.ToolTip><ToolTip Content="Zoom out" ToolTipService.Placement="Left" IsHitTestVisible="False" /></ToolTipService.ToolTip>
+                    </Button>
                 </StackPanel>
             </Border>
         </StackPanel>
@@ -234,7 +252,7 @@
             <Grid x:Name="ScaleRule" Width="70" Height="5"><Border Height="1" Background="#3A3A3C" VerticalAlignment="Bottom" /><Border Width="1" Background="#3A3A3C" HorizontalAlignment="Left" /><Border Width="1" Background="#3A3A3C" HorizontalAlignment="Right" /></Grid>
         </StackPanel>
         <Border x:Name="Footer" HorizontalAlignment="Left" VerticalAlignment="Bottom" Padding="7,4" Margin="392,0,16,8"
-                CornerRadius="7" Background="#DCFFFFFF" MaxWidth="610">
+                CornerRadius="7" Background="#DCFFFFFF" MaxWidth="610" AutomationProperties.Name="Map attribution">
             <StackPanel Spacing="2">
                 <TextBlock FontSize="10" Foreground="#636366" TextWrapping="Wrap" Text="OpenFreeMap · OpenMapTiles · © OpenStreetMap" />
                 <TextBlock x:Name="EarthCredits" Visibility="Collapsed" TextWrapping="Wrap" FontSize="10" Foreground="#636366"
@@ -244,7 +262,8 @@
         </Border>
         <Button x:Name="MapInfoButton" Style="{StaticResource AtlasIconButton}" Content="i" FontSize="16" FontWeight="SemiBold"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="12" Background="{StaticResource AtlasSurfaceBrush}"
-                AutomationProperties.Name="Map information" ToolTipService.ToolTip="Map information">
+                AutomationProperties.Name="Map information">
+            <ToolTipService.ToolTip><ToolTip Content="Map information" IsHitTestVisible="False" /></ToolTipService.ToolTip>
             <Button.Flyout>
                 <Flyout Placement="TopEdgeAlignedRight">
                     <ScrollViewer MaxHeight="460" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

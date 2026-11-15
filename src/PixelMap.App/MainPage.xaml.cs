@@ -63,6 +63,9 @@ public sealed partial class MainPage : Page
         JourneyPanel.Attach(Map, _geocoder, new RoutePlanner(RoutingHttp, Map.VectorTiles));
         GamePanel.Attach(Map);
         GamePanel.CloseRequested += (_, _) => DisplayGame(false);
+        GamePanel.ChromeBoundsChanged += (_, _) => { if (_gameOpen) LayoutChrome(ActualWidth, ActualHeight); };
+        Footer.SizeChanged += (_, _) => { if (_gameOpen) LayoutChrome(ActualWidth, ActualHeight); };
+        SceneDock.SizeChanged += (_, _) => { if (_gameOpen) LayoutChrome(ActualWidth, ActualHeight); };
         JourneyPanel.CloseRequested += (_, _) => DisplayJourneys(false);
         JourneyPanel.PickingChanged += (_, _) => LayoutJourneys();
         JourneyPanel.SizeChanged += (_, _) => UpdateNavigationInsets();
@@ -168,7 +171,6 @@ public sealed partial class MainPage : Page
             bool horizontalTools = _narrow && mapHeight < 375;
             SceneDock.Orientation = horizontalTools ? Orientation.Horizontal : Orientation.Vertical;
             LayerStack.Orientation = ToolStack.Orientation = horizontalTools ? Orientation.Horizontal : Orientation.Vertical;
-            SceneDock.Margin = new Thickness(0, inset + _safeTop, inset + _safeRight, 0);
             MapTools.Visibility = _gameOpen ? Visibility.Collapsed : Visibility.Visible;
             LayerDivider.Visibility = ToolDivider.Visibility = horizontalTools ? Visibility.Collapsed : Visibility.Visible;
             bool zoomVisible = !horizontalTools || width - _safeLeft - _safeRight >= 360;
@@ -181,7 +183,22 @@ public sealed partial class MainPage : Page
             MapInfoButton.Visibility = mapHeight >= 170 && !_gameOpen ? Visibility.Visible : Visibility.Collapsed;
             ScaleBar.Margin = new Thickness(0, 0, inset + _safeRight, coveredBottom + 58 + _safeBottom);
             ScaleBar.Visibility = mapHeight >= 250 && !_gameOpen ? Visibility.Visible : Visibility.Collapsed;
-            GamePanel.SetViewportInsets(new Thickness(_safeLeft, _safeTop, _safeRight, _safeBottom), _keyboardBottom);
+            // Attribution remains readable while free-roam controls reserve its measured
+            // footprint. Only horizontally overlapping game chrome needs vertical separation.
+            double gameBottom = _gameOpen && Footer.Visibility == Visibility.Visible
+                ? Footer.ActualHeight + Math.Max(6, _safeBottom) + 8 : 0;
+            double dockRight = width - inset - _safeRight;
+            double dockLeft = dockRight - SceneDock.ActualWidth;
+            var gameBounds = GamePanel.SettingsBounds;
+            bool sharesDockColumns = _gameOpen && !gameBounds.IsEmpty &&
+                gameBounds.Left < dockRight && gameBounds.Right > dockLeft;
+            double gameTop = sharesDockColumns && GamePanel.IsSettingsAtBottom
+                ? inset + _safeTop + SceneDock.ActualHeight + 12 : 0;
+            GamePanel.SetViewportInsets(new Thickness(_safeLeft, _safeTop, _safeRight, _safeBottom),
+                _keyboardBottom, gameBottom, gameTop);
+            double dockTop = sharesDockColumns && !GamePanel.IsSettingsAtBottom
+                ? GamePanel.SettingsBounds.Bottom + 12 : inset + _safeTop;
+            SceneDock.Margin = new Thickness(0, dockTop, inset + _safeRight, 0);
             AutomationProperties.SetName(SheetHandle, _sheetDetent == 2 ? "Collapse search sheet" : "Expand search sheet");
             AutomationProperties.SetHelpText(SheetHandle, "Drag to resize. Up Arrow expands; Down Arrow collapses; Home shows the map; End expands fully.");
             UpdateNavigationInsets();

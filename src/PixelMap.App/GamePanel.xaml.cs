@@ -8,6 +8,7 @@ using PixelMap.Controls;
 using PixelMap.Rendering;
 using PixelMap.Routing;
 using PixelMap.Simulation;
+using Windows.Foundation;
 
 namespace PixelMap.App;
 
@@ -21,12 +22,27 @@ public sealed partial class GamePanel : UserControl
     private long _lookTimestamp, _lastTelemetry, _lastPadPointer;
     private SessionViewState? _displayedSession;
     private Thickness _safeInsets;
-    private double _keyboardBottom;
+    private double _keyboardBottom, _bottomObstruction, _topObstruction;
     private readonly record struct SessionViewState(JourneyState State, TravelMode Mode, JourneyCameraRig Rig,
         bool FreeRoam, bool FreeFlight, bool Follow, bool Muted);
     private enum PadAction { JumpBrake, Boost, Climb, Descend }
 
     public event EventHandler? CloseRequested;
+    public event EventHandler? ChromeBoundsChanged;
+
+    public bool IsSettingsAtBottom => SettingsCard.VerticalAlignment == VerticalAlignment.Bottom;
+    public Rect SettingsBounds
+    {
+        get
+        {
+            if (!_shown || SettingsCard.ActualWidth <= 0 || SettingsCard.ActualHeight <= 0) return Rect.Empty;
+            var margin = SettingsCard.Margin;
+            double left = SettingsCard.HorizontalAlignment == HorizontalAlignment.Center
+                ? (ActualWidth - SettingsCard.ActualWidth + margin.Left - margin.Right) / 2 : margin.Left;
+            double top = IsSettingsAtBottom ? ActualHeight - margin.Bottom - SettingsCard.ActualHeight : margin.Top;
+            return new Rect(left, top, SettingsCard.ActualWidth, SettingsCard.ActualHeight);
+        }
+    }
 
     public GamePanel()
     {
@@ -45,6 +61,7 @@ public sealed partial class GamePanel : UserControl
         BindPad(Climb, PadAction.Climb);
         BindPad(Descend, PadAction.Descend);
         SizeChanged += (_, _) => LayoutControls();
+        SettingsCard.SizeChanged += (_, _) => ChromeBoundsChanged?.Invoke(this, EventArgs.Empty);
         Unloaded += (_, _) => ReleaseInput();
     }
 
@@ -79,11 +96,14 @@ public sealed partial class GamePanel : UserControl
         ReleaseInput();
     }
 
-    public void SetViewportInsets(Thickness insets, double keyboardBottom)
+    public void SetViewportInsets(Thickness insets, double keyboardBottom, double bottomObstruction = 0, double topObstruction = 0)
     {
-        if (_safeInsets.Equals(insets) && _keyboardBottom.Equals(keyboardBottom)) return;
+        if (_safeInsets.Equals(insets) && _keyboardBottom.Equals(keyboardBottom) &&
+            _bottomObstruction.Equals(bottomObstruction) && _topObstruction.Equals(topObstruction)) return;
         _safeInsets = insets;
         _keyboardBottom = keyboardBottom;
+        _bottomObstruction = bottomObstruction;
+        _topObstruction = topObstruction;
         LayoutControls();
     }
 
@@ -97,15 +117,18 @@ public sealed partial class GamePanel : UserControl
         bool bottomSetup = narrow && Setup.Visibility == Visibility.Visible;
         SettingsCard.HorizontalAlignment = bottomSetup ? HorizontalAlignment.Center : HorizontalAlignment.Left;
         SettingsCard.VerticalAlignment = bottomSetup ? VerticalAlignment.Bottom : VerticalAlignment.Top;
-        SettingsCard.Margin = new Thickness(inset + _safeInsets.Left, inset + _safeInsets.Top,
-            inset + _safeInsets.Right, Math.Max(inset, _safeInsets.Bottom) + _keyboardBottom);
+        double top = bottomSetup ? Math.Max(inset + _safeInsets.Top, _topObstruction) : inset + _safeInsets.Top;
+        double bottom = Math.Max(Math.Max(inset, _safeInsets.Bottom), _bottomObstruction) + _keyboardBottom;
+        SettingsCard.Margin = new Thickness(inset + _safeInsets.Left, top, inset + _safeInsets.Right, bottom);
         SettingsCard.Padding = new Thickness(16, compactHud ? 8 : 14, 16, compactHud ? 8 : 14);
         SettingsContent.Spacing = compactHud ? 5 : 10;
         SettingsCard.Width = Math.Max(180, Math.Min(360, ActualWidth - 2 * inset - _safeInsets.Left - _safeInsets.Right));
-        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - _keyboardBottom - _safeInsets.Top - _safeInsets.Bottom - 2 * inset - (compact ? 64 : 0));
-        TouchPad.Margin = new Thickness(inset + _safeInsets.Left, 0, inset + _safeInsets.Right, Math.Max(36, _safeInsets.Bottom + 16));
+        SettingsCard.MaxHeight = Math.Max(120, ActualHeight - top - bottom - (compact ? 64 : 0));
+        TouchPad.Margin = new Thickness(inset + _safeInsets.Left, 0, inset + _safeInsets.Right,
+            Math.Max(Math.Max(36, _safeInsets.Bottom + 16), _bottomObstruction) + _keyboardBottom);
         PadActions.Orientation = compact ? Orientation.Horizontal : Orientation.Vertical;
         FlightActions.Orientation = ActualWidth < 370 ? Orientation.Vertical : Orientation.Horizontal;
+        ChromeBoundsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private string SelectedMode => (ModeChoice.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "Walk";

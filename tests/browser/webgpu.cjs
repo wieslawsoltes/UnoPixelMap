@@ -805,9 +805,14 @@ async function publicCameraLink(page) {
 }
 
 async function captureInterface(page, name, details) {
-    await assertGraphicsHealthy(page, name);
+    await assertGraphicsHealthy(page, name + " before screenshot");
+    // Semantic layout can lead Skia's queued canvas presentation. Use the same
+    // completion fence as rendering captures before recording interface pixels.
+    await verifyGpu(page, name);
+    const presentedDetails = typeof details === "function" ? await details() : details;
     await page.screenshot({path: join(output, name + ".png"), timeout: 30000});
-    report.scenarios.push({name, ...details});
+    await assertGraphicsHealthy(page, name + " after screenshot");
+    report.scenarios.push({name, ...presentedDetails});
 }
 
 async function desktopInterface(page) {
@@ -924,8 +929,18 @@ async function mobileInterface(page, cdp) {
     assert.ok(dragged.y < start.y - 100, "Native touch drag opens the sheet and snaps to a higher detent");
     assert.ok(Math.abs(dragging.sheet.rect.height - middleHeight) <= 1, "The released sheet retains the middle detent height");
     assert.deepEqual(await map.boundingBox(), bounds, "Dragging chrome preserves the map viewport");
-    await captureInterface(page, "mobile-dragged-sheet", {collapsed: start, dragged, peers: dragging, mapBounds: bounds,
-        expectedDetent: {height: middleHeight, sheetTop: middleTop, handleTop: middleHandleTop}});
+    await captureInterface(page, "mobile-dragged-sheet", async () => {
+        const presentedPeers = await readPeers(page.getByRole("group", {name: "Search and directions", exact: true}).or(handle));
+        const sheets = presentedPeers.filter(peer => peer.connected && peer.name === "Search and directions");
+        const handles = presentedPeers.filter(peer => peer.connected && /^(Expand|Collapse) search sheet$/.test(peer.name || ""));
+        assert.equal(sheets.length, 1, "The presented sheet has one live semantic peer");
+        assert.equal(handles.length, 1, "The presented sheet has one live handle peer");
+        assert.deepEqual(sheets[0].rect, dragging.sheet.rect, "Presentation preserves the verified snapped sheet bounds");
+        assert.deepEqual(handles[0].rect, dragged, "Presentation preserves the verified snapped handle bounds");
+        return {collapsed: start, dragged: handles[0].rect,
+            peers: {...dragging, sheet: sheets[0], handle: handles[0]}, geometryAfterPresentation: true, mapBounds: bounds,
+            expectedDetent: {height: middleHeight, sheetTop: middleTop, handleTop: middleHandleTop}};
+    });
     await waitForSettledFocus(page, handle); await page.keyboard.press("Home");
     const restored = await waitForSheetTop(page, compactRanges, "Home restores the compact sheet after dragging");
     assert.ok(Math.abs(restored.handle.rect.y - collapsed.y) <= 1, "The sheet returns to its compact detent");
@@ -951,6 +966,35 @@ async function mobileUi(browser) {
         await saveFailure(page, "mobile-interface", error);
         throw error;
     } finally { await context.close(); }
+}
+
+function assertMobileGameClearance(viewport, chrome, touchControls) {
+    const evidence = {viewport, chrome, touchControls};
+    try {
+        const one = name => {
+            const peers = chrome.filter(peer => peer.connected && peer.name === name);
+            assert.equal(peers.length, 1, name + ": one live mobile chrome peer exists");
+            return peers[0];
+        };
+        const dock = one("Map layers and location"), settings = one("Free roam settings"), attribution = one("Map attribution");
+        const controls = Object.values(touchControls).flat();
+        for (const peer of [dock, settings, attribution, ...controls]) {
+            const rect = peer.rect;
+            assert.ok(peer.connected && rect.width > 0 && rect.height > 0 && rect.x >= 0 && rect.y >= 0 &&
+                rect.x + rect.width <= viewport.width && rect.y + rect.height <= viewport.height,
+                peer.name + ": visible mobile chrome remains inside the viewport");
+        }
+        const overlaps = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width &&
+            a.y < b.y + b.height && b.y < a.y + a.height;
+        assert.ok(!overlaps(dock.rect, settings.rect), "The map rail does not overlap free-roam settings");
+        assert.ok(!overlaps(attribution.rect, settings.rect), "Map attribution does not overlap free-roam settings");
+        for (const peer of controls)
+            assert.ok(!overlaps(attribution.rect, peer.rect), "Map attribution does not overlap " + peer.name);
+        return {viewport, peers: chrome, visibleTouchPeers: controls.length, passed: true};
+    } catch (error) {
+        error.interfaceEvidence = {gameChromeClearance: evidence};
+        throw error;
+    }
 }
 
 async function mobileFreeRoamUi(browser) {
@@ -995,16 +1039,19 @@ async function mobileFreeRoamUi(browser) {
         const runningControls = await touchState("visible");
         await click(page, "Expand game settings", true);
         await namedControl(page, "Collapse game settings").waitFor({state: "visible", timeout});
-        const expandedControls = await touchState("hidden");
         const settings = page.getByRole("group", {name: "Free roam settings", exact: true});
-        await captureInterface(page, "mobile-free-roam-settings-expanded", {
-            runningControls, touchControls: expandedControls, settings: await readPeers(settings), touchControlsHidden: true
+        const chrome = page.getByRole("group", {name: /^(Map layers and location|Free roam settings|Map attribution)$/});
+        await captureInterface(page, "mobile-free-roam-settings-expanded", async () => {
+            const touchControls = await touchState("hidden");
+            const clearance = assertMobileGameClearance(size, await readPeers(chrome), touchControls);
+            return {runningControls, touchControls, settings: await readPeers(settings), touchControlsHidden: true, clearance};
         });
         await click(page, "Collapse game settings", true);
         await namedControl(page, "Expand game settings").waitFor({state: "visible", timeout});
-        const restoredControls = await touchState("visible");
-        await captureInterface(page, "mobile-free-roam-settings-collapsed", {
-            touchControls: restoredControls, settings: await readPeers(settings), touchControlsRestored: true
+        await captureInterface(page, "mobile-free-roam-settings-collapsed", async () => {
+            const touchControls = await touchState("visible");
+            const clearance = assertMobileGameClearance(size, await readPeers(chrome), touchControls);
+            return {touchControls, settings: await readPeers(settings), touchControlsRestored: true, clearance};
         });
         await click(page, "Pause free roam", true);
         await namedControl(page, "Resume free roam").waitFor({state: "visible", timeout});
@@ -1426,7 +1473,8 @@ async function run() {
     }
 }
 
-module.exports = {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites};
+module.exports = {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites,
+    captureInterface, assertMobileGameClearance};
 
 if (require.main === module)
     run().catch(error => { console.error(error); process.exitCode = 1; });

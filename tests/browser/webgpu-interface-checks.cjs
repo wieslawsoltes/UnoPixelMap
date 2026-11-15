@@ -19,11 +19,13 @@ const dependencies = {
 const requireStub = name => name.startsWith("node:") ? require(name) :
     Object.hasOwn(dependencies, name) ? dependencies[name] : assert.fail("Unexpected integration dependency: " + name);
 requireStub.main = {};
-vm.runInNewContext(source, {module: moduleUnderTest, require: requireStub,
+const integrationContext = vm.createContext({module: moduleUnderTest, require: requireStub,
     process: {argv: ["node", "webgpu.cjs", "--preflight-only"], env: {}},
     console: {log() {}, error: (...values) => loggedFailures.push(values)},
-    URL, Date, Promise, setTimeout, clearTimeout}, {filename: "webgpu.cjs"});
-const {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites} = moduleUnderTest.exports;
+    URL, Date, Promise, setTimeout, clearTimeout});
+vm.runInContext(source, integrationContext, {filename: "webgpu.cjs"});
+const {waitForSheetTop, verifyLayerPointerDismissal, selectLayerKeyboard, runIndependentSuites,
+    captureInterface, assertMobileGameClearance} = moduleUnderTest.exports;
 
 function peer(name, id, rect, connected = true, attributes = {}) {
     const group = name === "Search and directions";
@@ -217,9 +219,93 @@ async function independenceChecks() {
     assert.equal(loggedFailures.length, 2, "Every failed UI suite remains visible in the final failure report");
 }
 
+function gameChromeChecks() {
+    const viewport = {width: 390, height: 844};
+    const visible = (name, rect) => ({name, id: name, connected: true, rect});
+    const fixture = () => ({
+        chrome: [
+            visible("Map layers and location", {x: 328, y: 213.5, width: 50, height: 95}),
+            visible("Free roam settings", {x: 12, y: 12, width: 360, height: 189.5}),
+            visible("Map attribution", {x: 12, y: 786.5, width: 265, height: 51.5})
+        ],
+        controls: {
+            pad: [visible("Free roam touch controls", {x: 12, y: 640, width: 366, height: 128})],
+            movement: [visible("Free roam movement stick", {x: 12, y: 656, width: 112, height: 112})],
+            look: [visible("Free roam look stick", {x: 266, y: 656, width: 112, height: 112})],
+            jump: [visible("Free roam jump or brake", {x: 171, y: 657, width: 48.5, height: 48})],
+            boost: [visible("Free roam boost", {x: 171, y: 710, width: 48.5, height: 48})]
+        }
+    });
+    const clear = fixture();
+    assert.equal(assertMobileGameClearance(viewport, clear.chrome, clear.controls).visibleTouchPeers, 5);
+    const expanded = fixture();
+    expanded.chrome[0].rect.y = 12;
+    expanded.chrome[1].rect = {x: 15, y: 263, width: 360, height: 503};
+    assert.equal(assertMobileGameClearance(viewport, expanded.chrome, {}).passed, true);
+
+    // These are the two observed e010a465 mobile failures: the original rail
+    // behind the top card, and attribution covering the lower stick/pad area.
+    const coveredRail = fixture(); coveredRail.chrome[0].rect.y = 12;
+    assert.throws(() => assertMobileGameClearance(viewport, coveredRail.chrome, coveredRail.controls),
+        /map rail does not overlap free-roam settings/);
+    const coveredPad = fixture(); coveredPad.controls.pad[0].rect.y = 680;
+    assert.throws(() => assertMobileGameClearance(viewport, coveredPad.chrome, coveredPad.controls), error => {
+        assert.match(error.message, /Map attribution does not overlap Free roam touch controls/);
+        assert.equal(error.interfaceEvidence.gameChromeClearance.touchControls.pad[0].rect.y, 680);
+        return true;
+    });
+    const coveredSettings = fixture(); coveredSettings.chrome[1].rect = {x: 15, y: 329, width: 360, height: 503};
+    assert.throws(() => assertMobileGameClearance(viewport, coveredSettings.chrome, {}),
+        /Map attribution does not overlap free-roam settings/);
+    const missingAttribution = fixture(); missingAttribution.chrome.pop();
+    assert.throws(() => assertMobileGameClearance(viewport, missingAttribution.chrome, missingAttribution.controls),
+        /Map attribution: one live mobile chrome peer exists/);
+    const clippedRail = fixture(); clippedRail.chrome[0].rect.x = 350;
+    assert.throws(() => assertMobileGameClearance(viewport, clippedRail.chrome, clippedRail.controls),
+        /Map layers and location: visible mobile chrome remains inside the viewport/);
+}
+
+async function interfacePresentationChecks() {
+    const originalVerify = integrationContext.verifyGpu, originalHealth = integrationContext.assertGraphicsHealthy;
+    const order = [];
+    let completed = false, geometryRead = false;
+    try {
+        integrationContext.assertGraphicsHealthy = async (_page, name) => order.push(name.endsWith("before screenshot") ? "health-before" : "health-after");
+        integrationContext.verifyGpu = async () => {
+            order.push("gpu-start");
+            await Promise.resolve();
+            completed = true;
+            order.push("gpu-completed-and-presented");
+        };
+        const page = {screenshot: async () => {
+            assert.ok(completed && geometryRead, "The PNG follows GPU completion/presentation and fresh geometry");
+            order.push("screenshot");
+        }};
+        await captureInterface(page, "presented-interface-contract", async () => {
+            assert.equal(completed, true);
+            geometryRead = true;
+            order.push("fresh-geometry");
+            return {finalSheetTop: 430.5};
+        });
+        assert.deepEqual(order, ["health-before", "gpu-start", "gpu-completed-and-presented", "fresh-geometry", "screenshot", "health-after"]);
+        const recorded = vm.runInContext("report.scenarios.at(-1)", integrationContext);
+        assert.equal(recorded.name, "presented-interface-contract");
+        assert.equal(recorded.finalSheetTop, 430.5, "The report retains geometry read after the presentation fence");
+
+        integrationContext.verifyGpu = async () => { throw new Error("GPU presentation did not complete"); };
+        await assert.rejects(captureInterface({screenshot: unavailable}, "failed-interface-contract", unavailable),
+            /GPU presentation did not complete/);
+    } finally {
+        integrationContext.verifyGpu = originalVerify;
+        integrationContext.assertGraphicsHealthy = originalHealth;
+    }
+}
+
 (async () => {
     await sheetChecks();
     await layerChecks();
+    gameChromeChecks();
+    await interfacePresentationChecks();
     await independenceChecks();
-    console.log("WebGPU interface contracts passed: replaced sheet peers, strict handle/group geometry, bounded failures, pointer receipts, independent keyboard diagnostics and rendering-suite continuation.");
+    console.log("WebGPU interface contracts passed: settled sheet geometry, completed GPU presentation, unobscured mobile game controls, pointer receipts, independent keyboard diagnostics and rendering-suite continuation.");
 })().catch(error => { console.error(error); process.exitCode = 1; });
