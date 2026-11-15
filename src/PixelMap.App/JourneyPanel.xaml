@@ -111,7 +111,7 @@
                             </Border>
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4" AutomationProperties.Name="Playback options">
-                            <ComboBox x:Name="Rate" HorizontalAlignment="Stretch" AutomationProperties.Name="Playback speed" SelectionChanged="OnRate">
+                            <ComboBox x:Name="Rate" MinWidth="0" HorizontalAlignment="Stretch" AutomationProperties.Name="Playback speed" SelectionChanged="OnRate">
                                 <ComboBoxItem Tag="1" Content="1×" /><ComboBoxItem Tag="4" Content="4×" /><ComboBoxItem Tag="12" Content="12×" />
                                 <ComboBoxItem Tag="0.25" Content="0.25×" />
                             </ComboBox>

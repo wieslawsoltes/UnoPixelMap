@@ -52,7 +52,7 @@
                 </Grid>
                 <StackPanel x:Name="Setup" Spacing="10">
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <ComboBox x:Name="ModeChoice" Header="Move as" SelectedIndex="0" HorizontalAlignment="Stretch"
+                        <ComboBox x:Name="ModeChoice" Header="Move as" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnModeChanged" AutomationProperties.Name="Free roam vehicle">
                             <ComboBoxItem Tag="Walk" Content="Walk" />
                             <ComboBoxItem Tag="Drive" Content="Car" />
@@ -62,7 +62,7 @@
                             <ComboBoxItem Tag="Train" Content="Train" />
                             <ComboBoxItem Tag="FreeFlight" Content="Free flight" />
                         </ComboBox>
-                        <ComboBox x:Name="CameraChoice" Grid.Column="1" Header="Camera" SelectedIndex="1" HorizontalAlignment="Stretch"
+                        <ComboBox x:Name="CameraChoice" Grid.Column="1" Header="Camera" SelectedIndex="1" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnCameraChanged" AutomationProperties.Name="Free roam camera">
                             <ComboBoxItem Tag="Chase" Content="Third person" />
                             <ComboBoxItem Tag="FirstPerson" Content="First person" />
@@ -72,14 +72,14 @@
                         </ComboBox>
                     </Grid>
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <ComboBox x:Name="StyleChoice" Header="Graphics" SelectedIndex="0" HorizontalAlignment="Stretch"
+                        <ComboBox x:Name="StyleChoice" Header="Graphics" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnStyleChanged" AutomationProperties.Name="Game rendering style">
                             <ComboBoxItem Tag="Pixel" Content="Pixel art" />
                             <ComboBoxItem Tag="Normal" Content="Normal" />
                             <ComboBoxItem Tag="Minecraft" Content="Minecraft" />
                             <ComboBoxItem Tag="Roblox" Content="Roblox" />
                         </ComboBox>
-                        <ComboBox x:Name="LayerChoice" Grid.Column="1" Header="World layer" SelectedIndex="0" HorizontalAlignment="Stretch"
+                        <ComboBox x:Name="LayerChoice" Grid.Column="1" Header="World layer" SelectedIndex="0" MinWidth="0" HorizontalAlignment="Stretch"
                                   SelectionChanged="OnLayerChanged" AutomationProperties.Name="Game map layer">
                             <ComboBoxItem Tag="Map" Content="Map" />
                             <ComboBoxItem Tag="Earth" Content="Earth" />

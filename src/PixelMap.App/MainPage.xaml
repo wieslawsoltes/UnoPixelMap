@@ -24,6 +24,7 @@
         <Border x:Name="SidebarSurface" Width="360" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16"
                 Padding="16,6,16,16" CornerRadius="22" Background="{StaticResource AtlasSurfaceBrush}"
                 BorderBrush="{StaticResource AtlasSeparatorBrush}" BorderThickness="1"
+                AutomationProperties.Name="Search and directions"
                 Tapped="OnChromeTapped" DoubleTapped="OnChromeDoubleTapped" PointerWheelChanged="OnChromeWheel">
             <Grid RowDefinitions="Auto,Auto,*">
                 <Grid Height="44" ColumnDefinitions="*,44" AutomationProperties.Name="Map toolbar">
@@ -64,7 +65,7 @@
                 </StackPanel>
                 <Grid x:Name="SidebarContent" Grid.Row="2">
                     <ScrollViewer x:Name="HomeScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="HomePane" Spacing="18">
+                        <StackPanel x:Name="HomePane" Spacing="12">
                             <Border x:Name="PlaceCard" Padding="0,4,0,0">
                                 <StackPanel Spacing="5">
                                     <TextBlock x:Name="PlaceEyebrow" Text="Explore the map" Foreground="{StaticResource AtlasSecondaryBrush}" FontSize="13" />
@@ -159,27 +160,31 @@
                     <Button x:Name="ViewButton" Style="{StaticResource MapAction}" AutomationProperties.Name="Map appearance" ToolTipService.ToolTip="Map appearance">
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedRight">
-                            <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
+                            <MenuFlyoutSubItem Text="Rendering style">
+                                <ToggleMenuFlyoutItem x:Name="PixelStyleItem" Text="Pixel art rendering" Tag="Pixel" IsChecked="True" Click="OnRenderStyle" />
+                                <ToggleMenuFlyoutItem x:Name="NormalStyleItem" Text="Normal rendering" Tag="Normal" Click="OnRenderStyle" />
+                                <ToggleMenuFlyoutItem x:Name="MinecraftStyleItem" Text="Minecraft rendering" Tag="Minecraft" Click="OnRenderStyle" />
+                                <ToggleMenuFlyoutItem x:Name="RobloxStyleItem" Text="Roblox rendering" Tag="Roblox" Click="OnRenderStyle" />
+                            </MenuFlyoutSubItem>
                             <MenuFlyoutSubItem Text="Rendering quality">
                                 <ToggleMenuFlyoutItem x:Name="BalancedQualityItem" Text="Balanced quality" Tag="Balanced" Click="OnRenderingQuality" />
                                 <ToggleMenuFlyoutItem x:Name="HighQualityItem" Text="High quality" Tag="High" IsChecked="True" Click="OnRenderingQuality" />
                                 <ToggleMenuFlyoutItem x:Name="UltraQualityItem" Text="Ultra quality" Tag="Ultra" Click="OnRenderingQuality" />
                             </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem Text="Lighting">
+                                <ToggleMenuFlyoutItem x:Name="DayItem" Text="Daylight" Tag="Day" IsChecked="True" Click="OnPalette" />
+                                <ToggleMenuFlyoutItem x:Name="DuskItem" Text="Golden hour" Tag="Dusk" Click="OnPalette" />
+                                <ToggleMenuFlyoutItem x:Name="NightItem" Text="After dark" Tag="Night" Click="OnPalette" />
+                            </MenuFlyoutSubItem>
                             <ToggleMenuFlyoutItem x:Name="TerrainReliefItem" Text="Terrain relief" Click="OnTerrainRelief"
                                                  ToolTipService.ToolTip="Render real elevation beneath Map, Earth or Elevation with height-aware camera and journeys." />
-                            <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
-                            <MenuFlyoutItem Text="Rotate left 45 degrees" Click="OnRotateLeft" />
-                            <MenuFlyoutItem Text="Rotate right 45 degrees" Click="OnRotateRight" />
-                            <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
-                            <MenuFlyoutSeparator />
-                            <ToggleMenuFlyoutItem x:Name="PixelStyleItem" Text="Pixel art rendering" Tag="Pixel" IsChecked="True" Click="OnRenderStyle" />
-                            <ToggleMenuFlyoutItem x:Name="NormalStyleItem" Text="Normal rendering" Tag="Normal" Click="OnRenderStyle" />
-                            <ToggleMenuFlyoutItem x:Name="MinecraftStyleItem" Text="Minecraft rendering" Tag="Minecraft" Click="OnRenderStyle" />
-                            <ToggleMenuFlyoutItem x:Name="RobloxStyleItem" Text="Roblox rendering" Tag="Roblox" Click="OnRenderStyle" />
-                            <MenuFlyoutSeparator />
-                            <ToggleMenuFlyoutItem x:Name="DayItem" Text="Daylight" Tag="Day" IsChecked="True" Click="OnPalette" />
-                            <ToggleMenuFlyoutItem x:Name="DuskItem" Text="Golden hour" Tag="Dusk" Click="OnPalette" />
-                            <ToggleMenuFlyoutItem x:Name="NightItem" Text="After dark" Tag="Night" Click="OnPalette" />
+                            <MenuFlyoutSubItem Text="Camera">
+                                <ToggleMenuFlyoutItem x:Name="PerspectiveItem" Text="Perspective lens" Click="OnPerspective" />
+                                <MenuFlyoutItem Text="Camera angles and orbit" Click="OnCameraTools" />
+                                <MenuFlyoutItem Text="Rotate left 45 degrees" Click="OnRotateLeft" />
+                                <MenuFlyoutItem Text="Rotate right 45 degrees" Click="OnRotateRight" />
+                                <MenuFlyoutItem x:Name="ProjectionItem" Text="Switch to overhead view" Click="OnProjection" />
+                            </MenuFlyoutSubItem>
                             <MenuFlyoutSeparator />
                             <MenuFlyoutItem Text="City guide" Click="OnGuide" />
                             <MenuFlyoutItem Text="Share this view" Click="OnShare" />
