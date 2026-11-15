@@ -210,10 +210,24 @@ public sealed partial class GamePanel : UserControl
     private void SetExpanded(bool expanded)
     {
         Setup.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+        if (expanded) ReleaseInput();
         SettingsToggle.Content = expanded ? "−" : "Settings";
         SettingsToggle.Width = expanded ? 44 : 90;
         AutomationProperties.SetName(SettingsToggle, expanded ? "Collapse game settings" : "Expand game settings");
+        UpdateTouchPadState();
         LayoutControls();
+    }
+
+    private bool CanUseTouchPad => _shown && Setup.Visibility != Visibility.Visible &&
+        _map?.Journey.IsFreeRoaming == true && _map.Journey.Active;
+
+    private void UpdateTouchPadState()
+    {
+        bool visible = _shown && _map?.Journey.IsFreeRoaming == true && Setup.Visibility != Visibility.Visible;
+        bool paused = _map?.Journey.State == JourneyState.Paused;
+        TouchPad.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+        TouchPad.IsHitTestVisible = visible && !paused;
+        TouchPad.Opacity = paused ? .45 : 1;
     }
 
     private void OnPause(object sender, RoutedEventArgs e)
@@ -276,10 +290,8 @@ public sealed partial class GamePanel : UserControl
         }
         if (force || transition)
         {
-            TouchPad.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+            UpdateTouchPadState();
             Transport.Visibility = TelemetryBox.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
-            TouchPad.IsHitTestVisible = active && !paused;
-            TouchPad.Opacity = paused ? .45 : 1;
             string title = !active ? "Free roam" : paused ? "Game paused" : session.IsFreeFlying ? "Free flight"
                 : session.Vehicle.Mode switch { TravelMode.Walk => "Walking", TravelMode.Drive => "Driving", TravelMode.Bike => "Cycling", TravelMode.Boat => "Sailing", TravelMode.Train => "Train", _ => "Flying" };
             SetText(Title, title);
@@ -317,7 +329,7 @@ public sealed partial class GamePanel : UserControl
     {
         button.AddHandler(PointerPressedEvent, new PointerEventHandler((_, e) =>
         {
-            if (_map?.Journey.IsFreeRoaming != true || !_map.Journey.Active) return;
+            if (!CanUseTouchPad) return;
             _lastPadPointer = Environment.TickCount64;
             _pressed[e.Pointer.PointerId] = action;
             button.CapturePointer(e.Pointer);
@@ -338,7 +350,7 @@ public sealed partial class GamePanel : UserControl
         button.Click += (_, _) =>
         {
             // Keyboard and assistive activation provide a finite input pulse.
-            if (_map?.Journey.IsFreeRoaming != true || !_map.Journey.Active || Environment.TickCount64 - _lastPadPointer < 250) return;
+            if (!CanUseTouchPad || Environment.TickCount64 - _lastPadPointer < 250) return;
             _pressed[uint.MaxValue] = action;
             SendInput();
             _pulseClock.Stop();
@@ -349,6 +361,7 @@ public sealed partial class GamePanel : UserControl
     private void SendInput()
     {
         if (_map is null) return;
+        if (!CanUseTouchPad) { _map.SetFreeRoamInput(default); return; }
         bool held(PadAction action) => _pressed.ContainsValue(action);
         bool walking = _map.Journey.Vehicle.Mode == TravelMode.Walk && !_map.Journey.IsFreeFlying;
         bool strafe = walking || _map.Journey.IsFreeFlying;
@@ -364,7 +377,7 @@ public sealed partial class GamePanel : UserControl
 
     private void UpdateLookClock()
     {
-        bool moving = Math.Abs(LookStick.Value.X) + Math.Abs(LookStick.Value.Y) > 0;
+        bool moving = CanUseTouchPad && Math.Abs(LookStick.Value.X) + Math.Abs(LookStick.Value.Y) > 0;
         if (moving && !_lookClock.IsEnabled)
         {
             _lookTimestamp = Stopwatch.GetTimestamp();
@@ -378,8 +391,8 @@ public sealed partial class GamePanel : UserControl
         long now = Stopwatch.GetTimestamp();
         double dt = Math.Clamp(Stopwatch.GetElapsedTime(_lookTimestamp, now).TotalSeconds, 0, .1);
         _lookTimestamp = now;
-        if (_map?.Journey.IsFreeRoaming == true && _map.Journey.Active)
-            _map.LookFreeRoam(LookStick.Value.X * 120 * dt, -LookStick.Value.Y * 90 * dt);
+        if (CanUseTouchPad)
+            _map!.LookFreeRoam(LookStick.Value.X * 120 * dt, -LookStick.Value.Y * 90 * dt);
         else ReleaseInput();
     }
 
@@ -387,9 +400,13 @@ public sealed partial class GamePanel : UserControl
     {
         _lookClock.Stop();
         _pulseClock.Stop();
+        _pressed.Clear();
+        JumpBrake.ReleasePointerCaptures();
+        Boost.ReleasePointerCaptures();
+        Climb.ReleasePointerCaptures();
+        Descend.ReleasePointerCaptures();
         MoveStick.Reset();
         LookStick.Reset();
-        _pressed.Clear();
         _map?.SetFreeRoamInput(default);
     }
 }

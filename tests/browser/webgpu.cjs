@@ -926,6 +926,70 @@ async function mobileUi(browser) {
     } finally { await context.close(); }
 }
 
+async function mobileFreeRoamUi(browser) {
+    const {context, page} = await open(browser, "", {mobile: true, density: 2});
+    try {
+        await verifyGpu(page, "mobile-free-roam-interface-initial");
+        const size = page.viewportSize();
+        const sheetHandle = page.getByRole("button", {name: /^(Expand|Collapse) search sheet$/});
+        await waitForSettledFocus(page, sheetHandle);
+        await page.keyboard.press("End");
+        await waitForSheetTop(page, {handle: [0, size.height * .2 - 1], sheet: [0, size.height * .2 - 1]},
+            "The mobile free-roam entry is exposed by expanding the search sheet");
+        await click(page, "Open free roam game", true);
+        await click(page, "Start free roam at map center", true);
+        const timeout = 30000;
+        const pad = page.getByRole("group", {name: "Free roam touch controls", exact: true});
+        const controls = [
+            ["movement", page.getByLabel("Free roam movement stick", {exact: true})],
+            ["look", page.getByLabel("Free roam look stick", {exact: true})],
+            ["jump", namedControl(page, "Free roam jump or brake")],
+            ["boost", namedControl(page, "Free roam boost")]
+        ];
+        const touchState = async state => {
+            await pad.waitFor({state, timeout});
+            for (const [, control] of controls) await control.waitFor({state, timeout});
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            const peers = {pad: await readPeers(pad)};
+            for (const [name, control] of controls) {
+                peers[name] = await readPeers(control);
+                if (state === "visible") {
+                    assert.equal(peers[name].length, 1, name + ": a single accessible touch control is exposed");
+                    const rect = peers[name][0].rect;
+                    assert.ok(rect.width >= 44 && rect.height >= 44, name + ": free-roam controls retain touch target size");
+                    assert.ok(rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= size.width && rect.y + rect.height <= size.height,
+                        name + ": free-roam touch control stays inside the mobile viewport");
+                }
+            }
+            return peers;
+        };
+        await namedControl(page, "Pause free roam").waitFor({state: "visible", timeout});
+        await namedControl(page, "Expand game settings").waitFor({state: "visible", timeout});
+        const runningControls = await touchState("visible");
+        await click(page, "Expand game settings", true);
+        await namedControl(page, "Collapse game settings").waitFor({state: "visible", timeout});
+        const expandedControls = await touchState("hidden");
+        const settings = page.getByRole("group", {name: "Free roam settings", exact: true});
+        await captureInterface(page, "mobile-free-roam-settings-expanded", {
+            runningControls, touchControls: expandedControls, settings: await readPeers(settings), touchControlsHidden: true
+        });
+        await click(page, "Collapse game settings", true);
+        await namedControl(page, "Expand game settings").waitFor({state: "visible", timeout});
+        const restoredControls = await touchState("visible");
+        await captureInterface(page, "mobile-free-roam-settings-collapsed", {
+            touchControls: restoredControls, settings: await readPeers(settings), touchControlsRestored: true
+        });
+        await click(page, "Pause free roam", true);
+        await namedControl(page, "Resume free roam").waitFor({state: "visible", timeout});
+        await click(page, "Exit free roam", true);
+        await pad.waitFor({state: "hidden", timeout});
+        await verifyGpu(page, "mobile-free-roam-interface");
+    } catch (error) {
+        await saveFailure(page, "mobile-free-roam-interface", error);
+        throw error;
+    } finally { await context.close(); }
+}
+
 async function desktop(browser) {
     const { context, page } = await open(browser);
     try {
@@ -1296,6 +1360,7 @@ async function run() {
                     report.scenarios.push(await runPixelArtFixtures(instance, base, output))],
                 ["desktop", desktop], ["desktop-interface", desktopUi], ["journeys", journeys],
                 ["mobile", mobile], ["mobile-interface", mobileUi],
+                ["mobile-free-roam-interface", mobileFreeRoamUi],
                 ["unavailable", unavailable], ["device-loss", deviceLoss]]);
         }
         assert.deepEqual(report.errors, [], "No application exceptions occurred");
